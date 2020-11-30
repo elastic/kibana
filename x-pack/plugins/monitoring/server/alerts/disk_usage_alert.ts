@@ -80,10 +80,9 @@ export class DiskUsageAlert extends BaseAlert {
     );
 
     return stats.map((stat) => {
-      const { clusterUuid, nodeId, diskUsage, ccs } = stat;
+      const { clusterUuid, diskUsage, ccs } = stat;
       return {
-        instanceKey: `${clusterUuid}:${nodeId}`,
-        shouldFire: diskUsage > threshold,
+        shouldFire: diskUsage > threshold!,
         severity: AlertSeverity.Danger,
         meta: stat,
         clusterUuid,
@@ -93,15 +92,7 @@ export class DiskUsageAlert extends BaseAlert {
   }
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    const alertInstanceStates = alertInstance.state?.alertStates as AlertDiskUsageState[];
-    const nodeFilter = filters?.find((filter) => filter.nodeUuid);
-
-    if (!filters || !filters.length || !alertInstanceStates?.length || !nodeFilter?.nodeUuid) {
-      return true;
-    }
-
-    const nodeAlerts = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeFilter.nodeUuid);
-    return Boolean(nodeAlerts.length);
+    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
@@ -218,9 +209,7 @@ export class DiskUsageAlert extends BaseAlert {
         internalShortMessage,
         internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: firingNodes
-          .map((state) => `${state.nodeName}:${state.diskUsage.toFixed(2)}`)
-          .join(','),
+        nodes: firingNodes.map((state) => `${state.nodeName}:${state.diskUsage}`).join(','),
         count: firingCount,
         clusterName: cluster.clusterName,
         action,

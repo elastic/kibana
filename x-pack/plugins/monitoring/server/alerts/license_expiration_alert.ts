@@ -14,33 +14,27 @@ import {
   AlertMessage,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
-  AlertInstanceState,
   LegacyAlert,
-  CommonAlertParams,
 } from '../../common/types/alerts';
 import { AlertExecutorOptions, AlertInstance } from '../../../alerts/server';
 import {
-  INDEX_ALERTS,
   ALERT_LICENSE_EXPIRATION,
   FORMAT_DURATION_TEMPLATE_SHORT,
   LEGACY_ALERT_DETAILS,
 } from '../../common/constants';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType } from '../../common/enums';
-import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
-import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerts/common';
 import { Globals } from '../static_globals';
-
-const WATCH_NAME = 'xpack_license_expiration';
 
 export class LicenseExpirationAlert extends BaseAlert {
   constructor(public rawAlert?: SanitizedAlert) {
     super(rawAlert, {
       id: ALERT_LICENSE_EXPIRATION,
       name: LEGACY_ALERT_DETAILS[ALERT_LICENSE_EXPIRATION].label,
-      isLegacy: true,
+      legacy: {
+        watchName: 'xpack_license_expiration',
+      },
       interval: '1d',
       actionVariables: [
         {
@@ -71,50 +65,14 @@ export class LicenseExpirationAlert extends BaseAlert {
   }
 
   protected async execute(options: AlertExecutorOptions): Promise<any> {
-    if (!this.config.ui.show_license_expiration) {
+    if (!Globals.app.config.ui.show_license_expiration) {
       return;
     }
     return await super.execute(options);
   }
 
-  protected async fetchData(
-    params: CommonAlertParams,
-    callCluster: any,
-    clusters: AlertCluster[],
-    availableCcs: string[]
-  ): Promise<AlertData[]> {
-    let alertIndexPattern = INDEX_ALERTS;
-    if (availableCcs) {
-      alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
-    }
-    const legacyAlerts = await fetchLegacyAlerts(
-      callCluster,
-      clusters,
-      alertIndexPattern,
-      WATCH_NAME,
-      Globals.app.config.ui.max_bucket_size
-    );
-    return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
-      accum.push({
-        instanceKey: `${legacyAlert.metadata.cluster_uuid}`,
-        clusterUuid: legacyAlert.metadata.cluster_uuid,
-        shouldFire: !legacyAlert.resolved_timestamp,
-        severity: mapLegacySeverity(legacyAlert.metadata.severity),
-        meta: legacyAlert,
-      });
-      return accum;
-    }, []);
-  }
-
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
     const legacyAlert = item.meta as LegacyAlert;
-    if (!alertState.ui.isFiring) {
-      return {
-        text: i18n.translate('xpack.monitoring.alerts.licenseExpiration.ui.resolvedMessage', {
-          defaultMessage: `The license for this cluster is active.`,
-        }),
-      };
-    }
     return {
       text: i18n.translate('xpack.monitoring.alerts.licenseExpiration.ui.firingMessage', {
         defaultMessage: `The license for this cluster expires in #relative at #absolute. #start_linkPlease update your license.#end_link`,
@@ -146,14 +104,10 @@ export class LicenseExpirationAlert extends BaseAlert {
 
   protected async executeActions(
     instance: AlertInstance,
-    instanceState: AlertInstanceState,
+    alertState: AlertState,
     item: AlertData,
     cluster: AlertCluster
   ) {
-    if (instanceState.alertStates.length === 0) {
-      return;
-    }
-    const alertState = instanceState.alertStates[0];
     const legacyAlert = item.meta as LegacyAlert;
     const $expiry = moment(legacyAlert.metadata.time);
     if (alertState.ui.isFiring) {

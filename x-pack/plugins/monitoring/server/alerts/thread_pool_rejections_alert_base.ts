@@ -86,10 +86,9 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
     );
 
     return stats.map((stat) => {
-      const { clusterUuid, nodeId, rejectionCount, ccs } = stat;
+      const { clusterUuid, rejectionCount, ccs } = stat;
 
       return {
-        instanceKey: `${clusterUuid}:${nodeId}`,
         shouldFire: rejectionCount > threshold,
         rejectionCount,
         severity: AlertSeverity.Danger,
@@ -101,16 +100,7 @@ export class ThreadPoolRejectionsAlertBase extends BaseAlert {
   }
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    const alertInstanceStates = alertInstance.state
-      ?.alertStates as AlertThreadPoolRejectionsState[];
-    const nodeUuid = filters?.find((filter) => filter.nodeUuid)?.nodeUuid;
-
-    if (!alertInstanceStates?.length || !nodeUuid) {
-      return true;
-    }
-
-    const nodeAlerts = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeUuid);
-    return Boolean(nodeAlerts.length);
+    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getUiMessage(alertState: AlertThreadPoolRejectionsState): AlertMessage {

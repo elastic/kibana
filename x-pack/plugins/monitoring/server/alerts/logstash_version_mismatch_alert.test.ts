@@ -17,14 +17,29 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
 
+jest.mock('../static_globals', () => ({
+  Globals: {
+    app: {
+      getLogger: jest.fn(),
+      config: {
+        ui: {
+          show_license_expiration: true,
+          ccs: { enabled: true },
+          metricbeat: { index: 'metricbeat-*' },
+          container: { elasticsearch: { enabled: false } },
+        },
+      },
+    },
+  },
+}));
+
 describe('LogstashVersionMismatchAlert', () => {
   it('should have defaults', () => {
     const alert = new LogstashVersionMismatchAlert();
-    expect(alert.type).toBe(ALERT_LOGSTASH_VERSION_MISMATCH);
-    expect(alert.label).toBe('Logstash version mismatch');
-    expect(alert.defaultThrottle).toBe('1d');
-    // @ts-ignore
-    expect(alert.actionVariables).toStrictEqual([
+    expect(alert.alertOptions.id).toBe(ALERT_LOGSTASH_VERSION_MISMATCH);
+    expect(alert.alertOptions.name).toBe('Logstash version mismatch');
+    expect(alert.alertOptions.throttle).toBe('1d');
+    expect(alert.alertOptions.actionVariables).toStrictEqual([
       {
         name: 'versionList',
         description: 'The versions of Logstash running in this cluster.',
@@ -61,21 +76,6 @@ describe('LogstashVersionMismatchAlert', () => {
         cluster_uuid: clusterUuid,
       },
     };
-    const getUiSettingsService = () => ({
-      asScopedToClient: jest.fn(),
-    });
-    const getLogger = () => ({
-      debug: jest.fn(),
-    });
-    const monitoringCluster = null;
-    const config = {
-      ui: {
-        ccs: { enabled: true },
-        container: { elasticsearch: { enabled: false } },
-        metricbeat: { index: 'metricbeat-*' },
-      },
-    };
-    const kibanaUrl = 'http://localhost:5601';
 
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
@@ -118,7 +118,7 @@ describe('LogstashVersionMismatchAlert', () => {
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -159,7 +159,7 @@ describe('LogstashVersionMismatchAlert', () => {
       await type.executor({
         ...executorOptions,
         // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();

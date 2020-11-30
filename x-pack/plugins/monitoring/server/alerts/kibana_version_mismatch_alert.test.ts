@@ -17,14 +17,28 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
 
+jest.mock('../static_globals', () => ({
+  Globals: {
+    app: {
+      getLogger: jest.fn(),
+      config: {
+        ui: {
+          ccs: { enabled: true },
+          metricbeat: { index: 'metricbeat-*' },
+          container: { elasticsearch: { enabled: false } },
+        },
+      },
+    },
+  },
+}));
+
 describe('KibanaVersionMismatchAlert', () => {
   it('should have defaults', () => {
     const alert = new KibanaVersionMismatchAlert();
-    expect(alert.type).toBe(ALERT_KIBANA_VERSION_MISMATCH);
-    expect(alert.label).toBe('Kibana version mismatch');
-    expect(alert.defaultThrottle).toBe('1d');
-    // @ts-ignore
-    expect(alert.actionVariables).toStrictEqual([
+    expect(alert.alertOptions.id).toBe(ALERT_KIBANA_VERSION_MISMATCH);
+    expect(alert.alertOptions.name).toBe('Kibana version mismatch');
+    expect(alert.alertOptions.throttle).toBe('1d');
+    expect(alert.alertOptions.actionVariables).toStrictEqual([
       {
         name: 'versionList',
         description: 'The versions of Kibana running in this cluster.',
@@ -105,8 +119,7 @@ describe('KibanaVersionMismatchAlert', () => {
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -146,8 +159,7 @@ describe('KibanaVersionMismatchAlert', () => {
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();

@@ -11,28 +11,23 @@ import {
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertInstanceState,
   LegacyAlert,
   LegacyAlertNodesChangedList,
-  CommonAlertParams,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import { INDEX_ALERTS, ALERT_NODES_CHANGED, LEGACY_ALERT_DETAILS } from '../../common/constants';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
-import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
+import { ALERT_NODES_CHANGED, LEGACY_ALERT_DETAILS } from '../../common/constants';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerts/common';
-import { Globals } from '../static_globals';
-
-const WATCH_NAME = 'elasticsearch_nodes';
 
 export class NodesChangedAlert extends BaseAlert {
   constructor(public rawAlert?: SanitizedAlert) {
     super(rawAlert, {
       id: ALERT_NODES_CHANGED,
       name: LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].label,
-      isLegacy: true,
+      legacy: {
+        watchName: 'elasticsearch_nodes',
+        changeDataValues: { shouldFire: true },
+      },
       actionVariables: [
         {
           name: 'added',
@@ -66,42 +61,13 @@ export class NodesChangedAlert extends BaseAlert {
     });
   }
 
-  private getNodeStates(legacyAlert: LegacyAlert): LegacyAlertNodesChangedList | undefined {
-    return legacyAlert.nodes;
-  }
-
-  protected async fetchData(
-    params: CommonAlertParams,
-    callCluster: any,
-    clusters: AlertCluster[],
-    availableCcs: string[]
-  ): Promise<AlertData[]> {
-    let alertIndexPattern = INDEX_ALERTS;
-    if (availableCcs) {
-      alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
-    }
-    const legacyAlerts = await fetchLegacyAlerts(
-      callCluster,
-      clusters,
-      alertIndexPattern,
-      WATCH_NAME,
-      Globals.app.config.ui.max_bucket_size
-    );
-    return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
-      accum.push({
-        instanceKey: `${legacyAlert.metadata.cluster_uuid}`,
-        clusterUuid: legacyAlert.metadata.cluster_uuid,
-        shouldFire: true, // This alert always has a resolved timestamp
-        severity: mapLegacySeverity(legacyAlert.metadata.severity),
-        meta: legacyAlert,
-      });
-      return accum;
-    }, []);
+  private getNodeStates(legacyAlert: LegacyAlert): LegacyAlertNodesChangedList {
+    return legacyAlert.nodes || { added: {}, removed: {}, restarted: {} };
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
     const legacyAlert = item.meta as LegacyAlert;
-    const states = this.getNodeStates(legacyAlert) || { added: {}, removed: {}, restarted: {} };
+    const states = this.getNodeStates(legacyAlert);
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.resolvedMessage', {
@@ -160,14 +126,10 @@ export class NodesChangedAlert extends BaseAlert {
 
   protected async executeActions(
     instance: AlertInstance,
-    instanceState: AlertInstanceState,
+    alertState: AlertState,
     item: AlertData,
     cluster: AlertCluster
   ) {
-    if (instanceState.alertStates.length === 0) {
-      return;
-    }
-    const alertState = instanceState.alertStates[0];
     const legacyAlert = item.meta as LegacyAlert;
     if (alertState.ui.isFiring) {
       const shortActionText = i18n.translate('xpack.monitoring.alerts.nodesChanged.shortAction', {
@@ -177,7 +139,7 @@ export class NodesChangedAlert extends BaseAlert {
         defaultMessage: 'View nodes',
       });
       const action = `[${fullActionText}](elasticsearch/nodes)`;
-      const states = this.getNodeStates(legacyAlert) || { added: {}, removed: {}, restarted: {} };
+      const states = this.getNodeStates(legacyAlert);
       const added = Object.values(states.added).join(',');
       const removed = Object.values(states.removed).join(',');
       const restarted = Object.values(states.restarted).join(',');

@@ -12,14 +12,10 @@ import {
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertMissingDataState,
-  AlertMissingData,
+  AlertNodeState,
   AlertMessageTimeToken,
-  AlertInstanceState,
   CommonAlertFilter,
   CommonAlertParams,
-  CommonAlertStackProductFilter,
-  CommonAlertNodeUuidFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import {
@@ -33,19 +29,11 @@ import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
 import { parseDuration } from '../../../alerts/common/parse_duration';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
-import { getTypeLabelForStackProduct } from '../lib/alerts/get_type_label_for_stack_product';
-import { getListingLinkForStackProduct } from '../lib/alerts/get_listing_link_for_stack_product';
-import { getStackProductLabel } from '../lib/alerts/get_stack_product_label';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 
 // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
 const LIMIT_BUFFER = 3 * 60 * 1000;
-
-interface MissingDataParams {
-  duration: string;
-  limit: string;
-}
 
 export class MissingMonitoringDataAlert extends BaseAlert {
   constructor(public rawAlert?: SanitizedAlert) {
@@ -57,20 +45,18 @@ export class MissingMonitoringDataAlert extends BaseAlert {
         limit: '1d',
       },
       throttle: '6h',
+      accessorKey: 'gapDuration',
       actionVariables: [
         {
-          name: 'stackProducts',
-          description: i18n.translate(
-            'xpack.monitoring.alerts.missingData.actionVariables.stackProducts',
-            {
-              defaultMessage: 'The stack products missing monitoring data.',
-            }
-          ),
+          name: 'nodes',
+          description: i18n.translate('xpack.monitoring.alerts.missingData.actionVariables.nodes', {
+            defaultMessage: 'The list of nodes missing monitoring data.',
+          }),
         },
         {
           name: 'count',
           description: i18n.translate('xpack.monitoring.alerts.missingData.actionVariables.count', {
-            defaultMessage: 'The number of stack products missing monitoring data.',
+            defaultMessage: 'The number of nodes missing monitoring data.',
           }),
         },
         ...Object.values(AlertingDefaults.ALERT_TYPE.context),
@@ -88,8 +74,8 @@ export class MissingMonitoringDataAlert extends BaseAlert {
     if (availableCcs) {
       indexPattern = getCcsIndexPattern(indexPattern, availableCcs);
     }
-    const duration = parseDuration(((params as unknown) as MissingDataParams).duration);
-    const limit = parseDuration(((params as unknown) as MissingDataParams).limit);
+    const duration = parseDuration(params.duration);
+    const limit = parseDuration(params.limit!);
     const now = +new Date();
     const missingData = await fetchMissingMonitoringData(
       callCluster,
@@ -101,58 +87,17 @@ export class MissingMonitoringDataAlert extends BaseAlert {
     );
     return missingData.map((missing) => {
       return {
-        instanceKey: `${missing.clusterUuid}:${missing.stackProduct}:${missing.stackProductUuid}`,
         clusterUuid: missing.clusterUuid,
         shouldFire: missing.gapDuration > duration,
         severity: AlertSeverity.Danger,
-        meta: { missing, limit },
+        meta: { ...missing, limit },
         ccs: missing.ccs,
       };
     });
   }
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    const alertInstanceState = (alertInstance.state as unknown) as AlertInstanceState;
-    if (filters && filters.length) {
-      for (const filter of filters) {
-        const stackProductFilter = filter as CommonAlertStackProductFilter;
-        if (stackProductFilter && stackProductFilter.stackProduct) {
-          let existsInState = false;
-          for (const state of alertInstanceState.alertStates) {
-            if ((state as AlertMissingDataState).stackProduct === stackProductFilter.stackProduct) {
-              existsInState = true;
-              break;
-            }
-          }
-          if (!existsInState) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
-  }
-
-  protected filterAlertState(alertState: AlertState, filters: CommonAlertFilter[]) {
-    const state = alertState as AlertMissingDataState;
-    if (filters && filters.length) {
-      for (const filter of filters) {
-        const stackProductFilter = filter as CommonAlertStackProductFilter;
-        if (stackProductFilter && stackProductFilter.stackProduct) {
-          if (state.stackProduct !== stackProductFilter.stackProduct) {
-            return false;
-          }
-        }
-
-        const nodeUuidFilter = filter as CommonAlertNodeUuidFilter;
-        if (nodeUuidFilter && nodeUuidFilter.nodeUuid) {
-          if (state.stackProductUuid !== nodeUuidFilter.nodeUuid) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
+    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
@@ -167,35 +112,30 @@ export class MissingMonitoringDataAlert extends BaseAlert {
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const { missing } = item.meta as { missing: AlertMissingData; limit: number };
+    const { nodeName, gapDuration } = item.meta as {
+      nodeName: string;
+      gapDuration: number;
+      limit: number;
+    };
     return {
       text: i18n.translate('xpack.monitoring.alerts.missingData.ui.firingMessage', {
-        defaultMessage: `For the past {gapDuration}, we have not detected any monitoring data from the {stackProduct} {type}: {stackProductName}, starting at #absolute`,
+        defaultMessage: `For the past {gapDuration}, we have not detected any monitoring data from the Elasticsearch node: {nodeName}, starting at #absolute`,
         values: {
-          gapDuration: moment.duration(missing.gapDuration, 'milliseconds').humanize(),
-          stackProduct: getStackProductLabel(missing.stackProduct),
-          type: getTypeLabelForStackProduct(missing.stackProduct, false),
-          stackProductName: missing.stackProductName,
+          gapDuration: moment.duration(gapDuration, 'milliseconds').humanize(),
+          nodeName,
         },
       }),
       nextSteps: [
         createLink(
           i18n.translate('xpack.monitoring.alerts.missingData.ui.nextSteps.viewAll', {
-            defaultMessage: `#start_linkView all {stackProduct} {type}#end_link`,
-            values: {
-              type: getTypeLabelForStackProduct(missing.stackProduct),
-              stackProduct: getStackProductLabel(missing.stackProduct),
-            },
+            defaultMessage: `#start_linkView all Elasticsearch nodes#end_link`,
           }),
-          getListingLinkForStackProduct(missing.stackProduct),
+          'elasticsearch/nodes',
           AlertMessageTokenType.Link
         ),
         {
           text: i18n.translate('xpack.monitoring.alerts.missingData.ui.nextSteps.verifySettings', {
-            defaultMessage: `Verify monitoring settings on the {type}`,
-            values: {
-              type: getTypeLabelForStackProduct(missing.stackProduct, false),
-            },
+            defaultMessage: `Verify monitoring settings on the node`,
           }),
         },
       ],
@@ -213,42 +153,29 @@ export class MissingMonitoringDataAlert extends BaseAlert {
 
   protected executeActions(
     instance: AlertInstance,
-    instanceState: AlertInstanceState,
+    { alertStates }: { alertStates: AlertNodeState[] },
     item: AlertData | null,
     cluster: AlertCluster
   ) {
-    if (instanceState.alertStates.length === 0) {
-      return;
-    }
+    const firingNodes = alertStates.filter((alertState) => alertState.ui.isFiring);
+    const firingCount = firingNodes.length;
 
-    const firingCount = instanceState.alertStates.filter((alertState) => alertState.ui.isFiring)
-      .length;
-    const firingStackProducts = instanceState.alertStates
-      .filter((_state) => (_state as AlertMissingDataState).ui.isFiring)
-      .map((_state) => {
-        const state = _state as AlertMissingDataState;
-        return `${getStackProductLabel(state.stackProduct)} ${getTypeLabelForStackProduct(
-          state.stackProduct,
-          false
-        )}: ${state.stackProductName}`;
-      })
-      .join(', ');
     if (firingCount > 0) {
       const shortActionText = i18n.translate('xpack.monitoring.alerts.missingData.shortAction', {
         defaultMessage:
-          'Verify these stack products are up and running, then double check the monitoring settings.',
+          'Verify these nodes are up and running, then double check the monitoring settings.',
       });
       const fullActionText = i18n.translate('xpack.monitoring.alerts.missingData.fullAction', {
-        defaultMessage: 'View what monitoring data we do have for these stack products.',
+        defaultMessage: 'View what monitoring data we do have for these nodes.',
       });
 
-      const ccs = instanceState.alertStates.find((state) => state.ccs)?.ccs;
+      const ccs = alertStates.find((state) => state.ccs)?.ccs;
       const globalStateLink = this.createGlobalStateLink('overview', cluster.clusterUuid, ccs);
       const action = `[${fullActionText}](${globalStateLink})`;
       const internalShortMessage = i18n.translate(
         'xpack.monitoring.alerts.missingData.firing.internalShortMessage',
         {
-          defaultMessage: `We have not detected any monitoring data for {count} stack product(s) in cluster: {clusterName}. {shortActionText}`,
+          defaultMessage: `We have not detected any monitoring data for {count} node(s) in cluster: {clusterName}. {shortActionText}`,
           values: {
             count: firingCount,
             clusterName: cluster.clusterName,
@@ -259,7 +186,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       const internalFullMessage = i18n.translate(
         'xpack.monitoring.alerts.missingData.firing.internalFullMessage',
         {
-          defaultMessage: `We have not detected any monitoring data for {count} stack product(s) in cluster: {clusterName}. {action}`,
+          defaultMessage: `We have not detected any monitoring data for {count} node(s) in cluster: {clusterName}. {action}`,
           values: {
             count: firingCount,
             clusterName: cluster.clusterName,
@@ -271,7 +198,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
         internalShortMessage,
         internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
-        stackProducts: firingStackProducts,
+        nodes: firingNodes.map((state) => `node: ${state.nodeName}`).toString(),
         count: firingCount,
         clusterName: cluster.clusterName,
         action,

@@ -86,10 +86,9 @@ export class MemoryUsageAlert extends BaseAlert {
     );
 
     return stats.map((stat) => {
-      const { clusterUuid, nodeId, memoryUsage, ccs } = stat;
+      const { clusterUuid, memoryUsage, ccs } = stat;
       return {
-        instanceKey: `${clusterUuid}:${nodeId}`,
-        shouldFire: memoryUsage > threshold,
+        shouldFire: memoryUsage > threshold!,
         severity: AlertSeverity.Danger,
         meta: stat,
         clusterUuid,
@@ -99,15 +98,7 @@ export class MemoryUsageAlert extends BaseAlert {
   }
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    const alertInstanceStates = alertInstance.state?.alertStates as AlertMemoryUsageState[];
-    const nodeFilter = filters?.find((filter) => filter.nodeUuid);
-
-    if (!filters || !filters.length || !alertInstanceStates?.length || !nodeFilter?.nodeUuid) {
-      return true;
-    }
-
-    const nodeAlerts = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeFilter.nodeUuid);
-    return Boolean(nodeAlerts.length);
+    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {

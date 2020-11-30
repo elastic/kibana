@@ -10,6 +10,20 @@ import { fetchClusters } from '../lib/alerts/fetch_clusters';
 
 const RealDate = Date;
 
+jest.mock('../static_globals', () => ({
+  Globals: {
+    app: {
+      getLogger: jest.fn(),
+      config: {
+        ui: {
+          ccs: { enabled: true },
+          metricbeat: { index: 'metricbeat-*' },
+        },
+      },
+    },
+  },
+}));
+
 jest.mock('../lib/alerts/fetch_legacy_alerts', () => ({
   fetchLegacyAlerts: jest.fn(),
 }));
@@ -20,11 +34,10 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
 describe('ClusterHealthAlert', () => {
   it('should have defaults', () => {
     const alert = new ClusterHealthAlert();
-    expect(alert.type).toBe(ALERT_CLUSTER_HEALTH);
-    expect(alert.label).toBe('Cluster health');
-    expect(alert.defaultThrottle).toBe('1d');
-    // @ts-ignore
-    expect(alert.actionVariables).toStrictEqual([
+    expect(alert.alertOptions.id).toBe(ALERT_CLUSTER_HEALTH);
+    expect(alert.alertOptions.name).toBe('Cluster health');
+    expect(alert.alertOptions.throttle).toBe('1d');
+    expect(alert.alertOptions.actionVariables).toStrictEqual([
       { name: 'clusterHealth', description: 'The health of the cluster.' },
       {
         name: 'internalShortMessage',
@@ -99,8 +112,7 @@ describe('ClusterHealthAlert', () => {
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
+        params: {},
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
         alertStates: [
@@ -153,8 +165,7 @@ describe('ClusterHealthAlert', () => {
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
+        params: {},
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();

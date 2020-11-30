@@ -30,14 +30,29 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
 
+jest.mock('../static_globals', () => ({
+  Globals: {
+    app: {
+      getLogger: jest.fn(),
+      config: {
+        ui: {
+          ccs: { enabled: true },
+          metricbeat: { index: 'metricbeat-*' },
+          container: { elasticsearch: { enabled: false } },
+        },
+      },
+    },
+  },
+}));
+
 describe('DiskUsageAlert', () => {
   it('should have defaults', () => {
     const alert = new DiskUsageAlert() as IDiskUsageAlertMock;
-    expect(alert.type).toBe(ALERT_DISK_USAGE);
-    expect(alert.label).toBe('Disk Usage');
-    expect(alert.defaultThrottle).toBe('1d');
-    expect(alert.defaultParams).toStrictEqual({ threshold: 80, duration: '5m' });
-    expect(alert.actionVariables).toStrictEqual([
+    expect(alert.alertOptions.id).toBe(ALERT_DISK_USAGE);
+    expect(alert.alertOptions.name).toBe('Disk Usage');
+    expect(alert.alertOptions.throttle).toBe('1d');
+    expect(alert.alertOptions.defaultParams).toStrictEqual({ threshold: 80, duration: '5m' });
+    expect(alert.alertOptions.actionVariables).toStrictEqual([
       { name: 'nodes', description: 'The list of nodes reporting high disk usage.' },
       { name: 'count', description: 'The number of nodes reporting high disk usage.' },
       {
@@ -73,21 +88,6 @@ describe('DiskUsageAlert', () => {
       nodeName,
       diskUsage,
     };
-    const getUiSettingsService = () => ({
-      asScopedToClient: jest.fn(),
-    });
-    const getLogger = () => ({
-      debug: jest.fn(),
-    });
-    const monitoringCluster = null;
-    const config = {
-      ui: {
-        ccs: { enabled: true },
-        container: { elasticsearch: { enabled: false } },
-        metricbeat: { index: 'metricbeat-*' },
-      },
-    };
-    const kibanaUrl = 'http://localhost:5601';
 
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
@@ -128,7 +128,7 @@ describe('DiskUsageAlert', () => {
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {
@@ -138,7 +138,7 @@ describe('DiskUsageAlert', () => {
         actionPlain: 'Verify disk usage levels across affected nodes.',
         clusterName,
         count,
-        nodes: `${nodeName}:${diskUsage.toFixed(2)}`,
+        nodes: `${nodeName}:${diskUsage}`,
         state: 'firing',
       });
     });
@@ -157,7 +157,7 @@ describe('DiskUsageAlert', () => {
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {
@@ -167,27 +167,7 @@ describe('DiskUsageAlert', () => {
         actionPlain: 'Verify disk usage levels across affected nodes.',
         clusterName,
         count,
-        nodes: `${nodeName}:${diskUsage.toFixed(2)}`,
-        state: 'firing',
-      });
-    });
-
-    it('should fire with different messaging for cloud', async () => {
-      const alert = new DiskUsageAlert() as IDiskUsageAlertMock;
-      const type = alert.getAlertType();
-      await type.executor({
-        ...executorOptions,
-        params: alert.defaultParams,
-      } as any);
-      const count = 1;
-      expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `Disk usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify disk usage levels across affected nodes.`,
-        internalShortMessage: `Disk usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify disk usage levels across affected nodes.`,
-        action: `[View nodes](elasticsearch/nodes)`,
-        actionPlain: 'Verify disk usage levels across affected nodes.',
-        clusterName,
-        count,
-        nodes: `${nodeName}:${diskUsage.toFixed(2)}`,
+        nodes: `${nodeName}:${diskUsage}`,
         state: 'firing',
       });
     });

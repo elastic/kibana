@@ -55,8 +55,8 @@ export class AlertsFactory {
   public static async getByType(
     type: string,
     alertsClient: AlertsClient | undefined
-  ): Promise<BaseAlert | void> {
-    const alertCls = BY_TYPE[type] || BaseAlert;
+  ): Promise<BaseAlert | undefined> {
+    const alertCls = BY_TYPE[type];
     if (!alertCls || !alertsClient) {
       return;
     }

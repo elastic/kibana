@@ -51,6 +51,9 @@ export async function fetchStatus(
 
       result.states = Object.values(states).reduce((accum: CommonAlertState[], instance: any) => {
         const alertInstanceState = instance.state as AlertInstanceState;
+        if (!alertInstanceState.alertStates) {
+          return accum;
+        }
         for (const state of alertInstanceState.alertStates) {
           const meta = instance.meta;
           if (clusterUuid && state.cluster.clusterUuid !== clusterUuid) {

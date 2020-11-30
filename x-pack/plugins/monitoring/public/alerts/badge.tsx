@@ -18,7 +18,7 @@ import { CommonAlertStatus, CommonAlertState } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 // @ts-ignore
 import { formatDateTimeLocal } from '../../common/formatting';
-import { AlertMessage, AlertState } from '../../common/types/alerts';
+import { AlertState } from '../../common/types/alerts';
 import { AlertPanel } from './panel';
 import { Legacy } from '../legacy_shims';
 import { isInSetupMode } from '../lib/setup_mode';
@@ -40,10 +40,9 @@ interface AlertInPanel {
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
   stateFilter: (state: AlertState) => boolean;
-  nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertsBadge: React.FC<Props> = (props: Props) => {
-  const { stateFilter = () => true, nextStepsFilter = () => true } = props;
+  const { stateFilter = () => true } = props;
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
   const alerts = Object.values(props.alerts).filter(Boolean);
@@ -82,7 +81,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
           id: index + 1,
           title: alertStatus.rawAlert.name,
           width: 400,
-          content: <AlertPanel alert={alertStatus} nextStepsFilter={nextStepsFilter} />,
+          content: <AlertPanel alert={alertStatus} />,
         };
       }),
     ];
@@ -159,13 +158,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
             id: index + 1,
             title: getDateFromState(alertStatus.alertState),
             width: 400,
-            content: (
-              <AlertPanel
-                alert={alertStatus.alert}
-                alertState={alertStatus.alertState}
-                nextStepsFilter={nextStepsFilter}
-              />
-            ),
+            content: <AlertPanel alert={alertStatus.alert} alertState={alertStatus.alertState} />,
           };
         }),
       ];

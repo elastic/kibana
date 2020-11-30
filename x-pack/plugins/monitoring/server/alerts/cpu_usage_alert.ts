@@ -17,7 +17,6 @@ import {
   AlertMessageLinkToken,
   AlertInstanceState,
   CommonAlertFilter,
-  CommonAlertNodeUuidFilter,
   CommonAlertParams,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
@@ -34,11 +33,6 @@ import { parseDuration } from '../../../alerts/common/parse_duration';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
-
-interface CpuUsageParams {
-  threshold: number;
-  duration: string;
-}
 
 export class CpuUsageAlert extends BaseAlert {
   constructor(public rawAlert?: SanitizedAlert) {
@@ -78,7 +72,7 @@ export class CpuUsageAlert extends BaseAlert {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const duration = parseDuration(((params as unknown) as CpuUsageParams).duration);
+    const duration = parseDuration(params.duration);
     const endMs = +new Date();
     const startMs = endMs - duration;
     const stats = await fetchCpuUsageNodeStats(
@@ -96,9 +90,8 @@ export class CpuUsageAlert extends BaseAlert {
       }
 
       return {
-        instanceKey: `${stat.clusterUuid}:${stat.nodeId}`,
         clusterUuid: stat.clusterUuid,
-        shouldFire: stat.cpuUsage > params.threshold,
+        shouldFire: stat.cpuUsage > params.threshold!,
         severity: AlertSeverity.Danger,
         meta: stat,
         ccs: stat.ccs,
@@ -107,25 +100,7 @@ export class CpuUsageAlert extends BaseAlert {
   }
 
   protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
-    const alertInstanceState = (alertInstance.state as unknown) as AlertInstanceState;
-    if (filters && filters.length) {
-      for (const _filter of filters) {
-        const filter = _filter as CommonAlertNodeUuidFilter;
-        if (filter && filter.nodeUuid) {
-          let nodeExistsInStates = false;
-          for (const state of alertInstanceState.alertStates) {
-            if ((state as AlertCpuUsageState).nodeId === filter.nodeUuid) {
-              nodeExistsInStates = true;
-              break;
-            }
-          }
-          if (!nodeExistsInStates) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
+    return super.filterAlertInstance(alertInstance, filters, true);
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
@@ -146,7 +121,7 @@ export class CpuUsageAlert extends BaseAlert {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting cpu usage of {cpuUsage}% at #absolute`,
         values: {
           nodeName: stat.nodeName,
-          cpuUsage: stat.cpuUsage.toFixed(2),
+          cpuUsage: stat.cpuUsage,
         },
       }),
       nextSteps: [
@@ -183,23 +158,18 @@ export class CpuUsageAlert extends BaseAlert {
 
   protected executeActions(
     instance: AlertInstance,
-    instanceState: AlertInstanceState,
+    { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster
   ) {
-    if (instanceState.alertStates.length === 0) {
+    if (alertStates.length === 0) {
       return;
     }
 
-    const firingCount = instanceState.alertStates.filter((alertState) => alertState.ui.isFiring)
-      .length;
-    const firingNodes = instanceState.alertStates
-      .filter((_state) => (_state as AlertCpuUsageState).ui.isFiring)
-      .map((_state) => {
-        const state = _state as AlertCpuUsageState;
-        return `${state.nodeName}:${state.cpuUsage.toFixed(2)}`;
-      })
-      .join(',');
+    const firingNodes = alertStates.filter(
+      (alertState) => alertState.ui.isFiring
+    ) as AlertCpuUsageState[];
+    const firingCount = firingNodes.length;
     if (firingCount > 0) {
       const shortActionText = i18n.translate('xpack.monitoring.alerts.cpuUsage.shortAction', {
         defaultMessage: 'Verify CPU levels across affected nodes.',
@@ -234,7 +204,7 @@ export class CpuUsageAlert extends BaseAlert {
         internalShortMessage,
         internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: firingNodes,
+        nodes: firingNodes.map(({ nodeName, cpuUsage }) => `${nodeName}:${cpuUsage}`).toString(),
         count: firingCount,
         clusterName: cluster.clusterName,
         action,

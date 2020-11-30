@@ -11,31 +11,23 @@ import {
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertInstanceState,
   LegacyAlert,
-  CommonAlertParams,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import {
-  INDEX_ALERTS,
-  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
-  LEGACY_ALERT_DETAILS,
-} from '../../common/constants';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
+import { ALERT_ELASTICSEARCH_VERSION_MISMATCH, LEGACY_ALERT_DETAILS } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
-import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerts/common';
-import { Globals } from '../static_globals';
-
-const WATCH_NAME = 'elasticsearch_version_mismatch';
 
 export class ElasticsearchVersionMismatchAlert extends BaseAlert {
   constructor(public rawAlert?: SanitizedAlert) {
     super(rawAlert, {
       id: ALERT_ELASTICSEARCH_VERSION_MISMATCH,
       name: LEGACY_ALERT_DETAILS[ALERT_ELASTICSEARCH_VERSION_MISMATCH].label,
-      isLegacy: true,
+      legacy: {
+        watchName: 'elasticsearch_version_mismatch',
+        changeDataValues: { severity: AlertSeverity.Warning },
+      },
       interval: '1d',
       actionVariables: [
         {
@@ -50,47 +42,6 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
         ...Object.values(AlertingDefaults.ALERT_TYPE.context),
       ],
     });
-  }
-
-  protected async fetchData(
-    params: CommonAlertParams,
-    callCluster: any,
-    clusters: AlertCluster[],
-    availableCcs: string[]
-  ): Promise<AlertData[]> {
-    let alertIndexPattern = INDEX_ALERTS;
-    if (availableCcs) {
-      alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
-    }
-
-    const legacyAlerts = await fetchLegacyAlerts(
-      callCluster,
-      clusters,
-      alertIndexPattern,
-      WATCH_NAME,
-      Globals.app.config.ui.max_bucket_size
-    );
-
-    return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
-      const severity = AlertSeverity.Warning;
-
-      accum.push({
-        instanceKey: `${legacyAlert.metadata.cluster_uuid}`,
-        clusterUuid: legacyAlert.metadata.cluster_uuid,
-        shouldFire: !legacyAlert.resolved_timestamp,
-        severity,
-        meta: legacyAlert,
-      });
-      return accum;
-    }, []);
-  }
-
-  private getVersions(legacyAlert: LegacyAlert) {
-    const prefixStr = 'Versions: ';
-    return legacyAlert.message.slice(
-      legacyAlert.message.indexOf(prefixStr) + prefixStr.length,
-      legacyAlert.message.length - 1
-    );
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
@@ -113,14 +64,10 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
 
   protected async executeActions(
     instance: AlertInstance,
-    instanceState: AlertInstanceState,
+    alertState: AlertState,
     item: AlertData,
     cluster: AlertCluster
   ) {
-    if (instanceState.alertStates.length === 0) {
-      return;
-    }
-    const alertState = instanceState.alertStates[0];
     const legacyAlert = item.meta as LegacyAlert;
     const versions = this.getVersions(legacyAlert);
     if (alertState.ui.isFiring) {
