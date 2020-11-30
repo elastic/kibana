@@ -571,9 +571,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
   handleListUpdate = () => {
     if (this.componentIsUnmounting) return;
 
-    const newQueryBarRect = this.queryBarInputDivRefInstance.current?.getBoundingClientRect();
-
-    return this.setState({	    const newQueryBarRect = this.queryBarInputDivRefInstance.current?.getBoundingClientRect();
+    return this.setState({
       queryBarRect: this.queryBarInputDivRefInstance.current?.getBoundingClientRect(),
     });
   };
