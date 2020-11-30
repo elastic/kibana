@@ -1,17 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`OverviewPageFooter render 1`] = `
-<footer
-  className="kbnOverviewPageFooter"
->
-  <EuiFlexGroup
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <div />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</footer>
-`;
+exports[`OverviewPageFooter render 1`] = `""`;
