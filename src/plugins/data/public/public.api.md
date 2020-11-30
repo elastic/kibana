@@ -2133,10 +2133,10 @@ export interface SearchInterceptorDeps {
 export type SearchRequest = Record<string, any>;
 
 // Warning: (ae-forgotten-export) The symbol "UrlGeneratorId" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "SearchSessionRestorationInfoProvider" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "SearchSessionInfoProvider" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface SearchSessionRestorationInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId> {
+export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId> {
     getName: () => Promise<string>;
     // (undocumented)
     getUrlGeneratorData: () => Promise<{

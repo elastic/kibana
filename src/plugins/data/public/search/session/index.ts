@@ -17,10 +17,6 @@
  * under the License.
  */
 
-export {
-  SessionService,
-  ISessionService,
-  SearchSessionRestorationInfoProvider,
-} from './session_service';
+export { SessionService, ISessionService, SearchSessionInfoProvider } from './session_service';
 export { SessionState } from './session_state';
 export { SessionsClient, ISessionsClient } from './sessions_client';

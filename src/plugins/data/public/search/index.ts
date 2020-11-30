@@ -44,7 +44,7 @@ export {
 export {
   SessionService,
   ISessionService,
-  SearchSessionRestorationInfoProvider,
+  SearchSessionInfoProvider,
   SessionState,
   SessionsClient,
   ISessionsClient,

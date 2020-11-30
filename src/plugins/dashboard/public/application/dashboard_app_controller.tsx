@@ -441,7 +441,7 @@ export class DashboardAppController {
       DashboardContainer
     >(DASHBOARD_CONTAINER_TYPE);
 
-    searchService.session.setSearchSessionRestorationInfoProvider(
+    searchService.session.setSearchSessionInfoProvider(
       createSessionRestorationDataProvider({
         data,
         getDashboardTitle: () => getDashTitle(),

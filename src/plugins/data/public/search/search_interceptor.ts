@@ -170,7 +170,7 @@ export class SearchInterceptor {
     // 1. The user manually aborts (via `cancelPending`)
     // 2. The request times out
     // 3. abort() is called on `selfAbortController`. This is used by session service to abort all pending searches that it tracks.
-    // to cancel searches that belong to the currently tracked session
+    //    to cancel searches that belong to the currently tracked session
     // 4. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
     const signals = [
       this.abortController.signal,

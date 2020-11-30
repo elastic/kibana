@@ -288,7 +288,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     }
   });
 
-  data.search.session.setSearchSessionRestorationInfoProvider(
+  data.search.session.setSearchSessionInfoProvider(
     createSearchSessionRestorationDataProvider({
       appStateContainer,
       data,

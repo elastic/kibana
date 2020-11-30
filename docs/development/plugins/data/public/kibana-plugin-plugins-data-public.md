@@ -89,7 +89,7 @@
 |  [SavedQueryService](./kibana-plugin-plugins-data-public.savedqueryservice.md) |  |
 |  [SearchError](./kibana-plugin-plugins-data-public.searcherror.md) |  |
 |  [SearchInterceptorDeps](./kibana-plugin-plugins-data-public.searchinterceptordeps.md) |  |
-|  [SearchSessionRestorationInfoProvider](./kibana-plugin-plugins-data-public.searchsessionrestorationinfoprovider.md) | Provide info about current search session to be stored in backgroundSearch saved object |
+|  [SearchSessionInfoProvider](./kibana-plugin-plugins-data-public.searchSessionInfoprovider.md) | Provide info about current search session to be stored in backgroundSearch saved object |
 |  [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md) | search source fields |
 |  [TabbedAggColumn](./kibana-plugin-plugins-data-public.tabbedaggcolumn.md) | \* |
 |  [TabbedTable](./kibana-plugin-plugins-data-public.tabbedtable.md) | \* |

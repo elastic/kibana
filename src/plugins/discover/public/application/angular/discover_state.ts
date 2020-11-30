@@ -33,7 +33,7 @@ import {
   esFilters,
   Filter,
   Query,
-  SearchSessionRestorationInfoProvider,
+  SearchSessionInfoProvider,
 } from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../url_generator';
@@ -260,7 +260,7 @@ export function createSearchSessionRestorationDataProvider(deps: {
   appStateContainer: StateContainer<AppState>;
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
-}): SearchSessionRestorationInfoProvider {
+}): SearchSessionInfoProvider {
   return {
     getName: async () => 'Discover',
     getUrlGeneratorData: async () => {

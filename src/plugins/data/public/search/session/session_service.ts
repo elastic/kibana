@@ -35,7 +35,7 @@ export interface TrackSearchDescriptor {
 /**
  * Provide info about current search session to be stored in backgroundSearch saved object
  */
-export interface SearchSessionRestorationInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId> {
+export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId> {
   /**
    * User-facing name of the session.
    * e.g. will be displayed in background sessions management list
@@ -55,7 +55,7 @@ export class SessionService {
   public readonly state$: Observable<SessionState>;
   private readonly state: SessionStateContainer<TrackSearchDescriptor>;
 
-  private searchSessionRestorationInfoProvider?: SearchSessionRestorationInfoProvider;
+  private searchSessionInfoProvider?: SearchSessionInfoProvider;
   private appChangeSubscription$?: Subscription;
   private curApp?: string;
 
@@ -89,7 +89,6 @@ export class SessionService {
           }
         }
         this.curApp = appName;
-        this.setSearchSessionRestorationInfoProvider(undefined);
       });
     });
   }
@@ -97,12 +96,12 @@ export class SessionService {
   /**
    * Set a provider of info about current session
    * This will be used for creating a background session saved object
-   * @param searchSessionRestorationInfoProvider
+   * @param searchSessionInfoProvider
    */
-  public setSearchSessionRestorationInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId>(
-    searchSessionRestorationInfoProvider: SearchSessionRestorationInfoProvider<ID> | undefined
+  public setSearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId>(
+    searchSessionInfoProvider: SearchSessionInfoProvider<ID> | undefined
   ) {
-    this.searchSessionRestorationInfoProvider = searchSessionRestorationInfoProvider;
+    this.searchSessionInfoProvider = searchSessionInfoProvider;
   }
 
   /**
@@ -123,7 +122,7 @@ export class SessionService {
       this.appChangeSubscription$.unsubscribe();
     }
     this.clear();
-    this.setSearchSessionRestorationInfoProvider(undefined);
+    this.setSearchSessionInfoProvider(undefined);
   }
 
   /**
@@ -180,11 +179,14 @@ export class SessionService {
    */
   public clear() {
     this.state.transitions.clear();
+    this.setSearchSessionInfoProvider(undefined);
   }
 
   private refresh$ = new Subject<void>();
   /**
    * Observable emits when search result refresh was requested
+   * For example, search to background UI could have it's own "refresh" button
+   * Application would use this observable to handle user interaction on that button
    */
   public onRefresh$ = this.refresh$.asObservable();
 
@@ -217,7 +219,7 @@ export class SessionService {
     const sessionId = this.getSessionId();
     if (!sessionId) throw new Error('No current session');
     if (!this.curApp) throw new Error('No current app id');
-    const currentSessionInfoProvider = this.searchSessionRestorationInfoProvider;
+    const currentSessionInfoProvider = this.searchSessionInfoProvider;
     if (!currentSessionInfoProvider) throw new Error('No info provider for current session');
     const [name, { initialState, restoreState, urlGeneratorId }] = await Promise.all([
       currentSessionInfoProvider.getName(),

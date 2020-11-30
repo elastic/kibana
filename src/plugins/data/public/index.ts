@@ -399,7 +399,7 @@ export {
 export type {
   SearchSource,
   ISessionService,
-  SearchSessionRestorationInfoProvider,
+  SearchSessionInfoProvider,
   ISessionsClient,
 } from './search';
 
