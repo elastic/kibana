@@ -21,26 +21,30 @@ import { useLink } from '../../../../../hooks';
 import { PackageIcon } from '../../../../../components';
 import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
 
-const StyledCollapsablePanel = styled(EuiPanel).attrs((props) => ({
-  paddingSize: 'none',
-}))`
-  .euiAccordion__triggerWrapper {
-    border-bottom: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
+const StyledEuiAccordion = styled(EuiAccordion)`
+  .ingest-integration-title-button {
     padding: ${(props) => props.theme.eui.paddingSizes.m}
       ${(props) => props.theme.eui.paddingSizes.m};
-  }
-  .euiAccordion__childWrapper {
-    overflow: visible;
+    border-bottom: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
   }
 `;
 
-const CollapsablePanel: React.FC<{ title: React.ReactNode }> = ({ title, children }) => {
+const CollapsablePanel: React.FC<{ id: string; title: React.ReactNode }> = ({
+  id,
+  title,
+  children,
+}) => {
   return (
-    <StyledCollapsablePanel paddingSize="none">
-      <EuiAccordion id="accordion-1" arrowDisplay="right" buttonContent={title}>
+    <EuiPanel paddingSize="none">
+      <StyledEuiAccordion
+        id={id}
+        arrowDisplay="right"
+        buttonClassName={'ingest-integration-title-button'}
+        buttonContent={title}
+      >
         {children}
-      </EuiAccordion>
-    </StyledCollapsablePanel>
+      </StyledEuiAccordion>
+    </EuiPanel>
   );
 };
 
@@ -92,6 +96,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
 
   return (
     <CollapsablePanel
+      id={packagePolicy.id}
       title={
         <EuiTitle size="xs">
           <h3>
