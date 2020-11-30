@@ -25,7 +25,7 @@ import {
   markInProgressFirstAlert,
   goToInProgressAlerts,
 } from '../tasks/alerts';
-import { esArchiverLoad } from '../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
@@ -35,6 +35,10 @@ describe('Alerts', () => {
     beforeEach(() => {
       esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
+    });
+
+    afterEach(() => {
+      esArchiverUnload('alerts');
     });
 
     it('Closes and opens alerts', () => {
@@ -165,6 +169,10 @@ describe('Alerts', () => {
       loginAndWaitForPage(DETECTIONS_URL);
     });
 
+    afterEach(() => {
+      esArchiverUnload('closed_alerts');
+    });
+
     it('Open one alert when more than one closed alerts are selected', () => {
       waitForAlerts();
       goToClosedAlerts();
@@ -210,6 +218,10 @@ describe('Alerts', () => {
     beforeEach(() => {
       esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
+    });
+
+    afterEach(() => {
+      esArchiverUnload('alerts');
     });
 
     it('Mark one alert in progress when more than one open alerts are selected', () => {
