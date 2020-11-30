@@ -12,6 +12,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const elasticChart = getService('elasticChart');
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
@@ -440,6 +441,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return (
         (await (await testSubjects.find('lnsWorkspace')).getVisibleText()) === 'No results found'
       );
+    },
+
+    async getCurrentChartDebugState() {
+      return await elasticChart.getChartDebugData('lnsWorkspace');
     },
 
     /**
