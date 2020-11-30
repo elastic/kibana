@@ -24,11 +24,11 @@ import { registerCreateIndexPatternRoute } from './routes/create_index_pattern';
 import { registerGetIndexPatternRoute } from './routes/get_index_pattern';
 import { registerDeleteIndexPatternRoute } from './routes/delete_index_pattern';
 import { registerUpdateIndexPatternRoute } from './routes/update_index_pattern';
-import { registerCreateFieldRoute } from './routes/fields/create_field';
-import { registerPutFieldRoute } from './routes/fields/put_field';
-import { registerGetFieldRoute } from './routes/fields/get_field';
-import { registerDeleteFieldRoute } from './routes/fields/delete_field';
-import { registerUpdateFieldRoute } from './routes/fields/update_field';
+import { registerCreateScriptedFieldRoute } from './routes/scripted_fields/create_scripted_field';
+import { registerPutScriptedFieldRoute } from './routes/scripted_fields/put_scripted_field';
+import { registerGetScriptedFieldRoute } from './routes/scripted_fields/get_scripted_field';
+import { registerDeleteScriptedFieldRoute } from './routes/scripted_fields/delete_scripted_field';
+import { registerUpdateScriptedFieldRoute } from './routes/scripted_fields/update_scripted_field';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const parseMetaFields = (metaFields: string | string[]) => {
@@ -47,11 +47,11 @@ export function registerRoutes(http: HttpServiceSetup) {
   registerGetIndexPatternRoute(router);
   registerDeleteIndexPatternRoute(router);
   registerUpdateIndexPatternRoute(router);
-  registerCreateFieldRoute(router);
-  registerPutFieldRoute(router);
-  registerGetFieldRoute(router);
-  registerDeleteFieldRoute(router);
-  registerUpdateFieldRoute(router);
+  registerCreateScriptedFieldRoute(router);
+  registerPutScriptedFieldRoute(router);
+  registerGetScriptedFieldRoute(router);
+  registerDeleteScriptedFieldRoute(router);
+  registerUpdateScriptedFieldRoute(router);
 
   router.get(
     {

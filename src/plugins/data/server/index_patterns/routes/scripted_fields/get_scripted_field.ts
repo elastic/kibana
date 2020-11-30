@@ -19,14 +19,14 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../../core/server';
+import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { assertIndexPatternsContext } from '../util/assert_index_patterns_context';
 import { handleErrors } from '../util/handle_errors';
-import { fieldSpecSchema } from '../util/schemas';
 
-export const registerPutFieldRoute = (router: IRouter) => {
-  router.put(
+export const registerGetScriptedFieldRoute = (router: IRouter) => {
+  router.get(
     {
-      path: '/api/index_patterns/index_pattern/{id}/field',
+      path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
       validate: {
         params: schema.object(
           {
@@ -34,13 +34,13 @@ export const registerPutFieldRoute = (router: IRouter) => {
               minLength: 1,
               maxLength: 1_000,
             }),
+            name: schema.string({
+              minLength: 1,
+              maxLength: 1_000,
+            }),
           },
           { unknowns: 'allow' }
         ),
-        body: schema.object({
-          refresh_fields: schema.maybe(schema.boolean({ defaultValue: true })),
-          field: fieldSpecSchema,
-        }),
       },
     },
     router.handleLegacyErrors(
@@ -48,36 +48,21 @@ export const registerPutFieldRoute = (router: IRouter) => {
         assertIndexPatternsContext(async (ctx, req, res) => {
           const ip = ctx.indexPatterns.indexPatterns;
           const id = req.params.id;
-          const {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            refresh_fields = true,
-            field,
-          } = req.body;
+          const name = req.params.name;
 
           const indexPattern = await ip.get(id);
+          const field = indexPattern.fields.getByName(name);
 
-          const oldFieldObject = indexPattern.fields.getByName(field.name);
-          if (!!oldFieldObject) {
-            indexPattern.fields.remove(oldFieldObject);
+          if (!field) {
+            throw new ErrorIndexPatternFieldNotFound(id, name);
           }
-
-          indexPattern.fields.add(field);
-
-          await ip.updateSavedObject(indexPattern);
-          if (refresh_fields) {
-            await ip.refreshFields(indexPattern);
-          }
-
-          const fieldObject = indexPattern.fields.getByName(field.name);
-          if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
 
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
             body: JSON.stringify({
-              field: fieldObject.toSpec(),
-              index_pattern: indexPattern.toSpec(),
+              field: field.toSpec(),
             }),
           });
         })

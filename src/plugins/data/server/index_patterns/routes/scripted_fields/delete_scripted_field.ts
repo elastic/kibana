@@ -23,10 +23,10 @@ import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { assertIndexPatternsContext } from '../util/assert_index_patterns_context';
 import { handleErrors } from '../util/handle_errors';
 
-export const registerGetFieldRoute = (router: IRouter) => {
-  router.get(
+export const registerDeleteScriptedFieldRoute = (router: IRouter) => {
+  router.delete(
     {
-      path: '/api/index_patterns/index_pattern/{id}/field/{name}',
+      path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
       validate: {
         params: schema.object(
           {
@@ -57,13 +57,18 @@ export const registerGetFieldRoute = (router: IRouter) => {
             throw new ErrorIndexPatternFieldNotFound(id, name);
           }
 
+          if (!field.scripted) {
+            throw new Error('Only scripted fields can be deleted.');
+          }
+
+          indexPattern.fields.remove(field);
+
+          await ip.updateSavedObject(indexPattern);
+
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
-            body: JSON.stringify({
-              field: field.toSpec(),
-            }),
           });
         })
       )
