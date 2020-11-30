@@ -17,11 +17,8 @@
  * under the License.
  */
 import './discover_sidebar.scss';
-
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { isEqual, sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { UiStatsMetricType } from '@kbn/analytics';
 import {
   EuiAccordion,
@@ -33,6 +30,8 @@ import {
   EuiNotificationBadge,
   EuiPageSideBar,
 } from '@elastic/eui';
+import { isEqual, sortBy } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -48,6 +47,10 @@ import { DiscoverServices } from '../../../build_services';
 
 export interface DiscoverSidebarProps {
   /**
+   * Determines whether add/remove buttons are displayed not only when focused
+   */
+  alwaysShowActionButtons?: boolean;
+  /**
    * the selected columns displayed in the doc table in discover
    */
   columns: string[];
@@ -55,6 +58,10 @@ export interface DiscoverSidebarProps {
    * a statistics of the distribution of fields in the given hits
    */
   fieldCounts: Record<string, number>;
+  /**
+   * Current state of the field filter, filtering fields by name, type, ...
+   */
+  fieldFilter: FieldFilterState;
   /**
    * hits fetched from ES, displayed in the doc table
    */
@@ -85,36 +92,30 @@ export interface DiscoverSidebarProps {
    */
   services: DiscoverServices;
   /**
-   * Callback function to select another index pattern
-   */
-  setIndexPattern: (id: string) => void;
-  /**
-   * Shows Add button at all times and not only on focus
-   */
-  mobile?: boolean;
-  /**
-   * Shows index pattern and a button that displays the sidebar in a flyout
-   */
-  useFlyout?: boolean;
-  /**
-   * Current state of the field filter, filtering fields by name, type, ...
-   */
-  fieldFilter: FieldFilterState;
-  /**
    * Change current state of fieldFilter
    */
   setFieldFilter: (next: FieldFilterState) => void;
+  /**
+   * Callback function to select another index pattern
+   */
+  setIndexPattern: (id: string) => void;
   /**
    * Metric tracking function
    * @param metricType
    * @param eventName
    */
   trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  /**
+   * Shows index pattern and a button that displays the sidebar in a flyout
+   */
+  useFlyout?: boolean;
 }
 
 export function DiscoverSidebar({
+  alwaysShowActionButtons = false,
   columns,
   fieldCounts,
+  fieldFilter,
   hits,
   indexPatternList,
   onAddField,
@@ -122,12 +123,10 @@ export function DiscoverSidebar({
   onRemoveField,
   selectedIndexPattern,
   services,
+  setFieldFilter,
   setIndexPattern,
   trackUiMetric,
-  mobile = false,
   useFlyout = false,
-  fieldFilter,
-  setFieldFilter,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   useEffect(() => {
@@ -269,6 +268,7 @@ export function DiscoverSidebar({
                               className="dscSidebar__item"
                             >
                               <DiscoverField
+                                alwaysShowActionButton={alwaysShowActionButtons}
                                 field={field}
                                 indexPattern={selectedIndexPattern}
                                 onAddField={onAddField}
@@ -276,7 +276,6 @@ export function DiscoverSidebar({
                                 onAddFilter={onAddFilter}
                                 getDetails={getDetailsByField}
                                 selected={true}
-                                mobile={mobile}
                                 trackUiMetric={trackUiMetric}
                               />
                             </li>
@@ -330,13 +329,13 @@ export function DiscoverSidebar({
                               className="dscSidebar__item"
                             >
                               <DiscoverField
+                                alwaysShowActionButton={alwaysShowActionButtons}
                                 field={field}
                                 indexPattern={selectedIndexPattern}
                                 onAddField={onAddField}
                                 onRemoveField={onRemoveField}
                                 onAddFilter={onAddFilter}
                                 getDetails={getDetailsByField}
-                                mobile={mobile}
                                 trackUiMetric={trackUiMetric}
                               />
                             </li>
@@ -358,13 +357,13 @@ export function DiscoverSidebar({
                           className="dscSidebar__item"
                         >
                           <DiscoverField
+                            alwaysShowActionButton={alwaysShowActionButtons}
                             field={field}
                             indexPattern={selectedIndexPattern}
                             onAddField={onAddField}
                             onRemoveField={onRemoveField}
                             onAddFilter={onAddFilter}
                             getDetails={getDetailsByField}
-                            mobile={mobile}
                             trackUiMetric={trackUiMetric}
                           />
                         </li>

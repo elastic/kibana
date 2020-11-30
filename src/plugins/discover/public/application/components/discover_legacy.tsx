@@ -254,16 +254,18 @@ export function DiscoverLegacy({
                             onResetQuery={resetQuery}
                           />
                         </EuiFlexItem>
-                        <EuiFlexItem className="dscResultCount__actions">
-                          <TimechartHeader
-                            dateFormat={opts.config.get('dateFormat')}
-                            timeRange={timeRange}
-                            options={search.aggs.intervalOptions}
-                            onChangeInterval={onChangeInterval}
-                            stateInterval={state.interval || ''}
-                            bucketInterval={bucketInterval}
-                          />
-                        </EuiFlexItem>
+                        {toggleOn && (
+                          <EuiFlexItem className="dscResultCount__actions">
+                            <TimechartHeader
+                              dateFormat={opts.config.get('dateFormat')}
+                              timeRange={timeRange}
+                              options={search.aggs.intervalOptions}
+                              onChangeInterval={onChangeInterval}
+                              stateInterval={state.interval || ''}
+                              bucketInterval={bucketInterval}
+                            />
+                          </EuiFlexItem>
+                        )}
                         <EuiFlexItem className="dscResultCount__toggle" grow={false}>
                           <EuiButtonEmpty
                             size="xs"
@@ -330,9 +332,6 @@ export function DiscoverLegacy({
                               onRemoveColumn={onRemoveColumn}
                               onSort={onSort}
                             />
-                            <span tabIndex={-1} id="discoverBottomMarker">
-                              &#8203;
-                            </span>
                             {rows.length === opts.sampleSize && (
                               <div
                                 className="dscTable__footer"
@@ -365,6 +364,9 @@ export function DiscoverLegacy({
                                 </EuiButtonEmpty>
                               </div>
                             )}
+                            <span tabIndex={-1} id="discoverBottomMarker">
+                              &#8203;
+                            </span>
                           </div>
                         )}
                       </section>

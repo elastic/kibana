@@ -44,6 +44,10 @@ import { DiscoverServices } from '../../../build_services';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
+   * Determines whether add/remove buttons are displayed non only when focused
+   */
+  alwaysShowActionButtons?: boolean;
+  /**
    * the selected columns displayed in the doc table in discover
    */
   columns: string[];
@@ -59,6 +63,10 @@ export interface DiscoverSidebarResponsiveProps {
    * List of available index patterns
    */
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  /**
+   * Has been toggled closed
+   */
+  isClosed?: boolean;
   /**
    * Callback function when selecting a field
    */
@@ -85,23 +93,15 @@ export interface DiscoverSidebarResponsiveProps {
    */
   setIndexPattern: (id: string) => void;
   /**
-   * Shows Add button at all times and not only on focus
-   */
-  mobile?: boolean;
-  /**
-   * Shows index pattern and a button that displays the sidebar in a flyout
-   */
-  useFlyout?: boolean;
-  /**
-   * Has been toggled closed
-   */
-  isClosed?: boolean;
-  /**
    * Metric tracking function
    * @param metricType
    * @param eventName
    */
   trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  /**
+   * Shows index pattern and a button that displays the sidebar in a flyout
+   */
+  useFlyout?: boolean;
 }
 
 /**
@@ -113,15 +113,17 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
-  if (!props.selectedIndexPattern || props.isClosed) {
+  if (!props.selectedIndexPattern) {
     return null;
   }
 
   return (
     <>
-      <EuiHideFor sizes={['xs', 's']}>
-        <DiscoverSidebar {...props} fieldFilter={fieldFilter} setFieldFilter={setFieldFilter} />
-      </EuiHideFor>
+      {props.isClosed ? null : (
+        <EuiHideFor sizes={['xs', 's']}>
+          <DiscoverSidebar {...props} fieldFilter={fieldFilter} setFieldFilter={setFieldFilter} />
+        </EuiHideFor>
+      )}
       <EuiShowFor sizes={['xs', 's']}>
         <div className="dscSidebar__mobile">
           <section
@@ -190,7 +192,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                   {...props}
                   fieldFilter={fieldFilter}
                   setFieldFilter={setFieldFilter}
-                  mobile={true}
+                  alwaysShowActionButtons={true}
                 />
               </div>
             </EuiFlyout>
