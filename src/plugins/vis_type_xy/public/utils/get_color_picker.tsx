@@ -48,7 +48,6 @@ export const getColorPicker = (
 ): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
   const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
   const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
-    onClose();
     if (!seriesName) {
       return;
     }
@@ -56,6 +55,8 @@ export const getColorPicker = (
       onChange(newColor);
     }
     setColor(newColor, seriesName, event);
+    // must be called after onChange
+    onClose();
   };
 
   return (
