@@ -7,6 +7,7 @@
 import * as rt from 'io-ts';
 import { jsonArrayRT } from '../../typed_json';
 import { logEntriesCursorRT } from './common';
+import { logSourceColumnConfigurationRT } from '../log_sources';
 
 export const LOG_ENTRIES_PATH = '/api/log_entries/entries';
 
@@ -19,6 +20,7 @@ export const logEntriesBaseRequestRT = rt.intersection([
   rt.partial({
     query: rt.union([rt.string, rt.null]),
     size: rt.number,
+    columns: rt.array(logSourceColumnConfigurationRT),
   }),
 ]);
 

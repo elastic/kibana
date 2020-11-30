@@ -135,11 +135,16 @@ test('Unlink is not compatible when embeddable is not in a dashboard container',
 test('Unlink replaces embeddableId and retains panel count', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
+  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
   const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
   await action.execute({ embeddable });
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount);
-  expect(Object.keys(container.getInput().panels)).toContain(embeddable.id);
-  const newPanel = container.getInput().panels[embeddable.id!];
+
+  const newPanelId = Object.keys(container.getInput().panels).find(
+    (key) => !originalPanelKeySet.has(key)
+  );
+  expect(newPanelId).toBeDefined();
+  const newPanel = container.getInput().panels[newPanelId!];
   expect(newPanel.type).toEqual(embeddable.type);
 });
 
@@ -159,10 +164,15 @@ test('Unlink unwraps all attributes from savedObject', async () => {
     mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: embeddable.id },
     mockedByValueInput: { attributes: complicatedAttributes, id: embeddable.id },
   });
+  const dashboard = embeddable.getRoot() as IContainer;
+  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
   const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
   await action.execute({ embeddable });
-  expect(Object.keys(container.getInput().panels)).toContain(embeddable.id);
-  const newPanel = container.getInput().panels[embeddable.id!];
+  const newPanelId = Object.keys(container.getInput().panels).find(
+    (key) => !originalPanelKeySet.has(key)
+  );
+  expect(newPanelId).toBeDefined();
+  const newPanel = container.getInput().panels[newPanelId!];
   expect(newPanel.type).toEqual(embeddable.type);
   expect(newPanel.explicitInput.attributes).toEqual(complicatedAttributes);
 });

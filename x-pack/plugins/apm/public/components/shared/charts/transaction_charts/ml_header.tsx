@@ -84,7 +84,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
           transactionType={transactionType}
         >
           {i18n.translate('xpack.apm.metrics.transactionChart.viewJob', {
-            defaultMessage: 'View Job:',
+            defaultMessage: 'View Job',
           })}
         </MLJobLink>
       </ShiftedEuiText>

@@ -57,10 +57,19 @@ export const createPositiveRate = (doc, intervalString, aggRoot) => (metric) => 
   overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}`, positiveOnlyBucket);
 };
 
-export function positiveRate(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
+export function positiveRate(
+  req,
+  panel,
+  series,
+  esQueryConfig,
+  indexPatternObject,
+  capabilities,
+  { barTargetUiSettings }
+) {
   return (next) => (doc) => {
     const { interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
-    const { intervalString } = getBucketSize(req, interval, capabilities);
+    const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
+
     if (series.metrics.some(filter)) {
       series.metrics
         .filter(filter)

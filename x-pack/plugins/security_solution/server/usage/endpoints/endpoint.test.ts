@@ -20,9 +20,9 @@ import * as fleetSavedObjects from './fleet_saved_objects';
 describe('test security solution endpoint telemetry', () => {
   let mockSavedObjectsRepository: jest.Mocked<ISavedObjectsRepository>;
   let getFleetSavedObjectsMetadataSpy: jest.SpyInstance<Promise<SavedObjectsFindResponse<Agent>>>;
-  let getLatestFleetEndpointEventSpy: jest.SpyInstance<Promise<
-    SavedObjectsFindResponse<AgentEventSOAttributes>
-  >>;
+  let getLatestFleetEndpointEventSpy: jest.SpyInstance<
+    Promise<SavedObjectsFindResponse<AgentEventSOAttributes>>
+  >;
 
   beforeAll(() => {
     getLatestFleetEndpointEventSpy = jest.spyOn(fleetSavedObjects, 'getLatestFleetEndpointEvent');
