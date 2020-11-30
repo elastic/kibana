@@ -49,7 +49,7 @@ export class EsArchiver {
     this.client = client;
     this.dataDir = dataDir;
     this.log = log;
-    this.kbnClient = new KbnClient(log, { url: kibanaUrl });
+    this.kbnClient = new KbnClient({ log, url: kibanaUrl });
   }
 
   /**

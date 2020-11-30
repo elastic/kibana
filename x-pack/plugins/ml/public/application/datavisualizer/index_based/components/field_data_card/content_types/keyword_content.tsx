@@ -24,7 +24,7 @@ export const KeywordContent: FC<FieldDataCardProps> = ({ config }) => {
   return (
     <div className="mlFieldDataCard__stats">
       <div>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs" color="subdued" data-test-subj="mlFieldDataCardDocCount">
           <EuiIcon type="document" />
           &nbsp;
           <FormattedMessage
@@ -41,7 +41,7 @@ export const KeywordContent: FC<FieldDataCardProps> = ({ config }) => {
       <EuiSpacer size="xs" />
 
       <div>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs" color="subdued" data-test-subj="mlFieldDataCardCardinality">
           <EuiIcon type="database" />
           &nbsp;
           <FormattedMessage

@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, LegacyScopedClusterClient } from '../../../../src/core/server';
+import { PluginStartContract as TriggersActionsUiStartContract } from '../../triggers_actions_ui/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
-import { getService as getServiceIndexThreshold } from './alert_types/index_threshold';
-
-export { Logger, IRouter } from '../../../../src/core/server';
 
 export {
   PluginSetupContract as AlertingSetup,
@@ -23,14 +20,6 @@ export interface StackAlertsDeps {
   features: FeaturesPluginSetup;
 }
 
-// external service exposed through plugin setup/start
-export interface IService {
-  indexThreshold: ReturnType<typeof getServiceIndexThreshold>;
+export interface StackAlertsStartDeps {
+  triggersActionsUi: TriggersActionsUiStartContract;
 }
-
-// version of service for internal use
-export interface Service extends IService {
-  logger: Logger;
-}
-
-export type CallCluster = LegacyScopedClusterClient['callAsCurrentUser'];

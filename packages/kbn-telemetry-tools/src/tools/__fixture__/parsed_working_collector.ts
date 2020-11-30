@@ -34,21 +34,21 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
         },
         my_index_signature_prop: {
           avg: {
-            type: 'number',
+            type: 'float',
           },
           count: {
-            type: 'number',
+            type: 'long',
           },
           max: {
-            type: 'number',
+            type: 'long',
           },
           min: {
-            type: 'number',
+            type: 'long',
           },
         },
         my_objects: {
           total: {
-            type: 'number',
+            type: 'long',
           },
           type: {
             type: 'boolean',
@@ -58,7 +58,7 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
           type: 'array',
           items: {
             total: {
-              type: 'number',
+              type: 'long',
             },
             type: { type: 'boolean' },
           },

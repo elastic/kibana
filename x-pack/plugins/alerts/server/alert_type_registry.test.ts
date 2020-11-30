@@ -7,9 +7,9 @@
 import { TaskRunnerFactory } from './task_runner';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertType } from './types';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/mocks';
 
-const taskManager = taskManagerMock.setup();
+const taskManager = taskManagerMock.createSetup();
 const alertTypeRegistryParams = {
   taskManager,
   taskRunnerFactory: new TaskRunnerFactory(),
@@ -95,6 +95,33 @@ describe('register()', () => {
     );
   });
 
+  test('throws if AlertType action groups contains reserved group id', () => {
+    const alertType = {
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+        {
+          id: 'resolved',
+          name: 'Resolved',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      executor: jest.fn(),
+      producer: 'alerts',
+    };
+    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+
+    expect(() => registry.register(alertType)).toThrowError(
+      new Error(
+        `Alert type [id="${alertType.id}"] cannot be registered. Action groups [resolved] are reserved by the framework.`
+      )
+    );
+  });
+
   test('registers the executor with the task manager', () => {
     const alertType = {
       id: 'test',
@@ -118,7 +145,6 @@ describe('register()', () => {
           "alerting:test": Object {
             "createTaskRunner": [Function],
             "title": "Test",
-            "type": "alerting:test",
           },
         },
       ]
@@ -202,6 +228,10 @@ describe('get()', () => {
             "id": "default",
             "name": "Default",
           },
+          Object {
+            "id": "resolved",
+            "name": "Resolved",
+          },
         ],
         "actionVariables": Object {
           "context": Array [],
@@ -255,6 +285,10 @@ describe('list()', () => {
             Object {
               "id": "testActionGroup",
               "name": "Test Action Group",
+            },
+            Object {
+              "id": "resolved",
+              "name": "Resolved",
             },
           ],
           "actionVariables": Object {

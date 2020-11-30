@@ -35,27 +35,46 @@ import {
 } from './actions';
 import { Action } from './reducer';
 import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
-import * as detectionI18n from '../../translations';
 import { LinkAnchor } from '../../../../../common/components/links';
+import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { TagsDisplay } from './tag_display';
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
   dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
-  reFetchRules: (refreshPrePackagedRule?: boolean) => void
+  reFetchRules: (refreshPrePackagedRule?: boolean) => void,
+  actionsPrivileges:
+    | boolean
+    | Readonly<{
+        [x: string]: boolean;
+      }>
 ) => [
   {
     'data-test-subj': 'editRuleAction',
     description: i18n.EDIT_RULE_SETTINGS,
+    name: !actionsPrivileges ? (
+      <EuiToolTip position="left" content={i18n.EDIT_RULE_SETTINGS_TOOLTIP}>
+        <>{i18n.EDIT_RULE_SETTINGS}</>
+      </EuiToolTip>
+    ) : (
+      i18n.EDIT_RULE_SETTINGS
+    ),
     icon: 'controlsHorizontal',
-    name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
+    enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
   },
   {
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
-    name: i18n.DUPLICATE_RULE,
+    name: !actionsPrivileges ? (
+      <EuiToolTip position="left" content={i18n.EDIT_RULE_SETTINGS_TOOLTIP}>
+        <>{i18n.DUPLICATE_RULE}</>
+      </EuiToolTip>
+    ) : (
+      i18n.DUPLICATE_RULE
+    ),
+    enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: Rule) => {
       await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
       await reFetchRules(true);
@@ -97,6 +116,11 @@ interface GetColumns {
   hasNoPermissions: boolean;
   loadingRuleIds: string[];
   reFetchRules: (refreshPrePackagedRule?: boolean) => void;
+  hasReadActionsPrivileges:
+    | boolean
+    | Readonly<{
+        [x: string]: boolean;
+      }>;
 }
 
 export const getColumns = ({
@@ -108,6 +132,7 @@ export const getColumns = ({
   hasNoPermissions,
   loadingRuleIds,
   reFetchRules,
+  hasReadActionsPrivileges,
 }: GetColumns): RulesColumns[] => {
   const cols: RulesColumns[] = [
     {
@@ -185,7 +210,7 @@ export const getColumns = ({
           getEmptyTagValue()
         ) : (
           <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_UPDATE} date={new Date(value)}>
-            <FormattedRelative value={value} />
+            <FormattedDate value={value} fieldName={'last rule update date'} />
           </LocalizedDateTooltip>
         );
       },
@@ -227,11 +252,7 @@ export const getColumns = ({
       render: (value: Rule['enabled'], item: Rule) => (
         <EuiToolTip
           position="top"
-          content={
-            isMlRule(item.type) && !hasMlPermissions
-              ? detectionI18n.ML_RULES_DISABLED_MESSAGE
-              : undefined
-          }
+          content={getToolTipContent(item, hasMlPermissions, hasReadActionsPrivileges)}
         >
           <RuleSwitch
             data-test-subj="enabled"
@@ -239,7 +260,9 @@ export const getColumns = ({
             id={item.id}
             enabled={item.enabled}
             isDisabled={
-              hasNoPermissions || (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
+              !canEditRuleWithActions(item, hasReadActionsPrivileges) ||
+              hasNoPermissions ||
+              (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
             }
             isLoading={loadingRuleIds.includes(item.id)}
           />
@@ -251,7 +274,13 @@ export const getColumns = ({
   ];
   const actions: RulesColumns[] = [
     {
-      actions: getActions(dispatch, dispatchToaster, history, reFetchRules),
+      actions: getActions(
+        dispatch,
+        dispatchToaster,
+        history,
+        reFetchRules,
+        hasReadActionsPrivileges
+      ),
       width: '40px',
     } as EuiTableActionsColumnType<Rule>,
   ];

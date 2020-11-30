@@ -25,12 +25,12 @@ import { FieldComponent } from '../../../../common/components/autocomplete/field
 import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 
-const RiskScoreMappingEuiFormRow = styled(EuiFormRow)`
-  width: 468px;
-`;
-
 const NestedContent = styled.div`
   margin-left: 24px;
+`;
+
+const EuiFlexItemComboBoxColumn = styled(EuiFlexItem)`
+  max-width: 376px;
 `;
 
 const EuiFlexItemIconColumn = styled(EuiFlexItem)`
@@ -148,7 +148,7 @@ export const RiskScoreField = ({
   }, [fieldValue, handleRiskScoreMappingChecked, isDisabled]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction={'column'}>
       <EuiFlexItem>
         <EuiFormRow
           label={riskScoreLabel}
@@ -175,7 +175,7 @@ export const RiskScoreField = ({
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <RiskScoreMappingEuiFormRow
+        <EuiFormRow
           label={riskScoreMappingLabel}
           labelAppend={field.labelAppend}
           helpText={
@@ -197,9 +197,9 @@ export const RiskScoreField = ({
               <EuiFlexGroup direction={'column'} gutterSize="s">
                 <EuiFlexItem>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <EuiFlexItem>
+                    <EuiFlexItemComboBoxColumn>
                       <EuiFormLabel>{i18n.SOURCE_FIELD}</EuiFormLabel>
-                    </EuiFlexItem>
+                    </EuiFlexItemComboBoxColumn>
                     <EuiFlexItemIconColumn grow={false} />
                     <EuiFlexItemRiskScoreColumn grow={false}>
                       <EuiFormLabel>{i18n.DEFAULT_RISK_SCORE}</EuiFormLabel>
@@ -209,7 +209,7 @@ export const RiskScoreField = ({
 
                 <EuiFlexItem>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <EuiFlexItem>
+                    <EuiFlexItemComboBoxColumn>
                       <FieldComponent
                         placeholder={placeholder ?? ''}
                         indexPattern={indices}
@@ -221,9 +221,8 @@ export const RiskScoreField = ({
                         onChange={handleFieldChange}
                         data-test-subj={dataTestSubj}
                         aria-label={idAria}
-                        fieldInputWidth={270}
                       />
-                    </EuiFlexItem>
+                    </EuiFlexItemComboBoxColumn>
                     <EuiFlexItemIconColumn grow={false}>
                       <EuiIcon type={'sortRight'} />
                     </EuiFlexItemIconColumn>
@@ -235,7 +234,7 @@ export const RiskScoreField = ({
               </EuiFlexGroup>
             )}
           </NestedContent>
-        </RiskScoreMappingEuiFormRow>
+        </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

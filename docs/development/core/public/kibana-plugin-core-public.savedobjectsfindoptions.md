@@ -15,10 +15,11 @@ export interface SavedObjectsFindOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [defaultSearchOperator](./kibana-plugin-core-public.savedobjectsfindoptions.defaultsearchoperator.md) | <code>'AND' &#124; 'OR'</code> |  |
+|  [defaultSearchOperator](./kibana-plugin-core-public.savedobjectsfindoptions.defaultsearchoperator.md) | <code>'AND' &#124; 'OR'</code> | The search operator to use with the provided filter. Defaults to <code>OR</code> |
 |  [fields](./kibana-plugin-core-public.savedobjectsfindoptions.fields.md) | <code>string[]</code> | An array of fields to include in the results |
 |  [filter](./kibana-plugin-core-public.savedobjectsfindoptions.filter.md) | <code>string &#124; KueryNode</code> |  |
-|  [hasReference](./kibana-plugin-core-public.savedobjectsfindoptions.hasreference.md) | <code>{</code><br/><code>        type: string;</code><br/><code>        id: string;</code><br/><code>    }</code> |  |
+|  [hasReference](./kibana-plugin-core-public.savedobjectsfindoptions.hasreference.md) | <code>SavedObjectsFindOptionsReference &#124; SavedObjectsFindOptionsReference[]</code> | Search for documents having a reference to the specified objects. Use <code>hasReferenceOperator</code> to specify the operator to use when searching for multiple references. |
+|  [hasReferenceOperator](./kibana-plugin-core-public.savedobjectsfindoptions.hasreferenceoperator.md) | <code>'AND' &#124; 'OR'</code> | The operator to use when searching by multiple references using the <code>hasReference</code> option. Defaults to <code>OR</code> |
 |  [namespaces](./kibana-plugin-core-public.savedobjectsfindoptions.namespaces.md) | <code>string[]</code> |  |
 |  [page](./kibana-plugin-core-public.savedobjectsfindoptions.page.md) | <code>number</code> |  |
 |  [perPage](./kibana-plugin-core-public.savedobjectsfindoptions.perpage.md) | <code>number</code> |  |

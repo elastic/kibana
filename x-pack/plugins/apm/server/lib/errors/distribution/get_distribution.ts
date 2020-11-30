@@ -4,18 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../../typings/common';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { getBuckets } from './get_buckets';
 import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
+import { getBuckets } from './get_buckets';
 
 function getBucketSize({ start, end }: SetupTimeRange) {
   return Math.floor((end - start) / BUCKET_TARGET_COUNT);
 }
-
-export type ErrorDistributionAPIResponse = PromiseReturnType<
-  typeof getErrorDistribution
->;
 
 export async function getErrorDistribution({
   serviceName,

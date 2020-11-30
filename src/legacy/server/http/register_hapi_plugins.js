@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import HapiTemplates from 'vision';
-import HapiStaticFiles from 'inert';
-import HapiProxy from 'h2o2';
+import HapiTemplates from '@hapi/vision';
+import HapiStaticFiles from '@hapi/inert';
+import HapiProxy from '@hapi/h2o2';
 
 const plugins = [HapiTemplates, HapiStaticFiles, HapiProxy];
 

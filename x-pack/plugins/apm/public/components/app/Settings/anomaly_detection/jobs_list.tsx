@@ -80,7 +80,7 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={onAddEnvironments}>
+          <EuiButton fill iconType="plusInCircle" onClick={onAddEnvironments}>
             {i18n.translate(
               'xpack.apm.settings.anomalyDetection.jobList.addEnvironments',
               {

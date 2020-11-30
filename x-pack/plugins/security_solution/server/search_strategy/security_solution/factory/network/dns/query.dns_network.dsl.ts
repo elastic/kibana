@@ -15,25 +15,27 @@ import {
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
+const HUGE_QUERY_SIZE = 1000000;
+
 type QueryOrder =
-  | { _count: Direction }
-  | { _key: Direction }
-  | { unique_domains: Direction }
-  | { dns_bytes_in: Direction }
-  | { dns_bytes_out: Direction };
+  | { _count: { order: Direction } }
+  | { _key: { order: Direction } }
+  | { unique_domains: { order: Direction } }
+  | { dns_bytes_in: { order: Direction } }
+  | { dns_bytes_out: { order: Direction } };
 
 const getQueryOrder = (sort: SortField<NetworkDnsFields>): QueryOrder => {
   switch (sort.field) {
     case NetworkDnsFields.queryCount:
-      return { _count: sort.direction };
+      return { _count: { order: sort.direction } };
     case NetworkDnsFields.dnsName:
-      return { _key: sort.direction };
+      return { _key: { order: sort.direction } };
     case NetworkDnsFields.uniqueDomains:
-      return { unique_domains: sort.direction };
+      return { unique_domains: { order: sort.direction } };
     case NetworkDnsFields.dnsBytesIn:
-      return { dns_bytes_in: sort.direction };
+      return { dns_bytes_in: { order: sort.direction } };
     case NetworkDnsFields.dnsBytesOut:
-      return { dns_bytes_out: sort.direction };
+      return { dns_bytes_out: { order: sort.direction } };
   }
   assertUnreachable(sort.field);
 };
@@ -67,7 +69,7 @@ export const buildDnsQuery = ({
   filterQuery,
   isPtrIncluded,
   sort,
-  pagination: { querySize },
+  pagination: { cursorStart, querySize },
   stackByField = 'dns.question.registered_domain',
   timerange: { from, to },
 }: NetworkDnsRequestOptions) => {
@@ -89,18 +91,22 @@ export const buildDnsQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...getCountAgg(),
         dns_name_query_count: {
           terms: {
             field: stackByField,
-            size: querySize,
-            order: {
-              ...getQueryOrder(sort),
-            },
+            size: HUGE_QUERY_SIZE,
           },
           aggs: {
+            bucket_sort: {
+              bucket_sort: {
+                sort: [getQueryOrder(sort), { _key: { order: Direction.asc } }],
+                from: cursorStart,
+                size: querySize,
+              },
+            },
             unique_domains: {
               cardinality: {
                 field: 'dns.question.name',

@@ -5,14 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertType, ActionVariable } from '../../types';
+import { ActionVariable, ActionVariables } from '../../types';
 
 // return a "flattened" list of action variables for an alertType
-export function actionVariablesFromAlertType(alertType: AlertType): ActionVariable[] {
+export function transformActionVariables(actionVariables: ActionVariables): ActionVariable[] {
   const alwaysProvidedVars = getAlwaysProvidedActionVariables();
-  const contextVars = prefixKeys(alertType.actionVariables.context, 'context.');
-  const paramsVars = prefixKeys(alertType.actionVariables.params, 'params.');
-  const stateVars = prefixKeys(alertType.actionVariables.state, 'state.');
+  const contextVars = actionVariables.context
+    ? prefixKeys(actionVariables.context, 'context.')
+    : [];
+  const paramsVars = prefixKeys(actionVariables.params, 'params.');
+  const stateVars = prefixKeys(actionVariables.state, 'state.');
 
   return alwaysProvidedVars.concat(contextVars, paramsVars, stateVars);
 }
@@ -57,9 +59,23 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   });
 
   result.push({
+    name: 'date',
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.dateLabel', {
+      defaultMessage: 'The date the alert scheduled the action.',
+    }),
+  });
+
+  result.push({
     name: 'alertInstanceId',
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertInstanceIdLabel', {
       defaultMessage: 'The alert instance id that scheduled actions for the alert.',
+    }),
+  });
+
+  result.push({
+    name: 'alertActionGroup',
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertActionGroupLabel', {
+      defaultMessage: 'The alert action group that was used to scheduled actions for the alert.',
     }),
   });
 

@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
-import { AlertInstanceState } from '../../alerts/types';
+import { AlertInstanceState } from '../../../common/types/alerts';
 import { AlertsClient } from '../../../../alerts/server';
 import { AlertsFactory } from '../../alerts';
-import { CommonAlertStatus, CommonAlertState, CommonAlertFilter } from '../../../common/types';
+import {
+  CommonAlertStatus,
+  CommonAlertState,
+  CommonAlertFilter,
+} from '../../../common/types/alerts';
 import { ALERTS } from '../../../common/constants';
 import { MonitoringLicenseService } from '../../types';
 
@@ -18,8 +22,9 @@ export async function fetchStatus(
   clusterUuid: string,
   start: number,
   end: number,
-  filters: CommonAlertFilter[]
+  filters: CommonAlertFilter[] = []
 ): Promise<{ [type: string]: CommonAlertStatus }> {
+  const types: Array<{ type: string; result: CommonAlertStatus }> = [];
   const byType: { [type: string]: CommonAlertStatus } = {};
   await Promise.all(
     (alertTypes || ALERTS).map(async (type) => {
@@ -39,7 +44,7 @@ export async function fetchStatus(
         alert: serialized,
       };
 
-      byType[type] = result;
+      types.push({ type, result });
 
       const id = alert.getId();
       if (!id) {
@@ -74,6 +79,11 @@ export async function fetchStatus(
       }, []);
     })
   );
+
+  types.sort((a, b) => (a.type === b.type ? 0 : a.type.length > b.type.length ? 1 : -1));
+  for (const { type, result } of types) {
+    byType[type] = result;
+  }
 
   return byType;
 }

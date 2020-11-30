@@ -5,7 +5,7 @@
 ```ts
 
 import { APICaller as APICaller_2 } from 'kibana/server';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CallCluster as CallCluster_2 } from 'src/legacy/core_plugins/elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
@@ -116,9 +116,9 @@ import { RecursiveReadonly } from 'kibana/public';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
-import { Request } from 'hapi';
-import { ResponseObject } from 'hapi';
-import { ResponseToolkit } from 'hapi';
+import { Request } from '@hapi/hapi';
+import { ResponseObject } from '@hapi/hapi';
+import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';

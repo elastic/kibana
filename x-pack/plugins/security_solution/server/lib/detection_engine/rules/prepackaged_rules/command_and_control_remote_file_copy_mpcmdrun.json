@@ -12,7 +12,7 @@
   "license": "Elastic License",
   "name": "Remote File Download via MpCmdRun",
   "note": "### Investigating Remote File Download via MpCmdRun\nVerify details such as the parent process, URL reputation, and downloaded file details. Additionally, `MpCmdRun` logs this information in the Appdata Temp folder in `MpCmdRun.log`.",
-  "query": "event.category:process and event.type:(start or process_started) and (process.name:MpCmdRun.exe or process.pe.original_file_name:MpCmdRun.exe) and process.args:((\"-DownloadFile\" or \"-downloadfile\") and \"-url\" and \"-path\")",
+  "query": "event.category:process and event.type:(start or process_started) and (process.name:MpCmdRun.exe or process.pe.original_file_name:MpCmdRun.exe or winlog.event_data.OriginalFileName:MpCmdRun.exe) and process.args:((\"-DownloadFile\" or \"-downloadfile\") and \"-url\" and \"-path\")",
   "references": [
     "https://twitter.com/mohammadaskar2/status/1301263551638761477",
     "https://www.bleepingcomputer.com/news/microsoft/microsoft-defender-can-ironically-be-used-to-download-malware/"
@@ -22,7 +22,10 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Command and Control"
   ],
   "threat": [
     {

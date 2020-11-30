@@ -92,6 +92,7 @@ export const Properties = React.memo<Props>(
       setShowTimelineModal(true);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
     const { Modal: AllCasesModal, onOpenModal: onOpenCaseModal } = useAllCasesModal({ timelineId });
 
     const datePickerWidth = useMemo(

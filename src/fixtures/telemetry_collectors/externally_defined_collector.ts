@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet, CollectorOptions } from '../../plugins/usage_collection/server/collector';
+import {
+  CollectorSet,
+  UsageCollectorOptions,
+} from '../../plugins/usage_collection/server/collector';
 import { loggerMock } from '../../core/server/logging/logger.mock';
 
 const collectorSet = new CollectorSet({
@@ -28,7 +31,7 @@ interface Usage {
   locale: string;
 }
 
-function createCollector(): CollectorOptions<Usage> {
+function createCollector(): UsageCollectorOptions<Usage> {
   return {
     type: 'from_fn_collector',
     isReady: () => true,
@@ -46,7 +49,7 @@ function createCollector(): CollectorOptions<Usage> {
 }
 
 export function defineCollectorFromVariable() {
-  const fromVarCollector: CollectorOptions<Usage> = {
+  const fromVarCollector: UsageCollectorOptions<Usage> = {
     type: 'from_variable_collector',
     isReady: () => true,
     fetch(): Usage {

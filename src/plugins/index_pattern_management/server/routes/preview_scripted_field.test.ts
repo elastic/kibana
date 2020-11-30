@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreSetup, RequestHandlerContext } from 'src/core/server';
 import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
 import { registerPreviewScriptedFieldRoute } from './preview_scripted_field';

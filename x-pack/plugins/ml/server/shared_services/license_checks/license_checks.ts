@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlServerLicense } from '../../lib/license';
+import { MlLicense } from '../../../common/license';
 import { InsufficientFullLicenseError, InsufficientBasicLicenseError } from './errors';
 
 export type LicenseCheck = () => void;
 
 export function licenseChecks(
-  mlLicense: MlServerLicense
+  mlLicense: MlLicense
 ): { isFullLicense: LicenseCheck; isMinimumLicense: LicenseCheck } {
   return {
     isFullLicense() {

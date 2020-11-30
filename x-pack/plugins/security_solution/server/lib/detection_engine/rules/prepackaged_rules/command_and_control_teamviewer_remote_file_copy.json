@@ -20,7 +20,10 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Command and Control"
   ],
   "threat": [
     {

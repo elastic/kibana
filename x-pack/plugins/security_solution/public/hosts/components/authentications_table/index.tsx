@@ -256,12 +256,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems:
-          node.lastSuccess != null &&
-          node.lastSuccess.source != null &&
-          node.lastSuccess.source.ip != null
-            ? node.lastSuccess.source.ip
-            : null,
+        rowItems: node.lastSuccess?.source?.ip || null,
         attrName: 'source.ip',
         idPrefix: `authentications-table-${node._id}-lastSuccessSource`,
         render: (item) => <NetworkDetailsLink ip={item} />,
@@ -273,12 +268,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems:
-          node.lastSuccess != null &&
-          node.lastSuccess.host != null &&
-          node.lastSuccess.host.name != null
-            ? node.lastSuccess.host.name
-            : null,
+        rowItems: node.lastSuccess?.host?.name ?? null,
         attrName: 'host.name',
         idPrefix: `authentications-table-${node._id}-lastSuccessfulDestination`,
         render: (item) => <HostDetailsLink hostName={item} />,
@@ -301,12 +291,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems:
-          node.lastFailure != null &&
-          node.lastFailure.source != null &&
-          node.lastFailure.source.ip != null
-            ? node.lastFailure.source.ip
-            : null,
+        rowItems: node.lastFailure?.source?.ip || null,
         attrName: 'source.ip',
         idPrefix: `authentications-table-${node._id}-lastFailureSource`,
         render: (item) => <NetworkDetailsLink ip={item} />,
@@ -318,12 +303,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems:
-          node.lastFailure != null &&
-          node.lastFailure.host != null &&
-          node.lastFailure.host.name != null
-            ? node.lastFailure.host.name
-            : null,
+        rowItems: node.lastFailure?.host?.name || null,
         attrName: 'host.name',
         idPrefix: `authentications-table-${node._id}-lastFailureDestination`,
         render: (item) => <HostDetailsLink hostName={item} />,

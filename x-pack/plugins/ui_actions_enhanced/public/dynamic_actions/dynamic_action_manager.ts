@@ -18,6 +18,7 @@ import {
 } from '../../../../../src/plugins/kibana_utils/common';
 import { StartContract } from '../plugin';
 import { SerializedAction, SerializedEvent } from './types';
+import { dynamicActionGrouping } from './dynamic_action_grouping';
 
 const compareEvents = (
   a: ReadonlyArray<{ eventId: string }>,
@@ -93,6 +94,7 @@ export class DynamicActionManager {
     uiActions.registerAction({
       ...actionDefinition,
       id: actionId,
+      grouping: dynamicActionGrouping,
       isCompatible: async (context) => {
         if (!(await isCompatible(context))) return false;
         if (!actionDefinition.isCompatible) return true;

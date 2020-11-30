@@ -78,8 +78,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
        */
       async eventsWithEntityIDAndCategory(
         entityID: string,
-        category: string,
-        after?: string
+        category: string
       ): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
         const events =
           entityID === metadata.entityIDs.origin
@@ -113,7 +112,18 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
        * Get entities matching a document.
        */
       async entities(): Promise<ResolverEntityIndex> {
-        return [{ entity_id: metadata.entityIDs.origin }];
+        return [
+          {
+            name: 'endpoint',
+            schema: {
+              id: 'process.entity_id',
+              parent: 'process.parent.entity_id',
+              ancestry: 'process.Ext.ancestry',
+              name: 'process.name',
+            },
+            id: metadata.entityIDs.origin,
+          },
+        ];
       },
     },
   };

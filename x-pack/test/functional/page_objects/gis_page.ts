@@ -19,6 +19,15 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
   const renderable = getService('renderable');
+  const browser = getService('browser');
+  const MenuToggle = getService('MenuToggle');
+  const listingTable = getService('listingTable');
+
+  const setViewPopoverToggle = new MenuToggle({
+    name: 'SetView Popover',
+    menuTestSubject: 'mapSetViewForm',
+    toggleButtonTestSubject: 'toggleSetViewVisibilityButton',
+  });
 
   function escapeLayerName(layerName: string) {
     return layerName.split(' ').join('_');
@@ -112,13 +121,10 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
 
       await retry.try(async () => {
         await this.searchForMapWithName(name);
-        await this.selectMap(name);
+        await listingTable.clickItemLink('map', name);
         await PageObjects.header.waitUntilLoadingHasFinished();
-
-        const onMapListingPage = await this.onMapListingPage();
-        if (onMapListingPage) {
-          throw new Error(`Failed to open map ${name}`);
-        }
+        // check Map landing page is not present
+        await testSubjects.missingOrFail('mapLandingPage', { timeout: 10000 });
       });
 
       await this.waitForLayersToLoad();
@@ -126,8 +132,8 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
 
     async deleteSavedMaps(search: string) {
       await this.searchForMapWithName(search);
-      await testSubjects.click('checkboxSelectAll');
-      await testSubjects.click('deleteSelectedItems');
+      await listingTable.checkListingSelectAllCheckbox();
+      await listingTable.clickDeleteSelected();
       await PageObjects.common.clickConfirmOnModal();
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -142,7 +148,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       await renderable.waitForRender();
     }
 
-    async saveMap(name: string, uncheckReturnToOriginModeSwitch = false) {
+    async saveMap(name: string, uncheckReturnToOriginModeSwitch = false, tags?: string[]) {
       await testSubjects.click('mapSaveButton');
       await testSubjects.setValue('savedObjectTitle', name);
       if (uncheckReturnToOriginModeSwitch) {
@@ -153,6 +159,13 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
           throw new Error('Unable to uncheck "returnToOriginModeSwitch", it does not exist.');
         }
         await testSubjects.setEuiSwitch('returnToOriginModeSwitch', 'uncheck');
+      }
+      if (tags) {
+        await testSubjects.click('savedObjectTagSelector');
+        for (const tagName of tags) {
+          await testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
+        }
+        await testSubjects.click('savedObjectTitle');
       }
       await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
@@ -166,7 +179,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
     }
 
     async expectMissingCreateNewButton() {
-      await testSubjects.missingOrFail('newMapLink');
+      await testSubjects.missingOrFail('newItemButton');
     }
 
     async expectMissingAddLayerButton() {
@@ -179,8 +192,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
 
     async onMapListingPage() {
       log.debug(`onMapListingPage`);
-      const exists = await testSubjects.exists('mapsListingPage', { timeout: 3500 });
-      return exists;
+      return await listingTable.onListingPage('map');
     }
 
     async searchForMapWithName(name: string) {
@@ -188,19 +200,9 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
 
       await this.gotoMapListingPage();
 
-      await retry.try(async () => {
-        const searchFilter = await testSubjects.find('searchFilter');
-        await searchFilter.clearValue();
-        await searchFilter.click();
-        await searchFilter.type(name);
-        await PageObjects.common.pressEnterKey();
-      });
+      await listingTable.searchForItemWithName(name);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
-    async selectMap(name: string) {
-      await testSubjects.click(`mapListingTitleLink-${name.split(' ').join('-')}`);
     }
 
     async getHits() {
@@ -224,50 +226,18 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       }
     }
 
-    async getMapCountWithName(name: string) {
+    async searchAndExpectItemsCount(name: string, count: number) {
       await this.gotoMapListingPage();
 
-      log.debug(`getMapCountWithName: ${name}`);
-      await this.searchForMapWithName(name);
-      const buttons = await find.allByButtonText(name);
-      return buttons.length;
-    }
-
-    async isSetViewPopoverOpen() {
-      return await testSubjects.exists('mapSetViewForm', { timeout: 500 });
-    }
-
-    async openSetViewPopover() {
-      const isOpen = await this.isSetViewPopoverOpen();
-      if (!isOpen) {
-        await retry.try(async () => {
-          await testSubjects.click('toggleSetViewVisibilityButton');
-          const isOpenAfterClick = await this.isSetViewPopoverOpen();
-          if (!isOpenAfterClick) {
-            throw new Error('set view popover not opened');
-          }
-        });
-      }
-    }
-
-    async closeSetViewPopover() {
-      const isOpen = await this.isSetViewPopoverOpen();
-      if (isOpen) {
-        await retry.try(async () => {
-          await testSubjects.click('toggleSetViewVisibilityButton');
-          const isOpenAfterClick = await this.isSetViewPopoverOpen();
-          if (isOpenAfterClick) {
-            throw new Error('set view popover not closed');
-          }
-        });
-      }
+      log.debug(`searchAndExpectItemsCount: ${name}`);
+      await listingTable.searchAndExpectItemsCount('map', name, count);
     }
 
     async setView(lat: number, lon: number, zoom: number) {
       log.debug(
         `Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`
       );
-      await this.openSetViewPopover();
+      await setViewPopoverToggle.open();
       await testSubjects.setValue('latitudeInput', lat.toString());
       await testSubjects.setValue('longitudeInput', lon.toString());
       await testSubjects.setValue('zoomInput', zoom.toString());
@@ -277,11 +247,20 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
 
     async getView() {
       log.debug('Get view');
-      await this.openSetViewPopover();
-      const lat = await testSubjects.getAttribute('latitudeInput', 'value');
-      const lon = await testSubjects.getAttribute('longitudeInput', 'value');
-      const zoom = await testSubjects.getAttribute('zoomInput', 'value');
-      await this.closeSetViewPopover();
+      await setViewPopoverToggle.open();
+      // this method is regularly called within a retry, so we need to reduce the timeouts
+      // of the retries done within the getAttribute method in order to ensure that they fail
+      // early enough to retry getView()
+      const getAttributeOptions = {
+        tryTimeout: 5000,
+        findTimeout: 1000,
+      };
+
+      const lat = await testSubjects.getAttribute('latitudeInput', 'value', getAttributeOptions);
+      const lon = await testSubjects.getAttribute('longitudeInput', 'value', getAttributeOptions);
+      const zoom = await testSubjects.getAttribute('zoomInput', 'value', getAttributeOptions);
+
+      await setViewPopoverToggle.close();
       return {
         lat: parseFloat(lat),
         lon: parseFloat(lon),
@@ -691,6 +670,13 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
         });
       }
       await testSubjects.click('mapSettingSubmitButton');
+    }
+
+    async refreshAndClearUnsavedChangesWarning() {
+      await browser.refresh();
+      // accept alert if it pops up
+      const alert = await browser.getAlert();
+      await alert?.accept();
     }
   }
   return new GisPage();

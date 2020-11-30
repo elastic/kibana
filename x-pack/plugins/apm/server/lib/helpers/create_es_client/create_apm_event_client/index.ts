@@ -5,20 +5,22 @@
  */
 
 import { ValuesType } from 'utility-types';
-import { APMBaseDoc } from '../../../../../typings/es_schemas/raw/apm_base_doc';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { KibanaRequest } from '../../../../../../../../src/core/server';
+import {
+  KibanaRequest,
+  LegacyScopedClusterClient,
+} from '../../../../../../../../src/core/server';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../typings/elasticsearch';
+} from '../../../../../../../typings/elasticsearch';
 import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
-import { APMRequestHandlerContext } from '../../../../routes/typings';
 import { addFilterToExcludeLegacyData } from './add_filter_to_exclude_legacy_data';
 import { callClientWithDebug } from '../call_client_with_debug';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
+import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { unpackProcessorEvents } from './unpack_processor_events';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
@@ -31,7 +33,7 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   [ProcessorEvent.error]: APMError;
   [ProcessorEvent.transaction]: Transaction;
   [ProcessorEvent.span]: Span;
-  [ProcessorEvent.metric]: APMBaseDoc;
+  [ProcessorEvent.metric]: Metric;
   [ProcessorEvent.onboarding]: unknown;
   [ProcessorEvent.sourcemap]: unknown;
 }[T];
@@ -51,20 +53,23 @@ type TypedSearchResponse<
 export type APMEventClient = ReturnType<typeof createApmEventClient>;
 
 export function createApmEventClient({
-  context,
+  esClient,
+  debug,
   request,
   indices,
   options: { includeFrozen } = { includeFrozen: false },
 }: {
-  context: APMRequestHandlerContext;
+  esClient: Pick<
+    LegacyScopedClusterClient,
+    'callAsInternalUser' | 'callAsCurrentUser'
+  >;
+  debug: boolean;
   request: KibanaRequest;
   indices: ApmIndicesConfig;
   options: {
     includeFrozen: boolean;
   };
 }) {
-  const client = context.core.elasticsearch.legacy.client;
-
   return {
     search<TParams extends APMEventESSearchRequest>(
       params: TParams,
@@ -77,14 +82,14 @@ export function createApmEventClient({
         : withProcessorEventFilter;
 
       return callClientWithDebug({
-        apiCaller: client.callAsCurrentUser,
+        apiCaller: esClient.callAsCurrentUser,
         operationName: 'search',
         params: {
           ...withPossibleLegacyDataFilter,
           ignore_throttled: !includeFrozen,
         },
         request,
-        debug: context.params.query._debug,
+        debug,
       });
     },
   };

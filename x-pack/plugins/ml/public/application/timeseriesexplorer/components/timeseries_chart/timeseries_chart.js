@@ -10,7 +10,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { Component, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isEqual, reduce, each, get } from 'lodash';
 import d3 from 'd3';
@@ -21,10 +21,10 @@ import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../../../../common/util/anomaly_utils';
-import { annotation$ } from '../../../services/annotations_service';
 import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
+  ANNOTATION_SYMBOL_HEIGHT,
   MULTI_BUCKET_SYMBOL_SIZE,
   SCHEDULED_EVENT_SYMBOL_HEIGHT,
   drawLineChartDots,
@@ -48,7 +48,9 @@ import {
   renderAnnotations,
   highlightFocusChartAnnotation,
   unhighlightFocusChartAnnotation,
+  ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -57,6 +59,8 @@ const contextChartHeight = 60;
 const contextChartLineTopMargin = 3;
 const chartSpacing = 25;
 const swimlaneHeight = 30;
+const ctxAnnotationMargin = 2;
+const annotationHeight = ANNOTATION_SYMBOL_HEIGHT + ctxAnnotationMargin * 2;
 const margin = { top: 10, right: 10, bottom: 15, left: 40 };
 
 const ZOOM_INTERVAL_OPTIONS = [
@@ -80,9 +84,16 @@ const anomalyGrayScale = d3.scale
   .domain([3, 25, 50, 75, 100])
   .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
 
-function getSvgHeight() {
+function getSvgHeight(showAnnotations) {
+  const adjustedAnnotationHeight = showAnnotations ? annotationHeight : 0;
   return (
-    focusHeight + contextChartHeight + swimlaneHeight + chartSpacing + margin.top + margin.bottom
+    focusHeight +
+    contextChartHeight +
+    swimlaneHeight +
+    adjustedAnnotationHeight +
+    chartSpacing +
+    margin.top +
+    margin.bottom
   );
 }
 
@@ -225,7 +236,12 @@ class TimeseriesChartIntl extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.renderFocusChartOnly === false || prevProps.svgWidth !== this.props.svgWidth) {
+    if (
+      this.props.renderFocusChartOnly === false ||
+      prevProps.svgWidth !== this.props.svgWidth ||
+      prevProps.showAnnotations !== this.props.showAnnotations ||
+      prevProps.annotationData !== this.props.annotationData
+    ) {
       this.renderChart();
       this.drawContextChartSelection();
     }
@@ -246,6 +262,7 @@ class TimeseriesChartIntl extends Component {
       modelPlotEnabled,
       selectedJob,
       svgWidth,
+      showAnnotations,
     } = this.props;
 
     const createFocusChart = this.createFocusChart.bind(this);
@@ -254,7 +271,7 @@ class TimeseriesChartIntl extends Component {
     const focusYAxis = this.focusYAxis;
     const focusYScale = this.focusYScale;
 
-    const svgHeight = getSvgHeight();
+    const svgHeight = getSvgHeight(showAnnotations);
 
     // Clear any existing elements from the visualization,
     // then build the svg elements for the bubble chart.
@@ -367,18 +384,18 @@ class TimeseriesChartIntl extends Component {
 
     // Draw each of the component elements.
     createFocusChart(focus, this.vizWidth, focusHeight);
-    drawContextElements(context, this.vizWidth, contextChartHeight, swimlaneHeight);
+    drawContextElements(
+      context,
+      this.vizWidth,
+      contextChartHeight,
+      swimlaneHeight,
+      annotationHeight
+    );
   }
 
   contextChartInitialized = false;
   drawContextChartSelection() {
-    const {
-      contextChartData,
-      contextChartSelected,
-      contextForecastData,
-      zoomFrom,
-      zoomTo,
-    } = this.props;
+    const { contextChartData, contextForecastData, zoomFrom, zoomTo } = this.props;
 
     if (contextChartData === undefined) {
       return;
@@ -432,10 +449,6 @@ class TimeseriesChartIntl extends Component {
           new Date(contextXScaleDomain[0]),
           new Date(contextXScaleDomain[1])
         );
-        if (this.contextChartInitialized === false) {
-          this.contextChartInitialized = true;
-          contextChartSelected({ from: contextXScaleDomain[0], to: contextXScaleDomain[1] });
-        }
       }
     }
   }
@@ -717,7 +730,8 @@ class TimeseriesChartIntl extends Component {
       this.focusXScale,
       showAnnotations,
       showFocusChartTooltip,
-      hideFocusChartTooltip
+      hideFocusChartTooltip,
+      this.props.annotationUpdatesService
     );
 
     // disable brushing (creation of annotations) when annotations aren't shown
@@ -947,9 +961,18 @@ class TimeseriesChartIntl extends Component {
   }
 
   drawContextElements(cxtGroup, cxtWidth, cxtChartHeight, swlHeight) {
-    const { bounds, contextChartData, contextForecastData, modelPlotEnabled } = this.props;
-
+    const {
+      bounds,
+      contextChartData,
+      contextForecastData,
+      modelPlotEnabled,
+      annotationData,
+      showAnnotations,
+    } = this.props;
     const data = contextChartData;
+
+    const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
+    const hideFocusChartTooltip = this.props.tooltipService.hide.bind(this.props.tooltipService);
 
     this.contextXScale = d3.time
       .scale()
@@ -997,20 +1020,26 @@ class TimeseriesChartIntl extends Component {
       .domain([chartLimits.min, chartLimits.max]);
 
     const borders = cxtGroup.append('g').attr('class', 'axis');
+    const brushChartHeight = showAnnotations
+      ? cxtChartHeight + swlHeight + annotationHeight
+      : cxtChartHeight + swlHeight;
 
     // Add borders left and right.
-    borders
-      .append('line')
-      .attr('x1', 0)
-      .attr('y1', 0)
-      .attr('x2', 0)
-      .attr('y2', cxtChartHeight + swlHeight);
+    borders.append('line').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', brushChartHeight);
     borders
       .append('line')
       .attr('x1', cxtWidth)
       .attr('y1', 0)
       .attr('x2', cxtWidth)
-      .attr('y2', cxtChartHeight + swlHeight);
+      .attr('y2', brushChartHeight);
+
+    // Add bottom borders
+    borders
+      .append('line')
+      .attr('x1', 0)
+      .attr('y1', brushChartHeight)
+      .attr('x2', cxtWidth)
+      .attr('y2', brushChartHeight);
 
     // Add x axis.
     const timeBuckets = getTimeBucketsFromCache();
@@ -1064,6 +1093,61 @@ class TimeseriesChartIntl extends Component {
 
     cxtGroup.append('path').datum(data).attr('class', 'values-line').attr('d', contextValuesLine);
     drawLineChartDots(data, cxtGroup, contextValuesLine, 1);
+
+    // Add annotation markers to the context area
+    cxtGroup.append('g').classed('mlContextAnnotations', true);
+
+    const [contextXRangeStart, contextXRangeEnd] = this.contextXScale.range();
+    const ctxAnnotations = cxtGroup
+      .select('.mlContextAnnotations')
+      .selectAll('g.mlContextAnnotation')
+      .data(showAnnotations && annotationData ? annotationData : [], (d) => d._id || '');
+
+    ctxAnnotations.enter().append('g').classed('mlContextAnnotation', true);
+
+    const ctxAnnotationRects = ctxAnnotations
+      .selectAll('.mlContextAnnotationRect')
+      .data((d) => [d]);
+
+    ctxAnnotationRects
+      .enter()
+      .append('rect')
+      .attr('rx', ctxAnnotationMargin)
+      .attr('ry', ctxAnnotationMargin)
+      .on('mouseover', function (d) {
+        showFocusChartTooltip(d, this);
+      })
+      .on('mouseout', () => hideFocusChartTooltip())
+      .classed('mlContextAnnotationRect', true);
+
+    ctxAnnotationRects
+      .attr('x', (d) => {
+        const date = moment(d.timestamp);
+        let xPos = this.contextXScale(date);
+
+        if (xPos - ANNOTATION_SYMBOL_HEIGHT <= contextXRangeStart) {
+          xPos = 0;
+        }
+        if (xPos + ANNOTATION_SYMBOL_HEIGHT >= contextXRangeEnd) {
+          xPos = contextXRangeEnd - ANNOTATION_SYMBOL_HEIGHT;
+        }
+
+        return xPos;
+      })
+      .attr('y', cxtChartHeight + swlHeight + 2)
+      .attr('height', ANNOTATION_SYMBOL_HEIGHT)
+      .attr('width', (d) => {
+        const start = this.contextXScale(moment(d.timestamp)) + 1;
+        const end =
+          typeof d.end_timestamp !== 'undefined'
+            ? this.contextXScale(moment(d.end_timestamp)) - 1
+            : start + ANNOTATION_MIN_WIDTH;
+        const width = Math.max(ANNOTATION_MIN_WIDTH, end - start);
+        return width;
+      });
+
+    ctxAnnotations.classed('mlAnnotationHidden', !showAnnotations);
+    ctxAnnotationRects.exit().remove();
 
     // Create the path elements for the forecast value line and bounds area.
     if (contextForecastData !== undefined) {
@@ -1143,19 +1227,23 @@ class TimeseriesChartIntl extends Component {
       .attr('width', 10)
       .attr('height', 90)
       .attr('class', 'brush-handle')
-      .attr('x', contextXScale(handleBrushExtent[0]) - 10)
-      .html(
-        '<div class="brush-handle-inner brush-handle-inner-left"><i class="fa fa-caret-left"></i></div>'
-      );
+      .attr('x', contextXScale(handleBrushExtent[0]) - 10).html(`
+        <div class="brush-handle-inner brush-handle-inner-left" style="padding-top: 27px">
+          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="6" height="9">
+            <polygon points="5,0 5,8 0,4" />
+          </svg>
+        </div>`);
     const rightHandle = contextGroup
       .append('foreignObject')
       .attr('width', 10)
       .attr('height', 90)
       .attr('class', 'brush-handle')
-      .attr('x', contextXScale(handleBrushExtent[1]) + 0)
-      .html(
-        '<div class="brush-handle-inner brush-handle-inner-right"><i class="fa fa-caret-right"></i></div>'
-      );
+      .attr('x', contextXScale(handleBrushExtent[1]) + 0).html(`
+        <div class="brush-handle-inner brush-handle-inner-right" style="padding-top: 27px">
+          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="6" height="9">
+            <polygon points="0,0 0,8 5,4" />
+          </svg>
+        </div>`);
 
     function brushing() {
       const brushExtent = brush.extent();
@@ -1379,6 +1467,22 @@ class TimeseriesChartIntl extends Component {
             key: seriesKey,
           },
           valueAccessor: 'multi_bucket_impact',
+        });
+      }
+
+      if (marker.metricFunction) {
+        tooltipData.push({
+          label: i18n.translate(
+            'xpack.ml.timeSeriesExplorer.timeSeriesChart.metricActualPlotFunctionLabel',
+            {
+              defaultMessage: 'function',
+            }
+          ),
+          value: marker.metricFunction,
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'metric_function',
         });
       }
 
@@ -1689,9 +1793,17 @@ class TimeseriesChartIntl extends Component {
 }
 
 export const TimeseriesChart = (props) => {
-  const annotationProp = useObservable(annotation$);
+  const annotationUpdatesService = useContext(MlAnnotationUpdatesContext);
+  const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
+
   if (annotationProp === undefined) {
     return null;
   }
-  return <TimeseriesChartIntl annotation={annotationProp} {...props} />;
+  return (
+    <TimeseriesChartIntl
+      annotation={annotationProp}
+      {...props}
+      annotationUpdatesService={annotationUpdatesService}
+    />
+  );
 };

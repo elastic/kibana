@@ -76,6 +76,6 @@ describe('ConnectorsDropdown', () => {
       wrappingComponent: TestProviders,
     });
 
-    expect(newWrapper.find('button span').text()).toEqual('My Connector');
+    expect(newWrapper.find('button span:not([data-euiicon-type])').text()).toEqual('My Connector');
   });
 });

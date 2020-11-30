@@ -18,16 +18,11 @@
  */
 
 import React from 'react';
-import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
 import { withKibana } from '../../../../kibana_react/public';
 import type { QueryBarTopRowProps } from './query_bar_top_row';
 import type { QueryStringInputProps } from './query_string_input';
 
-const Fallback = () => (
-  <EuiDelayRender>
-    <EuiLoadingContent lines={1} />
-  </EuiDelayRender>
-);
+const Fallback = () => <div />;
 
 const LazyQueryBarTopRow = React.lazy(() => import('./query_bar_top_row'));
 export const QueryBarTopRow = (props: QueryBarTopRowProps) => (

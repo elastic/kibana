@@ -29,10 +29,12 @@ import {
 } from '../metric_distribution_chart';
 import { TopValues } from '../top_values';
 
-enum DETAILS_MODE {
-  DISTRIBUTION = 'distribution',
-  TOP_VALUES = 'top_values',
-}
+const DETAILS_MODE = {
+  DISTRIBUTION: 'distribution',
+  TOP_VALUES: 'top_values',
+} as const;
+
+type DetailsModeType = typeof DETAILS_MODE[keyof typeof DETAILS_MODE];
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 210;
@@ -76,7 +78,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
   return (
     <div className="mlFieldDataCard__stats">
       <div>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs" color="subdued" data-test-subj="mlFieldDataCardDocCount">
           <EuiIcon type="document" />
           &nbsp;
           <FormattedMessage
@@ -91,7 +93,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       </div>
       <EuiSpacer size="xs" />
       <div>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs" color="subdued" data-test-subj="mlFieldDataCardCardinality">
           <EuiIcon type="database" />
           &nbsp;
           <FormattedMessage
@@ -131,13 +133,13 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup gutterSize="xs" justifyContent="center">
-        <EuiFlexItem grow={1} className="eui-textTruncate">
+        <EuiFlexItem grow={1} className="eui-textTruncate" data-test-subj="mlFieldDataCardMin">
           <DisplayValue value={kibanaFieldFormat(min, fieldFormat)} />
         </EuiFlexItem>
-        <EuiFlexItem grow={1} className="eui-textTruncate">
+        <EuiFlexItem grow={1} className="eui-textTruncate" data-test-subj="mlFieldDataCardMedian">
           <DisplayValue value={kibanaFieldFormat(median, fieldFormat)} />
         </EuiFlexItem>
-        <EuiFlexItem grow={1} className="eui-textTruncate">
+        <EuiFlexItem grow={1} className="eui-textTruncate" data-test-subj="mlFieldDataCardMax">
           <DisplayValue value={kibanaFieldFormat(max, fieldFormat)} />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -145,14 +147,14 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       <EuiButtonGroup
         options={detailsOptions}
         idSelected={detailsMode}
-        onChange={(optionId) => setDetailsMode(optionId as DETAILS_MODE)}
-        aria-label={i18n.translate(
+        onChange={(optionId) => setDetailsMode(optionId as DetailsModeType)}
+        legend={i18n.translate(
           'xpack.ml.fieldDataCard.cardNumber.selectMetricDetailsDisplayAriaLabel',
           {
             defaultMessage: 'Select display option for metric details',
           }
         )}
-        data-test-subj="mlFieldDataCardNumberDetailsSelect"
+        data-test-subj="mlFieldDataCardDetailsSelect"
         isFullWidth={true}
         buttonSize="compressed"
       />

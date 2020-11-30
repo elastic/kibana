@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { ColorsService } from './colors';
+export { LegacyColorsService } from './legacy_colors';
 export { ThemeService } from './theme';

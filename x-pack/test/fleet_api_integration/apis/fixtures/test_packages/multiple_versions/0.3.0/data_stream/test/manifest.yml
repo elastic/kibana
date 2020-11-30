@@ -1,0 +1,9 @@
+title: Test Dataset
+
+type: logs
+
+elasticsearch:
+  index_template.mappings:
+    dynamic: false
+  index_template.settings:
+    index.lifecycle.name: reference

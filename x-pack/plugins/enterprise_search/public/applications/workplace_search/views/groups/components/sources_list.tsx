@@ -8,18 +8,18 @@ import React from 'react';
 
 import { EuiFilterSelectItem } from '@elastic/eui';
 
-import { IContentSource } from '../../../types';
+import { ContentSource } from '../../../types';
 
 import { SourceOptionItem } from './source_option_item';
 
-interface ISourcesListProps {
-  contentSources: IContentSource[];
+interface SourcesListProps {
+  contentSources: ContentSource[];
   filteredSources: string[];
   addFilteredSource(sourceId: string): void;
   removeFilteredSource(sourceId: string): void;
 }
 
-export const SourcesList: React.FC<ISourcesListProps> = ({
+export const SourcesList: React.FC<SourcesListProps> = ({
   contentSources,
   filteredSources,
   addFilteredSource,

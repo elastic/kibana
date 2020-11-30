@@ -5,7 +5,16 @@
  */
 
 import _ from 'lodash';
-import { PollerOptions } from './types';
+
+interface PollerOptions {
+  functionToPoll: () => Promise<any>;
+  pollFrequencyInMillis: number;
+  trailing?: boolean;
+  continuePollingOnError?: boolean;
+  pollFrequencyErrorMultiplier?: number;
+  successFunction?: (...args: any) => any;
+  errorFunction?: (error: Error) => any;
+}
 
 // @TODO Maybe move to observables someday
 export class Poller {

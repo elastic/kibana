@@ -5,7 +5,7 @@
  */
 
 import { merge } from 'lodash';
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { BaseWatch } from './base_watch';
 import { WATCH_TYPES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';

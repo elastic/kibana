@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UnwrapPromise } from '@kbn/utility-types';
+import type { PublicMethodsOf, UnwrapPromise } from '@kbn/utility-types';
 import {
   ILegacyClusterClient,
   KibanaRequest,
@@ -12,7 +12,7 @@ import {
 } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
-import { SecurityAuditLogger } from '../audit';
+import { SecurityAuditLogger, AuditServiceSetup } from '../audit';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -45,7 +45,8 @@ export {
 } from './http_authentication';
 
 interface SetupAuthenticationParams {
-  auditLogger: SecurityAuditLogger;
+  legacyAuditLogger: SecurityAuditLogger;
+  audit: AuditServiceSetup;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   http: HttpServiceSetup;
   clusterClient: ILegacyClusterClient;
@@ -58,7 +59,8 @@ interface SetupAuthenticationParams {
 export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication>>;
 
 export async function setupAuthentication({
-  auditLogger,
+  legacyAuditLogger: auditLogger,
+  audit,
   getFeatureUsageService,
   http,
   clusterClient,
@@ -82,7 +84,8 @@ export async function setupAuthentication({
   };
 
   const authenticator = new Authenticator({
-    auditLogger,
+    legacyAuditLogger: auditLogger,
+    audit,
     loggers,
     clusterClient,
     basePath: http.basePath,

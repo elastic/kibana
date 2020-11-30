@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
+import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 import { RestoreSnapshot } from '../../../public/application/sections/restore_snapshot';
 import { WithAppDependencies } from './setup_environment';
 

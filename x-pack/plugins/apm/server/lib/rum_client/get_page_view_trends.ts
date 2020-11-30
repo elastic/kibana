@@ -20,6 +20,7 @@ export async function getPageViewTrends({
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
+    checkFetchStartFieldExists: false,
   });
   let breakdownItem: BreakdownItem | null = null;
   if (breakdowns) {

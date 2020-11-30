@@ -5,11 +5,24 @@
  */
 
 import crypto from 'crypto';
+import type { Duration } from 'moment';
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { Logger } from '../../../../src/core/server';
+import { Logger, config as coreConfig } from '../../../../src/core/server';
+import type { AuthenticationProvider } from '../common/types';
 
 export type ConfigType = ReturnType<typeof createConfig>;
+type RawConfigType = TypeOf<typeof ConfigSchema>;
+
+interface ProvidersCommonConfigType {
+  enabled: Type<boolean>;
+  showInSelector: Type<boolean>;
+  order: Type<number>;
+  description?: Type<string>;
+  hint?: Type<string>;
+  icon?: Type<string>;
+  session?: Type<{ idleTimeout?: Duration | null; lifespan?: Duration | null }>;
+}
 
 const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =>
   schema.conditional(
@@ -21,10 +34,6 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
     schema.never()
   );
 
-type ProvidersCommonConfigType = Record<
-  'enabled' | 'showInSelector' | 'order' | 'description' | 'hint' | 'icon',
-  Type<any>
->;
 function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonConfigType> = {}) {
   return {
     enabled: schema.boolean({ defaultValue: true }),
@@ -34,22 +43,35 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     hint: schema.maybe(schema.string()),
     icon: schema.maybe(schema.string()),
     accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
+    session: schema.object({
+      idleTimeout: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
+      lifespan: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
+    }),
     ...overrides,
   };
 }
 
-function getUniqueProviderSchema(
+function getUniqueProviderSchema<TProperties extends Record<string, Type<any>>>(
   providerType: string,
-  overrides?: Partial<ProvidersCommonConfigType>
+  overrides?: Partial<ProvidersCommonConfigType>,
+  properties?: TProperties
 ) {
   return schema.maybe(
-    schema.recordOf(schema.string(), schema.object(getCommonProviderSchemaProperties(overrides)), {
-      validate(config) {
-        if (Object.values(config).filter((provider) => provider.enabled).length > 1) {
-          return `Only one "${providerType}" provider can be configured.`;
-        }
-      },
-    })
+    schema.recordOf(
+      schema.string(),
+      schema.object(
+        properties
+          ? { ...getCommonProviderSchemaProperties(overrides), ...properties }
+          : getCommonProviderSchemaProperties(overrides)
+      ),
+      {
+        validate(config) {
+          if (Object.values(config).filter((provider) => provider.enabled).length > 1) {
+            return `Only one "${providerType}" provider can be configured.`;
+          }
+        },
+      }
+    )
   );
 }
 
@@ -107,6 +129,40 @@ const providersConfigSchema = schema.object(
         schema.object({ ...getCommonProviderSchemaProperties(), realm: schema.string() })
       )
     ),
+    anonymous: getUniqueProviderSchema(
+      'anonymous',
+      {
+        description: schema.string({
+          defaultValue: i18n.translate('xpack.security.loginAsGuestLabel', {
+            defaultMessage: 'Continue as Guest',
+          }),
+        }),
+        hint: schema.string({
+          defaultValue: i18n.translate('xpack.security.loginAsGuestHintLabel', {
+            defaultMessage: 'For anonymous users',
+          }),
+        }),
+        icon: schema.string({ defaultValue: 'globe' }),
+        session: schema.object({
+          idleTimeout: schema.nullable(schema.duration()),
+          lifespan: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
+        }),
+      },
+      {
+        credentials: schema.oneOf([
+          schema.object({
+            username: schema.string(),
+            password: schema.string(),
+          }),
+          schema.object({
+            apiKey: schema.oneOf([
+              schema.object({ id: schema.string(), key: schema.string() }),
+              schema.string(),
+            ]),
+          }),
+        ]),
+      }
+    ),
   },
   {
     validate(config) {
@@ -147,8 +203,8 @@ export const ConfigSchema = schema.object({
     schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
   ),
   session: schema.object({
-    idleTimeout: schema.nullable(schema.duration()),
-    lifespan: schema.nullable(schema.duration()),
+    idleTimeout: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
+    lifespan: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
     cleanupInterval: schema.duration({
       defaultValue: '1h',
       validate(value) {
@@ -175,6 +231,7 @@ export const ConfigSchema = schema.object({
             hint: undefined,
             icon: undefined,
             accessAgreement: undefined,
+            session: { idleTimeout: undefined, lifespan: undefined },
           },
         },
         token: undefined,
@@ -182,6 +239,7 @@ export const ConfigSchema = schema.object({
         oidc: undefined,
         pki: undefined,
         kerberos: undefined,
+        anonymous: undefined,
       },
     }),
     oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
@@ -198,13 +256,34 @@ export const ConfigSchema = schema.object({
       schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
     }),
   }),
-  audit: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
+  audit: schema.object(
+    {
+      enabled: schema.boolean({ defaultValue: false }),
+      appender: schema.maybe(coreConfig.logging.appenders),
+      ignore_filters: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            categories: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          })
+        )
+      ),
+    },
+    {
+      validate: (auditConfig) => {
+        if (auditConfig.ignore_filters && !auditConfig.appender) {
+          return 'xpack.security.audit.ignore_filters can only be used with the ECS audit logger. To enable the ECS audit logger, specify where you want to write the audit events using xpack.security.audit.appender.';
+        }
+      },
+    }
+  ),
 });
 
 export function createConfig(
-  config: TypeOf<typeof ConfigSchema>,
+  config: RawConfigType,
   logger: Logger,
   { isTLSEnabled }: { isTLSEnabled: boolean }
 ) {
@@ -212,7 +291,7 @@ export function createConfig(
   if (encryptionKey === undefined) {
     logger.warn(
       'Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on ' +
-        'restart, please set xpack.security.encryptionKey in kibana.yml'
+        'restart, please set xpack.security.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
     );
 
     encryptionKey = crypto.randomBytes(16).toString('hex');
@@ -293,7 +372,45 @@ export function createConfig(
       sortedProviders: Object.freeze(sortedProviders),
       http: config.authc.http,
     },
+    session: getSessionConfig(config.session, providers),
     encryptionKey,
     secureCookies,
+  };
+}
+
+function getSessionConfig(session: RawConfigType['session'], providers: ProvidersConfigType) {
+  const defaultAnonymousSessionLifespan = schema.duration().validate('30d');
+  return {
+    cleanupInterval: session.cleanupInterval,
+    getExpirationTimeouts({ type, name }: AuthenticationProvider) {
+      // Both idle timeout and lifespan from the provider specific session config can have three
+      // possible types of values: `Duration`, `null` and `undefined`. The `undefined` type means that
+      // provider doesn't override session config and we should fall back to the global one instead.
+      const providerSessionConfig = providers[type as keyof ProvidersConfigType]?.[name]?.session;
+
+      // We treat anonymous sessions differently since users can create them without realizing it. This may lead to a
+      // non controllable amount of sessions stored in the session index. To reduce the impact we set a 30 days lifespan
+      // for the anonymous sessions in case neither global nor provider specific lifespan is configured explicitly.
+      // We can remove this code once https://github.com/elastic/kibana/issues/68885 is resolved.
+      const providerLifespan =
+        type === 'anonymous' &&
+        providerSessionConfig?.lifespan === undefined &&
+        session.lifespan === undefined
+          ? defaultAnonymousSessionLifespan
+          : providerSessionConfig?.lifespan;
+
+      const [idleTimeout, lifespan] = [
+        [session.idleTimeout, providerSessionConfig?.idleTimeout],
+        [session.lifespan, providerLifespan],
+      ].map(([globalTimeout, providerTimeout]) => {
+        const timeout = providerTimeout === undefined ? globalTimeout ?? null : providerTimeout;
+        return timeout && timeout.asMilliseconds() > 0 ? timeout : null;
+      });
+
+      return {
+        idleTimeout,
+        lifespan,
+      };
+    },
   };
 }

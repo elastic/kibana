@@ -24,11 +24,11 @@ describe('ApmIndices', () => {
     );
 
     expect(getByText('Indices')).toMatchInlineSnapshot(`
-      <h2
-        class="euiTitle euiTitle--medium"
+      <h1
+        class="euiTitle euiTitle--large"
       >
         Indices
-      </h2>
+      </h1>
     `);
 
     expect(spy).toHaveBeenCalledTimes(2);

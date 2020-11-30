@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { ChartBase } from './types';
-import { ESSearchResponse } from '../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { getVizColorForIndex } from '../../../common/viz_colors';
 import { GenericMetricsRequest } from './fetch_and_transform_metrics';
+import { ChartBase } from './types';
 
 export type GenericMetricsChart = ReturnType<
   typeof transformDataToMetricsChart

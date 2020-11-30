@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   staticIndexPatternRoute,
   dynamicIndexPatternRoute,
   apmIndexPatternTitleRoute,
 } from './index_pattern';
+import { createApi } from './create_api';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
@@ -21,6 +21,9 @@ import {
   serviceNodeMetadataRoute,
   serviceAnnotationsRoute,
   serviceAnnotationsCreateRoute,
+  serviceErrorGroupsRoute,
+  serviceThroughputRoute,
+  serviceTransactionGroupsRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -42,6 +45,10 @@ import { serviceNodesRoute } from './service_nodes';
 import { tracesRoute, tracesByIdRoute } from './traces';
 import { transactionByTraceIdRoute } from './transaction';
 import {
+  correlationsForSlowTransactionsRoute,
+  correlationsForFailedTransactionsRoute,
+} from './correlations';
+import {
   transactionGroupsBreakdownRoute,
   transactionGroupsChartsRoute,
   transactionGroupsDistributionRoute,
@@ -60,7 +67,6 @@ import {
   uiFiltersEnvironmentsRoute,
   rumOverviewLocalFiltersRoute,
 } from './ui_filters';
-import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
   createCustomLinkRoute,
@@ -111,6 +117,9 @@ const createApmApi = () => {
     .add(serviceNodeMetadataRoute)
     .add(serviceAnnotationsRoute)
     .add(serviceAnnotationsCreateRoute)
+    .add(serviceErrorGroupsRoute)
+    .add(serviceThroughputRoute)
+    .add(serviceTransactionGroupsRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -121,6 +130,10 @@ const createApmApi = () => {
     .add(listAgentConfigurationEnvironmentsRoute)
     .add(listAgentConfigurationServicesRoute)
     .add(createOrUpdateAgentConfigurationRoute)
+
+    // Correlations
+    .add(correlationsForSlowTransactionsRoute)
+    .add(correlationsForFailedTransactionsRoute)
 
     // APM indices
     .add(apmIndexSettingsRoute)

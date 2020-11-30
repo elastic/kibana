@@ -3,7 +3,7 @@
 [[fleet]]
 = {fleet}
 
-experimental[]
+beta[]
 
 {fleet} in {kib} enables you to add and manage integrations for popular
 services and platforms, as well as manage {elastic-agent} installations in

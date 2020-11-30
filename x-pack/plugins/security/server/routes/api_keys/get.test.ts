@@ -10,7 +10,7 @@ import { defineGetApiKeysRoutes } from './get';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 interface TestOptions {
   isAdmin?: boolean;

@@ -12,7 +12,7 @@ import { setup as followerIndexAddSetup } from './follower_index_add.helpers';
 import { setup as followerIndexEditSetup } from './follower_index_edit.helpers';
 import { setup as homeSetup } from './home.helpers';
 
-export { nextTick, getRandomString, findTestSubject } from '../../../../../../test_utils';
+export { nextTick, getRandomString, findTestSubject, delay } from '@kbn/test/jest';
 
 export { setupEnvironment } from './setup_environment';
 

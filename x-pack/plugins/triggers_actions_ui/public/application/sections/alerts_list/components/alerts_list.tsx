@@ -7,6 +7,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { i18n } from '@kbn/i18n';
+import { capitalize, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState, Fragment } from 'react';
 import {
@@ -30,7 +31,6 @@ import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
 import { AlertsContextProvider } from '../../../context/alerts_context';
-import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -39,7 +39,12 @@ import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { AlertStatusFilter, getHealthColor } from './alert_status_filter';
-import { loadAlerts, loadAlertTypes, deleteAlerts } from '../../../lib/alert_api';
+import {
+  loadAlerts,
+  loadAlertAggregations,
+  loadAlertTypes,
+  deleteAlerts,
+} from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
@@ -52,6 +57,7 @@ import {
 } from '../../../../../../alerts/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
 import { alertsStatusesTranslationsMapping } from '../translations';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const ENTER_KEY = 13;
 
@@ -70,15 +76,16 @@ export const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
   const {
     http,
-    toastNotifications,
-    capabilities,
+    notifications: { toasts },
+    application: { capabilities },
     alertTypeRegistry,
     actionTypeRegistry,
     uiSettings,
     docLinks,
     charts,
-    dataPlugin,
-  } = useAppDependencies();
+    data,
+    kibanaFeatures,
+  } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
@@ -136,7 +143,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }
         setAlertTypesState({ isLoading: false, data: index, isInitialized: true });
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertTypesMessage',
             { defaultMessage: 'Unable to load alert types' }
@@ -153,7 +160,7 @@ export const AlertsList: React.FunctionComponent = () => {
         const result = await loadActionTypes({ http });
         setActionTypes(result.filter((actionType) => actionTypeRegistry.has(actionType.id)));
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.unableToLoadActionTypesMessage',
             { defaultMessage: 'Unable to load action types' }
@@ -176,7 +183,7 @@ export const AlertsList: React.FunctionComponent = () => {
           actionTypesFilter,
           alertStatusesFilter,
         });
-        await loadAlertsTotalStatuses();
+        await loadAlertAggs();
         setAlertsState({
           isLoading: false,
           data: alertsResponse.data,
@@ -187,7 +194,7 @@ export const AlertsList: React.FunctionComponent = () => {
           setPage({ ...page, index: 0 });
         }
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsMessage',
             {
@@ -200,23 +207,20 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
-  async function loadAlertsTotalStatuses() {
-    let alertsStatuses = {};
+  async function loadAlertAggs() {
     try {
-      AlertExecutionStatusValues.forEach(async (status: string) => {
-        const alertsTotalResponse = await loadAlerts({
-          http,
-          page: { index: 0, size: 0 },
-          searchText,
-          typesFilter,
-          actionTypesFilter,
-          alertStatusesFilter: [status],
-        });
-        setAlertsStatusesTotal({ ...alertsStatuses, [status]: alertsTotalResponse.total });
-        alertsStatuses = { ...alertsStatuses, [status]: alertsTotalResponse.total };
+      const alertsAggs = await loadAlertAggregations({
+        http,
+        searchText,
+        typesFilter,
+        actionTypesFilter,
+        alertStatusesFilter,
       });
+      if (alertsAggs?.alertExecutionStatus) {
+        setAlertsStatusesTotal(alertsAggs.alertExecutionStatus);
+      }
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage',
           {
@@ -334,16 +338,43 @@ export const AlertsList: React.FunctionComponent = () => {
     (alertType) => alertType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
 
+  const getProducerFeatureName = (producer: string) => {
+    return kibanaFeatures?.find((featureItem) => featureItem.id === producer)?.name;
+  };
+
+  const groupAlertTypesByProducer = () => {
+    return authorizedAlertTypes.reduce(
+      (
+        result: Record<
+          string,
+          Array<{
+            value: string;
+            name: string;
+          }>
+        >,
+        alertType
+      ) => {
+        const producer = alertType.producer;
+        (result[producer] = result[producer] || []).push({
+          value: alertType.id,
+          name: alertType.name,
+        });
+        return result;
+      },
+      {}
+    );
+  };
+
   const toolsRight = [
     <TypeFilter
       key="type-filter"
       onChange={(types: string[]) => setTypesFilter(types)}
-      options={authorizedAlertTypes
-        .map((alertType) => ({
-          value: alertType.id,
-          name: alertType.name,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name))}
+      options={sortBy(Object.entries(groupAlertTypesByProducer())).map(
+        ([groupName, alertTypesOptions]) => ({
+          groupName: getProducerFeatureName(groupName) ?? capitalize(groupName),
+          subOptions: alertTypesOptions.sort((a, b) => a.name.localeCompare(b.name)),
+        })
+      )}
     />,
     <ActionTypeFilter
       key="action-type-filter"
@@ -437,15 +468,14 @@ export const AlertsList: React.FunctionComponent = () => {
               title={
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertsList.attentionBannerTitle"
-                  defaultMessage="Error found in {totalStausesError} {totalStausesError, plural, one {{singleTitle}} other {# {multipleTitle}}}."
+                  defaultMessage="Error found in {totalStausesError, plural, one {# alert} other {# alerts}}."
                   values={{
                     totalStausesError: alertsStatusesTotal.error,
-                    singleTitle: 'alert',
-                    multipleTitle: 'alerts',
                   }}
                 />
               }
               iconType="alert"
+              data-test-subj="alertsErrorBanner"
             >
               <EuiButton
                 type="primary"
@@ -471,7 +501,7 @@ export const AlertsList: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
+          <EuiText size="s" color="subdued" data-test-subj="totalAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalItemsCountDescription"
               defaultMessage="Showing: {pageSize} of {totalItemCount} alerts."
@@ -483,11 +513,10 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="primary">
+          <EuiHealth color="primary" data-test-subj="totalActiveAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesActiveDescription"
               defaultMessage="Active: {totalStausesActive}"
-              data-test-subj="totalStausesActive"
               values={{
                 totalStausesActive: alertsStatusesTotal.active,
               }}
@@ -495,30 +524,27 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="danger">
+          <EuiHealth color="danger" data-test-subj="totalErrorAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesErrorDescription"
-              data-test-subj="totalStausesError"
               defaultMessage="Error: {totalStausesError}"
               values={{ totalStausesError: alertsStatusesTotal.error }}
             />
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="subdued">
+          <EuiHealth color="subdued" data-test-subj="totalOkAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesOkDescription"
-              data-test-subj="totalStausesOk"
               defaultMessage="Ok: {totalStausesOk}"
               values={{ totalStausesOk: alertsStatusesTotal.ok }}
             />
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="success">
+          <EuiHealth color="success" data-test-subj="totalPendingAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesPendingDescription"
-              data-test-subj="totalStausesPending"
               defaultMessage="Pending: {totalStausesPending}"
               values={{
                 totalStausesPending: alertsStatusesTotal.pending,
@@ -527,10 +553,9 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="warning">
+          <EuiHealth color="warning" data-test-subj="totalUnknownAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalStausesUnknownDescription"
-              data-test-subj="totalStausesUnknown"
               defaultMessage="Unknown: {totalStausesUnknown}"
               values={{
                 totalStausesUnknown: alertsStatusesTotal.unknown,
@@ -639,14 +664,15 @@ export const AlertsList: React.FunctionComponent = () => {
           http,
           actionTypeRegistry,
           alertTypeRegistry,
-          toastNotifications,
+          toastNotifications: toasts,
           uiSettings,
           docLinks,
           charts,
-          dataFieldsFormats: dataPlugin.fieldFormats,
+          dataFieldsFormats: data.fieldFormats,
           capabilities,
-          dataUi: dataPlugin.ui,
-          dataIndexPatterns: dataPlugin.indexPatterns,
+          dataUi: data.ui,
+          dataIndexPatterns: data.indexPatterns,
+          kibanaFeatures,
         }}
       >
         <AlertAdd

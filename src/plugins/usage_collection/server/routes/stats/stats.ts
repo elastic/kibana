@@ -26,8 +26,11 @@ import { first } from 'rxjs/operators';
 import {
   ElasticsearchClient,
   IRouter,
+  ISavedObjectsRepository,
+  KibanaRequest,
   LegacyAPICaller,
   MetricsServiceSetup,
+  SavedObjectsClientContract,
   ServiceStatus,
   ServiceStatusLevels,
 } from '../../../../../core/server';
@@ -64,14 +67,22 @@ export function registerStatsRoute({
 }) {
   const getUsage = async (
     callCluster: LegacyAPICaller,
-    esClient: ElasticsearchClient
+    esClient: ElasticsearchClient,
+    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
+    kibanaRequest: KibanaRequest
   ): Promise<any> => {
-    const usage = await collectorSet.bulkFetchUsage(callCluster, esClient);
+    const usage = await collectorSet.bulkFetchUsage(
+      callCluster,
+      esClient,
+      savedObjectsClient,
+      kibanaRequest
+    );
     return collectorSet.toObject(usage);
   };
 
-  const getClusterUuid = async (callCluster: LegacyAPICaller): Promise<string> => {
-    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
+  const getClusterUuid = async (asCurrentUser: ElasticsearchClient): Promise<string> => {
+    const { body } = await asCurrentUser.info({ filter_path: 'cluster_uuid' });
+    const { cluster_uuid: uuid } = body;
     return uuid;
   };
 
@@ -100,7 +111,8 @@ export function registerStatsRoute({
       let extended;
       if (isExtended) {
         const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const { asCurrentUser } = context.core.elasticsearch.client;
+        const savedObjectsClient = context.core.savedObjects.client;
 
         if (shouldGetUsage) {
           const collectorsReady = await collectorSet.areAllCollectorsReady();
@@ -109,8 +121,13 @@ export function registerStatsRoute({
           }
         }
 
-        const usagePromise = shouldGetUsage ? getUsage(callCluster, esClient) : Promise.resolve({});
-        const [usage, clusterUuid] = await Promise.all([usagePromise, getClusterUuid(callCluster)]);
+        const usagePromise = shouldGetUsage
+          ? getUsage(callCluster, asCurrentUser, savedObjectsClient, req)
+          : Promise.resolve({});
+        const [usage, clusterUuid] = await Promise.all([
+          usagePromise,
+          getClusterUuid(asCurrentUser),
+        ]);
 
         let modifiedUsage = usage;
         if (isLegacy) {

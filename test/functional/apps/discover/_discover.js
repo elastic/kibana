@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
+  const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -290,6 +291,51 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemAdd('_score');
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
+      });
+      it('should add a field with customLabel, sort by it, display it correctly', async function () {
+        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.clickFieldListItemAdd('referer');
+        await PageObjects.discover.clickFieldSort('referer');
+        expect(await PageObjects.discover.getDocHeader()).to.have.string('Referer custom');
+        expect(await PageObjects.discover.getAllFieldNames()).to.contain('Referer custom');
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain('referer');
+      });
+    });
+
+    describe('refresh interval', function () {
+      it('should refetch when autofresh is enabled', async () => {
+        const intervalS = 5;
+        await PageObjects.timePicker.startAutoRefresh(intervalS);
+
+        // check inspector panel request stats for timestamp
+        await inspector.open();
+
+        const getRequestTimestamp = async () => {
+          const requestStats = await inspector.getTableData();
+          const requestStatsRow = requestStats.filter(
+            (r) => r && r[0] && r[0].includes('Request timestamp')
+          );
+          if (!requestStatsRow || !requestStatsRow[0] || !requestStatsRow[0][1]) {
+            return '';
+          }
+          return requestStatsRow[0][1];
+        };
+
+        const requestTimestampBefore = await getRequestTimestamp();
+        await retry.waitFor('refetch because of refresh interval', async () => {
+          const requestTimestampAfter = await getRequestTimestamp();
+          log.debug(
+            `Timestamp before: ${requestTimestampBefore}, Timestamp after: ${requestTimestampAfter}`
+          );
+          return requestTimestampAfter && requestTimestampBefore !== requestTimestampAfter;
+        });
+      });
+
+      after(async () => {
+        await inspector.close();
+        await PageObjects.timePicker.pauseAutoRefresh();
       });
     });
   });

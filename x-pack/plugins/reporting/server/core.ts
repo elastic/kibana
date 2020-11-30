@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { first, map, take } from 'rxjs/operators';
 import {

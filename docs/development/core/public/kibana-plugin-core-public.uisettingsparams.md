@@ -19,6 +19,7 @@ export interface UiSettingsParams<T = unknown>
 |  [category](./kibana-plugin-core-public.uisettingsparams.category.md) | <code>string[]</code> | used to group the configured setting in the UI |
 |  [deprecation](./kibana-plugin-core-public.uisettingsparams.deprecation.md) | <code>DeprecationSettings</code> | optional deprecation information. Used to generate a deprecation warning. |
 |  [description](./kibana-plugin-core-public.uisettingsparams.description.md) | <code>string</code> | description provided to a user in UI |
+|  [metric](./kibana-plugin-core-public.uisettingsparams.metric.md) | <code>{</code><br/><code>        type: UiStatsMetricType;</code><br/><code>        name: string;</code><br/><code>    }</code> | Metric to track once this property changes |
 |  [name](./kibana-plugin-core-public.uisettingsparams.name.md) | <code>string</code> | title in the UI |
 |  [optionLabels](./kibana-plugin-core-public.uisettingsparams.optionlabels.md) | <code>Record&lt;string, string&gt;</code> | text labels for 'select' type UI element |
 |  [options](./kibana-plugin-core-public.uisettingsparams.options.md) | <code>string[]</code> | array of permitted values for this setting |

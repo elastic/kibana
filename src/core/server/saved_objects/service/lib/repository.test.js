@@ -2446,6 +2446,161 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
+  describe('#removeReferencesTo', () => {
+    const type = 'type';
+    const id = 'id';
+    const defaultOptions = {};
+
+    const updatedCount = 42;
+
+    const removeReferencesToSuccess = async (options = defaultOptions) => {
+      client.updateByQuery.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          updated: updatedCount,
+        })
+      );
+      return await savedObjectsRepository.removeReferencesTo(type, id, options);
+    };
+
+    describe('client calls', () => {
+      it('should use the ES updateByQuery action', async () => {
+        await removeReferencesToSuccess();
+        expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+      });
+
+      it('uses the correct default `refresh` value', async () => {
+        await removeReferencesToSuccess();
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            refresh: true,
+          }),
+          expect.any(Object)
+        );
+      });
+
+      it('merges output of getSearchDsl into es request body', async () => {
+        const query = { query: 1, aggregations: 2 };
+        getSearchDslNS.getSearchDsl.mockReturnValue(query);
+        await removeReferencesToSuccess({ type });
+
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({ ...query }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should set index to all known SO indices on the request', async () => {
+        await removeReferencesToSuccess();
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: ['.kibana-test', 'custom'],
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should use the `refresh` option in the request', async () => {
+        const refresh = Symbol();
+
+        await removeReferencesToSuccess({ refresh });
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            refresh,
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should pass the correct parameters to the update script', async () => {
+        await removeReferencesToSuccess();
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              script: expect.objectContaining({
+                params: {
+                  type,
+                  id,
+                },
+              }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
+    });
+
+    describe('search dsl', () => {
+      it(`passes mappings and registry to getSearchDsl`, async () => {
+        await removeReferencesToSuccess();
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.anything()
+        );
+      });
+
+      it('passes namespace to getSearchDsl', async () => {
+        await removeReferencesToSuccess({ namespace: 'some-ns' });
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            namespaces: ['some-ns'],
+          })
+        );
+      });
+
+      it('passes hasReference to getSearchDsl', async () => {
+        await removeReferencesToSuccess();
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            hasReference: {
+              type,
+              id,
+            },
+          })
+        );
+      });
+
+      it('passes all known types to getSearchDsl', async () => {
+        await removeReferencesToSuccess();
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            type: registry.getAllTypes().map((type) => type.name),
+          })
+        );
+      });
+    });
+
+    describe('returns', () => {
+      it('returns the updated count from the ES response', async () => {
+        const response = await removeReferencesToSuccess();
+        expect(response.updated).toBe(updatedCount);
+      });
+    });
+
+    describe('errors', () => {
+      it(`throws when ES returns failures`, async () => {
+        client.updateByQuery.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            updated: 7,
+            failures: ['failure', 'another-failure'],
+          })
+        );
+
+        await expect(
+          savedObjectsRepository.removeReferencesTo(type, id, defaultOptions)
+        ).rejects.toThrowError(createConflictError(type, id));
+      });
+    });
+  });
+
   describe('#find', () => {
     const generateSearchResults = (namespace) => {
       return {
@@ -2808,6 +2963,19 @@ describe('SavedObjectsRepository', () => {
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           ...relevantOpts,
           type: [type],
+        });
+      });
+
+      it(`accepts hasReferenceOperator`, async () => {
+        const relevantOpts = {
+          ...commonOptions,
+          hasReferenceOperator: 'AND',
+        };
+
+        await findSuccess(relevantOpts, namespace);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+          ...relevantOpts,
+          hasReferenceOperator: 'AND',
         });
       });
 

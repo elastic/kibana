@@ -5,10 +5,7 @@
  */
 
 import { LayerConfig } from './types';
-import {
-  KibanaDatatable,
-  SerializedFieldFormat,
-} from '../../../../../src/plugins/expressions/public';
+import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 
 interface FormattedMetric {
@@ -34,7 +31,7 @@ export function isFormatterCompatible(
 export function getAxesConfiguration(
   layers: LayerConfig[],
   shouldRotate: boolean,
-  tables?: Record<string, KibanaDatatable>,
+  tables?: Record<string, Datatable>,
   formatFactory?: (mapping: SerializedFieldFormat) => IFieldFormat
 ): GroupsConfiguration {
   const series: { auto: FormattedMetric[]; left: FormattedMetric[]; right: FormattedMetric[] } = {
@@ -50,7 +47,7 @@ export function getAxesConfiguration(
         layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode ||
         'auto';
       let formatter: SerializedFieldFormat = table?.columns.find((column) => column.id === accessor)
-        ?.formatHint || { id: 'number' };
+        ?.meta?.params || { id: 'number' };
       if (layer.seriesType.includes('percentage') && formatter.id !== 'percent') {
         formatter = {
           id: 'percent',

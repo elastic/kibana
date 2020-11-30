@@ -60,8 +60,14 @@ import {
   THRESHOLD_TYPE,
   EQL_TYPE,
   EQL_QUERY_INPUT,
+  QUERY_PREVIEW_BUTTON,
+  EQL_QUERY_PREVIEW_HISTOGRAM,
+  EQL_QUERY_VALIDATION_SPINNER,
 } from '../screens/create_new_rule';
+import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
+import { NOTIFICATION_TOASTS, TOAST_ERROR_CLASS } from '../screens/shared';
 import { TIMELINE } from '../screens/timelines';
+import { refreshPage } from './security_header';
 
 export const createAndActivateRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -223,8 +229,12 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
   cy.get(EQL_QUERY_INPUT).type(rule.customQuery);
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+  cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
+  cy.get(QUERY_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
+  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
+  cy.get(NOTIFICATION_TOASTS).children().should('not.have.class', TOAST_ERROR_CLASS); // asserts no error toast on page
 
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
   cy.get(EQL_QUERY_INPUT).should('not.exist');
 };
 
@@ -263,12 +273,30 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
-export const waitForTheRuleToBeExecuted = async () => {
-  let status = '';
-  while (status !== 'succeeded') {
+export const waitForAlertsToPopulate = async () => {
+  cy.waitUntil(
+    () => {
+      refreshPage();
+      return cy
+        .get(SERVER_SIDE_EVENT_COUNT)
+        .invoke('text')
+        .then((countText) => {
+          const alertCount = parseInt(countText, 10) || 0;
+          return alertCount > 0;
+        });
+    },
+    { interval: 500, timeout: 12000 }
+  );
+};
+
+export const waitForTheRuleToBeExecuted = () => {
+  cy.waitUntil(() => {
     cy.get(REFRESH_BUTTON).click();
-    status = await cy.get(RULE_STATUS).invoke('text').promisify();
-  }
+    return cy
+      .get(RULE_STATUS)
+      .invoke('text')
+      .then((ruleStatus) => ruleStatus === 'succeeded');
+  });
 };
 
 export const selectEqlRuleType = () => {

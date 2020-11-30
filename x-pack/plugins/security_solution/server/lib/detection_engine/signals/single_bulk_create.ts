@@ -7,13 +7,14 @@
 import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../alerts/server';
-import { SignalSearchResponse, BulkResponse, SignalHit, BaseSignalHit } from './types';
+import { SignalSearchResponse, BulkResponse, BaseSignalHit } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { generateId, makeFloatString, errorAggregator } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { BuildRuleMessage } from './rule_messages';
 import { Logger } from '../../../../../../../src/core/server';
+import { isEventTypeSignal } from './build_event_type_signal';
 
 interface SingleBulkCreateParams {
   filteredEvents: SignalSearchResponse;
@@ -50,7 +51,7 @@ export const filterDuplicateRules = (
   signalSearchResponse: SignalSearchResponse
 ) => {
   return signalSearchResponse.hits.hits.filter((doc) => {
-    if (doc._source.signal == null) {
+    if (doc._source.signal == null || !isEventTypeSignal(doc)) {
       return true;
     } else {
       return !(
@@ -67,9 +68,9 @@ export const filterDuplicateRules = (
  * @param ruleId The rule id
  * @param signals The candidate new signals
  */
-export const filterDuplicateSignals = (ruleId: string, signals: SignalHit[]) => {
+export const filterDuplicateSignals = (ruleId: string, signals: BaseSignalHit[]) => {
   return signals.filter(
-    (doc) => !doc.signal.ancestors.some((ancestor) => ancestor.rule === ruleId)
+    (doc) => !doc._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleId)
   );
 };
 

@@ -1,0 +1,20 @@
+format_version: 1.0.0
+name: experimental2
+title: experimental integration
+description: This is a test package for testing experimental packages
+version: 0.1.0
+categories: []
+release: experimental
+type: integration
+license: basic
+
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+
+icons:
+  - src: '/img/logo_overrides_64_color.svg'
+    size: '16x16'
+    type: 'image/svg+xml'

@@ -19,41 +19,6 @@
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { coreMock, httpServerMock } from './mocks';
 
-describe('#auditor', () => {
-  test('returns the results of coreStart.audiTrail.asScoped', () => {
-    const request = httpServerMock.createKibanaRequest();
-    const coreStart = coreMock.createInternalStart();
-    const context = new CoreRouteHandlerContext(coreStart, request);
-
-    const auditor = context.auditor;
-    expect(auditor).toBe(coreStart.auditTrail.asScoped.mock.results[0].value);
-  });
-
-  test('lazily created', () => {
-    const request = httpServerMock.createKibanaRequest();
-    const coreStart = coreMock.createInternalStart();
-    const context = new CoreRouteHandlerContext(coreStart, request);
-
-    expect(coreStart.auditTrail.asScoped).not.toHaveBeenCalled();
-    const auditor = context.auditor;
-    expect(coreStart.auditTrail.asScoped).toHaveBeenCalled();
-    expect(auditor).toBeDefined();
-  });
-
-  test('only creates one instance', () => {
-    const request = httpServerMock.createKibanaRequest();
-    const coreStart = coreMock.createInternalStart();
-    const context = new CoreRouteHandlerContext(coreStart, request);
-
-    const auditor1 = context.auditor;
-    const auditor2 = context.auditor;
-    expect(coreStart.auditTrail.asScoped.mock.calls.length).toBe(1);
-    const mockResult = coreStart.auditTrail.asScoped.mock.results[0].value;
-    expect(auditor1).toBe(mockResult);
-    expect(auditor2).toBe(mockResult);
-  });
-});
-
 describe('#elasticsearch', () => {
   describe('#client', () => {
     test('returns the results of coreStart.elasticsearch.client.asScoped', () => {

@@ -22,7 +22,7 @@ export function MainFilters() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/services',
+          endpoint: 'GET /api/apm/rum-client/services',
           params: {
             query: {
               start,
@@ -44,11 +44,11 @@ export function MainFilters() {
           serviceNames={data ?? []}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <UserPercentile />
-      </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
         <EnvironmentFilter />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <UserPercentile />
       </EuiFlexItem>
     </>
   );

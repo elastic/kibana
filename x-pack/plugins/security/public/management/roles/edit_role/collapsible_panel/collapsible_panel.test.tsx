@@ -6,7 +6,7 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { CollapsiblePanel } from './collapsible_panel';
 
 test('it renders without blowing up', () => {

@@ -5,19 +5,17 @@
  */
 import { Logger } from '@kbn/logging';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { PromiseReturnType } from '../../../../typings/common';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getServicesProjection } from '../../../projections/services';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
-  getTransactionDurationAverages,
   getAgentNames,
-  getTransactionRates,
-  getTransactionErrorRates,
   getEnvironments,
   getHealthStatuses,
+  getTransactionDurationAverages,
+  getTransactionErrorRates,
+  getTransactionRates,
 } from './get_services_items_stats';
 
-export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
 export type ServicesItemsSetup = Setup & SetupTimeRange;
 export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
@@ -58,14 +56,27 @@ export async function getServicesItems({
     }),
   ]);
 
-  const allMetrics = [
-    ...transactionDurationAverages,
-    ...agentNames,
-    ...transactionRates,
-    ...transactionErrorRates,
-    ...environments,
-    ...healthStatuses,
-  ];
+  const apmServiceMetrics = joinByKey(
+    [
+      ...transactionDurationAverages,
+      ...agentNames,
+      ...transactionRates,
+      ...transactionErrorRates,
+      ...environments,
+    ],
+    'serviceName'
+  );
+
+  const apmServices = apmServiceMetrics.map(({ serviceName }) => serviceName);
+
+  // make sure to exclude health statuses from services
+  // that are not found in APM data
+
+  const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
+    apmServices.includes(serviceName)
+  );
+
+  const allMetrics = [...apmServiceMetrics, ...matchedHealthStatuses];
 
   return joinByKey(allMetrics, 'serviceName');
 }

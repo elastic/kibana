@@ -66,6 +66,7 @@ describe('utils/kbn_field_types', () => {
     test('returns the kbnFieldType name that matches the esType', () => {
       expect(castEsToKbnFieldTypeName(ES_FIELD_TYPES.KEYWORD)).toBe('string');
       expect(castEsToKbnFieldTypeName(ES_FIELD_TYPES.FLOAT)).toBe('number');
+      expect(castEsToKbnFieldTypeName(ES_FIELD_TYPES.UNSIGNED_LONG)).toBe('number');
     });
 
     test('returns unknown for unknown es types', () => {

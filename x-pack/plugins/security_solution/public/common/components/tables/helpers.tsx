@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
-import { MoreRowItems, Spacer } from '../page';
+import { MoreRowItems } from '../page';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 
@@ -92,12 +92,6 @@ export const getRowItemDraggables = ({
       const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
       return (
         <React.Fragment key={id}>
-          {index !== 0 && (
-            <>
-              {','}
-              <Spacer />
-            </>
-          )}
           <DraggableWrapper
             key={id}
             dataProvider={{

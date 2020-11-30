@@ -235,7 +235,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatIndexPatternsLabel',
       {
-        defaultMessage: 'Threat index patterns',
+        defaultMessage: 'Indicator index patterns',
       }
     ),
     helpText: <EuiText size="xs">{THREAT_MATCH_INDEX_HELPER_TEXT}</EuiText>,
@@ -265,7 +265,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatMappingLabel',
       {
-        defaultMessage: 'Threat Mapping',
+        defaultMessage: 'Indicator mapping',
       }
     ),
     validations: [
@@ -301,7 +301,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatQueryBarLabel',
       {
-        defaultMessage: 'Threat index query',
+        defaultMessage: 'Indicator index query',
       }
     ),
     validations: [

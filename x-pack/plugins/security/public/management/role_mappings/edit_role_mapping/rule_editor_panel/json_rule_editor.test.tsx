@@ -10,11 +10,11 @@ import 'brace/mode/json';
 // brace/ace uses the Worker class, which is not currently provided by JSDOM.
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
-import 'test_utils/stub_web_worker';
+import '@kbn/test/target/jest/utils/stub_web_worker';
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { JSONRuleEditor } from './json_rule_editor';
 import { EuiCodeEditor } from '@elastic/eui';
 import { AllRule, AnyRule, FieldRule, ExceptAnyRule, ExceptAllRule } from '../../model';

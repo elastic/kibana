@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { EuiCallOut } from '@elastic/eui';
@@ -12,12 +12,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
-import {
-  ActionsConnectorsContextProvider,
-  ActionType,
-  ConnectorAddFlyout,
-  ConnectorEditFlyout,
-} from '../../../../../triggers_actions_ui/public';
+import { ActionType } from '../../../../../triggers_actions_ui/public';
 
 import { ClosureType } from '../../containers/configure/types';
 
@@ -61,7 +56,7 @@ interface ConfigureCasesComponentProps {
 }
 
 const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
-  const { http, triggersActionsUi, notifications, application, docLinks } = useKibana().services;
+  const { triggersActionsUi } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -93,19 +88,13 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     setEditFlyoutVisibility(true);
   }, []);
 
-  const handleSetAddFlyoutVisibility = useCallback(
-    (isVisible: boolean) => {
-      setAddFlyoutVisibility(isVisible);
-    },
-    [setAddFlyoutVisibility]
-  );
+  const onCloseAddFlyout = useCallback(() => setAddFlyoutVisibility(false), [
+    setAddFlyoutVisibility,
+  ]);
 
-  const handleSetEditFlyoutVisibility = useCallback(
-    (isVisible: boolean) => {
-      setEditFlyoutVisibility(isVisible);
-    },
-    [setEditFlyoutVisibility]
-  );
+  const onCloseEditFlyout = useCallback(() => setEditFlyoutVisibility(false), [
+    setEditFlyoutVisibility,
+  ]);
 
   const onChangeConnector = useCallback(
     (id: string) => {
@@ -161,6 +150,32 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     }
   }, [connectors, connector, isLoadingConnectors]);
 
+  const ConnectorAddFlyout = useMemo(
+    () =>
+      triggersActionsUi.getAddConnectorFlyout({
+        consumer: 'case',
+        onClose: onCloseAddFlyout,
+        actionTypes,
+        reloadConnectors,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const ConnectorEditFlyout = useMemo(
+    () =>
+      editedConnectorItem && editFlyoutVisible
+        ? triggersActionsUi.getEditConnectorFlyout({
+            initialConnector: editedConnectorItem,
+            consumer: 'case',
+            onClose: onCloseEditFlyout,
+            reloadConnectors,
+          })
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [connector.id, editFlyoutVisible]
+  );
+
   return (
     <FormWrapper>
       {!connectorIsValid && (
@@ -193,33 +208,8 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           selectedConnector={connector.id}
         />
       </SectionWrapper>
-      <ActionsConnectorsContextProvider
-        value={{
-          http,
-          actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-          toastNotifications: notifications.toasts,
-          capabilities: application.capabilities,
-          reloadConnectors,
-          docLinks,
-          consumer: 'case',
-        }}
-      >
-        <ConnectorAddFlyout
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={handleSetAddFlyoutVisibility as Dispatch<SetStateAction<boolean>>}
-          actionTypes={actionTypes}
-        />
-        {editedConnectorItem && (
-          <ConnectorEditFlyout
-            key={editedConnectorItem.id}
-            initialConnector={editedConnectorItem}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={
-              handleSetEditFlyoutVisibility as Dispatch<SetStateAction<boolean>>
-            }
-          />
-        )}
-      </ActionsConnectorsContextProvider>
+      {addFlyoutVisible && ConnectorAddFlyout}
+      {ConnectorEditFlyout}
     </FormWrapper>
   );
 };

@@ -6,7 +6,7 @@
 
 import moment from 'moment-timezone';
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import '../../../../common/mock/formatted_relative';
 
 import { NoteCreated } from './note_created';

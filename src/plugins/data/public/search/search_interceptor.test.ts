@@ -16,182 +16,260 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { CoreSetup } from '../../../../core/public';
+import type { MockedKeys } from '@kbn/utility-types/jest';
+import { CoreSetup, CoreStart } from '../../../../core/public';
 import { coreMock } from '../../../../core/public/mocks';
 import { IEsSearchRequest } from '../../common/search';
 import { SearchInterceptor } from './search_interceptor';
-import { AbortError } from '../../common';
-import { SearchTimeoutError, PainlessError } from './errors';
+import { AbortError } from '../../../kibana_utils/public';
+import { SearchTimeoutError, PainlessError, TimeoutErrorMode } from './errors';
+import { searchServiceMock } from './mocks';
+import { ISearchStart } from '.';
+import { bfetchPluginMock } from '../../../bfetch/public/mocks';
+import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
+let bfetchSetup: jest.Mocked<BfetchPublicSetup>;
+let fetchMock: jest.Mock<any>;
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 jest.useFakeTimers();
 
 describe('SearchInterceptor', () => {
+  let searchMock: jest.Mocked<ISearchStart>;
+  let mockCoreStart: MockedKeys<CoreStart>;
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
+    mockCoreStart = coreMock.createStart();
+    searchMock = searchServiceMock.createStartContract();
+    fetchMock = jest.fn();
+    bfetchSetup = bfetchPluginMock.createSetupContract();
+    bfetchSetup.batchedFunction.mockReturnValue(fetchMock);
     searchInterceptor = new SearchInterceptor({
+      bfetch: bfetchSetup,
       toasts: mockCoreSetup.notifications.toasts,
-      startServices: mockCoreSetup.getStartServices(),
+      startServices: new Promise((resolve) => {
+        resolve([mockCoreStart, {}, {}]);
+      }),
       uiSettings: mockCoreSetup.uiSettings,
       http: mockCoreSetup.http,
+      session: searchMock.session,
+    });
+  });
+
+  describe('showError', () => {
+    test('Ignores an AbortError', async () => {
+      searchInterceptor.showError(new AbortError());
+      expect(mockCoreSetup.notifications.toasts.addDanger).not.toBeCalled();
+      expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
+    });
+
+    test('Ignores a SearchTimeoutError', async () => {
+      searchInterceptor.showError(new SearchTimeoutError(new Error(), TimeoutErrorMode.UPGRADE));
+      expect(mockCoreSetup.notifications.toasts.addDanger).not.toBeCalled();
+      expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
+    });
+
+    test('Renders a PainlessError', async () => {
+      searchInterceptor.showError(
+        new PainlessError({
+          body: {
+            attributes: {
+              error: {
+                failed_shards: {
+                  reason: 'bananas',
+                },
+              },
+            },
+          } as any,
+        })
+      );
+      expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
+      expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
+    });
+
+    test('Renders a general error', async () => {
+      searchInterceptor.showError(new Error('Oopsy'));
+      expect(mockCoreSetup.notifications.toasts.addDanger).not.toBeCalled();
+      expect(mockCoreSetup.notifications.toasts.addError).toBeCalledTimes(1);
     });
   });
 
   describe('search', () => {
     test('Observable should resolve if fetch is successful', async () => {
       const mockResponse: any = { result: 200 };
-      mockCoreSetup.http.fetch.mockResolvedValueOnce(mockResponse);
+      fetchMock.mockResolvedValueOnce(mockResponse);
       const mockRequest: IEsSearchRequest = {
         params: {},
       };
       const response = searchInterceptor.search(mockRequest);
-
-      const result = await response.toPromise();
-      expect(result).toBe(mockResponse);
+      expect(response.toPromise()).resolves.toBe(mockResponse);
     });
 
-    test('Observable should fail if fetch has an internal error', async () => {
-      const mockResponse: any = { result: 500, message: 'Internal Error' };
-      mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
-      const mockRequest: IEsSearchRequest = {
-        params: {},
-      };
-      const response = searchInterceptor.search(mockRequest);
+    describe('Should throw typed errors', () => {
+      test('Observable should fail if fetch has an internal error', async () => {
+        const mockResponse: any = new Error('Internal Error');
+        fetchMock.mockRejectedValue(mockResponse);
+        const mockRequest: IEsSearchRequest = {
+          params: {},
+        };
+        const response = searchInterceptor.search(mockRequest);
+        await expect(response.toPromise()).rejects.toThrow('Internal Error');
+      });
 
-      try {
-        await response.toPromise();
-      } catch (e) {
-        expect(e).toBe(mockResponse);
-      }
-    });
-
-    test('Should throw SearchTimeoutError on server timeout AND show toast', async (done) => {
-      const mockResponse: any = {
-        result: 500,
-        body: {
-          message: 'Request timed out',
-        },
-      };
-      mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
-      const mockRequest: IEsSearchRequest = {
-        params: {},
-      };
-      const response = searchInterceptor.search(mockRequest);
-
-      try {
-        await response.toPromise();
-      } catch (e) {
-        expect(e).toBeInstanceOf(SearchTimeoutError);
-        expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
-        done();
-      }
-    });
-
-    test('Search error should be debounced', async (done) => {
-      const mockResponse: any = {
-        result: 500,
-        body: {
-          message: 'Request timed out',
-        },
-      };
-      mockCoreSetup.http.fetch.mockRejectedValue(mockResponse);
-      const mockRequest: IEsSearchRequest = {
-        params: {},
-      };
-      try {
-        await searchInterceptor.search(mockRequest).toPromise();
-      } catch (e) {
-        expect(e).toBeInstanceOf(SearchTimeoutError);
-        try {
-          await searchInterceptor.search(mockRequest).toPromise();
-        } catch (e2) {
-          expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
-          done();
-        }
-      }
-    });
-
-    test('Should throw Painless error on server error with OSS format', async (done) => {
-      const mockResponse: any = {
-        result: 500,
-        body: {
-          attributes: {
-            error: {
-              failed_shards: [
-                {
-                  reason: {
-                    lang: 'painless',
-                    script_stack: ['a', 'b'],
-                    reason: 'banana',
-                  },
-                },
-              ],
+      describe('Should handle Timeout errors', () => {
+        test('Should throw SearchTimeoutError on server timeout AND show toast', async () => {
+          const mockResponse: any = {
+            result: 500,
+            body: {
+              message: 'Request timed out',
             },
-          },
-        },
-      };
-      mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
-      const mockRequest: IEsSearchRequest = {
-        params: {},
-      };
-      const response = searchInterceptor.search(mockRequest);
+          };
+          fetchMock.mockRejectedValueOnce(mockResponse);
+          const mockRequest: IEsSearchRequest = {
+            params: {},
+          };
+          const response = searchInterceptor.search(mockRequest);
+          await expect(response.toPromise()).rejects.toThrow(SearchTimeoutError);
+          expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
+        });
 
-      try {
-        await response.toPromise();
-      } catch (e) {
-        expect(e).toBeInstanceOf(PainlessError);
-        done();
-      }
-    });
+        test('Timeout error should show multiple times if not in a session', async () => {
+          const mockResponse: any = {
+            result: 500,
+            body: {
+              message: 'Request timed out',
+            },
+          };
+          fetchMock.mockRejectedValue(mockResponse);
+          const mockRequest: IEsSearchRequest = {
+            params: {},
+          };
 
-    test('Observable should fail if user aborts (test merged signal)', async () => {
-      const abortController = new AbortController();
-      mockCoreSetup.http.fetch.mockImplementationOnce((options: any) => {
-        return new Promise((resolve, reject) => {
-          options.signal.addEventListener('abort', () => {
-            reject(new AbortError());
-          });
+          await expect(searchInterceptor.search(mockRequest).toPromise()).rejects.toThrow(
+            SearchTimeoutError
+          );
+          await expect(searchInterceptor.search(mockRequest).toPromise()).rejects.toThrow(
+            SearchTimeoutError
+          );
+          expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(2);
+        });
 
-          setTimeout(resolve, 500);
+        test('Timeout error should show once per each session', async () => {
+          const mockResponse: any = {
+            result: 500,
+            body: {
+              message: 'Request timed out',
+            },
+          };
+          fetchMock.mockRejectedValue(mockResponse);
+          const mockRequest: IEsSearchRequest = {
+            params: {},
+          };
+
+          await expect(
+            searchInterceptor.search(mockRequest, { sessionId: 'abc' }).toPromise()
+          ).rejects.toThrow(SearchTimeoutError);
+          await expect(
+            searchInterceptor.search(mockRequest, { sessionId: 'def' }).toPromise()
+          ).rejects.toThrow(SearchTimeoutError);
+          expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(2);
+        });
+
+        test('Timeout error should show once in a single session', async () => {
+          const mockResponse: any = {
+            result: 500,
+            body: {
+              message: 'Request timed out',
+            },
+          };
+          fetchMock.mockRejectedValue(mockResponse);
+          const mockRequest: IEsSearchRequest = {
+            params: {},
+          };
+          await expect(
+            searchInterceptor.search(mockRequest, { sessionId: 'abc' }).toPromise()
+          ).rejects.toThrow(SearchTimeoutError);
+          await expect(
+            searchInterceptor.search(mockRequest, { sessionId: 'abc' }).toPromise()
+          ).rejects.toThrow(SearchTimeoutError);
+          expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
         });
       });
-      const mockRequest: IEsSearchRequest = {
-        params: {},
-      };
-      const response = searchInterceptor.search(mockRequest, {
-        abortSignal: abortController.signal,
+
+      test('Should throw Painless error on server error with OSS format', async () => {
+        const mockResponse: any = {
+          result: 500,
+          body: {
+            attributes: {
+              error: {
+                failed_shards: [
+                  {
+                    reason: {
+                      lang: 'painless',
+                      script_stack: ['a', 'b'],
+                      reason: 'banana',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        };
+        fetchMock.mockRejectedValueOnce(mockResponse);
+        const mockRequest: IEsSearchRequest = {
+          params: {},
+        };
+        const response = searchInterceptor.search(mockRequest);
+        await expect(response.toPromise()).rejects.toThrow(PainlessError);
       });
 
-      const next = jest.fn();
-      const error = (e: any) => {
-        expect(next).not.toBeCalled();
-        expect(e).toBeInstanceOf(AbortError);
-      };
-      response.subscribe({ next, error });
-      setTimeout(() => abortController.abort(), 200);
-      jest.advanceTimersByTime(5000);
+      test('Observable should fail if user aborts (test merged signal)', async () => {
+        const abortController = new AbortController();
+        fetchMock.mockImplementationOnce((options: any) => {
+          return new Promise((resolve, reject) => {
+            options.signal.addEventListener('abort', () => {
+              reject(new AbortError());
+            });
 
-      await flushPromises();
-    });
+            setTimeout(resolve, 500);
+          });
+        });
+        const mockRequest: IEsSearchRequest = {
+          params: {},
+        };
+        const response = searchInterceptor.search(mockRequest, {
+          abortSignal: abortController.signal,
+        });
 
-    test('Immediately aborts if passed an aborted abort signal', async (done) => {
-      const abort = new AbortController();
-      const mockRequest: IEsSearchRequest = {
-        params: {},
-      };
-      const response = searchInterceptor.search(mockRequest, { abortSignal: abort.signal });
-      abort.abort();
+        const next = jest.fn();
+        const error = (e: any) => {
+          expect(next).not.toBeCalled();
+          expect(e).toBeInstanceOf(AbortError);
+        };
+        response.subscribe({ next, error });
+        setTimeout(() => abortController.abort(), 200);
+        jest.advanceTimersByTime(5000);
 
-      const error = (e: any) => {
-        expect(e).toBeInstanceOf(AbortError);
-        expect(mockCoreSetup.http.fetch).not.toBeCalled();
-        done();
-      };
-      response.subscribe({ error });
+        await flushPromises();
+      });
+
+      test('Immediately aborts if passed an aborted abort signal', async (done) => {
+        const abort = new AbortController();
+        const mockRequest: IEsSearchRequest = {
+          params: {},
+        };
+        const response = searchInterceptor.search(mockRequest, { abortSignal: abort.signal });
+        abort.abort();
+
+        const error = (e: any) => {
+          expect(e).toBeInstanceOf(AbortError);
+          expect(fetchMock).not.toBeCalled();
+          done();
+        };
+        response.subscribe({ error });
+      });
     });
   });
 });

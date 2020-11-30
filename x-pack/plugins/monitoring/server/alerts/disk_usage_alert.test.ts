@@ -36,7 +36,7 @@ describe('DiskUsageAlert', () => {
     expect(alert.type).toBe(ALERT_DISK_USAGE);
     expect(alert.label).toBe('Disk Usage');
     expect(alert.defaultThrottle).toBe('1d');
-    expect(alert.defaultParams).toStrictEqual({ threshold: 90, duration: '5m' });
+    expect(alert.defaultParams).toStrictEqual({ threshold: 80, duration: '5m' });
     expect(alert.actionVariables).toStrictEqual([
       { name: 'nodes', description: 'The list of nodes reporting high disk usage.' },
       { name: 'count', description: 'The number of nodes reporting high disk usage.' },

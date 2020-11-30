@@ -19,7 +19,7 @@
 
 import { Observable, Subscription, combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { pick } from '@kbn/std';
 
 import { CoreService } from '../../types';
@@ -158,7 +158,7 @@ export class HttpService
    * @internal
    * */
   private shouldListen(config: HttpConfig) {
-    return !this.coreContext.env.isDevClusterMaster && config.autoListen;
+    return !this.coreContext.env.isDevCliParent && config.autoListen;
   }
 
   public async stop() {

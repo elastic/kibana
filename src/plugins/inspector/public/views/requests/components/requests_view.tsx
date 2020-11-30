@@ -31,7 +31,7 @@ import { RequestDetails } from './request_details';
 
 interface RequestSelectorState {
   requests: Request[];
-  request: Request;
+  request: Request | null;
 }
 
 export class RequestsViewComponent extends Component<InspectorViewProps, RequestSelectorState> {
@@ -43,9 +43,9 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
   constructor(props: InspectorViewProps) {
     super(props);
 
-    props.adapters.requests.on('change', this._onRequestsChange);
+    props.adapters.requests!.on('change', this._onRequestsChange);
 
-    const requests = props.adapters.requests.getRequests();
+    const requests = props.adapters.requests!.getRequests();
     this.state = {
       requests,
       request: requests.length ? requests[0] : null,
@@ -53,10 +53,10 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
   }
 
   _onRequestsChange = () => {
-    const requests = this.props.adapters.requests.getRequests();
+    const requests = this.props.adapters.requests!.getRequests();
     const newState = { requests } as RequestSelectorState;
 
-    if (!requests.includes(this.state.request)) {
+    if (!this.state.request || !requests.includes(this.state.request)) {
       newState.request = requests.length ? requests[0] : null;
     }
     this.setState(newState);
@@ -69,7 +69,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
   };
 
   componentWillUnmount() {
-    this.props.adapters.requests.removeListener('change', this._onRequestsChange);
+    this.props.adapters.requests!.removeListener('change', this._onRequestsChange);
   }
 
   static renderEmptyRequests() {
@@ -140,16 +140,35 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
           </p>
         </EuiText>
         <EuiSpacer size="xs" />
-        <RequestSelector
-          requests={this.state.requests}
-          selectedRequest={this.state.request}
-          onRequestChanged={this.selectRequest}
-        />
-        <EuiSpacer size="xs" />
+        {this.state.request && (
+          <>
+            <RequestSelector
+              requests={this.state.requests}
+              selectedRequest={this.state.request}
+              onRequestChanged={this.selectRequest}
+            />
+            <EuiSpacer size="xs" />
+          </>
+        )}
 
         {this.state.request && this.state.request.description && (
           <EuiText size="xs">
             <p>{this.state.request.description}</p>
+          </EuiText>
+        )}
+
+        {this.state.request && this.state.request.searchSessionId && (
+          <EuiText size="xs">
+            <p
+              data-test-subj={'inspectorRequestSearchSessionId'}
+              data-search-session-id={this.state.request.searchSessionId}
+            >
+              <FormattedMessage
+                id="inspector.requests.searchSessionId"
+                defaultMessage="Search session id: {searchSessionId}"
+                values={{ searchSessionId: this.state.request.searchSessionId }}
+              />
+            </p>
           </EuiText>
         )}
 
@@ -160,3 +179,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
     );
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { RequestsViewComponent as default };

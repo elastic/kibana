@@ -35,13 +35,14 @@ import { DIMMING_OPACITY_SETTING, HEATMAP_MAX_BUCKETS_SETTING } from '../../comm
  * @param config {Object} Parameters that define the chart type and chart options
  */
 export class Vis extends EventEmitter {
-  constructor(element, visConfigArgs, deps) {
+  constructor(element, visConfigArgs, core, charts) {
     super();
     this.element = element.get ? element.get(0) : element;
     this.visConfigArgs = _.cloneDeep(visConfigArgs);
-    this.visConfigArgs.dimmingOpacity = deps.uiSettings.get(DIMMING_OPACITY_SETTING);
-    this.visConfigArgs.heatmapMaxBuckets = deps.uiSettings.get(HEATMAP_MAX_BUCKETS_SETTING);
-    this.deps = deps;
+    this.visConfigArgs.dimmingOpacity = core.uiSettings.get(DIMMING_OPACITY_SETTING);
+    this.visConfigArgs.heatmapMaxBuckets = core.uiSettings.get(HEATMAP_MAX_BUCKETS_SETTING);
+    this.charts = charts;
+    this.uiSettings = core.uiSettings;
   }
 
   hasLegend() {
@@ -56,7 +57,7 @@ export class Vis extends EventEmitter {
       this.data,
       this.uiState,
       this.element,
-      this.deps.charts.colors.createColorLookupFunction.bind(this.deps.charts.colors)
+      this.charts.legacyColors.createColorLookupFunction.bind(this.charts.legacyColors)
     );
   }
 
@@ -78,7 +79,7 @@ export class Vis extends EventEmitter {
 
     this.initVisConfig(data, uiState);
 
-    this.handler = new Handler(this, this.visConfig, this.deps);
+    this.handler = new Handler(this, this.visConfig, this.uiSettings);
     this._runOnHandler('render');
   }
 

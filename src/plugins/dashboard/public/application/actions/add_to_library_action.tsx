@@ -19,14 +19,15 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import uuid from 'uuid';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
 import {
   PanelNotFoundError,
   EmbeddableInput,
   isReferenceOrValueEmbeddable,
+  isErrorEmbeddable,
 } from '../../../../embeddable/public';
+import { NotificationsStart } from '../../../../../core/public';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
 export const ACTION_ADD_TO_LIBRARY = 'addToFromLibrary';
@@ -40,7 +41,7 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 15;
 
-  constructor() {}
+  constructor(private deps: { toasts: NotificationsStart['toasts'] }) {}
 
   public getDisplayName({ embeddable }: AddToLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -60,7 +61,8 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
 
   public async isCompatible({ embeddable }: AddToLibraryActionContext) {
     return Boolean(
-      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
+      !isErrorEmbeddable(embeddable) &&
+        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&
         embeddable.getRoot().isContainer &&
         embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
@@ -86,8 +88,17 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
 
     const newPanel: PanelState<EmbeddableInput> = {
       type: embeddable.type,
-      explicitInput: { ...newInput, id: uuid.v4() },
+      explicitInput: { ...newInput },
     };
-    dashboard.replacePanel(panelToReplace, newPanel);
+    dashboard.replacePanel(panelToReplace, newPanel, true);
+
+    const title = i18n.translate('dashboard.panel.addToLibrary.successMessage', {
+      defaultMessage: `Panel '{panelTitle}' was added to the visualize library`,
+      values: { panelTitle: embeddable.getTitle() },
+    });
+    this.deps.toasts.addSuccess({
+      title,
+      'data-test-subj': 'unlinkPanelSuccess',
+    });
   }
 }

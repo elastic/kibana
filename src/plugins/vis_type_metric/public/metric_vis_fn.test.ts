@@ -23,7 +23,7 @@ import { functionWrapper } from '../../expressions/common/expression_functions/s
 describe('interpreter/functions#metric', () => {
   const fn = functionWrapper(createMetricVisFn());
   const context = {
-    type: 'kibana_datatable',
+    type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };

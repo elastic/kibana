@@ -17,12 +17,18 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge } from '@elastic/eui';
-import { IEmbeddable, ViewMode, isReferenceOrValueEmbeddable } from '../../embeddable_plugin';
+import React from 'react';
+import {
+  IEmbeddable,
+  ViewMode,
+  isReferenceOrValueEmbeddable,
+  isErrorEmbeddable,
+} from '../../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { reactToUiComponent } from '../../../../kibana_react/public';
+import { UnlinkFromLibraryAction } from '.';
+import { LibraryNotificationPopover } from './library_notification_popover';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 
@@ -35,23 +41,32 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
   public readonly type = ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;
 
+  constructor(private unlinkAction: UnlinkFromLibraryAction) {}
+
   private displayName = i18n.translate('dashboard.panel.LibraryNotification', {
-    defaultMessage: 'Library',
+    defaultMessage: 'Visualize Library',
   });
 
   private icon = 'folderCheck';
 
-  public readonly MenuItem = reactToUiComponent(() => (
-    <EuiBadge
-      data-test-subj={`embeddablePanelNotification-${this.id}`}
-      iconType={this.icon}
-      key={this.id}
-      style={{ marginTop: '2px', marginRight: '4px' }}
-      color="hollow"
-    >
-      {this.displayName}
-    </EuiBadge>
-  ));
+  private LibraryNotification: React.FC<{ context: LibraryNotificationActionContext }> = ({
+    context,
+  }: {
+    context: LibraryNotificationActionContext;
+  }) => {
+    const { embeddable } = context;
+    return (
+      <LibraryNotificationPopover
+        unlinkAction={this.unlinkAction}
+        displayName={this.displayName}
+        context={context}
+        icon={this.getIconType({ embeddable })}
+        id={this.id}
+      />
+    );
+  };
+
+  public readonly MenuItem = reactToUiComponent(this.LibraryNotification);
 
   public getDisplayName({ embeddable }: LibraryNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -67,18 +82,9 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
     return this.icon;
   }
 
-  public getDisplayNameTooltip = ({ embeddable }: LibraryNotificationActionContext) => {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
-    return i18n.translate('dashboard.panel.libraryNotification.toolTip', {
-      defaultMessage:
-        'This panel is linked to a Library item. Editing the panel might affect other dashboards.',
-    });
-  };
-
   public isCompatible = async ({ embeddable }: LibraryNotificationActionContext) => {
     return (
+      !isErrorEmbeddable(embeddable) &&
       embeddable.getRoot().isContainer &&
       embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
       isReferenceOrValueEmbeddable(embeddable) &&

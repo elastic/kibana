@@ -5,14 +5,13 @@
  */
 
 import moment from 'moment';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 
 export class QueryContext {
-  callES: LegacyAPICaller;
-  heartbeatIndices: string;
+  callES: ElasticsearchClient;
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination: CursorPagination;
@@ -23,7 +22,6 @@ export class QueryContext {
 
   constructor(
     database: any,
-    heartbeatIndices: string,
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination: CursorPagination,
@@ -32,7 +30,6 @@ export class QueryContext {
     statusFilter?: string
   ) {
     this.callES = database;
-    this.heartbeatIndices = heartbeatIndices;
     this.dateRangeStart = dateRangeStart;
     this.dateRangeEnd = dateRangeEnd;
     this.pagination = pagination;
@@ -42,13 +39,11 @@ export class QueryContext {
   }
 
   async search(params: any): Promise<any> {
-    params.index = this.heartbeatIndices;
-    return this.callES('search', params);
+    return this.callES.search({ body: params.body });
   }
 
   async count(params: any): Promise<any> {
-    params.index = this.heartbeatIndices;
-    return this.callES('count', params);
+    return this.callES.count(params);
   }
 
   async dateAndCustomFilters(): Promise<any[]> {
@@ -138,7 +133,6 @@ export class QueryContext {
   clone(): QueryContext {
     return new QueryContext(
       this.callES,
-      this.heartbeatIndices,
       this.dateRangeStart,
       this.dateRangeEnd,
       this.pagination,

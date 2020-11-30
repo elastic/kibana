@@ -43,7 +43,8 @@ export async function getLogEntryRateBuckets(
         COMPOSITE_AGGREGATION_BATCH_SIZE,
         afterLatestBatchKey,
         datasets
-      )
+      ),
+      [logRateJobId]
     );
 
     const { after_key: afterKey, buckets: latestBatchBuckets = [] } =

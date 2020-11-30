@@ -17,8 +17,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "ML",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "ML"
   ],
   "type": "machine_learning",
   "version": 1

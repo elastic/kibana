@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
 import { IFieldType } from 'src/plugins/data/common';
-import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
+import { ESSearchResponse } from '../../../../typings/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 
 const SHARD_SIZE = 5000;

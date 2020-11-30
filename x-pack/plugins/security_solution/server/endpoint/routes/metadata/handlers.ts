@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { RequestHandlerContext, Logger, RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import {
@@ -15,7 +15,7 @@ import {
   MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
-import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
+import { Agent, AgentStatus, PackagePolicy } from '../../../../../fleet/common/types/models';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
@@ -245,7 +245,7 @@ export async function mapToHostResultList(
   }
 }
 
-async function enrichHostMetadata(
+export async function enrichHostMetadata(
   hostMetadata: HostMetadata,
   metadataRequestContext: MetadataRequestContext,
   metadataQueryStrategyVersion: MetadataQueryStrategyVersions
@@ -282,9 +282,53 @@ async function enrichHostMetadata(
       throw e;
     }
   }
+
+  let policyInfo: HostInfo['policy_info'];
+  try {
+    const agent = await metadataRequestContext.endpointAppContextService
+      ?.getAgentService()
+      ?.getAgent(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        elasticAgentId
+      );
+    const agentPolicy = await metadataRequestContext.endpointAppContextService
+      .getAgentPolicyService()
+      ?.get(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        agent?.policy_id!,
+        true
+      );
+    const endpointPolicy = ((agentPolicy?.package_policies || []) as PackagePolicy[]).find(
+      (policy: PackagePolicy) => policy.package?.name === 'endpoint'
+    );
+
+    policyInfo = {
+      agent: {
+        applied: {
+          revision: agent?.policy_revision || 0,
+          id: agent?.policy_id || '',
+        },
+        configured: {
+          revision: agentPolicy?.revision || 0,
+          id: agentPolicy?.id || '',
+        },
+      },
+      endpoint: {
+        revision: endpointPolicy?.revision || 0,
+        id: endpointPolicy?.id || '',
+      },
+    };
+  } catch (e) {
+    // this is a non-vital enrichment of expected policy revisions.
+    // if we fail just fetching these, the rest of the endpoint
+    // data should still be returned. log the error and move on
+    log.error(e);
+  }
+
   return {
     metadata: hostMetadata,
     host_status: hostStatus,
+    policy_info: policyInfo,
     query_strategy_version: metadataQueryStrategyVersion,
   };
 }

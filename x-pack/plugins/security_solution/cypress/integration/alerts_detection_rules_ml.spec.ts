@@ -23,6 +23,7 @@ import {
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
   getDetails,
+  removeExternalLinkText,
   MACHINE_LEARNING_JOB_ID,
   MACHINE_LEARNING_JOB_STATUS,
   MITRE_ATTACK_DETAILS,
@@ -44,6 +45,7 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
+  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
@@ -78,6 +80,7 @@ describe('Detection rules, machine learning', () => {
   });
 
   after(() => {
+    deleteRule();
     esArchiverUnload('prebuilt_rules_loaded');
   });
 
@@ -115,14 +118,18 @@ describe('Detection rules, machine learning', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${machineLearningRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${machineLearningRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', machineLearningRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', machineLearningRule.severity);
       getDetails(RISK_SCORE_DETAILS).should('have.text', machineLearningRule.riskScore);
-      getDetails(REFERENCE_URLS_DETAILS).should('have.text', expectedUrls);
+      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      });
       getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
-      getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
+      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      });
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
     });
     cy.get(DEFINITION_DETAILS).within(() => {

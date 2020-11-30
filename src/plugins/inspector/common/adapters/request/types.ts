@@ -49,6 +49,7 @@ export interface Request extends RequestParams {
 export interface RequestParams {
   id?: string;
   description?: string;
+  searchSessionId?: string;
 }
 
 export interface RequestStatistics {

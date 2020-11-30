@@ -26,7 +26,7 @@ export const kibanaRegionMapLayerWizardConfig: LayerWizard = {
   }),
   icon: 'logoKibana',
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: unknown) => {
+    const onSourceConfigChange = (sourceConfig: { name: string }) => {
       const sourceDescriptor = KibanaRegionmapSource.createDescriptor(sourceConfig);
       const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       previewLayers([layerDescriptor]);

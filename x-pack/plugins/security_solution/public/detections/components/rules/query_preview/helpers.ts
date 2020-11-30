@@ -16,13 +16,13 @@ import { FieldValueQueryBar } from '../query_bar';
 import { ESQuery } from '../../../../../common/typed_json';
 import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 
-export const HITS_THRESHOLD: Record<string, number> = {
-  h: 1,
-  d: 24,
-  M: 730,
-};
-
-export const isNoisy = (hits: number, timeframe: Unit) => {
+/**
+ * Determines whether or not to display noise warning.
+ * Is considered noisy if alerts/hour rate > 1
+ * @param hits Total query search hits
+ * @param timeframe Range selected by user (last hour, day...)
+ */
+export const isNoisy = (hits: number, timeframe: Unit): boolean => {
   if (timeframe === 'h') {
     return hits > 1;
   } else if (timeframe === 'd') {
@@ -34,6 +34,12 @@ export const isNoisy = (hits: number, timeframe: Unit) => {
   return false;
 };
 
+/**
+ * Determines what timerange options to show.
+ * Eql sequence queries tend to be slower, so decided
+ * not to include the last month option.
+ * @param ruleType
+ */
 export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
   if (ruleType === 'eql') {
     return [
@@ -49,6 +55,13 @@ export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
   }
 };
 
+/**
+ * Quick little helper to extract the query info from the
+ * queryBar object.
+ * @param queryBar Object containing all query info
+ * @param index Indices searched
+ * @param ruleType
+ */
 export const getInfoFromQueryBar = (
   queryBar: FieldValueQueryBar,
   index: string[],
@@ -88,10 +101,15 @@ export const getInfoFromQueryBar = (
   }
 };
 
+/**
+ * Config passed into elastic-charts settings.
+ * @param to
+ * @param from
+ */
 export const getHistogramConfig = (
   to: string,
   from: string,
-  showLegend: boolean = false
+  showLegend = false
 ): ChartSeriesConfigs => {
   return {
     series: {
@@ -131,7 +149,11 @@ export const getHistogramConfig = (
   };
 };
 
-export const getThresholdHistogramConfig = (height: number | undefined): ChartSeriesConfigs => {
+/**
+ * Threshold histogram is displayed a bit differently,
+ * x-axis is not time based, but ordinal.
+ */
+export const getThresholdHistogramConfig = (): ChartSeriesConfigs => {
   return {
     series: {
       xScaleType: ScaleType.Ordinal,
@@ -165,6 +187,6 @@ export const getThresholdHistogramConfig = (height: number | undefined): ChartSe
         },
       },
     },
-    customHeight: height ?? 200,
+    customHeight: 200,
   };
 };

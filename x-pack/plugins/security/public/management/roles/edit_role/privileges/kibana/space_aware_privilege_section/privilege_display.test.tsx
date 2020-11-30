@@ -6,7 +6,7 @@
 
 import { EuiText } from '@elastic/eui';
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { PrivilegeDisplay } from './privilege_display';
 
 describe('PrivilegeDisplay', () => {

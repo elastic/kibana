@@ -60,7 +60,7 @@
   ],
   "tags": [
     "Elastic",
-    "Endpoint"
+    "Endpoint Security"
   ],
   "timestamp_override": "event.ingested",
   "type": "query",

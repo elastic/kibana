@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { FieldFormatsStart, FieldFormatsSetup, FieldFormatsService } from '.';
 import { fieldFormatsMock } from '../../common/field_formats/mocks';
 

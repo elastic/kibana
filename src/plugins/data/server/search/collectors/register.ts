@@ -37,9 +37,9 @@ export async function registerUsageCollector(
       isReady: () => true,
       fetch: fetchProvider(context.config.legacy.globalConfig$),
       schema: {
-        successCount: { type: 'number' },
-        errorCount: { type: 'number' },
-        averageDuration: { type: 'long' },
+        successCount: { type: 'long' },
+        errorCount: { type: 'long' },
+        averageDuration: { type: 'float' },
       },
     });
     usageCollection.registerCollector(collector);

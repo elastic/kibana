@@ -174,6 +174,29 @@ describe('Sourcerer component', () => {
     wrapper.find(`[data-test-subj="sourcerer-reset"]`).first().simulate('click');
     expect(wrapper.find(`[data-test-subj="config-option"]`).first().exists()).toBeFalsy();
   });
+  it('disables saving when no index patterns are selected', () => {
+    store = createStore(
+      {
+        ...state,
+        sourcerer: {
+          ...state.sourcerer,
+          kibanaIndexPatterns: [{ id: '1234', title: 'auditbeat-*' }],
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+    wrapper.find('[data-test-subj="sourcerer-trigger"]').first().simulate('click');
+    wrapper.find('[data-test-subj="comboBoxClearButton"]').first().simulate('click');
+    expect(wrapper.find('[data-test-subj="add-index"]').first().prop('disabled')).toBeTruthy();
+  });
   it('returns index pattern options for kibanaIndexPatterns and configIndexPatterns', () => {
     store = createStore(
       {

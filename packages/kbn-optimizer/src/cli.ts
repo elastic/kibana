@@ -146,7 +146,11 @@ run(
     await lastValueFrom(update$.pipe(logOptimizerState(log, config)));
 
     if (updateLimits) {
-      updateBundleLimits(log, config);
+      updateBundleLimits({
+        log,
+        config,
+        dropMissing: !(focus || filter),
+      });
     }
   },
   {

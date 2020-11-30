@@ -18,12 +18,13 @@ import {
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleUpdate,
   getSimpleMlRuleUpdate,
+  createRule,
+  getSimpleRule,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   describe('update_rules', () => {
     describe('update rules', () => {
@@ -33,16 +34,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
       });
 
       it('should update a single rule property of name using a rule_id', async () => {
-        // create a simple rule
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRuleUpdate('rule-1'))
-          .expect(200);
+        await createRule(supertest, getSimpleRule('rule-1'));
 
         // update a simple rule's name
         const updatedRule = getSimpleRuleUpdate('rule-1');
@@ -64,12 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return a 403 forbidden if it is a machine learning job', async () => {
-        // create a simple rule
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRuleUpdate('rule-1'))
-          .expect(200);
+        await createRule(supertest, getSimpleRule('rule-1'));
 
         // update a simple rule's type to try to be a machine learning job type
         const updatedRule = getSimpleMlRuleUpdate('rule-1');
@@ -90,14 +81,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update a single rule property of name using an auto-generated rule_id', async () => {
-        const rule = getSimpleRuleUpdate('rule-1');
+        const rule = getSimpleRule('rule-1');
         delete rule.rule_id;
-        // create a simple rule
-        const { body: createRuleBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(rule)
-          .expect(200);
+        const createRuleBody = await createRule(supertest, rule);
 
         // update a simple rule's name
         const updatedRule = getSimpleRuleUpdate('rule-1');
@@ -119,12 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update a single rule property of name using the auto-generated id', async () => {
-        // create a simple rule
-        const { body: createdBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRuleUpdate('rule-1'))
-          .expect(200);
+        const createdBody = await createRule(supertest, getSimpleRule('rule-1'));
 
         // update a simple rule's name
         const updatedRule = getSimpleRuleUpdate('rule-1');
@@ -146,12 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should change the version of a rule when it updates enabled and another property', async () => {
-        // create a simple rule
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRuleUpdate('rule-1'))
-          .expect(200);
+        await createRule(supertest, getSimpleRule('rule-1'));
 
         // update a simple rule's enabled to false and another property
         const updatedRule = getSimpleRuleUpdate('rule-1');
@@ -174,12 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should change other properties when it does updates and effectively delete them such as timeline_title', async () => {
-        // create a simple rule
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRuleUpdate('rule-1'))
-          .expect(200);
+        await createRule(supertest, getSimpleRule('rule-1'));
 
         const ruleUpdate = getSimpleRuleUpdate('rule-1');
         ruleUpdate.timeline_title = 'some title';

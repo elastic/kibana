@@ -61,6 +61,14 @@ export interface SavedObjectStatusMeta {
 }
 
 /**
+ * @public
+ */
+export interface SavedObjectsFindOptionsReference {
+  type: string;
+  id: string;
+}
+
+/**
  *
  * @public
  */
@@ -85,7 +93,20 @@ export interface SavedObjectsFindOptions {
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.
    */
   rootSearchFields?: string[];
-  hasReference?: { type: string; id: string };
+
+  /**
+   * Search for documents having a reference to the specified objects.
+   * Use `hasReferenceOperator` to specify the operator to use when searching for multiple references.
+   */
+  hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
+  /**
+   * The operator to use when searching by multiple references using the `hasReference` option. Defaults to `OR`
+   */
+  hasReferenceOperator?: 'AND' | 'OR';
+
+  /**
+   * The search operator to use with the provided filter. Defaults to `OR`
+   */
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string | KueryNode;
   namespaces?: string[];

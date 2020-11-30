@@ -13,6 +13,7 @@ $visLegendLineHeight: $euiSize;
   left: 0;
   display: flex;
   padding: $euiSizeXS;
+  margin: $euiSizeS;
   background-color: $euiColorEmptyShade;
   transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance, background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
 
@@ -33,13 +34,13 @@ $visLegendLineHeight: $euiSize;
   height: 100%;
 }
 
-.visLib--legend-left {
+.vislib--legend-left {
   .visLegend__list {
     margin-bottom: $euiSizeL;
   }
 }
 
-.visLib--legend-bottom {
+.vislib--legend-bottom {
   .visLegend__list {
     margin-left: $euiSizeL;
   }
@@ -64,8 +65,8 @@ $visLegendLineHeight: $euiSize;
     }
   }
 
-  .visLib--legend-top &,
-  .visLib--legend-bottom & {
+  .vislib--legend-top &,
+  .vislib--legend-bottom & {
     width: auto;
     flex-direction: row;
     flex-wrap: wrap;

@@ -16,7 +16,7 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
-import { GeneratedText } from './panel_content_utilities';
+import { GeneratedText } from '../generated_text';
 import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
@@ -220,9 +220,9 @@ const NodeDetailView = memo(function ({
           } as HTMLAttributes<HTMLElement>
         }
         descriptionProps={
-          { 'data-test-subj': 'resolver:node-detail:entry-description' } as HTMLAttributes<
-            HTMLElement
-          >
+          {
+            'data-test-subj': 'resolver:node-detail:entry-description',
+          } as HTMLAttributes<HTMLElement>
         }
         compressed
         listItems={processInfoEntry}

@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickRegionMap');
       await PageObjects.visualize.clickRegionMap();
       await PageObjects.visualize.clickNewSearch();

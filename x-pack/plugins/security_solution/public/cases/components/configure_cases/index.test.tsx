@@ -12,7 +12,7 @@ import { TestProviders } from '../../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 import {
-  ActionsConnectorsContextProvider,
+  ActionConnector,
   ConnectorAddFlyout,
   ConnectorEditFlyout,
   TriggersAndActionsUIPublicPluginStart,
@@ -41,6 +41,47 @@ describe('ConfigureCases', () => {
   beforeEach(() => {
     useKibanaMock().services.triggersActionsUi = ({
       actionTypeRegistry: actionTypeRegistryMock.create(),
+      getAddConnectorFlyout: jest.fn().mockImplementation(() => (
+        <ConnectorAddFlyout
+          onClose={() => {}}
+          actionTypeRegistry={actionTypeRegistryMock.create()}
+          actionTypes={[
+            {
+              id: '.servicenow',
+              name: 'servicenow',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'gold',
+            },
+            {
+              id: '.jira',
+              name: 'jira',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'gold',
+            },
+            {
+              id: '.resilient',
+              name: 'resilient',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'gold',
+            },
+          ]}
+        />
+      )),
+      getEditConnectorFlyout: jest
+        .fn()
+        .mockImplementation(() => (
+          <ConnectorEditFlyout
+            onClose={() => {}}
+            actionTypeRegistry={actionTypeRegistryMock.create()}
+            initialConnector={connectors[1] as ActionConnector}
+          />
+        )),
     } as unknown) as TriggersAndActionsUIPublicPluginStart;
   });
 
@@ -62,14 +103,9 @@ describe('ConfigureCases', () => {
       expect(wrapper.find('[data-test-subj="closure-options-radio-group"]').exists()).toBeTruthy();
     });
 
-    test('it renders the ActionsConnectorsContextProvider', () => {
+    test('it does NOT render the ConnectorAddFlyout', () => {
       // Components from triggersActionsUi  do not have a data-test-subj
-      expect(wrapper.find(ActionsConnectorsContextProvider).exists()).toBeTruthy();
-    });
-
-    test('it renders the ConnectorAddFlyout', () => {
-      // Components from triggersActionsUi  do not have a data-test-subj
-      expect(wrapper.find(ConnectorAddFlyout).exists()).toBeTruthy();
+      expect(wrapper.find(ConnectorAddFlyout).exists()).toBeFalsy();
     });
 
     test('it does NOT render the ConnectorEditFlyout', () => {
@@ -157,10 +193,6 @@ describe('ConfigureCases', () => {
       wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
     });
 
-    test('it renders the ConnectorEditFlyout', () => {
-      expect(wrapper.find(ConnectorEditFlyout).exists()).toBeTruthy();
-    });
-
     test('it renders with correct props', () => {
       // Connector
       expect(wrapper.find(Connectors).prop('connectors')).toEqual(connectors);
@@ -173,21 +205,8 @@ describe('ConfigureCases', () => {
       expect(wrapper.find(ClosureOptions).prop('closureTypeSelected')).toBe('close-by-user');
 
       // Flyouts
-      expect(wrapper.find(ConnectorAddFlyout).prop('addFlyoutVisible')).toBe(false);
-      expect(wrapper.find(ConnectorAddFlyout).prop('actionTypes')).toEqual([
-        expect.objectContaining({
-          id: '.servicenow',
-        }),
-        expect.objectContaining({
-          id: '.jira',
-        }),
-        expect.objectContaining({
-          id: '.resilient',
-        }),
-      ]);
-
-      expect(wrapper.find(ConnectorEditFlyout).prop('editFlyoutVisible')).toBe(false);
-      expect(wrapper.find(ConnectorEditFlyout).prop('initialConnector')).toEqual(connectors[0]);
+      expect(wrapper.find(ConnectorAddFlyout).exists()).toBe(false);
+      expect(wrapper.find(ConnectorEditFlyout).exists()).toBe(false);
     });
 
     test('it disables correctly when the user cannot crud', () => {
@@ -518,7 +537,18 @@ describe('user interactions', () => {
     wrapper.find('button[data-test-subj="dropdown-connector-add-connector"]').simulate('click');
     wrapper.update();
 
-    expect(wrapper.find(ConnectorAddFlyout).prop('addFlyoutVisible')).toBe(true);
+    expect(wrapper.find(ConnectorAddFlyout).exists()).toBe(true);
+    expect(wrapper.find(ConnectorAddFlyout).prop('actionTypes')).toEqual([
+      expect.objectContaining({
+        id: '.servicenow',
+      }),
+      expect.objectContaining({
+        id: '.jira',
+      }),
+      expect.objectContaining({
+        id: '.resilient',
+      }),
+    ]);
   });
 
   test('it show the edit flyout when pressing the update connector button', () => {
@@ -528,7 +558,8 @@ describe('user interactions', () => {
       .simulate('click');
     wrapper.update();
 
-    expect(wrapper.find(ConnectorEditFlyout).prop('editFlyoutVisible')).toBe(true);
+    expect(wrapper.find(ConnectorEditFlyout).exists()).toBe(true);
+    expect(wrapper.find(ConnectorEditFlyout).prop('initialConnector')).toEqual(connectors[1]);
     expect(
       wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
     ).toBeFalsy();

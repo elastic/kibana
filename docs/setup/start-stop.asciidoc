@@ -25,25 +25,8 @@ stop and start {kib} from the command line.
 include::install/windows-running.asciidoc[]
 
 [float]
-[[start-stop-deb]]
-=== Debian packages
-
-include::install/init-systemd.asciidoc[]
-
-[float]
-include::install/deb-init.asciidoc[]
-
-[float]
-include::install/systemd.asciidoc[]
-
-[float]
-[[start-stop-rpm]]
-=== RPM packages
-
-include::install/init-systemd.asciidoc[]
-
-[float]
-include::install/rpm-init.asciidoc[]
+[[start-stop-deb-rpm]]
+=== Debian and RPM packages
 
 [float]
 include::install/systemd.asciidoc[]

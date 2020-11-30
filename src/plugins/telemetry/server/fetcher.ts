@@ -213,8 +213,7 @@ export class FetcherTask {
   private async fetchTelemetry() {
     return await this.telemetryCollectionManager!.getStats({
       unencrypted: false,
-      start: moment().subtract(20, 'minutes').toISOString(),
-      end: moment().toISOString(),
+      timestamp: moment().valueOf(),
     });
   }
 
@@ -231,6 +230,7 @@ export class FetcherTask {
     await fetch(url, {
       method: 'post',
       body: cluster,
+      headers: { 'X-Elastic-Stack-Version': this.currentKibanaVersion },
     });
   }
 }

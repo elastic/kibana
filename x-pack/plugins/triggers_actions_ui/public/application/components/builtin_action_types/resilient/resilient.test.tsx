@@ -68,7 +68,7 @@ describe('resilient connector validation', () => {
       errors: {
         apiUrl: ['URL is required.'],
         apiKeyId: [],
-        apiKeySecret: ['API key secret is required'],
+        apiKeySecret: ['Secret is required'],
         orgId: ['Organization ID is required'],
       },
     });

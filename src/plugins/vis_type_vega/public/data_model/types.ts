@@ -207,6 +207,7 @@ export interface TooltipConfig {
   position?: ToolTipPositions;
   padding?: number | Padding;
   centerOnMark?: boolean | number;
+  textTruncate?: boolean;
 }
 
 export interface DstObj {

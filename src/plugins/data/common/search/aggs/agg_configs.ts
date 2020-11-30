@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 
 import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
@@ -122,15 +123,29 @@ export class AggConfigs {
     { addToAggConfigs = true } = {}
   ) => {
     const { type } = params;
-    let aggConfig;
+    const getType = (t: string) => {
+      const typeFromRegistry = this.typesRegistry.get(t);
 
+      if (!typeFromRegistry) {
+        throw new Error(
+          i18n.translate('data.search.aggs.error.aggNotFound', {
+            defaultMessage: 'Unable to find a registered agg type for "{type}".',
+            values: { type: type as string },
+          })
+        );
+      }
+
+      return typeFromRegistry;
+    };
+
+    let aggConfig;
     if (params instanceof AggConfig) {
       aggConfig = params;
       params.parent = this;
     } else {
       aggConfig = new AggConfig(this, {
         ...params,
-        type: typeof type === 'string' ? this.typesRegistry.get(type) : type,
+        type: typeof type === 'string' ? getType(type) : type,
       });
     }
 

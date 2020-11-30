@@ -3,21 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mean } from 'lodash';
-import { EventOutcome } from '../../../common/event_outcome';
+
+import { Coordinate } from '../../../typings/timeseries';
+
 import {
+  EVENT_OUTCOME,
+  SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-  SERVICE_NAME,
-  EVENT_OUTCOME,
 } from '../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../common/event_outcome';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+  calculateTransactionErrorPercentage,
+  getOutcomeAggregation,
+  getTransactionErrorRateTimeSeries,
+} from '../helpers/transaction_error_rate';
 
 export async function getErrorRate({
   serviceName,
@@ -31,7 +35,11 @@ export async function getErrorRate({
   transactionName?: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
-}) {
+}): Promise<{
+  noHits: boolean;
+  transactionErrorRate: Coordinate[];
+  average: number | null;
+}> {
   const { start, end, esFilter, apmEventClient } = setup;
 
   const transactionNamefilter = transactionName
@@ -52,6 +60,8 @@ export async function getErrorRate({
     ...esFilter,
   ];
 
+  const outcomes = getOutcomeAggregation({ searchAggregatedTransactions });
+
   const params = {
     apm: {
       events: [
@@ -64,28 +74,16 @@ export async function getErrorRate({
       size: 0,
       query: { bool: { filter } },
       aggs: {
-        total_transactions: {
+        outcomes,
+        timeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: getBucketSize(start, end).intervalString,
+            fixed_interval: getBucketSize({ start, end }).intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },
           aggs: {
-            [EVENT_OUTCOME]: {
-              terms: {
-                field: EVENT_OUTCOME,
-              },
-              aggs: {
-                count: {
-                  value_count: {
-                    field: getTransactionDurationFieldForAggregatedTransactions(
-                      searchAggregatedTransactions
-                    ),
-                  },
-                },
-              },
-            },
+            outcomes,
           },
         },
       },
@@ -96,31 +94,17 @@ export async function getErrorRate({
 
   const noHits = resp.hits.total.value === 0;
 
-  const erroneousTransactionsRate =
-    resp.aggregations?.total_transactions.buckets.map((bucket) => {
-      const successful =
-        bucket[EVENT_OUTCOME].buckets.find(
-          (eventOutcomeBucket) =>
-            eventOutcomeBucket.key === EventOutcome.success
-        )?.count.value ?? 0;
+  if (!resp.aggregations) {
+    return { noHits, transactionErrorRate: [], average: null };
+  }
 
-      const failed =
-        bucket[EVENT_OUTCOME].buckets.find(
-          (eventOutcomeBucket) =>
-            eventOutcomeBucket.key === EventOutcome.failure
-        )?.count.value ?? 0;
-
-      return {
-        x: bucket.key,
-        y: failed / (successful + failed),
-      };
-    }) || [];
-
-  const average = mean(
-    erroneousTransactionsRate
-      .map((errorRate) => errorRate.y)
-      .filter((y) => isFinite(y))
+  const transactionErrorRate = getTransactionErrorRateTimeSeries(
+    resp.aggregations.timeseries.buckets
   );
 
-  return { noHits, erroneousTransactionsRate, average };
+  const average = calculateTransactionErrorPercentage(
+    resp.aggregations.outcomes
+  );
+
+  return { noHits, transactionErrorRate, average };
 }

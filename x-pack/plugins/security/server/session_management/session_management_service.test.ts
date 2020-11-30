@@ -14,7 +14,7 @@ import {
 import { Session } from './session';
 import { SessionIndex } from './session_index';
 
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -50,7 +50,6 @@ describe('SessionManagementService', () => {
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
         [SESSION_INDEX_CLEANUP_TASK_NAME]: {
           title: 'Cleanup expired or invalid user sessions',
-          type: SESSION_INDEX_CLEANUP_TASK_NAME,
           createTaskRunner: expect.any(Function),
         },
       });

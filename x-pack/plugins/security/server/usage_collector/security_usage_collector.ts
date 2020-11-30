@@ -59,7 +59,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         type: 'boolean',
       },
       authProviderCount: {
-        type: 'number',
+        type: 'long',
       },
       enabledAuthProviders: {
         type: 'array',

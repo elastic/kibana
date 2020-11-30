@@ -78,7 +78,6 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       closePopover={() => setShowPopover(false)}
       button={managePipelineButton}
       panelPaddingSize="none"
-      withTitle
       repositionOnScroll
       data-test-subj="documentsDropdown"
       panelClassName="documentsDropdownPanel"

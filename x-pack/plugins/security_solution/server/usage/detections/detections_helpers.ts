@@ -8,7 +8,7 @@ import { SearchParams } from 'elasticsearch';
 
 import {
   LegacyAPICaller,
-  SavedObjectsClient,
+  SavedObjectsClientContract,
   KibanaRequest,
 } from '../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../ml/server';
@@ -167,17 +167,19 @@ export const getRulesUsage = async (
   return rulesUsage;
 };
 
-export const getMlJobsUsage = async (ml: MlPluginSetup | undefined): Promise<MlJobsUsage> => {
+export const getMlJobsUsage = async (
+  ml: MlPluginSetup | undefined,
+  savedObjectClient: SavedObjectsClientContract
+): Promise<MlJobsUsage> => {
   let jobsUsage: MlJobsUsage = initialMlJobsUsage;
 
   if (ml) {
     try {
-      const fakeRequest = {} as KibanaRequest;
-      const fakeSOClient = {} as SavedObjectsClient;
+      const fakeRequest = { headers: {} } as KibanaRequest;
 
-      const modules = await ml.modulesProvider(fakeRequest, fakeSOClient).listModules();
+      const modules = await ml.modulesProvider(fakeRequest, savedObjectClient).listModules();
       const moduleJobs = modules.flatMap((module) => module.jobs);
-      const jobs = await ml.jobServiceProvider(fakeRequest).jobsSummary();
+      const jobs = await ml.jobServiceProvider(fakeRequest, savedObjectClient).jobsSummary();
 
       jobsUsage = jobs.filter(isSecurityJob).reduce((usage, job) => {
         const isElastic = moduleJobs.some((moduleJob) => moduleJob.id === job.id);

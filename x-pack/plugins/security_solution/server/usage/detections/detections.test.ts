@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from '../../../../../../src/core/server';
+import { LegacyAPICaller, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import {
@@ -17,6 +17,7 @@ import { fetchDetectionsUsage } from './index';
 describe('Detections Usage', () => {
   describe('fetchDetectionsUsage()', () => {
     let callClusterMock: jest.Mocked<LegacyAPICaller>;
+    let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
     let mlMock: ReturnType<typeof mlServicesMock.create>;
 
     beforeEach(() => {
@@ -25,7 +26,12 @@ describe('Detections Usage', () => {
     });
 
     it('returns zeroed counts if both calls are empty', async () => {
-      const result = await fetchDetectionsUsage('', callClusterMock, mlMock);
+      const result = await fetchDetectionsUsage(
+        '',
+        callClusterMock,
+        mlMock,
+        savedObjectsClientMock
+      );
 
       expect(result).toEqual({
         detection_rules: {
@@ -53,7 +59,12 @@ describe('Detections Usage', () => {
 
     it('tallies rules data given rules results', async () => {
       (callClusterMock as jest.Mock).mockResolvedValue(getMockRulesResponse());
-      const result = await fetchDetectionsUsage('', callClusterMock, mlMock);
+      const result = await fetchDetectionsUsage(
+        '',
+        callClusterMock,
+        mlMock,
+        savedObjectsClientMock
+      );
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -81,7 +92,12 @@ describe('Detections Usage', () => {
         jobsSummary: mockJobSummary,
       });
 
-      const result = await fetchDetectionsUsage('', callClusterMock, mlMock);
+      const result = await fetchDetectionsUsage(
+        '',
+        callClusterMock,
+        mlMock,
+        savedObjectsClientMock
+      );
 
       expect(result).toEqual(
         expect.objectContaining({

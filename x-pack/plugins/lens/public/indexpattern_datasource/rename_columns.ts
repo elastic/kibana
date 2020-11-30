@@ -5,11 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ExpressionFunctionDefinition,
-  KibanaDatatable,
-  KibanaDatatableColumn,
-} from 'src/plugins/expressions';
+import { ExpressionFunctionDefinition, Datatable, DatatableColumn } from 'src/plugins/expressions';
 import { IndexPatternColumn } from './operations';
 
 interface RemapArgs {
@@ -20,12 +16,12 @@ export type OriginalColumn = { id: string } & IndexPatternColumn;
 
 export const renameColumns: ExpressionFunctionDefinition<
   'lens_rename_columns',
-  KibanaDatatable,
+  Datatable,
   RemapArgs,
-  KibanaDatatable
+  Datatable
 > = {
   name: 'lens_rename_columns',
-  type: 'kibana_datatable',
+  type: 'datatable',
   help: i18n.translate('xpack.lens.functions.renameColumns.help', {
     defaultMessage: 'A helper to rename the columns of a datatable',
   }),
@@ -38,12 +34,12 @@ export const renameColumns: ExpressionFunctionDefinition<
       }),
     },
   },
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['datatable'],
   fn(data, { idMap: encodedIdMap }) {
     const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn>;
 
     return {
-      type: 'kibana_datatable',
+      type: 'datatable',
       rows: data.rows.map((row) => {
         const mappedRow: Record<string, unknown> = {};
         Object.entries(idMap).forEach(([fromId, toId]) => {
@@ -77,7 +73,7 @@ export const renameColumns: ExpressionFunctionDefinition<
   },
 };
 
-function getColumnName(originalColumn: OriginalColumn, newColumn: KibanaDatatableColumn) {
+function getColumnName(originalColumn: OriginalColumn, newColumn: DatatableColumn) {
   if (originalColumn && originalColumn.operationType === 'date_histogram') {
     const fieldName = originalColumn.sourceField;
 

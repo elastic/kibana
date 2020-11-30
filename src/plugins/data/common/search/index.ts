@@ -23,3 +23,5 @@ export * from './expressions';
 export * from './search_source';
 export * from './tabify';
 export * from './types';
+export * from './session';
+export * from './utils';

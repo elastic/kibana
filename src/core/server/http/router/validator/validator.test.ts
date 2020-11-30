@@ -36,7 +36,7 @@ describe('Router validator', () => {
     expect(() => validator.getParams({})).toThrowError('[foo]: Not a string');
 
     expect(() => validator.getParams(undefined)).toThrowError(
-      "Cannot destructure property `foo` of 'undefined' or 'null'."
+      "Cannot destructure property 'foo' of 'undefined' as it is undefined."
     );
     expect(() => validator.getParams({}, 'myField')).toThrowError('[myField.foo]: Not a string');
 

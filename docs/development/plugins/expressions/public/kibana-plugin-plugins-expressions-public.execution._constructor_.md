@@ -9,12 +9,12 @@ Constructs a new instance of the `Execution` class
 <b>Signature:</b>
 
 ```typescript
-constructor(params: ExecutionParams<ExtraContext>);
+constructor(execution: ExecutionParams);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  params | <code>ExecutionParams&lt;ExtraContext&gt;</code> |  |
+|  execution | <code>ExecutionParams</code> |  |
 

@@ -114,7 +114,7 @@ describe('EventLogStart', () => {
       ).toEqual(result);
 
       expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
-        esContext.esNames.alias,
+        esContext.esNames.indexPattern,
         undefined,
         'saved-object-type',
         'saved-object-id',
@@ -195,7 +195,7 @@ describe('EventLogStart', () => {
       ).toEqual(result);
 
       expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
-        esContext.esNames.alias,
+        esContext.esNames.indexPattern,
         undefined,
         'saved-object-type',
         'saved-object-id',

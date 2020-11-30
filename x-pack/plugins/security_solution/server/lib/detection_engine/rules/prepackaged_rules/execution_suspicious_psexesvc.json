@@ -1,0 +1,44 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies suspicious psexec activity which is executing from the psexec service that has been renamed, possibly to evade detection.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Suspicious Process Execution via Renamed PsExec Executable",
+  "query": "event.category:process and event.type:(start or process_started) and (process.pe.original_file_name:(psexesvc.exe or PSEXESVC.exe) or winlog.event_data.OriginalFileName:(psexesvc.exe or PSEXESVC.exe)) and process.parent.name:services.exe and not process.name:(psexesvc.exe or PSEXESVC.exe)",
+  "risk_score": 47,
+  "rule_id": "e2f9fdf5-8076-45ad-9427-41e0e03dc9c2",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1035",
+          "name": "Service Execution",
+          "reference": "https://attack.mitre.org/techniques/T1035/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { BrowserExpandedRowComponent } from '../browser_expanded_row';
 import { Ping } from '../../../../../common/runtime_types';
@@ -28,7 +28,7 @@ describe('BrowserExpandedRowComponent', () => {
 
   it('returns empty step state when no journey', () => {
     expect(shallowWithIntl(<BrowserExpandedRowComponent />)).toMatchInlineSnapshot(
-      `<EmptyStepState />`
+      `<EmptyJourney />`
     );
   });
 
@@ -43,7 +43,7 @@ describe('BrowserExpandedRowComponent', () => {
           }}
         />
       )
-    ).toMatchInlineSnapshot(`<EmptyStepState />`);
+    ).toMatchInlineSnapshot(`<EmptyJourney />`);
   });
 
   it('displays loading spinner when loading', () => {
@@ -109,6 +109,27 @@ describe('BrowserExpandedRowComponent', () => {
         }
       />
     `);
+  });
+
+  it('handles case where synth type is somehow missing', () => {
+    expect(
+      shallowWithIntl(
+        <BrowserExpandedRowComponent
+          journey={{
+            checkGroup: 'check_group',
+            loading: false,
+            steps: [
+              {
+                ...defStep,
+                synthetics: {
+                  type: undefined,
+                },
+              },
+            ],
+          }}
+        />
+      )
+    ).toMatchInlineSnapshot(`""`);
   });
 
   it('renders console output step list when only console steps are present', () => {

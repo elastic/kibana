@@ -1,1 +1,1 @@
-"[tagcloud] > [visdimension] > Can not cast 'null' to any of 'kibana_datatable'"
+{"as":"tagloud_vis","type":"render","value":{"visData":{"columns":[],"meta":{},"rows":[],"type":"datatable"},"visParams":{"maxFontSize":72,"metric":{"accessor":0,"format":{"id":"string","params":{}},"type":"vis_dimension"},"minFontSize":18,"orientation":"single","scale":"linear","showLabel":true},"visType":"tagcloud"}}

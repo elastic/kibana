@@ -14,6 +14,7 @@ import {
   PluginInitializerContext,
   LegacyAPICaller,
 } from 'src/core/server';
+import { handleEsError } from './shared_imports';
 
 import { Index as IndexWithoutIlm } from '../../index_management/common/types';
 import { PLUGIN } from '../common/constants';
@@ -99,6 +100,9 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
       router,
       config,
       license: this.license,
+      lib: {
+        handleEsError,
+      },
     });
 
     if (config.ui.enabled) {

@@ -22,12 +22,17 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { ChromeBreadcrumbsAppendExtension } from '../../chrome_service';
 
 describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
     const wrapper = mount(
-      <HeaderBreadcrumbs appTitle$={new BehaviorSubject('')} breadcrumbs$={breadcrumbs$} />
+      <HeaderBreadcrumbs
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+        breadcrumbsAppendExtension$={new BehaviorSubject(undefined)}
+      />
     );
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
 
@@ -38,5 +43,30 @@ describe('HeaderBreadcrumbs', () => {
     act(() => breadcrumbs$.next([]));
     wrapper.update();
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
+  });
+
+  it('renders breadcrumbs extension', () => {
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
+    const breadcrumbsAppendExtension$ = new BehaviorSubject<
+      undefined | ChromeBreadcrumbsAppendExtension
+    >({
+      content: (root: HTMLDivElement) => {
+        root.innerHTML = '<div class="my-extension">__render__</div>';
+        return () => (root.innerHTML = '');
+      },
+    });
+
+    const wrapper = mount(
+      <HeaderBreadcrumbs
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+        breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
+      />
+    );
+
+    expect(wrapper.find('.euiBreadcrumb').getDOMNode().querySelector('my-extension')).toBeDefined();
+    act(() => breadcrumbsAppendExtension$.next(undefined));
+    wrapper.update();
+    expect(wrapper.find('.euiBreadcrumb').getDOMNode().querySelector('my-extension')).toBeNull();
   });
 });

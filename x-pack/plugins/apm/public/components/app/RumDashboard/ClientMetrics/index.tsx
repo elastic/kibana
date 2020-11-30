@@ -7,7 +7,13 @@ import * as React from 'react';
 import numeral from '@elastic/numeral';
 import styled from 'styled-components';
 import { useContext, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiStat,
+  EuiToolTip,
+  EuiIconTip,
+} from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { I18LABELS } from '../translations';
 import { useUxQuery } from '../hooks/useUxQuery';
@@ -22,6 +28,24 @@ const ClFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
+function formatTitle(unit: string, value?: number) {
+  if (typeof value === 'undefined') return I18LABELS.dataMissing;
+  return formatToSec(value, unit);
+}
+
+function PageViewsTotalTitle({ pageViews }: { pageViews?: number }) {
+  if (typeof pageViews === 'undefined') {
+    return <>{I18LABELS.dataMissing}</>;
+  }
+  return pageViews < 10000 ? (
+    <>{numeral(pageViews).format('0,0')}</>
+  ) : (
+    <EuiToolTip content={numeral(pageViews).format('0,0')}>
+      <>{numeral(pageViews).format('0 a')}</>
+    </EuiToolTip>
+  );
+}
+
 export function ClientMetrics() {
   const uxQuery = useUxQuery();
 
@@ -29,7 +53,7 @@ export function ClientMetrics() {
     (callApmApi) => {
       if (uxQuery) {
         return callApmApi({
-          pathname: '/api/apm/rum/client-metrics',
+          endpoint: 'GET /api/apm/rum/client-metrics',
           params: {
             query: {
               ...uxQuery,
@@ -50,38 +74,60 @@ export function ClientMetrics() {
 
   const STAT_STYLE = { width: '240px' };
 
-  const pageViewsTotal = data?.pageViews?.value ?? 0;
-
   return (
     <ClFlexGroup responsive={false}>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
-          title={formatToSec(data?.backEnd?.value ?? 0, 'ms')}
-          description={I18LABELS.backEnd}
-          isLoading={status !== 'success'}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={STAT_STYLE}>
-        <EuiStat
-          titleSize="l"
-          title={formatToSec(data?.frontEnd?.value ?? 0, 'ms')}
-          description={I18LABELS.frontEnd}
-          isLoading={status !== 'success'}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={STAT_STYLE}>
-        <EuiStat
-          titleSize="l"
-          title={
-            pageViewsTotal < 10000 ? (
-              numeral(pageViewsTotal).format('0,0')
-            ) : (
-              <EuiToolTip content={numeral(pageViewsTotal).format('0,0')}>
-                <>{numeral(pageViewsTotal).format('0 a')}</>
-              </EuiToolTip>
-            )
+          title={formatTitle('ms', data?.totalPageLoadDuration?.value)}
+          description={
+            <>
+              {I18LABELS.totalPageLoad}
+              <EuiIconTip
+                content={I18LABELS.totalPageLoadTooltip}
+                type="questionInCircle"
+              />
+            </>
           }
+          isLoading={status !== 'success'}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={STAT_STYLE}>
+        <EuiStat
+          titleSize="l"
+          title={formatTitle('ms', data?.backEnd?.value)}
+          description={
+            <>
+              {I18LABELS.backEnd}
+              <EuiIconTip
+                content={I18LABELS.backEndTooltip}
+                type="questionInCircle"
+              />
+            </>
+          }
+          isLoading={status !== 'success'}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={STAT_STYLE}>
+        <EuiStat
+          titleSize="l"
+          title={formatTitle('ms', data?.frontEnd?.value)}
+          description={
+            <>
+              {I18LABELS.frontEnd}
+              <EuiIconTip
+                content={I18LABELS.frontEndTooltip}
+                type="questionInCircle"
+              />
+            </>
+          }
+          isLoading={status !== 'success'}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={STAT_STYLE}>
+        <EuiStat
+          titleSize="l"
+          title={<PageViewsTotalTitle pageViews={data?.pageViews?.value} />}
           description={I18LABELS.pageViews}
           isLoading={status !== 'success'}
         />

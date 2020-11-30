@@ -168,7 +168,6 @@ export function initSavedObjectFinderDirective(app, savedSheetLoader, uiSettings
             switch (keyMap[$event.keyCode]) {
               case 'enter':
                 if (self.hitCount !== 1) return;
-
                 const hit = self.hits[0];
                 if (!hit) return;
 

@@ -29,10 +29,13 @@ import {
   ThresholdLineStyles,
 } from './utils/collections';
 import { Labels, Style } from '../../charts/public';
+import { Dimensions } from './vislib/helpers/point_series/point_series';
 
 export interface CommonVislibParams {
   addTooltip: boolean;
+  addLegend: boolean;
   legendPosition: Positions;
+  dimensions: Dimensions;
 }
 
 export interface Scale {
@@ -87,6 +90,9 @@ export interface BasicVislibParams extends CommonVislibParams {
   labels: Labels;
   thresholdLine: ThresholdLine;
   valueAxes: ValueAxis[];
+  gauge?: {
+    percentageMode: boolean;
+  };
   grid: {
     categoryLines: boolean;
     valueAxis?: string;

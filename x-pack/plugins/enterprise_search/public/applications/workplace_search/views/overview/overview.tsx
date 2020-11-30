@@ -17,7 +17,7 @@ import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/t
 import { AppLogic } from '../../app_logic';
 import { OverviewLogic } from './overview_logic';
 
-import { Loading } from '../../components/shared/loading';
+import { Loading } from '../../../shared/loading';
 import { ProductButton } from '../../components/shared/product_button';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
@@ -56,7 +56,14 @@ export const Overview: React.FC = () => {
     initializeOverview();
   }, [initializeOverview]);
 
-  if (dataLoading) return <Loading />;
+  // TODO: Remove div wrapper once the Overview page is using the full Layout
+  if (dataLoading) {
+    return (
+      <div style={{ height: '90vh' }}>
+        <Loading />
+      </div>
+    );
+  }
 
   const hideOnboarding = hasUsers && hasOrgSources && isOldAccount && orgName !== defaultOrgName;
 

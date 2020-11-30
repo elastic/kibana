@@ -78,7 +78,7 @@ Put the dashboard in *Edit* mode, then use the following options:
 
 * To resize, click the resize control, then drag to the new dimensions.
 
-* To delete, open the panel menu, then select Delete from dashboard. When you delete a panel from the dashboard, the 
+* To delete, open the panel menu, then select *Delete from dashboard*. When you delete a panel from the dashboard, the 
 visualization or saved search from the panel is still available in Kibana.
 
 [float]

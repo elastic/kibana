@@ -10,20 +10,20 @@ import React from 'react';
 import { ANOMALY_SEVERITY } from '../../../../../ml/common';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { useEnvironments } from '../../../hooks/useEnvironments';
-import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
 import {
   AnomalySeverity,
   SelectAnomalySeverity,
-} from './SelectAnomalySeverity';
+} from './select_anomaly_severity';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {
   EnvironmentField,
   ServiceField,
   TransactionTypeField,
 } from '../fields';
+import { useApmService } from '../../../hooks/use_apm_service';
 
 interface Params {
   windowSize: number;
@@ -47,7 +47,7 @@ interface Props {
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
-  const transactionTypes = useServiceTransactionTypes(urlParams);
+  const { transactionTypes } = useApmService();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end, transactionType } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });

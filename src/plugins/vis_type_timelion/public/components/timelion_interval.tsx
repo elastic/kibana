@@ -108,7 +108,7 @@ function TimelionInterval({ value, setValue, setValidity }: TimelionIntervalProp
 
   return (
     <EuiFormRow
-      compressed
+      display="rowCompressed"
       fullWidth
       helpText={i18n.translate('timelion.vis.selectIntervalHelpText', {
         defaultMessage:

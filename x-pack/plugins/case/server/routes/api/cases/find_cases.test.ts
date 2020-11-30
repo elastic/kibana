@@ -29,7 +29,7 @@ describe('FIND all cases', () => {
       method: 'get',
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
@@ -46,7 +46,7 @@ describe('FIND all cases', () => {
       method: 'get',
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
@@ -63,7 +63,7 @@ describe('FIND all cases', () => {
       method: 'get',
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [mockCaseNoConnectorId],
       })
@@ -80,7 +80,7 @@ describe('FIND all cases', () => {
       method: 'get',
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [mockCaseNoConnectorId],
         caseConfigureSavedObject: mockCaseConfigure,

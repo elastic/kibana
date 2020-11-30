@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../plugins/apm/typings/common';
+import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { SecurityServiceProvider } from '../../../../test/common/services/security';
 
 type SecurityService = PromiseReturnType<typeof SecurityServiceProvider>;
@@ -23,12 +23,21 @@ const roles = {
     kibana: [
       {
         base: [],
-        feature: { apm: ['read'], ml: ['read'] },
+        feature: { apm: ['read'], ml: ['read'], savedObjectsManagement: ['read'] },
         spaces: ['*'],
       },
     ],
   },
   [ApmUser.apmReadUserWithoutMlAccess]: {
+    elasticsearch: {
+      cluster: [],
+      indices: [
+        {
+          names: ['apm-*'],
+          privileges: ['read', 'view_index_metadata'],
+        },
+      ],
+    },
     kibana: [
       {
         base: [],
@@ -41,7 +50,7 @@ const roles = {
     kibana: [
       {
         base: [],
-        feature: { apm: ['all'], ml: ['all'] },
+        feature: { apm: ['all'], ml: ['all'], savedObjectsManagement: ['all'] },
         spaces: ['*'],
       },
     ],
@@ -74,7 +83,7 @@ const users = {
     roles: ['apm_user', ApmUser.apmReadUser],
   },
   [ApmUser.apmReadUserWithoutMlAccess]: {
-    roles: ['apm_user', ApmUser.apmReadUserWithoutMlAccess],
+    roles: [ApmUser.apmReadUserWithoutMlAccess],
   },
   [ApmUser.apmWriteUser]: {
     roles: ['apm_user', ApmUser.apmWriteUser],

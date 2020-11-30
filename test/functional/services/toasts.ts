@@ -71,6 +71,12 @@ export function ToastsProvider({ getService }: FtrProviderContext) {
     private async getGlobalToastList() {
       return await testSubjects.find('globalToastList');
     }
+
+    public async getToastCount() {
+      const list = await this.getGlobalToastList();
+      const toasts = await list.findAllByCssSelector(`.euiToast`);
+      return toasts.length;
+    }
   }
 
   return new Toasts();

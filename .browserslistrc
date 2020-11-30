@@ -4,6 +4,8 @@ last 2 Chrome versions
 last 2 Safari versions
 > 0.25%
 not ie 11
+not op_mini all
+not samsung 4
 
 [dev]
 last 1 chrome versions

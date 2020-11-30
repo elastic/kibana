@@ -10,7 +10,7 @@
  * Bucket spans: 5m, 10m, 30m, 1h, 3h
  */
 
-import { mlLog } from '../../client/log';
+import { mlLog } from '../../lib/log';
 import { INTERVALS, LONG_INTERVALS } from './intervals';
 
 export function singleSeriesCheckerFactory({ asCurrentUser }) {

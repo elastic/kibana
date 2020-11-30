@@ -45,6 +45,8 @@ export async function runFpm(
     }
   };
 
+  const envFolder = type === 'rpm' ? 'sysconfig' : 'default';
+
   const args = [
     // Force output even if it will overwrite an existing file
     '--force',
@@ -92,6 +94,8 @@ export async function runFpm(
     resolve(__dirname, 'package_scripts/pre_remove.sh'),
     '--after-remove',
     resolve(__dirname, 'package_scripts/post_remove.sh'),
+    '--rpm-posttrans',
+    resolve(__dirname, 'package_scripts/post_trans.sh'),
 
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
@@ -109,7 +113,12 @@ export async function runFpm(
     `pluginsDir=/usr/share/kibana/plugins`,
     '--template-value',
     `dataDir=/var/lib/kibana`,
-
+    '--template-value',
+    `logDir=/var/log/kibana`,
+    '--template-value',
+    `pidDir=/run/kibana`,
+    '--template-value',
+    `envFile=/etc/default/kibana`,
     // config and data directories are copied to /usr/share and /var/lib
     // below, so exclude them from the main package source located in
     // /usr/share/kibana/config. PATHS MUST BE RELATIVE, so drop the leading slash
@@ -117,6 +126,8 @@ export async function runFpm(
     `usr/share/kibana/config`,
     '--exclude',
     `usr/share/kibana/data`,
+    '--exclude',
+    'run/kibana/.gitempty',
 
     // flags specific to the package we are building, supplied by tasks below
     ...pkgSpecificFlags,
@@ -132,8 +143,12 @@ export async function runFpm(
     `${resolveWithTrailingSlash(fromBuild('data'))}=/var/lib/kibana/`,
 
     // copy package configurations
-    `${resolveWithTrailingSlash(__dirname, 'service_templates/sysv/')}=/`,
     `${resolveWithTrailingSlash(__dirname, 'service_templates/systemd/')}=/`,
+
+    `${resolveWithTrailingSlash(
+      __dirname,
+      'service_templates/env/kibana'
+    )}=/etc/${envFolder}/kibana`,
   ];
 
   log.debug('calling fpm with args:', args);

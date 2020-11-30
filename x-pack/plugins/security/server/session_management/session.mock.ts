@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { Session, SessionValue } from './session';
 import { sessionIndexMock } from './session_index.mock';

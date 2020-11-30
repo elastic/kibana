@@ -78,7 +78,7 @@ describe('getObjectReferencesToFetch()', () => {
     `);
   });
 
-  test(`doesn't deal with circular dependencies`, () => {
+  test('does not fail on circular dependencies', () => {
     const map = new Map<string, SavedObject>();
     map.set('index-pattern:1', {
       id: '1',
@@ -527,7 +527,7 @@ describe('injectNestedDependencies', () => {
     `);
   });
 
-  test(`doesn't deal with circular dependencies`, async () => {
+  test('does not fail on circular dependencies', async () => {
     const savedObjects = [
       {
         id: '2',

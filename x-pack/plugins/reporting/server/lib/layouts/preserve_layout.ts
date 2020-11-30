@@ -5,15 +5,11 @@
  */
 
 import path from 'path';
-import {
-  getDefaultLayoutSelectors,
-  Layout,
-  LayoutSelectorDictionary,
-  LayoutTypes,
-  PageSizeParams,
-  Size,
-  LayoutInstance,
-} from './';
+import { CustomPageSize } from 'pdfmake/interfaces';
+import { getDefaultLayoutSelectors } from '../../../common';
+import { LAYOUT_TYPES } from '../../../common/constants';
+import { LayoutSelectorDictionary, PageSizeParams, Size } from '../../../common/types';
+import { Layout, LayoutInstance } from './';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.
 const ZOOM: number = 2;
@@ -27,7 +23,7 @@ export class PreserveLayout extends Layout implements LayoutInstance {
   private readonly scaledWidth: number;
 
   constructor(size: Size, layoutSelectors?: LayoutSelectorDictionary) {
-    super(LayoutTypes.PRESERVE_LAYOUT);
+    super(LAYOUT_TYPES.PRESERVE_LAYOUT);
     this.height = size.height;
     this.width = size.width;
     this.scaledHeight = size.height * ZOOM;
@@ -72,7 +68,7 @@ export class PreserveLayout extends Layout implements LayoutInstance {
     return undefined;
   }
 
-  public getPdfPageSize(pageSizeParams: PageSizeParams) {
+  public getPdfPageSize(pageSizeParams: PageSizeParams): CustomPageSize {
     return {
       height:
         this.height +

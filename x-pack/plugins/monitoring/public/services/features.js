@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { has, isUndefined } from 'lodash';
 
 export function featuresProvider($window) {
   function getData() {
@@ -28,11 +28,11 @@ export function featuresProvider($window) {
 
   function isEnabled(featureName, defaultSetting) {
     const monitoringDataObj = getData();
-    if (_.has(monitoringDataObj, featureName)) {
+    if (has(monitoringDataObj, featureName)) {
       return monitoringDataObj[featureName];
     }
 
-    if (_.isUndefined(defaultSetting)) {
+    if (isUndefined(defaultSetting)) {
       return false;
     }
 

@@ -19,28 +19,29 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const configSchema = schema.object({
-  includeElasticMapsService: schema.boolean({ defaultValue: true }),
-  layers: schema.arrayOf(
+const layerConfigSchema = schema.object({
+  url: schema.string(),
+  format: schema.object({
+    type: schema.string({ defaultValue: 'geojson' }),
+  }),
+  meta: schema.object({
+    feature_collection_path: schema.string({ defaultValue: 'data' }),
+  }),
+  attribution: schema.string(),
+  name: schema.string(),
+  fields: schema.arrayOf(
     schema.object({
-      url: schema.string(),
-      format: schema.object({
-        type: schema.string({ defaultValue: 'geojson' }),
-      }),
-      meta: schema.object({
-        feature_collection_path: schema.string({ defaultValue: 'data' }),
-      }),
-      attribution: schema.string(),
       name: schema.string(),
-      fields: schema.arrayOf(
-        schema.object({
-          name: schema.string(),
-          description: schema.string(),
-        })
-      ),
-    }),
-    { defaultValue: [] }
+      description: schema.string(),
+    })
   ),
 });
+
+export const configSchema = schema.object({
+  includeElasticMapsService: schema.boolean({ defaultValue: true }),
+  layers: schema.arrayOf(layerConfigSchema, { defaultValue: [] }),
+});
+
+export type LayerConfig = TypeOf<typeof layerConfigSchema>;
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

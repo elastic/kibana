@@ -16,7 +16,7 @@ export const logEntriesItemRequestRT = rt.type({
 
 export type LogEntriesItemRequest = rt.TypeOf<typeof logEntriesItemRequestRT>;
 
-const logEntriesItemFieldRT = rt.type({ field: rt.string, value: rt.string });
+const logEntriesItemFieldRT = rt.type({ field: rt.string, value: rt.array(rt.string) });
 const logEntriesItemRT = rt.type({
   id: rt.string,
   index: rt.string,

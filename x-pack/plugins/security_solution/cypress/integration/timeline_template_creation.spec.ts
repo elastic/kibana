@@ -12,8 +12,8 @@ import {
   NOTES_BUTTON,
   NOTES_COUNT,
   NOTES_TEXT_AREA,
+  PIN_EVENT,
   TIMELINE_DESCRIPTION,
-  // TIMELINE_FILTER,
   TIMELINE_QUERY,
   TIMELINE_TITLE,
 } from '../screens/timeline';
@@ -35,7 +35,7 @@ import {
   closeTimeline,
   createNewTimelineTemplate,
   markAsFavorite,
-  openTimelineFromSettings,
+  openTimelineTemplateFromSettings,
   populateTimeline,
   waitForTimelineChanges,
 } from '../tasks/timeline';
@@ -56,12 +56,11 @@ describe.skip('Timeline Templates', () => {
     createNewTimelineTemplate();
     populateTimeline();
     addFilter(timeline.filter);
-    // To fix
-    // cy.get(PIN_EVENT).should(
-    //   'have.attr',
-    //   'aria-label',
-    //   'This event may not be pinned while editing a template timeline'
-    // );
+    cy.get(PIN_EVENT).should(
+      'have.attr',
+      'aria-label',
+      'This event may not be pinned while editing a template timeline'
+    );
     cy.get(LOCKED_ICON).should('be.visible');
 
     addNameToTimeline(timeline.title);
@@ -77,7 +76,7 @@ describe.skip('Timeline Templates', () => {
     waitForTimelineChanges();
     createNewTimelineTemplate();
     closeTimeline();
-    openTimelineFromSettings();
+    openTimelineTemplateFromSettings(timelineId);
 
     cy.contains(timeline.title).should('exist');
     cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);

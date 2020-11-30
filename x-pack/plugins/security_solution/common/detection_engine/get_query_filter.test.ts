@@ -1112,6 +1112,7 @@ describe('get_filter', () => {
                     '@timestamp': {
                       gte: 'now-5m',
                       lte: 'now',
+                      format: 'strict_date_optional_time',
                     },
                   },
                 },
@@ -1148,6 +1149,7 @@ describe('get_filter', () => {
                     'event.ingested': {
                       gte: 'now-5m',
                       lte: 'now',
+                      format: 'strict_date_optional_time',
                     },
                   },
                 },
@@ -1183,6 +1185,7 @@ describe('get_filter', () => {
                     '@timestamp': {
                       gte: 'now-5m',
                       lte: 'now',
+                      format: 'strict_date_optional_time',
                     },
                   },
                 },

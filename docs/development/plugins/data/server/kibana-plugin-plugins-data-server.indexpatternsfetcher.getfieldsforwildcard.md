@@ -13,8 +13,10 @@ getFieldsForWildcard(options: {
         pattern: string | string[];
         metaFields?: string[];
         fieldCapsOptions?: {
-            allowNoIndices: boolean;
+            allow_no_indices: boolean;
         };
+        type?: string;
+        rollupIndex?: string;
     }): Promise<FieldDescriptor[]>;
 ```
 
@@ -22,7 +24,7 @@ getFieldsForWildcard(options: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>{</code><br/><code>        pattern: string &#124; string[];</code><br/><code>        metaFields?: string[];</code><br/><code>        fieldCapsOptions?: {</code><br/><code>            allowNoIndices: boolean;</code><br/><code>        };</code><br/><code>    }</code> |  |
+|  options | <code>{</code><br/><code>        pattern: string &#124; string[];</code><br/><code>        metaFields?: string[];</code><br/><code>        fieldCapsOptions?: {</code><br/><code>            allow_no_indices: boolean;</code><br/><code>        };</code><br/><code>        type?: string;</code><br/><code>        rollupIndex?: string;</code><br/><code>    }</code> |  |
 
 <b>Returns:</b>
 

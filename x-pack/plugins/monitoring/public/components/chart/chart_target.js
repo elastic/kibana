@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { get, isEqual, filter } from 'lodash';
 import $ from 'jquery';
 import React from 'react';
 import { eventBus } from './event_bus';
@@ -50,12 +50,12 @@ export class ChartTarget extends React.Component {
   }
 
   UNSAFE_componentWillReceiveProps(newProps) {
-    if (this.plot && !_.isEqual(newProps, this.props)) {
+    if (this.plot && !isEqual(newProps, this.props)) {
       const { series, timeRange } = newProps;
 
       const xaxisOptions = this.plot.getAxes().xaxis.options;
-      xaxisOptions.min = _.get(timeRange, 'min');
-      xaxisOptions.max = _.get(timeRange, 'max');
+      xaxisOptions.min = get(timeRange, 'min');
+      xaxisOptions.max = get(timeRange, 'max');
 
       this.plot.setData(this.filterData(series, newProps.seriesToShow));
       this.plot.setupGrid();
@@ -73,7 +73,7 @@ export class ChartTarget extends React.Component {
   }
 
   filterData(data, seriesToShow) {
-    return _(data).filter(this.filterByShow(seriesToShow)).value();
+    return filter(data, this.filterByShow(seriesToShow));
   }
 
   async getOptions() {
@@ -128,7 +128,7 @@ export class ChartTarget extends React.Component {
     this.handleThorPlotHover = (_event, pos, item, originalPlot) => {
       if (this.plot !== originalPlot) {
         // the crosshair is set for the original chart already
-        this.plot.setCrosshair({ x: _.get(pos, 'x') });
+        this.plot.setCrosshair({ x: get(pos, 'x') });
       }
       this.props.updateLegend(pos, item);
     };

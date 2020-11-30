@@ -24,9 +24,10 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
+import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
-import { QueryBarTopRow } from '../query_string_input';
+import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
@@ -78,6 +79,8 @@ export interface SearchBarOwnProps {
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
+  // Track UI Metrics
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -331,6 +334,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             },
           });
         }
+        if (this.props.trackUiMetric) {
+          this.props.trackUiMetric(METRIC_TYPE.CLICK, `${this.services.appName}:query_submitted`);
+        }
       }
     );
   };
@@ -432,6 +438,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               filters={this.props.filters!}
               onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}
+              appName={this.services.appName}
+              trackUiMetric={this.props.trackUiMetric}
             />
           </div>
         </div>

@@ -28,7 +28,7 @@ export function defineKeyRotationRoutes({
       path: '/api/encrypted_saved_objects/_rotate_key',
       validate: {
         query: schema.object({
-          batchSize: schema.number({
+          batch_size: schema.number({
             min: 1,
             max: DEFAULT_MAX_RESULT_WINDOW,
             defaultValue: DEFAULT_MAX_RESULT_WINDOW,
@@ -60,7 +60,7 @@ export function defineKeyRotationRoutes({
       try {
         return response.ok({
           body: await encryptionKeyRotationService.rotate(request, {
-            batchSize: request.query.batchSize,
+            batchSize: request.query.batch_size,
             type: request.query.type,
           }),
         });

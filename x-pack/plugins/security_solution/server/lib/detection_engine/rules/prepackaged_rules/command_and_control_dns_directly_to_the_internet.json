@@ -23,7 +23,9 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Network"
+    "Network",
+    "Threat Detection",
+    "Command and Control"
   ],
   "threat": [
     {
@@ -43,5 +45,5 @@
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

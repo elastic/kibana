@@ -762,9 +762,9 @@ describe('rules_schema', () => {
       expect(fields).toEqual(expected);
     });
 
-    test('should return 5 fields for a rule of type "threat_match"', () => {
+    test('should return 8 fields for a rule of type "threat_match"', () => {
       const fields = addThreatMatchFields({ type: 'threat_match' });
-      expect(fields.length).toEqual(6);
+      expect(fields.length).toEqual(8);
     });
   });
 

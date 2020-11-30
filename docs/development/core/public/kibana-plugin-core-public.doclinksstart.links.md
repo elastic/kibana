@@ -9,6 +9,7 @@
 ```typescript
 readonly links: {
         readonly dashboard: {
+            readonly guide: string;
             readonly drilldowns: string;
             readonly drilldownsTriggerPicker: string;
             readonly urlDrilldownTemplateSyntax: string;

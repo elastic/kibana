@@ -37,12 +37,12 @@ export async function mountApp(
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
     getByValueFeatureFlag: () => Promise<DashboardFeatureFlagConfig>;
-    attributeService: LensAttributeService;
+    attributeService: () => Promise<LensAttributeService>;
   }
 ) {
   const { createEditorFrame, getByValueFeatureFlag, attributeService } = mountProps;
   const [coreStart, startDependencies] = await core.getStartServices();
-  const { data, navigation, embeddable } = startDependencies;
+  const { data, navigation, embeddable, savedObjectsTagging } = startDependencies;
 
   const instance = await createEditorFrame();
   const storage = new Storage(localStorage);
@@ -54,7 +54,8 @@ export async function mountApp(
     data,
     storage,
     navigation,
-    attributeService,
+    savedObjectsTagging,
+    attributeService: await attributeService(),
     http: coreStart.http,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
@@ -97,9 +98,12 @@ export async function mountApp(
 
   const redirectTo = (routeProps: RouteComponentProps<{ id?: string }>, savedObjectId?: string) => {
     if (!savedObjectId) {
-      routeProps.history.push('/');
+      routeProps.history.push({ pathname: '/', search: routeProps.history.location.search });
     } else {
-      routeProps.history.push(`/edit/${savedObjectId}`);
+      routeProps.history.push({
+        pathname: `/edit/${savedObjectId}`,
+        search: routeProps.history.location.search,
+      });
     }
   };
 
@@ -147,6 +151,11 @@ export async function mountApp(
     trackUiEvent('loaded_404');
     return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
   }
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  const unlistenParentHistory = params.history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
 
   params.element.classList.add('lnsAppWrapper');
   render(
@@ -167,5 +176,6 @@ export async function mountApp(
   return () => {
     instance.unmount();
     unmountComponentAtNode(params.element);
+    unlistenParentHistory();
   };
 }

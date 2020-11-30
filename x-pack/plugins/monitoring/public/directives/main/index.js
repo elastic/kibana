@@ -182,6 +182,10 @@ export class MonitoringMainController {
       return false;
     }
 
+    if (!setupMode.data) {
+      return false;
+    }
+
     const data = setupMode.data[product] || {};
     if (data.totalUniqueInstanceCount === 0) {
       return true;

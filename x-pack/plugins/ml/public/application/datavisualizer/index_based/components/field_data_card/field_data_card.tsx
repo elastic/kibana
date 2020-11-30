@@ -10,7 +10,6 @@ import React, { FC } from 'react';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 
 import { FieldVisConfig } from '../../common';
-// @ts-ignore
 import { FieldTitleBar } from '../../../../components/field_title_bar/index';
 import {
   BooleanContent,
@@ -76,7 +75,7 @@ export const FieldDataCard: FC<FieldDataCardProps> = ({ config }) => {
       hasShadow={false}
     >
       <FieldTitleBar card={config} />
-      <div className="mlFieldDataCard__content">
+      <div className="mlFieldDataCard__content" data-test-subj="mlFieldDataCardContent">
         {loading === true ? <LoadingIndicator /> : getCardContent()}
       </div>
     </EuiPanel>

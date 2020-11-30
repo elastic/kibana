@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from './authentication_result';
 

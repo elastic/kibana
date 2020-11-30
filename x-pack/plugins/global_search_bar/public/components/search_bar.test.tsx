@@ -9,7 +9,7 @@ import { waitFor, act } from '@testing-library/react';
 import { ReactWrapper } from 'enzyme';
 import { of, BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { applicationServiceMock } from '../../../../../src/core/public/mocks';
 import { GlobalSearchBatchedResults, GlobalSearchResult } from '../../../global_search/public';
 import { globalSearchPluginMock } from '../../../global_search/public/mocks';
@@ -54,7 +54,7 @@ describe('SearchBar', () => {
   });
 
   const triggerFocus = () => {
-    component.find('input[data-test-subj="header-search"]').simulate('focus');
+    component.find('input[data-test-subj="nav-search-input"]').simulate('focus');
   };
 
   const update = () => {
@@ -100,7 +100,7 @@ describe('SearchBar', () => {
     update();
 
     expect(searchService.find).toHaveBeenCalledTimes(1);
-    expect(searchService.find).toHaveBeenCalledWith('', {});
+    expect(searchService.find).toHaveBeenCalledWith({}, {});
     expect(getDisplayedOptionsTitle()).toMatchSnapshot();
 
     await simulateTypeChar('d');
@@ -108,7 +108,7 @@ describe('SearchBar', () => {
 
     expect(getDisplayedOptionsTitle()).toMatchSnapshot();
     expect(searchService.find).toHaveBeenCalledTimes(2);
-    expect(searchService.find).toHaveBeenCalledWith('d', {});
+    expect(searchService.find).toHaveBeenCalledWith({ term: 'd' }, {});
   });
 
   it('supports keyboard shortcuts', () => {

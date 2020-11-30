@@ -12,6 +12,7 @@ import { TestProviders } from '../../../common/mock';
 import { getFormMock } from '../__mock__/form';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
+import { CommentRequest, CommentType } from '../../../../../case/common/api';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { usePostComment } from '../../containers/use_post_comment';
 import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
@@ -66,8 +67,9 @@ const defaultPostCommment = {
   postComment,
 };
 
-const sampleData = {
+const sampleData: CommentRequest = {
   comment: 'what a cool comment',
+  type: CommentType.user,
 };
 
 describe('AddComment ', () => {

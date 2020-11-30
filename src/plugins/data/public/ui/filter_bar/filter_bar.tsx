@@ -22,6 +22,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 
+import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { FilterEditor } from './filter_editor';
 import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
@@ -45,6 +46,9 @@ interface Props {
   className: string;
   indexPatterns: IIndexPattern[];
   intl: InjectedIntl;
+  appName: string;
+  // Track UI Metrics
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 function FilterBarUI(props: Props) {
@@ -105,7 +109,6 @@ function FilterBarUI(props: Props) {
           isOpen={isAddFilterPopoverOpen}
           closePopover={() => setIsAddFilterPopoverOpen(false)}
           anchorPosition="downLeft"
-          withTitle
           panelPaddingSize="none"
           ownFocus={true}
           initialFocus=".filterEditor__hiddenItem"
@@ -129,6 +132,9 @@ function FilterBarUI(props: Props) {
 
   function onAdd(filter: Filter) {
     setIsAddFilterPopoverOpen(false);
+    if (props.trackUiMetric) {
+      props.trackUiMetric(METRIC_TYPE.CLICK, `${props.appName}:filter_added`);
+    }
     const filters = [...props.filters, filter];
     onFiltersUpdated(filters);
   }
@@ -140,6 +146,9 @@ function FilterBarUI(props: Props) {
   }
 
   function onUpdate(i: number, filter: Filter) {
+    if (props.trackUiMetric) {
+      props.trackUiMetric(METRIC_TYPE.CLICK, `${props.appName}:filter_edited`);
+    }
     const filters = [...props.filters];
     filters[i] = filter;
     onFiltersUpdated(filters);
@@ -166,11 +175,17 @@ function FilterBarUI(props: Props) {
   }
 
   function onToggleAllNegated() {
+    if (props.trackUiMetric) {
+      props.trackUiMetric(METRIC_TYPE.CLICK, `${props.appName}:filter_invertInclusion`);
+    }
     const filters = props.filters.map(toggleFilterNegated);
     onFiltersUpdated(filters);
   }
 
   function onToggleAllDisabled() {
+    if (props.trackUiMetric) {
+      props.trackUiMetric(METRIC_TYPE.CLICK, `${props.appName}:filter_toggleAllDisabled`);
+    }
     const filters = props.filters.map(toggleFilterDisabled);
     onFiltersUpdated(filters);
   }

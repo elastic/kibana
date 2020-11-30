@@ -8,13 +8,14 @@ import { PaginationInputPaginated } from '../../../graphql/types';
 
 export const generateTablePaginationOptions = (
   activePage: number,
-  limit: number
+  limit: number,
+  isBucketSort?: boolean
 ): PaginationInputPaginated => {
   const cursorStart = activePage * limit;
   return {
     activePage,
     cursorStart,
     fakePossibleCount: 4 <= activePage && activePage > 0 ? limit * (activePage + 2) : limit * 5,
-    querySize: limit + cursorStart,
+    querySize: isBucketSort ? limit : limit + cursorStart,
   };
 };

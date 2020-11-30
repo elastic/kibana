@@ -40,6 +40,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
+      await testSubjects.click('.index-card');
+
+      await find.clickByCssSelector('[data-test-subj="backButton"]');
+
       await testSubjects.click('.slack-card');
 
       await testSubjects.setValue('nameInput', connectorName);

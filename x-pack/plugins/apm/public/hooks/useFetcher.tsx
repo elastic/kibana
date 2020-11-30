@@ -21,7 +21,7 @@ export enum FETCH_STATUS {
 export interface FetcherResult<Data> {
   data?: Data;
   status: FETCH_STATUS;
-  error?: Error;
+  error?: IHttpFetchError;
 }
 
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type

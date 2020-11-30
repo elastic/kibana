@@ -54,7 +54,7 @@ const metricAggs: AggSelectOption[] = [
   },
   {
     label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.positiveRateLabel', {
-      defaultMessage: 'Positive Rate',
+      defaultMessage: 'Counter Rate',
     }),
     value: 'positive_rate',
   },

@@ -5,7 +5,7 @@
  */
 
 import './datapanel.scss';
-import { uniq, keyBy, groupBy } from 'lodash';
+import { uniq, groupBy } from 'lodash';
 import React, { useState, memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
@@ -18,10 +18,12 @@ import {
   EuiSpacer,
   EuiFilterGroup,
   EuiFilterButton,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DataPublicPluginStart, EsQueryConfig, Query, Filter } from 'src/plugins/data/public';
+import { htmlIdGenerator } from '@elastic/eui';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import {
@@ -222,6 +224,9 @@ const fieldFiltersLabel = i18n.translate('xpack.lens.indexPatterns.fieldFiltersL
   defaultMessage: 'Field filters',
 });
 
+const htmlId = htmlIdGenerator('datapanel');
+const fieldSearchDescriptionId = htmlId();
+
 export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
   indexPatternRefs,
@@ -266,9 +271,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const fieldInfoUnavailable = existenceFetchFailed || currentIndexPattern.hasRestrictions;
 
   const unfilteredFieldGroups: FieldGroups = useMemo(() => {
-    const fieldByName = keyBy(allFields, 'name');
     const containsData = (field: IndexPatternField) => {
-      const overallField = fieldByName[field.name];
+      const overallField = currentIndexPattern.getFieldByName(field.name);
 
       return (
         overallField && fieldExists(existingFields, currentIndexPattern.title, overallField.name)
@@ -490,6 +494,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
                 defaultMessage: 'Search fields',
               })}
+              aria-describedby={fieldSearchDescriptionId}
             />
           </EuiFormControlLayout>
 
@@ -551,6 +556,19 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             </EuiPopover>
           </EuiFilterGroup>
         </EuiFlexItem>
+        <EuiScreenReaderOnly>
+          <div aria-live="polite" id={fieldSearchDescriptionId}>
+            {i18n.translate('xpack.lens.indexPatterns.fieldSearchLiveRegion', {
+              defaultMessage:
+                '{availableFields} available {availableFields, plural, one {field} other {fields}}. {emptyFields} empty {emptyFields, plural, one {field} other {fields}}. {metaFields} meta {metaFields, plural, one {field} other {fields}}.',
+              values: {
+                availableFields: fieldGroups.AvailableFields.fields.length,
+                emptyFields: fieldGroups.EmptyFields.fields.length,
+                metaFields: fieldGroups.MetaFields.fields.length,
+              },
+            })}
+          </div>
+        </EuiScreenReaderOnly>
         <EuiFlexItem>
           <FieldList
             exists={(field) =>

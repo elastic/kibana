@@ -7,7 +7,7 @@ pipelines that perform common transformations and
 enrichments on your data.  For example, you might remove a field,
 rename an existing field, or set a new field.
 
-You’ll find *Ingest Node Pipelines* in *Stack Management > Ingest*. With this feature, you can:
+To begin, open the main menu, then click *Stack Management > Ingest Node Pipelines*. With *Ingest Node Pipelines*, you can:
 
 * View a list of your pipelines and drill down into details.
 * Create a pipeline that defines a series of tasks, known as processors.
@@ -23,7 +23,7 @@ image:management/ingest-pipelines/images/ingest-pipeline-list.png["Ingest node p
 The minimum required permissions to access *Ingest Node Pipelines* are
 the `manage_pipeline` and `cluster:monitor/nodes/info` cluster privileges.
 
-You can add these privileges in *Stack Management > Security > Roles*.
+To add privileges, open the main menu, then click *Stack Management > Roles*.
 
 [role="screenshot"]
 image:management/ingest-pipelines/images/ingest-pipeline-privileges.png["Privileges required for Ingest Node Pipelines"]

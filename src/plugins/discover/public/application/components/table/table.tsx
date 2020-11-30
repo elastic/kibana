@@ -46,7 +46,13 @@ export function DocViewTable({
     <table className="table table-condensed kbnDocViewerTable">
       <tbody>
         {Object.keys(flattened)
-          .sort()
+          .sort((fieldA, fieldB) => {
+            const mappingA = mapping(fieldA);
+            const mappingB = mapping(fieldB);
+            const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
+            const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
+            return nameA.localeCompare(nameB);
+          })
           .map((field) => {
             const valueRaw = flattened[field];
             const value = trimAngularSpan(String(formatted[field]));

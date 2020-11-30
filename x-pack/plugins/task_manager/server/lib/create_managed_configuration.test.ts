@@ -6,12 +6,12 @@
 
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
-import { mockLogger } from '../test_utils';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import {
   createManagedConfiguration,
   ADJUST_THROUGHPUT_INTERVAL,
 } from './create_managed_configuration';
+import { mockLogger } from '../test_utils';
 
 describe('createManagedConfiguration()', () => {
   let clock: sinon.SinonFakeTimers;

@@ -97,11 +97,18 @@ describe('fetchCpuUsageNodeStats', () => {
                           },
                         ],
                       },
-                      average_usage: {
-                        value: 10,
-                      },
-                      average_periods: {
-                        value: 5,
+                      histo: {
+                        buckets: [
+                          null,
+                          {
+                            usage_deriv: {
+                              normalized_value: 10,
+                            },
+                            periods_deriv: {
+                              normalized_value: 5,
+                            },
+                          },
+                        ],
                       },
                       average_quota: {
                         value: 50,
@@ -185,14 +192,14 @@ describe('fetchCpuUsageNodeStats', () => {
     });
     await fetchCpuUsageNodeStats(callCluster, clusters, index, startMs, endMs, size);
     expect(params).toStrictEqual({
-      index,
+      index: '.monitoring-es-*',
       filterPath: ['aggregations'],
       body: {
         size: 0,
         query: {
           bool: {
             filter: [
-              { terms: { cluster_uuid: clusters.map((cluster) => cluster.clusterUuid) } },
+              { terms: { cluster_uuid: ['abc123'] } },
               { term: { type: 'node_stats' } },
               { range: { timestamp: { format: 'epoch_millis', gte: 0, lte: 0 } } },
             ],
@@ -200,23 +207,38 @@ describe('fetchCpuUsageNodeStats', () => {
         },
         aggs: {
           clusters: {
-            terms: {
-              field: 'cluster_uuid',
-              size,
-              include: clusters.map((cluster) => cluster.clusterUuid),
-            },
+            terms: { field: 'cluster_uuid', size: 10, include: ['abc123'] },
             aggs: {
               nodes: {
-                terms: { field: 'node_stats.node_id', size },
+                terms: { field: 'node_stats.node_id', size: 10 },
                 aggs: {
                   index: { terms: { field: '_index', size: 1 } },
                   average_cpu: { avg: { field: 'node_stats.process.cpu.percent' } },
-                  average_usage: { avg: { field: 'node_stats.os.cgroup.cpuacct.usage_nanos' } },
-                  average_periods: {
-                    avg: { field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods' },
-                  },
                   average_quota: { avg: { field: 'node_stats.os.cgroup.cpu.cfs_quota_micros' } },
                   name: { terms: { field: 'source_node.name', size: 1 } },
+                  histo: {
+                    date_histogram: { field: 'timestamp', fixed_interval: '0m' },
+                    aggs: {
+                      average_periods: {
+                        max: { field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods' },
+                      },
+                      average_usage: { max: { field: 'node_stats.os.cgroup.cpuacct.usage_nanos' } },
+                      usage_deriv: {
+                        derivative: {
+                          buckets_path: 'average_usage',
+                          gap_policy: 'skip',
+                          unit: '1s',
+                        },
+                      },
+                      periods_deriv: {
+                        derivative: {
+                          buckets_path: 'average_periods',
+                          gap_policy: 'skip',
+                          unit: '1s',
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },

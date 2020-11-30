@@ -10,9 +10,13 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { getSavedObjectAttributesFromRepo } from '../lib/telemetry';
 
-interface ITelemetry {
+interface Telemetry {
   ui_viewed: {
     overview: number;
+    setup_guide: number;
+  };
+  ui_error: {
+    cannot_connect: number;
   };
   ui_clicked: {
     app_search: number;
@@ -31,13 +35,17 @@ export const registerTelemetryUsageCollector = (
   savedObjects: SavedObjectsServiceStart,
   log: Logger
 ) => {
-  const telemetryUsageCollector = usageCollection.makeUsageCollector<ITelemetry>({
+  const telemetryUsageCollector = usageCollection.makeUsageCollector<Telemetry>({
     type: 'enterprise_search',
     fetch: async () => fetchTelemetryMetrics(savedObjects, log),
     isReady: () => true,
     schema: {
       ui_viewed: {
         overview: { type: 'long' },
+        setup_guide: { type: 'long' },
+      },
+      ui_error: {
+        cannot_connect: { type: 'long' },
       },
       ui_clicked: {
         app_search: { type: 'long' },
@@ -60,9 +68,13 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log
     log
   );
 
-  const defaultTelemetrySavedObject: ITelemetry = {
+  const defaultTelemetrySavedObject: Telemetry = {
     ui_viewed: {
       overview: 0,
+      setup_guide: 0,
+    },
+    ui_error: {
+      cannot_connect: 0,
     },
     ui_clicked: {
       app_search: 0,
@@ -78,10 +90,14 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log
   return {
     ui_viewed: {
       overview: get(savedObjectAttributes, 'ui_viewed.overview', 0),
+      setup_guide: get(savedObjectAttributes, 'ui_viewed.setup_guide', 0),
+    },
+    ui_error: {
+      cannot_connect: get(savedObjectAttributes, 'ui_error.cannot_connect', 0),
     },
     ui_clicked: {
       app_search: get(savedObjectAttributes, 'ui_clicked.app_search', 0),
       workplace_search: get(savedObjectAttributes, 'ui_clicked.workplace_search', 0),
     },
-  } as ITelemetry;
+  } as Telemetry;
 };

@@ -160,15 +160,7 @@ https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-amd64.deb
 
 endif::[]
 
-==== SysV `init` vs `systemd`
-
-include::init-systemd.asciidoc[]
-
-[[deb-running-init]]
-include::deb-init.asciidoc[]
-
 [[deb-running-systemd]]
-
 include::systemd.asciidoc[]
 
 [[deb-configuring]]

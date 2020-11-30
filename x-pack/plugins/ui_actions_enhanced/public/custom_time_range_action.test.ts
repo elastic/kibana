@@ -18,7 +18,7 @@ import {
   HELLO_WORLD_EMBEDDABLE,
 } from '../../../../examples/embeddable_examples/public';
 
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { ReactElement } from 'react';
 
 const createOpenModalMock = () => {

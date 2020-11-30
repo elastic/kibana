@@ -9,18 +9,18 @@ import fetch from 'node-fetch';
 
 import { KibanaRequest, Logger } from 'src/core/server';
 import { ConfigType } from '../';
-import { IAccess } from './check_access';
+import { Access } from './check_access';
 
-import { IInitialAppData } from '../../common/types';
+import { InitialAppData } from '../../common/types';
 import { stripTrailingSlash } from '../../common/strip_slashes';
 
-interface IParams {
+interface Params {
   request: KibanaRequest;
   config: ConfigType;
   log: Logger;
 }
-interface IReturn extends IInitialAppData {
-  access?: IAccess;
+interface Return extends InitialAppData {
+  access?: Access;
   publicUrl?: string;
 }
 
@@ -35,10 +35,10 @@ export const callEnterpriseSearchConfigAPI = async ({
   config,
   log,
   request,
-}: IParams): Promise<IReturn> => {
+}: Params): Promise<Return> => {
   if (!config.host) return {};
 
-  const TIMEOUT_WARNING = `Enterprise Search access check took over ${config.accessCheckTimeoutWarning}ms. Please ensure your Enterprise Search server is respondingly normally and not adversely impacting Kibana load speeds.`;
+  const TIMEOUT_WARNING = `Enterprise Search access check took over ${config.accessCheckTimeoutWarning}ms. Please ensure your Enterprise Search server is responding normally and not adversely impacting Kibana load speeds.`;
   const TIMEOUT_MESSAGE = `Exceeded ${config.accessCheckTimeout}ms timeout while checking ${config.host}. Please consider increasing your enterpriseSearch.accessCheckTimeout value so that users aren't prevented from accessing Enterprise Search plugins due to slow responses.`;
   const CONNECTION_ERROR = 'Could not perform access check to Enterprise Search';
 

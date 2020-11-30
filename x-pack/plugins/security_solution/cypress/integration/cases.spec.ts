@@ -60,7 +60,7 @@ describe('Cases', () => {
     createNewCaseWithTimeline(case1);
     backToCases();
 
-    cy.get(ALL_CASES_PAGE_TITLE).should('have.text', 'Cases Beta');
+    cy.get(ALL_CASES_PAGE_TITLE).should('have.text', 'Cases');
     cy.get(ALL_CASES_OPEN_CASES_STATS).should('have.text', 'Open cases1');
     cy.get(ALL_CASES_CLOSED_CASES_STATS).should('have.text', 'Closed cases0');
     cy.get(ALL_CASES_OPEN_CASES_COUNT).should('have.text', 'Open cases (1)');

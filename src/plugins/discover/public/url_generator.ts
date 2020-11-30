@@ -67,12 +67,19 @@ export interface DiscoverUrlGeneratorState {
    * whether to hash the data in the url to avoid url length issues.
    */
   useHash?: boolean;
+
+  /**
+   * Background search session id
+   */
+  searchSessionId?: string;
 }
 
 interface Params {
   appBasePath: string;
   useHash: boolean;
 }
+
+export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
 
 export class DiscoverUrlGenerator
   implements UrlGeneratorsDefinition<typeof DISCOVER_APP_URL_GENERATOR> {
@@ -88,6 +95,7 @@ export class DiscoverUrlGenerator
     savedSearchId,
     timeRange,
     useHash = this.params.useHash,
+    searchSessionId,
   }: DiscoverUrlGeneratorState): Promise<string> => {
     const savedSearchPath = savedSearchId ? encodeURIComponent(savedSearchId) : '';
     const appState: {
@@ -110,6 +118,10 @@ export class DiscoverUrlGenerator
     let url = `${this.params.appBasePath}#/${savedSearchPath}`;
     url = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, url);
     url = setStateToKbnUrl('_a', appState, { useHash }, url);
+
+    if (searchSessionId) {
+      url = `${url}&${SEARCH_SESSION_ID_QUERY_PARAM}=${searchSessionId}`;
+    }
 
     return url;
   };

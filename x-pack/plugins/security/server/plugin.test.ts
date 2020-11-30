@@ -55,6 +55,7 @@ describe('Security Plugin', () => {
       await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
                 "audit": Object {
+                  "asScoped": [Function],
                   "getLogger": [Function],
                 },
                 "authc": Object {
@@ -109,10 +110,10 @@ describe('Security Plugin', () => {
                     },
                   },
                   "getFeatures": [Function],
+                  "getType": [Function],
                   "isEnabled": [Function],
                   "isLicenseAvailable": [Function],
                 },
-                "registerSpacesService": [Function],
               }
             `);
     });

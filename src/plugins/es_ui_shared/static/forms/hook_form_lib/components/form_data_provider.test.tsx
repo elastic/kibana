@@ -58,9 +58,9 @@ describe('<FormDataProvider />', () => {
 
     expect(onFormData.mock.calls.length).toBe(1);
 
-    const [formDataInitial] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-      OnUpdateHandler
-    >;
+    const [formDataInitial] = onFormData.mock.calls[
+      onFormData.mock.calls.length - 1
+    ] as Parameters<OnUpdateHandler>;
 
     expect(formDataInitial).toEqual({
       name: 'Initial value',
@@ -77,9 +77,9 @@ describe('<FormDataProvider />', () => {
 
     expect(onFormData).toBeCalledTimes(2);
 
-    const [formDataUpdated] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-      OnUpdateHandler
-    >;
+    const [formDataUpdated] = onFormData.mock.calls[
+      onFormData.mock.calls.length - 1
+    ] as Parameters<OnUpdateHandler>;
 
     expect(formDataUpdated).toEqual({
       name: 'updated value',
@@ -133,11 +133,11 @@ describe('<FormDataProvider />', () => {
       find('btn').simulate('click').update();
     });
 
-    expect(onFormData.mock.calls.length).toBe(1);
+    expect(onFormData.mock.calls.length).toBe(2);
 
-    const [formDataUpdated] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-      OnUpdateHandler
-    >;
+    const [formDataUpdated] = onFormData.mock.calls[
+      onFormData.mock.calls.length - 1
+    ] as Parameters<OnUpdateHandler>;
 
     expect(formDataUpdated).toEqual({
       name: 'updated value',
@@ -236,9 +236,9 @@ describe('<FormDataProvider />', () => {
 
     expect(onFormData.mock.calls.length).toBe(2); // 2 as the form "isValid" change caused a re-render
 
-    const [formData] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-      OnUpdateHandler
-    >;
+    const [formData] = onFormData.mock.calls[
+      onFormData.mock.calls.length - 1
+    ] as Parameters<OnUpdateHandler>;
 
     expect(formData).toEqual({
       name: 'updated value',

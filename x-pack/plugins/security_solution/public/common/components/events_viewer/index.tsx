@@ -24,6 +24,7 @@ import { InspectButtonContainer } from '../inspect';
 import { useFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
+import { EventDetailsFlyout } from './event_details_flyout';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
 
@@ -42,6 +43,7 @@ export interface OwnProps {
   start: string;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
+  onRuleChange?: () => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
@@ -64,6 +66,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   kqlMode,
   pageFilters,
   query,
+  onRuleChange,
   removeColumn,
   start,
   scopeId,
@@ -132,35 +135,44 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
 
   return (
-    <FullScreenContainer $isFullScreen={globalFullScreen}>
-      <InspectButtonContainer>
-        <EventsViewer
-          browserFields={browserFields}
-          columns={columns}
-          docValueFields={docValueFields}
-          id={id}
-          dataProviders={dataProviders!}
-          deletedEventIds={deletedEventIds}
-          end={end}
-          isLoadingIndexPattern={isLoadingIndexPattern}
-          filters={globalFilters}
-          headerFilterGroup={headerFilterGroup}
-          indexNames={selectedPatterns}
-          indexPattern={indexPattern}
-          isLive={isLive}
-          itemsPerPage={itemsPerPage!}
-          itemsPerPageOptions={itemsPerPageOptions!}
-          kqlMode={kqlMode}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          query={query}
-          start={start}
-          sort={sort}
-          toggleColumn={toggleColumn}
-          utilityBar={utilityBar}
-          graphEventId={graphEventId}
-        />
-      </InspectButtonContainer>
-    </FullScreenContainer>
+    <>
+      <FullScreenContainer $isFullScreen={globalFullScreen}>
+        <InspectButtonContainer>
+          <EventsViewer
+            browserFields={browserFields}
+            columns={columns}
+            docValueFields={docValueFields}
+            id={id}
+            dataProviders={dataProviders!}
+            deletedEventIds={deletedEventIds}
+            end={end}
+            isLoadingIndexPattern={isLoadingIndexPattern}
+            filters={globalFilters}
+            headerFilterGroup={headerFilterGroup}
+            indexNames={selectedPatterns}
+            indexPattern={indexPattern}
+            isLive={isLive}
+            itemsPerPage={itemsPerPage!}
+            itemsPerPageOptions={itemsPerPageOptions!}
+            kqlMode={kqlMode}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            query={query}
+            onRuleChange={onRuleChange}
+            start={start}
+            sort={sort}
+            toggleColumn={toggleColumn}
+            utilityBar={utilityBar}
+            graphEventId={graphEventId}
+          />
+        </InspectButtonContainer>
+      </FullScreenContainer>
+      <EventDetailsFlyout
+        browserFields={browserFields}
+        docValueFields={docValueFields}
+        timelineId={id}
+        toggleColumn={toggleColumn}
+      />
+    </>
   );
 };
 

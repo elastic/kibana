@@ -28,7 +28,7 @@ exports[`LocationMissingWarning component renders correctly against snapshot 1`]
           <span
             class="euiButtonContent euiButton__content"
           >
-            <div
+            <span
               class="euiButtonContent__icon"
               data-euiicon-type="alert"
             />

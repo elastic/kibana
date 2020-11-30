@@ -18,14 +18,9 @@
  */
 
 import React from 'react';
-import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
 import type { SuggestionsComponentProps } from './suggestions_component';
 
-const Fallback = () => (
-  <EuiDelayRender>
-    <EuiLoadingContent lines={1} />
-  </EuiDelayRender>
-);
+const Fallback = () => <div />;
 
 const LazySuggestionsComponent = React.lazy(() => import('./suggestions_component'));
 export const SuggestionsComponent = (props: SuggestionsComponentProps) => (
