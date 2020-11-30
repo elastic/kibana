@@ -50,7 +50,7 @@ export function registerSearchRoute({
               resp: await callCluster('search', {
                 index: request.body.index,
                 body: request.body.body,
-                rest_total_hits_as_int: true,
+                track_total_hits: true,
                 ignore_throttled: !includeFrozen,
               }),
             },
