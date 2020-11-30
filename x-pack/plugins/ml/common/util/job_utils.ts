@@ -104,6 +104,30 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
         scriptFields.indexOf(dtr.by_field_name!) === -1 &&
         scriptFields.indexOf(dtr.over_field_name!) === -1;
     }
+
+    // We don't currently support nested terms aggregation & when aggregation interval is different from bucket span
+    const hasDatafeed =
+      typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+    if (hasDatafeed) {
+      const aggs = getDatafeedAggregations(job.datafeed_config);
+      if (aggs !== undefined) {
+        const aggBucketsName = getAggregationBucketsName(aggs);
+        if (aggBucketsName !== undefined) {
+          // if datafeed has any nested terms aggregations at all
+          const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
+          const termsField = findAggField(aggregations, 'terms', true);
+          if (termsField !== undefined && Object.keys(termsField).length > 1) {
+            return false;
+          }
+
+          // if aggregation interval is different from bucket span
+          const datetimeBucket = aggs[aggBucketsName].date_histogram;
+          if (datetimeBucket?.fixed_interval !== job.analysis_config?.bucket_span) {
+            return false;
+          }
+        }
+      }
+    }
   }
 
   return isSourceDataChartable;
@@ -146,14 +170,6 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
   if (!isTimeSeriesViewJob(job)) {
     isSupported = 'not_time_series_view';
   }
-  // const detectors = job.analysis_config.detectors;
-  // if (detectors.every((dtr, i) => !isSourceDataChartableForDetector(job, i))) {
-  //   isSupported = 'source_data_not_chartable';
-  // }
-  // if (detectors.every((dtr, i) => !isModelPlotChartableForDetector(job, i))) {
-  //   isSupported = 'model_plot_not_chartable';
-  // }
-
   const hasDatafeed =
     typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
   if (hasDatafeed) {

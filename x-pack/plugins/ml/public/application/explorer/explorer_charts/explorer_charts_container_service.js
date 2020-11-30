@@ -109,7 +109,9 @@ export const anomalyDataChange = function (
 
     const job = mlJobService.getJob(jobId);
 
-    // If source data can be plotted, use that, otherwise model plot will be available.
+    // If the job uses aggregation or scripted fields, and if it's a config we don't support
+    // use model plot data if model plot is enabled
+    // else if source data can be plotted, use that, otherwise model plot will be available.
     const useSourceData = isSourceDataChartableForDetector(job, detectorIndex);
     if (useSourceData === true) {
       const datafeedQuery = get(config, 'datafeedConfig.query', null);
