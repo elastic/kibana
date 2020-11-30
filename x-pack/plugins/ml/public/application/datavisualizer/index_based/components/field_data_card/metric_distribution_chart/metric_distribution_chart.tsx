@@ -40,11 +40,18 @@ interface Props {
   height: number;
   chartData: MetricDistributionChartData[];
   fieldFormat?: any; // Kibana formatter for field being viewed
+  hideXAxis?: boolean;
 }
 
 const SPEC_ID = 'metric_distribution';
 
-export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, fieldFormat }) => {
+export const MetricDistributionChart: FC<Props> = ({
+  width,
+  height,
+  chartData,
+  fieldFormat,
+  hideXAxis,
+}) => {
   // This value is shown to label the y axis values in the tooltip.
   // Ideally we wouldn't show these values at all in the tooltip,
   // but this is not yet possible with Elastic charts.
@@ -98,6 +105,8 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
           id="bottom"
           position={Position.Bottom}
           tickFormat={(d) => kibanaFieldFormat(d, fieldFormat)}
+          hide={hideXAxis === true}
+          ticks={1}
         />
         <Axis id="left" position={Position.Left} tickFormat={(d) => d.toFixed(3)} hide={true} />
         <AreaSeries

@@ -106,20 +106,22 @@ export const MultiselectPicker: FC<{
         <EuiPopoverTitle paddingSize="s">
           <EuiFieldSearch compressed />
         </EuiPopoverTitle>
-        {Array.isArray(items) && items.length > 0 ? (
-          items.map((item, index) => (
-            <EuiFilterSelectItem
-              checked={item.checked}
-              key={index}
-              onClick={() => updateItem(index)}
-              style={{ flexDirection: 'row' }}
-            >
-              {item.name}
-            </EuiFilterSelectItem>
-          ))
-        ) : (
-          <NoFilterItems />
-        )}
+        <div style={{ maxHeight: 250, overflow: 'auto' }}>
+          {Array.isArray(items) && items.length > 0 ? (
+            items.map((item, index) => (
+              <EuiFilterSelectItem
+                checked={item.checked}
+                key={index}
+                onClick={() => updateItem(index)}
+                style={{ flexDirection: 'row' }}
+              >
+                {item.name}
+              </EuiFilterSelectItem>
+            ))
+          ) : (
+            <NoFilterItems />
+          )}
+        </div>
       </EuiPopover>
     </EuiFilterGroup>
   );

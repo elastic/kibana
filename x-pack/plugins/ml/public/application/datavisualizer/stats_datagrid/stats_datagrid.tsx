@@ -24,6 +24,7 @@ import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { DataVisualizerFieldExpandedRow } from './expanded_row';
 import { DocumentStat } from './components/field_data_column/document_stats';
 import { DistinctValues } from './components/field_data_column/distinct_values';
+import { NumberContentPreview } from './components/field_data_column/number_content_preview';
 interface DataVisualizerDataGrid {
   items: FieldVisConfig[];
 }
@@ -44,7 +45,7 @@ function getItemIdToExpandedRowMap(
 }
 
 export const DataVisualizerDataGrid = ({ items }: DataVisualizerDataGrid) => {
-  const [showDistributions, toggleShowDistribution] = useState<boolean>(false);
+  const [showDistributions, toggleShowDistribution] = useState<boolean>(true);
   const pagination = {
     initialPageSize: 20,
     pageSizeOptions: [10, 20],
@@ -156,7 +157,6 @@ export const DataVisualizerDataGrid = ({ items }: DataVisualizerDataGrid) => {
       sortable: true,
     },
     {
-      field: 'distributions',
       name: (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <EuiIcon type={'visBarVertical'} style={{ paddingRight: 5 }} />
@@ -176,16 +176,14 @@ export const DataVisualizerDataGrid = ({ items }: DataVisualizerDataGrid) => {
           />
         </div>
       ),
-      render: () => <div />,
+      render: (item: FieldVisConfig) => {
+        if (item === undefined || showDistributions === false) return null;
+        if (item.type === 'number' && item.stats?.distribution !== undefined) {
+          return <NumberContentPreview config={item} />;
+        }
+        return null;
+      },
     },
-    // @TODO: clarify what actions need to do here
-    // {
-    //   field: 'actions',
-    //   name: i18n.translate('xpack.ml.datavisualizer.dataGrid.actionsColumnName', {
-    //     defaultMessage: 'Actions',
-    //   }),
-    //   actions: [],
-    // },
   ];
 
   const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, items);
