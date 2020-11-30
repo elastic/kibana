@@ -18,9 +18,8 @@
  */
 
 import rison from 'rison-node';
+import { getUrl } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
-// @ts-ignore not TS yet
-import getUrl from '../../../src/test_utils/get_url';
 
 const DEFAULT_INITIAL_STATE = {
   columns: ['@message'],
