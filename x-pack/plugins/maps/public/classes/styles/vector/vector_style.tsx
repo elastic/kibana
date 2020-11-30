@@ -173,6 +173,74 @@ export class VectorStyle implements IVectorStyle {
     return getDefaultStaticProperties(mapColors);
   }
 
+  constructor(
+    descriptor: VectorStyleDescriptor | null,
+    source: IVectorSource,
+    layer: IVectorLayer
+  ) {
+    this._source = source;
+    this._layer = layer;
+    this._descriptor = descriptor
+      ? {
+          ...descriptor,
+          ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
+        }
+      : VectorStyle.createDescriptor();
+
+    this._styleMeta = new StyleMeta(this._descriptor.__styleMeta);
+
+    this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
+      this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
+      VECTOR_STYLES.SYMBOLIZE_AS
+    );
+    this._lineColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
+      VECTOR_STYLES.LINE_COLOR
+    );
+    this._fillColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.FILL_COLOR],
+      VECTOR_STYLES.FILL_COLOR
+    );
+    this._lineWidthStyleProperty = this._makeSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LINE_WIDTH],
+      VECTOR_STYLES.LINE_WIDTH,
+      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
+    );
+    this._iconStyleProperty = this._makeIconProperty(
+      this._descriptor.properties[VECTOR_STYLES.ICON]
+    );
+    this._iconSizeStyleProperty = this._makeSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.ICON_SIZE],
+      VECTOR_STYLES.ICON_SIZE,
+      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
+    );
+    this._iconOrientationProperty = this._makeOrientationProperty(
+      this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION],
+      VECTOR_STYLES.ICON_ORIENTATION
+    );
+    this._labelStyleProperty = this._makeLabelProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_TEXT]
+    );
+    this._labelSizeStyleProperty = this._makeSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE],
+      VECTOR_STYLES.LABEL_SIZE,
+      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
+    );
+    this._labelColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
+      VECTOR_STYLES.LABEL_COLOR
+    );
+    this._labelBorderColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_COLOR],
+      VECTOR_STYLES.LABEL_BORDER_COLOR
+    );
+    this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
+      VECTOR_STYLES.LABEL_BORDER_SIZE,
+      this._labelSizeStyleProperty
+    );
+  }
+
   async _updateFieldsInDescriptor(
     nextFields: IField[],
     styleFieldsHelper: StyleFieldsHelper,
@@ -237,14 +305,19 @@ export class VectorStyle implements IVectorStyle {
       }
     }
 
-    // Revert left-over invalid props to static styling, if necessary
-    return this._deleteFieldsFromDescriptorAndUpdateStyling(
-      nextFields,
-      styleFieldsHelper,
-      originalProperties,
-      mapColors,
-      hasChanges
-    );
+    return {
+      hasChanges,
+      nextStyleDescriptor: VectorStyle.createDescriptor(originalProperties, this.isTimeAware()),
+    };
+
+    // // Revert left-over invalid props to static styling, if necessary
+    // return this._deleteFieldsFromDescriptorAndUpdateStyling(
+    //   nextFields,
+    //   styleFieldsHelper,
+    //   originalProperties,
+    //   mapColors,
+    //   hasChanges
+    // );
   }
 
   async _deleteFieldsFromDescriptorAndUpdateStyling(
@@ -316,74 +389,6 @@ export class VectorStyle implements IVectorStyle {
         nextStyleDescriptor: VectorStyle.createDescriptor(originalProperties, this.isTimeAware()),
       };
     }
-  }
-
-  constructor(
-    descriptor: VectorStyleDescriptor | null,
-    source: IVectorSource,
-    layer: IVectorLayer
-  ) {
-    this._source = source;
-    this._layer = layer;
-    this._descriptor = descriptor
-      ? {
-          ...descriptor,
-          ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
-        }
-      : VectorStyle.createDescriptor();
-
-    this._styleMeta = new StyleMeta(this._descriptor.__styleMeta);
-
-    this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
-      this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
-      VECTOR_STYLES.SYMBOLIZE_AS
-    );
-    this._lineColorStyleProperty = this._makeColorProperty(
-      this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
-      VECTOR_STYLES.LINE_COLOR
-    );
-    this._fillColorStyleProperty = this._makeColorProperty(
-      this._descriptor.properties[VECTOR_STYLES.FILL_COLOR],
-      VECTOR_STYLES.FILL_COLOR
-    );
-    this._lineWidthStyleProperty = this._makeSizeProperty(
-      this._descriptor.properties[VECTOR_STYLES.LINE_WIDTH],
-      VECTOR_STYLES.LINE_WIDTH,
-      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
-    );
-    this._iconStyleProperty = this._makeIconProperty(
-      this._descriptor.properties[VECTOR_STYLES.ICON]
-    );
-    this._iconSizeStyleProperty = this._makeSizeProperty(
-      this._descriptor.properties[VECTOR_STYLES.ICON_SIZE],
-      VECTOR_STYLES.ICON_SIZE,
-      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
-    );
-    this._iconOrientationProperty = this._makeOrientationProperty(
-      this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION],
-      VECTOR_STYLES.ICON_ORIENTATION
-    );
-    this._labelStyleProperty = this._makeLabelProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_TEXT]
-    );
-    this._labelSizeStyleProperty = this._makeSizeProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE],
-      VECTOR_STYLES.LABEL_SIZE,
-      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
-    );
-    this._labelColorStyleProperty = this._makeColorProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
-      VECTOR_STYLES.LABEL_COLOR
-    );
-    this._labelBorderColorStyleProperty = this._makeColorProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_COLOR],
-      VECTOR_STYLES.LABEL_BORDER_COLOR
-    );
-    this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
-      VECTOR_STYLES.LABEL_BORDER_SIZE,
-      this._labelSizeStyleProperty
-    );
   }
 
   /*

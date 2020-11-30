@@ -276,18 +276,37 @@ export function updateLayerOrder(newLayerOrder: number[]) {
   };
 }
 
+export function updateMetricsProp(layerId, value) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layer = getLayerById(layerId, getState());
+    await dispatch({
+      type: UPDATE_SOURCE_PROP,
+      layerId,
+      propName: 'metrics',
+      value,
+    });
+    const previousFields = await (layer as IVectorLayer).getFields();
+    await dispatch(updateStyleProperties(layerId, previousFields as IESAggField[]));
+    dispatch(syncDataForLayerId(layerId));
+  };
+}
+
 export function updateSourceProp(
   layerId: string,
   propName: string,
   value: unknown,
   newLayerType?: LAYER_TYPE
 ) {
-  return async (
-    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
-    getState: () => MapStoreState
-  ) => {
-    const layer = getLayerById(layerId, getState());
-    const previousFields = await (layer as IVectorLayer).getFields();
+  return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    if (propName === 'metrics') {
+      if (newLayerType) {
+        throw new Error('May not change layer-type when modifying metrics source-property');
+      }
+      return await dispatch(updateMetricsProp(layerId, value));
+    }
     dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
@@ -296,9 +315,6 @@ export function updateSourceProp(
     });
     if (newLayerType) {
       dispatch(updateLayerType(layerId, newLayerType));
-    }
-    if (propName === 'metrics') {
-      await dispatch(updateStyleProperties(layerId, previousFields as IESAggField[]));
     }
     dispatch(syncDataForLayerId(layerId));
   };
