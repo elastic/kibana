@@ -1,0 +1,13 @@
+[[commands]]
+= Command line tools
+
+[partintro]
+--
+
+{kib} provides the following tools for performing tasks from the command line:
+
+* <<encryption-keys>>
+
+--
+
+include::encryption-keys.asciidoc[]

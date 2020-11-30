@@ -43,6 +43,8 @@ include::reporting/index.asciidoc[]
 
 include::alerting/index.asciidoc[]
 
+include::{kib-repo-dir}/commands/index.asciidoc[]
+
 include::api.asciidoc[]
 
 include::plugins.asciidoc[]
