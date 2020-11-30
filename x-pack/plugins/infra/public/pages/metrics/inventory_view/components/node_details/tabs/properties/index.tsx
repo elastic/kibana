@@ -6,7 +6,6 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiLoadingChart } from '@elastic/eui';
 import { TabContent, TabProps } from '../shared';
 import { Source } from '../../../../../../../containers/source';
