@@ -31,6 +31,7 @@ export const transactionGroupsRoute = createRoute({
       rangeRt,
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
@@ -67,6 +68,7 @@ export const transactionGroupsChartsRoute = createRoute({
       rangeRt,
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const logger = context.logger;
@@ -116,6 +118,7 @@ export const transactionGroupsDistributionRoute = createRoute({
       rangeRt,
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
@@ -159,6 +162,7 @@ export const transactionGroupsBreakdownRoute = createRoute({
       rangeRt,
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
@@ -182,6 +186,7 @@ export const transactionSampleForGroupRoute = createRoute({
       t.type({ serviceName: t.string, transactionName: t.string }),
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -212,6 +217,7 @@ export const transactionGroupsErrorRateRoute = createRoute({
       }),
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { params } = context;

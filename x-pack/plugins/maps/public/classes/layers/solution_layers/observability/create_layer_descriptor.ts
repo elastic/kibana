@@ -50,7 +50,7 @@ function createDynamicFillColorDescriptor(
   return {
     type: STYLE_TYPE.DYNAMIC,
     options: {
-      ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions),
+      ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
       field,
       color:
         layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE ? 'Green to Red' : 'Yellow to Red',
@@ -226,12 +226,12 @@ export function createLayerDescriptor({
     origin: FIELD_ORIGIN.SOURCE,
   };
 
-  const styleProperties: VectorStylePropertiesDescriptor = {
+  const styleProperties: Partial<VectorStylePropertiesDescriptor> = {
     [VECTOR_STYLES.FILL_COLOR]: createDynamicFillColorDescriptor(layer, metricStyleField),
     [VECTOR_STYLES.ICON_SIZE]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
+        ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
         field: metricStyleField,
       },
     },

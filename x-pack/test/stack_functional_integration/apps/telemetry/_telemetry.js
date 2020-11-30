@@ -19,13 +19,10 @@ export default ({ getService, getPageObjects }) => {
       await appsMenu.clickLink('Stack Monitoring');
     });
 
-    it('should show banner Help us improve Kibana and Elasticsearch', async () => {
-      const expectedMessage = `Help us improve the Elastic Stack
-To learn about how usage data helps us manage and improve our products and services, see our Privacy Statement. To stop collection, disable usage data here.
-Dismiss`;
+    it('should show banner Help us improve the Elastic Stack', async () => {
       const actualMessage = await PageObjects.monitoring.getWelcome();
       log.debug(`X-Pack message = ${actualMessage}`);
-      expect(actualMessage).to.be(expectedMessage);
+      expect(actualMessage).to.contain('Help us improve the Elastic Stack');
     });
   });
 };

@@ -10,7 +10,13 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
-import { AgentService, IngestManagerStartContract, PackageService } from '../../../fleet/server';
+import {
+  AgentService,
+  FleetStartContract,
+  PackageService,
+  AgentPolicyServiceInterface,
+  PackagePolicyServiceInterface,
+} from '../../../fleet/server';
 import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
 import {
   getPackagePolicyCreateCallback,
@@ -69,7 +75,10 @@ export const createMetadataService = (packageService: PackageService): MetadataS
 };
 
 export type EndpointAppContextServiceStartContract = Partial<
-  Pick<IngestManagerStartContract, 'agentService' | 'packageService'>
+  Pick<
+    FleetStartContract,
+    'agentService' | 'packageService' | 'packagePolicyService' | 'agentPolicyService'
+  >
 > & {
   logger: Logger;
   manifestManager?: ManifestManager;
@@ -77,7 +86,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   security: SecurityPluginSetup;
   alerts: AlertsPluginStartContract;
   config: ConfigType;
-  registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
+  registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
 };
 
@@ -88,11 +97,15 @@ export type EndpointAppContextServiceStartContract = Partial<
 export class EndpointAppContextService {
   private agentService: AgentService | undefined;
   private manifestManager: ManifestManager | undefined;
+  private packagePolicyService: PackagePolicyServiceInterface | undefined;
+  private agentPolicyService: AgentPolicyServiceInterface | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private metadataService: MetadataService | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
+    this.packagePolicyService = dependencies.packagePolicyService;
+    this.agentPolicyService = dependencies.agentPolicyService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
     this.metadataService = createMetadataService(dependencies.packageService!);
@@ -121,6 +134,14 @@ export class EndpointAppContextService {
 
   public getAgentService(): AgentService | undefined {
     return this.agentService;
+  }
+
+  public getPackagePolicyService(): PackagePolicyServiceInterface | undefined {
+    return this.packagePolicyService;
+  }
+
+  public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
+    return this.agentPolicyService;
   }
 
   public getMetadataService(): MetadataService | undefined {

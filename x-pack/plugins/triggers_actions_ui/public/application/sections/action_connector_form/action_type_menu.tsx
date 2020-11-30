@@ -7,24 +7,29 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
-import { ActionType, ActionTypeIndex } from '../../../types';
+import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
   actionTypes?: ActionType[];
   setHasActionsUpgradeableByTrial?: (value: boolean) => void;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export const ActionTypeMenu = ({
   onActionTypeChange,
   actionTypes,
   setHasActionsUpgradeableByTrial,
+  actionTypeRegistry,
 }: Props) => {
-  const { http, toastNotifications, actionTypeRegistry } = useActionsConnectorsContext();
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
 
   useEffect(() => {
@@ -47,8 +52,8 @@ export const ActionTypeMenu = ({
           setHasActionsUpgradeableByTrial(hasActionsUpgradeableByTrial);
         }
       } catch (e) {
-        if (toastNotifications) {
-          toastNotifications.addDanger({
+        if (toasts) {
+          toasts.addDanger({
             title: i18n.translate(
               'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionTypesMessage',
               { defaultMessage: 'Unable to load action types' }

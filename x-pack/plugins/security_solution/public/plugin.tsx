@@ -331,8 +331,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
-    if (plugins.ingestManager) {
-      const { registerExtension } = plugins.ingestManager;
+    if (plugins.fleet) {
+      const { registerExtension } = plugins.fleet;
 
       registerExtension({
         package: 'endpoint',

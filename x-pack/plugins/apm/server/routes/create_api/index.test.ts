@@ -53,6 +53,7 @@ describe('createApi', () => {
     createApi()
       .add(() => ({
         endpoint: 'GET /foo',
+        options: { tags: ['access:apm'] },
         handler: async () => null,
       }))
       .add(() => ({
@@ -60,6 +61,7 @@ describe('createApi', () => {
         params: t.type({
           body: t.string,
         }),
+        options: { tags: ['access:apm'] },
         handler: async () => null,
       }))
       .add(() => ({
@@ -125,6 +127,7 @@ describe('createApi', () => {
         .add(() => ({
           endpoint: 'GET /foo',
           params,
+          options: { tags: ['access:apm'] },
           handler: handlerMock,
         }))
         .init(mock, context);

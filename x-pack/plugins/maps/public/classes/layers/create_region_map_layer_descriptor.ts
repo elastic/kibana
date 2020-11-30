@@ -100,7 +100,7 @@ export function createRegionMapLayerDescriptor({
       [VECTOR_STYLES.FILL_COLOR]: {
         type: STYLE_TYPE.DYNAMIC,
         options: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions),
+          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
           field: {
             name: joinKey,
             origin: FIELD_ORIGIN.JOIN,
@@ -108,7 +108,7 @@ export function createRegionMapLayerDescriptor({
           color: colorPallette ? colorPallette.value : 'Yellow to Red',
           type: COLOR_MAP_TYPE.ORDINAL,
           fieldMetaOptions: {
-            ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions)
+            ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions)
               .fieldMetaOptions,
             isEnabled: false,
           },

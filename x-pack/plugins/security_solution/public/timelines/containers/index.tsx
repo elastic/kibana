@@ -136,7 +136,7 @@ export const useTimelineEvents = ({
       clearSignalsState();
 
       if (id === TimelineId.active) {
-        activeTimeline.setExpandedEventIds({});
+        activeTimeline.setExpandedEvent({});
         activeTimeline.setActivePage(newActivePage);
       }
 
@@ -200,7 +200,7 @@ export const useTimelineEvents = ({
                         updatedAt: Date.now(),
                       };
                       if (id === TimelineId.active) {
-                        activeTimeline.setExpandedEventIds({});
+                        activeTimeline.setExpandedEvent({});
                         activeTimeline.setPageName(pageName);
                         activeTimeline.setRequest(request);
                         activeTimeline.setResponse(newTimelineResponse);

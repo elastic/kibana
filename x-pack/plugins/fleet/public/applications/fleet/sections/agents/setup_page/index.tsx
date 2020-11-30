@@ -22,7 +22,7 @@ import {
   EuiCodeBlock,
   EuiLink,
 } from '@elastic/eui';
-import { useCore, sendPostFleetSetup } from '../../../hooks';
+import { useStartServices, sendPostFleetSetup } from '../../../hooks';
 import { WithoutHeaderLayout } from '../../../layouts';
 import { GetFleetStatusResponse } from '../../../types';
 
@@ -53,7 +53,7 @@ export const SetupPage: React.FunctionComponent<{
   missingRequirements: GetFleetStatusResponse['missing_requirements'];
 }> = ({ refresh, missingRequirements }) => {
   const [isFormLoading, setIsFormLoading] = useState<boolean>(false);
-  const core = useCore();
+  const core = useStartServices();
 
   const onSubmit = async () => {
     setIsFormLoading(true);
