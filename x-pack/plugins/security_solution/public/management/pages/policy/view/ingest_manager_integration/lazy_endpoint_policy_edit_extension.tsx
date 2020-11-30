@@ -5,7 +5,9 @@
  */
 
 import { lazy } from 'react';
+import { CoreStart } from 'kibana/public';
 import { PackagePolicyEditExtensionComponent } from '../../../../../../../fleet/public';
+import { StartPlugins } from '../../../../../types';
 
 export const LazyEndpointPolicyEditExtension = lazy<PackagePolicyEditExtensionComponent>(
   async () => {
@@ -16,3 +18,23 @@ export const LazyEndpointPolicyEditExtension = lazy<PackagePolicyEditExtensionCo
     };
   }
 );
+
+export const getLazyEndpointPolicyEditExtension = (
+  coreStart: CoreStart,
+  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
+) => {
+  return lazy<PackagePolicyEditExtensionComponent>(async () => {
+    const [{ withSecurityContext }, { EndpointPolicyEditExtension }] = await Promise.all([
+      import('./with_security_context'),
+      import('./endpoint_policy_edit_extension'),
+    ]);
+
+    return {
+      default: withSecurityContext({
+        coreStart,
+        depsStart,
+        WrappedComponent: EndpointPolicyEditExtension,
+      }),
+    };
+  });
+};
