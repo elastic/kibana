@@ -17,6 +17,7 @@ import {
   LAYER_STYLE_TYPE,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   STYLE_TYPE,
+  TOP_TERM_PERCENTAGE_SUFFIX,
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
@@ -83,7 +84,7 @@ export interface IVectorStyle extends IStyle {
   getStyleMeta(): StyleMeta;
   getDescriptorWithUpdatedStyleProps(
     nextFields: IField[],
-    oldFields: IField[],
+    previousFields: IField[],
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
@@ -179,21 +180,21 @@ export class VectorStyle implements IVectorStyle {
     previousFields: IField[],
     mapColors: string[]
   ) {
-    const invalidDynamicProperties = (Object.keys(originalProperties) as VECTOR_STYLES[]).filter(
-      (key) => {
-        const dynamicOptions = getDynamicOptions(originalProperties, key);
-        if (!dynamicOptions || !dynamicOptions.field || !dynamicOptions.field.name) {
-          return;
-        }
-
-        const matchingField = nextFields.find((field) => {
-          return (
-            dynamicOptions && dynamicOptions.field && dynamicOptions.field.name === field.getName()
-          );
-        });
-        return !matchingField;
+    const invalidStyleNames: VECTOR_STYLES[] = (Object.keys(
+      originalProperties
+    ) as VECTOR_STYLES[]).filter((key) => {
+      const dynamicOptions = getDynamicOptions(originalProperties, key);
+      if (!dynamicOptions || !dynamicOptions.field || !dynamicOptions.field.name) {
+        return;
       }
-    );
+
+      const hasMatchingField = nextFields.some((field) => {
+        return (
+          dynamicOptions && dynamicOptions.field && dynamicOptions.field.name === field.getName()
+        );
+      });
+      return !hasMatchingField;
+    });
 
     let hasChanges = false;
     for (let i = 0; i < previousFields.length; i++) {
@@ -204,9 +205,9 @@ export class VectorStyle implements IVectorStyle {
       }
 
       // Check if the updated field can be assigned to any of the broken style-properties.
-      for (let j = 0; j < invalidDynamicProperties.length; j++) {
+      for (let j = 0; j < invalidStyleNames.length; j++) {
         const dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions> = this.getAllStyleProperties().find(
-          (d) => d.getStyleName() === invalidDynamicProperties[j]
+          (d) => d.getStyleName() === invalidStyleNames[j]
         ) as IDynamicStyleProperty<DynamicStylePropertyOptions>;
 
         if (!dynamicProperty) {
@@ -214,22 +215,19 @@ export class VectorStyle implements IVectorStyle {
         }
 
         let newFieldDescriptor: StylePropertyField | undefined;
-        const isFieldDataTypeCompatible = styleFieldsHelper.isFieldDataTypeCompatibleWithStyleType(
+        const isFieldDataTypeCompatible = styleFieldsHelper.hasFieldForStyle(
           nextField,
           dynamicProperty.getStyleName()
         );
         if (isFieldDataTypeCompatible) {
-          newFieldDescriptor = await dynamicProperty.rectifyFieldDescriptor(
-            nextField as IESAggField,
-            {
-              origin: previousField.getOrigin(),
-              name: previousField.getName(),
-            }
-          );
+          newFieldDescriptor = await rectifyFieldDescriptor(nextField as IESAggField, {
+            origin: previousField.getOrigin(),
+            name: previousField.getName(),
+          });
 
           if (newFieldDescriptor) {
             hasChanges = true;
-            invalidDynamicProperties.splice(j, 1);
+            invalidStyleNames.splice(j, 1);
             j--;
           }
         }
@@ -998,4 +996,19 @@ function getDynamicOptions(
     return null;
   }
   return propertyDescriptor.options as DynamicStylePropertyOptions;
+}
+
+function rectifyFieldDescriptor(
+  currentField: IESAggField,
+  previousFieldDescriptor: StylePropertyField
+): Promise<StylePropertyField | undefined> {
+  if (previousFieldDescriptor.name.endsWith(TOP_TERM_PERCENTAGE_SUFFIX)) {
+    // Don't support auto-switching for top-term-percentages
+    return;
+  }
+
+  return {
+    origin: previousFieldDescriptor.origin,
+    name: currentField.getName(),
+  };
 }

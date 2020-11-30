@@ -51,10 +51,6 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
   getValueSuggestions(query: string): Promise<string[]>;
-  rectifyFieldDescriptor(
-    currentField: IESAggField,
-    previousFieldDescriptor: StylePropertyField
-  ): Promise<StylePropertyField | undefined>;
   enrichGeoJsonAndMbFeatureState(
     featureCollection: FeatureCollection,
     mbMap: MbMap,
@@ -245,21 +241,6 @@ export class DynamicStyleProperty<T>
           max,
           delta: max - min,
         } as RangeFieldMeta);
-  }
-
-  async rectifyFieldDescriptor(
-    currentField: IESAggField,
-    previousFieldDescriptor: StylePropertyField
-  ): Promise<StylePropertyField | undefined> {
-    if (previousFieldDescriptor.name.endsWith(TOP_TERM_PERCENTAGE_SUFFIX)) {
-      // Don't support auto-switching for top-term-percentages
-      return;
-    }
-
-    return {
-      origin: previousFieldDescriptor.origin,
-      name: currentField.getName(),
-    };
   }
 
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]) {

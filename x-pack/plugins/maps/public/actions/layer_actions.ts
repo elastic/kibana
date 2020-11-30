@@ -286,33 +286,21 @@ export function updateSourceProp(
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    if (propName === 'metrics') {
-      const layer = getLayerById(layerId, getState());
-      const oldFields = await (layer as IVectorLayer).getFields();
-      dispatch({
-        type: UPDATE_SOURCE_PROP,
-        layerId,
-        propName,
-        value,
-      });
-      if (newLayerType) {
-        dispatch(updateLayerType(layerId, newLayerType));
-      }
-      await dispatch(updateStyleProperties(layerId, oldFields as IESAggField[]));
-      dispatch(syncDataForLayerId(layerId));
-    } else {
-      dispatch({
-        type: UPDATE_SOURCE_PROP,
-        layerId,
-        propName,
-        value,
-      });
-      if (newLayerType) {
-        dispatch(updateLayerType(layerId, newLayerType));
-      }
-      // await dispatch(updateStyleProperties(layerId));
-      dispatch(syncDataForLayerId(layerId));
+    const layer = getLayerById(layerId, getState());
+    const previousFields = await (layer as IVectorLayer).getFields();
+    dispatch({
+      type: UPDATE_SOURCE_PROP,
+      layerId,
+      propName,
+      value,
+    });
+    if (newLayerType) {
+      dispatch(updateLayerType(layerId, newLayerType));
     }
+    if (propName === 'metrics') {
+      await dispatch(updateStyleProperties(layerId, previousFields as IESAggField[]));
+    }
+    dispatch(syncDataForLayerId(layerId));
   };
 }
 
@@ -507,13 +495,12 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor: StyleDescripto
 
 export function setJoinsForLayer(layer: ILayer, joins: JoinDescriptor[]) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    const previousFields = await (layer as IVectorLayer).getFields();
     await dispatch({
       type: SET_JOINS,
       layer,
       joins,
     });
-
-    const previousFields = await (layer as IVectorLayer).getFields();
     await dispatch(updateStyleProperties(layer.getId(), previousFields));
     dispatch(syncDataForLayerId(layer.getId()));
   };
