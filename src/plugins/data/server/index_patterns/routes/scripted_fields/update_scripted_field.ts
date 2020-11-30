@@ -77,6 +77,10 @@ export const registerUpdateScriptedFieldRoute = (router: IRouter) => {
 
           const field = ({ ...req.body.field, name } as unknown) as FieldSpec;
 
+          if (!field.scripted) {
+            throw new Error('Only scripted fields can be updated.');
+          }
+
           const indexPattern = await ip.get(id);
           let fieldObject = indexPattern.fields.getByName(field.name);
 

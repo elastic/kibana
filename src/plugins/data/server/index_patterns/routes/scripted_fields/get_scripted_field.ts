@@ -57,6 +57,10 @@ export const registerGetScriptedFieldRoute = (router: IRouter) => {
             throw new ErrorIndexPatternFieldNotFound(id, name);
           }
 
+          if (!field.scripted) {
+            throw new Error('Only scripted fields can be retrieved.');
+          }
+
           return res.ok({
             headers: {
               'content-type': 'application/json',

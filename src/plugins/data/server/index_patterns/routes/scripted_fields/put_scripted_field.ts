@@ -54,6 +54,10 @@ export const registerPutScriptedFieldRoute = (router: IRouter) => {
             field,
           } = req.body;
 
+          if (!field.scripted) {
+            throw new Error('Only scripted fields can be put.');
+          }
+
           const indexPattern = await ip.get(id);
 
           const oldFieldObject = indexPattern.fields.getByName(field.name);
