@@ -55,8 +55,8 @@ export function getInvalidFieldMessage(
   );
   return isInvalid
     ? [
-        i18n.translate('xpack.lens.indexPattern.invalidSourceField', {
-          defaultMessage: 'Field {invalidField} has an invalid reference',
+        i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
+          defaultMessage: 'Field {invalidField} was not found',
           values: { invalidField: sourceField },
         }),
       ]

@@ -518,7 +518,7 @@ describe('last_value', () => {
         },
       };
       expect(lastValueOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
-        'Field notExisting has an invalid reference',
+        'Field notExisting was not found',
       ]);
     });
     it('shows error message  if the sortField does not exist in index pattern', () => {
@@ -535,7 +535,7 @@ describe('last_value', () => {
         },
       };
       expect(lastValueOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
-        'Field notExisting has an invalid reference',
+        'Field notExisting was not found',
       ]);
     });
     it('shows error message if the sortField is not date', () => {
@@ -552,7 +552,7 @@ describe('last_value', () => {
         },
       };
       expect(lastValueOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
-        'Field bytes has an invalid reference',
+        'Field bytes is not a date field and cannot be used for sorting',
       ]);
     });
   });

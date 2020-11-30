@@ -846,7 +846,7 @@ describe('terms', () => {
         },
       };
       expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
-        'Field notExisting has an invalid reference',
+        'Field notExisting was not found',
       ]);
     });
   });

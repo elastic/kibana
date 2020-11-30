@@ -27,9 +27,15 @@ export function getInvalidSortFieldMessage(sortField: string, indexPattern?: Ind
     return;
   }
   const field = indexPattern.getFieldByName(sortField);
-  if (!(field && field.type === 'date')) {
-    return i18n.translate('xpack.lens.indexPattern.lastValue.invalidSortField', {
-      defaultMessage: 'Field {invalidField} has an invalid reference',
+  if (!field) {
+    return i18n.translate('xpack.lens.indexPattern.lastValue.sortFieldNotFound', {
+      defaultMessage: 'Field {invalidField} was not found',
+      values: { invalidField: sortField },
+    });
+  }
+  if (field.type !== 'date') {
+    return i18n.translate('xpack.lens.indexPattern.lastValue.invalidTypeSortField', {
+      defaultMessage: 'Field {invalidField} is not a date field and cannot be used for sorting',
       values: { invalidField: sortField },
     });
   }
