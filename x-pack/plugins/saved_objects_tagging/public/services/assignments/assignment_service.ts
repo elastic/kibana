@@ -7,12 +7,18 @@
 import { HttpSetup } from 'src/core/public';
 import {
   UpdateTagAssignmentsOptions,
-  FindAssignableObjectOptions,
+  FindAssignableObjectsOptions,
   AssignableObject,
 } from '../../../common/assignments';
 
 export interface ITagAssignmentService {
-  findAssignableObject(options: FindAssignableObjectOptions): Promise<AssignableObject[]>;
+  /**
+   * Search API that only returns objects that are effectively assignable to tags for the current user.
+   */
+  findAssignableObjects(options: FindAssignableObjectsOptions): Promise<AssignableObject[]>;
+  /**
+   * Updates the assignments for given tag ids, by adding or removing object assignments to them.
+   */
   updateTagAssignments(options: UpdateTagAssignmentsOptions): Promise<void>;
   /**
    * Return the list of saved object types the user can assign tags to.
@@ -41,7 +47,7 @@ export class TagAssignmentService implements ITagAssignmentService {
     this.http = http;
   }
 
-  public async findAssignableObject({ search, types, maxResults }: FindAssignableObjectOptions) {
+  public async findAssignableObjects({ search, types, maxResults }: FindAssignableObjectsOptions) {
     const { objects } = await this.http.get<FindAssignableObjectResponse>(
       '/internal/saved_objects_tagging/assignments/_find_assignable_objects',
       {

@@ -20,9 +20,9 @@ describe('TagAssignmentService', () => {
     http.post.mockResolvedValue({});
   });
 
-  describe('#findAssignableObject', () => {
+  describe('#findAssignableObjects', () => {
     it('calls `http.get` with the correct parameters', async () => {
-      await service.findAssignableObject({
+      await service.findAssignableObjects({
         maxResults: 50,
         search: 'term',
         types: ['dashboard', 'maps'],
@@ -49,7 +49,7 @@ describe('TagAssignmentService', () => {
         objects: results,
       });
 
-      const objects = await service.findAssignableObject({});
+      const objects = await service.findAssignableObjects({});
       expect(objects).toEqual(results);
     });
   });

@@ -16,7 +16,7 @@ import { SecurityPluginSetup } from '../../../../security/server';
 import {
   AssignableObject,
   UpdateTagAssignmentsOptions,
-  FindAssignableObjectOptions,
+  FindAssignableObjectsOptions,
   getKey,
   ObjectReference,
 } from '../../../common/assignments';
@@ -52,7 +52,7 @@ export class AssignmentService {
     search,
     types,
     maxResults = 100,
-  }: FindAssignableObjectOptions): Promise<AssignableObject[]> {
+  }: FindAssignableObjectsOptions): Promise<AssignableObject[]> {
     const searchedTypes = types
       ? types.filter((type) => taggableTypes.includes(type))
       : taggableTypes;

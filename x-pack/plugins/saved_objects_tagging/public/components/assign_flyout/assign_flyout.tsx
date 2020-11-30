@@ -62,7 +62,7 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
       setLoading(true);
       const { queryText, selectedTypes } = parseQuery(query);
 
-      const fetched = await assignmentService.findAssignableObject({
+      const fetched = await assignmentService.findAssignableObjects({
         search: queryText ? `${queryText}*` : undefined,
         types: selectedTypes,
         maxResults: 1000,

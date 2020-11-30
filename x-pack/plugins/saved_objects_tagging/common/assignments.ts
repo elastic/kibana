@@ -27,7 +27,7 @@ export interface UpdateTagAssignmentsOptions {
   unassign: ObjectReference[];
 }
 
-export interface FindAssignableObjectOptions {
+export interface FindAssignableObjectsOptions {
   search?: string;
   maxResults?: number;
   types?: string[];
