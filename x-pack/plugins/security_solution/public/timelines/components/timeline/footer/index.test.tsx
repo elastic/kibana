@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
+import React from 'react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
 

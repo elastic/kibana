@@ -22,6 +22,7 @@ import { search } from '../../notes/helpers';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
+  margin: 0;
   overflow: hidden;
 `;
 
@@ -66,7 +67,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
   return (
     <FullWidthFlexGroup>
       <ScrollableFlexItem grow={2}>
-        <StyledPanel>
+        <StyledPanel paddingSize="none">
           <EuiTitle>
             <h3>{'Notes'}</h3>
           </EuiTitle>

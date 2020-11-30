@@ -29,7 +29,7 @@ const Container = styled.div`
   transform: translateY(calc(100% - ${SHOW_HIDE_TRANSLATE_X}px));
   user-select: none;
   width: 100%;
-  z-index: ${({ theme }) => theme.eui.euiZLevel9};
+  z-index: ${({ theme }) => theme.eui.euiZLevel6};
 
   .${IS_DRAGGING_CLASS_NAME} & {
     transform: none;

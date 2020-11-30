@@ -86,6 +86,7 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ apolloClient, filte
   const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
   const timelineType = TimelineType.default;
   const { timelineStatus } = useTimelineStatus({ timelineType });
+
   useEffect(() => {
     fetchAllTimeline({
       pageInfo: {

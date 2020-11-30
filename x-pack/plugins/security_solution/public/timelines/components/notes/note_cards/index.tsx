@@ -54,7 +54,7 @@ interface Props {
 /** A view for entering and reviewing notes */
 export const NoteCards = React.memo<Props>(
   ({ associateNote, noteIds, showAddNote, toggleShowAddNote }) => {
-    const getNotesByIds = appSelectors.notesByIdsSelector();
+    const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
     const notesById = useDeepEqualSelector(getNotesByIds);
     const items = useMemo(() => appSelectors.getNotes(notesById, noteIds), [notesById, noteIds]);
     const [newNote, setNewNote] = useState('');

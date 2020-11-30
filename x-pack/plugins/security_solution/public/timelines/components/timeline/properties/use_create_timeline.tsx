@@ -20,15 +20,13 @@ import { inputsActions, inputsSelectors } from '../../../../common/store/inputs'
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
-export const useCreateTimeline = ({
-  timelineId,
-  timelineType,
-  closeGearMenu,
-}: {
+interface Props {
   timelineId?: string;
   timelineType: TimelineTypeLiteral;
   closeGearMenu?: () => void;
-}) => {
+}
+
+export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
   const dispatch = useDispatch();
   const existingIndexNamesSelector = useMemo(
     () => sourcererSelectors.getAllExistingIndexNamesSelector(),
@@ -92,19 +90,11 @@ export const useCreateTimeline = ({
     }
   }, [createTimeline, timelineId, timelineType, closeGearMenu]);
 
-  return { handleCreateNewTimeline };
+  return handleCreateNewTimeline;
 };
 
-export const useCreateTimelineButton = ({
-  timelineId,
-  timelineType,
-  closeGearMenu,
-}: {
-  timelineId?: string;
-  timelineType: TimelineTypeLiteral;
-  closeGearMenu?: () => void;
-}) => {
-  const { handleCreateNewTimeline } = useCreateTimeline({
+export const useCreateTimelineButton = ({ timelineId, timelineType, closeGearMenu }: Props) => {
+  const handleCreateNewTimeline = useCreateTimeline({
     timelineId,
     timelineType,
     closeGearMenu,
@@ -131,6 +121,7 @@ export const useCreateTimelineButton = ({
       };
       const dataTestSubjPrefix =
         timelineType === TimelineType.template ? `template-timeline-new` : `timeline-new`;
+
       return outline ? (
         <EuiButton data-test-subj={`${dataTestSubjPrefix}-with-border`} {...buttonProps}>
           {title}

@@ -37,7 +37,7 @@ jest.mock('../timeline', () => ({
   StatefulTimeline: () => <div />,
 }));
 
-describe.skip('Flyout', () => {
+describe('Flyout', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
 
@@ -55,19 +55,19 @@ describe.skip('Flyout', () => {
       expect(wrapper.find('Flyout')).toMatchSnapshot();
     });
 
-    test('it renders the default flyout state as a button', () => {
+    test('it renders the default flyout state as a bottom bar', () => {
       const wrapper = mount(
         <TestProviders>
           <Flyout timelineId="test" />
         </TestProviders>
       );
 
-      expect(
-        wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').first().text()
-      ).toContain('Timeline');
+      expect(wrapper.find('[data-test-subj="flyoutBottomBar"]').first().text()).toContain(
+        'Untitled timeline'
+      );
     });
 
-    test('it does NOT render the fly out button when its state is set to flyout is true', () => {
+    test('it does NOT render the fly out bottom bar when its state is set to flyout is true', () => {
       const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
       const storeShowIsTrue = createStore(
         stateShowIsTrue,

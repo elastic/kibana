@@ -64,11 +64,12 @@ interface HeaderGlobalProps {
   hideDetectionEngine?: boolean;
   isFixed?: boolean;
 }
+
 export const HeaderGlobal = React.memo(
   forwardRef<HTMLDivElement, HeaderGlobalProps>(
     ({ hideDetectionEngine = false, isFixed = true }, ref) => {
       const { globalHeaderPortalNode } = useGlobalHeaderPortal();
-      const { globalFullScreen } = useFullScreen();
+      const { globalFullScreen, timelineFullScreen } = useFullScreen();
       const search = useGetUrlSearch(navTabs.overview);
       const { application, http } = useKibana().services;
       const { navigateToApp } = application;
@@ -82,7 +83,7 @@ export const HeaderGlobal = React.memo(
       );
       return (
         <Wrapper ref={ref} $isFixed={isFixed}>
-          <WrapperContent $globalFullScreen={globalFullScreen}>
+          <WrapperContent $globalFullScreen={globalFullScreen ?? timelineFullScreen}>
             <FlexGroup
               alignItems="center"
               $hasSibling={globalHeaderPortalNode.hasChildNodes()}
@@ -129,8 +130,8 @@ export const HeaderGlobal = React.memo(
                 </EuiFlexGroup>
               </FlexItem>
             </FlexGroup>
-            <OutPortal node={globalHeaderPortalNode} />
           </WrapperContent>
+          <OutPortal node={globalHeaderPortalNode} />
         </Wrapper>
       );
     }

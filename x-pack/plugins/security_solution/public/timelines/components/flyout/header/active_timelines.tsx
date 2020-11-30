@@ -8,11 +8,17 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButtonIcon } from '@elast
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
+import styled from 'styled-components';
 
 import { TimelineType } from '../../../../../common/types/timeline';
 import { UNTITLED_TIMELINE, UNTITLED_TEMPLATE } from '../../timeline/properties/translations';
 import { useCreateTimeline } from '../../timeline/properties/use_create_timeline';
 import { timelineActions } from '../../../store/timeline';
+
+const ButtonWrapper = styled(EuiFlexItem)`
+  flex-direction: row;
+  align-items: center;
+`;
 
 interface ActiveTimelinesProps {
   timelineId: string;
@@ -28,7 +34,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
   isOpen,
 }) => {
   const dispatch = useDispatch();
-  const { handleCreateNewTimeline } = useCreateTimeline({ timelineId, timelineType });
+  const handleCreateNewTimeline = useCreateTimeline({ timelineId, timelineType });
 
   const handleToggleOpen = useCallback(
     () => dispatch(timelineActions.showTimeline({ id: timelineId, show: !isOpen })),
@@ -43,7 +49,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
+      <ButtonWrapper grow={false}>
         <EuiButtonEmpty
           data-test-subj="flyoutOverlay"
           size="s"
@@ -51,14 +57,14 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
           onClick={handleToggleOpen}
         >
           {title}
-          <EuiButtonIcon
-            href="#"
-            iconType="cross"
-            aria-label={`Close ${timelineTitle}`}
-            onClick={handleCreateNewTimeline}
-          />
         </EuiButtonEmpty>
-      </EuiFlexItem>
+        <EuiButtonIcon
+          href="#"
+          iconType="cross"
+          aria-label={`Close ${timelineTitle}`}
+          onClick={handleCreateNewTimeline}
+        />
+      </ButtonWrapper>
     </EuiFlexGroup>
   );
 };

@@ -19,7 +19,7 @@ import {
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 const StyledEuiFlyout = styled(EuiFlyout)`
-  z-index: 9999;
+  z-index: ${({ theme }) => theme.eui.euiZLevel7};
 `;
 
 interface EventDetailsFlyoutProps {

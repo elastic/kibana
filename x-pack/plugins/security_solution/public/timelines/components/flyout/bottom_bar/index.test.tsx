@@ -8,31 +8,17 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
-import { twoGroups } from '../../timeline/data_providers/mock/mock_and_providers';
+import { FlyoutBottomBar } from '.';
 
-import { FlyoutBottomBar, getBadgeCount } from '.';
-
-describe.skip('FlyoutBottomBar', () => {
-  describe('getBadgeCount', () => {
-    test('it returns 0 when dataProviders is empty', () => {
-      expect(getBadgeCount([])).toEqual(0);
-    });
-
-    test('it returns a count that includes every provider in every group of ANDs', () => {
-      expect(getBadgeCount(twoGroups)).toEqual(6);
-    });
-  });
-
-  test('it renders the expected button text', () => {
+describe('FlyoutBottomBar', () => {
+  test('it renders the expected bottom bar', () => {
     const wrapper = mount(
       <TestProviders>
         <FlyoutBottomBar timelineId="test" />
       </TestProviders>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').first().text()
-    ).toEqual('Timeline');
+    expect(wrapper.find('[data-test-subj="flyoutBottomBar"]').exists()).toBeTruthy();
   });
 
   test('it renders the data providers drop target area', () => {

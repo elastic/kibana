@@ -145,7 +145,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   utilityBar,
   graphEventId,
 }) => {
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen, timelineFullScreen } = useFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
@@ -270,7 +270,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               id={!resolverIsShowing(graphEventId) ? id : undefined}
               height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
               subtitle={utilityBar ? undefined : subtitle}
-              title={inspect ? justTitle : titleWithExitFullScreen}
+              title={timelineFullScreen ? justTitle : titleWithExitFullScreen}
             >
               {HeaderSectionContent}
             </HeaderSection>
@@ -287,7 +287,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               />
 
               {graphEventId && <GraphOverlay isEventViewer={true} timelineId={id} />}
-              <FullWidthFlexGroup $visible={!graphEventId}>
+              <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
                     browserFields={browserFields}

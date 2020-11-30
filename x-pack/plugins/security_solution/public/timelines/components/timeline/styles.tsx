@@ -25,8 +25,8 @@ export const TimelineBodyGlobalStyle = createGlobalStyle`
 
 export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
   className: `${SELECTOR_TIMELINE_BODY_CLASS_NAME} ${className}`,
-}))<{ bodyHeight?: number }>`
-  height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
+}))`
+  height: auto;
   overflow: auto;
   scrollbar-width: thin;
   flex: 1;

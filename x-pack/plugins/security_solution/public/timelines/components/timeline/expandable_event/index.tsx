@@ -6,7 +6,6 @@
 
 import { EuiTextColor, EuiLoadingContent, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { TimelineExpandedEvent } from '../../../../../common/types/timeline';
@@ -18,14 +17,6 @@ import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { getColumnHeaders } from '../body/column_headers/helpers';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import * as i18n from './translations';
-
-const ExpandableDetails = styled.div`
-  .euiAccordion__button {
-    display: none;
-  }
-`;
-
-ExpandableDetails.displayName = 'ExpandableDetails';
 
 interface Props {
   browserFields: BrowserFields;

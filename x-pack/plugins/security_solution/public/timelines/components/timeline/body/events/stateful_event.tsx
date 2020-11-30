@@ -132,6 +132,16 @@ const StatefulEventComponent: React.FC<Props> = ({
     [dispatch, event, isEventPinned, onPinEvent, timelineId]
   );
 
+  const RowRendererContent = useMemo(
+    () =>
+      getRowRenderer(event.ecs, rowRenderers).renderRow({
+        browserFields,
+        data: event.ecs,
+        timelineId,
+      }),
+    [browserFields, event.ecs, rowRenderers, timelineId]
+  );
+
   return (
     <EventsTrGroup
       className={STATEFUL_EVENT_CSS_CLASS_NAME}
@@ -182,11 +192,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           />
         </EventsTrSupplement>
 
-        {getRowRenderer(event.ecs, rowRenderers).renderRow({
-          browserFields,
-          data: event.ecs,
-          timelineId,
-        })}
+        {RowRendererContent}
       </EventsTrSupplementContainerWrapper>
     </EventsTrGroup>
   );

@@ -12,17 +12,6 @@ const fadeInEffect = keyframes`
   to { opacity: 1; }
 `;
 
-export const TimelineProperties = styled.div`
-  flex: 1;
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  user-select: none;
-`;
-
-TimelineProperties.displayName = 'TimelineProperties';
-
 export const NameField = styled(EuiFieldText)`
   .euiToolTipAnchor {
     display: block;

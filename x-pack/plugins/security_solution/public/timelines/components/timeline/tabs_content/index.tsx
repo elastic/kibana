@@ -5,7 +5,7 @@
  */
 
 import { EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
-import React, { lazy, memo, Suspense, useCallback, useMemo } from 'react';
+import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
@@ -132,6 +132,12 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
       ),
     [dispatch, timelineId]
   );
+
+  useEffect(() => {
+    if (!graphEventId && activeTab === TimelineTabs.graph) {
+      setQueryAsActiveTab();
+    }
+  }, [activeTab, graphEventId, setQueryAsActiveTab]);
 
   return (
     <>
