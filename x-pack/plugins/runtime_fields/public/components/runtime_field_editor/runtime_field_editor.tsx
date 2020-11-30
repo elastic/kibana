@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { DocLinksStart } from 'src/core/public';
+import { PainlessAutocompleteField } from '@kbn/monaco';
 
 import { RuntimeField } from '../../types';
 import { getLinks } from '../../lib';
@@ -15,10 +16,23 @@ export interface Props {
   docLinks: DocLinksStart;
   defaultValue?: RuntimeField;
   onChange?: FormProps['onChange'];
+  fieldsToAutocomplete?: PainlessAutocompleteField[];
 }
 
-export const RuntimeFieldEditor = ({ defaultValue, onChange, docLinks }: Props) => {
+export const RuntimeFieldEditor = ({
+  defaultValue,
+  onChange,
+  docLinks,
+  fieldsToAutocomplete,
+}: Props) => {
   const links = getLinks(docLinks);
 
-  return <RuntimeFieldForm links={links} defaultValue={defaultValue} onChange={onChange} />;
+  return (
+    <RuntimeFieldForm
+      links={links}
+      defaultValue={defaultValue}
+      onChange={onChange}
+      fieldsToAutocomplete={fieldsToAutocomplete}
+    />
+  );
 };
