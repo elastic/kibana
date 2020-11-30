@@ -99,6 +99,12 @@ export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
 export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 export { countOperation } from './count';
+export {
+  cumulativeSumOperation,
+  counterRateOperation,
+  derivativeOperation,
+  movingAverageOperation,
+} from './calculations';
 
 /**
  * Properties passed to the operation-specific part of the popover editor
