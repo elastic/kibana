@@ -188,9 +188,14 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
         // if datafeed has any nested terms aggregations at all
         const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
         const termsField = findAggField(aggregations, 'terms', true);
-        if (termsField !== undefined && Object.keys(termsField).length > 1) {
+        if (
+          termsField !== undefined &&
+          Object.keys(termsField).length > 1 &&
+          job.model_plot_config?.enabled !== true
+        ) {
           errorMessage = i18n.translate('xpack.ml.timeSeriesJob.nestedTermsAggregationsMessage', {
-            defaultMessage: 'detected nested terms aggregations in the datafeed configurations',
+            defaultMessage:
+              'there are nested terms aggregations in the datafeed and model plot is disabled',
           });
         }
 
@@ -201,7 +206,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
             'xpack.ml.timeSeriesJob.varyingBucketSpanAggregationInterval',
             {
               defaultMessage:
-                'detected varying bucket span and aggregation interval for aggregation fields',
+                'bucket span and aggregation interval is not the same for datafeed with aggregation fields',
             }
           );
         }

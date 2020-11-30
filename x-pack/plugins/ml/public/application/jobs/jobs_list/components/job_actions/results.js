@@ -41,7 +41,7 @@ export function ResultLinks({ jobs }) {
   const singleMetricDisabledMessageText =
     singleMetricDisabledMessage !== undefined
       ? i18n.translate('xpack.ml.jobsList.resultActions.singleMetricDisabledMessageText', {
-          defaultMessage: 'Disabled because {reason}',
+          defaultMessage: 'Disabled because {reason}.',
           values: {
             reason: singleMetricDisabledMessage,
           },
