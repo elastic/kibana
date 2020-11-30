@@ -29,7 +29,6 @@ describe('alertType', () => {
       geoField: 'testField',
       entity: 'testField',
       dateField: 'testField',
-      trackingEvent: 'testEvent',
       boundaryType: 'testType',
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndex',
@@ -39,28 +38,5 @@ describe('alertType', () => {
     };
 
     expect(alertType.validate?.params?.validate(params)).toBeTruthy();
-  });
-
-  it('validator fails with invalid params', async () => {
-    const paramsSchema = alertType.validate?.params;
-    if (!paramsSchema) throw new Error('params validator not set');
-
-    const params: GeoContainmentParams = {
-      index: 'testIndex',
-      indexId: 'testIndexId',
-      geoField: 'testField',
-      entity: 'testField',
-      dateField: 'testField',
-      trackingEvent: '',
-      boundaryType: 'testType',
-      boundaryIndexTitle: '',
-      boundaryIndexId: 'testIndex',
-      boundaryGeoField: 'testField',
-      boundaryNameField: 'testField',
-    };
-
-    expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
-      `"[trackingEvent]: value has length [0] but it must have a minimum length of [1]."`
-    );
   });
 });

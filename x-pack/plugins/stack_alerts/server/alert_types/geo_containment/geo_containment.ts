@@ -10,7 +10,6 @@ import { Logger } from 'src/core/server';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices, AlertTypeState } from '../../../../alerts/server';
 import { ActionGroupId, GEO_CONTAINMENT_ID, GeoContainmentParams } from './alert_type';
-import { ResolvedActionGroup } from '../../../../alerts/common';
 
 interface LatestEntityLocation {
   location: number[];
@@ -158,10 +157,6 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       currIntervalStartTime,
       currIntervalEndTime
     );
-    // No need to compare if no changes in current interval
-    if (!_.get(currentIntervalResults, 'hits.total.value')) {
-      return state;
-    }
 
     const currLocationMap: Map<string, EntityLocation> = transformResults(
       currentIntervalResults,
@@ -171,6 +166,7 @@ export const getGeoContainmentExecutor = (log: Logger) =>
 
     // Cycle through instances that received no updates and keep active
     const activeAlertsList = state.activeAlertsList || {};
+
     _.forEach(activeAlertsList, (val, key) => {
       if (!currLocationMap.has(key)) {
         const containingBoundaryName =
@@ -185,9 +181,9 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
       const context = {
         entityId: entityName,
-        entityDateTime: new Date(dateInShape),
+        entityDateTime: new Date(dateInShape).getTime(),
         entityDocumentId: docId,
-        detectionDateTime: new Date(currIntervalEndTime),
+        detectionDateTime: new Date(currIntervalEndTime).getTime(),
         entityLocation: `POINT (${location[0]} ${location[1]})`,
         containingBoundaryId: shapeLocationId,
         containingBoundaryName,
@@ -195,9 +191,7 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       const alertInstanceId = `${entityName}-${containingBoundaryName}`;
       if (shapeLocationId !== OTHER_CATEGORY) {
         activeAlertsList[entityName] = context;
-        services
-          .alertInstanceFactory(alertInstanceId)
-          .scheduleActions(ResolvedActionGroup.id, context);
+        services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
       } else {
         delete activeAlertsList[entityName];
       }

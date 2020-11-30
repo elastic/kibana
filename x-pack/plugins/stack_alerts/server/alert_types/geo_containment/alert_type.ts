@@ -91,7 +91,6 @@ export const ParamsSchema = schema.object({
   geoField: schema.string({ minLength: 1 }),
   entity: schema.string({ minLength: 1 }),
   dateField: schema.string({ minLength: 1 }),
-  trackingEvent: schema.string({ minLength: 1 }),
   boundaryType: schema.string({ minLength: 1 }),
   boundaryIndexTitle: schema.string({ minLength: 1 }),
   boundaryIndexId: schema.string({ minLength: 1 }),
@@ -108,7 +107,6 @@ export interface GeoContainmentParams {
   geoField: string;
   entity: string;
   dateField: string;
-  trackingEvent: string;
   boundaryType: string;
   boundaryIndexTitle: string;
   boundaryIndexId: string;
