@@ -17,25 +17,4 @@
  * under the License.
  */
 
-import {
-  getIndexPatternLoadMeta,
-  IndexPatternLoadExpressionFunctionDefinition,
-  IndexPatternLoadStartDependencies,
-} from '../../../common/index_patterns/expressions';
-
-export function getIndexPatternLoad({
-  getStartDependencies,
-}: {
-  getStartDependencies: () => Promise<IndexPatternLoadStartDependencies>;
-}) {
-  return (): IndexPatternLoadExpressionFunctionDefinition => ({
-    ...getIndexPatternLoadMeta(),
-    async fn(input, args) {
-      const { indexPatterns } = await getStartDependencies();
-
-      const indexPattern = await indexPatterns.get(args.id);
-
-      return { type: 'index_pattern', value: indexPattern.toSpec() };
-    },
-  });
-}
+export * from './load_index_pattern';

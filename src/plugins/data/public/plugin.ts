@@ -69,7 +69,7 @@ import {
 } from './actions';
 
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
-import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
+import { getIndexPatternLoad } from './index_patterns/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 
 declare module '../../ui_actions/public' {
@@ -109,7 +109,14 @@ export class DataPublicPlugin
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    expressions.registerFunction(indexPatternLoad);
+    expressions.registerFunction(
+      getIndexPatternLoad({
+        getStartDependencies: async () => {
+          const [, , { indexPatterns }] = await core.getStartServices();
+          return { indexPatterns };
+        },
+      })
+    );
     expressions.registerFunction(
       getEsaggs({
         getStartDependencies: async () => {
