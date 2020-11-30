@@ -11,21 +11,21 @@ exports[`LocationStatusTags component renders properly against props 1`] = `
             "color": "#d3dae6",
             "label": "Berlin",
             "status": "up",
-            "timestamp": "Oct 26, 2020 7:49:20 AM",
+            "timestamp": "Oct 26, 2020 2:49:20 AM",
           },
           Object {
             "availability": 100,
             "color": "#bd271e",
             "label": "Berlin",
             "status": "down",
-            "timestamp": "Oct 26, 2020 7:49:20 AM",
+            "timestamp": "Oct 26, 2020 2:49:20 AM",
           },
           Object {
             "availability": 100,
             "color": "#d3dae6",
             "label": "Islamabad",
             "status": "up",
-            "timestamp": "Oct 26, 2020 7:49:20 AM",
+            "timestamp": "Oct 26, 2020 2:49:20 AM",
           },
         ]
       }
@@ -189,7 +189,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 <span
                   class="euiTableCellContent__text"
                 >
-                  7:44:21 AM
+                  Oct 26, 2020 2:49:20 AM
                 </span>
               </div>
             </td>
@@ -260,7 +260,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 <span
                   class="euiTableCellContent__text"
                 >
-                  7:49:16 AM
+                  Oct 26, 2020 2:49:20 AM
                 </span>
               </div>
             </td>
@@ -427,7 +427,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 <span
                   class="euiTableCellContent__text"
                 >
-                  Nov 25, 2020 7:49:21 AM
+                  Oct 26, 2020 2:49:20 AM
                 </span>
               </div>
             </td>
@@ -498,7 +498,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 <span
                   class="euiTableCellContent__text"
                 >
-                  7:49:16 AM
+                  Oct 26, 2020 2:49:20 AM
                 </span>
               </div>
             </td>
@@ -665,7 +665,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class="euiTableCellContent__text"
                 >
-                  7:44:20 AM
+                  Oct 26, 2020 2:49:20 AM
                 </span>
               </div>
             </td>
@@ -736,7 +736,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class="euiTableCellContent__text"
                 >
-                  7:49:15 AM
+                  Oct 26, 2020 2:49:20 AM
                 </span>
               </div>
             </td>
@@ -807,7 +807,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class="euiTableCellContent__text"
                 >
-                  Oct 26, 2020 7:49:20 AM
+                  Oct 26, 2020 2:49:20 AM
                 </span>
               </div>
             </td>
@@ -878,7 +878,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class="euiTableCellContent__text"
                 >
-                  Nov 30, 2015 7:49:20 AM
+                  Oct 26, 2020 2:49:20 AM
                 </span>
               </div>
             </td>
@@ -949,7 +949,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class="euiTableCellContent__text"
                 >
-                  Nov 30, 2015 7:49:20 AM
+                  Oct 26, 2020 2:49:20 AM
                 </span>
               </div>
             </td>

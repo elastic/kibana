@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../index';
@@ -24,21 +23,21 @@ describe('LocationStatusTags component', () => {
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 'w').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 'w').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
       {
         summary: { up: 0, down: 2 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 'w').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
@@ -52,56 +51,56 @@ describe('LocationStatusTags component', () => {
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 's').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 'm').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 'h').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Tokyo', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 'd').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'New York', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 'w').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Toronto', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 'M').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Sydney', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 'y').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Paris', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 'y').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
@@ -115,14 +114,14 @@ describe('LocationStatusTags component', () => {
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 's').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 'd').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
@@ -136,14 +135,14 @@ describe('LocationStatusTags component', () => {
       {
         summary: { up: 0, down: 2 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 's').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
       {
         summary: { up: 0, down: 2 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment().subtract('5', 'm').toISOString(),
+        timestamp: 'Oct 26, 2020 7:49:20 AM',
         up_history: 4,
         down_history: 0,
       },
