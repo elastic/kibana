@@ -17,10 +17,16 @@
  * under the License.
  */
 
-import { ID } from './constants';
-import { lexerRules } from './lexer_rules';
-import { getSuggestionProvider } from './language';
+// This module is intended to be run inside of a webworker
+/* eslint-disable @kbn/eslint/module_migration */
 
-export const PainlessLang = { ID, getSuggestionProvider, lexerRules };
+import 'regenerator-runtime/runtime';
+// @ts-ignore
+import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
+import { PainlessWorker } from './painless_worker';
 
-export { PainlessContext } from './types';
+self.onmessage = () => {
+  worker.initialize((ctx: any, createData: any) => {
+    return new PainlessWorker();
+  });
+};

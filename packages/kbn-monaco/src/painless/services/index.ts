@@ -17,10 +17,5 @@
  * under the License.
  */
 
-import { ID } from './constants';
-import { lexerRules } from './lexer_rules';
-import { getSuggestionProvider } from './language';
-
-export const PainlessLang = { ID, getSuggestionProvider, lexerRules };
-
-export { PainlessContext } from './types';
+export { EditorStateService, EditorState } from './editor_state';
+export { WorkerProxyService } from './worker_proxy';

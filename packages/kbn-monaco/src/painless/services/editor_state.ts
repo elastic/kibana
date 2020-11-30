@@ -17,10 +17,29 @@
  * under the License.
  */
 
-import { ID } from './constants';
-import { lexerRules } from './lexer_rules';
-import { getSuggestionProvider } from './language';
+import { PainlessContext, Field } from '../types';
 
-export const PainlessLang = { ID, getSuggestionProvider, lexerRules };
+export interface EditorState {
+  context: PainlessContext;
+  fields?: Field[];
+}
 
-export { PainlessContext } from './types';
+export class EditorStateService {
+  context: PainlessContext = 'painless_test';
+  fields: Field[] = [];
+
+  public getState(): EditorState {
+    return {
+      context: this.context,
+      fields: this.fields,
+    };
+  }
+
+  public setup(context: PainlessContext, fields?: Field[]) {
+    this.context = context;
+
+    if (fields) {
+      this.fields = fields;
+    }
+  }
+}
