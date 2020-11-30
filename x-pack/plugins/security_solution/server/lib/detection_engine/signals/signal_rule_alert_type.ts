@@ -8,6 +8,7 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 
+import { Filter } from 'src/plugins/data/common';
 import {
   SIGNALS_ID,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
@@ -29,6 +30,7 @@ import {
   RuleAlertAttributes,
   EqlSignalSearchResponse,
   BaseSignalHit,
+  ThresholdQueryBucket,
 } from './types';
 import {
   getGapBetweenRuns,
@@ -46,6 +48,7 @@ import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
 import { findThresholdSignals } from './find_threshold_signals';
+import { findPreviousThresholdSignals } from './find_previous_threshold_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
 import {
@@ -300,6 +303,46 @@ export const signalRulesAlertType = ({
             lists: exceptionItems ?? [],
           });
 
+          const {
+            searchResult: previousSignals,
+            searchErrors: previousSearchErrors,
+          } = await findPreviousThresholdSignals({
+            indexPattern: [outputIndex],
+            from,
+            to,
+            services,
+            logger,
+            ruleId,
+            bucketByField: threshold.field,
+            timestampOverride,
+            buildRuleMessage,
+          });
+
+          previousSignals.aggregations.threshold.buckets.forEach((bucket: ThresholdQueryBucket) => {
+            esFilter.bool.filter.push(({
+              bool: {
+                must_not: {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          [threshold.field ?? 'signal.rule.rule_id']: bucket.key,
+                        },
+                      },
+                      {
+                        range: {
+                          [timestampOverride ?? '@timestamp']: {
+                            lte: bucket.lastSignalTimestamp.value_as_string,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            } as unknown) as Filter);
+          });
+
           const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
             inputIndexPattern: inputIndex,
             from,
@@ -349,7 +392,7 @@ export const signalRulesAlertType = ({
             }),
             createSearchAfterReturnType({
               success,
-              errors: [...errors, ...searchErrors],
+              errors: [...errors, ...previousSearchErrors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
             }),
