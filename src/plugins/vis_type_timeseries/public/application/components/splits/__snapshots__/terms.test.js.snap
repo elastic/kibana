@@ -43,8 +43,9 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         }
         labelType="label"
       >
-        <InjectIntl(FieldSelectUi)
+        <FieldSelect
           data-test-subj="groupByField"
+          disabled={false}
           fields={
             Object {
               "kibana_sample_data_flights": Array [
@@ -63,6 +64,8 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
           }
           indexPattern="kibana_sample_data_flights"
           onChange={[Function]}
+          placeholder="Select field..."
+          restrict={Array []}
           type="terms"
           value="OriginCityName"
         />

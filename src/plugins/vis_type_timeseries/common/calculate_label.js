@@ -20,6 +20,7 @@
 import { includes, startsWith } from 'lodash';
 import { lookup } from './agg_lookup';
 import { i18n } from '@kbn/i18n';
+import { extractTimefieldLabel } from './timefield_utils';
 
 const paths = [
   'cumulative_sum',
@@ -73,7 +74,7 @@ export function calculateLabel(metric, metrics) {
   if (metric.type === 'positive_rate') {
     return i18n.translate('visTypeTimeseries.calculateLabel.positiveRateLabel', {
       defaultMessage: 'Counter Rate of {field}',
-      values: { field: metric.field },
+      values: { field: extractTimefieldLabel(metric.field) },
     });
   }
   if (metric.type === 'static') {
@@ -112,9 +113,11 @@ export function calculateLabel(metric, metrics) {
       values: { lookupMetricType: lookup[metric.type], targetLabel },
     });
   }
-
   return i18n.translate('visTypeTimeseries.calculateLabel.lookupMetricTypeOfMetricFieldRankLabel', {
     defaultMessage: '{lookupMetricType} of {metricField}',
-    values: { lookupMetricType: lookup[metric.type], metricField: metric.field },
+    values: {
+      lookupMetricType: lookup[metric.type],
+      metricField: extractTimefieldLabel(metric.field),
+    },
   });
 }

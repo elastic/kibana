@@ -30,4 +30,12 @@ export class DefaultSearchStrategy extends AbstractSearchStrategy {
       capabilities: new DefaultSearchCapabilities(req),
     });
   }
+
+  async getFieldsForWildcard<TPayload = unknown>(
+    req: ReqFacade<TPayload>,
+    indexPattern: string,
+    capabilities?: unknown
+  ) {
+    return super.getFieldsForWildcard(req, indexPattern, capabilities);
+  }
 }

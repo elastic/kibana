@@ -17,12 +17,28 @@
  * under the License.
  */
 
-import { MODEL_TYPES } from './model_options';
+/**
+ * Time Range data modes.
+ * @constant
+ * @public
+ */
+export enum TIME_RANGE_DATA_MODES {
+  /**
+   * Entire timerange mode will match all the documents selected in the
+   * timerange timepicker
+   */
+  ENTIRE_TIME_RANGE = 'entire_time_range',
 
-describe('src/legacy/core_plugins/metrics/common/model_options.js', () => {
-  describe('MODEL_TYPES', () => {
-    test('should match a snapshot of constants', () => {
-      expect(MODEL_TYPES).toMatchSnapshot();
-    });
-  });
-});
+  /**
+   * Last value mode will match only the documents for the specified interval
+   * from the end of the timerange.
+   */
+  LAST_VALUE = 'last_value',
+}
+
+/**
+ * Key for getting the Time Range mode from the Panel configuration object.
+ * @constant
+ * @public
+ */
+export const TIME_RANGE_MODE_KEY = 'time_range_mode';

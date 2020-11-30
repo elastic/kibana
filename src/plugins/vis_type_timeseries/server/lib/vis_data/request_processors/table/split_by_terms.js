@@ -19,13 +19,18 @@
 
 import { overwrite } from '../../helpers';
 import { esQuery } from '../../../../../../data/server';
+import { extractTimefieldName } from '../../../../../common/timefield_utils';
 
 export function splitByTerms(req, panel, esQueryConfig, indexPattern) {
   return (next) => (doc) => {
     panel.series
       .filter((c) => c.aggregate_by && c.aggregate_function)
       .forEach((column) => {
-        overwrite(doc, `aggs.pivot.aggs.${column.id}.terms.field`, column.aggregate_by);
+        overwrite(
+          doc,
+          `aggs.pivot.aggs.${column.id}.terms.field`,
+          extractTimefieldName(column.aggregate_by)
+        );
         overwrite(doc, `aggs.pivot.aggs.${column.id}.terms.size`, 100);
 
         if (column.filter) {

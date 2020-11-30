@@ -33,7 +33,7 @@ import {
   EuiFormLabel,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
-import { createSelectHandler } from './lib/create_select_handler';
+import { createSelectHandler, createCustomLabelSelectHandled } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
 import { YesNo } from './yes_no';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
@@ -79,9 +79,6 @@ export const IndexPattern = ({
 }) => {
   const config = getUISettings();
 
-  const handleSelectChange = createSelectHandler(onChange);
-  const handleTextChange = createTextHandler(onChange);
-
   const timeFieldName = `${prefix}time_field`;
   const indexPatternName = `${prefix}index_pattern`;
   const intervalName = `${prefix}interval`;
@@ -99,6 +96,10 @@ export const IndexPattern = ({
     },
     [onChange, maxBarsName]
   );
+
+  const handleFieldsChange = createCustomLabelSelectHandled(onChange);
+  const handleSelectChange = createSelectHandler(onChange);
+  const handleTextChange = createTextHandler(onChange);
 
   const timeRangeOptions = [
     {
@@ -208,7 +209,7 @@ export const IndexPattern = ({
               restrict={RESTRICT_FIELDS}
               value={model[timeFieldName]}
               disabled={disabled}
-              onChange={handleSelectChange(timeFieldName)}
+              onChange={handleFieldsChange(timeFieldName)}
               indexPattern={model[indexPatternName]}
               fields={fields}
               placeholder={isDefaultIndexPatternUsed ? model.default_timefield : undefined}

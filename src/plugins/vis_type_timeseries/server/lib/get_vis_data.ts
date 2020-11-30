@@ -71,6 +71,16 @@ export function getVisData(
         )
         .toPromise();
     },
+    getIndexPatternsService: async () => {
+      const [{ savedObjects, elasticsearch }, { data }] = await framework.core.getStartServices();
+      const savedObjectsClient = savedObjects.getScopedClient(request);
+      const clusterClient = elasticsearch.client.asScoped(request).asCurrentUser;
+
+      return await data.indexPatterns.indexPatternsServiceFactory(
+        savedObjectsClient,
+        clusterClient
+      );
+    },
   };
   const promises = reqFacade.payload.panels.map(getPanelData(reqFacade));
   return Promise.all(promises).then((res) => {

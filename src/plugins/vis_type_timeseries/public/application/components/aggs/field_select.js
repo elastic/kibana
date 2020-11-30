@@ -17,17 +17,19 @@
  * under the License.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
-import { EuiComboBox } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
-import { isFieldEnabled } from '../../lib/check_ui_restrictions';
 import { i18n } from '@kbn/i18n';
+import PropTypes from 'prop-types';
+import { EuiComboBox } from '@elastic/eui';
+
+import { METRIC_TYPES } from '../../../../common/metric_types';
+import { isFieldEnabled } from '../../lib/check_ui_restrictions';
+import { extractTimefieldName } from '../../../../common/timefield_utils';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
 
-function FieldSelectUi({
+export function FieldSelect({
   type,
   fields,
   indexPattern,
@@ -39,20 +41,24 @@ function FieldSelectUi({
   uiRestrictions,
   ...rest
 }) {
-  if (type === 'count') {
+  if (type === METRIC_TYPES.COUNT) {
     return null;
   }
-
   const selectedOptions = [];
+
   const options = Object.values(
     (fields[indexPattern] || []).reduce((acc, field) => {
+      if (placeholder === field?.name) {
+        placeholder = field.label;
+      }
+
       if (
         isFieldTypeEnabled(restrict, field.type) &&
         isFieldEnabled(field.name, type, uiRestrictions)
       ) {
         const item = {
-          label: field.name,
           value: field.name,
+          label: field.label ?? field.name,
         };
 
         if (acc[field.type]) {
@@ -64,7 +70,7 @@ function FieldSelectUi({
           };
         }
 
-        if (value === item.value) {
+        if (extractTimefieldName(value) === item.value) {
           selectedOptions.push(item);
         }
       }
@@ -72,10 +78,6 @@ function FieldSelectUi({
       return acc;
     }, {})
   );
-
-  if (onChange && value && !selectedOptions.length) {
-    onChange();
-  }
 
   return (
     <EuiComboBox
@@ -90,7 +92,7 @@ function FieldSelectUi({
   );
 }
 
-FieldSelectUi.defaultProps = {
+FieldSelect.defaultProps = {
   indexPattern: '',
   disabled: false,
   restrict: [],
@@ -99,7 +101,7 @@ FieldSelectUi.defaultProps = {
   }),
 };
 
-FieldSelectUi.propTypes = {
+FieldSelect.propTypes = {
   disabled: PropTypes.bool,
   fields: PropTypes.object,
   id: PropTypes.string,
@@ -107,9 +109,7 @@ FieldSelectUi.propTypes = {
   onChange: PropTypes.func,
   restrict: PropTypes.array,
   type: PropTypes.string,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   uiRestrictions: PropTypes.object,
   placeholder: PropTypes.string,
 };
-
-export const FieldSelect = injectI18n(FieldSelectUi);

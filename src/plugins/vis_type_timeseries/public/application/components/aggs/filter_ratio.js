@@ -23,7 +23,8 @@ import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
-import { createSelectHandler } from '../lib/create_select_handler';
+import { createSelectHandler, createCustomLabelSelectHandled } from '../lib/create_select_handler';
+
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -54,6 +55,7 @@ export const FilterRatioAgg = (props) => {
     props.onChange,
   ]);
   const handleSelectChange = createSelectHandler(handleChange);
+  const handleFieldsChange = createCustomLabelSelectHandled(handleChange);
   const handleNumeratorQueryChange = useCallback((query) => handleChange({ numerator: query }), [
     handleChange,
   ]);
@@ -176,7 +178,7 @@ export const FilterRatioAgg = (props) => {
                 restrict={getSupportedFieldsByMetricType(model.metric_agg)}
                 indexPattern={indexPattern}
                 value={model.field}
-                onChange={handleSelectChange('field')}
+                onChange={handleFieldsChange('field')}
               />
             </EuiFormRow>
           </EuiFlexItem>

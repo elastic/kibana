@@ -17,10 +17,10 @@
  * under the License.
  */
 
-export const FIELD_TYPES = {
-  BOOLEAN: 'boolean',
-  DATE: 'date',
-  GEO: 'geo_point',
-  NUMBER: 'number',
-  STRING: 'string',
-};
+export enum FIELD_TYPES {
+  BOOLEAN = 'boolean',
+  DATE = 'date',
+  GEO = 'geo_point',
+  NUMBER = 'number',
+  STRING = 'string',
+}

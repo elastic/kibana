@@ -17,23 +17,16 @@
  * under the License.
  */
 
-import { createSelectHandler } from './create_select_handler';
+import { TimeFieldObject } from './types';
 
-describe('createSelectHandler()', () => {
-  let handleChange;
-  let changeHandler;
+const isTimefieldHasCustomLabel = (
+  timeField: any
+): timeField is { name: string; label: string } => {
+  return timeField && timeField.name && timeField.label;
+};
 
-  beforeEach(() => {
-    handleChange = jest.fn();
-    changeHandler = createSelectHandler(handleChange);
-    const fn = changeHandler('test');
-    fn([{ value: 'foo' }]);
-  });
+export const extractTimefieldName = (timeField: TimeFieldObject) =>
+  isTimefieldHasCustomLabel(timeField) ? timeField.name : timeField;
 
-  test('calls handleChange() function with partial', () => {
-    expect(handleChange.mock.calls.length).toEqual(1);
-    expect(handleChange.mock.calls[0][0]).toEqual({
-      test: 'foo',
-    });
-  });
-});
+export const extractTimefieldLabel = (timeField: TimeFieldObject) =>
+  isTimefieldHasCustomLabel(timeField) ? timeField.label : timeField;

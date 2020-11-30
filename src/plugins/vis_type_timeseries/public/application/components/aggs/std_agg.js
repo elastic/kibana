@@ -23,7 +23,7 @@ import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
-import { createSelectHandler } from '../lib/create_select_handler';
+import { createCustomLabelSelectHandled, createSelectHandler } from '../lib/create_select_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -37,8 +37,11 @@ import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_m
 
 export function StandardAgg(props) {
   const { model, panel, series, fields, uiRestrictions } = props;
+
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
+  const handleFieldsChange = createCustomLabelSelectHandled(handleChange);
+
   const restrictFields = getSupportedFieldsByMetricType(model.type);
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
@@ -88,7 +91,7 @@ export function StandardAgg(props) {
                 restrict={restrictFields}
                 indexPattern={indexPattern}
                 value={model.field}
-                onChange={handleSelectChange('field')}
+                onChange={handleFieldsChange('field')}
                 uiRestrictions={uiRestrictions}
                 fullWidth
               />

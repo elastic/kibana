@@ -23,6 +23,7 @@ import { set } from '@elastic/safer-lodash-set';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { MODEL_SCRIPTS } from './moving_fn_scripts';
+import { extractTimefieldName } from '../../../../common/timefield_utils';
 
 function checkMetric(metric, fields) {
   fields.forEach((field) => {
@@ -41,7 +42,7 @@ function stdMetric(bucket) {
   checkMetric(bucket, ['type', 'field']);
   const body = {};
   body[bucket.type] = {
-    field: bucket.field,
+    field: extractTimefieldName(bucket.field),
   };
   return body;
 }
@@ -49,14 +50,14 @@ function stdMetric(bucket) {
 function extendStats(bucket) {
   checkMetric(bucket, ['type', 'field']);
   const body = {
-    extended_stats: { field: bucket.field },
+    extended_stats: { field: extractTimefieldName(bucket.field) },
   };
   if (bucket.sigma) body.extended_stats.sigma = parseInt(bucket.sigma, 10);
   return body;
 }
 
 function extendStatsBucket(bucket, metrics) {
-  const bucketsPath = 'timeseries>' + getBucketsPath(bucket.field, metrics);
+  const bucketsPath = 'timeseries>' + getBucketsPath(extractTimefieldName(bucket.field), metrics);
   const body = { extended_stats_bucket: { buckets_path: bucketsPath } };
   if (bucket.sigma) {
     body.extended_stats_bucket.sigma = parseInt(bucket.sigma, 10);
@@ -116,19 +117,20 @@ export const bucketTransform = {
     checkMetric(bucket, ['type', 'field', 'size']);
     const body = {
       filter: {
-        exists: { field: bucket.field },
+        exists: { field: extractTimefieldName(bucket.field) },
       },
       aggs: {
         docs: {
           top_hits: {
             size: bucket.size,
-            _source: { includes: [bucket.field] },
+            _source: { includes: [extractTimefieldName(bucket.field)] },
           },
         },
       },
     };
     if (bucket.order_by) {
-      set(body, 'aggs.docs.top_hits.sort', [{ [bucket.order_by]: { order: bucket.order } }]);
+      const orderField = extractTimefieldName(bucket.order_by);
+      set(body, 'aggs.docs.top_hits.sort', [{ [orderField]: { order: bucket.order } }]);
     }
     return body;
   },
@@ -152,7 +154,7 @@ export const bucketTransform = {
 
     return {
       percentiles: {
-        field: bucket.field,
+        field: extractTimefieldName(bucket.field),
         percents,
         ...getPercentileHdrParam(bucket),
       },
@@ -164,7 +166,7 @@ export const bucketTransform = {
 
     return {
       percentile_ranks: {
-        field: bucket.field,
+        field: extractTimefieldName(bucket.field),
         values: (bucket.values || []).map((value) => (isEmpty(value) ? 0 : value)),
         ...getPercentileHdrParam(bucket),
       },
@@ -175,7 +177,7 @@ export const bucketTransform = {
     checkMetric(bucket, ['type', 'field']);
     const body = {
       derivative: {
-        buckets_path: getBucketsPath(bucket.field, metrics),
+        buckets_path: getBucketsPath(extractTimefieldName(bucket.field), metrics),
         gap_policy: 'skip', // seems sane
         unit: bucketSize,
       },
@@ -191,7 +193,7 @@ export const bucketTransform = {
     checkMetric(bucket, ['type', 'field']);
     const body = {
       serial_diff: {
-        buckets_path: getBucketsPath(bucket.field, metrics),
+        buckets_path: getBucketsPath(extractTimefieldName(bucket.field), metrics),
         gap_policy: 'skip', // seems sane
         lag: 1,
       },
@@ -207,7 +209,7 @@ export const bucketTransform = {
     checkMetric(bucket, ['type', 'field']);
     return {
       cumulative_sum: {
-        buckets_path: getBucketsPath(bucket.field, metrics),
+        buckets_path: getBucketsPath(extractTimefieldName(bucket.field), metrics),
       },
     };
   },
@@ -217,7 +219,7 @@ export const bucketTransform = {
 
     return {
       moving_fn: {
-        buckets_path: getBucketsPath(bucket.field, metrics),
+        buckets_path: getBucketsPath(extractTimefieldName(bucket.field), metrics),
         window: bucket.window,
         script: MODEL_SCRIPTS[bucket.model_type](bucket),
       },
@@ -251,7 +253,7 @@ export const bucketTransform = {
     const body = {
       bucket_script: {
         buckets_path: {
-          value: getBucketsPath(bucket.field, metrics),
+          value: getBucketsPath(extractTimefieldName(bucket.field), metrics),
         },
         script: {
           source: 'params.value > 0.0 ? params.value : 0.0',

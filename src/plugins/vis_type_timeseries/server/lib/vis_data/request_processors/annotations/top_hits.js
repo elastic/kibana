@@ -18,11 +18,13 @@
  */
 
 import { overwrite } from '../../helpers';
+import { extractTimefieldName } from '../../../../../common/timefield_utils';
 
 export function topHits(req, panel, annotation) {
   return (next) => (doc) => {
     const fields = (annotation.fields && annotation.fields.split(/[,\s]+/)) || [];
-    const timeField = annotation.time_field;
+    const timeField = extractTimefieldName(annotation.time_field);
+
     overwrite(doc, `aggs.${annotation.id}.aggs.hits.top_hits`, {
       sort: [
         {

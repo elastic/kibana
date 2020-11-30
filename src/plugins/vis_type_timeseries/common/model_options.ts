@@ -17,10 +17,10 @@
  * under the License.
  */
 
-export const MODEL_TYPES = {
-  UNWEIGHTED: 'simple',
-  WEIGHTED_EXPONENTIAL: 'ewma',
-  WEIGHTED_EXPONENTIAL_DOUBLE: 'holt',
-  WEIGHTED_EXPONENTIAL_TRIPLE: 'holt_winters',
-  WEIGHTED_LINEAR: 'linear',
-};
+export enum MODEL_TYPES {
+  UNWEIGHTED = 'simple',
+  WEIGHTED_EXPONENTIAL = 'ewma',
+  WEIGHTED_EXPONENTIAL_DOUBLE = 'holt',
+  WEIGHTED_EXPONENTIAL_TRIPLE = 'holt_winters',
+  WEIGHTED_LINEAR = 'linear',
+}

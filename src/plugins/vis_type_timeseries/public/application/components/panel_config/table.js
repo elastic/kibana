@@ -23,7 +23,6 @@ import { FieldSelect } from '../aggs/field_select';
 import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import { createTextHandler } from '../lib/create_text_handler';
-import { get } from 'lodash';
 import uuid from 'uuid';
 import { YesNo } from '../yes_no';
 import {
@@ -69,14 +68,15 @@ export class TablePanelConfig extends Component {
 
   handlePivotChange = (selectedOption) => {
     const { fields, model } = this.props;
-    const pivotId = get(selectedOption, '[0].value', null);
-    const field = fields[model.index_pattern].find((field) => field.name === pivotId);
-    const pivotType = get(field, 'type', model.pivot_type);
+    if (selectedOption && selectedOption[0]) {
+      const { value, label } = selectedOption[0];
+      const field = fields[model.index_pattern].find((field) => field.name === value);
 
-    this.props.onChange({
-      pivot_id: pivotId,
-      pivot_type: pivotType,
-    });
+      this.props.onChange({
+        pivot_id: value === label ? value : { name: value, label },
+        pivot_type: field.type ?? model.pivot_type,
+      });
+    }
   };
 
   render() {

@@ -31,6 +31,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 
 import { METRIC_TYPES } from '../../../../../common/metric_types';
+import { extractTimefieldLabel } from '../../../../../common/timefield_utils';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -179,7 +180,8 @@ class TableVis extends Component {
         </th>
       );
     });
-    const label = model.pivot_label || model.pivot_field || model.pivot_id;
+
+    const label = model.pivot_label || extractTimefieldLabel(model.pivot_id);
     let sortIcon;
     if (sort.column === '_default_') {
       sortIcon = sort.order === 'asc' ? 'sortUp' : 'sortDown';

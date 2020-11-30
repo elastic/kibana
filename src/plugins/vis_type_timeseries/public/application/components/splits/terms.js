@@ -38,6 +38,7 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { FIELD_TYPES } from '../../../../common/field_types';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
+import { extractTimefieldName } from '../../../../common/timefield_utils';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
 
@@ -89,7 +90,10 @@ export const SplitByTermsUI = ({
   const selectedDirectionOption = dirOptions.find((option) => {
     return model.terms_direction === option.value;
   });
-  const selectedField = find(fields[indexPattern], ({ name }) => name === model.terms_field);
+  const selectedField = find(
+    fields[indexPattern],
+    ({ name }) => name === extractTimefieldName(model.terms_field)
+  );
   const selectedFieldType = get(selectedField, 'type');
 
   if (

@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import {
+import type {
   RequestHandlerContext,
   FakeRequest,
   IUiSettingsClient,
   SavedObjectsClientContract,
 } from 'kibana/server';
 
-import { Framework } from '../../../plugin';
-import { IndexPatternsFetcher } from '../../../../../data/server';
-import { VisPayload } from '../../../../common/types';
+import type { Framework } from '../../../plugin';
+import type { IndexPatternsFetcher, IFieldType } from '../../../../../data/server';
+import type { VisPayload } from '../../../../common/types';
+import type { IndexPatternsService } from '../../../../../data/common';
 
 /**
  * ReqFacade is a regular KibanaRequest object extended with additional service
@@ -39,11 +40,12 @@ export interface ReqFacade<T = unknown> extends FakeRequest {
   framework: Framework;
   payload: T;
   pre: {
-    indexPatternsService?: IndexPatternsFetcher;
+    indexPatternsFetcher?: IndexPatternsFetcher;
   };
   getUiSettingsService: () => IUiSettingsClient;
   getSavedObjectsClient: () => SavedObjectsClientContract;
   getEsShardTimeout: () => Promise<number>;
+  getIndexPatternsService: () => Promise<IndexPatternsService>;
 }
 
 export abstract class AbstractSearchStrategy {
@@ -81,13 +83,25 @@ export abstract class AbstractSearchStrategy {
   async getFieldsForWildcard<TPayload = unknown>(
     req: ReqFacade<TPayload>,
     indexPattern: string,
-    capabilities?: unknown
-  ) {
-    const { indexPatternsService } = req.pre;
+    capabilities?: unknown,
+    options?: Partial<{
+      type: string;
+      rollupIndex: string;
+    }>
+  ): Promise<IFieldType[]> {
+    const { indexPatternsFetcher } = req.pre;
+    const indexPatternsService = await req.getIndexPatternsService();
+    const kibanaIndexPattern = await indexPatternsService.find(indexPattern);
 
-    return await indexPatternsService!.getFieldsForWildcard({
+    if (kibanaIndexPattern.length === 1) {
+      return kibanaIndexPattern[0].fields.getAll();
+    }
+
+    return await indexPatternsFetcher!.getFieldsForWildcard({
       pattern: indexPattern,
       fieldCapsOptions: { allow_no_indices: true },
+      metaFields: [],
+      ...options,
     });
   }
 }
