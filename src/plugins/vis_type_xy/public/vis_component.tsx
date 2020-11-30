@@ -22,6 +22,7 @@ import React, {
   KeyboardEvent,
   memo,
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -85,6 +86,17 @@ const VisComponent = (props: VisComponentProps) => {
       props.visParams.addLegend == null ? true : props.visParams.addLegend;
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
+
+  useEffect(() => {
+    const fn = () => {
+      props?.uiState?.emit?.('reload');
+    };
+    props?.uiState?.on?.('change', fn);
+
+    return () => {
+      props?.uiState?.off?.('change', fn);
+    };
+  }, [props?.uiState]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
