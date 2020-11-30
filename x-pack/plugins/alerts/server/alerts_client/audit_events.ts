@@ -56,7 +56,7 @@ const eventTypes: Record<AlertRuleAction, EventType> = {
 export interface AlertRuleEventParams {
   action: AlertRuleAction;
   outcome?: EventOutcome;
-  savedObject?: Required<Required<AuditEvent>['kibana']>['saved_object'];
+  savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   error?: Error;
 }
 
@@ -70,7 +70,7 @@ export function alertRuleEvent({
   const [present, progressive, past] = eventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
-    : outcome === 'unknown'
+    : outcome === EventOutcome.UNKNOWN
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
   const type = eventTypes[action];

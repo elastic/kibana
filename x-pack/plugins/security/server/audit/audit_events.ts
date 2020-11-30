@@ -209,7 +209,7 @@ const eventTypes: Record<SavedObjectAction, EventType> = {
 export interface SavedObjectEventParams {
   action: SavedObjectAction;
   outcome?: EventOutcome;
-  savedObject?: Required<Required<AuditEvent>['kibana']>['saved_object'];
+  savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   addToSpaces?: readonly string[];
   deleteFromSpaces?: readonly string[];
   error?: Error;
@@ -227,7 +227,7 @@ export function savedObjectEvent({
   const [present, progressive, past] = eventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
-    : outcome === 'unknown'
+    : outcome === EventOutcome.UNKNOWN
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
   const type = eventTypes[action];
