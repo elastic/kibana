@@ -17,21 +17,25 @@
  * under the License.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
+import { SavedSearch } from '../saved_searches';
 
-jest.mock('../../../kibana_services', () => {
-  return {
-    getServices: () => ({
-      core: { uiSettings: {}, savedObjects: {} },
-      addBasePath: (path) => path,
-    }),
-  };
-});
-
-import { OpenSearchPanel } from './open_search_panel';
-
-test('render', () => {
-  const component = shallow(<OpenSearchPanel onClose={() => {}} makeUrl={() => {}} />);
-  expect(component).toMatchSnapshot();
-});
+export const savedSearchMock = ({
+  id: 'the-saved-search-id',
+  type: 'search',
+  attributes: {
+    title: 'the-saved-search-title',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON:
+        '{"highlightAll":true,"version":true,"query":{"query":"foo : \\"bar\\" ","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+    },
+  },
+  references: [
+    {
+      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+      type: 'index-pattern',
+      id: 'the-index-pattern-id',
+    },
+  ],
+  migrationVersion: { search: '7.5.0' },
+  error: undefined,
+} as unknown) as SavedSearch;
