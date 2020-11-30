@@ -23,34 +23,31 @@ import {
 } from '@elastic/eui';
 
 import { ml } from '../../services/ml_api_service';
-import {
-  RepairSavedObjectResponse,
-  SavedObjectResult,
-} from '../../../../common/types/saved_objects';
-import { RepairList } from './repair_list';
+import { SyncSavedObjectResponse, SavedObjectResult } from '../../../../common/types/saved_objects';
+import { SyncList } from './sync_list';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
 interface Props {
   onClose: () => void;
 }
-export const JobSpacesRepairFlyout: FC<Props> = ({ onClose }) => {
+export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
   const [loading, setLoading] = useState(false);
-  const [repairable, setRepairable] = useState(false);
-  const [repairResp, setRepairResp] = useState<RepairSavedObjectResponse | null>(null);
+  const [canSync, setCanSync] = useState(false);
+  const [syncResp, setSyncResp] = useState<SyncSavedObjectResponse | null>(null);
 
-  async function loadRepairList(simulate: boolean = true) {
+  async function loadSyncList(simulate: boolean = true) {
     setLoading(true);
     try {
-      const resp = await ml.savedObjects.repairSavedObjects(simulate);
-      setRepairResp(resp);
+      const resp = await ml.savedObjects.syncSavedObjects(simulate);
+      setSyncResp(resp);
 
       const count = Object.values(resp).reduce((acc, cur) => acc + Object.keys(cur).length, 0);
-      setRepairable(count > 0);
+      setCanSync(count > 0);
       setLoading(false);
       return resp;
     } catch (error) {
-      // this shouldn't be hit as errors are returned per-repair task
+      // this shouldn't be hit as errors are returned per-sync task
       // as part of the response
       displayErrorToast(error);
       setLoading(false);
@@ -59,32 +56,33 @@ export const JobSpacesRepairFlyout: FC<Props> = ({ onClose }) => {
   }
 
   useEffect(() => {
-    loadRepairList();
+    loadSyncList();
   }, []);
 
-  async function repair() {
-    if (repairable) {
-      // perform the repair
-      const resp = await loadRepairList(false);
-      // check simulate the repair again to check that all
-      // items have been repaired.
-      await loadRepairList(true);
+  async function sync() {
+    if (canSync) {
+      // perform the sync
+      const resp = await loadSyncList(false);
+      // check simulate the sync again to check that all
+      // items have been synchronized.
+      await loadSyncList(true);
 
       if (resp === null) {
         return;
       }
       const { successCount, errorCount } = getResponseCounts(resp);
       if (errorCount > 0) {
-        const title = i18n.translate('xpack.ml.management.repairSavedObjectsFlyout.repair.error', {
-          defaultMessage: 'Some jobs cannot be repaired.',
+        const title = i18n.translate('xpack.ml.management.syncSavedObjectsFlyout.sync.error', {
+          defaultMessage: 'Some jobs cannot be synchronized.',
         });
         displayErrorToast(resp as any, title);
         return;
       }
 
       displaySuccessToast(
-        i18n.translate('xpack.ml.management.repairSavedObjectsFlyout.repair.success', {
-          defaultMessage: '{successCount} {successCount, plural, one {job} other {jobs}} repaired',
+        i18n.translate('xpack.ml.management.syncSavedObjectsFlyout.sync.success', {
+          defaultMessage:
+            '{successCount} {successCount, plural, one {job} other {jobs}} synchronized',
           values: { successCount },
         })
       );
@@ -98,8 +96,8 @@ export const JobSpacesRepairFlyout: FC<Props> = ({ onClose }) => {
           <EuiTitle size="m">
             <h2>
               <FormattedMessage
-                id="xpack.ml.management.repairSavedObjectsFlyout.headerLabel"
-                defaultMessage="Repair saved objects"
+                id="xpack.ml.management.syncSavedObjectsFlyout.headerLabel"
+                defaultMessage="Synchronize saved objects"
               />
             </h2>
           </EuiTitle>
@@ -108,33 +106,29 @@ export const JobSpacesRepairFlyout: FC<Props> = ({ onClose }) => {
           <EuiCallOut color="primary">
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.ml.management.repairSavedObjectsFlyout.description"
-                defaultMessage="Repair the saved objects if they are out of sync with the machine learning jobs in Elasticsearch."
+                id="xpack.ml.management.syncSavedObjectsFlyout.description"
+                defaultMessage="Synchronize the saved objects if they are out of sync with the machine learning jobs in Elasticsearch."
               />
             </EuiText>
           </EuiCallOut>
           <EuiSpacer />
-          <RepairList repairItems={repairResp} />
+          <SyncList syncItems={syncResp} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
                 <FormattedMessage
-                  id="xpack.ml.management.repairSavedObjectsFlyout.closeButton"
+                  id="xpack.ml.management.syncSavedObjectsFlyout.closeButton"
                   defaultMessage="Close"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={repair}
-                fill
-                isDisabled={repairable === false || loading === true}
-              >
+              <EuiButton onClick={sync} fill isDisabled={canSync === false || loading === true}>
                 <FormattedMessage
-                  id="xpack.ml.management.repairSavedObjectsFlyout.repairButton"
-                  defaultMessage="Repair"
+                  id="xpack.ml.management.syncSavedObjectsFlyout.syncButton"
+                  defaultMessage="Synchronize"
                 />
               </EuiButton>
             </EuiFlexItem>
@@ -145,7 +139,7 @@ export const JobSpacesRepairFlyout: FC<Props> = ({ onClose }) => {
   );
 };
 
-function getResponseCounts(resp: RepairSavedObjectResponse) {
+function getResponseCounts(resp: SyncSavedObjectResponse) {
   let successCount = 0;
   let errorCount = 0;
   Object.values(resp).forEach((result: SavedObjectResult) => {

@@ -71,7 +71,6 @@ describe('BulkUploader', () => {
           type: 'type_collector_test',
           fetch: noop, // empty payloads,
           isReady: () => true,
-          formatForBulkUpload: (result) => result,
         },
       ]);
 
@@ -111,13 +110,11 @@ describe('BulkUploader', () => {
           type: 'type_collector_test',
           fetch: noop, // empty payloads,
           isReady: () => false,
-          formatForBulkUpload: (result) => result,
         },
         {
           type: 'type_collector_test2',
           fetch: noop, // empty payloads,
           isReady: () => true,
-          formatForBulkUpload: (result) => result,
         },
       ]);
 
@@ -153,7 +150,6 @@ describe('BulkUploader', () => {
         {
           fetch: () => ({ type: 'type_collector_test', result: { testData: 12345 } }),
           isReady: () => true,
-          formatForBulkUpload: (result) => result,
         },
       ]);
       const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
@@ -191,13 +187,11 @@ describe('BulkUploader', () => {
         {
           fetch: usageCollectorFetch,
           isReady: () => true,
-          formatForBulkUpload: (result) => result,
           isUsageCollector: true,
         },
         {
           fetch: collectorFetch,
           isReady: () => true,
-          formatForBulkUpload: (result) => result,
           isUsageCollector: false,
         },
       ]);
@@ -223,7 +217,6 @@ describe('BulkUploader', () => {
         {
           fetch: usageCollectorFetch,
           isReady: () => true,
-          formatForBulkUpload: (result) => result,
           isUsageCollector: true,
         },
       ]);
@@ -253,13 +246,11 @@ describe('BulkUploader', () => {
         {
           fetch: statsCollectorFetch,
           isReady: () => true,
-          formatForBulkUpload: (result) => result,
           isUsageCollector: false,
         },
         {
           fetch: usageCollectorFetch,
           isReady: () => true,
-          formatForBulkUpload: (result) => result,
           isUsageCollector: true,
         },
       ]);
@@ -290,13 +281,11 @@ describe('BulkUploader', () => {
         {
           fetch: usageCollectorFetch,
           isReady: () => true,
-          formatForBulkUpload: (result) => result,
           isUsageCollector: true,
         },
         {
           fetch: collectorFetch,
           isReady: () => true,
-          formatForBulkUpload: (result) => result,
           isUsageCollector: false,
         },
       ]);
