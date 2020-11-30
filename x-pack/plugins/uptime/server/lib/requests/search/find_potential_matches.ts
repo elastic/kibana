@@ -37,7 +37,6 @@ const query = async (queryContext: QueryContext, size: number, index: number) =>
   const body = await queryBody(queryContext, size, index);
 
   const params = {
-    index: queryContext.heartbeatIndices,
     body,
   };
 

@@ -21,7 +21,7 @@ import dateMath from '@elastic/datemath';
 import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
 import { IIndexPattern, IFieldType, UI_SETTINGS, buildQueryFromFilters } from '../../../common';
-import { getQueryService } from '../../services';
+import { TimefilterSetup } from '../../query';
 
 function resolver(title: string, field: IFieldType, query: string, filters: any[]) {
   // Only cache results for a minute
@@ -40,8 +40,10 @@ interface ValueSuggestionsGetFnArgs {
   signal?: AbortSignal;
 }
 
-const getAutocompleteTimefilter = (indexPattern: IIndexPattern) => {
-  const { timefilter } = getQueryService().timefilter;
+const getAutocompleteTimefilter = (
+  { timefilter }: TimefilterSetup,
+  indexPattern: IIndexPattern
+) => {
   const timeRange = timefilter.getTime();
 
   // Use a rounded timerange so that memoizing works properly
@@ -54,7 +56,10 @@ const getAutocompleteTimefilter = (indexPattern: IIndexPattern) => {
 
 export const getEmptyValueSuggestions = (() => Promise.resolve([])) as ValueSuggestionsGetFn;
 
-export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsGetFn => {
+export const setupValueSuggestionProvider = (
+  core: CoreSetup,
+  { timefilter }: { timefilter: TimefilterSetup }
+): ValueSuggestionsGetFn => {
   const requestSuggestions = memoize(
     (index: string, field: IFieldType, query: string, filters: any = [], signal?: AbortSignal) =>
       core.http.fetch(`/api/kibana/suggestions/values/${index}`, {
@@ -86,7 +91,9 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
       return [];
     }
 
-    const timeFilter = useTimeRange ? getAutocompleteTimefilter(indexPattern) : undefined;
+    const timeFilter = useTimeRange
+      ? getAutocompleteTimefilter(timefilter, indexPattern)
+      : undefined;
     const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], indexPattern).filter : [];
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     return await requestSuggestions(title, field, query, filters, signal);

@@ -20,17 +20,24 @@
 import { first, skip, toArray } from 'rxjs/operators';
 import { loader, ExpressionLoader } from './loader';
 import { Observable } from 'rxjs';
-import { parseExpression, IInterpreterRenderHandlers } from '../common';
+import {
+  parseExpression,
+  IInterpreterRenderHandlers,
+  RenderMode,
+  AnyExpressionFunctionDefinition,
+} from '../common';
 
 // eslint-disable-next-line
-const { __getLastExecution } = require('./services');
+const { __getLastExecution, __getLastRenderMode } = require('./services');
 
 const element: HTMLElement = null as any;
 
 jest.mock('./services', () => {
+  let renderMode: RenderMode | undefined;
   const renderers: Record<string, unknown> = {
     test: {
       render: (el: HTMLElement, value: unknown, handlers: IInterpreterRenderHandlers) => {
+        renderMode = handlers.getRenderMode();
         handlers.done();
       },
     },
@@ -39,9 +46,18 @@ jest.mock('./services', () => {
   // eslint-disable-next-line
   const service = new (require('../common/service/expressions_services').ExpressionsService as any)();
 
+  const testFn: AnyExpressionFunctionDefinition = {
+    fn: () => ({ type: 'render', as: 'test' }),
+    name: 'testrender',
+    args: {},
+    help: '',
+  };
+  service.registerFunction(testFn);
+
   const moduleMock = {
     __execution: undefined,
     __getLastExecution: () => moduleMock.__execution,
+    __getLastRenderMode: () => renderMode,
     getRenderersRegistry: () => ({
       get: (id: string) => renderers[id],
     }),
@@ -128,6 +144,14 @@ describe('ExpressionLoader', () => {
     expressionLoader.update('test');
     response = await expressionLoader.render$.pipe(skip(1), first()).toPromise();
     expect(response).toBe(2);
+  });
+
+  it('passes mode to the renderer', async () => {
+    const expressionLoader = new ExpressionLoader(element, 'testrender', {
+      renderMode: 'edit',
+    });
+    await expressionLoader.render$.pipe(first()).toPromise();
+    expect(__getLastRenderMode()).toEqual('edit');
   });
 
   it('cancels the previous request when the expression is updated', () => {

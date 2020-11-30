@@ -333,13 +333,32 @@ export class HeadlessChromiumDriver {
   private _shouldUseCustomHeaders(conditions: ConditionalHeadersConditions, url: string) {
     const { hostname, protocol, port, pathname } = parseUrl(url);
 
-    if (port === null) throw new Error(`URL missing port: ${url}`);
+    // `port` is null in URLs that don't explicitly state it,
+    // however we can derive the port from the protocol (http/https)
+    // IE: https://feeds-staging.elastic.co/kibana/v8.0.0.json
+    const derivedPort = (() => {
+      if (port) {
+        return port;
+      }
+
+      if (protocol === 'http:') {
+        return '80';
+      }
+
+      if (protocol === 'https:') {
+        return '443';
+      }
+
+      return null;
+    })();
+
+    if (derivedPort === null) throw new Error(`URL missing port: ${url}`);
     if (pathname === null) throw new Error(`URL missing pathname: ${url}`);
 
     return (
       hostname === conditions.hostname &&
       protocol === `${conditions.protocol}:` &&
-      this._shouldUseCustomHeadersForPort(conditions, port) &&
+      this._shouldUseCustomHeadersForPort(conditions, derivedPort) &&
       pathname.startsWith(`${conditions.basePath}/`)
     );
   }

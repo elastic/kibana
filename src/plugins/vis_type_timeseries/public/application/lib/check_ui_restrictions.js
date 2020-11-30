@@ -18,10 +18,7 @@
  */
 
 import { get } from 'lodash';
-import {
-  RESTRICTIONS_KEYS,
-  DEFAULT_UI_RESTRICTION,
-} from '../../../../../plugins/vis_type_timeseries/common/ui_restrictions';
+import { RESTRICTIONS_KEYS, DEFAULT_UI_RESTRICTION } from '../../../common/ui_restrictions';
 
 /**
  * Generic method for checking all types of the UI Restrictions

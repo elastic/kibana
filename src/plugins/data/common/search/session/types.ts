@@ -18,6 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
+import type { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 
 export interface ISessionService {
   /**
@@ -30,6 +31,17 @@ export interface ISessionService {
    * @returns `Observable`
    */
   getSession$: () => Observable<string | undefined>;
+
+  /**
+   * Whether the active session is already saved (i.e. sent to background)
+   */
+  isStored: () => boolean;
+
+  /**
+   * Whether the active session is restored (i.e. reusing previous search IDs)
+   */
+  isRestore: () => boolean;
+
   /**
    * Starts a new session
    */
@@ -38,10 +50,58 @@ export interface ISessionService {
   /**
    * Restores existing session
    */
-  restore: (sessionId: string) => void;
+  restore: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
 
   /**
    * Clears the active session.
    */
   clear: () => void;
+
+  /**
+   * Saves a session
+   */
+  save: (name: string, url: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
+
+  /**
+   * Gets a saved session
+   */
+  get: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
+
+  /**
+   * Gets a list of saved sessions
+   */
+  find: (
+    options: SearchSessionFindOptions
+  ) => Promise<SavedObjectsFindResponse<BackgroundSessionSavedObjectAttributes>>;
+
+  /**
+   * Updates a session
+   */
+  update: (
+    sessionId: string,
+    attributes: Partial<BackgroundSessionSavedObjectAttributes>
+  ) => Promise<any>;
+
+  /**
+   * Deletes a session
+   */
+  delete: (sessionId: string) => Promise<void>;
+}
+
+export interface BackgroundSessionSavedObjectAttributes {
+  name: string;
+  created: string;
+  expires: string;
+  status: string;
+  initialState: Record<string, unknown>;
+  restoreState: Record<string, unknown>;
+  idMapping: Record<string, string>;
+}
+
+export interface SearchSessionFindOptions {
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: string;
+  filter?: string;
 }

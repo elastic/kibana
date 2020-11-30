@@ -5,6 +5,9 @@
     "src/**/*",
     "index.d.ts"
   ],
+  "exclude": [
+    "types/ftr_globals/**/*"
+  ],
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,

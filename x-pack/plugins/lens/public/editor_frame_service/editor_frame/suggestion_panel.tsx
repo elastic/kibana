@@ -273,6 +273,7 @@ export function SuggestionPanel({
     return (props: ReactExpressionRendererProps) => (
       <ExpressionRendererComponent {...props} searchContext={context} reload$={autoRefreshFetch$} />
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plugins.data.query.timefilter.timefilter, context]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);

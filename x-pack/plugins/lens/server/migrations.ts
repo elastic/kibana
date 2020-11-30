@@ -218,18 +218,18 @@ const removeInvalidAccessors: SavedObjectMigrationFn<
   if (newDoc.attributes.visualizationType === 'lnsXY') {
     const datasourceLayers = newDoc.attributes.state.datasourceStates.indexpattern.layers || {};
     const xyState = newDoc.attributes.state.visualization;
-    (newDoc.attributes as LensDocShapePre710<
-      XYStatePost77
-    >).state.visualization.layers = xyState.layers.map((layer: XYLayerPre77) => {
-      const layerId = layer.layerId;
-      const datasource = datasourceLayers[layerId];
-      return {
-        ...layer,
-        xAccessor: datasource?.columns[layer.xAccessor] ? layer.xAccessor : undefined,
-        splitAccessor: datasource?.columns[layer.splitAccessor] ? layer.splitAccessor : undefined,
-        accessors: layer.accessors.filter((accessor) => !!datasource?.columns[accessor]),
-      };
-    });
+    (newDoc.attributes as LensDocShapePre710<XYStatePost77>).state.visualization.layers = xyState.layers.map(
+      (layer: XYLayerPre77) => {
+        const layerId = layer.layerId;
+        const datasource = datasourceLayers[layerId];
+        return {
+          ...layer,
+          xAccessor: datasource?.columns[layer.xAccessor] ? layer.xAccessor : undefined,
+          splitAccessor: datasource?.columns[layer.splitAccessor] ? layer.splitAccessor : undefined,
+          accessors: layer.accessors.filter((accessor) => !!datasource?.columns[accessor]),
+        };
+      }
+    );
   }
   return newDoc;
 };

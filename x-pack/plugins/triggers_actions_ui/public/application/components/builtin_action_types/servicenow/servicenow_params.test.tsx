@@ -6,12 +6,9 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import ServiceNowParamsFields from './servicenow_params';
-import { DocLinksStart } from 'kibana/public';
-import { coreMock } from 'src/core/public/mocks';
 
 describe('ServiceNowParamsFields renders', () => {
   test('all params fields is rendered', () => {
-    const mocks = coreMock.createSetup();
     const actionParams = {
       subAction: 'pushToService',
       subActionParams: {
@@ -33,9 +30,6 @@ describe('ServiceNowParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[{ name: 'alertId', description: '' }]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
       />
     );
     expect(wrapper.find('[data-test-subj="urgencySelect"]').length > 0).toBeTruthy();
@@ -52,7 +46,6 @@ describe('ServiceNowParamsFields renders', () => {
   });
 
   test('the savedObjectId fields is rendered if we cant find an alertId in the messageVariables', () => {
-    const mocks = coreMock.createSetup();
     const actionParams = {
       subAction: 'pushToService',
       subActionParams: {
@@ -74,9 +67,6 @@ describe('ServiceNowParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
       />
     );
 

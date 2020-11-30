@@ -8,7 +8,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EuiOverlayMask, EuiFormFieldset, EuiCheckbox } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
-import { sendPostAgentUnenroll, sendPostBulkAgentUnenroll, useCore } from '../../../../hooks';
+import {
+  sendPostAgentUnenroll,
+  sendPostBulkAgentUnenroll,
+  useStartServices,
+} from '../../../../hooks';
 
 interface Props {
   onClose: () => void;
@@ -23,7 +27,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
   agentCount,
   useForceUnenroll,
 }) => {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const [forceUnenroll, setForceUnenroll] = useState<boolean>(useForceUnenroll || false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
@@ -144,7 +148,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
           }}
         >
           <EuiCheckbox
-            id="ingestManagerForceUnenrollAgents"
+            id="fleetForceUnenrollAgents"
             label={
               <FormattedMessage
                 id="xpack.fleet.unenrollAgents.forceUnenrollCheckboxLabel"

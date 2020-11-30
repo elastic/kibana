@@ -10,7 +10,6 @@ import { parseRelativeDate } from '../../helper';
 
 export class QueryContext {
   callES: ElasticsearchClient;
-  heartbeatIndices: string;
   dateRangeStart: string;
   dateRangeEnd: string;
   filterClause: any | null;
@@ -23,7 +22,6 @@ export class QueryContext {
 
   constructor(
     database: any,
-    heartbeatIndices: string,
     dateRangeStart: string,
     dateRangeEnd: string,
     filterClause: any | null,
@@ -34,7 +32,6 @@ export class QueryContext {
     sortDirection?: string
   ) {
     this.callES = database;
-    this.heartbeatIndices = heartbeatIndices;
     this.dateRangeStart = dateRangeStart;
     this.dateRangeEnd = dateRangeEnd;
     this.filterClause = filterClause;
@@ -46,15 +43,12 @@ export class QueryContext {
   }
 
   async search(params: any): Promise<any> {
-    params.index = this.heartbeatIndices;
-    return this.callES.search(params);
+    return this.callES.search({ body: params.body });
   }
 
   async count(params: any): Promise<any> {
-    params.index = this.heartbeatIndices;
     const { body: result } = await this.callES.count(params);
-    return result;
-  }
+    return result;  }
 
   async dateAndCustomFilters(): Promise<any[]> {
     const clauses = [await this.dateRangeFilter()];
@@ -143,7 +137,6 @@ export class QueryContext {
   clone(): QueryContext {
     return new QueryContext(
       this.callES,
-      this.heartbeatIndices,
       this.dateRangeStart,
       this.dateRangeEnd,
       this.filterClause,

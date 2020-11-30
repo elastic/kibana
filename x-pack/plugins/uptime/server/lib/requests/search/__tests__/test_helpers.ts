@@ -7,5 +7,5 @@
 import { QueryContext } from '../query_context';
 
 export const simpleQueryContext = (): QueryContext => {
-  return new QueryContext(undefined, 'indexName', '', '', undefined, 0, '');
+  return new QueryContext(undefined, '', '', undefined, 0, '');
 };

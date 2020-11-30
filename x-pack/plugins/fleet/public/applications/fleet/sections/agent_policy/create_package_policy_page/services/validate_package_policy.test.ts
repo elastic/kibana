@@ -7,7 +7,7 @@ import { installationStatuses } from '../../../../../../../common/constants';
 import { PackageInfo, NewPackagePolicy, RegistryPolicyTemplate } from '../../../../types';
 import { validatePackagePolicy, validationHasErrors } from './validate_package_policy';
 
-describe('Ingest Manager - validatePackagePolicy()', () => {
+describe('Fleet - validatePackagePolicy()', () => {
   const mockPackage = ({
     name: 'mock-package',
     title: 'Mock package',
@@ -496,7 +496,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
   });
 });
 
-describe('Ingest Manager - validationHasErrors()', () => {
+describe('Fleet - validationHasErrors()', () => {
   it('returns true for stream validation results with errors', () => {
     expect(
       validationHasErrors({

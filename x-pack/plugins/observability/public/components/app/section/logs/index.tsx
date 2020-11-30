@@ -5,19 +5,19 @@
  */
 
 import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind, EuiSpacer, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useHasData } from '../../../../hooks/use_has_data';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LogsFetchDataResponse } from '../../../../typings';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { ChartContainer } from '../../chart_container';
@@ -25,8 +25,6 @@ import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
 
 interface Props {
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
   bucketSize?: string;
 }
 
@@ -45,22 +43,33 @@ function getColorPerItem(series?: LogsFetchDataResponse['series']) {
   return colorsPerItem;
 }
 
-export function LogsSection({ absoluteTime, relativeTime, bucketSize }: Props) {
+export function LogsSection({ bucketSize }: Props) {
   const history = useHistory();
+  const chartTheme = useChartTheme();
+  const { forceUpdate, hasData } = useHasData();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
-  const { start, end } = absoluteTime;
-  const { data, status } = useFetcher(() => {
-    if (start && end && bucketSize) {
-      return getDataHandler('infra_logs')?.fetchData({
-        absoluteTime: { start, end },
-        relativeTime,
-        bucketSize,
-      });
-    }
-  }, [start, end, bucketSize, relativeTime]);
+  const { data, status } = useFetcher(
+    () => {
+      if (bucketSize) {
+        return getDataHandler('infra_logs')?.fetchData({
+          absoluteTime: { start: absoluteStart, end: absoluteEnd },
+          relativeTime: { start: relativeStart, end: relativeEnd },
+          bucketSize,
+        });
+      }
+    },
+    // Absolute times shouldn't be used here, since it would refetch on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [bucketSize, relativeStart, relativeEnd, forceUpdate]
+  );
 
-  const min = moment.utc(absoluteTime.start).valueOf();
-  const max = moment.utc(absoluteTime.end).valueOf();
+  if (!hasData.infra_logs?.hasData) {
+    return null;
+  }
+
+  const min = moment.utc(absoluteStart).valueOf();
+  const max = moment.utc(absoluteEnd).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 
@@ -115,7 +124,7 @@ export function LogsSection({ absoluteTime, relativeTime, bucketSize }: Props) {
       <ChartContainer isInitialLoad={isLoading && !data}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-          theme={useChartTheme()}
+          theme={chartTheme}
           showLegend
           legendPosition={Position.Right}
           xDomain={{ min, max }}

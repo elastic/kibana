@@ -36,7 +36,7 @@ pageLoadAssetSize:
   indexManagement: 140608
   indexPatternManagement: 154222
   infra: 197873
-  ingestManager: 415829
+  fleet: 415829
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -102,4 +102,5 @@ pageLoadAssetSize:
   visualizations: 295025
   visualize: 57431
   watcher: 43598
+  runtimeFields: 41752
   stackAlerts: 29684

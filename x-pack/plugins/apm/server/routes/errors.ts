@@ -12,9 +12,9 @@ import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 
-export const errorsRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/errors',
-  params: {
+export const errorsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/errors',
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
@@ -26,7 +26,8 @@ export const errorsRoute = createRoute(() => ({
       uiFiltersRt,
       rangeRt,
     ]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { params } = context;
@@ -40,27 +41,28 @@ export const errorsRoute = createRoute(() => ({
       setup,
     });
   },
-}));
+});
 
-export const errorGroupsRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/errors/{groupId}',
-  params: {
+export const errorGroupsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
+  params: t.type({
     path: t.type({
       serviceName: t.string,
       groupId: t.string,
     }),
     query: t.intersection([uiFiltersRt, rangeRt]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName, groupId } = context.params.path;
     return getErrorGroup({ serviceName, groupId, setup });
   },
-}));
+});
 
-export const errorDistributionRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/errors/distribution',
-  params: {
+export const errorDistributionRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/errors/distribution',
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
@@ -71,7 +73,8 @@ export const errorDistributionRoute = createRoute(() => ({
       uiFiltersRt,
       rangeRt,
     ]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { params } = context;
@@ -79,4 +82,4 @@ export const errorDistributionRoute = createRoute(() => ({
     const { groupId } = params.query;
     return getErrorDistribution({ serviceName, groupId, setup });
   },
-}));
+});

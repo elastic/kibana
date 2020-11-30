@@ -60,6 +60,7 @@ import {
 } from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
 import { getCaseConnectorUI } from './common/lib/connectors';
+import { licenseService } from './common/hooks/use_license';
 import { LazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 
@@ -330,8 +331,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
-    if (plugins.ingestManager) {
-      const { registerExtension } = plugins.ingestManager;
+    if (plugins.fleet) {
+      const { registerExtension } = plugins.fleet;
 
       registerExtension({
         package: 'endpoint',
@@ -345,6 +346,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         component: LazyEndpointPolicyCreateExtension,
       });
     }
+    licenseService.start(plugins.licensing.license$);
 
     return {};
   }

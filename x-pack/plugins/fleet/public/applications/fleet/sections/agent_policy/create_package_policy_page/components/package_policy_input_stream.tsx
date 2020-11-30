@@ -49,6 +49,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
 
     const requiredVars: RegistryVarsEntry[] = [];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const advancedVars: RegistryVarsEntry[] = [];
 
     if (packageInputStream.vars && packageInputStream.vars.length) {
