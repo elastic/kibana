@@ -58,6 +58,12 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
         param("machineType", "c2-standard-16")
       }
 
+      kibanaAgent {
+        id = "KIBANA_custom"
+        param("source-id", "kibana-custom-")
+        param("machineType", "custom-4-15360")
+      }
+
       feature {
         id = "kibana"
         type = "CloudProfile"
