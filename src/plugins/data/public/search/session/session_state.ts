@@ -158,7 +158,6 @@ export const sessionPureTransitions: SessionPureTransitions = {
     };
   },
   unTrackSearch: (state) => (search) => {
-    if (!state.sessionId) throw new Error("Can't untrack search. Missing sessionId");
     return {
       ...state,
       pendingSearches: state.pendingSearches.filter((s) => s !== search),

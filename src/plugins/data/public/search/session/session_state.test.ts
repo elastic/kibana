@@ -43,8 +43,6 @@ describe('Session state container', () => {
     });
 
     test('untrack', () => {
-      expect(() => state.transitions.unTrackSearch({})).toThrowError();
-
       state.transitions.start();
       const search = {};
       state.transitions.trackSearch(search);

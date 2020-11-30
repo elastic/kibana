@@ -9,9 +9,10 @@ import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
-import { ISessionService, SearchTimeoutError } from 'src/plugins/data/public';
+import { ISessionService, SearchTimeoutError, SessionState } from 'src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { bfetchPluginMock } from '../../../../../src/plugins/bfetch/public/mocks';
+import { BehaviorSubject } from 'rxjs';
 
 const timeTravel = (msToRun = 0) => {
   jest.advanceTimersByTime(msToRun);
@@ -44,12 +45,17 @@ function mockFetchImplementation(responses: any[]) {
 describe('EnhancedSearchInterceptor', () => {
   let mockUsageCollector: any;
   let sessionService: jest.Mocked<ISessionService>;
+  let sessionState$: BehaviorSubject<SessionState>;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    sessionState$ = new BehaviorSubject<SessionState>(SessionState.None);
     const dataPluginMockStart = dataPluginMock.createStartContract();
-    sessionService = dataPluginMockStart.search.session as jest.Mocked<ISessionService>;
+    sessionService = {
+      ...(dataPluginMockStart.search.session as jest.Mocked<ISessionService>),
+      state$: sessionState$,
+    };
     fetchMock = jest.fn();
 
     mockCoreSetup.uiSettings.get.mockImplementation((name: string) => {
@@ -363,6 +369,54 @@ describe('EnhancedSearchInterceptor', () => {
       expect(error.mock.calls[0][0]).toBe(responses[1].value);
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalled();
+    });
+
+    test('should NOT DELETE a running SAVED async search on abort', async () => {
+      const sessionId = 'sessionId';
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: true,
+            id: 1,
+          },
+        },
+        {
+          time: 300,
+          value: {
+            isPartial: false,
+            isRunning: false,
+            id: 1,
+          },
+        },
+      ];
+      mockFetchImplementation(responses);
+
+      const abortController = new AbortController();
+      setTimeout(() => abortController.abort(), 250);
+
+      const response = searchInterceptor.search(
+        {},
+        { abortSignal: abortController.signal, pollInterval: 0, sessionId }
+      );
+      response.subscribe({ next, error });
+
+      await timeTravel(10);
+
+      expect(next).toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+
+      sessionState$.next(SessionState.BackgroundLoading);
+
+      await timeTravel(240);
+
+      expect(error).toHaveBeenCalled();
+      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
     });
   });
 

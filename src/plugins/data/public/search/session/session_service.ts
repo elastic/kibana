@@ -51,7 +51,7 @@ export interface SearchSessionRestorationInfoProvider<ID extends UrlGeneratorId 
 /**
  * Responsible for tracking a current search session. Supports only a single session at a time.
  */
-export class SessionService implements ISessionService {
+export class SessionService {
   public readonly state$: Observable<SessionState>;
   private readonly state: SessionStateContainer<TrackSearchDescriptor>;
 
@@ -112,8 +112,6 @@ export class SessionService implements ISessionService {
    * @returns untrack function
    */
   public trackSearch(searchDescriptor: TrackSearchDescriptor): () => void {
-    if (!this.getSessionId())
-      throw new Error("Can't track search because there is no current session");
     this.state.transitions.trackSearch(searchDescriptor);
     return () => {
       this.state.transitions.unTrackSearch(searchDescriptor);
