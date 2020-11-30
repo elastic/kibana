@@ -13,7 +13,7 @@ import { getCaseDetailsUrl } from '../../../common/components/link_to';
 import * as i18n from './translations';
 import { CreateCaseForm } from './form';
 import { FormContext } from './form_context';
-import { useInsertTimeline } from '../use_insert_timeline/use_insert_timeline';
+import { useInsertTimeline } from '../use_insert_timeline';
 import { fieldName as descriptionFieldName } from './description';
 
 export const CommonUseField = getUseField({ component: Field });

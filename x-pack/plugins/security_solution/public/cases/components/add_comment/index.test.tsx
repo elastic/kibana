@@ -13,7 +13,7 @@ import { TestProviders } from '../../../common/mock';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
 import { CommentRequest, CommentType } from '../../../../../case/common/api';
-import { useInsertTimeline } from '../use_insert_timeline/use_insert_timeline';
+import { useInsertTimeline } from '../use_insert_timeline';
 import { usePostComment } from '../../containers/use_post_comment';
 
 jest.mock('../../containers/use_post_comment');
