@@ -52,16 +52,7 @@ export const getThresholdBucketFilters = async ({
     buildRuleMessage,
   });
 
-  /*
-  const filter: ESFilter = {
-    bool: {
-      must_not: [],
-    },
-  };
-  */
-
   const filters: ESFilter[] = [];
-
   searchResult.aggregations.threshold.buckets.forEach((bucket: ThresholdQueryBucket) => {
     filters.push({
       bool: {
