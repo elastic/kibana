@@ -301,8 +301,10 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
     } else {
       const visConfig = { ...vis.params };
       visConfig.dimensions = schemas;
+      visConfig.title = title;
       pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visConfig)}
+    ${prepareJson('uiState', uiState)}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.params.showPartialRows || false} `;
       if (indexPattern) {

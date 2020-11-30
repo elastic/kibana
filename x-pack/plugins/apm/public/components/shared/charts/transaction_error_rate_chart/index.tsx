@@ -91,6 +91,7 @@ export function TransactionErrorRateChart({
         ]}
         yLabelFormat={yLabelFormat}
         yTickFormat={yTickFormat}
+        yDomain={{ min: 0, max: 1 }}
       />
     </EuiPanel>
   );
