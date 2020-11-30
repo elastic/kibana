@@ -24,6 +24,12 @@ const Container = styled.div`
   `}
 `;
 
+const defaultAlertComment = {
+  type: CommentType.alert,
+  alertId: '{{context.rule.id}}',
+  index: '{{context.rule.output_index}}',
+};
+
 const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionParams>> = ({
   actionParams,
   editAction,
@@ -32,14 +38,7 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
   messageVariables,
   actionConnector,
 }) => {
-  const {
-    caseId = null,
-    comment = {
-      type: CommentType.alert,
-      alertId: '{{context.rule.id}}',
-      index: '{{context.rule.output_index}}',
-    },
-  } = actionParams.subActionParams ?? {};
+  const { caseId = null, comment = defaultAlertComment } = actionParams.subActionParams ?? {};
 
   const [selectedCase, setSelectedCase] = useState<string | null>(null);
 
@@ -72,16 +71,18 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
       editSubActionProperty('comment', comment);
     }
 
-    // We excluded the caseId from the dependency array to avoid an infinity loop
     if (caseId != null) {
-      setSelectedCase(caseId);
+      setSelectedCase((prevCaseId) => (prevCaseId !== caseId ? caseId : prevCaseId));
     }
+
+    // editAction creates an infinity loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     actionConnector,
     index,
     actionParams.subActionParams?.caseId,
     actionParams.subActionParams?.comment,
+    caseId,
     comment,
     actionParams.subAction,
   ]);

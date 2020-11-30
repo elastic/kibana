@@ -7,7 +7,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import { useGetCases } from '../../../containers/use_get_cases';
 import { useCreateCaseModal } from '../../use_create_case_modal';
-import { CasesDropdown } from './cases_dropdown';
+import { CasesDropdown, ADD_CASE_BUTTON_ID } from './cases_dropdown';
 
 interface ExistingCaseProps {
   selectedCase: string | null;
@@ -23,7 +23,7 @@ const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, sel
 
   const onChange = useCallback(
     (id: string) => {
-      if (id === 'add-case') {
+      if (id === ADD_CASE_BUTTON_ID) {
         openModal();
         return;
       }
@@ -34,7 +34,7 @@ const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, sel
   );
 
   const isCasesLoading = useMemo(
-    () => isLoadingCases.indexOf('cases') > -1 || isLoadingCases.indexOf('caseUpdate') > -1,
+    () => isLoadingCases.includes('cases') || isLoadingCases.includes('caseUpdate'),
     [isLoadingCases]
   );
 

@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React, { useCallback } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 
@@ -15,6 +16,7 @@ import { CreateCaseForm } from './form';
 import { FormContext } from './form_context';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { fieldName as descriptionFieldName } from './description';
+import { SubmitCaseButton } from './submit_button';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -23,23 +25,6 @@ const Container = styled.div`
     margin-top: ${theme.eui.euiSize};
   `}
 `;
-
-const SubmitButton = () => {
-  const { submit, isSubmitting } = useFormContext();
-
-  return (
-    <EuiButton
-      data-test-subj="create-case-submit"
-      fill
-      iconType="plusInCircle"
-      isDisabled={isSubmitting}
-      isLoading={isSubmitting}
-      onClick={submit}
-    >
-      {i18n.CREATE_CASE}
-    </EuiButton>
-  );
-};
 
 const InsertTimeline = () => {
   const { setFieldValue, getFormData } = useFormContext();
@@ -87,7 +72,7 @@ export const Create = React.memo(() => {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SubmitButton />
+              <SubmitCaseButton />
             </EuiFlexItem>
           </EuiFlexGroup>
         </Container>

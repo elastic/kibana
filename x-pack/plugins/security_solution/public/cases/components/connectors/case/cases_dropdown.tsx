@@ -17,8 +17,10 @@ interface CaseDropdownProps {
   onCaseChanged: (id: string) => void;
 }
 
+export const ADD_CASE_BUTTON_ID = 'add-case';
+
 const addNewCase = {
-  value: 'add-case',
+  value: ADD_CASE_BUTTON_ID,
   inputDisplay: (
     <span className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft">
       {i18n.CASE_CONNECTOR_ADD_NEW_CASE}

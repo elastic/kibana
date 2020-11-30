@@ -12,14 +12,13 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiButton,
 } from '@elastic/eui';
 
-import { useFormContext } from '../../../shared_imports';
-import * as i18n from '../../translations';
 import { FormContext } from '../create/form_context';
 import { CreateCaseForm } from '../create/form';
+import { SubmitCaseButton } from '../create/submit_button';
 import { Case } from '../../containers/types';
+import * as i18n from '../../translations';
 
 export interface CreateCaseModalProps {
   onCloseCaseModal: () => void;
@@ -32,25 +31,6 @@ const Container = styled.div`
     text-align: right;
   `}
 `;
-
-const SubmitButton = () => {
-  const { submit, isSubmitting } = useFormContext();
-
-  return (
-    <Container>
-      <EuiButton
-        data-test-subj="create-case-submit"
-        fill
-        iconType="plusInCircle"
-        isDisabled={isSubmitting}
-        isLoading={isSubmitting}
-        onClick={submit}
-      >
-        {i18n.CREATE_CASE}
-      </EuiButton>
-    </Container>
-  );
-};
 
 const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
   onCloseCaseModal,
@@ -73,7 +53,9 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
         <EuiModalBody>
           <FormContext onSuccess={onSuccess}>
             <CreateCaseForm withSteps={false} />
-            <SubmitButton />
+            <Container>
+              <SubmitCaseButton />
+            </Container>
           </FormContext>
         </EuiModalBody>
       </EuiModal>
