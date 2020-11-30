@@ -30,11 +30,15 @@ const chartBase: ChartBase = {
   series,
 };
 
-const getGcRateChart = (
-  setup: Setup & SetupTimeRange,
-  serviceName: string,
-  serviceNodeName?: string
-) => {
+function getGcRateChart({
+  setup,
+  serviceName,
+  serviceNodeName,
+}: {
+  setup: Setup & SetupTimeRange;
+  serviceName: string;
+  serviceNodeName?: string;
+}) {
   return fetchAndTransformGcMetrics({
     setup,
     serviceName,
@@ -42,6 +46,6 @@ const getGcRateChart = (
     chartBase,
     fieldName: METRIC_JAVA_GC_COUNT,
   });
-};
+}
 
 export { getGcRateChart };
