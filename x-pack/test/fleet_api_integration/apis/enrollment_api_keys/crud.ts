@@ -185,8 +185,7 @@ export default function (providerContext: FtrProviderContext) {
               policy_id: 'policy1',
             })
             .expect(400);
-
-          expect(res.body.message).match(/Fleet Admin user is Invalid/);
+          expect(res.body.message).match(/Fleet Admin user is invalid/);
         });
       });
     });

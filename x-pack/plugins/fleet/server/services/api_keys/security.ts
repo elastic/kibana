@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, FakeRequest, SavedObjectsClientContract } from 'src/core/server';
+import type { Request } from '@hapi/hapi';
+import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { FleetAdminUserInvalidError, isLegacyESClientError } from '../../errors';
 import { CallESAsCurrentUser } from '../../types';
 import { appContextService } from '../app_context';
@@ -19,13 +20,17 @@ export async function createAPIKey(
   if (!adminUser) {
     throw new Error('No admin user configured');
   }
-  const request: FakeRequest = {
+  const request = KibanaRequest.from(({
+    path: '/',
+    route: { settings: {} },
+    url: { href: '/' },
+    raw: { req: { url: '/' } },
     headers: {
       authorization: `Basic ${Buffer.from(`${adminUser.username}:${adminUser.password}`).toString(
         'base64'
       )}`,
     },
-  };
+  } as unknown) as Request);
   const security = appContextService.getSecurity();
   if (!security) {
     throw new Error('Missing security plugin');
@@ -64,13 +69,17 @@ export async function invalidateAPIKey(soClient: SavedObjectsClientContract, id:
   if (!adminUser) {
     throw new Error('No admin user configured');
   }
-  const request: FakeRequest = {
+  const request = KibanaRequest.from(({
+    path: '/',
+    route: { settings: {} },
+    url: { href: '/' },
+    raw: { req: { url: '/' } },
     headers: {
       authorization: `Basic ${Buffer.from(`${adminUser.username}:${adminUser.password}`).toString(
         'base64'
       )}`,
     },
-  };
+  } as unknown) as Request);
 
   const security = appContextService.getSecurity();
   if (!security) {
