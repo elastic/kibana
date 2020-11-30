@@ -43,13 +43,14 @@ import {
   EuiCode,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 function newAnnotation() {
   return {
     id: uuid.v1(),
     color: '#F00',
-    index_pattern: '*',
+    index_pattern: '',
     time_field: '@timestamp',
     icon: 'fa-tag',
     ignore_global_filters: 1,
@@ -84,7 +85,7 @@ export class AnnotationsEditor extends Component {
     const defaults = {
       fields: '',
       template: '',
-      index_pattern: '*',
+      index_pattern: '',
       query_string: { query: '', language: getDefaultQueryLanguage() },
     };
     const model = { ...defaults, ...row };
@@ -100,6 +101,8 @@ export class AnnotationsEditor extends Component {
     const htmlId = htmlIdGenerator(model.id);
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
+    const defaultIndexPattern = this.props.model.default_index_pattern;
+
     return (
       <div className="tvbAnnotationsEditor" key={model.id}>
         <EuiFlexGroup responsive={false}>
@@ -120,14 +123,22 @@ export class AnnotationsEditor extends Component {
                   label={
                     <FormattedMessage
                       id="visTypeTimeseries.annotationsEditor.indexPatternLabel"
-                      defaultMessage="Index pattern (required)"
+                      defaultMessage="Index pattern"
                     />
+                  }
+                  helpText={
+                    defaultIndexPattern &&
+                    !model.index_pattern &&
+                    i18n.translate('visTypeTimeseries.annotationsEditor.searchByDefaultIndex', {
+                      defaultMessage: 'Default index pattern is used. To query all indexes use *',
+                    })
                   }
                   fullWidth
                 >
                   <EuiFieldText
                     onChange={this.handleChange(model, 'index_pattern')}
                     value={model.index_pattern}
+                    placeholder={defaultIndexPattern}
                     fullWidth
                   />
                 </EuiFormRow>

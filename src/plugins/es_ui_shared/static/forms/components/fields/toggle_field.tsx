@@ -29,7 +29,7 @@ interface Props {
   [key: string]: any;
 }
 
-export const ToggleField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+export const ToggleField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   // Shim for sufficient overlap between EuiSwitchEvent and FieldHook[onChange] event
@@ -46,7 +46,7 @@ export const ToggleField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      describedByIds={idAria ? [idAria] : undefined}
       {...rest}
     >
       <EuiSwitch

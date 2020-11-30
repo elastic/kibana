@@ -164,9 +164,9 @@ describe('settings', () => {
     });
 
     it('should set advanced settings', () => {
-      input('Sample size').prop('onChange')!({ target: { valueAsNumber: 13 } } as React.ChangeEvent<
-        HTMLInputElement
-      >);
+      input('Sample size').prop('onChange')!({
+        target: { valueAsNumber: 13 },
+      } as React.ChangeEvent<HTMLInputElement>);
 
       expect(dispatchSpy).toHaveBeenCalledWith(
         updateSettings(

@@ -71,7 +71,7 @@ import {
 } from './services/agents';
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
-import { registerIngestManagerUsageCollector } from './collectors/register';
+import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
 
 export interface FleetSetupDeps {
@@ -216,7 +216,7 @@ export class FleetPlugin
     const config = await this.config$.pipe(first()).toPromise();
 
     // Register usage collection
-    registerIngestManagerUsageCollector(core, config, deps.usageCollection);
+    registerFleetUsageCollector(core, config, deps.usageCollection);
 
     // Always register app routes for permissions checking
     registerAppRoutes(router);
