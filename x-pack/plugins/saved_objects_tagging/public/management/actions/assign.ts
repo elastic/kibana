@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable, from } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart, OverlayStart } from 'kibana/public';
 import { TagWithRelations } from '../../../common';
@@ -19,6 +21,7 @@ interface GetAssignActionOptions {
   assignmentService: ITagAssignmentService;
   assignableTypes: string[];
   fetchTags: () => Promise<void>;
+  canceled$: Observable<void>;
 }
 
 export const getAssignAction = ({
@@ -28,6 +31,7 @@ export const getAssignAction = ({
   assignmentService,
   tagCache,
   fetchTags,
+  canceled$,
 }: GetAssignActionOptions): TagAction => {
   const openFlyout = getAssignFlyoutOpener({
     overlays,
@@ -57,12 +61,11 @@ export const getAssignAction = ({
         tagIds: [tag.id],
       });
 
-      // TODO
-      /*
+      // close the flyout when the action is canceled
+      // this is required when the user navigates away from the page
       canceled$.pipe(takeUntil(from(flyout.onClose))).subscribe(() => {
         flyout.close();
       });
-      */
 
       await flyout.onClose;
       await fetchTags();

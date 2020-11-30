@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import { getTableActions } from './index';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { createTagCapabilities } from '../../../common/test_utils';
@@ -42,6 +43,7 @@ describe('getTableActions', () => {
       assignableTypes,
       capabilities: createTagCapabilities(caps),
       fetchTags,
+      canceled$: new Observable<void>(),
     });
 
   const getIds = (actions: TagAction[]) => actions.map((action) => action.id);

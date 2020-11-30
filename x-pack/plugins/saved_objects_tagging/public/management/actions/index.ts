@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import { CoreStart } from 'kibana/public';
 import { TagsCapabilities } from '../../../common';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
@@ -23,6 +24,7 @@ interface GetActionsOptions {
   setLoading: (loading: boolean) => void;
   assignableTypes: string[];
   fetchTags: () => Promise<void>;
+  canceled$: Observable<void>;
 }
 
 export const getTableActions = ({
@@ -34,6 +36,7 @@ export const getTableActions = ({
   setLoading,
   assignableTypes,
   fetchTags,
+  canceled$,
 }: GetActionsOptions): TagAction[] => {
   const actions: TagAction[] = [];
 
@@ -50,6 +53,7 @@ export const getTableActions = ({
         fetchTags,
         notifications,
         overlays,
+        canceled$,
       })
     );
   }

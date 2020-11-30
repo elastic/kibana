@@ -87,6 +87,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
       setLoading,
       assignableTypes,
       fetchTags,
+      canceled$: unmount$,
     });
   }, [
     core,
@@ -97,6 +98,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     setLoading,
     assignableTypes,
     fetchTags,
+    unmount$,
   ]);
 
   const bulkActions = useMemo(() => {
