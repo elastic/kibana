@@ -101,6 +101,8 @@ export interface SavedObjectsRepositoryOptions {
  * @public
  */
 export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+  /** Sets all the counter fields to 0 if they don't already exist */
+  initialize?: boolean;
   migrationVersion?: SavedObjectsMigrationVersion;
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
@@ -1576,7 +1578,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const { migrationVersion, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { migrationVersion, refresh = DEFAULT_REFRESH_SETTING, initialize = false } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     const time = this._getCurrentTime();
@@ -1595,7 +1597,7 @@ export class SavedObjectsRepository {
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
       attributes: counterFieldNames.reduce((acc, counterFieldName) => {
-        acc[counterFieldName] = 1;
+        acc[counterFieldName] = initialize ? 0 : 1;
         return acc;
       }, {} as Record<string, number>),
       migrationVersion,
@@ -1624,7 +1626,7 @@ export class SavedObjectsRepository {
             `,
           lang: 'painless',
           params: {
-            count: 1,
+            count: initialize ? 0 : 1,
             time,
             type,
             counterFieldNames,
