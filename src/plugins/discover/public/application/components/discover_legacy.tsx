@@ -332,10 +332,12 @@ export function DiscoverLegacy({
                               onRemoveColumn={onRemoveColumn}
                               onSort={onSort}
                             />
-                            {rows.length === opts.sampleSize && (
+                            {rows.length === opts.sampleSize ? (
                               <div
                                 className="dscTable__footer"
                                 data-test-subj="discoverDocTableFooter"
+                                tabIndex={-1}
+                                id="discoverBottomMarker"
                               >
                                 <FormattedMessage
                                   id="discover.howToSeeOtherMatchingDocumentsDescription"
@@ -363,10 +365,11 @@ export function DiscoverLegacy({
                                   />
                                 </EuiButtonEmpty>
                               </div>
+                            ) : (
+                              <span tabIndex={-1} id="discoverBottomMarker">
+                                &#8203;
+                              </span>
                             )}
-                            <span tabIndex={-1} id="discoverBottomMarker">
-                              &#8203;
-                            </span>
                           </div>
                         )}
                       </section>
