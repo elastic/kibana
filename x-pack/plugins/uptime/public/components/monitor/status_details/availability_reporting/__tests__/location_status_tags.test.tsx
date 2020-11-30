@@ -8,6 +8,9 @@ import React from 'react';
 import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../index';
+import { mockMoment } from '../../../../../lib/helper/test_helpers';
+
+mockMoment();
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
