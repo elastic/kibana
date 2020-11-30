@@ -770,7 +770,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' recovered instance: '2'",
+            "message": "test:1: 'alert-name' instance '2' has recovered",
           },
         ],
         Array [
