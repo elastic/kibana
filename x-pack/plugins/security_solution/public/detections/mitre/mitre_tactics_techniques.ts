@@ -10043,3 +10043,24 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     value: 'winlogonHelperDll',
   },
 ];
+
+export const mockThreatData = {
+  tactic: {
+    name: 'Privilege Escalation',
+    id: 'TA0009',
+    reference: 'https://attack.mitre.org/tactics/TA0009',
+  },
+  technique: {
+    name: 'Event Triggered Execution',
+    id: 'T1546',
+    reference: 'https://attack.mitre.org/techniques/T1546',
+    tactics: ['privilege-escalation', 'persistence'],
+  },
+  subtechnique: {
+    name: '.bash_profile and .bashrc',
+    id: 'T1546.004',
+    reference: 'https://attack.mitre.org/techniques/T1546/004',
+    tactics: ['privilege-escalation', 'persistence'],
+    techniqueId: 'T1546',
+  },
+};

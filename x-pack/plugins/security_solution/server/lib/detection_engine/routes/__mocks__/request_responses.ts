@@ -392,7 +392,13 @@ export const getResult = (): RuleAlertType => ({
             id: 'T1499',
             name: 'endpoint denial of service',
             reference: 'https://attack.mitre.org/techniques/T1499/',
-            subtechnique: [],
+            subtechnique: [
+              {
+                id: 'T1499.001',
+                name: 'os exhaustion flood',
+                reference: 'https://attack.mitre.org/techniques/T1499/001/',
+              },
+            ],
           },
         ],
       },

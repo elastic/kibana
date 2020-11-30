@@ -10,7 +10,7 @@ const fs = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const fetch = require('node-fetch');
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { camelCase } = require('lodash');
+const { camelCase, startCase } = require('lodash');
 const { resolve } = require('path');
 
 const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
@@ -79,6 +79,20 @@ const getIdReference = (references) =>
     },
     { id: '', reference: '' }
   );
+
+const buildMockThreatData = (tactics, techniques, subtechniques) => {
+  const subtechnique = subtechniques[0];
+  const technique = techniques.find((technique) => technique.id === subtechnique.techniqueId);
+  const tactic = tactics.find(
+    (tactic) => (tactic.name = startCase(camelCase(subtechnique.tactics[0])))
+  );
+
+  return {
+    tactic,
+    technique,
+    subtechnique,
+  };
+};
 
 async function main() {
   fetch(MITRE_ENTERPRISE_ATTACK_URL)
@@ -175,6 +189,14 @@ async function main() {
             ${JSON.stringify(getSubtechniquesOptions(subtechniques), null, 2)
               .replace(/}"/g, '}')
               .replace(/"{/g, '{')};
+
+          export const mockThreatData = ${JSON.stringify(
+            buildMockThreatData(tactics, techniques, subtechniques),
+            null,
+            2
+          )
+            .replace(/}"/g, '}')
+            .replace(/"{/g, '{')};
       `;
 
       fs.writeFileSync(`${OUTPUT_DIRECTORY}/mitre_tactics_techniques.ts`, body, 'utf-8');
