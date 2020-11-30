@@ -2,7 +2,6 @@
 [[alert-management]]
 === Managing Alerts
 
-beta[]
 
 The *Alerts* tab provides a cross-app view of alerting. Different {kib} apps like <<metrics-app,Metrics>>, <<xpack-apm,APM>>, <<uptime-app,Uptime>>, and <<xpack-siem,SIEM>> can offer their own alerts, and the *Alerts* tab provides a central place to:
 
