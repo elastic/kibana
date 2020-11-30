@@ -167,7 +167,9 @@ export const Page: FC = () => {
 
   const [searchString, setSearchString] = useState(initSearchString);
   const [searchQuery, setSearchQuery] = useState(initSearchQuery);
-  const [searchQueryLanguage, setSearchQueryLanguage] = useState(initQueryLanguage);
+  const [searchQueryLanguage, setSearchQueryLanguage] = useState<SearchQueryLanguage>(
+    initQueryLanguage
+  );
   const [samplerShardSize, setSamplerShardSize] = useState(defaults.samplerShardSize);
 
   // TODO - type overallStats and stats
@@ -252,7 +254,7 @@ export const Page: FC = () => {
     }
 
     const { query } = getQueryFromSavedSearch(savedSearch);
-    const queryLanguage = query.language;
+    const queryLanguage = query.language as SearchQueryLanguage;
     const qryString = query.query;
     let qry;
     if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
