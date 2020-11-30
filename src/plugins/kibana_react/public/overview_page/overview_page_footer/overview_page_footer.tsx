@@ -98,13 +98,18 @@ export const OverviewPageFooter: FC<Props> = ({
     </EuiButtonEmpty>
   );
 
-  return (
-    <footer className="kbnOverviewPageFooter">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <div>{isAdvancedSettingsEnabled ? defaultRoutebutton : null}</div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </footer>
-  );
+  let kbnOverviewFooter;
+  if (isAdvancedSettingsEnabled) {
+    kbnOverviewFooter = (
+      <footer className="kbnOverviewPageFooter">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <div>{defaultRoutebutton}</div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </footer>
+    );
+  }
+
+  return kbnOverviewFooter;
 };
