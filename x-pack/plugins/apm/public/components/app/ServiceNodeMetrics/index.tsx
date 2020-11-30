@@ -51,7 +51,11 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
   const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, serviceNodeName } = match.params;
   const { agentName } = useAgentName();
-  const { data } = useServiceMetricCharts(urlParams, agentName);
+  const { data } = useServiceMetricCharts(
+    urlParams,
+    agentName,
+    serviceNodeName
+  );
   const { start, end } = urlParams;
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
