@@ -52,25 +52,26 @@ Coming soon.
 
 Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
 
-- Create an index pattern &mdash; `POST /api/index_patterns/index_pattern`
-- Fetch an index pattern by `{id}` &mdash; `GET /api/index_patterns/index_pattern/{id}`
-- Delete an index pattern by `{id}` &mdash; `DELETE /api/index_patterns/index_pattern/{id}`
-- Partially update an index pattern by `{id}` &mdash; `POST /api/index_patterns/index_pattern/{id}`
-  - `title`
-  - `timeFieldName`
-  - `intervalName`
-  - `fields`
-    - Optionally refresh fields.
-  - `sourceFilters`
-  - `fieldFormatMap`
-  - `type`
-  - `typeMeta`
+- Index Patterns API
+  - Create an index pattern &mdash; `POST /api/index_patterns/index_pattern`
+  - Fetch an index pattern by `{id}` &mdash; `GET /api/index_patterns/index_pattern/{id}`
+  - Delete an index pattern by `{id}` &mdash; `DELETE /api/index_patterns/index_pattern/{id}`
+  - Partially update an index pattern by `{id}` &mdash; `POST /api/index_patterns/index_pattern/{id}`
 - Fields API
-  - Create a field &mdash; `POST /api/index_patterns/index_pattern/{id}/field`
-  - Upsert a field &mdash; `PUT /api/index_patterns/index_pattern/{id}/field`
-  - Fetch a field &mdash; `GET /api/index_patterns/index_pattern/{id}/field/{name}`
-  - Remove a field &mdash; `DELETE /api/index_patterns/index_pattern/{id}/field/{name}`
-  - Update a an existing field &mdash; `POST /api/index_patterns/index_pattern/{id}/field/{name}`
+  - Update field &mdash; `POST /api/index_patterns/index_pattern/{id}/fields`
+- Scripted Fields API
+  - Create a field &mdash; `POST /api/index_patterns/index_pattern/{id}/scripted_field`
+  - Upsert a field &mdash; `PUT /api/index_patterns/index_pattern/{id}/scripted_field`
+  - Fetch a field &mdash; `GET /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
+  - Remove a field &mdash; `DELETE /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
+  - Update a an existing field &mdash; `POST /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
+
+
+### Index Patterns API
+
+Index Patterns CURD API allows you to create, retrieve and delete index patterns. I also
+exposes an update endpoint which allows you to update specific fields without changing
+the rest of the index pattern object.
 
 #### Create an index pattern
 
@@ -136,7 +137,7 @@ The endpoint returns the created index pattern object.
 ```
 
 
-### Fetch an index pattern by ID
+#### Fetch an index pattern by ID
 
 Retrieve and index pattern by its ID.
 
@@ -165,7 +166,7 @@ Returns an index pattern object.
 ```
 
 
-### Delete an index pattern by ID
+#### Delete an index pattern by ID
 
 Delete and index pattern by its ID.
 
@@ -176,10 +177,20 @@ DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 Returns an '200 OK` response with empty body on success.
 
 
-### Partially update an index pattern by ID
+#### Partially update an index pattern by ID
 
 Update part of an index pattern. Only provided fields will be updated on the
 index pattern, missing fields will stay as they are persisted.
+
+These fields can be update partially:
+  - `title`
+  - `timeFieldName`
+  - `intervalName`
+  - `fields` (optionally refresh fields)
+  - `sourceFilters`
+  - `fieldFormatMap`
+  - `type`
+  - `typeMeta`
 
 Update a title of an index pattern.
 
@@ -236,15 +247,90 @@ This endpoint returns the updated index pattern object.
 
 ### Fields API
 
-Fields allows you to manage fields of an existing index pattern.
+Fields API allows to change field metadata, such as `count`, `customLabel`, and `format`.
 
-#### Create a field
+
+#### Update fields
+
+Update endpoint allows you to update fields presentation metadata, such as `count`,
+`customLabel`, and `format`. You can update multiple fields in one request. Updates
+are merges with persisted metadata. To remove existing metadata specify `null` as value.
+
+Set popularity `count` for field `foo`:
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fields
+{
+    "fields": {
+        "foo": {
+            "count": 123
+        }
+    }
+}
+```
+
+Update multiple metadata values and fields in one request:
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fields
+{
+    "fields": {
+        "foo": {
+            "count": 123,
+            "customLabel": "Foo"
+        },
+        "bar": {
+            "customLabel": "Bar"
+        }
+    }
+}
+```
+
+Use `null` value to delete metadata:
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fields
+{
+    "fields": {
+        "foo": {
+            "customLabel": null
+        }
+    }
+}
+```
+
+You can skip field refresh using `refresh_fields` flag. `refresh_fields` defaults to `true`.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fields
+{
+    "refresh_fields": false,
+    "fields": {}
+}
+```
+
+This endpoint returns the updated index pattern object.
+
+```json
+{
+    "index_pattern": {
+
+    }
+}
+```
+
+
+### Scripted Fields API
+
+Scripted Fields API provides CRUD API for scripted fields of an index pattern.
+
+#### Create a scripted field
 
 Create a field by simply specifying its name, will default to `string` type. Returns
 an error if a field with the provided name already exists.
 
 ```
-POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field
 {
     "field": {
         "name": "my_field"
@@ -255,7 +341,7 @@ POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fiel
 Create a field by specifying all field properties.
 
 ```
-POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field
 {
     "field": {
         "name": "",
@@ -278,14 +364,14 @@ POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fiel
 }
 ```
 
-#### Upsert a field
+#### Upsert a scripted field
 
 Creates a new field or updates an existing one, if one already exists with the same name.
 
 Create a field by simply specifying its name.
 
 ```
-PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
+PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field
 {
     "field": {
         "name": "my_field"
@@ -296,7 +382,7 @@ PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
 Create a field by specifying all field properties.
 
 ```
-PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
+PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field
 {
     "field": {
         "name": "",
@@ -319,12 +405,12 @@ PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
 }
 ```
 
-#### Fetch a field
+#### Fetch a scripted field
 
 Fetch an existing index pattern field by field name.
 
 ```
-GET /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field/<name>
+GET /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field/<name>
 ```
 
 Returns the field object.
@@ -335,15 +421,15 @@ Returns the field object.
 }
 ```
 
-#### Delete a field
+#### Delete a scripted field
 
 Delete a field of an index pattern.
 
 ```
-DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field/<name>
+DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field/<name>
 ```
 
-#### Update a an existing field
+#### Update a an existing scripted field
 
 Updates an exiting field by mergin provided properties with the existing ones. If
 there is no existing field with the specified name, returns a `404 Not Found` error.
@@ -351,7 +437,7 @@ there is no existing field with the specified name, returns a `404 Not Found` er
 You can specify any field properties, except `name` which is specified in the URL path.
 
 ```
-POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field/<name>
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field/<name>
 {
     "field": {
         "type": "",
