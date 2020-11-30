@@ -37,7 +37,6 @@ export interface Props {
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
   onChangeConnector: (id: string) => void;
-  onClickUpdateMappings: () => void;
   selectedConnector: { id: string; type: string };
   updateConnectorDisabled: boolean;
 }
@@ -48,7 +47,6 @@ const ConnectorsComponent: React.FC<Props> = ({
   isLoading,
   mappings,
   onChangeConnector,
-  onClickUpdateMappings,
   selectedConnector,
   updateConnectorDisabled,
 }) => {
@@ -107,8 +105,6 @@ const ConnectorsComponent: React.FC<Props> = ({
                   connectorActionTypeId={selectedConnector.type}
                   isLoading={isLoading}
                   mappings={mappings}
-                  updateFieldMappingsDisabled={updateConnectorDisabled}
-                  setEditFlyoutVisibility={onClickUpdateMappings}
                 />
               </EuiFlexItem>
             ) : null}

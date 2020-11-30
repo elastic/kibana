@@ -5,9 +5,8 @@
  */
 
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -19,20 +18,12 @@ export interface MappingProps {
   connectorActionTypeId: string;
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
-  setEditFlyoutVisibility: () => void;
-  updateFieldMappingsDisabled: boolean;
 }
 
-const EuiButtonEmptyExtended = styled(EuiButtonEmpty)`
-  font-size: 12px;
-  height: 24px;
-`;
 const MappingComponent: React.FC<MappingProps> = ({
   connectorActionTypeId,
   isLoading,
   mappings,
-  setEditFlyoutVisibility,
-  updateFieldMappingsDisabled,
 }) => {
   const selectedConnector = useMemo(() => connectorsConfiguration[connectorActionTypeId], [
     connectorActionTypeId,
@@ -46,19 +37,6 @@ const MappingComponent: React.FC<MappingProps> = ({
             {i18n.FIELD_MAPPING_DESC(selectedConnector.name)}
           </EuiTextColor>
         </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmptyExtended
-              data-test-subj="case-mappings-update-connector-button"
-              disabled={updateFieldMappingsDisabled}
-              onClick={setEditFlyoutVisibility}
-            >
-              {i18n.UPDATE_FIELD_MAPPINGS}
-            </EuiButtonEmptyExtended>
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <FieldMapping

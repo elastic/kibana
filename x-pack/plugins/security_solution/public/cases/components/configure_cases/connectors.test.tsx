@@ -25,7 +25,6 @@ describe('Connectors', () => {
     isLoading: false,
     mappings: [],
     onChangeConnector,
-    onClickUpdateMappings: jest.fn(),
     selectedConnector: { id: 'none', type: ConnectorTypes.none },
     updateConnectorDisabled: false,
   };

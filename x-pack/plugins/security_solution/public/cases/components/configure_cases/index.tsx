@@ -30,7 +30,6 @@ import {
   normalizeCaseConnector,
 } from './utils';
 import * as i18n from './translations';
-import { FieldMappingFlyout } from './field_mapping_flyout';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -62,7 +61,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
-  const [mappingsFlyoutVisible, setMappingsFlyoutVisibility] = useState<boolean>(false);
   const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
     null
   );
@@ -86,12 +84,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   const reloadConnectors = useCallback(async () => refetchConnectors(), []);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connector.id === 'none';
-  const onClickUpdateMappings = useCallback(() => {
-    setMappingsFlyoutVisibility(true);
-  }, []);
-  const onCloseUpdateMappings = useCallback(() => {
-    setMappingsFlyoutVisibility(false);
-  }, []);
   const onClickUpdateConnector = useCallback(() => {
     setEditFlyoutVisibility(true);
   }, []);
@@ -213,16 +205,12 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           isLoading={isLoadingAny}
           mappings={mappings}
           onChangeConnector={onChangeConnector}
-          onClickUpdateMappings={onClickUpdateMappings}
           selectedConnector={connector}
           updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
         />
       </SectionWrapper>
       {addFlyoutVisible && ConnectorAddFlyout}
       {ConnectorEditFlyout}
-      {mappingsFlyoutVisible && editedConnectorItem != null && (
-        <FieldMappingFlyout onClose={onCloseUpdateMappings} connector={editedConnectorItem} />
-      )}
     </FormWrapper>
   );
 };
