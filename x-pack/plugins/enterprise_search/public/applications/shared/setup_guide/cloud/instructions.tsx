@@ -32,7 +32,7 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                   id="xpack.enterpriseSearch.setupGuide.cloud.step1.instruction1"
                   defaultMessage="Visit the Elastic Cloud console to {editDeploymentLink}."
                   values={{
-                    visitCloudLink: cloudDeploymentLink ? (
+                    editDeploymentLink: cloudDeploymentLink ? (
                       <EuiLink href={cloudDeploymentLink + '/edit'} target="_blank">
                         edit your deployment
                       </EuiLink>
