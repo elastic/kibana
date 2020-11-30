@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { IndexPattern, IFieldType } from '../../../../../src/plugins/data/common';
-import { AGG_TYPE, TOP_TERM_PERCENTAGE_SUFFIX } from '../constants';
+import { AGG_TYPE, JOIN_FIELD_NAME_PREFIX, TOP_TERM_PERCENTAGE_SUFFIX } from '../constants';
 
 export type BucketProperties = Record<string | number, unknown>;
 export type PropertiesMap = Map<string, BucketProperties>;
@@ -64,7 +64,10 @@ export function extractPropertiesFromBucket(
         );
       }
     } else {
-      if (key.startsWith(AGG_TYPE.PERCENTILE)) {
+      if (
+        key.startsWith(AGG_TYPE.PERCENTILE) ||
+        key.startsWith(JOIN_FIELD_NAME_PREFIX + AGG_TYPE.PERCENTILE)
+      ) {
         const values = bucket[key].values;
         for (const k in values) {
           if (values.hasOwnProperty(k)) {
