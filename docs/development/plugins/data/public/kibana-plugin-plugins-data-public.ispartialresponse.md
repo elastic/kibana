@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-isPartialResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean | undefined
+isPartialResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean
 ```

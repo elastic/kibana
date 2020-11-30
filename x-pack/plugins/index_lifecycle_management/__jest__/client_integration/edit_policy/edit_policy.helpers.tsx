@@ -7,12 +7,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
+import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
 
 import { EditPolicy } from '../../../public/application/sections/edit_policy';
 import { DataTierAllocationType } from '../../../public/application/sections/edit_policy/types';
 
 import { Phases as PolicyPhases } from '../../../common/types';
+
+import { KibanaContextProvider } from '../../../public/shared_imports';
+import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
 
 type Phases = keyof PolicyPhases;
 
@@ -48,7 +51,17 @@ const testBedConfig: TestBedConfig = {
   },
 };
 
-const initTestBed = registerTestBed<TestSubjects>(EditPolicy, testBedConfig);
+const breadcrumbService = createBreadcrumbsMock();
+
+const MyComponent = (props: any) => {
+  return (
+    <KibanaContextProvider services={{ breadcrumbService }}>
+      <EditPolicy {...props} />
+    </KibanaContextProvider>
+  );
+};
+
+const initTestBed = registerTestBed<TestSubjects>(MyComponent, testBedConfig);
 
 type SetupReturn = ReturnType<typeof setup>;
 
@@ -207,6 +220,11 @@ export const setup = async () => {
         setReplicas: setReplicas('cold'),
         setFreeze,
         setIndexPriority: setIndexPriority('cold'),
+      },
+      delete: {
+        enable: enable('delete'),
+        setMinAgeValue: setMinAgeValue('delete'),
+        setMinAgeUnits: setMinAgeUnits('delete'),
       },
     },
   };

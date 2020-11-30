@@ -6,7 +6,7 @@
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 
-import { registerTestBed, TestBed } from '../../../../../../../test_utils';
+import { registerTestBed, TestBed } from '@kbn/test/jest';
 import { Props } from '../';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 

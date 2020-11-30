@@ -79,5 +79,27 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
 
       await testSubjects.missingOrFail('add-element-button');
     },
+
+    async getTimeFiltersFromDebug() {
+      await testSubjects.existOrFail('canvasDebug__content');
+
+      const contentElem = await testSubjects.find('canvasDebug__content');
+      const content = await contentElem.getVisibleText();
+
+      const filters = JSON.parse(content);
+
+      return filters.and.filter((f: any) => f.filterType === 'time');
+    },
+
+    async getMatchFiltersFromDebug() {
+      await testSubjects.existOrFail('canvasDebug__content');
+
+      const contentElem = await testSubjects.find('canvasDebug__content');
+      const content = await contentElem.getVisibleText();
+
+      const filters = JSON.parse(content);
+
+      return filters.and.filter((f: any) => f.filterType === 'exactly');
+    },
   };
 }

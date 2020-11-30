@@ -28,6 +28,7 @@ const WATCH_NAME = 'elasticsearch_nodes';
 export class NodesChangedAlert extends BaseAlert {
   public type = ALERT_NODES_CHANGED;
   public label = LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].label;
+  public description = LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].description;
   public isLegacy = true;
 
   protected actionVariables = [

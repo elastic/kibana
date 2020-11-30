@@ -7,7 +7,7 @@
 import jobConfig from '../../../../../common/types/__mocks__/job_config_farequote';
 import mockAnnotations from './__mocks__/mock_annotations.json';
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { AnnotationsTable } from './annotations_table';
@@ -24,7 +24,7 @@ jest.mock('../../../services/ml_api_service', () => {
   return {
     ml: {
       annotations: {
-        getAnnotations: jest.fn().mockReturnValue(mockAnnotations$),
+        getAnnotations$: jest.fn().mockReturnValue(mockAnnotations$),
       },
     },
   };

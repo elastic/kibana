@@ -6,10 +6,10 @@
 
 import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
+import { Logger } from 'src/core/server';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices, AlertTypeState } from '../../../../alerts/server';
 import { ActionGroupId, GEO_THRESHOLD_ID, GeoThresholdParams } from './alert_type';
-import { Logger } from '../../types';
 
 interface LatestEntityLocation {
   location: number[];
@@ -38,7 +38,7 @@ export function transformResults(
         return _.map(subBuckets, (subBucket) => {
           const locationFieldResult = _.get(
             subBucket,
-            `entityHits.hits.hits[0].fields.${geoField}[0]`,
+            `entityHits.hits.hits[0].fields["${geoField}"][0]`,
             ''
           );
           const location = locationFieldResult
@@ -50,7 +50,7 @@ export function transformResults(
             : null;
           const dateInShape = _.get(
             subBucket,
-            `entityHits.hits.hits[0].fields.${dateField}[0]`,
+            `entityHits.hits.hits[0].fields["${dateField}"][0]`,
             null
           );
           const docId = _.get(subBucket, `entityHits.hits.hits[0]._id`);
@@ -144,11 +144,14 @@ export function getMovedEntities(
         []
       )
       // Do not track entries to or exits from 'other'
-      .filter((entityMovementDescriptor: EntityMovementDescriptor) =>
-        trackingEvent === 'entered'
-          ? entityMovementDescriptor.currLocation.shapeId !== OTHER_CATEGORY
-          : entityMovementDescriptor.prevLocation.shapeId !== OTHER_CATEGORY
-      )
+      .filter((entityMovementDescriptor: EntityMovementDescriptor) => {
+        if (trackingEvent !== 'crossed') {
+          return trackingEvent === 'entered'
+            ? entityMovementDescriptor.currLocation.shapeId !== OTHER_CATEGORY
+            : entityMovementDescriptor.prevLocation.shapeId !== OTHER_CATEGORY;
+        }
+        return true;
+      })
   );
 }
 
@@ -169,7 +172,7 @@ function getOffsetTime(delayOffsetWithUnits: string, oldTime: Date): Date {
   return adjustedDate;
 }
 
-export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
+export const getGeoThresholdExecutor = (log: Logger) =>
   async function ({
     previousStartedAt,
     startedAt,
@@ -194,7 +197,8 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
           services.callCluster,
           log,
           alertId,
-          params.boundaryNameField
+          params.boundaryNameField,
+          params.boundaryIndexQuery
         );
 
     const executeEsQuery = await executeEsQueryFactory(params, services, log, shapesFilters);
@@ -253,27 +257,36 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     movedEntities.forEach(({ entityName, currLocation, prevLocation }) => {
       const toBoundaryName = shapesIdsNamesMap[currLocation.shapeId] || currLocation.shapeId;
       const fromBoundaryName = shapesIdsNamesMap[prevLocation.shapeId] || prevLocation.shapeId;
-      services
-        .alertInstanceFactory(`${entityName}-${toBoundaryName || currLocation.shapeId}`)
-        .scheduleActions(ActionGroupId, {
-          entityId: entityName,
-          timeOfDetection: new Date(currIntervalEndTime).getTime(),
-          crossingLine: `LINESTRING (${prevLocation.location[0]} ${prevLocation.location[1]}, ${currLocation.location[0]} ${currLocation.location[1]})`,
+      let alertInstance;
+      if (params.trackingEvent === 'entered') {
+        alertInstance = `${entityName}-${toBoundaryName || currLocation.shapeId}`;
+      } else if (params.trackingEvent === 'exited') {
+        alertInstance = `${entityName}-${fromBoundaryName || prevLocation.shapeId}`;
+      } else {
+        // == 'crossed'
+        alertInstance = `${entityName}-${fromBoundaryName || prevLocation.shapeId}-${
+          toBoundaryName || currLocation.shapeId
+        }`;
+      }
+      services.alertInstanceFactory(alertInstance).scheduleActions(ActionGroupId, {
+        entityId: entityName,
+        timeOfDetection: new Date(currIntervalEndTime).getTime(),
+        crossingLine: `LINESTRING (${prevLocation.location[0]} ${prevLocation.location[1]}, ${currLocation.location[0]} ${currLocation.location[1]})`,
 
-          toEntityLocation: `POINT (${currLocation.location[0]} ${currLocation.location[1]})`,
-          toEntityDateTime: currLocation.date,
-          toEntityDocumentId: currLocation.docId,
+        toEntityLocation: `POINT (${currLocation.location[0]} ${currLocation.location[1]})`,
+        toEntityDateTime: currLocation.date,
+        toEntityDocumentId: currLocation.docId,
 
-          toBoundaryId: currLocation.shapeId,
-          toBoundaryName,
+        toBoundaryId: currLocation.shapeId,
+        toBoundaryName,
 
-          fromEntityLocation: `POINT (${prevLocation.location[0]} ${prevLocation.location[1]})`,
-          fromEntityDateTime: prevLocation.date,
-          fromEntityDocumentId: prevLocation.docId,
+        fromEntityLocation: `POINT (${prevLocation.location[0]} ${prevLocation.location[1]})`,
+        fromEntityDateTime: prevLocation.date,
+        fromEntityDocumentId: prevLocation.docId,
 
-          fromBoundaryId: prevLocation.shapeId,
-          fromBoundaryName,
-        });
+        fromBoundaryId: prevLocation.shapeId,
+        fromBoundaryName,
+      });
     });
 
     // Combine previous results w/ current results for state of next run

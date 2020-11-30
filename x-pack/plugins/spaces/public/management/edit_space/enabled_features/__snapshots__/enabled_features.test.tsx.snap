@@ -90,7 +90,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
               "category": Object {
                 "euiIconType": "logoKibana",
                 "id": "kibana",
-                "label": "Kibana",
+                "label": "Analytics",
                 "order": 1000,
               },
               "id": "feature-1",
@@ -102,7 +102,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
               "category": Object {
                 "euiIconType": "logoKibana",
                 "id": "kibana",
-                "label": "Kibana",
+                "label": "Analytics",
                 "order": 1000,
               },
               "id": "feature-2",

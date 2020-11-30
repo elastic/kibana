@@ -49,6 +49,7 @@ import {
   setOverlays,
   setSavedSearchLoader,
   setEmbeddable,
+  setDocLinks,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -172,6 +173,7 @@ export class VisualizationsPlugin
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
     setSavedObjects(core.savedObjects);
+    setDocLinks(core.docLinks);
     setIndexPatterns(data.indexPatterns);
     setSearch(data.search);
     setFilterManager(data.query.filterManager);

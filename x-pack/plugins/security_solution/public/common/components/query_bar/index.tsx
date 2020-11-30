@@ -62,7 +62,10 @@ export const QueryBar = memo<QueryBarComponentProps>(
     const [draftQuery, setDraftQuery] = useState(filterQuery);
 
     useEffect(() => {
-      // Reset draftQuery when `Create new timeline` is clicked
+      setDraftQuery(filterQuery);
+    }, [filterQuery]);
+
+    useEffect(() => {
       if (filterQueryDraft == null) {
         setDraftQuery(filterQuery);
       }

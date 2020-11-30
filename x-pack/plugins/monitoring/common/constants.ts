@@ -260,30 +260,51 @@ export const LEGACY_ALERT_DETAILS = {
     label: i18n.translate('xpack.monitoring.alerts.clusterHealth.label', {
       defaultMessage: 'Cluster health',
     }),
+    description: i18n.translate('xpack.monitoring.alerts.clusterHealth.description', {
+      defaultMessage: 'Alert when the health of the cluster changes.',
+    }),
   },
   [ALERT_ELASTICSEARCH_VERSION_MISMATCH]: {
     label: i18n.translate('xpack.monitoring.alerts.elasticsearchVersionMismatch.label', {
       defaultMessage: 'Elasticsearch version mismatch',
     }),
+    description: i18n.translate(
+      'xpack.monitoring.alerts.elasticsearchVersionMismatch.description',
+      {
+        defaultMessage: 'Alert when the cluster has multiple versions of Elasticsearch.',
+      }
+    ),
   },
   [ALERT_KIBANA_VERSION_MISMATCH]: {
     label: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.label', {
       defaultMessage: 'Kibana version mismatch',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.description', {
+      defaultMessage: 'Alert when the cluser has multiple versions of Kibana.',
     }),
   },
   [ALERT_LICENSE_EXPIRATION]: {
     label: i18n.translate('xpack.monitoring.alerts.licenseExpiration.label', {
       defaultMessage: 'License expiration',
     }),
+    description: i18n.translate('xpack.monitoring.alerts.licenseExpiration.description', {
+      defaultMessage: 'Alert when the cluster license is about to expire.',
+    }),
   },
   [ALERT_LOGSTASH_VERSION_MISMATCH]: {
     label: i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.label', {
       defaultMessage: 'Logstash version mismatch',
     }),
+    description: i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.description', {
+      defaultMessage: 'Alert when the cluster has multiple versions of Logstash.',
+    }),
   },
   [ALERT_NODES_CHANGED]: {
     label: i18n.translate('xpack.monitoring.alerts.nodesChanged.label', {
       defaultMessage: 'Nodes changed',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.nodesChanged.description', {
+      defaultMessage: 'Alert when adding, removing, or restarting a node.',
     }),
   },
 };
@@ -295,6 +316,9 @@ export const ALERT_DETAILS = {
   [ALERT_CPU_USAGE]: {
     label: i18n.translate('xpack.monitoring.alerts.cpuUsage.label', {
       defaultMessage: 'CPU Usage',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.cpuUsage.description', {
+      defaultMessage: 'Alert when the CPU load for a node is consistently high.',
     }),
     paramDetails: {
       threshold: {
@@ -329,6 +353,9 @@ export const ALERT_DETAILS = {
     label: i18n.translate('xpack.monitoring.alerts.diskUsage.label', {
       defaultMessage: 'Disk Usage',
     }),
+    description: i18n.translate('xpack.monitoring.alerts.diskUsage.description', {
+      defaultMessage: 'Alert when the disk usage for a node is consistently high.',
+    }),
   },
   [ALERT_MEMORY_USAGE]: {
     paramDetails: {
@@ -348,6 +375,9 @@ export const ALERT_DETAILS = {
     label: i18n.translate('xpack.monitoring.alerts.memoryUsage.label', {
       defaultMessage: 'Memory Usage (JVM)',
     }),
+    description: i18n.translate('xpack.monitoring.alerts.memoryUsage.description', {
+      defaultMessage: 'Alert when a node reports high memory usage.',
+    }),
   },
   [ALERT_MISSING_MONITORING_DATA]: {
     paramDetails: {
@@ -366,6 +396,9 @@ export const ALERT_DETAILS = {
     },
     label: i18n.translate('xpack.monitoring.alerts.missingData.label', {
       defaultMessage: 'Missing monitoring data',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.missingData.description', {
+      defaultMessage: 'Alert when monitoring data is missing.',
     }),
   },
   [ALERT_THREAD_POOL_SEARCH_REJECTIONS]: {
@@ -388,6 +421,10 @@ export const ALERT_DETAILS = {
       defaultMessage: 'Thread pool {type} rejections',
       values: { type: 'search' },
     }),
+    description: i18n.translate('xpack.monitoring.alerts.searchThreadPoolRejections.description', {
+      defaultMessage:
+        'Alert when the number of rejections in the search thread pool exceeds the threshold.',
+    }),
   },
   [ALERT_THREAD_POOL_WRITE_REJECTIONS]: {
     paramDetails: {
@@ -408,6 +445,10 @@ export const ALERT_DETAILS = {
     label: i18n.translate('xpack.monitoring.alerts.threadPoolRejections.label', {
       defaultMessage: 'Thread pool {type} rejections',
       values: { type: 'write' },
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.writeThreadPoolRejections.description', {
+      defaultMessage:
+        'Alert when the number of rejections in the write thread pool exceeds the threshold.',
     }),
   },
 };

@@ -7,8 +7,9 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertInstances, AlertInstanceListItem, alertInstanceToListItem } from './alert_instances';
-import { Alert, AlertInstanceSummary, AlertInstanceStatus } from '../../../../types';
+import { Alert, AlertInstanceSummary, AlertInstanceStatus, AlertType } from '../../../../types';
 import { EuiBasicTable } from '@elastic/eui';
+jest.mock('../../../../common/lib/kibana');
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
@@ -24,25 +25,21 @@ beforeAll(() => {
   global.Date.now = jest.fn(() => fakeNow.getTime());
 });
 
-jest.mock('../../../app_context', () => {
-  const toastNotifications = jest.fn();
-  return {
-    useAppDependencies: jest.fn(() => ({ toastNotifications })),
-  };
-});
-
 describe('alert_instances', () => {
   it('render a list of alert instances', () => {
     const alert = mockAlert();
+    const alertType = mockAlertType();
     const alertInstanceSummary = mockAlertInstanceSummary({
       instances: {
         first_instance: {
           status: 'OK',
           muted: false,
+          actionGroupId: 'default',
         },
         second_instance: {
           status: 'Active',
           muted: false,
+          actionGroupId: 'action group id unknown',
         },
       },
     });
@@ -51,14 +48,14 @@ describe('alert_instances', () => {
       // active first
       alertInstanceToListItem(
         fakeNow.getTime(),
-        alert,
+        alertType,
         'second_instance',
         alertInstanceSummary.instances.second_instance
       ),
       // ok second
       alertInstanceToListItem(
         fakeNow.getTime(),
-        alert,
+        alertType,
         'first_instance',
         alertInstanceSummary.instances.first_instance
       ),
@@ -69,6 +66,7 @@ describe('alert_instances', () => {
         <AlertInstances
           {...mockAPIs}
           alert={alert}
+          alertType={alertType}
           alertInstanceSummary={alertInstanceSummary}
           readOnly={false}
         />
@@ -80,6 +78,7 @@ describe('alert_instances', () => {
 
   it('render a hidden field with duration epoch', () => {
     const alert = mockAlert();
+    const alertType = mockAlertType();
     const alertInstanceSummary = mockAlertInstanceSummary();
 
     expect(
@@ -88,6 +87,7 @@ describe('alert_instances', () => {
           durationEpoch={fake2MinutesAgo.getTime()}
           {...mockAPIs}
           alert={alert}
+          alertType={alertType}
           readOnly={false}
           alertInstanceSummary={alertInstanceSummary}
         />
@@ -99,6 +99,7 @@ describe('alert_instances', () => {
 
   it('render all active alert instances', () => {
     const alert = mockAlert();
+    const alertType = mockAlertType();
     const instances: Record<string, AlertInstanceStatus> = {
       ['us-central']: {
         status: 'OK',
@@ -114,6 +115,7 @@ describe('alert_instances', () => {
         <AlertInstances
           {...mockAPIs}
           alert={alert}
+          alertType={alertType}
           readOnly={false}
           alertInstanceSummary={mockAlertInstanceSummary({
             instances,
@@ -123,8 +125,8 @@ describe('alert_instances', () => {
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual([
-      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-central', instances['us-central']),
-      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-east', instances['us-east']),
+      alertInstanceToListItem(fakeNow.getTime(), alertType, 'us-central', instances['us-central']),
+      alertInstanceToListItem(fakeNow.getTime(), alertType, 'us-east', instances['us-east']),
     ]);
   });
 
@@ -132,6 +134,7 @@ describe('alert_instances', () => {
     const alert = mockAlert({
       mutedInstanceIds: ['us-west', 'us-east'],
     });
+    const alertType = mockAlertType();
     const instanceUsWest: AlertInstanceStatus = { status: 'OK', muted: false };
     const instanceUsEast: AlertInstanceStatus = { status: 'OK', muted: false };
 
@@ -140,6 +143,7 @@ describe('alert_instances', () => {
         <AlertInstances
           {...mockAPIs}
           alert={alert}
+          alertType={alertType}
           readOnly={false}
           alertInstanceSummary={mockAlertInstanceSummary({
             instances: {
@@ -158,15 +162,40 @@ describe('alert_instances', () => {
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual([
-      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-west', instanceUsWest),
-      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-east', instanceUsEast),
+      alertInstanceToListItem(fakeNow.getTime(), alertType, 'us-west', instanceUsWest),
+      alertInstanceToListItem(fakeNow.getTime(), alertType, 'us-east', instanceUsEast),
     ]);
   });
 });
 
 describe('alertInstanceToListItem', () => {
   it('handles active instances', () => {
-    const alert = mockAlert();
+    const alertType = mockAlertType({
+      actionGroups: [
+        { id: 'default', name: 'Default Action Group' },
+        { id: 'testing', name: 'Test Action Group' },
+      ],
+    });
+    const start = fake2MinutesAgo;
+    const instance: AlertInstanceStatus = {
+      status: 'Active',
+      muted: false,
+      activeStartDate: fake2MinutesAgo.toISOString(),
+      actionGroupId: 'testing',
+    };
+
+    expect(alertInstanceToListItem(fakeNow.getTime(), alertType, 'id', instance)).toEqual({
+      instance: 'id',
+      status: { label: 'Active', actionGroup: 'Test Action Group', healthColor: 'primary' },
+      start,
+      sortPriority: 0,
+      duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
+      isMuted: false,
+    });
+  });
+
+  it('handles active instances with no action group id', () => {
+    const alertType = mockAlertType();
     const start = fake2MinutesAgo;
     const instance: AlertInstanceStatus = {
       status: 'Active',
@@ -174,9 +203,9 @@ describe('alertInstanceToListItem', () => {
       activeStartDate: fake2MinutesAgo.toISOString(),
     };
 
-    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alertType, 'id', instance)).toEqual({
       instance: 'id',
-      status: { label: 'Active', healthColor: 'primary' },
+      status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
       start,
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
@@ -185,19 +214,18 @@ describe('alertInstanceToListItem', () => {
   });
 
   it('handles active muted instances', () => {
-    const alert = mockAlert({
-      mutedInstanceIds: ['id'],
-    });
+    const alertType = mockAlertType();
     const start = fake2MinutesAgo;
     const instance: AlertInstanceStatus = {
       status: 'Active',
       muted: true,
       activeStartDate: fake2MinutesAgo.toISOString(),
+      actionGroupId: 'default',
     };
 
-    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alertType, 'id', instance)).toEqual({
       instance: 'id',
-      status: { label: 'Active', healthColor: 'primary' },
+      status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
       start,
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
@@ -206,15 +234,16 @@ describe('alertInstanceToListItem', () => {
   });
 
   it('handles active instances with start date', () => {
-    const alert = mockAlert();
+    const alertType = mockAlertType();
     const instance: AlertInstanceStatus = {
       status: 'Active',
       muted: false,
+      actionGroupId: 'default',
     };
 
-    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alertType, 'id', instance)).toEqual({
       instance: 'id',
-      status: { label: 'Active', healthColor: 'primary' },
+      status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
       start: undefined,
       duration: 0,
       sortPriority: 0,
@@ -223,14 +252,13 @@ describe('alertInstanceToListItem', () => {
   });
 
   it('handles muted inactive instances', () => {
-    const alert = mockAlert({
-      mutedInstanceIds: ['id'],
-    });
+    const alertType = mockAlertType();
     const instance: AlertInstanceStatus = {
       status: 'OK',
       muted: true,
+      actionGroupId: 'default',
     };
-    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alertType, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'OK', healthColor: 'subdued' },
       start: undefined,
@@ -268,6 +296,23 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
   };
 }
 
+function mockAlertType(overloads: Partial<AlertType> = {}): AlertType {
+  return {
+    id: 'test.testAlertType',
+    name: 'My Test Alert Type',
+    actionGroups: [{ id: 'default', name: 'Default Action Group' }],
+    actionVariables: {
+      context: [],
+      state: [],
+      params: [],
+    },
+    defaultActionGroupId: 'default',
+    authorizedConsumers: {},
+    producer: 'alerts',
+    ...overloads,
+  };
+}
+
 function mockAlertInstanceSummary(
   overloads: Partial<AlertInstanceSummary> = {}
 ): AlertInstanceSummary {
@@ -288,6 +333,7 @@ function mockAlertInstanceSummary(
       foo: {
         status: 'OK',
         muted: false,
+        actionGroupId: 'testActionGroup',
       },
     },
   };

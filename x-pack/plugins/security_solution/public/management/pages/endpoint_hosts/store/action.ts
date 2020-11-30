@@ -11,7 +11,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
-import { GetPackagesResponse } from '../../../../../../ingest_manager/common';
+import { GetPackagesResponse } from '../../../../../../fleet/common';
 import { EndpointState } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 

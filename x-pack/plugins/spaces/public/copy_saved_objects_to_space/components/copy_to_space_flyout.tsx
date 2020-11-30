@@ -61,13 +61,16 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     }
   );
   useEffect(() => {
-    const getSpaces = spacesManager.getSpaces('copySavedObjectsIntoSpace');
+    const getSpaces = spacesManager.getSpaces({ includeAuthorizedPurposes: true });
     const getActiveSpace = spacesManager.getActiveSpace();
     Promise.all([getSpaces, getActiveSpace])
       .then(([allSpaces, activeSpace]) => {
         setSpacesState({
           isLoading: false,
-          spaces: allSpaces.filter((space) => space.id !== activeSpace.id),
+          spaces: allSpaces.filter(
+            ({ id, authorizedPurposes }) =>
+              id !== activeSpace.id && authorizedPurposes?.copySavedObjectsIntoSpace !== false
+          ),
         });
       })
       .catch((e) => {

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../index';
 

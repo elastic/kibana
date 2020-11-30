@@ -7,10 +7,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import expect from '@kbn/expect';
+import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { RulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import { CreateExceptionListItemSchema } from '../../../../plugins/lists/common';
 import { EXCEPTION_LIST_URL } from '../../../../plugins/lists/common/constants';
@@ -32,7 +32,7 @@ import {
   createExceptionList,
   createExceptionListItem,
   waitForSignalsToBePresent,
-  getAllSignals,
+  getSignalsByIds,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
         await deleteAllExceptions(es);
       });
 
@@ -101,6 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const ruleWithException: CreateRulesSchema = {
           ...getSimpleRule(),
+          enabled: true,
           exceptions_list: [
             {
               id,
@@ -117,6 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const expected: Partial<RulesSchema> = {
           ...getSimpleRuleOutput(),
+          enabled: true,
           exceptions_list: [
             {
               id,
@@ -349,10 +351,10 @@ export default ({ getService }: FtrProviderContext) => {
           getCreateExceptionListMinimalSchemaMock()
         );
 
-        // Rule id of "6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6" is from the file:
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/c2_reg_beacon.json
+        // Rule id of "eb079c62-4481-4d6e-9643-3ca499df7aaa" is from the file:
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/external_alerts.json
         // since this rule does not have existing exceptions_list that we are going to use for tests
-        const immutableRule = await getRule(supertest, '6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6');
+        const immutableRule = await getRule(supertest, 'eb079c62-4481-4d6e-9643-3ca499df7aaa');
         expect(immutableRule.exceptions_list.length).eql(0); // make sure we have no exceptions_list
 
         // add a second exceptions list as a user is allowed to add a second list to an immutable rule
@@ -360,7 +362,7 @@ export default ({ getService }: FtrProviderContext) => {
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send({
-            rule_id: '6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6',
+            rule_id: 'eb079c62-4481-4d6e-9643-3ca499df7aaa',
             exceptions_list: [
               {
                 id,
@@ -372,11 +374,11 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await downgradeImmutableRule(es, '6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6');
+        await downgradeImmutableRule(es, 'eb079c62-4481-4d6e-9643-3ca499df7aaa');
         await installPrePackagedRules(supertest);
         const immutableRuleSecondTime = await getRule(
           supertest,
-          '6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6'
+          'eb079c62-4481-4d6e-9643-3ca499df7aaa'
         );
 
         expect(immutableRuleSecondTime.exceptions_list).to.eql([
@@ -397,7 +399,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest);
-          await deleteAllAlerts(es);
+          await deleteAllAlerts(supertest);
           await deleteAllExceptions(es);
           await esArchiver.unload('auditbeat/hosts');
         });
@@ -422,7 +424,14 @@ export default ({ getService }: FtrProviderContext) => {
           await createExceptionListItem(supertest, exceptionListItem);
 
           const ruleWithException: CreateRulesSchema = {
-            ...getSimpleRule(),
+            name: 'Simple Rule Query',
+            description: 'Simple Rule Query',
+            enabled: true,
+            risk_score: 1,
+            rule_id: 'rule-1',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'query',
             from: '1900-01-01T00:00:00.000Z',
             query: 'host.name: "suricata-sensor-amsterdam"',
             exceptions_list: [
@@ -434,9 +443,10 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           };
-          await createRule(supertest, ruleWithException);
-          await waitForSignalsToBePresent(supertest, 10);
-          const signalsOpen = await getAllSignals(supertest);
+          const { id: createdId } = await createRule(supertest, ruleWithException);
+          await waitForRuleSuccess(supertest, createdId);
+          await waitForSignalsToBePresent(supertest, 10, [createdId]);
+          const signalsOpen = await getSignalsByIds(supertest, [createdId]);
           expect(signalsOpen.hits.hits.length).equal(10);
         });
 
@@ -460,9 +470,16 @@ export default ({ getService }: FtrProviderContext) => {
           await createExceptionListItem(supertest, exceptionListItem);
 
           const ruleWithException: CreateRulesSchema = {
-            ...getSimpleRule(),
+            name: 'Simple Rule Query',
+            description: 'Simple Rule Query',
+            enabled: true,
+            risk_score: 1,
+            rule_id: 'rule-1',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'query',
             from: '1900-01-01T00:00:00.000Z',
-            query: 'host.name: "suricata-sensor-amsterdam"', // this matches all the exceptions we should exclude
+            query: 'host.name: "suricata-sensor-amsterdam"',
             exceptions_list: [
               {
                 id,
@@ -474,7 +491,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const rule = await createRule(supertest, ruleWithException);
           await waitForRuleSuccess(supertest, rule.id);
-          const signalsOpen = await getAllSignals(supertest);
+          const signalsOpen = await getSignalsByIds(supertest, [rule.id]);
           expect(signalsOpen.hits.hits.length).equal(0);
         });
       });

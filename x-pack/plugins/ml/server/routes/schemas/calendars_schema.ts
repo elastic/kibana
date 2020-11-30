@@ -11,6 +11,7 @@ export const calendarSchema = schema.object({
   calendarId: schema.string(),
   job_ids: schema.arrayOf(schema.maybe(schema.string())),
   description: schema.maybe(schema.string()),
+  total_job_count: schema.maybe(schema.number()),
   events: schema.arrayOf(
     schema.maybe(
       schema.object({

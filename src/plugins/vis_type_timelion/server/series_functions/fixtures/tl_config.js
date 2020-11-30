@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import sinon from 'sinon';
+import { of } from 'rxjs';
 import timelionDefaults from '../../lib/get_namespaced_settings';
 import esResponse from './es_response';
 
@@ -30,14 +30,6 @@ export default function () {
       if (!functions[name]) throw new Error('No such function: ' + name);
       return functions[name];
     },
-    getStartServices: sinon
-      .stub()
-      .returns(
-        Promise.resolve([
-          {},
-          { data: { search: { search: () => Promise.resolve({ rawResponse: esResponse }) } } },
-        ])
-      ),
 
     esShardTimeout: moment.duration(30000),
     allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
@@ -53,6 +45,10 @@ export default function () {
   tlConfig.settings = timelionDefaults();
 
   tlConfig.setTargetSeries();
+
+  tlConfig.context = {
+    search: { search: () => of({ rawResponse: esResponse }) },
+  };
 
   return tlConfig;
 }

@@ -51,7 +51,7 @@ describe('PreviewEqlQueryHistogram', () => {
 
     expect(wrapper.find('[data-test-subj="queryPreviewLoading"]').exists()).toBeTruthy();
     expect(
-      wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').at(0).prop('subtitle')
+      wrapper.find('[dataTestSubj="queryPreviewEqlHistogram"]').at(0).prop('subtitle')
     ).toEqual(i18n.QUERY_PREVIEW_SUBTITLE_LOADING);
   });
 
@@ -78,9 +78,9 @@ describe('PreviewEqlQueryHistogram', () => {
 
     expect(wrapper.find('[data-test-subj="queryPreviewLoading"]').exists()).toBeFalsy();
     expect(
-      wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').at(0).prop('subtitle')
+      wrapper.find('[dataTestSubj="queryPreviewEqlHistogram"]').at(0).prop('subtitle')
     ).toEqual(i18n.QUERY_PREVIEW_TITLE(9154));
-    expect(wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').at(0).props().data).toEqual([
+    expect(wrapper.find('[dataTestSubj="queryPreviewEqlHistogram"]').at(0).props().data).toEqual([
       {
         key: 'hits',
         value: [

@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 
+import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -19,12 +20,10 @@ import {
   waitForRuleSuccess,
   createRule,
 } from '../../utils';
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   describe('add_actions', () => {
     describe('adding actions', () => {
@@ -34,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
       });
 
       it('should be able to create a new webhook action and attach it to a rule', async () => {
@@ -60,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send(getWebHookAction())
           .expect(200);
 
-        const rule = await createRule(supertest, getRuleWithWebHookAction(hookAction.id));
+        const rule = await createRule(supertest, getRuleWithWebHookAction(hookAction.id, true));
         await waitForRuleSuccess(supertest, rule.id);
 
         // expected result for status should be 'succeeded'
@@ -82,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // create a rule with the action attached and a meta field
         const ruleWithAction: CreateRulesSchema = {
-          ...getRuleWithWebHookAction(hookAction.id),
+          ...getRuleWithWebHookAction(hookAction.id, true),
           meta: {},
         };
 

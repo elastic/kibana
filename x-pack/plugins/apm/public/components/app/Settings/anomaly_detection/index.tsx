@@ -17,10 +17,7 @@ import { LicensePrompt } from '../../../shared/LicensePrompt';
 import { useLicense } from '../../../../hooks/useLicense';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-export type AnomalyDetectionApiResponse = APIReturnType<
-  '/api/apm/settings/anomaly-detection',
-  'GET'
->;
+export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/anomaly-detection'>;
 
 const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
   jobs: [],
@@ -38,7 +35,9 @@ export function AnomalyDetection() {
   const { refetch, data = DEFAULT_VALUE, status } = useFetcher(
     (callApmApi) => {
       if (canGetJobs) {
-        return callApmApi({ pathname: `/api/apm/settings/anomaly-detection` });
+        return callApmApi({
+          endpoint: `GET /api/apm/settings/anomaly-detection`,
+        });
       }
     },
     [canGetJobs],
@@ -76,8 +75,7 @@ export function AnomalyDetection() {
       <EuiSpacer size="l" />
       <EuiText>
         {i18n.translate('xpack.apm.settings.anomalyDetection.descriptionText', {
-          defaultMessage:
-            'The Machine Learning anomaly detection integration enables application health status indicators for each configured environment in the Service map by identifying transaction duration anomalies.',
+          defaultMessage: `Machine Learning's anomaly detection integration enables application health status indicators for services in each configured environment by identifying transaction duration anomalies.`,
         })}
       </EuiText>
       <EuiSpacer size="l" />

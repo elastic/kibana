@@ -6,7 +6,7 @@
 
 import { EuiSpacer, EuiSteps, EuiText, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 import { useLogEntryCategoriesSetup } from '../../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { createInitialConfigurationStep } from '../initial_configuration_step';
 import { createProcessStep } from '../process_step';

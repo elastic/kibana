@@ -6,7 +6,13 @@
 
 import { SavedObjectReference } from 'kibana/public';
 import { Ast } from '@kbn/interpreter/common';
-import { Datasource, DatasourcePublicAPI, Visualization } from '../../types';
+import {
+  Datasource,
+  DatasourcePublicAPI,
+  FramePublicAPI,
+  Visualization,
+  VisualizationDimensionGroupConfig,
+} from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
@@ -91,3 +97,45 @@ export async function persistedStateToExpression(
     datasourceLayers,
   });
 }
+
+export const validateDatasourceAndVisualization = (
+  currentDataSource: Datasource | null,
+  currentDatasourceState: unknown | null,
+  currentVisualization: Visualization | null,
+  currentVisualizationState: unknown | undefined,
+  frameAPI: FramePublicAPI
+):
+  | Array<{
+      shortMessage: string;
+      longMessage: string;
+    }>
+  | undefined => {
+  const layersGroups = currentVisualizationState
+    ? currentVisualization
+        ?.getLayerIds(currentVisualizationState)
+        .reduce<Record<string, VisualizationDimensionGroupConfig[]>>((memo, layerId) => {
+          const groups = currentVisualization?.getConfiguration({
+            frame: frameAPI,
+            layerId,
+            state: currentVisualizationState,
+          }).groups;
+          if (groups) {
+            memo[layerId] = groups;
+          }
+          return memo;
+        }, {})
+    : undefined;
+
+  const datasourceValidationErrors = currentDatasourceState
+    ? currentDataSource?.getErrorMessages(currentDatasourceState, layersGroups)
+    : undefined;
+
+  const visualizationValidationErrors = currentVisualizationState
+    ? currentVisualization?.getErrorMessages(currentVisualizationState, frameAPI)
+    : undefined;
+
+  if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
+    return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
+  }
+  return undefined;
+};

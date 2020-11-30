@@ -22,18 +22,18 @@ import { HttpSetup } from 'src/core/public';
  *
  * Links completely outside of Kibana should not use our React Router helpers or navigateToUrl.
  */
-interface ICreateHrefDeps {
+interface CreateHrefDeps {
   history: History;
   http: HttpSetup;
 }
-export interface ICreateHrefOptions {
+export interface CreateHrefOptions {
   shouldNotCreateHref?: boolean;
 }
 
 export const createHref = (
   path: string,
-  { history, http }: ICreateHrefDeps,
-  { shouldNotCreateHref }: ICreateHrefOptions = {}
+  { history, http }: CreateHrefDeps,
+  { shouldNotCreateHref }: CreateHrefOptions = {}
 ): string => {
   return shouldNotCreateHref ? http.basePath.prepend(path) : history.createHref({ pathname: path });
 };

@@ -40,6 +40,7 @@ const WATCH_NAME = 'elasticsearch_cluster_status';
 export class ClusterHealthAlert extends BaseAlert {
   public type = ALERT_CLUSTER_HEALTH;
   public label = LEGACY_ALERT_DETAILS[ALERT_CLUSTER_HEALTH].label;
+  public description = LEGACY_ALERT_DETAILS[ALERT_CLUSTER_HEALTH].description;
   public isLegacy = true;
 
   protected actionVariables = [

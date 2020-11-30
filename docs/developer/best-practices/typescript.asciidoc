@@ -32,7 +32,7 @@ Run `node scripts/find_plugins_without_ts_refs.js --id your_plugin_id` to get a 
 
 [discrete]
 ==== Implementation
-- Make sure all the plugins listed as dependencies in `kibana.json` file have migrated to TS project references.
+- Make sure all the plugins listed as dependencies in *requiredPlugins*, *optionalPlugins* & *requiredBundles* properties of `kibana.json` manifest file have migrated to TS project references.
 - Add `tsconfig.json` in the root folder of your plugin.
 [source,json]
 ----

@@ -7,6 +7,7 @@
 import { CoreSetup } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { times } from 'lodash';
+import { ES_TEST_INDEX_NAME } from '../../../../lib';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
   AlertType,
@@ -330,6 +331,7 @@ function getValidationAlertType() {
 function getPatternFiringAlertType() {
   const paramsSchema = schema.object({
     pattern: schema.recordOf(schema.string(), schema.arrayOf(schema.boolean())),
+    reference: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State {
@@ -351,6 +353,18 @@ function getPatternFiringAlertType() {
           throw new Error(`pattern for instance ${instanceId} is not an array`);
         }
         maxPatternLength = Math.max(maxPatternLength, instancePattern.length);
+      }
+
+      if (params.reference) {
+        await services.scopedClusterClient.index({
+          index: ES_TEST_INDEX_NAME,
+          refresh: 'wait_for',
+          body: {
+            reference: params.reference,
+            source: 'alert:test.patternFiring',
+            ...alertExecutorOptions,
+          },
+        });
       }
 
       // get the pattern index, return if past it
@@ -423,6 +437,21 @@ export function defineAlertTypes(
       throw new Error('this alert is intended to fail');
     },
   };
+  const longRunningAlertType: AlertType = {
+    id: 'test.longRunning',
+    name: 'Test: Long Running',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    async executor() {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    },
+  };
 
   alerts.registerType(getAlwaysFiringAlertType());
   alerts.registerType(getCumulativeFiringAlertType());
@@ -435,4 +464,5 @@ export function defineAlertTypes(
   alerts.registerType(onlyStateVariablesAlertType);
   alerts.registerType(getPatternFiringAlertType());
   alerts.registerType(throwAlertType);
+  alerts.registerType(longRunningAlertType);
 }

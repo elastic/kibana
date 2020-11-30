@@ -20,7 +20,7 @@
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 import { BaseVisType, BaseVisTypeOptions } from './base_vis_type';
 import { ReactVisType, ReactVisTypeOptions } from './react_vis_type';
-import { VisType } from './types';
+import { VisType, VisGroups } from './types';
 
 /**
  * Vis Types Service
@@ -101,6 +101,21 @@ export class TypesService {
        * returns all registered aliases
        */
       getAliases: visTypeAliasRegistry.get,
+      /**
+       * unregisters a visualization alias by its name
+       * alias is a visualization type without implementation, it just redirects somewhere in kibana
+       * @param {string} visTypeAliasName - visualization alias name
+       */
+      unRegisterAlias: visTypeAliasRegistry.remove,
+      /**
+       * returns all visualizations of specific group
+       * @param {VisGroups} group - group type (aggbased | other | tools)
+       */
+      getByGroup: (group: VisGroups) => {
+        return Object.values(this.types).filter((type) => {
+          return type.group === group;
+        });
+      },
     };
   }
 

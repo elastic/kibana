@@ -38,11 +38,11 @@ export const getDateMetaByDatatableColumn = ({
   getConfig,
 }: DateMetaByColumnDeps) => async (
   column: DatatableColumn
-): Promise<undefined | { timeZone: string; timeRange: TimeRange; interval: string }> => {
+): Promise<undefined | { timeZone: string; timeRange?: TimeRange; interval: string }> => {
   if (column.meta.source !== 'esaggs') return;
   if (column.meta.sourceParams?.type !== BUCKET_TYPES.DATE_HISTOGRAM) return;
   const params = column.meta.sourceParams.params as AggParamsDateHistogram;
-  const appliedTimeRange = column.meta.sourceParams.appliedTimeRange as TimeRange;
+  const appliedTimeRange = column.meta.sourceParams.appliedTimeRange as TimeRange | undefined;
 
   const tz = inferTimeZone(
     params,
@@ -52,9 +52,11 @@ export const getDateMetaByDatatableColumn = ({
   );
 
   const interval =
-    params.interval === 'auto' ? calculateAutoTimeExpression(appliedTimeRange) : params.interval;
+    params.interval === 'auto' && appliedTimeRange
+      ? calculateAutoTimeExpression(appliedTimeRange)
+      : params.interval;
 
-  if (!interval) {
+  if (!interval || interval === 'auto') {
     throw new Error('time interval could not be determined');
   }
 

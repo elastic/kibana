@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GetAgentStatusResponse } from '../../../../../../../ingest_manager/common/types/rest_spec';
+import { GetAgentStatusResponse } from '../../../../../../../fleet/common/types/rest_spec';
 import { PolicyData, UIPolicyConfig } from '../../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../../common/types';
 import { PolicyDetailsState } from '../../types';
@@ -28,6 +28,13 @@ interface UserChangedPolicyConfig {
   type: 'userChangedPolicyConfig';
   payload: {
     policyConfig: UIPolicyConfig;
+  };
+}
+
+interface UserChangedAntivirusRegistration {
+  type: 'userChangedAntivirusRegistration';
+  payload: {
+    enabled: boolean;
   };
 }
 
@@ -62,4 +69,5 @@ export type PolicyDetailsAction =
   | ServerReturnedPolicyDetailsUpdateFailure
   | ServerReturnedUpdatedPolicyDetailsData
   | ServerFailedToReturnPolicyDetailsData
-  | UserChangedPolicyConfig;
+  | UserChangedPolicyConfig
+  | UserChangedAntivirusRegistration;

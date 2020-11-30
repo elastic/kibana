@@ -4,18 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ProcessorEvent } from '../../../common/processor_event';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
 } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../typings/common';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
-
-export type ErrorGroupAPIResponse = PromiseReturnType<typeof getErrorGroup>;
 
 // TODO: rename from "getErrorGroup"  to "getErrorGroupSample" (since a single error is returned, not an errorGroup)
 export async function getErrorGroup({

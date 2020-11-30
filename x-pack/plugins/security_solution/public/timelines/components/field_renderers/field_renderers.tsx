@@ -260,12 +260,12 @@ MoreContainer.displayName = 'MoreContainer';
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
   ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const handleClose = useCallback(() => setIsOpen(false), []);
+    const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
     const button = useMemo(
       () => (
         <>
           {' ,'}
-          <EuiButtonEmpty size="xs" onClick={handleClose}>
+          <EuiButtonEmpty size="xs" onClick={togglePopover}>
             {`+${rowItems.length - overflowIndexStart} `}
             <FormattedMessage
               id="xpack.securitySolution.fieldRenderers.moreLabel"
@@ -274,7 +274,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
           </EuiButtonEmpty>
         </>
       ),
-      [handleClose, overflowIndexStart, rowItems.length]
+      [togglePopover, overflowIndexStart, rowItems.length]
     );
 
     return (
@@ -284,7 +284,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
             id="popover"
             button={button}
             isOpen={isOpen}
-            closePopover={handleClose}
+            closePopover={togglePopover}
             repositionOnScroll
           >
             <MoreContainer

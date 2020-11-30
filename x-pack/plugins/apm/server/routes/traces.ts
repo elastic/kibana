@@ -12,11 +12,12 @@ import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 
-export const tracesRoute = createRoute(() => ({
-  path: '/api/apm/traces',
-  params: {
+export const tracesRoute = createRoute({
+  endpoint: 'GET /api/apm/traces',
+  params: t.type({
     query: t.intersection([rangeRt, uiFiltersRt]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
@@ -27,18 +28,19 @@ export const tracesRoute = createRoute(() => ({
       setup
     );
   },
-}));
+});
 
-export const tracesByIdRoute = createRoute(() => ({
-  path: '/api/apm/traces/{traceId}',
-  params: {
+export const tracesByIdRoute = createRoute({
+  endpoint: 'GET /api/apm/traces/{traceId}',
+  params: t.type({
     path: t.type({
       traceId: t.string,
     }),
     query: rangeRt,
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return getTrace(context.params.path.traceId, setup);
   },
-}));
+});

@@ -69,31 +69,27 @@ const delay = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-export interface KibanaConfig {
+interface Options {
   url: string;
-  ssl?: {
-    enabled: boolean;
-    key: string;
-    certificate: string;
-    certificateAuthorities: string;
-  };
+  certificateAuthorities?: Buffer[];
 }
 
 export class KbnClientRequester {
+  private readonly url: string;
   private readonly httpsAgent: Https.Agent | null;
-  constructor(private readonly log: ToolingLog, private readonly kibanaConfig: KibanaConfig) {
+
+  constructor(private readonly log: ToolingLog, options: Options) {
+    this.url = options.url;
     this.httpsAgent =
-      kibanaConfig.ssl && kibanaConfig.ssl.enabled
+      Url.parse(options.url).protocol === 'https:'
         ? new Https.Agent({
-            cert: kibanaConfig.ssl.certificate,
-            key: kibanaConfig.ssl.key,
-            ca: kibanaConfig.ssl.certificateAuthorities,
+            ca: options.certificateAuthorities,
           })
         : null;
   }
 
   private pickUrl() {
-    return this.kibanaConfig.url;
+    return this.url;
   }
 
   public resolveUrl(relativeUrl: string = '/') {
@@ -132,7 +128,7 @@ export class KbnClientRequester {
           errorMessage = `Conflict on GET (path=${options.path}, attempt=${attempt}/${maxAttempts})`;
           this.log.error(errorMessage);
         } else if (requestedRetries || failedToGetResponse) {
-          errorMessage = `[${description}] request failed (attempt=${attempt}/${maxAttempts})`;
+          errorMessage = `[${description}] request failed (attempt=${attempt}/${maxAttempts}): ${error.message}`;
           this.log.error(errorMessage);
         } else {
           throw error;

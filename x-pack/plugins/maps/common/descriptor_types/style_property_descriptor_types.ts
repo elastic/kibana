@@ -174,18 +174,18 @@ export type SizeStylePropertyDescriptor =
     };
 
 export type VectorStylePropertiesDescriptor = {
-  [VECTOR_STYLES.SYMBOLIZE_AS]?: SymbolizeAsStylePropertyDescriptor;
-  [VECTOR_STYLES.FILL_COLOR]?: ColorStylePropertyDescriptor;
-  [VECTOR_STYLES.LINE_COLOR]?: ColorStylePropertyDescriptor;
-  [VECTOR_STYLES.LINE_WIDTH]?: SizeStylePropertyDescriptor;
-  [VECTOR_STYLES.ICON]?: IconStylePropertyDescriptor;
-  [VECTOR_STYLES.ICON_SIZE]?: SizeStylePropertyDescriptor;
-  [VECTOR_STYLES.ICON_ORIENTATION]?: OrientationStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_TEXT]?: LabelStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_COLOR]?: ColorStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_SIZE]?: SizeStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_BORDER_COLOR]?: ColorStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_BORDER_SIZE]?: LabelBorderSizeStylePropertyDescriptor;
+  [VECTOR_STYLES.SYMBOLIZE_AS]: SymbolizeAsStylePropertyDescriptor;
+  [VECTOR_STYLES.FILL_COLOR]: ColorStylePropertyDescriptor;
+  [VECTOR_STYLES.LINE_COLOR]: ColorStylePropertyDescriptor;
+  [VECTOR_STYLES.LINE_WIDTH]: SizeStylePropertyDescriptor;
+  [VECTOR_STYLES.ICON]: IconStylePropertyDescriptor;
+  [VECTOR_STYLES.ICON_SIZE]: SizeStylePropertyDescriptor;
+  [VECTOR_STYLES.ICON_ORIENTATION]: OrientationStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_TEXT]: LabelStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_COLOR]: ColorStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_SIZE]: SizeStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_BORDER_COLOR]: ColorStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_BORDER_SIZE]: LabelBorderSizeStylePropertyDescriptor;
 };
 
 export type StyleDescriptor = {

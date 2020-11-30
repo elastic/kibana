@@ -91,6 +91,7 @@ export function DocViewTableRow({
         <FieldName
           fieldName={field}
           fieldType={fieldType}
+          fieldMapping={fieldMapping}
           fieldIconProps={{ fill: 'none', color: 'gray' }}
           scripted={Boolean(fieldMapping?.scripted)}
         />

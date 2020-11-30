@@ -89,6 +89,20 @@ describe('uiSettings', () => {
 
   describe('#start', () => {
     describe('validation', () => {
+      it('throws if validation schema is not provided', async () => {
+        const { register } = await service.setup(setupDeps);
+        register({
+          // @ts-expect-error schema is required key
+          custom: {
+            value: 42,
+          },
+        });
+
+        await expect(service.start()).rejects.toMatchInlineSnapshot(
+          `[Error: Validation schema is not provided for [custom] UI Setting]`
+        );
+      });
+
       it('validates registered definitions', async () => {
         const { register } = await service.setup(setupDeps);
         register({
@@ -124,6 +138,21 @@ describe('uiSettings', () => {
         await expect(customizedService.start()).rejects.toMatchInlineSnapshot(
           `[Error: [ui settings overrides [custom]]: expected value of type [string] but got [number]]`
         );
+      });
+
+      it('do not throw on unknown overrides', async () => {
+        const coreContext = mockCoreContext.create();
+        coreContext.configService.atPath.mockReturnValueOnce(
+          new BehaviorSubject({
+            overrides: {
+              custom: 42,
+            },
+          })
+        );
+        const customizedService = new UiSettingsService(coreContext);
+        await customizedService.setup(setupDeps);
+
+        await customizedService.start();
       });
     });
 

@@ -26,11 +26,10 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
 
   return {
-    search: (request, options, context) =>
+    search: (request, options, { esClient }) =>
       from(
         new Promise<IndexFieldsStrategyResponse>(async (resolve) => {
-          const { elasticsearch } = context.core;
-          const indexPatternsFetcher = new IndexPatternsFetcher(elasticsearch.client.asCurrentUser);
+          const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
           const dedupeIndices = dedupeIndexName(request.indices);
 
           const responsesIndexFields = await Promise.all(

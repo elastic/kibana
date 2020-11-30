@@ -30,7 +30,7 @@ type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 const { v4: uuidv4 } = jest.requireActual('uuid');
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
-const config = { maxImportPayloadBytes: 10485760, maxImportExportSize: 10000 } as SavedObjectConfig;
+const config = { maxImportPayloadBytes: 26214400, maxImportExportSize: 10000 } as SavedObjectConfig;
 const URL = '/internal/saved_objects/_import';
 
 describe(`POST ${URL}`, () => {

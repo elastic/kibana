@@ -227,6 +227,7 @@ describe('axes_configuration', () => {
     xScaleType: 'ordinal',
     yScaleType: 'linear',
     isHistogram: false,
+    palette: { type: 'palette', name: 'default' },
   };
 
   it('should map auto series to left axis', () => {

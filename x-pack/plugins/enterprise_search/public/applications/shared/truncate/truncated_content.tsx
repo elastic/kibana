@@ -10,14 +10,14 @@ import { truncate, truncateBeginning } from './';
 
 import './truncated_content.scss';
 
-interface ITruncatedContentProps {
+interface TruncatedContentProps {
   content: string;
   length: number;
   beginning?: boolean;
   tooltipType?: 'inline' | 'title';
 }
 
-export const TruncatedContent: React.FC<ITruncatedContentProps> = ({
+export const TruncatedContent: React.FC<TruncatedContentProps> = ({
   content,
   length,
   beginning = false,

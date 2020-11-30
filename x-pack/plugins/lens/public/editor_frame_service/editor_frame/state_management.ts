@@ -6,6 +6,7 @@
 
 import { EditorFrameProps } from './index';
 import { Document } from '../../persistence/saved_object_store';
+import { TableInspectorAdapter } from '../types';
 
 export interface PreviewState {
   visualization: {
@@ -21,6 +22,7 @@ export interface EditorFrameState extends PreviewState {
   description?: string;
   stagedPreview?: PreviewState;
   activeDatasourceId: string | null;
+  activeData?: TableInspectorAdapter;
 }
 
 export type Action =
@@ -31,6 +33,10 @@ export type Action =
   | {
       type: 'UPDATE_TITLE';
       title: string;
+    }
+  | {
+      type: 'UPDATE_ACTIVE_DATA';
+      tables: TableInspectorAdapter;
     }
   | {
       type: 'UPDATE_STATE';
@@ -139,6 +145,11 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
       return { ...state, title: action.title };
     case 'UPDATE_STATE':
       return action.updater(state);
+    case 'UPDATE_ACTIVE_DATA':
+      return {
+        ...state,
+        activeData: { ...action.tables },
+      };
     case 'UPDATE_LAYER':
       return {
         ...state,

@@ -5,44 +5,22 @@
   "license": "Apache-2.0",
   "main": "./target/index.js",
   "scripts": {
-    "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx --ignore *.test.js,**/__tests__/** --source-maps=inline",
-    "kbn:bootstrap": "yarn build",
-    "kbn:watch": "yarn build --watch"
+    "build": "node scripts/build",
+    "kbn:bootstrap": "node scripts/build --source-maps",
+    "kbn:watch": "node scripts/build --watch --source-maps"
   },
   "kibana": {
     "devOnly": true
   },
-  "devDependencies": {
-    "@babel/cli": "^7.10.5",
-    "@jest/types": "^26.5.2",
-    "@kbn/babel-preset": "1.0.0",
-    "@kbn/dev-utils": "1.0.0",
-    "@kbn/utils": "1.0.0",
-    "@types/joi": "^13.4.2",
-    "@types/lodash": "^4.14.159",
-    "@types/parse-link-header": "^1.0.0",
-    "@types/strip-ansi": "^5.2.1",
-    "@types/xml2js": "^0.4.5",
-    "diff": "^4.0.1"
-  },
   "dependencies": {
-    "@jest/reporters": "^26.5.2",
-    "chalk": "^4.1.0",
-    "dedent": "^0.7.0",
-    "del": "^5.1.0",
-    "execa": "^4.0.2",
-    "exit-hook": "^2.2.0",
-    "getopts": "^2.2.5",
-    "glob": "^7.1.2",
-    "globby": "^8.0.1",
-    "joi": "^13.5.2",
-    "lodash": "^4.17.20",
-    "mustache": "^2.3.2",
-    "parse-link-header": "^1.0.1",
-    "rxjs": "^6.5.5",
-    "strip-ansi": "^6.0.0",
-    "tar-fs": "^2.1.0",
-    "xml2js": "^0.4.22",
-    "zlib": "^1.0.5"
+    "@kbn/es": "link:../kbn-es",
+    "@kbn/i18n": "link:../kbn-i18n",
+    "@kbn/optimizer": "link:../kbn-optimizer"
+  },
+  "devDependencies": {
+    "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "@kbn/expect": "link:../kbn-expect",
+    "@kbn/utils": "link:../kbn-utils"
   }
 }

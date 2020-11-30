@@ -234,3 +234,7 @@ export const EDIT_CONNECTOR = i18n.translate('xpack.securitySolution.case.caseVi
 export const NO_CONNECTOR = i18n.translate('xpack.securitySolution.case.common.noConnector', {
   defaultMessage: 'No connector selected',
 });
+
+export const UNKNOWN = i18n.translate('xpack.securitySolution.case.caseView.unknown', {
+  defaultMessage: 'Unknown',
+});

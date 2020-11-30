@@ -69,34 +69,5 @@ describe('AlertingBuiltins Plugin', () => {
 
       expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith(BUILT_IN_ALERTS_FEATURE);
     });
-
-    it('should return a service in the expected shape', async () => {
-      const alertingSetup = alertsMock.createSetup();
-      const featuresSetup = featuresPluginMock.createSetup();
-      const service = await plugin.setup(coreSetup, {
-        alerts: alertingSetup,
-        features: featuresSetup,
-      });
-
-      expect(typeof service.indexThreshold.timeSeriesQuery).toBe('function');
-    });
-  });
-
-  describe('start()', () => {
-    let context: ReturnType<typeof coreMock['createPluginInitializerContext']>;
-    let plugin: AlertingBuiltinsPlugin;
-    let coreStart: ReturnType<typeof coreMock['createStart']>;
-
-    beforeEach(() => {
-      context = coreMock.createPluginInitializerContext();
-      plugin = new AlertingBuiltinsPlugin(context);
-      coreStart = coreMock.createStart();
-    });
-
-    it('should return a service in the expected shape', async () => {
-      const service = await plugin.start(coreStart);
-
-      expect(typeof service.indexThreshold.timeSeriesQuery).toBe('function');
-    });
   });
 });

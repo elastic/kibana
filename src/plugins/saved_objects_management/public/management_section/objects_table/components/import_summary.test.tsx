@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { ShallowWrapper } from 'enzyme';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@kbn/test/jest';
 import { ImportSummary, ImportSummaryProps } from './import_summary';
 import { FailedImport } from '../../../lib';
 

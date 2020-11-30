@@ -5,7 +5,9 @@
  */
 
 import React, { memo } from 'react';
-import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiAvatar } from '@elastic/eui';
+
+import * as i18n from './translations';
 
 interface UserActionAvatarProps {
   username?: string | null;
@@ -13,17 +15,9 @@ interface UserActionAvatarProps {
 }
 
 const UserActionAvatarComponent = ({ username, fullName }: UserActionAvatarProps) => {
-  const avatarName = fullName && fullName.length > 0 ? fullName : username ?? null;
+  const avatarName = fullName && fullName.length > 0 ? fullName : username ?? i18n.UNKNOWN;
 
-  return (
-    <>
-      {avatarName ? (
-        <EuiAvatar name={avatarName} data-test-subj={`user-action-avatar`} />
-      ) : (
-        <EuiLoadingSpinner data-test-subj={`user-action-avatar-loading-spinner`} />
-      )}
-    </>
-  );
+  return <EuiAvatar name={avatarName} data-test-subj={`user-action-avatar`} />;
 };
 
 export const UserActionAvatar = memo(UserActionAvatarComponent);

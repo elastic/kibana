@@ -7,7 +7,7 @@
 // Mock the mlJobService that is imported for saving rules.
 jest.mock('../../services/job_service.js', () => 'mlJobService');
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { ScopeExpression } from './scope_expression';

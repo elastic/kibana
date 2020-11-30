@@ -6,10 +6,11 @@
 
 import { EuiCard, EuiIcon, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SetupStatus } from '../../../../../common/log_analysis';
 import { CreateJobButton, RecreateJobButton } from '../../log_analysis_setup/create_job_button';
-import { useLinkProps } from '../../../../hooks/use_link_props';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { mountReactNode } from '../../../../../../../../src/core/public/utils';
 
 export const LogAnalysisModuleListCard: React.FC<{
   jobId: string;
@@ -26,18 +27,45 @@ export const LogAnalysisModuleListCard: React.FC<{
   moduleStatus,
   onViewSetup,
 }) => {
+  const {
+    services: {
+      ml,
+      application: { navigateToUrl },
+      notifications: { toasts },
+    },
+  } = useKibanaContextForPlugin();
+
+  const [viewInMlLink, setViewInMlLink] = useState<string>('');
+
+  const getMlUrl = async () => {
+    if (!ml.urlGenerator) {
+      toasts.addWarning({
+        title: mountReactNode(
+          <FormattedMessage
+            id="xpack.infra.logs.analysis.mlNotAvailable"
+            defaultMessage="ML plugin is not available"
+          />
+        ),
+      });
+      return;
+    }
+    setViewInMlLink(await ml.urlGenerator.createUrl({ page: 'jobs', pageState: { jobId } }));
+  };
+
+  useEffect(() => {
+    getMlUrl();
+  });
+
+  const navigateToMlApp = async () => {
+    await navigateToUrl(viewInMlLink);
+  };
+
   const moduleIcon =
     moduleStatus.type === 'required' ? (
       <EuiIcon size="xxl" type="machineLearningApp" />
     ) : (
       <EuiIcon color="secondary" size="xxl" type="check" />
     );
-
-  const viewInMlLinkProps = useLinkProps({
-    app: 'ml',
-    pathname: '/jobs',
-    search: { mlManagement: `(jobId:${jobId})` },
-  });
 
   const moduleSetupButton =
     moduleStatus.type === 'required' ? (
@@ -50,13 +78,17 @@ export const LogAnalysisModuleListCard: React.FC<{
     ) : (
       <>
         <RecreateJobButton hasSetupCapabilities={hasSetupCapabilities} onClick={onViewSetup} />
-        <EuiSpacer size="xs" />
-        <EuiButtonEmpty {...viewInMlLinkProps}>
-          <FormattedMessage
-            id="xpack.infra.logs.analysis.viewInMlButtonLabel"
-            defaultMessage="View in Machine Learning"
-          />
-        </EuiButtonEmpty>
+        {viewInMlLink ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiButtonEmpty onClick={navigateToMlApp}>
+              <FormattedMessage
+                id="xpack.infra.logs.analysis.viewInMlButtonLabel"
+                defaultMessage="View in Machine Learning"
+              />
+            </EuiButtonEmpty>
+          </>
+        ) : null}
       </>
     );
 

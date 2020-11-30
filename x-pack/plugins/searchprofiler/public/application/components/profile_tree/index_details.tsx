@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { msToPretty } from '../../utils';
+import { msToPretty } from '../../lib';
 import { Index } from '../../types';
 
 export interface Props {

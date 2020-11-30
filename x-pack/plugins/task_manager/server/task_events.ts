@@ -11,7 +11,7 @@ import { ConcreteTaskInstance } from './task';
 import { Result, Err } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { PollingError } from './polling';
-import { TaskRunResult } from './task_runner';
+import { TaskRunResult } from './task_running';
 
 export enum TaskEventType {
   TASK_CLAIM = 'TASK_CLAIM',

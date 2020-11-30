@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { FullTimeRangeSelector } from './index';
 import { Query } from 'src/plugins/data/public';
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';

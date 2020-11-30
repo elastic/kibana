@@ -18,7 +18,6 @@ import {
   checkForDuplicateTitle,
   saveWithConfirmation,
   isErrorNonFatal,
-  SavedObjectKibanaServices,
 } from '../../../../../src/plugins/saved_objects/public';
 import {
   injectReferences,
@@ -176,7 +175,7 @@ export async function saveSavedWorkspace(
       savedObject as any,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
-      services as SavedObjectKibanaServices
+      services
     );
     savedObject.isSaving = true;
 

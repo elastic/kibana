@@ -5,7 +5,7 @@
  */
 
 import './expression.scss';
-
+import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {
@@ -93,7 +93,9 @@ export const getMetricChartRenderer = (
   ) => {
     const resolvedFormatFactory = await formatFactory;
     ReactDOM.render(
-      <MetricChart {...config} formatFactory={resolvedFormatFactory} />,
+      <I18nProvider>
+        <MetricChart {...config} formatFactory={resolvedFormatFactory} />
+      </I18nProvider>,
       domNode,
       () => {
         handlers.done();

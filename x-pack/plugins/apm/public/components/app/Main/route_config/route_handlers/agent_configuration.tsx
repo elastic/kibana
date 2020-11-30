@@ -26,7 +26,7 @@ export function EditAgentConfigurationRouteHandler(
   const res = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/view',
+        endpoint: 'GET /api/apm/settings/agent-configuration/view',
         params: { query: { name, environment } },
       });
     },

@@ -12,24 +12,9 @@
     "kbn:watch": "node scripts/build --watch"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "7.10.0-rc.1",
-    "@kbn/dev-utils": "1.0.0",
-    "abort-controller": "^3.0.0",
-    "chalk": "^4.1.0",
-    "dedent": "^0.7.0",
-    "del": "^5.1.0",
-    "execa": "^4.0.2",
-    "getopts": "^2.2.5",
-    "glob": "^7.1.2",
-    "node-fetch": "^2.6.1",
-    "simple-git": "1.116.0",
-    "tar-fs": "^2.1.0",
-    "tree-kill": "^1.2.2",
-    "yauzl": "^2.10.0"
+    "@kbn/dev-utils": "link:../kbn-dev-utils"
   },
   "devDependencies": {
-    "@kbn/babel-preset": "1.0.0",
-    "@babel/cli": "^7.10.5",
-    "del": "^5.1.0"
+    "@kbn/babel-preset": "link:../kbn-babel-preset"
   }
 }

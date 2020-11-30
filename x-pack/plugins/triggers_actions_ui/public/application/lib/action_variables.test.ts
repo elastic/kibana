@@ -5,15 +5,15 @@
  */
 
 import { AlertType, ActionVariables } from '../../types';
-import { actionVariablesFromAlertType } from './action_variables';
+import { transformActionVariables } from './action_variables';
 import { ALERTS_FEATURE_ID } from '../../../../alerts/common';
 
 beforeEach(() => jest.resetAllMocks());
 
-describe('actionVariablesFromAlertType', () => {
+describe('transformActionVariables', () => {
   test('should return correct variables when no state or context provided', async () => {
     const alertType = getAlertType({ context: [], state: [], params: [] });
-    expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -32,8 +32,16 @@ describe('actionVariablesFromAlertType', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
         },
       ]
     `);
@@ -48,7 +56,7 @@ describe('actionVariablesFromAlertType', () => {
       state: [],
       params: [],
     });
-    expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -67,8 +75,16 @@ describe('actionVariablesFromAlertType', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
         },
         Object {
           "description": "foo-description",
@@ -91,7 +107,7 @@ describe('actionVariablesFromAlertType', () => {
       ],
       params: [],
     });
-    expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -110,8 +126,16 @@ describe('actionVariablesFromAlertType', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
         },
         Object {
           "description": "foo-description",
@@ -137,7 +161,7 @@ describe('actionVariablesFromAlertType', () => {
       ],
       params: [{ name: 'fooP', description: 'fooP-description' }],
     });
-    expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -156,8 +180,16 @@ describe('actionVariablesFromAlertType', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
         },
         Object {
           "description": "fooC-description",

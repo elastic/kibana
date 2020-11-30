@@ -25,6 +25,8 @@ import { AggSelect } from './agg_select';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
+import { METRIC_TYPES } from '../../../../common/metric_types';
+
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -154,7 +156,7 @@ const StandardSiblingAggUi = (props) => {
           >
             <MetricSelect
               onChange={handleSelectChange('field')}
-              exclude={['percentile']}
+              exclude={[METRIC_TYPES.PERCENTILE, METRIC_TYPES.TOP_HIT]}
               metrics={siblings}
               metric={model}
               value={model.field}
@@ -179,6 +181,7 @@ StandardSiblingAggUi.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
   uiRestrictions: PropTypes.object,
+  exclude: PropTypes.array,
 };
 
 export const StandardSiblingAgg = injectI18n(StandardSiblingAggUi);

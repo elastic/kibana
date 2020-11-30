@@ -30,7 +30,10 @@ const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
 
 export class AdvancedSettingsPlugin
   implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
-  public setup(core: CoreSetup, { management, home }: AdvancedSettingsPluginSetup) {
+  public setup(
+    core: CoreSetup,
+    { management, home, usageCollection }: AdvancedSettingsPluginSetup
+  ) {
     const kibanaSection = management.sections.section.kibana;
 
     kibanaSection.registerApp({
@@ -41,7 +44,12 @@ export class AdvancedSettingsPlugin
         const { mountManagementSection } = await import(
           './management_app/mount_management_section'
         );
-        return mountManagementSection(core.getStartServices, params, component.start);
+        return mountManagementSection(
+          core.getStartServices,
+          params,
+          component.start,
+          usageCollection
+        );
       },
     });
 

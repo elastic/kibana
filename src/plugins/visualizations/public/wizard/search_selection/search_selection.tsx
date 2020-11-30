@@ -24,13 +24,15 @@ import React from 'react';
 import { IUiSettingsClient, SavedObjectsStart } from '../../../../../core/public';
 
 import { SavedObjectFinderUi } from '../../../../../plugins/saved_objects/public';
-import { VisType } from '../../vis_types';
+import type { VisType } from '../../vis_types';
+import { DialogNavigation } from '../dialog_navigation';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
   visType: VisType;
   uiSettings: IUiSettingsClient;
   savedObjects: SavedObjectsStart;
+  goBack: () => void;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps> {
@@ -54,6 +56,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
+          <DialogNavigation goBack={this.props.goBack} />
           <SavedObjectFinderUi
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}

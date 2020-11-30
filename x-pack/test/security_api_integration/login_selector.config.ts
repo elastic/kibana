@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
@@ -15,13 +16,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
 
-  const kerberosKeytabPath = resolve(__dirname, '../kerberos_api_integration/fixtures/krb5.keytab');
-  const kerberosConfigPath = resolve(__dirname, '../kerberos_api_integration/fixtures/krb5.conf');
+  const kerberosKeytabPath = resolve(__dirname, './fixtures/kerberos/krb5.keytab');
+  const kerberosConfigPath = resolve(__dirname, './fixtures/kerberos/krb5.conf');
 
-  const oidcJWKSPath = resolve(__dirname, '../oidc_api_integration/fixtures/jwks.json');
-  const oidcIdPPlugin = resolve(__dirname, '../oidc_api_integration/fixtures/oidc_provider');
+  const oidcJWKSPath = resolve(__dirname, './fixtures/oidc/jwks.json');
+  const oidcIdPPlugin = resolve(__dirname, './fixtures/oidc/oidc_provider');
 
-  const pkiKibanaCAPath = resolve(__dirname, '../pki_api_integration/fixtures/kibana_ca.crt');
+  const pkiKibanaCAPath = resolve(__dirname, './fixtures/pki/kibana_ca.crt');
 
   const saml1IdPMetadataPath = resolve(__dirname, './fixtures/saml/idp_metadata.xml');
   const saml2IdPMetadataPath = resolve(__dirname, './fixtures/saml/idp_metadata_2.xml');
@@ -35,6 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     kibana: {
       ...xPackAPITestsConfig.get('servers.kibana'),
       protocol: 'https',
+      certificateAuthorities: [readFileSync(CA_CERT_PATH)],
     },
   };
 
@@ -43,9 +45,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers,
     security: { disableTestUser: true },
     services: {
-      randomness: kibanaAPITestsConfig.get('services.randomness'),
-      legacyEs: kibanaAPITestsConfig.get('services.legacyEs'),
-      supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
+      ...kibanaAPITestsConfig.get('services'),
+      ...xPackAPITestsConfig.get('services'),
     },
     junit: {
       reportName: 'X-Pack Security API Integration Tests (Login Selector)',
@@ -125,6 +126,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               realm: 'saml2',
               maxRedirectURLSize: '100b',
               useRelayStateDeepLink: true,
+            },
+          },
+          anonymous: {
+            anonymous1: {
+              order: 6,
+              credentials: { username: 'anonymous_user', password: 'changeme' },
             },
           },
         })}`,

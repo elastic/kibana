@@ -5,6 +5,7 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { PaletteOutput } from 'src/plugins/charts/common';
 import { TimeRange, Filter as DataFilter } from 'src/plugins/data/public';
 import { EmbeddableInput } from 'src/plugins/embeddable/public';
 import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
@@ -20,12 +21,14 @@ interface Arguments {
   id: string;
   title: string | null;
   timerange: TimeRangeArg | null;
+  palette?: PaletteOutput;
 }
 
 export type SavedLensInput = EmbeddableInput & {
   id: string;
   timeRange?: TimeRange;
   filters: DataFilter[];
+  palette?: PaletteOutput;
 };
 
 const defaultTimeRange = {
@@ -61,6 +64,11 @@ export function savedLens(): ExpressionFunctionDefinition<
         help: argHelp.title,
         required: false,
       },
+      palette: {
+        types: ['palette'],
+        help: argHelp.palette!,
+        required: false,
+      },
     },
     type: EmbeddableExpressionType,
     fn: (input, args) => {
@@ -74,6 +82,8 @@ export function savedLens(): ExpressionFunctionDefinition<
           timeRange: args.timerange || defaultTimeRange,
           title: args.title === null ? undefined : args.title,
           disableTriggers: true,
+          palette: args.palette,
+          renderMode: 'noInteractivity',
         },
         embeddableType: EmbeddableTypes.lens,
         generatedAt: Date.now(),

@@ -18,52 +18,46 @@ export interface GetLatestMonitorParams {
   monitorId?: string | null;
 
   observerLocation?: string;
-
-  status?: string;
 }
 
 // Get The monitor latest state sorted by timestamp with date range
 export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Ping> = async ({
-  callES,
-  dynamicSettings,
+  uptimeEsClient,
   dateStart,
   dateEnd,
   monitorId,
   observerLocation,
-  status,
 }) => {
   const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: dateStart,
-                  lte: dateEnd,
-                },
+    query: {
+      bool: {
+        filter: [
+          { exists: { field: 'summary' } },
+          {
+            range: {
+              '@timestamp': {
+                gte: dateStart,
+                lte: dateEnd,
               },
             },
-            ...(status ? [{ term: { 'monitor.status': status } }] : []),
-            ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
-            ...(observerLocation ? [{ term: { 'observer.geo.name': observerLocation } }] : []),
-          ],
-        },
+          },
+          ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
+          ...(observerLocation ? [{ term: { 'observer.geo.name': observerLocation } }] : []),
+        ],
       },
-      size: 1,
-      _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error'],
-      sort: {
-        '@timestamp': { order: 'desc' },
-      },
+    },
+    size: 1,
+    _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error'],
+    sort: {
+      '@timestamp': { order: 'desc' },
     },
   };
 
-  const result = await callES('search', params);
+  const { body: result } = await uptimeEsClient.search({ body: params });
+
   const doc = result.hits?.hits?.[0];
   const docId = doc?._id ?? '';
-  const { tls, ...ping } = doc?._source ?? {};
+  const { tls, ...ping } = (doc?._source as Ping & { '@timestamp': string }) ?? {};
 
   return {
     ...ping,

@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memoize } from 'lodash';
+import { isString, memoize } from 'lodash';
 
 export enum IntervalCadence {
   Minute = 'm',
   Second = 's',
+  Hour = 'h',
+  Day = 'd',
 }
 const VALID_CADENCE = new Set(Object.values(IntervalCadence));
 const CADENCE_IN_MS: Record<IntervalCadence, number> = {
   [IntervalCadence.Second]: 1000,
   [IntervalCadence.Minute]: 60 * 1000,
+  [IntervalCadence.Hour]: 60 * 60 * 1000,
+  [IntervalCadence.Day]: 24 * 60 * 60 * 1000,
 };
 
 function isCadence(cadence: IntervalCadence | string): cadence is IntervalCadence {
@@ -51,6 +55,16 @@ export function intervalFromDate(date: Date, interval?: string): Date | undefine
     return;
   }
   return secondsFromDate(date, parseIntervalAsSecond(interval));
+}
+
+export function maxIntervalFromDate(
+  date: Date,
+  ...intervals: Array<string | undefined>
+): Date | undefined {
+  const maxSeconds = Math.max(...intervals.filter(isString).map(parseIntervalAsSecond));
+  if (!isNaN(maxSeconds)) {
+    return secondsFromDate(date, maxSeconds);
+  }
 }
 
 /**

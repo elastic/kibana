@@ -19,19 +19,18 @@
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
+import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { handleResponse } from './fetch';
 import {
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
+  kibana,
+  kibanaContext,
+  kibanaContextFunction,
   ISearchGeneric,
-  ISearchOptions,
-  SearchSourceService,
-  SearchSourceDependencies,
   ISessionService,
+  SearchSourceDependencies,
+  SearchSourceService,
 } from '../../common/search';
 import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
@@ -51,6 +50,7 @@ import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
+  bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -72,7 +72,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     { http, getStartServices, notifications, uiSettings }: CoreSetup,
-    { expressions, usageCollection }: SearchServiceSetupDependencies
+    { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
@@ -82,6 +82,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
      * all pending search requests, as well as getting the number of pending search requests.
      */
     this.searchInterceptor = new SearchInterceptor({
+      bfetch,
       toasts: notifications.toasts,
       http,
       uiSettings,
@@ -89,6 +90,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       usageCollector: this.usageCollector!,
       session: this.sessionService,
     });
+
+    expressions.registerFunction(kibana);
+    expressions.registerFunction(kibanaContextFunction);
+    expressions.registerType(kibanaContext);
 
     expressions.registerFunction(esdsl);
     expressions.registerType(esRawResponse);
@@ -126,15 +131,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
-      search: <
-        SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-      >(
-        request: SearchStrategyRequest,
-        options: ISearchOptions
-      ) => {
-        return search<SearchStrategyRequest, SearchStrategyResponse>(request, options).toPromise();
-      },
+      search,
       onResponse: handleResponse,
       legacy: {
         callMsearch: getCallMsearch({ http }),

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { DocLinksStart } from 'kibana/public';
+import { mountWithIntl } from '@kbn/test/jest';
 import JiraConnectorFields from './jira_connectors';
 import { JiraActionConnector } from './types';
+jest.mock('../../../../common/lib/kibana');
 
 describe('JiraActionConnectorFields renders', () => {
   test('alerting Jira connector fields is rendered', () => {
@@ -25,16 +25,12 @@ describe('JiraActionConnectorFields renders', () => {
         projectKey: 'CK',
       },
     } as JiraActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <JiraConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -68,16 +64,12 @@ describe('JiraActionConnectorFields renders', () => {
         projectKey: 'CK',
       },
     } as JiraActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <JiraConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
         consumer={'case'}
       />
@@ -104,16 +96,12 @@ describe('JiraActionConnectorFields renders', () => {
       secrets: {},
       config: {},
     } as JiraActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <JiraConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -136,16 +124,12 @@ describe('JiraActionConnectorFields renders', () => {
         projectKey: 'CK',
       },
     } as JiraActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <JiraConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], email: [], apiToken: [], projectKey: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );

@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { OptInMessage } from './opt_in_message';
 
 describe('OptInMessage', () => {

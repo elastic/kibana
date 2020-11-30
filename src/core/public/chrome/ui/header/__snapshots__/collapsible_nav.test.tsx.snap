@@ -131,7 +131,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "category": Object {
             "euiIconType": "logoKibana",
             "id": "kibana",
-            "label": "Kibana",
+            "label": "Analytics",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -187,7 +187,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "category": Object {
             "euiIconType": "logoKibana",
             "id": "kibana",
-            "label": "Kibana",
+            "label": "Analytics",
             "order": 1000,
           },
           "data-test-subj": "visualize",
@@ -201,7 +201,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "category": Object {
             "euiIconType": "logoKibana",
             "id": "kibana",
-            "label": "Kibana",
+            "label": "Analytics",
             "order": 1000,
           },
           "data-test-subj": "dashboard",
@@ -859,7 +859,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 isCollapsible={true}
                 key="kibana"
                 onToggle={[Function]}
-                title="Kibana"
+                title="Analytics"
               >
                 <EuiAccordion
                   arrowDisplay="right"
@@ -886,7 +886,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             className="euiCollapsibleNavGroup__title"
                             id="mockId__title"
                           >
-                            Kibana
+                            Analytics
                           </h3>
                         </EuiTitle>
                       </EuiFlexItem>
@@ -971,7 +971,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                       id="mockId__title"
                                     >
-                                      Kibana
+                                      Analytics
                                     </h3>
                                   </EuiTitle>
                                 </div>
@@ -996,7 +996,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               className="euiCollapsibleNavGroup__children"
                             >
                               <EuiListGroup
-                                aria-label="Primary navigation links, Kibana"
+                                aria-label="Primary navigation links, Analytics"
                                 color="subdued"
                                 gutterSize="none"
                                 listItems={
@@ -1031,7 +1031,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 size="s"
                               >
                                 <ul
-                                  aria-label="Primary navigation links, Kibana"
+                                  aria-label="Primary navigation links, Analytics"
                                   className="euiListGroup"
                                   style={
                                     Object {

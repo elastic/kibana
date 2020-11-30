@@ -76,7 +76,7 @@ export type ImmutableMiddleware<S, A extends Action> = (
  */
 export type ImmutableMiddlewareFactory<S = State> = (
   coreStart: CoreStart,
-  depsStart: Pick<StartPlugins, 'data' | 'ingestManager'>
+  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
 ) => ImmutableMiddleware<S, AppAction>;
 
 /**
@@ -87,7 +87,7 @@ export type ImmutableMiddlewareFactory<S = State> = (
  */
 export type SecuritySubPluginMiddlewareFactory = (
   coreStart: CoreStart,
-  depsStart: Pick<StartPlugins, 'data' | 'ingestManager'>
+  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
 ) => Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 
 /**
@@ -158,7 +158,7 @@ export type CreateStructuredSelector = <
 >(
   selectorMap: SelectorMap
 ) => (
-  state: SelectorMap[keyof SelectorMap] extends (state: infer State) => unknown ? State : never
+  state: SelectorMap[keyof SelectorMap] extends (state: infer S) => unknown ? S : never
 ) => {
   [Key in keyof SelectorMap]: ReturnType<SelectorMap[Key]>;
 };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { UnauthorizedPrompt } from './unauthorized_prompt';
 
 describe('UnauthorizedPrompt', () => {

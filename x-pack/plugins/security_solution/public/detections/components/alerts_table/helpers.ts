@@ -5,7 +5,12 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { Filter, esKuery, KueryNode } from '../../../../../../../src/plugins/data/public';
+import {
+  Filter,
+  esKuery,
+  KueryNode,
+  esFilters,
+} from '../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
   DataProviderType,
@@ -214,3 +219,30 @@ export const replaceTemplateFieldFromDataProviders = (
     }
     return newDataProvider;
   });
+
+export const buildTimeRangeFilter = (from: string, to: string): Filter[] => [
+  {
+    range: {
+      '@timestamp': {
+        gte: from,
+        lt: to,
+        format: 'strict_date_optional_time',
+      },
+    },
+    meta: {
+      type: 'range',
+      disabled: false,
+      negate: false,
+      alias: null,
+      key: '@timestamp',
+      params: {
+        gte: from,
+        lt: to,
+        format: 'strict_date_optional_time',
+      },
+    },
+    $state: {
+      store: esFilters.FilterStateStore.APP_STATE,
+    },
+  } as Filter,
+];

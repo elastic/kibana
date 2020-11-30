@@ -7,15 +7,13 @@ import { schema } from '@kbn/config-schema';
 import { LegacyAPICaller, IRouter } from 'src/core/server';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
-import { INDEX_NAMES } from '../../../common/constants';
 import { checkLicense } from '../../lib/check_license';
 
 async function deletePipelines(callWithRequest: LegacyAPICaller, pipelineIds: string[]) {
   const deletePromises = pipelineIds.map((pipelineId) => {
-    return callWithRequest('delete', {
-      index: INDEX_NAMES.PIPELINES,
-      id: pipelineId,
-      refresh: 'wait_for',
+    return callWithRequest('transport.request', {
+      path: '/_logstash/pipeline/' + encodeURIComponent(pipelineId),
+      method: 'DELETE',
     })
       .then((success) => ({ success }))
       .catch((error) => ({ error }));

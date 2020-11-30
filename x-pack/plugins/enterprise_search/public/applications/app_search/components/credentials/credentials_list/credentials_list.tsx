@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { CredentialsLogic } from '../credentials_logic';
 import { Key } from './key';
 import { HiddenText } from '../../../../shared/hidden_text';
-import { IApiToken } from '../types';
+import { ApiToken } from '../types';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
 import { apiTokenSort } from '../utils/api_token_sort';
 import { getModeDisplayText, getEnginesDisplayText } from '../utils';
@@ -26,21 +26,21 @@ export const CredentialsList: React.FC = () => {
 
   const items = useMemo(() => apiTokens.slice().sort(apiTokenSort), [apiTokens]);
 
-  const columns: Array<EuiBasicTableColumn<IApiToken>> = [
+  const columns: Array<EuiBasicTableColumn<ApiToken>> = [
     {
       name: 'Name',
       width: '12%',
-      render: (token: IApiToken) => token.name,
+      render: (token: ApiToken) => token.name,
     },
     {
       name: 'Type',
       width: '15%',
-      render: (token: IApiToken) => TOKEN_TYPE_DISPLAY_NAMES[token.type],
+      render: (token: ApiToken) => TOKEN_TYPE_DISPLAY_NAMES[token.type],
     },
     {
       name: 'Key',
       width: '36%',
-      render: (token: IApiToken) => {
+      render: (token: ApiToken) => {
         const { key } = token;
         if (!key) return null;
         return (
@@ -64,12 +64,12 @@ export const CredentialsList: React.FC = () => {
     {
       name: 'Modes',
       width: '10%',
-      render: (token: IApiToken) => getModeDisplayText(token),
+      render: (token: ApiToken) => getModeDisplayText(token),
     },
     {
       name: 'Engines',
       width: '18%',
-      render: (token: IApiToken) => getEnginesDisplayText(token),
+      render: (token: ApiToken) => getEnginesDisplayText(token),
     },
     {
       actions: [
@@ -83,7 +83,7 @@ export const CredentialsList: React.FC = () => {
           type: 'icon',
           icon: 'pencil',
           color: 'primary',
-          onClick: (token: IApiToken) => showCredentialsForm(token),
+          onClick: (token: ApiToken) => showCredentialsForm(token),
         },
         {
           name: i18n.translate('xpack.enterpriseSearch.actions.delete', {
@@ -95,7 +95,7 @@ export const CredentialsList: React.FC = () => {
           type: 'icon',
           icon: 'trash',
           color: 'danger',
-          onClick: (token: IApiToken) => deleteApiKey(token.name),
+          onClick: (token: ApiToken) => deleteApiKey(token.name),
         },
       ],
     },
@@ -108,7 +108,7 @@ export const CredentialsList: React.FC = () => {
     hidePerPageOptions: true,
   };
 
-  const onTableChange = ({ page }: CriteriaWithPagination<IApiToken>) => {
+  const onTableChange = ({ page }: CriteriaWithPagination<ApiToken>) => {
     const { index: current } = page;
     fetchCredentials(current + 1);
   };

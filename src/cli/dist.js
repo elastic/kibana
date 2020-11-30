@@ -19,4 +19,5 @@
 
 require('../apm')();
 require('../setup_node_env/dist');
+require('../setup_node_env/root');
 require('./cli');

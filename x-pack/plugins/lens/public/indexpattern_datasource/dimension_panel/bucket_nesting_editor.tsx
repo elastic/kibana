@@ -20,20 +20,25 @@ function nestColumn(columnOrder: string[], outer: string, inner: string) {
   return result;
 }
 
-function getFieldName(fieldMap: Record<string, IndexPatternField>, column: IndexPatternColumn) {
-  return hasField(column) ? fieldMap[column.sourceField]?.displayName || column.sourceField : '';
+function getFieldName(
+  column: IndexPatternColumn,
+  getFieldByName: (name: string) => IndexPatternField | undefined
+) {
+  return hasField(column)
+    ? getFieldByName(column.sourceField)?.displayName || column.sourceField
+    : '';
 }
 
 export function BucketNestingEditor({
   columnId,
   layer,
   setColumns,
-  fieldMap,
+  getFieldByName,
 }: {
   columnId: string;
   layer: IndexPatternLayer;
   setColumns: (columns: string[]) => void;
-  fieldMap: Record<string, IndexPatternField>;
+  getFieldByName: (name: string) => IndexPatternField | undefined;
 }) {
   const column = layer.columns[columnId];
   const columns = Object.entries(layer.columns);
@@ -42,7 +47,7 @@ export function BucketNestingEditor({
     .map(([value, c]) => ({
       value,
       text: c.label,
-      fieldName: getFieldName(fieldMap, c),
+      fieldName: getFieldName(c, getFieldByName),
       operationType: c.operationType,
     }));
 

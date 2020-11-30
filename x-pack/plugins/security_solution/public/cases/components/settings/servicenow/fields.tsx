@@ -27,9 +27,9 @@ const selectOptions = [
   },
 ];
 
-const ServiceNowSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
-  ServiceNowFieldsType
->> = ({ isEdit = true, fields, connector, onChange }) => {
+const ServiceNowSettingFieldsComponent: React.FunctionComponent<
+  SettingFieldsProps<ServiceNowFieldsType>
+> = ({ isEdit = true, fields, connector, onChange }) => {
   const { severity = null, urgency = null, impact = null } = fields ?? {};
 
   const listItems = useMemo(

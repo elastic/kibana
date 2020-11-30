@@ -5,8 +5,7 @@
  */
 import expect from '@kbn/expect';
 import archives_metadata from '../../../common/archives_metadata';
-import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
-import { expectSnapshot } from '../../../common/match_snapshot';
+import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

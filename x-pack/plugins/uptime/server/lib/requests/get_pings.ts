@@ -52,8 +52,7 @@ const REMOVE_NON_SUMMARY_BROWSER_CHECKS = {
 };
 
 export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = async ({
-  callES,
-  dynamicSettings,
+  uptimeEsClient,
   dateRange: { from, to },
   index,
   monitorId,
@@ -63,54 +62,39 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
   location,
 }) => {
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
-  const sortParam = { sort: [{ '@timestamp': { order: sort ?? 'desc' } }] };
-  const filter: any[] = [{ range: { '@timestamp': { gte: from, lte: to } } }];
-  if (monitorId) {
-    filter.push({ term: { 'monitor.id': monitorId } });
-  }
-  if (status) {
-    filter.push({ term: { 'monitor.status': status } });
-  }
 
-  let postFilterClause = {};
-  if (location) {
-    postFilterClause = { post_filter: { term: { 'observer.geo.name': location } } };
-  }
-  const queryContext = {
-    bool: {
-      filter,
-      ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,
-    },
-  };
-  const params: any = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      query: {
-        ...queryContext,
+  const searchBody = {
+    size,
+    ...(index ? { from: index * size } : {}),
+    query: {
+      bool: {
+        filter: [
+          { range: { '@timestamp': { gte: from, lte: to } } },
+          ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
+          ...(status ? [{ term: { 'monitor.status': status } }] : []),
+        ],
+        ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,
       },
-      ...sortParam,
-      size,
-      aggregations: {
-        locations: {
-          terms: {
-            field: 'observer.geo.name',
-            missing: 'N/A',
-            size: 1000,
-          },
+    },
+    sort: [{ '@timestamp': { order: (sort ?? 'desc') as 'asc' | 'desc' } }],
+    aggs: {
+      locations: {
+        terms: {
+          field: 'observer.geo.name',
+          missing: 'N/A',
+          size: 1000,
         },
       },
-      ...postFilterClause,
     },
+    ...(location ? { post_filter: { term: { 'observer.geo.name': location } } } : {}),
   };
 
-  if (index) {
-    params.body.from = index * size;
-  }
-
   const {
-    hits: { hits, total },
-    aggregations: aggs,
-  } = await callES('search', params);
+    body: {
+      hits: { hits, total },
+      aggregations: aggs,
+    },
+  } = await uptimeEsClient.search({ body: searchBody });
 
   const locations = aggs?.locations ?? { buckets: [{ key: 'N/A', doc_count: 0 }] };
 
@@ -129,7 +113,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
 
   return {
     total: total.value,
-    locations: locations.buckets.map((bucket: { key: string }) => bucket.key),
+    locations: locations.buckets.map((bucket) => bucket.key as string),
     pings,
   };
 };

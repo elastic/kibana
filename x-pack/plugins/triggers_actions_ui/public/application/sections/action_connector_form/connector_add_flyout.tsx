@@ -24,34 +24,41 @@ import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
-import { ActionType, ActionConnector, IErrorObject } from '../../../types';
+import {
+  ActionType,
+  ActionConnector,
+  IErrorObject,
+  ActionTypeRegistryContract,
+} from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
 
 export interface ConnectorAddFlyoutProps {
   onClose: () => void;
   actionTypes?: ActionType[];
   onTestConnector?: (connector: ActionConnector) => void;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
-export const ConnectorAddFlyout = ({
+const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   onClose,
   actionTypes,
   onTestConnector,
-}: ConnectorAddFlyoutProps) => {
+  reloadConnectors,
+  consumer,
+  actionTypeRegistry,
+}) => {
   let hasErrors = false;
   const {
     http,
-    toastNotifications,
-    capabilities,
-    actionTypeRegistry,
-    reloadConnectors,
-    docLinks,
-    consumer,
-  } = useActionsConnectorsContext();
+    notifications: { toasts },
+    application: { capabilities },
+  } = useKibana().services;
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
 
@@ -72,10 +79,8 @@ export const ConnectorAddFlyout = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const closeFlyout = useCallback(() => {
-    setActionType(undefined);
-    setConnector(initialConnector);
     onClose();
-  }, [onClose, initialConnector]);
+  }, [onClose]);
 
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -92,6 +97,7 @@ export const ConnectorAddFlyout = ({
         onActionTypeChange={onActionTypeChange}
         actionTypes={actionTypes}
         setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
+        actionTypeRegistry={actionTypeRegistry}
       />
     );
   } else {
@@ -110,19 +116,15 @@ export const ConnectorAddFlyout = ({
         dispatch={dispatch}
         errors={errors}
         actionTypeRegistry={actionTypeRegistry}
-        http={http}
-        docLinks={docLinks}
-        capabilities={capabilities}
         consumer={consumer}
       />
     );
   }
-
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
       .then((savedConnector) => {
-        if (toastNotifications) {
-          toastNotifications.addSuccess(
+        if (toasts) {
+          toasts.addSuccess(
             i18n.translate(
               'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
               {
@@ -137,7 +139,7 @@ export const ConnectorAddFlyout = ({
         return savedConnector;
       })
       .catch((errorRes) => {
-        toastNotifications.addDanger(
+        toasts.addDanger(
           errorRes.body?.message ??
             i18n.translate(
               'xpack.triggersActionsUI.sections.addConnectorForm.updateErrorNotificationText',

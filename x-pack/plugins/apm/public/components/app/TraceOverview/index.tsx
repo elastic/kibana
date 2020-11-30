@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
-import { TraceList } from './TraceList';
-import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { Projection } from '../../../../common/projections';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { SearchBar } from '../../shared/search_bar';
+import { TraceList } from './TraceList';
 
-type TracesAPIResponse = APIReturnType<'/api/apm/traces'>;
+type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
   items: [],
   isAggregationAccurate: true,
@@ -28,7 +29,7 @@ export function TraceOverview() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          pathname: '/api/apm/traces',
+          endpoint: 'GET /api/apm/traces',
           params: {
             query: {
               start,
@@ -56,20 +57,22 @@ export function TraceOverview() {
 
   return (
     <>
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localUIFiltersConfig} showCount={false} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <EuiPanel>
-            <TraceList
-              items={data.items}
-              isLoading={status === FETCH_STATUS.LOADING}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <SearchBar />
+      <EuiPage>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <LocalUIFilters {...localUIFiltersConfig} showCount={false} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={7}>
+            <EuiPanel>
+              <TraceList
+                items={data.items}
+                isLoading={status === FETCH_STATUS.LOADING}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPage>
     </>
   );
 }

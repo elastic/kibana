@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { datatable, DatatableComponent } from './expression';
 import { LensMultiTable } from '../types';
 import { DatatableProps } from './expression';

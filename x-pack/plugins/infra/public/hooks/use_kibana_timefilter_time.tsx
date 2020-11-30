@@ -5,7 +5,10 @@
  */
 
 import { useCallback } from 'react';
-import { useUpdateEffect, useMount } from 'react-use';
+
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import useMount from 'react-use/lib/useMount';
+
 import { useKibanaContextForPlugin } from './use_kibana';
 import { TimeRange, TimefilterContract } from '../../../../../src/plugins/data/public';
 

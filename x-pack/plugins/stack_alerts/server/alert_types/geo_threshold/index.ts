@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Service, AlertingSetup } from '../../types';
+import { Logger } from 'src/core/server';
+import { AlertingSetup } from '../../types';
 import { getAlertType } from './alert_type';
 
 interface RegisterParams {
-  service: Omit<Service, 'indexThreshold'>;
+  logger: Logger;
   alerts: AlertingSetup;
 }
 
 export function register(params: RegisterParams) {
-  const { service, alerts } = params;
-  alerts.registerType(getAlertType(service));
+  const { logger, alerts } = params;
+  alerts.registerType(getAlertType(logger));
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ISavedObjectsRepository, SavedObject } from 'kibana/server';
+import { ISavedObjectsRepository, SavedObject } from 'src/core/server';
 import { ReportSchemaType } from './schema';
 
 export async function storeReport(

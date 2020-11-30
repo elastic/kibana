@@ -7,7 +7,7 @@
 import { setup as componentTemplatesListSetup } from './component_template_list.helpers';
 import { setup as componentTemplateDetailsSetup } from './component_template_details.helpers';
 
-export { nextTick, getRandomString, findTestSubject } from '../../../../../../../../../test_utils';
+export { nextTick, getRandomString, findTestSubject } from '@kbn/test/jest';
 
 export { setupEnvironment, appDependencies } from './setup_environment';
 

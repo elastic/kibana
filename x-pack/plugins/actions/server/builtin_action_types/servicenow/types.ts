@@ -8,12 +8,13 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  ExternalIncidentServiceConfigurationSchema,
-  ExternalIncidentServiceSecretConfigurationSchema,
   ExecutorParamsSchema,
-  ExecutorSubActionPushParamsSchema,
+  ExecutorSubActionCommonFieldsParamsSchema,
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
+  ExecutorSubActionPushParamsSchema,
+  ExternalIncidentServiceConfigurationSchema,
+  ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ExternalServiceCommentResponse } from '../case/types';
@@ -26,6 +27,12 @@ export type ServiceNowPublicConfigurationType = TypeOf<
 export type ServiceNowSecretConfigurationType = TypeOf<
   typeof ExternalIncidentServiceSecretConfigurationSchema
 >;
+
+export type ExecutorSubActionCommonFieldsParams = TypeOf<
+  typeof ExecutorSubActionCommonFieldsParamsSchema
+>;
+
+export type ServiceNowExecutorResultData = PushToServiceResponse | GetCommonFieldsResponse;
 
 export interface CreateCommentRequest {
   [key: string]: string;
@@ -59,6 +66,7 @@ export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
 export type ExternalServiceParams = Record<string, unknown>;
 
 export interface ExternalService {
+  getFields: () => Promise<GetCommonFieldsResponse>;
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
   createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
@@ -102,8 +110,24 @@ export interface GetIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs
 export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: ExecutorSubActionHandshakeParams;
 }
+export interface ExternalServiceFields {
+  column_label: string;
+  name: string;
+  internal_type: {
+    link: string;
+    value: string;
+  };
+  max_length: string;
+  element: string;
+}
+export type GetCommonFieldsResponse = ExternalServiceFields[];
+export interface GetCommonFieldsHandlerArgs {
+  externalService: ExternalService;
+  params: ExecutorSubActionCommonFieldsParams;
+}
 
 export interface ExternalServiceApi {
+  getFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;

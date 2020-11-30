@@ -34,7 +34,7 @@ export function SetupInstructionsLink({
           {SETUP_INSTRUCTIONS_LABEL}
         </EuiButton>
       ) : (
-        <EuiButtonEmpty size="s" color="primary" iconType="plusInCircle">
+        <EuiButtonEmpty size="s" color="primary" iconType="indexOpen">
           {ADD_DATA_LABEL}
         </EuiButtonEmpty>
       )}

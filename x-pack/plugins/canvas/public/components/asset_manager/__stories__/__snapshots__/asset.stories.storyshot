@@ -12,7 +12,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
     className="euiFlexItem"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall canvasAsset"
+      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow canvasAsset"
     >
       <div
         className="canvasAsset__thumb canvasCheckered"
@@ -190,7 +190,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
     className="euiFlexItem"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall canvasAsset"
+      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow canvasAsset"
     >
       <div
         className="canvasAsset__thumb canvasCheckered"
