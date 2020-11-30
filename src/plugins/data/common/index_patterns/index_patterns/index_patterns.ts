@@ -169,21 +169,6 @@ export class IndexPatternsService {
   };
 
   /**
-   * Returns an object matching a given title
-   *
-   * @param title {string}
-   * @returns {Promise<SavedObject|undefined>}
-   */
-  getByTitle = async (title: string, refresh: boolean = false) => {
-    const idsWithTitle = await this.getIdsWithTitle(refresh);
-    const item = idsWithTitle.find((i) => i.title === title);
-
-    if (item?.id) {
-      return this.get(item.id);
-    }
-  };
-
-  /**
    * Clear index pattern list cache
    * @param id optionally clear a single id
    */

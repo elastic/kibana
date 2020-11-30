@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { flatten } from 'lodash';
 import { getData } from '../services';
 
 import type { Data, VegaSpec } from '../data_model/types';
@@ -32,15 +33,15 @@ export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {
     data = [spec.data];
   }
 
-  return (
+  return flatten<IndexPattern>(
     await Promise.all(
-      data.reduce<Data[]>((accumulator, currentValue) => {
+      data.reduce<Array<Promise<IndexPattern[]>>>((accumulator, currentValue) => {
         if (currentValue.url?.index) {
-          accumulator.push(indexPatterns.getByTitle(currentValue.url.index));
+          accumulator.push(indexPatterns.find(currentValue.url.index));
         }
 
         return accumulator;
       }, [])
     )
-  ).filter((index) => Boolean(index)) as IndexPattern[];
+  );
 };

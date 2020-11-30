@@ -24,8 +24,6 @@ import { PANEL_TYPES } from '../common/panel_types';
 import { toExpressionAst } from './to_ast';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
 import { getDataStart } from './services';
-import { INDEXES_SEPARATOR } from '../common/constants';
-import { IndexPattern } from '../../data/public';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -85,16 +83,7 @@ export const metricsVisDefinition = {
   inspectorAdapters: {},
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();
-    const indexes: string = params.index_pattern;
 
-    if (indexes) {
-      return (
-        await Promise.all(
-          indexes.split(INDEXES_SEPARATOR).map((title) => indexPatterns.getByTitle(title))
-        )
-      ).filter((index) => Boolean(index)) as IndexPattern[];
-    }
-
-    return [];
+    return params.index_pattern ? await indexPatterns.find(params.index_pattern) : [];
   },
 };
