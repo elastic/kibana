@@ -494,7 +494,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
     const searchService = getSearchService();
-    const searchSource = await searchService.searchSource.create(initialSearchContext);
+    const searchSource = await searchService.searchSource.create(initialSearchContext as object);
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 1);
