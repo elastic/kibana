@@ -76,7 +76,7 @@ export class VisEditor extends Component {
     });
   }, VIS_STATE_DEBOUNCE_DELAY);
 
-  fetchFields = debounce(
+  debouncedFetchFields = debounce(
     (extractedIndexPatterns) => {
       if (this.abortControllerFetchFields) {
         this.abortControllerFetchFields.abort();
@@ -107,7 +107,7 @@ export class VisEditor extends Component {
 
     const extractedIndexPatterns = extractIndexPatterns(nextModel);
     if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-      this.fetchFields(extractedIndexPatterns).then((visFields) =>
+      this.debouncedFetchFields(extractedIndexPatterns).then((visFields) =>
         this.setState({
           visFields,
           extractedIndexPatterns,
