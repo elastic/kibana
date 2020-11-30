@@ -88,9 +88,9 @@ export class EventsQuery {
     filter: string | undefined
   ): Promise<SafeResolverEvent[]> {
     const parsedFilters = EventsQuery.buildFilters(filter);
-    const response: ApiResponse<SearchResponse<
-      SafeResolverEvent
-    >> = await client.asCurrentUser.search(this.buildSearch(parsedFilters));
+    const response: ApiResponse<
+      SearchResponse<SafeResolverEvent>
+    > = await client.asCurrentUser.search(this.buildSearch(parsedFilters));
     return response.body.hits.hits.map((hit) => hit._source);
   }
 }

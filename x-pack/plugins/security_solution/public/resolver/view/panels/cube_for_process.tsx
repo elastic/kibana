@@ -17,7 +17,7 @@ interface StyledSVGCube {
 }
 import { useCubeAssets } from '../use_cube_assets';
 import { useSymbolIDs } from '../use_symbol_ids';
-import { CubeState } from '../../types';
+import { NodeDataStatus } from '../../types';
 
 /**
  * Icon representing a process node.
@@ -33,7 +33,7 @@ export const CubeForProcess = memo(function ({
    * 'running' if the process represented by the node is still running.
    * 'loading' if the process represented
    */
-  state: CubeState;
+  state: NodeDataStatus;
   isOrigin?: boolean;
   className?: string;
 }) {
@@ -52,7 +52,7 @@ export const CubeForProcess = memo(function ({
       <desc>
         {i18n.translate('xpack.securitySolution.resolver.node_icon', {
           defaultMessage:
-            '{state, select, running {Running Process} terminated {Terminated Process} loading {Loading Process}}',
+            '{state, select, running {Running Process} terminated {Terminated Process} loading {Loading Process} error {Error Process}}',
           values: { state },
         })}
       </desc>

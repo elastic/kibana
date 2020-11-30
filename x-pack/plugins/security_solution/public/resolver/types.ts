@@ -252,10 +252,10 @@ export interface NodeEventsInCategoryState {
 }
 
 /**
- * The visual state of the process cubes in the graph. Loading indicates that we haven't received the node data yet
+ * The state of the process cubes in the graph. Loading indicates that we haven't received the node data yet
  * to determine whether it is a running or terminated process.
  */
-export type CubeState = 'running' | 'loading' | 'terminated' | 'error';
+export type NodeDataStatus = 'running' | 'loading' | 'terminated' | 'error';
 
 /**
  * Defines the data structure used by the node data middleware. The middleware creates a map of node IDs to this
@@ -275,8 +275,7 @@ export interface NodeData {
   /**
    * An indication of the current state for retrieving the data.
    */
-  status: 'requested' | 'received' | 'error';
-  terminated: boolean;
+  status: NodeDataStatus;
 }
 
 /**

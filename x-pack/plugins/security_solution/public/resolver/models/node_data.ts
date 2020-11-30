@@ -22,7 +22,7 @@ export function setRequestedNodes(
     ...originalData,
     ...requestedNodesArray.map((id: string): [string, NodeData] => [
       id,
-      { events: [], status: 'requested', terminated: false },
+      { events: [], status: 'loading' },
     ]),
   ]);
 }
@@ -43,7 +43,7 @@ export function setErrorNodes(
     ...originalData,
     ...errorNodesArray.map((id: string): [string, NodeData] => [
       id,
-      { events: [], status: 'error', terminated: false },
+      { events: [], status: 'error' },
     ]),
   ]);
 }
@@ -81,7 +81,7 @@ export function updateWithReceivedNodes({
       } else {
         // if we didn't reach the limit but we didn't receive any node data for a particular ID
         // then that means Elasticsearch does not have any node data for that ID.
-        copiedMap.set(id, { events: [], status: 'received', terminated: false });
+        copiedMap.set(id, { events: [], status: 'running' });
       }
     }
   }
@@ -90,8 +90,7 @@ export function updateWithReceivedNodes({
   for (const [id, info] of receivedNodes.entries()) {
     copiedMap.set(id, {
       events: [...info.events],
-      status: 'received',
-      terminated: info.terminated,
+      status: info.terminated ? 'terminated' : 'running',
     });
   }
 
@@ -120,14 +119,14 @@ export function idsNotInBase(
 }
 
 /**
- * This is used for displaying information in the node panel mainly and we should be able to remove it eventually.
- *
+ * This is used for displaying information in the node panel mainly and we should be able to remove it eventually in
+ * favor of showing all the node data associated with a node in the tree.
  *
  * @param data node data for a specific node ID
  * @returns the first event or undefined if the node data passed in was undefined
  */
 export function firstEvent(data: NodeData | undefined) {
-  return !data || data.status !== 'received' || data.events.length <= 0
+  return !data || data.status === 'loading' || data.status === 'error' || data.events.length <= 0
     ? undefined
     : data.events[0];
 }

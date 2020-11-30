@@ -384,6 +384,9 @@ export const visibleNodes: (state: ResolverState) => (time: number) => Set<strin
  */
 export const nodeData = composeSelectors(dataStateSelector, dataSelectors.nodeData);
 
+/**
+ * Returns true if we are currently loading the node's data.
+ */
 export const isNodeDataLoading = composeSelectors(
   dataStateSelector,
   dataSelectors.isNodeDataLoading
