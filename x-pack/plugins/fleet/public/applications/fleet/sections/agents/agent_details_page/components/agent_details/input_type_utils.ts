@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  DATASET_FIELD,
+  STATE_DATASET_FIELD,
   AGENT_DATASET_FILEBEAT,
   AGENT_DATASET_METRICBEAT,
 } from '../agent_logs/constants';
@@ -33,9 +33,11 @@ export function displayInputType(inputType: string): string {
 
 export function getLogsQueryByInputType(inputType: string) {
   if (inputType === 'logfile') {
-    return `_q=(${DATASET_FIELD.name}:!(${AGENT_DATASET_FILEBEAT}))`;
+    return `(${STATE_DATASET_FIELD}:!(${AGENT_DATASET_FILEBEAT}))`;
   }
   if (inputType.match(/\/metrics$/)) {
-    return `_q=(${DATASET_FIELD.name}:!(${AGENT_DATASET_METRICBEAT}))`;
+    return `(${STATE_DATASET_FIELD}:!(${AGENT_DATASET_METRICBEAT}))`;
   }
+
+  return '';
 }

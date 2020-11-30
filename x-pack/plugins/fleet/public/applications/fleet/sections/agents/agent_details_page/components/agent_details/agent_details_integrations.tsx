@@ -75,10 +75,11 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
       render: (inputType: string) => {
         return (
           <EuiButtonIcon
-            href={`${getHref('fleet_agent_details', {
+            href={getHref('fleet_agent_details', {
               agentId: agent.id,
               tabId: 'logs',
-            })}?${getLogsQueryByInputType(inputType)}`}
+              logQuery: getLogsQueryByInputType(inputType),
+            })}
             iconType="editorAlignLeft"
             title={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
               defaultMessage: 'View logs',
