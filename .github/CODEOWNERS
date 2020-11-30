@@ -142,9 +142,8 @@
 #CC# /src/plugins/maps_oss/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 #CC# /x-pack/plugins/maps_legacy_licensing @elastic/kibana-gis
-#CC# /src/plugins/home/server/tutorials @elastic/kibana-gis
-#CC# /src/plugins/tile_map/ @elastic/kibana-gis
-#CC# /src/plugins/region_map/ @elastic/kibana-gis
+/src/plugins/tile_map/ @elastic/kibana-gis
+/src/plugins/region_map/ @elastic/kibana-gis
 
 # Operations
 /src/dev/ @elastic/kibana-operations
@@ -188,6 +187,9 @@
 /x-pack/test/saved_object_tagging/ @elastic/kibana-core
 /packages/kbn-config-schema/ @elastic/kibana-core
 /packages/kbn-std/ @elastic/kibana-core
+/packages/kbn-config/ @elastic/kibana-core
+/packages/kbn-logging/ @elastic/kibana-core
+/packages/kbn-legacy-logging/ @elastic/kibana-core
 /src/legacy/server/config/ @elastic/kibana-core
 /src/legacy/server/http/ @elastic/kibana-core
 /src/legacy/server/logging/ @elastic/kibana-core
@@ -205,6 +207,28 @@
 #CC# /x-pack/plugins/features/ @elastic/kibana-core
 #CC# /x-pack/plugins/global_search/ @elastic/kibana-core
 
+# Kibana Telemetry
+/packages/kbn-analytics/ @elastic/kibana-core
+/packages/kbn-telemetry-tools/ @elastic/kibana-core
+/src/plugins/kibana_usage_collection/ @elastic/kibana-core
+/src/plugins/newsfeed/ @elastic/kibana-core
+/src/plugins/telemetry/ @elastic/kibana-core
+/src/plugins/telemetry_collection_manager/ @elastic/kibana-core
+/src/plugins/telemetry_management_section/ @elastic/kibana-core
+/src/plugins/usage_collection/ @elastic/kibana-core
+/x-pack/plugins/telemetry_collection_xpack/ @elastic/kibana-core
+/.telemetryrc.json @elastic/kibana-core
+/x-pack/.telemetryrc.json @elastic/kibana-core
+src/plugins/telemetry/schema/legacy_oss_plugins.json @elastic/kibana-core
+src/plugins/telemetry/schema/oss_plugins.json @elastic/kibana-core
+x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kibana-core
+
+# Kibana Localization
+/src/dev/i18n/  @elastic/kibana-localization @elastic/kibana-core
+/src/core/public/i18n/  @elastic/kibana-localization @elastic/kibana-core
+/packages/kbn-i18n/  @elastic/kibana-localization @elastic/kibana-core
+#CC# /x-pack/plugins/translations/ @elastic/kibana-localization @elastic/kibana-core
+
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-core
 /src/plugins/security_oss/ @elastic/kibana-security
@@ -221,28 +245,6 @@
 /x-pack/test/spaces_api_integration/ @elastic/kibana-security
 #CC# /x-pack/plugins/security_solution/ @elastic/kibana-security
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
-
-# Kibana Localization
-/src/dev/i18n/  @elastic/kibana-localization
-/src/core/public/i18n/  @elastic/kibana-localization
-/packages/kbn-i18n/  @elastic/kibana-localization
-#CC# /x-pack/plugins/translations/ @elastic/kibana-localization
-
-# Kibana Telemetry
-/packages/kbn-analytics/ @elastic/kibana-telemetry
-/packages/kbn-telemetry-tools/ @elastic/kibana-telemetry
-/src/plugins/kibana_usage_collection/ @elastic/kibana-telemetry
-/src/plugins/newsfeed/ @elastic/kibana-telemetry
-/src/plugins/telemetry/ @elastic/kibana-telemetry
-/src/plugins/telemetry_collection_manager/ @elastic/kibana-telemetry
-/src/plugins/telemetry_management_section/ @elastic/kibana-telemetry
-/src/plugins/usage_collection/ @elastic/kibana-telemetry
-/x-pack/plugins/telemetry_collection_xpack/ @elastic/kibana-telemetry
-/.telemetryrc.json @elastic/kibana-telemetry
-/x-pack/.telemetryrc.json @elastic/kibana-telemetry
-src/plugins/telemetry/schema/legacy_oss_plugins.json @elastic/kibana-telemetry
-src/plugins/telemetry/schema/oss_plugins.json @elastic/kibana-telemetry
-x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kibana-telemetry
 
 # Kibana Alerting Services
 /x-pack/plugins/alerts/ @elastic/kibana-alerting-services
