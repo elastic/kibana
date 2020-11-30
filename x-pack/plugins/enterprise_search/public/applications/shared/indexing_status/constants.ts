@@ -23,6 +23,6 @@ export const INDEXING_STATUS_HAS_ERRORS_TITLE = i18n.translate(
 export const INDEXING_STATUS_HAS_ERRORS_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.indexingStatus.hasErrors.button',
   {
-    defaultMessage: 'View Errors',
+    defaultMessage: 'View errors',
   }
 );
