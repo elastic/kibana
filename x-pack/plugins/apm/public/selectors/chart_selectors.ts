@@ -30,11 +30,16 @@ export interface ITpmBucket {
   color: string;
 }
 
+export interface AnomalySeries {
+  scores: TimeSeries;
+  bounderies: TimeSeries;
+}
+
 export interface ITransactionChartData {
   tpmSeries?: ITpmBucket[];
   responseTimeSeries?: TimeSeries[];
   mlJobId: string | undefined;
-  anomalySeries?: TimeSeries[];
+  anomalySeries?: AnomalySeries;
 }
 
 const INITIAL_DATA: Partial<TimeSeriesAPIResponse> = {
@@ -72,12 +77,14 @@ function getResponseTimeAnnomalySeries({
   anomalyTimeseries,
 }: {
   anomalyTimeseries: TimeSeriesAPIResponse['anomalyTimeseries'];
-}): TimeSeries[] | undefined {
+}): AnomalySeries | undefined {
   if (anomalyTimeseries) {
-    return [
-      getAnomalyBoundariesSeries(anomalyTimeseries?.anomalyBoundaries),
-      getAnomalyScoreSeries(anomalyTimeseries?.anomalyScore),
-    ];
+    return {
+      bounderies: getAnomalyBoundariesSeries(
+        anomalyTimeseries.anomalyBoundaries
+      ),
+      scores: getAnomalyScoreSeries(anomalyTimeseries.anomalyScore),
+    };
   }
 }
 

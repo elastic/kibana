@@ -34,6 +34,7 @@ import { useTheme } from '../../../hooks/useTheme';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useAnnotations } from '../../../hooks/use_annotations';
 import { useChartPointerEvent } from '../../../hooks/use_chart_pointer_event';
+import { AnomalySeries } from '../../../selectors/chart_selectors';
 import { unit } from '../../../style/variables';
 import { ChartContainer } from './chart_container';
 import { onBrushEnd } from './helper/helper';
@@ -54,7 +55,7 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
-  anomalySeries?: TimeSeries[];
+  anomalySeries?: AnomalySeries;
 }
 
 export function TimeseriesChart({
@@ -179,19 +180,21 @@ export function TimeseriesChart({
         })}
 
         {anomalySeries &&
-          anomalySeries.map((anomalySerie) => {
-            if (anomalySerie.type === 'area') {
+          Object.keys(anomalySeries).map((key) => {
+            const anomalyType = key as keyof AnomalySeries;
+            const anomaly = anomalySeries[anomalyType];
+            if (anomalyType === 'bounderies') {
               return (
                 <AreaSeries
-                  key={anomalySerie.title}
-                  id={anomalySerie.title}
+                  key={anomaly.title}
+                  id={anomaly.title}
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   xAccessor="x"
                   yAccessors={['y']}
                   y0Accessors={['y0']}
-                  data={isEmpty ? [] : anomalySerie.data}
-                  color={anomalySerie.color}
+                  data={isEmpty ? [] : anomaly.data}
+                  color={anomaly.color}
                   curve={CurveType.CURVE_MONOTONE_X}
                   hideInLegend
                   filterSeriesInTooltip={() => false}
@@ -200,9 +203,9 @@ export function TimeseriesChart({
             }
             return (
               <RectAnnotation
-                key={anomalySerie.title}
+                key={anomaly.title}
                 id="score_anomalies"
-                dataValues={(anomalySerie.data as RectCoordinate[]).map(
+                dataValues={(anomaly.data as RectCoordinate[]).map(
                   ({ x0, x: x1 }) => ({
                     coordinates: {
                       x0,
@@ -211,7 +214,7 @@ export function TimeseriesChart({
                   })
                 )}
                 style={{
-                  fill: anomalySerie.color,
+                  fill: anomaly.color,
                 }}
               />
             );
