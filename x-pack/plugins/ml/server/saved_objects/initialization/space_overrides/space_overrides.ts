@@ -5,7 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import type { JobSpaceOverrides } from '../../repair';
+import type { JobSpaceOverrides } from '../../sync';
 import { logJobsSpaces } from './logs';
 import { metricsJobsSpaces } from './metrics';
 
