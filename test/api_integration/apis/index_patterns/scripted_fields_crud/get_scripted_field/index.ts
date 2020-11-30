@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('scripted_fields_crud', () => {
-    loadTestFile(require.resolve('./create_scripted_field'));
-    loadTestFile(require.resolve('./get_scripted_field'));
-    loadTestFile(require.resolve('./delete_scripted_field'));
+  describe('get_scripted_field', () => {
+    loadTestFile(require.resolve('./errors'));
+    loadTestFile(require.resolve('./main'));
   });
 }
