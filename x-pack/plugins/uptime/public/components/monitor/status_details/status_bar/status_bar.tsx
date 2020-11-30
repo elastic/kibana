@@ -26,14 +26,14 @@ import { MonitorRedirects } from './monitor_redirects';
 
 export const MonListTitle = styled(EuiDescriptionListTitle)`
   &&& {
-    width: 35%;
-    max-width: 200px;
+    width: 30%;
+    max-width: 250px;
   }
 `;
 
 export const MonListDescription = styled(EuiDescriptionListDescription)`
   &&& {
-    width: 65%;
+    width: 70%;
     overflow-wrap: anywhere;
   }
 `;
