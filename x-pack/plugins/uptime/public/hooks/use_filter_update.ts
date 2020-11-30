@@ -6,7 +6,6 @@
 
 import { useEffect } from 'react';
 import { useUrlParams } from './use_url_params';
-import { use_selected_filters } from './useSelectedFilters';
 
 export const useFilterUpdate = (
   fieldName?: string,
