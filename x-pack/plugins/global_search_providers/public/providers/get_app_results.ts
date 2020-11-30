@@ -5,10 +5,10 @@
  */
 
 import levenshtein from 'js-levenshtein';
-import { PublicAppInfo, PublicAppSubLinkInfo } from 'src/core/public';
+import { PublicAppInfo, PublicAppSearchDeepLinkInfo } from 'src/core/public';
 import { GlobalSearchProviderResult } from '../../../global_search/public';
 
-/** Type used internally to represent an application unrolled into its separate sublinks */
+/** Type used internally to represent an application unrolled into its separate searchDeepLinks */
 export interface AppLink {
   id: string;
   app: PublicAppInfo;
@@ -22,10 +22,12 @@ export const getAppResults = (
 ): GlobalSearchProviderResult[] => {
   return (
     apps
-      // Unroll all sublinks
-      .flatMap((app) => flattenSubLinks(app))
-      // Only include sublinks if there is a search term
-      .filter((appLink) => term.length > 0 || appLink.subLinkTitles.length === 0)
+      // Unroll all searchDeepLinks, only if there is a search term
+      .flatMap((app) =>
+        term.length > 0
+          ? flattenDeepLinks(app)
+          : [{ id: app.id, app, path: app.appRoute, subLinkTitles: [] }]
+      )
       .map((appLink) => ({
         appLink,
         score: scoreApp(term, appLink),
@@ -82,8 +84,11 @@ export const appToResult = (appLink: AppLink, score: number): GlobalSearchProvid
   };
 };
 
-const flattenSubLinks = (app: PublicAppInfo, subLink?: PublicAppSubLinkInfo): AppLink[] => {
-  if (!subLink) {
+const flattenDeepLinks = (
+  app: PublicAppInfo,
+  deepLink?: PublicAppSearchDeepLinkInfo
+): AppLink[] => {
+  if (!deepLink) {
     return [
       {
         id: app.id,
@@ -91,25 +96,27 @@ const flattenSubLinks = (app: PublicAppInfo, subLink?: PublicAppSubLinkInfo): Ap
         path: app.appRoute,
         subLinkTitles: [],
       },
-      ...app.subLinks.flatMap((appSubLink) => flattenSubLinks(app, appSubLink)),
+      ...app.searchDeepLinks.flatMap((appDeepLink) => flattenDeepLinks(app, appDeepLink)),
     ];
   }
 
-  const appLink: AppLink = {
-    id: `${app.id}-${subLink.id}`,
-    app,
-    subLinkTitles: [subLink.title],
-    path: `${app.appRoute}${subLink.path}`,
-  };
-
   return [
-    ...(subLink.path ? [appLink] : []),
-    ...subLink.subLinks
-      .flatMap((subSubLink) => flattenSubLinks(app, subSubLink))
-      .map((subAppLink) => ({
-        ...subAppLink,
+    ...(deepLink.path
+      ? [
+          {
+            id: `${app.id}-${deepLink.id}`,
+            app,
+            subLinkTitles: [deepLink.title],
+            path: `${app.appRoute}${deepLink.path}`,
+          },
+        ]
+      : []),
+    ...deepLink.searchDeepLinks
+      .flatMap((deepDeepLink) => flattenDeepLinks(app, deepDeepLink))
+      .map((deepAppLink) => ({
+        ...deepAppLink,
         // shift current sublink title into array of sub-sublink titles
-        subLinkTitles: [subLink.title, ...subAppLink.subLinkTitles],
+        subLinkTitles: [deepLink.title, ...deepAppLink.subLinkTitles],
       })),
   ];
 };

@@ -21,9 +21,9 @@ import {
   App,
   AppNavLinkStatus,
   AppStatus,
-  AppSubLink,
+  AppSearchDeepLink,
   PublicAppInfo,
-  PublicAppSubLinkInfo,
+  PublicAppSearchDeepLinkInfo,
 } from '../types';
 
 export function getAppInfo(app: App): PublicAppInfo {
@@ -39,21 +39,26 @@ export function getAppInfo(app: App): PublicAppInfo {
     status: app.status!,
     navLinkStatus,
     appRoute: app.appRoute!,
-    subLinks: getSubLinkInfos(app, app.subLinks),
+    searchDeepLinks: getSearchDeepLinkInfos(app, app.searchDeepLinks),
   };
 }
 
-function getSubLinkInfos(app: App, subLinks?: AppSubLink[]): PublicAppSubLinkInfo[] {
-  if (!subLinks) {
+function getSearchDeepLinkInfos(
+  app: App,
+  searchDeepLinks?: AppSearchDeepLink[]
+): PublicAppSearchDeepLinkInfo[] {
+  if (!searchDeepLinks) {
     return [];
   }
 
-  return subLinks.map((rawSubLink) => {
-    return {
-      id: rawSubLink.id,
-      title: rawSubLink.title,
-      path: rawSubLink.path,
-      subLinks: getSubLinkInfos(app, rawSubLink.subLinks),
-    };
-  });
+  return searchDeepLinks.map(
+    (rawDeepLink): PublicAppSearchDeepLinkInfo => {
+      return {
+        id: rawDeepLink.id,
+        title: rawDeepLink.title,
+        path: rawDeepLink.path,
+        searchDeepLinks: getSearchDeepLinkInfos(app, rawDeepLink.searchDeepLinks),
+      };
+    }
+  );
 }

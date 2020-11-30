@@ -19,7 +19,7 @@ const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.visible,
   chromeless: false,
-  subLinks: [],
+  searchDeepLinks: [],
   ...props,
 });
 
@@ -43,16 +43,18 @@ describe('getAppResults', () => {
     expect(results[0]).toEqual(expect.objectContaining({ id: 'dashboard', score: 100 }));
   });
 
-  it('creates multiple links for apps with sublinks', () => {
+  it('creates multiple links for apps with searchDeepLinks', () => {
     const apps = [
       createApp({
-        subLinks: [
-          { id: 'sub1', title: 'Sub1', path: '/sub1', subLinks: [] },
+        searchDeepLinks: [
+          { id: 'sub1', title: 'Sub1', path: '/sub1', searchDeepLinks: [] },
           {
             id: 'sub2',
             title: 'Sub2',
             path: '/sub2',
-            subLinks: [{ id: 'sub2sub1', title: 'Sub2Sub1', path: '/sub2/sub1', subLinks: [] }],
+            searchDeepLinks: [
+              { id: 'sub2sub1', title: 'Sub2Sub1', path: '/sub2/sub1', searchDeepLinks: [] },
+            ],
           },
         ],
       }),
@@ -69,10 +71,10 @@ describe('getAppResults', () => {
     ]);
   });
 
-  it('only includes sublinks when search term is non-empty', () => {
+  it('only includes searchDeepLinks when search term is non-empty', () => {
     const apps = [
       createApp({
-        subLinks: [{ id: 'sub1', title: 'Sub1', path: '/sub1', subLinks: [] }],
+        searchDeepLinks: [{ id: 'sub1', title: 'Sub1', path: '/sub1', searchDeepLinks: [] }],
       }),
     ];
 

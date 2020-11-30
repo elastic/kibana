@@ -83,7 +83,7 @@ export enum AppNavLinkStatus {
  */
 export type AppUpdatableFields = Pick<
   App,
-  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'subLinks'
+  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'searchDeepLinks'
 >;
 
 /**
@@ -237,49 +237,49 @@ export interface App<HistoryLocationState = unknown> {
   exactRoute?: boolean;
 
   /**
-   * Array of links that represent secondary in-app locations for the given app.
+   * Array of links that represent secondary in-app locations for the app.
    *
+   * Used to populate navigational search results (where available).
    * Can be updated using the {@link App.updater$} observable. See {@link AppSubLink} for more details.
    */
-  subLinks?: AppSubLink[];
+  searchDeepLinks?: AppSearchDeepLink[];
 }
 
 /**
  * Input type for registering secondary in-app locations for an application.
  *
- * Sublinks must include at least one of `path` or `subLinks`. A sublink that does not have a `path` represents a
- * topological level in the application's hierarchy, but does not have a destination URL that is user-accessible.
- *
- * Used to populate navigational search results (where available).
+ * Deep links must include at least one of `path` or `searchDeepLinks`. A deep link that does not have a `path`
+ * represents a topological level in the application's hierarchy, but does not have a destination URL that is
+ * user-accessible.
  * @public
  */
-export type AppSubLink = {
+export type AppSearchDeepLink = {
   /** Identifier to represent this sublink, should be unique for this application */
   id: string;
-  /** Title to label represent this sublink */
+  /** Title to label represent this deep link */
   title: string;
 } & (
   | {
       /** URL path to access this link, relative to the application's appRoute. */
       path: string;
       /** Optional array of links that are 'underneath' this section in the hierarchy */
-      subLinks?: AppSubLink[];
+      searchDeepLinks?: AppSearchDeepLink[];
     }
   | {
       /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
       path?: string;
       /** Array links that are 'underneath' this section in this hierarchy. */
-      subLinks: AppSubLink[];
+      searchDeepLinks: AppSearchDeepLink[];
     }
 );
 
 /**
- * Public information about a registered app's {@link AppSubLink | subLinks}
+ * Public information about a registered app's {@link AppSearchDeepLink | searchDeepLinks}
  *
  * @public
  */
-export type PublicAppSubLinkInfo = Omit<AppSubLink, 'subLinks'> & {
-  subLinks: PublicAppSubLinkInfo[];
+export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks'> & {
+  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
 };
 
 /**
@@ -287,12 +287,12 @@ export type PublicAppSubLinkInfo = Omit<AppSubLink, 'subLinks'> & {
  *
  * @public
  */
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'subLinks'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'searchDeepLinks'> & {
   // remove optional on fields populated with default values
   status: AppStatus;
   navLinkStatus: AppNavLinkStatus;
   appRoute: string;
-  subLinks: PublicAppSubLinkInfo[];
+  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
 };
 
 /**

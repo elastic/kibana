@@ -109,9 +109,9 @@ export {
   AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
-  AppSubLink,
+  AppSearchDeepLink,
   PublicAppInfo,
-  PublicAppSubLinkInfo,
+  PublicAppSearchDeepLinkInfo,
   ScopedHistory,
   NavigateToAppOptions,
 } from './application';

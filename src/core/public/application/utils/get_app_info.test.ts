@@ -43,17 +43,17 @@ describe('getAppInfo', () => {
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
-      subLinks: [],
+      searchDeepLinks: [],
     });
   });
 
-  it('populates default values for nested subLinks', () => {
+  it('populates default values for nested searchDeepLinks', () => {
     const app = createApp({
-      subLinks: [
+      searchDeepLinks: [
         {
           id: 'sub-id',
           title: 'sub-title',
-          subLinks: [{ id: 'sub-sub-id', title: 'sub-sub-title', path: '/sub-sub' }],
+          searchDeepLinks: [{ id: 'sub-sub-id', title: 'sub-sub-title', path: '/sub-sub' }],
         },
       ],
     });
@@ -65,16 +65,16 @@ describe('getAppInfo', () => {
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.visible,
       appRoute: `/app/some-id`,
-      subLinks: [
+      searchDeepLinks: [
         {
           id: 'sub-id',
           title: 'sub-title',
-          subLinks: [
+          searchDeepLinks: [
             {
               id: 'sub-sub-id',
               title: 'sub-sub-title',
               path: '/sub-sub',
-              subLinks: [], // default empty array added
+              searchDeepLinks: [], // default empty array added
             },
           ],
         },
