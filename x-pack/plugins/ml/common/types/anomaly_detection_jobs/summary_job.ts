@@ -46,6 +46,8 @@ export interface AuditMessage {
 export type MlSummaryJobs = MlSummaryJob[];
 
 export interface MlJobWithTimeRange extends CombinedJobWithStats {
+  id: string;
+  isNotSingleMetricViewerJobMessage?: boolean;
   timeRange: {
     from: number;
     to: number;

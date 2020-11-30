@@ -45,6 +45,28 @@ export function validateJobSelection(
         },
       }
     );
+
+    // show specific reason why we can't show the single metric viewer
+    if (invalidIds.length === 1) {
+      const selectedJobId = invalidIds[0];
+      const selectedJob = jobsWithTimeRange.find((j) => j.id === selectedJobId);
+      if (
+        selectedJob !== undefined &&
+        selectedJob.isNotSingleMetricViewerJobMessage !== undefined
+      ) {
+        warningText += i18n.translate(
+          'xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage',
+          {
+            defaultMessage: `; {reason}`,
+            values: {
+              selectedJobId,
+              reason: selectedJob.isNotSingleMetricViewerJobMessage,
+            },
+          }
+        );
+      }
+    }
+
     if (validSelectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
       warningText += i18n.translate('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
         defaultMessage: ', auto selecting first job',

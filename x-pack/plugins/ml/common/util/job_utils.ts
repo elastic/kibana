@@ -10,6 +10,7 @@ import moment, { Duration } from 'moment';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 
+import { i18n } from '@kbn/i18n';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
@@ -48,9 +49,13 @@ export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds: numb
   return freq;
 }
 
+export function isTimeSeriesViewJob(job: CombinedJob): boolean {
+  return getSingleMetricViewerJobErrorMessage(job) === undefined;
+}
+
 // Returns a flag to indicate whether the job is suitable for viewing
 // in the Time Series dashboard.
-export function isTimeSeriesViewJob(job: CombinedJob): boolean {
+export function isTimeSeriesViewableJob(job: CombinedJob): boolean {
   // only allow jobs with at least one detector whose function corresponds to
   // an ES aggregation which can be viewed in the single metric view and which
   // doesn't use a scripted field which can be very difficult or impossible to
@@ -105,7 +110,8 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
         scriptFields.indexOf(dtr.over_field_name!) === -1;
     }
 
-    // We don't currently support nested terms aggregation & when aggregation interval is different from bucket span
+    // We don't currently support nested terms aggregation
+    // & when aggregation interval is different from bucket span
     const hasDatafeed =
       typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
     if (hasDatafeed) {
@@ -166,9 +172,11 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
 // Returns a reason to indicate why the job configuration is not supported
 // if the result is undefined, that means the single metric job should be viewable
 export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
-  let isSupported;
-  if (!isTimeSeriesViewJob(job)) {
-    isSupported = 'not_time_series_view';
+  let errorMessage;
+  if (!isTimeSeriesViewableJob(job)) {
+    errorMessage = i18n.translate('xpack.ml.timeSeriesJob.notViewableTimeSeriesJobMessage', {
+      defaultMessage: 'not a viewable time series job',
+    });
   }
   const hasDatafeed =
     typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
@@ -181,18 +189,26 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
         const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
         const termsField = findAggField(aggregations, 'terms', true);
         if (termsField !== undefined && Object.keys(termsField).length > 1) {
-          isSupported = 'detected_nested_terms_aggregations';
+          errorMessage = i18n.translate('xpack.ml.timeSeriesJob.nestedTermsAggregationsMessage', {
+            defaultMessage: 'detected nested terms aggregations in the datafeed configurations',
+          });
         }
 
         // if aggregation interval is different from bucket span
         const datetimeBucket = aggs[aggBucketsName].date_histogram;
         if (datetimeBucket?.fixed_interval !== job.analysis_config?.bucket_span) {
-          isSupported = 'varying_bucket_span_and_aggregation_interval';
+          errorMessage = i18n.translate(
+            'xpack.ml.timeSeriesJob.varyingBucketSpanAggregationInterval',
+            {
+              defaultMessage:
+                'detected varying bucket span and aggregation interval for aggregation fields',
+            }
+          );
         }
       }
     }
   }
-  return isSupported;
+  return errorMessage;
 }
 
 // Returns the names of the partition, by, and over fields for the detector with the
