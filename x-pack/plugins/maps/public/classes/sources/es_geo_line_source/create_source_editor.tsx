@@ -11,14 +11,19 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiPanel } from '@elastic/eui';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
-import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
 
 import { getGeoPointFields } from '../../../index_pattern_util';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { GeoLineForm } from './geo_line_form';
 
 interface Props {
-  onSourceConfigChange: (sourceConfig: Partial<ESGeoLineSourceDescriptor>) => void;
+  onSourceConfigChange: (
+    sourceConfig: {
+      indexPatternId: string;
+      geoField: string;
+      splitField: string;
+      sortField: string;
+    } | null
+  ) => void;
 }
 
 interface State {
@@ -48,7 +53,11 @@ export class CreateSourceEditor extends Component<Props, State> {
     );
   };
 
-  _onGeoFieldSelect = (geoField) => {
+  _onGeoFieldSelect = (geoField?: string) => {
+    if (geoField === undefined) {
+      return;
+    }
+
     this.setState(
       {
         geoField,
@@ -57,7 +66,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     );
   };
 
-  _onSplitFieldSelect = (newValue) => {
+  _onSplitFieldSelect = (newValue: string) => {
     this.setState(
       {
         splitField: newValue,
@@ -66,7 +75,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     );
   };
 
-  _onSortFieldSelect = (newValue) => {
+  _onSortFieldSelect = (newValue: string) => {
     this.setState(
       {
         sortField: newValue,
@@ -79,7 +88,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     const { indexPattern, geoField, splitField, sortField } = this.state;
 
     const sourceConfig =
-      indexPattern && geoField && splitField && sortField
+      indexPattern && indexPattern.id && geoField && splitField && sortField
         ? { indexPatternId: indexPattern.id, geoField, splitField, sortField }
         : null;
     this.props.onSourceConfigChange(sourceConfig);
@@ -128,7 +137,9 @@ export class CreateSourceEditor extends Component<Props, State> {
     return (
       <EuiPanel>
         <GeoIndexPatternSelect
-          value={this.state.indexPattern ? this.state.indexPattern.id : ''}
+          value={
+            this.state.indexPattern && this.state.indexPattern.id ? this.state.indexPattern.id : ''
+          }
           onChange={this._onIndexPatternSelect}
           isGeoPointsOnly={true}
         />

@@ -6,7 +6,6 @@
 
 import React, { Fragment, Component } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import {

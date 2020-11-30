@@ -4,32 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React from 'react';
-import uuid from 'uuid/v4';
 
 import { i18n } from '@kbn/i18n';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import { getField, addFieldToDSL, makeESBbox } from '../../../../common/elasticsearch_util';
-import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
+import { getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
+import {
+  ESGeoLineSourceDescriptor,
+  VectorSourceRequestMeta,
+} from '../../../../common/descriptor_types';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
-import { DataRequestAbortError } from '../../util/data_request';
+import { AbstractESAggSource } from '../es_agg_source';
+import { DataRequest } from '../../util/data_request';
 import { registerSource } from '../source_registry';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESDocField } from '../../fields/es_doc_field';
 import { UpdateSourceEditor } from './update_source_editor';
-import { SourceEditorArgs } from '../source';
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { GeoJsonWithMeta } from '../vector_source';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { IField } from '../../fields/field';
 
 const MAX_TRACKS = 1000;
+
+interface SourceMeta {
+  areResultsTrimmed: boolean;
+  areEntitiesTrimmed: boolean;
+  entityCount: number;
+  totalEntities: number;
+}
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
   defaultMessage: 'Tracks',
 });
 
 export class ESGeoLineSource extends AbstractESAggSource {
-  static createDescriptor(descriptor: Partial<ESGeoLineSourceDescriptor>) {
-    const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
+  static createDescriptor(
+    descriptor: Partial<ESGeoLineSourceDescriptor>
+  ): ESGeoLineSourceDescriptor {
+    const normalizedDescriptor = AbstractESAggSource.createDescriptor(
+      descriptor
+    ) as ESGeoLineSourceDescriptor;
     if (!isValidStringConfig(normalizedDescriptor.geoField)) {
       throw new Error('Cannot create an ESGeoLineSource without a geoField');
     }
@@ -70,11 +87,12 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   getSyncMeta() {
     return {
-      requestType: this._descriptor.requestType,
+      splitField: this._descriptor.splitField,
+      sortField: this._descriptor.sortField,
     };
   }
 
-  async getImmutableProperties() {
+  async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     let indexPatternTitle = this.getIndexPatternId();
     try {
       const indexPattern = await this.getIndexPattern();
@@ -103,7 +121,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     ];
   }
 
-  _createSplitField() {
+  _createSplitField(): IField {
     return new ESDocField({
       fieldName: this._descriptor.splitField,
       source: this,
@@ -120,11 +138,11 @@ export class ESGeoLineSource extends AbstractESAggSource {
     ];
   }
 
-  async getFields() {
+  async getFields(): Promise<IField[]> {
     return [...this.getMetricFields(), this._createSplitField()];
   }
 
-  getFieldByName(name: string) {
+  getFieldByName(name: string): IField | null {
     return name === this._descriptor.splitField
       ? this._createSplitField()
       : this.getMetricFieldForName(name);
@@ -138,7 +156,12 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return false;
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback, isRequestStillActive) {
+  async getGeoJsonWithMeta(
+    layerName: string,
+    searchFilters: VectorSourceRequestMeta,
+    registerCancelCallback: (callback: () => void) => void,
+    isRequestStillActive: () => boolean
+  ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
 
@@ -187,13 +210,13 @@ export class ESGeoLineSource extends AbstractESAggSource {
         areEntitiesTrimmed,
         entityCount: entityBuckets.length,
         totalEntities,
-      },
+      } as SourceMeta,
     };
   }
 
-  getSourceTooltipContent(sourceDataRequest) {
+  getSourceTooltipContent(sourceDataRequest?: DataRequest) {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
-    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
+    const meta = sourceDataRequest ? (sourceDataRequest.getMeta() as SourceMeta) : null;
     if (!featureCollection || !meta) {
       // no tooltip content needed when there is no feature collection or meta
       return {
@@ -218,7 +241,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       tooltipContent: entitiesFoundMsg,
       // Used to show trimmed icon in legend
       // user only needs to be notified of trimmed results when entities are trimmed
-      areResultsTrimmed: meta.areEntitiesTrimmed,
+      areResultsTrimmed: !!meta.areEntitiesTrimmed,
     };
   }
 

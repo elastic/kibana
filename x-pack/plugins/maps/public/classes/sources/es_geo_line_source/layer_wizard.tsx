@@ -9,10 +9,7 @@ import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
 import { ESGeoLineSource, geoLineTitle } from './es_geo_line_source';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import {
-  ColorDynamicOptions,
-  ESGeoLineSourceDescriptor,
-} from '../../../../common/descriptor_types';
+import { ColorDynamicOptions } from '../../../../common/descriptor_types';
 import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
@@ -40,7 +37,14 @@ export const geoLineLayerWizardConfig: LayerWizard = {
     return !getIsGoldPlus();
   },
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: Partial<ESGeoLineSourceDescriptor>) => {
+    const onSourceConfigChange = (
+      sourceConfig: {
+        indexPatternId: string;
+        geoField: string;
+        splitField: string;
+        sortField: string;
+      } | null
+    ) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;

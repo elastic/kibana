@@ -34,7 +34,16 @@ type ESGeoGridSourceSyncMeta = {
   requestType: RENDER_AS;
 };
 
-export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncMeta | null;
+type ESGeoLineSourceSyncMeta = {
+  splitField: string;
+  sortField: string;
+};
+
+export type VectorSourceSyncMeta =
+  | ESSearchSourceSyncMeta
+  | ESGeoGridSourceSyncMeta
+  | ESGeoLineSourceSyncMeta
+  | null;
 
 export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;

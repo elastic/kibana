@@ -5,13 +5,13 @@
  */
 
 import _ from 'lodash';
-import { Feature } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
 import { extractPropertiesFromBucket } from '../../../../common/elasticsearch_util';
 
 const KEYS_TO_IGNORE = ['key', 'path'];
 
 export function convertToGeoJson(esResponse: any, entitySplitFieldName: string) {
-  const features = [];
+  const features: Feature[] = [];
 
   const buckets = _.get(esResponse, 'aggregations.entitySplit.buckets', []);
   buckets.forEach((bucket: any) => {
@@ -29,6 +29,6 @@ export function convertToGeoJson(esResponse: any, entitySplitFieldName: string) 
     featureCollection: {
       type: 'FeatureCollection',
       features,
-    },
+    } as FeatureCollection,
   };
 }
