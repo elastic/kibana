@@ -757,6 +757,39 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+// [Pie Chart] Migrate vislib pie chart to use the new plugin vis_type_pie
+const migrateVislibPie: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'pie') {
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify({
+            ...visState,
+            params: {
+              ...visState.params,
+              palette: {
+                type: 'palette',
+                name: 'kibana_palette',
+              },
+            },
+          }),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -790,4 +823,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.8.0': flow(migrateTsvbDefaultColorPalettes),
   '7.9.3': flow(migrateMatchAllQuery),
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
+  '7.12.0': flow(migrateVislibPie),
 };
