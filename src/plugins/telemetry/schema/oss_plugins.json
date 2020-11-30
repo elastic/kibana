@@ -1884,6 +1884,9 @@
               "lastUpdatedAt": {
                 "type": "date"
               },
+              "fromTimestamp": {
+                "type": "date"
+              },
               "counterType": {
                 "type": "keyword"
               },
