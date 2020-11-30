@@ -4,4 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { isEsError, handleEsError } from '../../../../src/plugins/es_ui_shared/server';
+export interface Exception {
+  field: string;
+  operator: string;
+  values: string[];
+}
+
+export const exception: Exception = {
+  field: 'host.name',
+  operator: 'is',
+  values: ['suricata-iowa'],
+};
