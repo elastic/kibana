@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart, OverlayStart } from 'kibana/public';
 import { TagWithRelations } from '../../../common';
 import { ITagInternalClient } from '../../services/tags';
+import { TagAction } from './types';
 
 interface GetDeleteActionOptions {
   overlays: OverlayStart;
@@ -22,8 +22,9 @@ export const getDeleteAction = ({
   overlays,
   tagClient,
   fetchTags,
-}: GetDeleteActionOptions): EuiTableAction<TagWithRelations> => {
+}: GetDeleteActionOptions): TagAction => {
   return {
+    id: 'delete',
     name: ({ name }) =>
       i18n.translate('xpack.savedObjectsTagging.management.table.actions.delete.title', {
         defaultMessage: 'Delete {name} tag',

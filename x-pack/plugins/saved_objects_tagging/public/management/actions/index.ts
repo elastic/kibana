@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
 import { CoreStart } from 'kibana/public';
-import { TagsCapabilities, TagWithRelations } from '../../../common';
+import { TagsCapabilities } from '../../../common';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
+import { TagAction } from './types';
 import { getDeleteAction } from './delete';
 import { getEditAction } from './edit';
 import { getAssignAction } from './assign';
+
+export { TagAction } from './types';
 
 interface GetActionsOptions {
   core: CoreStart;
@@ -32,8 +34,8 @@ export const getTableActions = ({
   setLoading,
   assignableTypes,
   fetchTags,
-}: GetActionsOptions): Array<EuiTableAction<TagWithRelations>> => {
-  const actions: Array<EuiTableAction<TagWithRelations>> = [];
+}: GetActionsOptions): TagAction[] => {
+  const actions: TagAction[] = [];
 
   if (capabilities.edit) {
     actions.push(getEditAction({ notifications, overlays, tagClient, fetchTags }));

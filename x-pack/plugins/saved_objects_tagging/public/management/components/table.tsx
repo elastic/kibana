@@ -6,11 +6,11 @@
 
 import React, { useRef, useEffect, FC, ReactNode } from 'react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query } from '@elastic/eui';
-import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TagsCapabilities, TagWithRelations } from '../../../common';
 import { TagBadge } from '../../components';
+import { TagAction } from '../actions';
 
 interface TagTableProps {
   loading: boolean;
@@ -23,7 +23,7 @@ interface TagTableProps {
   onSelectionChange: (selection: TagWithRelations[]) => void;
   getTagRelationUrl: (tag: TagWithRelations) => string;
   onShowRelations: (tag: TagWithRelations) => void;
-  actions: Array<EuiTableAction<TagWithRelations>>;
+  actions: TagAction[];
   actionBar: ReactNode;
 }
 

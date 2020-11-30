@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart, OverlayStart } from 'kibana/public';
 import { TagWithRelations } from '../../../common';
 import { ITagInternalClient } from '../../services/tags';
 import { getEditModalOpener } from '../../components/edition_modal';
+import { TagAction } from './types';
 
 interface GetEditActionOptions {
   overlays: OverlayStart;
@@ -23,9 +23,10 @@ export const getEditAction = ({
   overlays,
   tagClient,
   fetchTags,
-}: GetEditActionOptions): EuiTableAction<TagWithRelations> => {
+}: GetEditActionOptions): TagAction => {
   const editModalOpener = getEditModalOpener({ overlays, tagClient });
   return {
+    id: 'edit',
     name: ({ name }) =>
       i18n.translate('xpack.savedObjectsTagging.management.table.actions.edit.title', {
         defaultMessage: 'Edit {name} tag',

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart, OverlayStart } from 'kibana/public';
 import { TagWithRelations } from '../../../common';
 import { ITagsCache } from '../../services/tags';
 import { getAssignFlyoutOpener } from '../../components/assign_flyout';
 import { ITagAssignmentService } from '../../services/assignments';
+import { TagAction } from './types';
 
 interface GetAssignActionOptions {
   overlays: OverlayStart;
@@ -28,7 +28,7 @@ export const getAssignAction = ({
   assignmentService,
   tagCache,
   fetchTags,
-}: GetAssignActionOptions): EuiTableAction<TagWithRelations> => {
+}: GetAssignActionOptions): TagAction => {
   const openFlyout = getAssignFlyoutOpener({
     overlays,
     notifications,
@@ -38,6 +38,7 @@ export const getAssignAction = ({
   });
 
   return {
+    id: 'assign',
     name: ({ name }) =>
       i18n.translate('xpack.savedObjectsTagging.management.table.actions.assign.title', {
         defaultMessage: 'Manage {name} assignments',
