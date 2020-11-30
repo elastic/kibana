@@ -10,8 +10,6 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useGetUrlParams } from '../hooks';
-import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { PageHeader } from '../components/common/header/page_header';
 import { IIndexPattern } from '../../../../../src/plugins/data/public';
 import { useUpdateKueryString } from '../hooks';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
@@ -63,8 +61,6 @@ export const OverviewPageComponent = React.memo(
       dispatch(getMonitorAlertsAction.get());
     }, [dispatch]);
 
-    const linkParameters = stringifyUrlParams(params, true);
-
     useBreadcrumbs([]); // No extra breadcrumbs on overview
 
     return (
@@ -87,7 +83,7 @@ export const OverviewPageComponent = React.memo(
           <EuiSpacer size="xs" />
           <StatusPanel />
           <EuiSpacer size="s" />
-          <MonitorList filters={esFilters} linkParameters={linkParameters} />
+          <MonitorList filters={esFilters} />
         </EmptyState>
       </>
     );
