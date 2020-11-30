@@ -17,10 +17,25 @@
  * under the License.
  */
 
-import { ID } from './constants';
-import { lexerRules } from './lexer_rules';
-import { getSuggestionProvider } from './language';
+import { PainlessCompletionResult, PainlessContext, Field } from '../types';
 
-export const PainlessLang = { ID, getSuggestionProvider, lexerRules };
+import { getAutocompleteSuggestions } from './lib';
 
-export { PainlessContext } from './types';
+export class PainlessWorker {
+  public provideAutocompleteSuggestions(
+    currentLineChars: string,
+    context: PainlessContext,
+    fields?: Field[]
+  ): PainlessCompletionResult {
+    // Array of the active line words, e.g., [boolean, isTrue, =, true]
+    const words = currentLineChars.replace('\t', '').split(' ');
+
+    const autocompleteSuggestions: PainlessCompletionResult = getAutocompleteSuggestions(
+      context,
+      words,
+      fields
+    );
+
+    return autocompleteSuggestions;
+  }
+}
