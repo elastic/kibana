@@ -201,13 +201,18 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               }`}
               isActive={infoIsOpen}
               onClick={togglePopover}
-              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
-                defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
-                values: {
-                  fieldName: field.displayName,
-                  fieldType: field.type,
-                },
-              })}
+              buttonProps={{
+                ['aria-label']: i18n.translate(
+                  'xpack.lens.indexPattern.fieldStatsButtonAriaLabel',
+                  {
+                    defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
+                    values: {
+                      fieldName: field.displayName,
+                      fieldType: field.type,
+                    },
+                  }
+                ),
+              }}
               fieldIcon={lensFieldIcon}
               fieldName={
                 <EuiHighlight search={wrapOnDot(highlight)}>
