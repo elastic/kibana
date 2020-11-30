@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -82,12 +82,17 @@ export const ExplorationPageWrapper: FC<Props> = ({
 
   const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
 
-  const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
-    if (update.query) {
-      setSearchQuery(update.query);
-    }
-    setPageUrlState({ queryText: update.queryString, queryLanguage: update.language });
-  };
+  const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = useCallback(
+    (update) => {
+      if (update.query) {
+        setSearchQuery(update.query);
+      }
+      if (update.queryString !== pageUrlState.queryText) {
+        setPageUrlState({ queryText: update.queryString, queryLanguage: update.language });
+      }
+    },
+    [pageUrlState, setPageUrlState]
+  );
 
   const query: ExplorationQueryBarProps['query'] = {
     query: pageUrlState.queryText,

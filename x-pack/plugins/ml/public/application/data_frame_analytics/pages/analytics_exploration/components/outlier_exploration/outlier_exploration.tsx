@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, FC } from 'react';
+import React, { useState, FC, useCallback } from 'react';
 
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -45,12 +45,17 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
 
-  const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
-    if (update.query) {
-      setSearchQuery(update.query);
-    }
-    setPageUrlState({ queryText: update.queryString, queryLanguage: update.language });
-  };
+  const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = useCallback(
+    (update) => {
+      if (update.query) {
+        setSearchQuery(update.query);
+      }
+      if (update.queryString !== pageUrlState.queryText) {
+        setPageUrlState({ queryText: update.queryString, queryLanguage: update.language });
+      }
+    },
+    [pageUrlState, setPageUrlState]
+  );
 
   const query: ExplorationQueryBarProps['query'] = {
     query: pageUrlState.queryText,
