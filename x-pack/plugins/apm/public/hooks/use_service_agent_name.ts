@@ -5,19 +5,18 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
+import { useUrlParams } from './useUrlParams';
 
-const INITIAL_DATA = { transactionTypes: [] };
-
-export function useServiceTransactionTypes(urlParams: IUrlParams) {
+export function useServiceAgentName() {
   const { serviceName } = useParams<{ serviceName?: string }>();
+  const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
-  const { data = INITIAL_DATA } = useFetcher(
+  const { data, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/transaction_types',
+          endpoint: 'GET /api/apm/services/{serviceName}/agent_name',
           params: {
             path: { serviceName },
             query: { start, end },
@@ -28,5 +27,5 @@ export function useServiceTransactionTypes(urlParams: IUrlParams) {
     [serviceName, start, end]
   );
 
-  return data.transactionTypes;
+  return { agentName: data?.agentName, status, error };
 }
