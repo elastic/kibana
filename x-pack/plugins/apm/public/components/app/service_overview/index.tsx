@@ -16,10 +16,13 @@ import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
+import { AnnotationsContextProvider } from '../../../context/annotations_context';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event_context';
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { SearchBar } from '../../shared/search_bar';
+import { LatencyChart } from './latency_chart';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
@@ -44,122 +47,117 @@ export function ServiceOverview({
   useTrackPageview({ app: 'apm', path: 'service_overview', delay: 15000 });
 
   return (
-    <ChartPointerEventContextProvider>
-      <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
-            <EuiPanel>
-              <EuiTitle size="xs">
-                <h2>
-                  {i18n.translate(
-                    'xpack.apm.serviceOverview.latencyChartTitle',
-                    {
-                      defaultMessage: 'Latency',
-                    }
-                  )}
-                </h2>
-              </EuiTitle>
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={4}>
-                <ServiceOverviewThroughputChart height={chartHeight} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={6}>
-                <EuiPanel>
-                  <ServiceOverviewTransactionsTable serviceName={serviceName} />
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s">
-              {!isRumAgentName(agentName) && (
+    <AnnotationsContextProvider>
+      <ChartPointerEventContextProvider>
+        <SearchBar />
+        <EuiPage>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <EuiPanel>
+                <LatencyChart height={200} />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={4}>
-                  <TransactionErrorRateChart
-                    height={chartHeight}
-                    showAnnotations={false}
-                  />
+                  <ServiceOverviewThroughputChart height={chartHeight} />
                 </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={6}>
-                <EuiPanel>
-                  <ServiceOverviewErrorsTable serviceName={serviceName} />
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={4}>
-                <TransactionBreakdownChart showAnnotations={false} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={6}>
-                <EuiPanel>
-                  <EuiFlexGroup>
-                    <EuiFlexItem>
-                      <EuiTitle size="xs">
-                        <h2>
+                <EuiFlexItem grow={6}>
+                  <EuiPanel>
+                    <ServiceOverviewTransactionsTable
+                      serviceName={serviceName}
+                    />
+                  </EuiPanel>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s">
+                {!isRumAgentName(agentName) && (
+                  <EuiFlexItem grow={4}>
+                    <TransactionErrorRateChart
+                      height={chartHeight}
+                      showAnnotations={false}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={6}>
+                  <EuiPanel>
+                    <ServiceOverviewErrorsTable serviceName={serviceName} />
+                  </EuiPanel>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={4}>
+                  <TransactionBreakdownChart showAnnotations={false} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={6}>
+                  <EuiPanel>
+                    <EuiFlexGroup>
+                      <EuiFlexItem>
+                        <EuiTitle size="xs">
+                          <h2>
+                            {i18n.translate(
+                              'xpack.apm.serviceOverview.dependenciesTableTitle',
+                              {
+                                defaultMessage: 'Dependencies',
+                              }
+                            )}
+                          </h2>
+                        </EuiTitle>
+                      </EuiFlexItem>
+                      <TableLinkFlexItem>
+                        <ServiceMapLink serviceName={serviceName}>
                           {i18n.translate(
-                            'xpack.apm.serviceOverview.dependenciesTableTitle',
+                            'xpack.apm.serviceOverview.dependenciesTableLinkText',
                             {
-                              defaultMessage: 'Dependencies',
+                              defaultMessage: 'View service map',
                             }
                           )}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <TableLinkFlexItem>
-                      <ServiceMapLink serviceName={serviceName}>
+                        </ServiceMapLink>
+                      </TableLinkFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={4}>
+                  <EuiPanel>
+                    <EuiTitle size="xs">
+                      <h2>
                         {i18n.translate(
-                          'xpack.apm.serviceOverview.dependenciesTableLinkText',
+                          'xpack.apm.serviceOverview.instancesLatencyDistributionChartTitle',
                           {
-                            defaultMessage: 'View service map',
+                            defaultMessage: 'Instances latency distribution',
                           }
                         )}
-                      </ServiceMapLink>
-                    </TableLinkFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={4}>
-                <EuiPanel>
-                  <EuiTitle size="xs">
-                    <h2>
-                      {i18n.translate(
-                        'xpack.apm.serviceOverview.instancesLatencyDistributionChartTitle',
-                        {
-                          defaultMessage: 'Instances latency distribution',
-                        }
-                      )}
-                    </h2>
-                  </EuiTitle>
-                </EuiPanel>
-              </EuiFlexItem>
-              <EuiFlexItem grow={6}>
-                <EuiPanel>
-                  <EuiTitle size="xs">
-                    <h2>
-                      {i18n.translate(
-                        'xpack.apm.serviceOverview.instancesTableTitle',
-                        {
-                          defaultMessage: 'Instances',
-                        }
-                      )}
-                    </h2>
-                  </EuiTitle>
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPage>
-    </ChartPointerEventContextProvider>
+                      </h2>
+                    </EuiTitle>
+                  </EuiPanel>
+                </EuiFlexItem>
+                <EuiFlexItem grow={6}>
+                  <EuiPanel>
+                    <EuiTitle size="xs">
+                      <h2>
+                        {i18n.translate(
+                          'xpack.apm.serviceOverview.instancesTableTitle',
+                          {
+                            defaultMessage: 'Instances',
+                          }
+                        )}
+                      </h2>
+                    </EuiTitle>
+                  </EuiPanel>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPage>
+      </ChartPointerEventContextProvider>
+    </AnnotationsContextProvider>
   );
 }

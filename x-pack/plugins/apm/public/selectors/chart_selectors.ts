@@ -99,7 +99,7 @@ export function getResponseTimeSeries({
   const series: TimeSeries[] = [
     {
       title: i18n.translate('xpack.apm.transactions.chart.averageLabel', {
-        defaultMessage: 'Avg.',
+        defaultMessage: 'Average',
       }),
       data: avg,
       legendValue: asDuration(overallAvgDuration),
