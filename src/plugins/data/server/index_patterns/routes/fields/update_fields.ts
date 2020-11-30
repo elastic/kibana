@@ -23,7 +23,7 @@ import { assertIndexPatternsContext } from '../util/assert_index_patterns_contex
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../util/schemas';
 
-export const registerUpdateScriptedFieldRoute = (router: IRouter) => {
+export const registerUpdateFieldsRoute = (router: IRouter) => {
   router.post(
     {
       path: '/api/index_patterns/index_pattern/{id}/fields',
@@ -103,7 +103,7 @@ export const registerUpdateScriptedFieldRoute = (router: IRouter) => {
           }
 
           if (changeCount < 1) {
-            throw new Error('Index pattern change set is empty.');
+            throw new Error('Change set is empty.');
           }
 
           await ip.updateSavedObject(indexPattern);

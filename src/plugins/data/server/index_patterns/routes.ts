@@ -24,6 +24,7 @@ import { registerCreateIndexPatternRoute } from './routes/create_index_pattern';
 import { registerGetIndexPatternRoute } from './routes/get_index_pattern';
 import { registerDeleteIndexPatternRoute } from './routes/delete_index_pattern';
 import { registerUpdateIndexPatternRoute } from './routes/update_index_pattern';
+import { registerUpdateFieldsRoute } from './routes/fields/update_fields';
 import { registerCreateScriptedFieldRoute } from './routes/scripted_fields/create_scripted_field';
 import { registerPutScriptedFieldRoute } from './routes/scripted_fields/put_scripted_field';
 import { registerGetScriptedFieldRoute } from './routes/scripted_fields/get_scripted_field';
@@ -43,10 +44,16 @@ export function registerRoutes(http: HttpServiceSetup) {
 
   const router = http.createRouter();
 
+  // Index Patterns API
   registerCreateIndexPatternRoute(router);
   registerGetIndexPatternRoute(router);
   registerDeleteIndexPatternRoute(router);
   registerUpdateIndexPatternRoute(router);
+
+  // Fields API
+  registerUpdateFieldsRoute(router);
+
+  // Scripted Field API
   registerCreateScriptedFieldRoute(router);
   registerPutScriptedFieldRoute(router);
   registerGetScriptedFieldRoute(router);

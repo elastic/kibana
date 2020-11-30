@@ -46,7 +46,8 @@ const indexPatternSpecSchema = schema.object({
     schema.recordOf(
       schema.string(),
       schema.object({
-        customName: schema.string(),
+        customLabel: schema.maybe(schema.string()),
+        count: schema.maybe(schema.number()),
       })
     )
   ),
