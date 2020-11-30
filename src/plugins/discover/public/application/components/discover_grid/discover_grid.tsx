@@ -17,10 +17,13 @@
  * under the License.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import './discover_grid.scss';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiDataGridSorting,
+  EuiDataGridStyle,
+  EuiDataGridProps,
   EuiDataGrid,
   EuiIcon,
   EuiScreenReaderOnly,
@@ -31,25 +34,25 @@ import {
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { getDefaultSort } from '../../angular/doc_table/lib/get_default_sort';
-import {
-  getEuiGridColumns,
-  getPopoverContents,
-  getSchemaDetectors,
-  getVisibleColumns,
-} from './discover_grid_helpers';
+import { getPopoverContents, getSchemaDetectors } from './discover_grid_helpers';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridContext } from './discover_grid_context';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { DiscoverGridSettings } from './types';
 import { SortPairArr } from '../../angular/doc_table/lib/get_sort';
-import { leadControlColumns } from './discover_grid_columns';
+import {
+  getEuiGridColumns,
+  getLeadControlColumns,
+  getVisibleColumns,
+} from './discover_grid_columns';
+import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './constants';
 
 interface SortObj {
   id: string;
   direction: string;
 }
 
-interface Props {
+interface DiscoverGridProps {
   ariaLabelledBy: string;
   columns: string[];
   getContextAppHref: (id: string) => string;
@@ -69,16 +72,9 @@ interface Props {
   sort: SortPairArr[];
 }
 
-const gridStyle = {
-  border: 'horizontal',
-  fontSize: 's',
-  cellPadding: 's',
-  rowHover: 'none',
-};
-const pageSizeArr = [25, 50, 100, 500];
-const defaultPageSize = 50;
-
-export const EuiDataGridMemoized = React.memo((props: any) => <EuiDataGrid {...props} />);
+export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => (
+  <EuiDataGrid {...props} />
+));
 
 export const DiscoverGrid = React.memo(
   ({
@@ -99,7 +95,7 @@ export const DiscoverGrid = React.memo(
     onAddColumn,
     showTimeCol,
     onSetColumns,
-  }: Props) => {
+  }: DiscoverGridProps) => {
     const [showSelected, setShowSelected] = useState(false);
     const [viewed, setViewed] = useState<number>(-1);
     const timeString = useMemo(
@@ -156,14 +152,6 @@ export const DiscoverGrid = React.memo(
       indexPattern,
     ]);
 
-    const toolbarVisibility = {
-      showColumnSelector: {
-        allowHide: false,
-        allowReorder: true,
-      },
-      showStyleSelector: false,
-    };
-
     /**
      * Render variables
      */
@@ -193,106 +181,102 @@ export const DiscoverGrid = React.memo(
       sortingColumns,
       onTableSort,
     ]);
-    const lead = useMemo(() => leadControlColumns(rows), [rows]);
+    const lead = useMemo(() => getLeadControlColumns(rows), [rows]);
 
     if (!rowCount || !rows) {
       return (
-        <I18nProvider>
-          <div className="euiDataGrid__noResults">
-            <EuiText size="xs" color="subdued">
-              <EuiIcon type="discoverApp" size="m" color="subdued" />
-              <EuiSpacer size="s" />
-              <FormattedMessage id="discover.noResultsFound" defaultMessage="No results found" />
-            </EuiText>
-          </div>
-        </I18nProvider>
+        <div className="euiDataGrid__noResults">
+          <EuiText size="xs" color="subdued">
+            <EuiIcon type="discoverApp" size="m" color="subdued" />
+            <EuiSpacer size="s" />
+            <FormattedMessage id="discover.noResultsFound" defaultMessage="No results found" />
+          </EuiText>
+        </div>
       );
     }
 
     return (
-      <I18nProvider>
-        <DiscoverGridContext.Provider
-          value={{
-            showSelected,
-            setShowSelected,
-            viewed,
-            setViewed,
-            rows,
-            onFilter,
-            indexPattern,
-          }}
-        >
-          <>
-            <EuiDataGridMemoized
-              aria-labelledby={ariaLabelledBy}
-              aria-describedby={randomId}
-              data-test-subj="docTable"
-              sorting={sorting}
-              rowCount={rowCount}
-              columns={euiGridColumns}
-              renderCellValue={renderCellValue}
-              leadingControlColumns={lead}
-              columnVisibility={columnsVisibility}
-              pagination={paginationObj}
-              toolbarVisibility={toolbarVisibility}
-              gridStyle={gridStyle}
-              schemaDetectors={schemaDetectors}
-              popoverContents={popoverContents}
-              onColumnResize={(col: { columnId: string; width: number }) => {
-                if (onResize) {
-                  onResize(col);
-                }
+      <DiscoverGridContext.Provider
+        value={{
+          showSelected,
+          setShowSelected,
+          viewed,
+          setViewed,
+          rows,
+          onFilter,
+          indexPattern,
+        }}
+      >
+        <>
+          <EuiDataGridMemoized
+            aria-labelledby={ariaLabelledBy}
+            aria-describedby={randomId}
+            data-test-subj="docTable"
+            sorting={sorting as EuiDataGridSorting}
+            rowCount={rowCount}
+            columns={euiGridColumns}
+            renderCellValue={renderCellValue}
+            leadingControlColumns={lead}
+            columnVisibility={columnsVisibility}
+            pagination={paginationObj}
+            toolbarVisibility={toolbarVisibility}
+            gridStyle={gridStyle as EuiDataGridStyle}
+            schemaDetectors={schemaDetectors}
+            popoverContents={popoverContents}
+            onColumnResize={(col: { columnId: string; width: number }) => {
+              if (onResize) {
+                onResize(col);
+              }
+            }}
+          />
+
+          {showDisclaimer && (
+            <p className="dscTable__footer">
+              <FormattedMessage
+                id="discover.howToSeeOtherMatchingDocumentsDescriptionGrid"
+                defaultMessage="These are the first {sampleSize} documents matching your search, refine your search to see others."
+                values={{ sampleSize }}
+              />
+              <a href={`#${ariaLabelledBy}`}>
+                <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
+              </a>
+            </p>
+          )}
+          {searchTitle && (
+            <EuiScreenReaderOnly>
+              <p id={String(randomId)}>
+                {searchDescription ? (
+                  <FormattedMessage
+                    id="discover.searchGenerationWithDescriptionGrid"
+                    defaultMessage="Table generated by search {searchTitle} ({searchDescription})"
+                    values={{ searchTitle, searchDescription }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="discover.searchGenerationWithDescription"
+                    defaultMessage="Table generated by search {searchTitle}"
+                    values={{ searchTitle }}
+                  />
+                )}
+              </p>
+            </EuiScreenReaderOnly>
+          )}
+          {viewed > -1 && rows[viewed] && (
+            <DiscoverGridFlyout
+              indexPattern={indexPattern}
+              getContextAppHref={getContextAppHref}
+              hit={rows[viewed]}
+              columns={columns}
+              onFilter={onFilter}
+              onRemoveColumn={onRemoveColumn}
+              onAddColumn={onAddColumn}
+              onClose={() => {
+                setViewed(-1);
               }}
             />
-
-            {showDisclaimer && (
-              <p className="dscTable__footer">
-                <FormattedMessage
-                  id="discover.howToSeeOtherMatchingDocumentsDescriptionGrid"
-                  defaultMessage="These are the first {sampleSize} documents matching your search, refine your search to see others."
-                  values={{ sampleSize }}
-                />
-                <a href={`#${ariaLabelledBy}`}>
-                  <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
-                </a>
-              </p>
-            )}
-            {searchTitle && (
-              <EuiScreenReaderOnly>
-                <p id={String(randomId)}>
-                  {searchDescription ? (
-                    <FormattedMessage
-                      id="discover.searchGenerationWithDescriptionGrid"
-                      defaultMessage="Table generated by search {searchTitle} ({searchDescription})"
-                      values={{ searchTitle, searchDescription }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="discover.searchGenerationWithDescription"
-                      defaultMessage="Table generated by search {searchTitle}"
-                      values={{ searchTitle }}
-                    />
-                  )}
-                </p>
-              </EuiScreenReaderOnly>
-            )}
-            {viewed > -1 && rows[viewed] && (
-              <DiscoverGridFlyout
-                indexPattern={indexPattern}
-                getContextAppHref={getContextAppHref}
-                hit={rows[viewed]}
-                columns={columns}
-                onFilter={onFilter}
-                onRemoveColumn={onRemoveColumn}
-                onAddColumn={onAddColumn}
-                onClose={() => {
-                  setViewed(-1);
-                }}
-              />
-            )}
-          </>
-        </DiscoverGridContext.Provider>
-      </I18nProvider>
+          )}
+        </>
+      </DiscoverGridContext.Provider>
     );
   }
 );
