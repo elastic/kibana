@@ -5,7 +5,7 @@
  */
 
 import { AlertNavigationRegistry } from './alert_navigation_registry';
-import { AlertType, SanitizedAlert } from '../../common';
+import { AlertType, RecoveredActionGroup, SanitizedAlert } from '../../common';
 import uuid from 'uuid';
 
 beforeEach(() => jest.resetAllMocks());
@@ -14,10 +14,7 @@ const mockAlertType = (id: string): AlertType => ({
   id,
   name: id,
   actionGroups: [],
-  recoveryActionGroup: {
-    id: 'recovered',
-    name: 'Recovered',
-  },
+  recoveryActionGroup: RecoveredActionGroup,
   actionVariables: [],
   defaultActionGroupId: 'default',
   producer: 'alerts',

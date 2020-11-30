@@ -15,6 +15,7 @@ import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { RecoveredActionGroup } from '../../../common';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -683,10 +684,7 @@ describe('create()', () => {
         },
       ],
       defaultActionGroupId: 'default',
-      recoveryActionGroup: {
-        id: 'recovered',
-        name: 'Recovered',
-      },
+      recoveryActionGroup: RecoveredActionGroup,
       validate: {
         params: schema.object({
           param1: schema.string(),

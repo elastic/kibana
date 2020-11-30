@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { esKuery } from '../../../../../src/plugins/data/server';
+import { RecoveredActionGroup } from '../../common';
 import {
   asFiltersByAlertTypeAndConsumer,
   ensureFieldIsSafeForQuery,
@@ -17,10 +18,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
-            recoveryActionGroup: {
-              id: 'recovered',
-              name: 'Recovered',
-            },
+            recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
             producer: 'myApp',
@@ -44,10 +42,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
-            recoveryActionGroup: {
-              id: 'recovered',
-              name: 'Recovered',
-            },
+            recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
             producer: 'myApp',
@@ -73,10 +68,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
-            recoveryActionGroup: {
-              id: 'recovered',
-              name: 'Recovered',
-            },
+            recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
             producer: 'myApp',
@@ -90,10 +82,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
-            recoveryActionGroup: {
-              id: 'recovered',
-              name: 'Recovered',
-            },
+            recoveryActionGroup: RecoveredActionGroup,
             id: 'myOtherAppAlertType',
             name: 'myOtherAppAlertType',
             producer: 'alerts',
@@ -107,10 +96,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
-            recoveryActionGroup: {
-              id: 'recovered',
-              name: 'Recovered',
-            },
+            recoveryActionGroup: RecoveredActionGroup,
             id: 'mySecondAppAlertType',
             name: 'mySecondAppAlertType',
             producer: 'myApp',

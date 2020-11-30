@@ -9,6 +9,7 @@ import { actionsClientMock } from '../../../../actions/server/mocks';
 import { ConstructorOptions } from '../alerts_client';
 import { eventLogClientMock } from '../../../../event_log/server/mocks';
 import { AlertTypeRegistry } from '../../alert_type_registry';
+import { RecoveredActionGroup } from '../../../common';
 
 export const mockedDateString = '2019-02-12T21:01:22.479Z';
 
@@ -82,10 +83,7 @@ export function getBeforeSetup(
     id: '123',
     name: 'Test',
     actionGroups: [{ id: 'default', name: 'Default' }],
-    recoveryActionGroup: {
-      id: 'recovered',
-      name: 'Recovered',
-    },
+    recoveryActionGroup: RecoveredActionGroup,
     defaultActionGroupId: 'default',
     async executor() {},
     producer: 'alerts',

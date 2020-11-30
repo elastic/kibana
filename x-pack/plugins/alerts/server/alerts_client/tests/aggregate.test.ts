@@ -14,6 +14,7 @@ import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { AlertExecutionStatusValues } from '../../types';
+import { RecoveredActionGroup } from '../../../common';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -53,10 +54,7 @@ describe('aggregate()', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
-      recoveryActionGroup: {
-        id: 'recovered',
-        name: 'Recovered',
-      },
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myType',
       name: 'myType',
       producer: 'myApp',
@@ -106,10 +104,7 @@ describe('aggregate()', () => {
           name: 'Test',
           actionGroups: [{ id: 'default', name: 'Default' }],
           defaultActionGroupId: 'default',
-          recoveryActionGroup: {
-            id: 'recovered',
-            name: 'Recovered',
-          },
+          recoveryActionGroup: RecoveredActionGroup,
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },
