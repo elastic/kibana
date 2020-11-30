@@ -36,7 +36,6 @@ export interface UiSettingsServiceOptions {
 }
 
 interface ReadOptions {
-  ignore401Errors?: boolean;
   autoCreateOrUpgradeIfMissing?: boolean;
 }
 
@@ -209,10 +208,9 @@ export class UiSettingsClient implements IUiSettingsClient {
     }
   }
 
-  private async read({
-    ignore401Errors = false,
-    autoCreateOrUpgradeIfMissing = true,
-  }: ReadOptions = {}): Promise<Record<string, any>> {
+  private async read({ autoCreateOrUpgradeIfMissing = true }: ReadOptions = {}): Promise<
+    Record<string, any>
+  > {
     try {
       const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
       return resp.attributes;
@@ -227,16 +225,13 @@ export class UiSettingsClient implements IUiSettingsClient {
         });
 
         if (!failedUpgradeAttributes) {
-          return await this.read({
-            ignore401Errors,
-            autoCreateOrUpgradeIfMissing: false,
-          });
+          return await this.read({ autoCreateOrUpgradeIfMissing: false });
         }
 
         return failedUpgradeAttributes;
       }
 
-      if (this.isIgnorableError(error, ignore401Errors)) {
+      if (this.isIgnorableError(error)) {
         return {};
       }
 
@@ -244,17 +239,9 @@ export class UiSettingsClient implements IUiSettingsClient {
     }
   }
 
-  private isIgnorableError(error: Error, ignore401Errors: boolean) {
-    const {
-      isForbiddenError,
-      isEsUnavailableError,
-      isNotAuthorizedError,
-    } = this.savedObjectsClient.errors;
+  private isIgnorableError(error: Error) {
+    const { isForbiddenError, isEsUnavailableError } = this.savedObjectsClient.errors;
 
-    return (
-      isForbiddenError(error) ||
-      isEsUnavailableError(error) ||
-      (ignore401Errors && isNotAuthorizedError(error))
-    );
+    return isForbiddenError(error) || isEsUnavailableError(error);
   }
 }
