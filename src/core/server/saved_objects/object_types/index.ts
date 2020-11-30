@@ -17,24 +17,6 @@
  * under the License.
  */
 
-import { ISavedObjectsRepository } from './repository';
-
-const create = (): jest.Mocked<ISavedObjectsRepository> => ({
-  checkConflicts: jest.fn(),
-  create: jest.fn(),
-  bulkCreate: jest.fn(),
-  bulkUpdate: jest.fn(),
-  delete: jest.fn(),
-  bulkGet: jest.fn(),
-  find: jest.fn(),
-  get: jest.fn(),
-  resolve: jest.fn(),
-  update: jest.fn(),
-  addToNamespaces: jest.fn(),
-  deleteFromNamespaces: jest.fn(),
-  deleteByNamespace: jest.fn(),
-  incrementCounter: jest.fn(),
-  removeReferencesTo: jest.fn(),
-});
-
-export const savedObjectsRepositoryMock = { create };
+export { LEGACY_URL_ALIAS_TYPE } from './constants';
+export { LegacyUrlAlias } from './types';
+export { registerCoreObjectTypes } from './registration';

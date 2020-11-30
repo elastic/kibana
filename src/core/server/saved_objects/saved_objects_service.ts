@@ -53,6 +53,7 @@ import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { createMigrationEsClient } from './migrations/core/';
+import { registerCoreObjectTypes } from './object_types';
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -305,6 +306,8 @@ export class SavedObjectsService
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
     });
+
+    registerCoreObjectTypes(this.typeRegistry);
 
     return {
       status$: calculateStatus$(

@@ -247,6 +247,24 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   }
 
   /**
+   * Resolves a single object, using any legacy URL alias if it exists
+   *
+   * @param type - The type of SavedObject to retrieve
+   * @param id - The ID of the SavedObject to retrieve
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
+   * @returns {promise} - { saved_object, outcome }
+   */
+  async resolve<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
+    throwErrorIfNamespaceSpecified(options);
+
+    return await this.client.resolve<T>(type, id, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
    * Updates an object
    *
    * @param {string} type

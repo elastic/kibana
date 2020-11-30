@@ -40,6 +40,7 @@ import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure
 import { SavedObjectsRepository } from './service/lib/repository';
 
 jest.mock('./service/lib/repository');
+jest.mock('./object_types');
 
 describe('SavedObjectsService', () => {
   const createCoreContext = ({
@@ -142,6 +143,7 @@ describe('SavedObjectsService', () => {
 
     describe('#registerType', () => {
       it('registers the type to the internal typeRegistry', async () => {
+        // we mocked registerCoreObjectTypes above, so this test case only reflects direct calls to the registerType method
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());

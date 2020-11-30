@@ -22,6 +22,7 @@ import { SavedObjectsSerializer } from './serializer';
 import { SavedObjectsRawDoc } from './types';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { encodeVersion } from '../version';
+import { LEGACY_URL_ALIAS_TYPE } from '../object_types';
 
 let typeRegistry = typeRegistryMock.create();
 typeRegistry.isNamespaceAgnostic.mockReturnValue(true);
@@ -1279,6 +1280,27 @@ describe('#generateRawId', () => {
     test(`uses the id that is specified and doesn't prefix the namespace`, () => {
       const id = namespaceAgnosticSerializer.generateRawId('foo', 'hello', 'world');
       expect(id).toEqual('hello:world');
+    });
+  });
+});
+
+describe('#generateRawLegacyUrlAliasId', () => {
+  describe(`returns expected value`, () => {
+    const expected = `${LEGACY_URL_ALIAS_TYPE}:foo:bar:baz`;
+
+    test(`for single-namespace types`, () => {
+      const id = singleNamespaceSerializer.generateRawLegacyUrlAliasId('foo', 'bar', 'baz');
+      expect(id).toEqual(expected);
+    });
+
+    test(`for multi-namespace types`, () => {
+      const id = multiNamespaceSerializer.generateRawLegacyUrlAliasId('foo', 'bar', 'baz');
+      expect(id).toEqual(expected);
+    });
+
+    test(`for namespace-agnostic types`, () => {
+      const id = namespaceAgnosticSerializer.generateRawLegacyUrlAliasId('foo', 'bar', 'baz');
+      expect(id).toEqual(expected);
     });
   });
 });

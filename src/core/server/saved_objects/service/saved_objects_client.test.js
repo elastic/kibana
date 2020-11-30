@@ -126,6 +126,22 @@ test(`#get`, async () => {
   expect(result).toBe(returnValue);
 });
 
+test(`#resolve`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    resolve: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const options = Symbol();
+  const result = await client.resolve(type, id, options);
+
+  expect(mockRepository.resolve).toHaveBeenCalledWith(type, id, options);
+  expect(result).toBe(returnValue);
+});
+
 test(`#update`, async () => {
   const returnValue = Symbol();
   const mockRepository = {

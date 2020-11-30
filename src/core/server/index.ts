@@ -279,6 +279,7 @@ export {
   SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsResolveResponse,
   SavedObjectsSerializer,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,

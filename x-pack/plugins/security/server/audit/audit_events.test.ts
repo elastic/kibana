@@ -115,6 +115,12 @@ describe('#savedObjectEvent', () => {
     ).not.toBeUndefined();
     expect(
       savedObjectEvent({
+        action: SavedObjectAction.RESOLVE,
+        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
+      })
+    ).not.toBeUndefined();
+    expect(
+      savedObjectEvent({
         action: SavedObjectAction.FIND,
         savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
       })
@@ -131,6 +137,18 @@ describe('#savedObjectEvent', () => {
     expect(
       savedObjectEvent({
         action: SavedObjectAction.GET,
+        savedObject: { type: 'telemetry', id: 'SAVED_OBJECT_ID' },
+      })
+    ).toBeUndefined();
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.RESOLVE,
+        savedObject: { type: 'config', id: 'SAVED_OBJECT_ID' },
+      })
+    ).toBeUndefined();
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.RESOLVE,
         savedObject: { type: 'telemetry', id: 'SAVED_OBJECT_ID' },
       })
     ).toBeUndefined();

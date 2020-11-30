@@ -17,24 +17,20 @@
  * under the License.
  */
 
-import { ISavedObjectsRepository } from './repository';
+import { typeRegistryMock } from '../saved_objects_type_registry.mock';
+import { LEGACY_URL_ALIAS_TYPE } from './constants';
+import { registerCoreObjectTypes } from './registration';
 
-const create = (): jest.Mocked<ISavedObjectsRepository> => ({
-  checkConflicts: jest.fn(),
-  create: jest.fn(),
-  bulkCreate: jest.fn(),
-  bulkUpdate: jest.fn(),
-  delete: jest.fn(),
-  bulkGet: jest.fn(),
-  find: jest.fn(),
-  get: jest.fn(),
-  resolve: jest.fn(),
-  update: jest.fn(),
-  addToNamespaces: jest.fn(),
-  deleteFromNamespaces: jest.fn(),
-  deleteByNamespace: jest.fn(),
-  incrementCounter: jest.fn(),
-  removeReferencesTo: jest.fn(),
+describe('Core saved object types registration', () => {
+  describe('#registerCoreObjectTypes', () => {
+    it('registers all expected types', () => {
+      const typeRegistry = typeRegistryMock.create();
+      registerCoreObjectTypes(typeRegistry);
+
+      expect(typeRegistry.registerType).toHaveBeenCalledTimes(1);
+      expect(typeRegistry.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({ name: LEGACY_URL_ALIAS_TYPE })
+      );
+    });
+  });
 });
-
-export const savedObjectsRepositoryMock = { create };

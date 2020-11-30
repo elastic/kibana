@@ -24,6 +24,7 @@ import { ALL_NAMESPACES_STRING } from './utils';
 import { SavedObjectsSerializer } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { esKuery } from '../../es_query';
@@ -226,6 +227,7 @@ describe('SavedObjectsRepository', () => {
       rawToSavedObject: jest.fn(),
       savedObjectToRaw: jest.fn(),
       generateRawId: jest.fn(),
+      generateRawLegacyUrlAliasId: jest.fn(),
       trimIdPrefix: jest.fn(),
     };
     const _serializer = new SavedObjectsSerializer(registry);
@@ -3267,6 +3269,231 @@ describe('SavedObjectsRepository', () => {
       it(`includes originId property if present in cluster call response`, async () => {
         const result = await getSuccess(type, id, {}, true);
         expect(result).toMatchObject({ originId });
+      });
+    });
+  });
+
+  describe('#resolve', () => {
+    const type = 'index-pattern';
+    const id = 'logstash-*';
+    const aliasTargetId = 'some-other-id'; // only used for 'aliasMatch' and 'conflict' outcomes
+    const namespace = 'foo-namespace';
+
+    const getMockAliasDocument = (resolveCounter) => ({
+      body: {
+        get: {
+          _source: {
+            [LEGACY_URL_ALIAS_TYPE]: {
+              targetId: aliasTargetId,
+              ...(resolveCounter && { resolveCounter }),
+              // other fields are not used by the repository
+            },
+          },
+        },
+      },
+    });
+
+    describe('outcomes', () => {
+      describe('error', () => {
+        const expectNotFoundError = async (type, id, options) => {
+          await expect(savedObjectsRepository.resolve(type, id, options)).rejects.toThrowError(
+            createGenericNotFoundError(type, id)
+          );
+        };
+
+        it('because type is invalid', async () => {
+          await expectNotFoundError('unknownType', id);
+          expect(client.update).not.toHaveBeenCalled();
+          expect(client.get).not.toHaveBeenCalled();
+          expect(client.mget).not.toHaveBeenCalled();
+        });
+
+        it('because type is hidden', async () => {
+          await expectNotFoundError(HIDDEN_TYPE, id);
+          expect(client.update).not.toHaveBeenCalled();
+          expect(client.get).not.toHaveBeenCalled();
+          expect(client.mget).not.toHaveBeenCalled();
+        });
+
+        it('because alias is not used and actual object is not found', async () => {
+          const options = { namespace: undefined };
+          const response = { found: false };
+          client.get.mockResolvedValueOnce(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
+          );
+
+          await expectNotFoundError(type, id, options);
+          expect(client.update).not.toHaveBeenCalled();
+          expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
+          expect(client.mget).not.toHaveBeenCalled();
+        });
+
+        it('because actual object and alias object are both not found', async () => {
+          const options = { namespace };
+          const objectResults = [
+            { type, id, found: false },
+            { type, id: aliasTargetId, found: false },
+          ];
+          client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
+          const response = getMockMgetResponse(objectResults, options.namespace);
+          client.mget.mockResolvedValueOnce(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
+          );
+
+          await expectNotFoundError(type, id, options);
+          expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+          expect(client.get).not.toHaveBeenCalled();
+          expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
+        });
+      });
+
+      describe('exactMatch', () => {
+        it('because namespace is undefined', async () => {
+          const options = { namespace: undefined };
+          const response = getMockGetResponse({ type, id });
+          client.get.mockResolvedValueOnce(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
+          );
+
+          const result = await savedObjectsRepository.resolve(type, id, options);
+          expect(client.update).not.toHaveBeenCalled();
+          expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
+          expect(client.mget).not.toHaveBeenCalled();
+          expect(result).toEqual({
+            saved_object: expect.objectContaining({ type, id }),
+            outcome: 'exactMatch',
+          });
+        });
+
+        describe('because alias is not used', () => {
+          const expectExactMatchResult = async (aliasResult) => {
+            const options = { namespace };
+            client.update.mockResolvedValueOnce(aliasResult); // for alias object
+            const response = getMockGetResponse({ type, id }, options.namespace);
+            client.get.mockResolvedValueOnce(
+              elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
+            );
+
+            const result = await savedObjectsRepository.resolve(type, id, options);
+            expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+            expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
+            expect(client.mget).not.toHaveBeenCalled();
+            expect(result).toEqual({
+              saved_object: expect.objectContaining({ type, id }),
+              outcome: 'exactMatch',
+            });
+          };
+
+          it('since alias call resulted in 404', async () => {
+            await expectExactMatchResult({ statusCode: 404 });
+          });
+
+          it('since alias is not found', async () => {
+            await expectExactMatchResult({ body: { get: { found: false } } });
+          });
+
+          it('since alias is disabled', async () => {
+            await expectExactMatchResult({
+              body: { get: { _source: { [LEGACY_URL_ALIAS_TYPE]: { disabled: true } } } },
+            });
+          });
+        });
+
+        describe('because alias is used', () => {
+          const expectExactMatchResult = async (objectResults) => {
+            const options = { namespace };
+            client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
+            const response = getMockMgetResponse(objectResults, options.namespace);
+            client.mget.mockResolvedValueOnce(
+              elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target and alias target
+            );
+
+            const result = await savedObjectsRepository.resolve(type, id, options);
+            expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+            expect(client.get).not.toHaveBeenCalled();
+            expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
+            expect(result).toEqual({
+              saved_object: expect.objectContaining({ type, id }),
+              outcome: 'exactMatch',
+            });
+          };
+
+          it('but alias target is not found', async () => {
+            const objects = [
+              { type, id },
+              { type, id: aliasTargetId, found: false },
+            ];
+            await expectExactMatchResult(objects);
+          });
+
+          it('but alias target does not exist in this namespace', async () => {
+            const objects = [
+              { type: MULTI_NAMESPACE_TYPE, id }, // correct namespace field is added by getMockMgetResponse
+              { type: MULTI_NAMESPACE_TYPE, id: aliasTargetId, namespace: `not-${namespace}` }, // overrides namespace field that would otherwise be added by getMockMgetResponse
+            ];
+            await expectExactMatchResult(objects);
+          });
+        });
+      });
+
+      describe('aliasMatch', () => {
+        const expectAliasMatchResult = async (objectResults) => {
+          const options = { namespace };
+          client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
+          const response = getMockMgetResponse(objectResults, options.namespace);
+          client.mget.mockResolvedValueOnce(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target and alias target
+          );
+
+          const result = await savedObjectsRepository.resolve(type, id, options);
+          expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+          expect(client.get).not.toHaveBeenCalled();
+          expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
+          expect(result).toEqual({
+            saved_object: expect.objectContaining({ type, id: aliasTargetId }),
+            outcome: 'aliasMatch',
+          });
+        };
+
+        it('because actual target is not found', async () => {
+          const objects = [
+            { type, id, found: false },
+            { type, id: aliasTargetId },
+          ];
+          await expectAliasMatchResult(objects);
+        });
+
+        it('because actual target does not exist in this namespace', async () => {
+          const objects = [
+            { type: MULTI_NAMESPACE_TYPE, id, namespace: `not-${namespace}` }, // overrides namespace field that would otherwise be added by getMockMgetResponse
+            { type: MULTI_NAMESPACE_TYPE, id: aliasTargetId }, // correct namespace field is added by getMockMgetResponse
+          ];
+          await expectAliasMatchResult(objects);
+        });
+      });
+
+      describe('conflict', () => {
+        it('because actual target and alias target are both found', async () => {
+          const options = { namespace };
+          const objectResults = [
+            { type, id }, // correct namespace field is added by getMockMgetResponse
+            { type, id: aliasTargetId }, // correct namespace field is added by getMockMgetResponse
+          ];
+          client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
+          const response = getMockMgetResponse(objectResults, options.namespace);
+          client.mget.mockResolvedValueOnce(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target and alias target
+          );
+
+          const result = await savedObjectsRepository.resolve(type, id, options);
+          expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+          expect(client.get).not.toHaveBeenCalled();
+          expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
+          expect(result).toEqual({
+            saved_object: expect.objectContaining({ type, id }),
+            outcome: 'conflict',
+          });
+        });
       });
     });
   });

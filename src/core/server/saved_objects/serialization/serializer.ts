@@ -18,6 +18,7 @@
  */
 
 import uuid from 'uuid';
+import { LEGACY_URL_ALIAS_TYPE } from '../object_types';
 import { decodeVersion, encodeVersion } from '../version';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import {
@@ -154,6 +155,17 @@ export class SavedObjectsSerializer {
     const namespacePrefix =
       namespace && this.registry.isSingleNamespace(type) ? `${namespace}:` : '';
     return `${namespacePrefix}${type}:${id || uuid.v1()}`;
+  }
+
+  /**
+   * Given a saved object type and id, generates the compound id that is stored in the raw document for its legacy URL alias.
+   *
+   * @param {string} namespace - The namespace of the saved object
+   * @param {string} type - The saved object type
+   * @param {string} id - The id of the saved object
+   */
+  public generateRawLegacyUrlAliasId(namespace: string, type: string, id: string) {
+    return `${LEGACY_URL_ALIAS_TYPE}:${namespace}:${type}:${id}`;
   }
 
   private trimIdPrefix(namespace: string | undefined, type: string, id: string, flexible: boolean) {

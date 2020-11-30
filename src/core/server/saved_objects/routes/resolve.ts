@@ -17,24 +17,24 @@
  * under the License.
  */
 
-import { ISavedObjectsRepository } from './repository';
+import { schema } from '@kbn/config-schema';
+import { IRouter } from '../../http';
 
-const create = (): jest.Mocked<ISavedObjectsRepository> => ({
-  checkConflicts: jest.fn(),
-  create: jest.fn(),
-  bulkCreate: jest.fn(),
-  bulkUpdate: jest.fn(),
-  delete: jest.fn(),
-  bulkGet: jest.fn(),
-  find: jest.fn(),
-  get: jest.fn(),
-  resolve: jest.fn(),
-  update: jest.fn(),
-  addToNamespaces: jest.fn(),
-  deleteFromNamespaces: jest.fn(),
-  deleteByNamespace: jest.fn(),
-  incrementCounter: jest.fn(),
-  removeReferencesTo: jest.fn(),
-});
-
-export const savedObjectsRepositoryMock = { create };
+export const registerResolveRoute = (router: IRouter) => {
+  router.get(
+    {
+      path: '/resolve/{type}/{id}',
+      validate: {
+        params: schema.object({
+          type: schema.string(),
+          id: schema.string(),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { type, id } = req.params;
+      const result = await context.core.savedObjects.client.resolve(type, id);
+      return res.ok({ body: result });
+    })
+  );
+};

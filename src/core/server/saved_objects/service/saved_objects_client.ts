@@ -288,6 +288,15 @@ export interface SavedObjectsUpdateResponse<T = unknown>
  *
  * @public
  */
+export interface SavedObjectsResolveResponse<T = unknown> {
+  saved_object: SavedObject<T>;
+  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+}
+
+/**
+ *
+ * @public
+ */
 export class SavedObjectsClient {
   public static errors = SavedObjectsErrorHelpers;
   public errors = SavedObjectsErrorHelpers;
@@ -388,6 +397,21 @@ export class SavedObjectsClient {
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T>> {
     return await this._repository.get(type, id, options);
+  }
+
+  /**
+   * Resolves a single object, using any legacy URL alias if it exists
+   *
+   * @param type - The type of SavedObject to retrieve
+   * @param id - The ID of the SavedObject to retrieve
+   * @param options
+   */
+  async resolve<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsResolveResponse<T>> {
+    return await this._repository.resolve(type, id, options);
   }
 
   /**

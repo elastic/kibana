@@ -17,24 +17,30 @@
  * under the License.
  */
 
-import { ISavedObjectsRepository } from './repository';
+import { LEGACY_URL_ALIAS_TYPE } from './constants';
+import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from '..';
 
-const create = (): jest.Mocked<ISavedObjectsRepository> => ({
-  checkConflicts: jest.fn(),
-  create: jest.fn(),
-  bulkCreate: jest.fn(),
-  bulkUpdate: jest.fn(),
-  delete: jest.fn(),
-  bulkGet: jest.fn(),
-  find: jest.fn(),
-  get: jest.fn(),
-  resolve: jest.fn(),
-  update: jest.fn(),
-  addToNamespaces: jest.fn(),
-  deleteFromNamespaces: jest.fn(),
-  deleteByNamespace: jest.fn(),
-  incrementCounter: jest.fn(),
-  removeReferencesTo: jest.fn(),
-});
+const legacyUrlAliasMappings = {
+  properties: {
+    targetNamespace: { type: 'keyword' },
+    targetType: { type: 'keyword' },
+    targetId: { type: 'keyword' },
+    lastResolved: { type: 'date' },
+    resolveCounter: { type: 'integer' },
+    disabled: { type: 'boolean' },
+  },
+};
 
-export const savedObjectsRepositoryMock = { create };
+/**
+ * @internal
+ */
+export function registerCoreObjectTypes(
+  typeRegistry: ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
+) {
+  typeRegistry.registerType({
+    name: LEGACY_URL_ALIAS_TYPE,
+    namespaceType: 'agnostic',
+    mappings: legacyUrlAliasMappings,
+    hidden: true,
+  });
+}
