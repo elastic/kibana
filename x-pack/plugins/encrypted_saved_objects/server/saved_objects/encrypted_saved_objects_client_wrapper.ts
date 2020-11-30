@@ -115,7 +115,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
           (options?.overwrite && object.version) || SavedObjectsUtils.isRandomId(object.id);
         if (object.id && !canSpecifyID) {
           throw new Error(
-            'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `.generateId`.'
+            'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `SavedObjectsUtils.generateId`.'
           );
         }
 

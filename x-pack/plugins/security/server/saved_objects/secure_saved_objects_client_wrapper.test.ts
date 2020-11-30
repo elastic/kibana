@@ -12,8 +12,10 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { SavedObjectActions } from '../authorization/actions/saved_object';
 import { AuditEvent, EventOutcome } from '../audit';
 
-jest.mock('../../../../../src/core/server/saved_objects/serialization/serializer', () => ({
-  generateSavedObjectId: () => 'GENERATED_ID',
+jest.mock('../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+  SavedObjectsUtils: {
+    generateId: () => 'mock-saved-object-id',
+  },
 }));
 
 let clientOpts: ReturnType<typeof createSecureSavedObjectsClientWrapperOptions>;
@@ -690,7 +692,7 @@ describe('#create', () => {
   });
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
-    const options = { id: 'GENERATED_ID', namespace };
+    const options = { id: 'mock-saved-object-id', namespace };
     await expectForbiddenError(client.create, { type, attributes, options });
   });
 
@@ -698,7 +700,7 @@ describe('#create', () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.create.mockResolvedValue(apiCallReturnValue as any);
 
-    const options = { id: 'GENERATED_ID', namespace };
+    const options = { id: 'mock-saved-object-id', namespace };
     const result = await expectSuccess(client.create, {
       type,
       attributes,
@@ -729,7 +731,7 @@ describe('#create', () => {
   test(`adds audit event when successful`, async () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.create.mockResolvedValue(apiCallReturnValue as any);
-    const options = { id: 'GENERATED_ID', namespace };
+    const options = { id: 'mock-saved-object-id', namespace };
     await expectSuccess(client.create, { type, attributes, options });
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
     expectAuditEvent('saved_object_create', EventOutcome.UNKNOWN, { type, id: expect.any(String) });
