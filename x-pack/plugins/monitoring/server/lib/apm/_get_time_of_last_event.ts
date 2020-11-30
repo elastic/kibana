@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+// @ts-ignore
 import { createApmQuery } from './create_apm_query';
+// @ts-ignore
 import { ApmClusterMetric } from '../metrics';
+import { LegacyRequest, ElasticsearchResponse } from '../../types';
 
 export async function getTimeOfLastEvent({
   req,
@@ -15,6 +17,13 @@ export async function getTimeOfLastEvent({
   start,
   end,
   clusterUuid,
+}: {
+  req: LegacyRequest;
+  callWithRequest: (_req: any, endpoint: string, params: any) => Promise<ElasticsearchResponse>;
+  apmIndexPattern: string;
+  start: number;
+  end: number;
+  clusterUuid: string;
 }) {
   const params = {
     index: apmIndexPattern,
@@ -49,5 +58,5 @@ export async function getTimeOfLastEvent({
   };
 
   const response = await callWithRequest(req, 'search', params);
-  return get(response, 'hits.hits[0]._source.timestamp');
+  return response.hits?.hits.length ? response.hits?.hits[0]._source.timestamp : null;
 }

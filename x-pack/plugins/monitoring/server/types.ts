@@ -78,7 +78,9 @@ export interface IBulkUploader {
 export interface LegacyRequest {
   logger: Logger;
   getLogger: (...scopes: string[]) => Logger;
-  payload: unknown;
+  payload: {
+    [key: string]: any;
+  };
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;
@@ -140,14 +142,23 @@ export interface ElasticsearchSource {
       name: string;
       type: string;
       version: string;
+      host: string;
     };
     metrics: {
       beat: {
         memstats: {
           memory_alloc: number;
         };
+        info: {
+          uptime: {
+            ms: number;
+          };
+        };
       };
       libbeat: {
+        config: {
+          reloads: number;
+        };
         output: {
           type: string;
           write: {
@@ -161,6 +172,8 @@ export interface ElasticsearchSource {
         pipeline: {
           events: {
             total: number;
+            published: number;
+            dropped: number;
           };
         };
       };

@@ -4,39 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, upperFirst } from 'lodash';
+import { upperFirst } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
+// @ts-ignore
 import { createQuery } from '../create_query';
+// @ts-ignore
 import { getDiffCalculation } from '../beats/_beats_stats';
+// @ts-ignore
 import { ApmMetric } from '../metrics';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
+import { LegacyRequest, ElasticsearchResponse } from '../../types';
 
-export function handleResponse(response, apmUuid) {
-  const firstStats = get(
-    response,
-    'hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats'
-  );
-  const stats = get(response, 'hits.hits[0]._source.beats_stats');
+export function handleResponse(response: ElasticsearchResponse, apmUuid: string) {
+  if (!response.hits || response.hits.hits.length === 0) {
+    return {};
+  }
 
-  const eventsTotalFirst = get(firstStats, 'metrics.libbeat.pipeline.events.total', null);
-  const eventsEmittedFirst = get(firstStats, 'metrics.libbeat.pipeline.events.published', null);
-  const eventsDroppedFirst = get(firstStats, 'metrics.libbeat.pipeline.events.dropped', null);
-  const bytesWrittenFirst = get(firstStats, 'metrics.libbeat.output.write.bytes', null);
+  const firstStats = response.hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats;
+  const stats = response.hits.hits[0]._source.beats_stats;
 
-  const eventsTotalLast = get(stats, 'metrics.libbeat.pipeline.events.total', null);
-  const eventsEmittedLast = get(stats, 'metrics.libbeat.pipeline.events.published', null);
-  const eventsDroppedLast = get(stats, 'metrics.libbeat.pipeline.events.dropped', null);
-  const bytesWrittenLast = get(stats, 'metrics.libbeat.output.write.bytes', null);
+  if (!firstStats || !stats) {
+    return {};
+  }
+
+  const eventsTotalFirst = firstStats.metrics.libbeat.pipeline.events.total;
+  const eventsEmittedFirst = firstStats.metrics.libbeat.pipeline.events.published;
+  const eventsDroppedFirst = firstStats.metrics.libbeat.pipeline.events.dropped;
+  const bytesWrittenFirst = firstStats.metrics.libbeat.output.write.bytes;
+
+  const eventsTotalLast = stats.metrics.libbeat.pipeline.events.total;
+  const eventsEmittedLast = stats.metrics.libbeat.pipeline.events.published;
+  const eventsDroppedLast = stats.metrics.libbeat.pipeline.events.dropped;
+  const bytesWrittenLast = stats.metrics.libbeat.output.write.bytes;
 
   return {
     uuid: apmUuid,
-    transportAddress: get(stats, 'beat.host', null),
-    version: get(stats, 'beat.version', null),
-    name: get(stats, 'beat.name', null),
-    type: upperFirst(get(stats, 'beat.type')) || null,
-    output: upperFirst(get(stats, 'metrics.libbeat.output.type')) || null,
-    configReloads: get(stats, 'metrics.libbeat.config.reloads', null),
-    uptime: get(stats, 'metrics.beat.info.uptime.ms', null),
+    transportAddress: stats.beat.host,
+    version: stats.beat.version,
+    name: stats.beat.name,
+    type: upperFirst(stats.beat.type) || null,
+    output: upperFirst(stats.metrics.libbeat.output.type) || null,
+    configReloads: stats.metrics.libbeat.config.reloads,
+    uptime: stats.metrics.beat.info.uptime.ms,
     eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst),
     eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst),
     eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst),
@@ -44,7 +54,21 @@ export function handleResponse(response, apmUuid) {
   };
 }
 
-export async function getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid, start, end }) {
+export async function getApmInfo(
+  req: LegacyRequest,
+  apmIndexPattern: string,
+  {
+    clusterUuid,
+    apmUuid,
+    start,
+    end,
+  }: {
+    clusterUuid: string;
+    apmUuid: string;
+    start: number;
+    end: number;
+  }
+) {
   checkParam(apmIndexPattern, 'apmIndexPattern in beats/getBeatSummary');
 
   const filters = [

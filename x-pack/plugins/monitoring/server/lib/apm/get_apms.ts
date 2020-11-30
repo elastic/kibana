@@ -14,7 +14,7 @@ import { createApmQuery } from './create_apm_query';
 import { calculateRate } from '../calculate_rate';
 // @ts-ignore
 import { getDiffCalculation } from './_apm_stats';
-import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../types';
+import { LegacyRequest, ElasticsearchResponse, ElasticsearchResponseHit } from '../../types';
 
 export function handleResponse(response: ElasticsearchResponse, start: number, end: number) {
   const initial = { ids: new Set(), beats: [] };
@@ -86,7 +86,7 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
   return beats;
 }
 
-export async function getApms(req: any, apmIndexPattern: string, clusterUuid: string) {
+export async function getApms(req: LegacyRequest, apmIndexPattern: string, clusterUuid: string) {
   checkParam(apmIndexPattern, 'apmIndexPattern in getBeats');
 
   const config = req.server.config();
