@@ -41,7 +41,7 @@ export function validateJobSelection(
     const selectedJob = jobsWithTimeRange.find((j) => j.id === selectedJobId);
     if (selectedJob !== undefined && selectedJob.isNotSingleMetricViewerJobMessage !== undefined) {
       const warningText = i18n.translate(
-        'xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage',
+        'xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningWithReasonMessage',
         {
           defaultMessage: `You can't view {selectedJobId} in this dashboard because {reason}.`,
           values: {
