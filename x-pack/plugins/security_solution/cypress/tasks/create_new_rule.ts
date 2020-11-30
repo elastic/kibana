@@ -68,7 +68,6 @@ import {
   COMBO_BOX_CLEAR_BTN,
   COMBO_BOX_RESULT,
 } from '../screens/create_new_rule';
-import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { NOTIFICATION_TOASTS, TOAST_ERROR_CLASS } from '../screens/shared';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
