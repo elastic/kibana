@@ -179,46 +179,35 @@ export function TimeseriesChart({
           );
         })}
 
-        {anomalySeries &&
-          Object.keys(anomalySeries).map((key) => {
-            const anomalyType = key as keyof AnomalySeries;
-            const anomaly = anomalySeries[anomalyType];
-            if (anomalyType === 'bounderies') {
-              return (
-                <AreaSeries
-                  key={anomaly.title}
-                  id={anomaly.title}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor="x"
-                  yAccessors={['y']}
-                  y0Accessors={['y0']}
-                  data={isEmpty ? [] : anomaly.data}
-                  color={anomaly.color}
-                  curve={CurveType.CURVE_MONOTONE_X}
-                  hideInLegend
-                  filterSeriesInTooltip={() => false}
-                />
-              );
-            }
-            return (
-              <RectAnnotation
-                key={anomaly.title}
-                id="score_anomalies"
-                dataValues={(anomaly.data as RectCoordinate[]).map(
-                  ({ x0, x: x1 }) => ({
-                    coordinates: {
-                      x0,
-                      x1,
-                    },
-                  })
-                )}
-                style={{
-                  fill: anomaly.color,
-                }}
-              />
-            );
-          })}
+        {anomalySeries?.bounderies && (
+          <AreaSeries
+            key={anomalySeries.bounderies.title}
+            id={anomalySeries.bounderies.title}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            y0Accessors={['y0']}
+            data={anomalySeries.bounderies.data}
+            color={anomalySeries.bounderies.color}
+            curve={CurveType.CURVE_MONOTONE_X}
+            hideInLegend
+            filterSeriesInTooltip={() => false}
+          />
+        )}
+
+        {anomalySeries?.scores && (
+          <RectAnnotation
+            key={anomalySeries.scores.title}
+            id="score_anomalies"
+            dataValues={(anomalySeries.scores.data as RectCoordinate[]).map(
+              ({ x0, x: x1 }) => ({
+                coordinates: { x0, x1 },
+              })
+            )}
+            style={{ fill: anomalySeries.scores.color }}
+          />
+        )}
       </Chart>
     </ChartContainer>
   );
