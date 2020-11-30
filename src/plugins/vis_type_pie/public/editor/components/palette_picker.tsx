@@ -41,13 +41,13 @@ export function PalettePicker<ParamName extends string>({
   return (
     <EuiFormRow
       fullWidth
-      label={i18n.translate('xpack.lens.palettePicker.label', {
+      label={i18n.translate('visTypePie.palettePicker.label', {
         defaultMessage: 'Color palette',
       })}
     >
       <EuiColorPalettePicker
         disabled={disabled}
-        data-test-subj="lns-palettePicker"
+        data-test-subj="pie-palettePicker"
         compressed
         palettes={getColorsService()
           .getAll()

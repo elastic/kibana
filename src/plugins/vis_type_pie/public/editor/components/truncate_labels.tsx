@@ -33,7 +33,7 @@ function TruncateLabelsOption({ disabled, value = null, setValue }: TruncateLabe
 
   return (
     <EuiFormRow
-      label={i18n.translate('visTypeVislib.controls.truncateLabel', {
+      label={i18n.translate('visTypePie.controls.truncateLabel', {
         defaultMessage: 'Truncate',
       })}
       fullWidth
@@ -41,7 +41,7 @@ function TruncateLabelsOption({ disabled, value = null, setValue }: TruncateLabe
     >
       <EuiFieldNumber
         disabled={disabled}
-        value={value === null ? '' : value}
+        value={value || ''}
         onChange={onChange}
         fullWidth
         compressed
