@@ -25,6 +25,10 @@ import { SpacesService } from '../../../spaces_service';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { ObjectType } from '@kbn/config-schema';
+
+// Mock out circular dependency
+jest.mock('../../../../../../../src/core/server/saved_objects/es_query', () => {});
+
 jest.mock('../../../../../../../src/core/server', () => {
   return {
     ...(jest.requireActual('../../../../../../../src/core/server') as Record<string, unknown>),
