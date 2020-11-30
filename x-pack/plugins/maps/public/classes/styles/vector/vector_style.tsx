@@ -266,59 +266,38 @@ export class VectorStyle implements IVectorStyle {
 
     let hasChanges = false;
 
-    for (let j = 0; j < invalidStyleNames.length; j++) {
+    invalidStyleNames.forEach((invalidStyleName) => {
       for (let i = 0; i < previousFields.length; i++) {
         const previousField = previousFields[i];
         const nextField = nextFields[i];
         if (previousField.isEqual(nextField)) {
           continue;
         }
-
-        // Check if the updated field can be assigned to any of the broken style-properties.
-        const dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions> = this.getAllStyleProperties().find(
-          (d) => d.getStyleName() === invalidStyleNames[j]
-        ) as IDynamicStyleProperty<DynamicStylePropertyOptions>;
-
-        if (!dynamicProperty) {
-          continue;
-        }
-
         let newFieldDescriptor: StylePropertyField | undefined;
         const isFieldDataTypeCompatible = styleFieldsHelper.hasFieldForStyle(
           nextField,
-          dynamicProperty.getStyleName()
+          invalidStyleName
         );
         if (isFieldDataTypeCompatible) {
-          newFieldDescriptor = await rectifyFieldDescriptor(nextField as IESAggField, {
+          newFieldDescriptor = rectifyFieldDescriptor(nextField as IESAggField, {
             origin: previousField.getOrigin(),
             name: previousField.getName(),
           });
 
           if (newFieldDescriptor) {
             hasChanges = true;
-            // invalidStyleNames.splice(j, 1);
-            // j--;
           }
         }
 
-        (originalProperties[dynamicProperty.getStyleName()]!
+        (originalProperties[invalidStyleName]!
           .options! as DynamicStylePropertyOptions).field = newFieldDescriptor;
       }
-    }
+    });
 
     return {
       hasChanges,
       nextStyleDescriptor: VectorStyle.createDescriptor(originalProperties, this.isTimeAware()),
     };
-
-    // // Revert left-over invalid props to static styling, if necessary
-    // return this._deleteFieldsFromDescriptorAndUpdateStyling(
-    //   nextFields,
-    //   styleFieldsHelper,
-    //   originalProperties,
-    //   mapColors,
-    //   hasChanges
-    // );
   }
 
   async _deleteFieldsFromDescriptorAndUpdateStyling(
