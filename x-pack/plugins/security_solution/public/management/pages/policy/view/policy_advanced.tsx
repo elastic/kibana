@@ -42,7 +42,6 @@ function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
       ) {
         if (nextPath[nextPath.length - 1] === 'advanced') {
           newPolicyConfig[nextPath[nextPath.length - 1]] = undefined;
-          break; // We reached the top of the advanced section and can now break.
         } else {
           delete newPolicyConfig[nextPath[nextPath.length - 1]];
         }
