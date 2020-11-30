@@ -5,7 +5,6 @@
  */
 import React, { useMemo, useCallback } from 'react';
 import { useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
