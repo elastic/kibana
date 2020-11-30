@@ -108,7 +108,7 @@ const ParamsSchema = schema.object(
     viewInKibanaPath: schema.string({ defaultValue: DEFAULT_VIEW_IN_KIBANA_PATH }),
     viewInKibanaText: schema.string({
       defaultValue: i18n.translate('xpack.actions.builtin.email.viewInKibanaText', {
-        defaultMessage: 'View in Kibana',
+        defaultMessage: 'Go to Kibana',
       }),
     }),
   },
@@ -246,14 +246,14 @@ function getSecureValue(secure: boolean | null | undefined, port: number | null)
 function getViewInKibanaMessage(viewInKibanaPath: string, viewInKibanaText: string) {
   if (viewInKibanaPath === DEFAULT_VIEW_IN_KIBANA_PATH) {
     return i18n.translate('xpack.actions.builtin.email.defaultViewInKibanaMessage', {
-      defaultMessage: 'This message was sent by a Kibana connector. [Open Kibana]({link}).',
+      defaultMessage: 'This message was sent by Kibana. [Go to Kibana]({link}).',
       values: {
         link: KIBANA_ROOT,
       },
     });
   }
   return i18n.translate('xpack.actions.builtin.email.customViewInKibanaMessage', {
-    defaultMessage: 'This message was sent by a Kibana connector. [{viewInKibanaText}]({link}).',
+    defaultMessage: 'This message was sent by Kibana. [{viewInKibanaText}]({link}).',
     values: {
       viewInKibanaText,
       link: KIBANA_ROOT + viewInKibanaPath,
