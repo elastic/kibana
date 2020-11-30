@@ -59,9 +59,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               defaultMessage: 'Agent version',
             }),
             description:
-              typeof agent.local_metadata.elastic === 'object' &&
-              typeof agent.local_metadata.elastic.agent === 'object' &&
-              typeof agent.local_metadata.elastic.agent.version === 'string' ? (
+              typeof agent.local_metadata?.elastic?.agent?.version === 'string' ? (
                 <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
                   <EuiFlexItem grow={false} className="eui-textNoWrap">
                     {agent.local_metadata.elastic.agent.version}
@@ -102,8 +100,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               defaultMessage: 'Host name',
             }),
             description:
-              typeof agent.local_metadata.host === 'object' &&
-              typeof agent.local_metadata.host.hostname === 'string'
+              typeof agent.local_metadata?.host?.hostname === 'string'
                 ? agent.local_metadata.host.hostname
                 : '-',
           },
@@ -112,9 +109,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               defaultMessage: 'Logging level',
             }),
             description:
-              typeof agent.local_metadata.elastic === 'object' &&
-              typeof agent.local_metadata.elastic.agent === 'object' &&
-              typeof agent.local_metadata.elastic.agent.log_level === 'string'
+              typeof agent.local_metadata?.elastic?.agent?.log_level === 'string'
                 ? agent.local_metadata.elastic.agent.log_level
                 : '-',
           },
@@ -123,9 +118,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               defaultMessage: 'Agent release',
             }),
             description:
-              typeof agent.local_metadata.elastic === 'object' &&
-              typeof agent.local_metadata.elastic.agent === 'object' &&
-              typeof agent.local_metadata.elastic.agent.snapshot === 'boolean'
+              typeof agent.local_metadata?.elastic?.agent?.snapshot === 'boolean'
                 ? agent.local_metadata.elastic.agent.snapshot === true
                   ? 'snapshot'
                   : 'stable'
@@ -136,8 +129,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               defaultMessage: 'Platform',
             }),
             description:
-              typeof agent.local_metadata.os === 'object' &&
-              typeof agent.local_metadata.os.platform === 'string'
+              typeof agent.local_metadata?.os?.platform === 'string'
                 ? agent.local_metadata.os.platform
                 : '-',
           },

@@ -38,12 +38,6 @@ import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './compon
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { isAgentUpgradeable } from '../../../services';
 
-const Divider = styled.div`
-  width: 0;
-  height: 100%;
-  border-left: ${(props) => props.theme.eui.euiBorderThin};
-`;
-
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
     params: { agentId, tabId = '' },
@@ -141,7 +135,6 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 '-'
               ),
             },
-            { isDivider: true },
             {
               label: i18n.translate('xpack.fleet.agentDetails.policyLabel', {
                 defaultMessage: 'Policy',
@@ -159,7 +152,6 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 agentData.item.policy_id || '-'
               ),
             },
-            { isDivider: true },
             {
               label: i18n.translate('xpack.fleet.agentDetails.agentVersionLabel', {
                 defaultMessage: 'Agent version',
@@ -198,7 +190,6 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                   '-'
                 ),
             },
-            { isDivider: true },
             {
               content: (
                 <AgentDetailsActionMenu
@@ -212,22 +203,18 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 />
               ),
             },
-          ]
-            .filter((item) => item.isDivider !== true)
-            .map((item, index) => (
-              <EuiFlexItem grow={false} key={index}>
-                {item.isDivider ?? false ? (
-                  <Divider />
-                ) : item.label ? (
-                  <EuiDescriptionList compressed>
-                    <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
-                    <EuiDescriptionListDescription>{item.content}</EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                ) : (
-                  item.content
-                )}
-              </EuiFlexItem>
-            ))}
+          ].map((item, index) => (
+            <EuiFlexItem grow={false} key={index}>
+              {item.label ? (
+                <EuiDescriptionList compressed>
+                  <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>{item.content}</EuiDescriptionListDescription>
+                </EuiDescriptionList>
+              ) : (
+                item.content
+              )}
+            </EuiFlexItem>
+          ))}
         </EuiFlexGroup>
       ) : undefined,
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
