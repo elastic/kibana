@@ -47,6 +47,7 @@ export interface ActionAccordionFormProps {
   actions: AlertAction[];
   defaultActionGroupId: string;
   actionGroups?: ActionGroupWithMessageVariables[];
+  defaultActionMessage?: string;
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setActions: (actions: AlertAction[]) => void;
@@ -66,13 +67,14 @@ interface ActiveActionConnectorState {
 export const ActionForm = ({
   actions,
   defaultActionGroupId,
-  actionGroups,
   setActionIdByIndex,
   setActionGroupIdByIndex,
   setActions,
   setActionParamsProperty,
   actionTypes,
   messageVariables,
+  actionGroups,
+  defaultActionMessage,
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   actionTypeRegistry,
@@ -338,6 +340,7 @@ export const ActionForm = ({
               defaultActionGroupId={defaultActionGroupId}
               messageVariables={messageVariables}
               actionGroups={actionGroups}
+              defaultActionMessage={defaultActionMessage}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
               onAddConnector={() => {
                 setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });

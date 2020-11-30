@@ -239,6 +239,7 @@ function getAlertType(actionVariables: ActionVariables): AlertType {
     actionVariables,
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     authorizedConsumers: {},
     producer: ALERTS_FEATURE_ID,
   };

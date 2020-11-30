@@ -85,6 +85,7 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
           producer: ALERTS_FEATURE_ID,
           authorizedConsumers: {
             [ALERTS_FEATURE_ID]: { read: true, all: true },
@@ -218,6 +219,7 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
           producer: ALERTS_FEATURE_ID,
           authorizedConsumers: {
             [ALERTS_FEATURE_ID]: { read: true, all: true },
@@ -234,6 +236,7 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
           producer: 'test',
           authorizedConsumers: {
             [ALERTS_FEATURE_ID]: { read: true, all: true },

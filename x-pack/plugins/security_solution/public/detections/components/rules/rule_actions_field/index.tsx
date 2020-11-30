@@ -119,7 +119,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         messageVariables={messageVariables}
         defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
         setActionIdByIndex={setActionIdByIndex}
-        setAlertProperty={setAlertProperty}
+        setActions={setAlertProperty}
         setActionParamsProperty={setActionParamsProperty}
         actionTypeRegistry={actionTypeRegistry}
         actionTypes={supportedActionTypes}
