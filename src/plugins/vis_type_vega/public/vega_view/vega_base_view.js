@@ -137,7 +137,7 @@ export class VegaBaseView {
     let idxObj;
 
     if (index) {
-      idxObj = await indexPatterns.find(index);
+      [idxObj] = await indexPatterns.find(index);
       if (!idxObj) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.baseView.indexNotFoundErrorMessage', {
