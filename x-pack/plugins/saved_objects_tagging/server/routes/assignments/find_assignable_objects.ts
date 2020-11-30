@@ -6,6 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
+import { FindAssignableObjectResponse } from '../../../common/http_api_types';
 
 export const registerFindAssignableObjectsRoute = (router: IRouter) => {
   router.get(
@@ -32,7 +33,7 @@ export const registerFindAssignableObjectsRoute = (router: IRouter) => {
       return res.ok({
         body: {
           objects: results,
-        },
+        } as FindAssignableObjectResponse,
       });
     })
   );

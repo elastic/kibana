@@ -9,6 +9,11 @@ import { IRouter } from 'src/core/server';
 import { AssignmentError } from '../../services';
 
 export const registerUpdateTagsAssignmentsRoute = (router: IRouter) => {
+  const objectReferenceSchema = schema.object({
+    type: schema.string(),
+    id: schema.string(),
+  });
+
   router.post(
     {
       path: '/api/saved_objects_tagging/assignments/update_by_tags',
@@ -16,22 +21,8 @@ export const registerUpdateTagsAssignmentsRoute = (router: IRouter) => {
         body: schema.object(
           {
             tags: schema.arrayOf(schema.string(), { minSize: 1 }),
-            assign: schema.maybe(
-              schema.arrayOf(
-                schema.object({
-                  type: schema.string(),
-                  id: schema.string(),
-                })
-              )
-            ),
-            unassign: schema.maybe(
-              schema.arrayOf(
-                schema.object({
-                  type: schema.string(),
-                  id: schema.string(),
-                })
-              )
-            ),
+            assign: schema.maybe(schema.arrayOf(objectReferenceSchema)),
+            unassign: schema.maybe(schema.arrayOf(objectReferenceSchema)),
           },
           {
             validate: ({ assign, unassign }) => {

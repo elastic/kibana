@@ -10,6 +10,10 @@ import {
   FindAssignableObjectsOptions,
   AssignableObject,
 } from '../../../common/assignments';
+import {
+  FindAssignableObjectResponse,
+  GetAssignableTypesResponse,
+} from '../../../common/http_api_types';
 
 export interface ITagAssignmentService {
   /**
@@ -28,16 +32,6 @@ export interface ITagAssignmentService {
 
 export interface TagAssignmentServiceOptions {
   http: HttpSetup;
-}
-
-// TODO: move to common and use on server-side
-
-export interface FindAssignableObjectResponse {
-  objects: AssignableObject[];
-}
-
-export interface GetAssignableTypesResponse {
-  types: string[];
 }
 
 export class TagAssignmentService implements ITagAssignmentService {

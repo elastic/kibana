@@ -5,6 +5,7 @@
  */
 
 import { IRouter } from 'src/core/server';
+import { GetAssignableTypesResponse } from '../../../common/http_api_types';
 
 export const registerGetAssignableTypesRoute = (router: IRouter) => {
   router.get(
@@ -19,7 +20,7 @@ export const registerGetAssignableTypesRoute = (router: IRouter) => {
       return res.ok({
         body: {
           types,
-        },
+        } as GetAssignableTypesResponse,
       });
     })
   );
