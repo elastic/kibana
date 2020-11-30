@@ -46,4 +46,5 @@ const Wrapper = euiStyled.div`
   flex-direction: column;
   flex: 1 0 0%;
   overflow: hidden;
+  padding-top: 1px; // Buffer for the "Reload" buttons' hover state
 `;
