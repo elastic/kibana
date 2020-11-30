@@ -48,19 +48,6 @@ function RuntimeFieldsListItemComponent(
 
     return (
       <EuiFlexGroup gutterSize="s" className="mappingsEditor__fieldsListItem__actions">
-        {/* {canHaveMultiFields && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={addMultiFieldButtonLabel}>
-              <EuiButtonIcon
-                iconType="documents"
-                onClick={addField}
-                data-test-subj="addMultiFieldButton"
-                aria-label={addMultiFieldButtonLabel}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )} */}
-
         <EuiFlexItem grow={false}>
           <EuiToolTip content={editButtonLabel}>
             <EuiButtonIcon
@@ -109,12 +96,6 @@ function RuntimeFieldsListItemComponent(
             alignItems="center"
             className="mappingsEditor__fieldsListItem__content"
           >
-            {/* {isMultiField && (
-              <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__icon">
-                <EuiIcon color="subdued" type="documents" />
-              </EuiFlexItem>
-            )} */}
-
             <EuiFlexItem
               grow={false}
               className="mappingsEditor__fieldsListItem__name"
@@ -133,8 +114,6 @@ function RuntimeFieldsListItemComponent(
           </EuiFlexGroup>
         </div>
       </div>
-
-      {/* {renderCreateField()} */}
     </li>
   );
 }
