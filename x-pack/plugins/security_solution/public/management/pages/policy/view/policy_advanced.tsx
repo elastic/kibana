@@ -16,20 +16,24 @@ import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
   let newPolicyConfig = obj;
 
+  // If the user is deleting the value, then we need to ensure we clean up the config.
+  // We delete any sections are the empty, whether that be an empty string,  empty object, or undefined.
   if (value === '' || value === undefined) {
     for (let k = path.length; k >= 0; k--) {
       const nextPath = path.slice(0, k);
       for (let i = 0; i < nextPath.length - 1; i++) {
+        // Traverse and find the next section
         newPolicyConfig = newPolicyConfig[nextPath[i]] as Record<string, unknown>;
       }
       if (
         newPolicyConfig[nextPath[nextPath.length - 1]] === undefined ||
         newPolicyConfig[nextPath[nextPath.length - 1]] === '' ||
-        Object.keys(newPolicyConfig[nextPath[nextPath.length - 1]]).length === 0 ||
+        Object.keys(newPolicyConfig[nextPath[nextPath.length - 1]] as object).length === 0 ||
         k === path.length
       ) {
         if (nextPath[nextPath.length - 1] === 'advanced') {
           newPolicyConfig[nextPath[nextPath.length - 1]] = undefined;
+          break; // We reached the top of the advanced section and can now break.
         } else {
           delete newPolicyConfig[nextPath[nextPath.length - 1]];
         }
