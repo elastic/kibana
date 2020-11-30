@@ -43,7 +43,7 @@ export default function ({ getService }) {
       ]);
 
       await supertest
-        .post('/api/ui_counters/report')
+        .post('/api/ui_counters/_report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
         .send({ report })
@@ -68,11 +68,10 @@ export default function ({ getService }) {
         createUiCounterEvent(uniqueEventName, METRIC_TYPE.CLICK, 2),
       ]);
       await supertest
-        .post('/api/ui_counters/report')
+        .post('/api/ui_counters/_report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
         .send({ report })
-
         .expect(200);
 
       const {

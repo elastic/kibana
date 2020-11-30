@@ -235,9 +235,11 @@ There are a few ways you can test that your usage collector is working properly.
    Yes, but that is not a major concern. A visualization on such info might be a date histogram that gets events-per-second or something, which would be impacted by server restarts, so we'll have to offset the beginning of the time range when we detect that the latest metric is smaller than the earliest metric. That would be a pretty custom visualization, but perhaps future Kibana enhancements will be able to support that.
 
 
-# UI Counters
+# UI Metric app
 
 UI_metric is deprecated in favor of UI Counters.
+
+# UI Counters
 
 ## Purpose
 
@@ -321,5 +323,5 @@ use a `eventName` of  `create_vis_1m`, `create_vis_5m`, `create_vis_20m`, or `cr
 
 # Routes registered by this plugin
 
-- `/api/ui_counters/report`: Used by `ui_metrics` and `ui_counters` usage collector instances to report their usage data to the server
+- `/api/ui_counters/_report`: Used by `ui_metrics` and `ui_counters` usage collector instances to report their usage data to the server
 - `/api/stats`: Get the metrics and usage ([details](./server/routes/stats/README.md))

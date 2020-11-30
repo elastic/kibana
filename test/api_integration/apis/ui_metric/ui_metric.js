@@ -44,7 +44,7 @@ export default function ({ getService }) {
       const uiStatsMetric = createStatsMetric('myEvent');
       const { report } = reportManager.assignReports([uiStatsMetric]);
       await supertest
-        .post('/api/ui_counters/report')
+        .post('/api/ui_counters/_report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
         .send({ report })
@@ -69,7 +69,7 @@ export default function ({ getService }) {
         uiStatsMetric2,
       ]);
       await supertest
-        .post('/api/ui_counters/report')
+        .post('/api/ui_counters/_report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
         .send({ report })
@@ -93,7 +93,7 @@ export default function ({ getService }) {
         createStatsMetric(uniqueEventName, METRIC_TYPE.LOADED),
       ]);
       await supertest
-        .post('/api/ui_counters/report')
+        .post('/api/ui_counters/_report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
         .send({ report })

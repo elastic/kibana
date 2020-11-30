@@ -17,30 +17,31 @@
  * under the License.
  */
 
-import { Reporter, Storage } from '@kbn/analytics';
-import { HttpSetup } from 'kibana/public';
-
-interface AnalyicsReporterConfig {
-  localStorage: Storage;
-  debug: boolean;
-  fetch: HttpSetup;
-}
-
-export function createReporter(config: AnalyicsReporterConfig): Reporter {
-  const { localStorage, debug, fetch } = config;
-
-  return new Reporter({
-    debug,
-    storage: localStorage,
-    async http(report) {
-      const response = await fetch.post('/api/ui_counters/_report', {
-        body: JSON.stringify({ report }),
-      });
-
-      if (response.status !== 'ok') {
-        throw Error('Unable to store report.');
-      }
-      return response;
+export const basicUiCounters = {
+  dailyEvents: [
+    {
+      appName: 'myApp',
+      eventName: 'my_event_885082425109579',
+      lastUpdatedAt: '2020-11-30T11:43:00.961Z',
+      fromTimestamp: '2020-11-30T00:00:00Z',
+      counterType: 'loaded',
+      total: 1,
     },
-  });
-}
+    {
+      appName: 'myApp',
+      eventName: 'my_event_885082425109579_2',
+      lastUpdatedAt: '2020-10-28T11:43:00.961Z',
+      fromTimestamp: '2020-10-28T00:00:00Z',
+      counterType: 'count',
+      total: 1,
+    },
+    {
+      appName: 'myApp',
+      eventName: 'my_event_885082425109579',
+      lastUpdatedAt: '2020-11-30T11:43:00.961Z',
+      fromTimestamp: '2020-11-30T00:00:00Z',
+      counterType: 'click',
+      total: 2,
+    },
+  ],
+};

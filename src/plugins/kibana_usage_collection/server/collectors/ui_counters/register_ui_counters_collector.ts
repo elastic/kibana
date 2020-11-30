@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import moment from 'moment';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   UICounterSavedObject,
@@ -28,6 +29,7 @@ interface UiCounterEvent {
   appName: string;
   eventName: string;
   lastUpdatedAt?: string;
+  fromTimestamp?: string;
   counterType: string;
   total: number;
 }
@@ -42,11 +44,13 @@ export function transformRawCounter(rawUiCounter: UICounterSavedObject) {
   const eventName = restId.join(':');
   const counterTotal: unknown = attributes.count;
   const total = typeof counterTotal === 'number' ? counterTotal : 0;
+  const fromTimestamp = moment(lastUpdatedAt).utc().startOf('day').format();
 
   return {
     appName,
     eventName,
     lastUpdatedAt,
+    fromTimestamp,
     counterType,
     total,
   };
@@ -62,6 +66,7 @@ export function registerUiCountersUsageCollector(usageCollection: UsageCollectio
           appName: { type: 'keyword' },
           eventName: { type: 'keyword' },
           lastUpdatedAt: { type: 'date' },
+          fromTimestamp: { type: 'date' },
           counterType: { type: 'keyword' },
           total: { type: 'integer' },
         },

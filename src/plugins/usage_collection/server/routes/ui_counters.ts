@@ -27,7 +27,7 @@ export function registerUiCountersRoute(
 ) {
   router.post(
     {
-      path: '/api/ui_counters/report',
+      path: '/api/ui_counters/_report',
       validate: {
         body: schema.object({
           report: reportSchema,
