@@ -8,8 +8,7 @@ import React, { useMemo, useState } from 'react';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import {
   extractItems,
-  getSeries,
-  getDomain,
+  getSeriesAndDomain,
   getSidebarItems,
   getLegendItems,
 } from './data_formatting';
@@ -60,8 +59,8 @@ export const WaterfallChartWrapper = () => {
   // TODO: Will be sourced via an API
   const [networkData] = useState<NetworkItems>(FAKE_ITEMS);
 
-  const series = useMemo(() => {
-    return getSeries(networkData);
+  const { series, domain } = useMemo(() => {
+    return getSeriesAndDomain(networkData);
   }, [networkData]);
 
   const sidebarItems = useMemo(() => {
@@ -69,10 +68,6 @@ export const WaterfallChartWrapper = () => {
   }, [networkData]);
 
   const legendItems = getLegendItems();
-
-  const domain = useMemo(() => {
-    return getDomain(networkData);
-  }, [networkData]);
 
   return (
     <WaterfallProvider
@@ -85,7 +80,7 @@ export const WaterfallChartWrapper = () => {
     >
       <WaterfallChart
         tickFormat={(d: number) => `${Number(d).toFixed(0)} ms`}
-        domain={{ min: domain.min, max: domain.max }}
+        domain={domain}
         barStyleAccessor={(datum) => {
           return datum.datum.config.colour;
         }}

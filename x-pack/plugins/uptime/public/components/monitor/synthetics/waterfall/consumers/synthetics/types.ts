@@ -150,9 +150,13 @@ export interface NetworkItem {
   url: string;
   status: number;
   mimeType?: string;
-  startMs: number;
-  endMs: number;
-  duration: number;
+  // NOTE: This is the time the request was actually issued. timing.request_time might be later if the request was queued.
+  requestSentTime: number;
+  responseReceivedTime: number;
+  // NOTE: Denotes the earlier figure out of request sent time and request start time (part of timings). This can vary based on queue times, and
+  // also whether an entry actually has timings available.
+  // Ref: https://github.com/ChromeDevTools/devtools-frontend/blob/ed2a064ac194bfae4e25c4748a9fa3513b3e9f7d/front_end/network/RequestTimingView.js#L154
+  earliestRequestTime: number;
   timings: CalculatedTimings | null;
 }
 export type NetworkItems = NetworkItem[];
