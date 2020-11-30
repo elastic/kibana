@@ -21,7 +21,7 @@ export interface ITagAssignmentService {
    */
   findAssignableObjects(options: FindAssignableObjectsOptions): Promise<AssignableObject[]>;
   /**
-   * Updates the assignments for given tag ids, by adding or removing object assignments to them.
+   * Update the assignments for given tag ids, by adding or removing object assignments to them.
    */
   updateTagAssignments(options: UpdateTagAssignmentsOptions): Promise<void>;
   /**
