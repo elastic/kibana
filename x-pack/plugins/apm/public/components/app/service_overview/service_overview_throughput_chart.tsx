@@ -62,7 +62,7 @@ export function ServiceOverviewThroughputChart({
         fetchStatus={status}
         timeseries={[
           {
-            data: data.throughput ?? [],
+            data: data?.throughput ?? [],
             type: 'linemark',
             color: theme.eui.euiColorVis0,
             title: i18n.translate(
