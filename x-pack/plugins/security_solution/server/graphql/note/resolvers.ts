@@ -15,9 +15,7 @@ export type QueryAllNoteResolver = AppResolverWithFields<
   'totalCount' | 'Note'
 >;
 
-export type QueryNotesByTimelineIdResolver = AppResolverOf<
-  QueryResolvers.GetNotesByTimelineIdResolver
->;
+export type QueryNotesByTimelineIdResolver = AppResolverOf<QueryResolvers.GetNotesByTimelineIdResolver>;
 
 export type QueryNotesByEventIdResolver = AppResolverOf<QueryResolvers.GetNotesByEventIdResolver>;
 
@@ -27,9 +25,7 @@ export type MutationNoteResolver = AppResolverOf<
 
 export type MutationDeleteNoteResolver = AppResolverOf<MutationResolvers.DeleteNoteResolver>;
 
-export type MutationDeleteNoteByTimelineIdResolver = AppResolverOf<
-  MutationResolvers.DeleteNoteByTimelineIdResolver
->;
+export type MutationDeleteNoteByTimelineIdResolver = AppResolverOf<MutationResolvers.DeleteNoteByTimelineIdResolver>;
 
 interface NoteResolversDeps {
   note: Note;

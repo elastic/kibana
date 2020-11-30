@@ -7,7 +7,6 @@
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 import { Direction } from '../../../graphql/types';
-import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/constants';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 import { SubsetTimelineModel, TimelineModel } from './model';
@@ -24,6 +23,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   eventType: 'all',
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
+  expandedEvent: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   filters: [],
@@ -57,6 +57,5 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
     sortDirection: Direction.desc,
   },
   status: TimelineStatus.draft,
-  width: DEFAULT_TIMELINE_WIDTH,
   version: null,
 };
