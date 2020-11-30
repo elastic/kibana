@@ -15,6 +15,7 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [initialize](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.initialize.md) | <code>boolean</code> | Sets all the counter fields to 0 if they don't already exist |
 |  [migrationVersion](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> |  |
 |  [refresh](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.refresh.md) | <code>MutatingOperationRefreshSetting</code> | The Elasticsearch Refresh setting for this operation |
 

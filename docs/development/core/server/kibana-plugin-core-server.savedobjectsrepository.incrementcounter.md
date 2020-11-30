@@ -29,25 +29,19 @@ incrementCounter(type: string, id: string, counterFieldNames: string[], options?
 
 ## Remarks
 
-When supplying a field name like `stats.api.counter` the field name will be used as-is to create a document like: `{attributes: {'stats.api.counter': 1}}` It will not create a nested structure like: `{attributes: {stats: {api: {counter: 1}}}}`
+\* When supplying a field name like `stats.api.counter` the field name will be used as-is to create a document like: `{attributes: {'stats.api.counter': 1}}` It will not create a nested structure like: `{attributes: {stats: {api: {counter: 1}}}}` When using incrementCounter for collecting usage data, you need to ensure that usage collection happens on a best-effort basis and doesn't negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/master/src/plugins/usage\_collection/README.md\#tracking-interactions-with-incrementcounter)
 
 ## Example
 
-Collecting usage data
 
 ```ts
 const repository = coreStart.savedObjects.createInternalRepository();
 
-// NOTE: Usage collection happens on a best-effort basis, so we don't
-// `await` the promise returned by `incrementCounter` and we swallow any
-// exceptions in production.
 repository
-  .incrementCounter('test_counter_type', 'counter_2', [
-    'stats.api.count',
-    'stats.api.count2',
-    'stats.total',
+  .incrementCounter('dashboard_counter_type', 'counter_id', [
+    'stats.apiCalls',
+    'stats.sampleDataInstalled',
   ])
-  .catch((e) => (coreContext.env.cliArgs.dev ? logger.error(e) : e));
 
 ```
 

@@ -2366,6 +2366,7 @@ export interface SavedObjectsImportUnsupportedTypeError {
 
 // @public (undocumented)
 export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+    initialize?: boolean;
     // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     refresh?: MutatingOperationRefreshSetting;
