@@ -17,12 +17,11 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('index_patterns', () => {
-    loadTestFile(require.resolve('./es_errors'));
-    loadTestFile(require.resolve('./fields_for_time_pattern_route'));
-    loadTestFile(require.resolve('./fields_for_wildcard_route'));
-    loadTestFile(require.resolve('./index_pattern_crud'));
-    loadTestFile(require.resolve('./scripted_fields_crud'));
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('create_scripted_field', () => {
+    loadTestFile(require.resolve('./errors'));
+    loadTestFile(require.resolve('./main'));
   });
 }
