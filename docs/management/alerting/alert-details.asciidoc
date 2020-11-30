@@ -2,7 +2,6 @@
 [[alert-details]]
 === Alert details
 
-beta[]
 
 The *Alert details* page tells you about the state of the alert and provides granular control over the actions it is taking. 
 
