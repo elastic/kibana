@@ -54,7 +54,8 @@ function getLogMock() {
 export default ({ getService }: FtrProviderContext) => {
   const esClient = getService('es');
 
-  describe('Kibana index migration', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/84445
+  describe.skip('Kibana index migration', () => {
     before(() => esClient.indices.delete({ index: '.migrate-*' }));
 
     it('Migrates an existing index that has never been migrated before', async () => {
