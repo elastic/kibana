@@ -77,7 +77,7 @@ export async function getAnomalySeries({
     return;
   }
 
-  const { intervalString, bucketSize } = getBucketSize(start, end);
+  const { intervalString, bucketSize } = getBucketSize({ start, end });
 
   const esResponse = await anomalySeriesFetcher({
     serviceName,

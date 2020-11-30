@@ -67,9 +67,9 @@ describe('Data Streams tab', () => {
       expect(exists('templateList')).toBe(true);
     });
 
-    test('when Ingest Manager is enabled, links to Ingest Manager', async () => {
+    test('when Fleet is enabled, links to Fleet', async () => {
       testBed = await setup({
-        plugins: { ingestManager: { hi: 'ok' } },
+        plugins: { fleet: { hi: 'ok' } },
       });
 
       await act(async () => {
@@ -80,7 +80,7 @@ describe('Data Streams tab', () => {
       component.update();
 
       // Assert against the text because the href won't be available, due to dependency upon our core mock.
-      expect(findEmptyPromptIndexTemplateLink().text()).toBe('Ingest Manager');
+      expect(findEmptyPromptIndexTemplateLink().text()).toBe('Fleet');
     });
   });
 
@@ -99,10 +99,10 @@ describe('Data Streams tab', () => {
         createNonDataStreamIndex('non-data-stream-index'),
       ]);
 
-      const dataStreamForDetailPanel = createDataStreamPayload('dataStream1');
+      const dataStreamForDetailPanel = createDataStreamPayload({ name: 'dataStream1' });
       setLoadDataStreamsResponse([
         dataStreamForDetailPanel,
-        createDataStreamPayload('dataStream2'),
+        createDataStreamPayload({ name: 'dataStream2' }),
       ]);
       setLoadDataStreamResponse(dataStreamForDetailPanel);
 
@@ -287,9 +287,9 @@ describe('Data Streams tab', () => {
         createDataStreamBackingIndex('data-stream-index2', 'dataStream2'),
       ]);
 
-      const dataStreamDollarSign = createDataStreamPayload('%dataStream');
-      setLoadDataStreamsResponse([dataStreamDollarSign]);
-      setLoadDataStreamResponse(dataStreamDollarSign);
+      const dataStreamPercentSign = createDataStreamPayload({ name: '%dataStream' });
+      setLoadDataStreamsResponse([dataStreamPercentSign]);
+      setLoadDataStreamResponse(dataStreamPercentSign);
 
       testBed = await setup({
         history: createMemoryHistory(),
@@ -327,10 +327,10 @@ describe('Data Streams tab', () => {
     test('with an ILM url generator and an ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
-      const dataStreamForDetailPanel = {
-        ...createDataStreamPayload('dataStream1'),
+      const dataStreamForDetailPanel = createDataStreamPayload({
+        name: 'dataStream1',
         ilmPolicyName: 'my_ilm_policy',
-      };
+      });
       setLoadDataStreamsResponse([dataStreamForDetailPanel]);
       setLoadDataStreamResponse(dataStreamForDetailPanel);
 
@@ -351,7 +351,7 @@ describe('Data Streams tab', () => {
     test('with an ILM url generator and no ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
-      const dataStreamForDetailPanel = createDataStreamPayload('dataStream1');
+      const dataStreamForDetailPanel = createDataStreamPayload({ name: 'dataStream1' });
       setLoadDataStreamsResponse([dataStreamForDetailPanel]);
       setLoadDataStreamResponse(dataStreamForDetailPanel);
 
@@ -373,10 +373,10 @@ describe('Data Streams tab', () => {
     test('without an ILM url generator and with an ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
-      const dataStreamForDetailPanel = {
-        ...createDataStreamPayload('dataStream1'),
+      const dataStreamForDetailPanel = createDataStreamPayload({
+        name: 'dataStream1',
         ilmPolicyName: 'my_ilm_policy',
-      };
+      });
       setLoadDataStreamsResponse([dataStreamForDetailPanel]);
       setLoadDataStreamResponse(dataStreamForDetailPanel);
 
@@ -393,6 +393,133 @@ describe('Data Streams tab', () => {
       await actions.clickNameAt(0);
       expect(findDetailPanelIlmPolicyLink().exists()).toBeFalsy();
       expect(findDetailPanelIlmPolicyName().contains('my_ilm_policy')).toBeTruthy();
+    });
+  });
+
+  describe('managed data streams', () => {
+    const nonBreakingSpace = ' ';
+    beforeEach(async () => {
+      const managedDataStream = createDataStreamPayload({
+        name: 'managed-data-stream',
+        _meta: {
+          package: 'test',
+          managed: true,
+          managed_by: 'ingest-manager',
+        },
+      });
+      const nonManagedDataStream = createDataStreamPayload({ name: 'non-managed-data-stream' });
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([managedDataStream, nonManagedDataStream]);
+
+      testBed = await setup({
+        history: createMemoryHistory(),
+      });
+      await act(async () => {
+        testBed.actions.goToDataStreamsList();
+      });
+      testBed.component.update();
+    });
+
+    test('listed in the table with Managed label', () => {
+      const { table } = testBed;
+      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+
+      expect(tableCellsValues).toEqual([
+        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', 'Delete'],
+        ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
+      ]);
+    });
+
+    test('turning off "Include managed" switch hides managed data streams', async () => {
+      const { exists, actions, component, table } = testBed;
+      let { tableCellsValues } = table.getMetaData('dataStreamTable');
+
+      expect(tableCellsValues).toEqual([
+        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', 'Delete'],
+        ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
+      ]);
+
+      expect(exists('includeManagedSwitch')).toBe(true);
+
+      await act(async () => {
+        actions.clickIncludeManagedSwitch();
+      });
+      component.update();
+
+      ({ tableCellsValues } = table.getMetaData('dataStreamTable'));
+      expect(tableCellsValues).toEqual([['', 'non-managed-data-stream', 'green', '1', 'Delete']]);
+    });
+  });
+
+  describe('data stream privileges', () => {
+    describe('delete', () => {
+      const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+      const dataStreamWithDelete = createDataStreamPayload({
+        name: 'dataStreamWithDelete',
+        privileges: { delete_index: true },
+      });
+      const dataStreamNoDelete = createDataStreamPayload({
+        name: 'dataStreamNoDelete',
+        privileges: { delete_index: false },
+      });
+
+      beforeEach(async () => {
+        setLoadDataStreamsResponse([dataStreamWithDelete, dataStreamNoDelete]);
+
+        testBed = await setup({ history: createMemoryHistory() });
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+      });
+
+      test('displays/hides delete button depending on data streams privileges', async () => {
+        const { table } = testBed;
+        const { tableCellsValues } = table.getMetaData('dataStreamTable');
+
+        expect(tableCellsValues).toEqual([
+          ['', 'dataStreamNoDelete', 'green', '1', ''],
+          ['', 'dataStreamWithDelete', 'green', '1', 'Delete'],
+        ]);
+      });
+
+      test('displays/hides delete action depending on data streams privileges', async () => {
+        const {
+          actions: { selectDataStream },
+          find,
+        } = testBed;
+
+        selectDataStream('dataStreamNoDelete', true);
+        expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
+
+        selectDataStream('dataStreamWithDelete', true);
+        expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
+
+        selectDataStream('dataStreamNoDelete', false);
+        expect(find('deleteDataStreamsButton').exists()).toBeTruthy();
+      });
+
+      test('displays delete button in detail panel', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamWithDelete);
+        await clickNameAt(1);
+
+        expect(find('deleteDataStreamButton').exists()).toBeTruthy();
+      });
+
+      test('hides delete button in detail panel', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamNoDelete);
+        await clickNameAt(0);
+
+        expect(find('deleteDataStreamButton').exists()).toBeFalsy();
+      });
     });
   });
 });

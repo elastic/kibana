@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   staticIndexPatternRoute,
   dynamicIndexPatternRoute,
   apmIndexPatternTitleRoute,
 } from './index_pattern';
+import { createApi } from './create_api';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
@@ -22,6 +22,7 @@ import {
   serviceAnnotationsRoute,
   serviceAnnotationsCreateRoute,
   serviceErrorGroupsRoute,
+  serviceTransactionGroupsRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -43,8 +44,8 @@ import { serviceNodesRoute } from './service_nodes';
 import { tracesRoute, tracesByIdRoute } from './traces';
 import { transactionByTraceIdRoute } from './transaction';
 import {
-  correlationsForRangesRoute,
   correlationsForSlowTransactionsRoute,
+  correlationsForFailedTransactionsRoute,
 } from './correlations';
 import {
   transactionGroupsBreakdownRoute,
@@ -65,7 +66,6 @@ import {
   uiFiltersEnvironmentsRoute,
   rumOverviewLocalFiltersRoute,
 } from './ui_filters';
-import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
   createCustomLinkRoute,
@@ -117,6 +117,7 @@ const createApmApi = () => {
     .add(serviceAnnotationsRoute)
     .add(serviceAnnotationsCreateRoute)
     .add(serviceErrorGroupsRoute)
+    .add(serviceTransactionGroupsRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -130,7 +131,7 @@ const createApmApi = () => {
 
     // Correlations
     .add(correlationsForSlowTransactionsRoute)
-    .add(correlationsForRangesRoute)
+    .add(correlationsForFailedTransactionsRoute)
 
     // APM indices
     .add(apmIndexSettingsRoute)

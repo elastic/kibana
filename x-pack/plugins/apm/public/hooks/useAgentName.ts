@@ -16,7 +16,7 @@ export function useAgentName() {
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/agent_name',
+          endpoint: 'GET /api/apm/services/{serviceName}/agent_name',
           params: {
             path: { serviceName },
             query: { start, end },

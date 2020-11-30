@@ -63,7 +63,10 @@ export async function removeInstallation(options: {
 
   // remove the package archive and its contents from the cache so that a reinstall fetches
   // a fresh copy from the registry
-  deletePackageCache(pkgName, pkgVersion);
+  deletePackageCache({
+    name: pkgName,
+    version: pkgVersion,
+  });
 
   // successful delete's in SO client return {}. return something more useful
   return installedAssets;

@@ -2100,6 +2100,7 @@ export const mockTimelineModel: TimelineModel = {
   eventIdToNoteIds: {},
   eventType: 'all',
   excludedRowRendererIds: [],
+  expandedEvent: {},
   filters: [
     {
       $state: {
@@ -2150,7 +2151,6 @@ export const mockTimelineModel: TimelineModel = {
   templateTimelineId: null,
   templateTimelineVersion: null,
   version: '1',
-  width: 1100,
 };
 
 export const mockTimelineResult: TimelineResult = {
@@ -2220,6 +2220,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     eventIdToNoteIds: {},
     eventType: 'all',
     excludedRowRendererIds: [],
+    expandedEvent: {},
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
@@ -2252,7 +2253,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     templateTimelineVersion: null,
     templateTimelineId: null,
     version: null,
-    width: 1100,
   },
   to: '2018-11-05T19:03:25.937Z',
   notes: null,

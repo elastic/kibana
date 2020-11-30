@@ -10,8 +10,8 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { shallow } from 'enzyme';
 
-import { EuiLink as EuiLinkExternal } from '@elastic/eui';
-import { EuiLink } from '../react_router_helpers';
+import { EuiLink } from '@elastic/eui';
+import { EuiLinkTo } from '../react_router_helpers';
 import { ENTERPRISE_SEARCH_PLUGIN, APP_SEARCH_PLUGIN } from '../../../../common/constants';
 
 import { SideNav, SideNavLink, SideNavItem } from './';
@@ -42,7 +42,7 @@ describe('SideNavLink', () => {
     const wrapper = shallow(<SideNavLink to="/">Link</SideNavLink>);
 
     expect(wrapper.type()).toEqual('li');
-    expect(wrapper.find(EuiLink)).toHaveLength(1);
+    expect(wrapper.find(EuiLinkTo)).toHaveLength(1);
     expect(wrapper.find('.enterpriseSearchNavLinks__item')).toHaveLength(1);
   });
 
@@ -52,7 +52,7 @@ describe('SideNavLink', () => {
         Link
       </SideNavLink>
     );
-    const externalLink = wrapper.find(EuiLinkExternal);
+    const externalLink = wrapper.find(EuiLink);
 
     expect(externalLink).toHaveLength(1);
     expect(externalLink.prop('href')).toEqual('http://website.com');

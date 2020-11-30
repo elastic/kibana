@@ -42,7 +42,7 @@ export function AddEnvironments({
   const { data = [], status } = useFetcher(
     (callApmApi) =>
       callApmApi({
-        pathname: `/api/apm/settings/anomaly-detection/environments`,
+        endpoint: `GET /api/apm/settings/anomaly-detection/environments`,
       }),
     [],
     { preservePreviousData: false }

@@ -18,6 +18,7 @@
  */
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
+import { TimefilterSetup } from '../query';
 import { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
 import {
   getEmptyValueSuggestions,
@@ -57,9 +58,9 @@ export class AutocompleteService {
   private hasQuerySuggestions = (language: string) => this.querySuggestionProviders.has(language);
 
   /** @public **/
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, { timefilter }: { timefilter: TimefilterSetup }) {
     this.getValueSuggestions = this.autocompleteConfig.valueSuggestions.enabled
-      ? setupValueSuggestionProvider(core)
+      ? setupValueSuggestionProvider(core, { timefilter })
       : getEmptyValueSuggestions;
 
     return {

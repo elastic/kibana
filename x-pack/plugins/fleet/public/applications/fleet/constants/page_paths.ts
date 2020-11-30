@@ -31,7 +31,7 @@ export interface DynamicPagePathValues {
   [key: string]: string;
 }
 
-export const BASE_PATH = '/app/ingestManager';
+export const BASE_PATH = '/app/fleet';
 
 // If routing paths are changed here, please also check to see if
 // `pagePathGetters()`, below, needs any modifications
@@ -51,8 +51,7 @@ export const PAGE_ROUTING_PATHS = {
   fleet: '/fleet',
   fleet_agent_list: '/fleet/agents',
   fleet_agent_details: '/fleet/agents/:agentId/:tabId?',
-  fleet_agent_details_events: '/fleet/agents/:agentId',
-  fleet_agent_details_details: '/fleet/agents/:agentId/details',
+  fleet_agent_details_logs: '/fleet/agents/:agentId/logs',
   fleet_enrollment_tokens: '/fleet/enrollment-tokens',
   data_streams: '/data-streams',
 };

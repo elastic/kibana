@@ -15,7 +15,7 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { SearchBar } from '../../shared/search_bar';
 import { TraceList } from './TraceList';
 
-type TracesAPIResponse = APIReturnType<'/api/apm/traces'>;
+type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
   items: [],
   isAggregationAccurate: true,
@@ -29,7 +29,7 @@ export function TraceOverview() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          pathname: '/api/apm/traces',
+          endpoint: 'GET /api/apm/traces',
           params: {
             query: {
               start,

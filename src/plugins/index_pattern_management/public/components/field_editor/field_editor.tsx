@@ -126,6 +126,7 @@ export interface FieldEditorState {
   errors?: string[];
   format: any;
   spec: IndexPatternField['spec'];
+  customLabel: string;
 }
 
 export interface FieldEdiorProps {
@@ -166,6 +167,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       isSaving: false,
       format: props.indexPattern.getFormatterForField(spec),
       spec: { ...spec },
+      customLabel: '',
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -209,6 +211,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         data.fieldFormats
       ),
       fieldFormatId: indexPattern.getFormatterForFieldNoDefault(spec.name)?.type?.id,
+      customLabel: spec.customLabel || '',
       fieldFormatParams: format.params(),
     });
   }
@@ -405,6 +408,33 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           data-test-subj="editorFieldType"
           onChange={(e) => {
             this.onTypeChange(e.target.value as KBN_FIELD_TYPES);
+          }}
+        />
+      </EuiFormRow>
+    );
+  }
+
+  renderCustomLabel() {
+    const { customLabel, spec } = this.state;
+
+    return (
+      <EuiFormRow
+        label={i18n.translate('indexPatternManagement.customLabel', {
+          defaultMessage: 'Custom label',
+        })}
+        helpText={
+          <FormattedMessage
+            id="indexPatternManagement.labelHelpText"
+            defaultMessage="Set a custom label to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          />
+        }
+      >
+        <EuiFieldText
+          value={customLabel || ''}
+          placeholder={spec.name}
+          data-test-subj="editorFieldCustomLabel"
+          onChange={(e) => {
+            this.setState({ customLabel: e.target.value });
           }}
         />
       </EuiFormRow>
@@ -772,7 +802,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   saveField = async () => {
     const field = this.state.spec;
     const { indexPattern } = this.props;
-    const { fieldFormatId, fieldFormatParams } = this.state;
+    const { fieldFormatId, fieldFormatParams, customLabel } = this.state;
 
     if (field.scripted) {
       this.setState({
@@ -811,6 +841,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       indexPattern.setFieldFormat(field.name, { id: fieldFormatId, params: fieldFormatParams });
     } else {
       indexPattern.deleteFieldFormat(field.name);
+    }
+
+    if (field.customLabel !== customLabel) {
+      field.customLabel = customLabel;
+      indexPattern.fields.update(field);
     }
 
     return indexPatternService
@@ -873,6 +908,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiForm>
           {this.renderScriptingPanels()}
           {this.renderName()}
+          {this.renderCustomLabel()}
           {this.renderLanguage()}
           {this.renderType()}
           {this.renderTypeConflict()}

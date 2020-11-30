@@ -6,15 +6,10 @@
 
 import { ReactElement } from 'react';
 import { StyleDescriptor } from '../../../common/descriptor_types';
-import { ILayer } from '../layers/layer';
 
 export interface IStyle {
   getType(): string;
-  renderEditor({
-    layer,
-    onStyleDescriptorChange,
-  }: {
-    layer: ILayer;
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
-  }): ReactElement<any> | null;
+  renderEditor(
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+  ): ReactElement<any> | null;
 }

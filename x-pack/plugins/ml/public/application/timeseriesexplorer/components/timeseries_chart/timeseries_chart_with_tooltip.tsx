@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState, useCallback } from 'react';
+import React, { FC, useEffect, useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { MlTooltipComponent } from '../../../components/chart_tooltip';
 import { TimeseriesChart } from './timeseries_chart';
@@ -16,6 +16,7 @@ import { useMlKibana, useNotifications } from '../../../contexts/kibana';
 import { getBoundsRoundedToInterval } from '../../../util/time_buckets';
 import { ANNOTATION_EVENT_USER } from '../../../../../common/constants/annotations';
 import { getControlsForDetector } from '../../get_controls_for_detector';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
@@ -49,6 +50,8 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
+
+  const annotationUpdatesService = useContext(MlAnnotationUpdatesContext);
 
   const [annotationData, setAnnotationData] = useState<Annotation[]>([]);
 
@@ -123,6 +126,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
         {(tooltipService) => (
           <TimeseriesChart
             {...chartProps}
+            annotationUpdatesService={annotationUpdatesService}
             annotationData={annotationData}
             bounds={bounds}
             detectorIndex={detectorIndex}

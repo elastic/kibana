@@ -62,6 +62,20 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
       return visualizationNames;
     }
 
+    public async waitUntilTableIsLoaded() {
+      return retry.try(async () => {
+        const isLoaded = await find.existsByDisplayedByCssSelector(
+          '[data-test-subj="itemsInMemTable"]:not(.euiBasicTable-loading)'
+        );
+
+        if (isLoaded) {
+          return true;
+        } else {
+          throw new Error('Waiting');
+        }
+      });
+    }
+
     /**
      * Navigates through all pages on Landing page and returns array of items names
      */

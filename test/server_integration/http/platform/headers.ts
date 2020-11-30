@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
 
   describe('headers timeout ', () => {
-    it('issue-73849', async () => {
+    it('handles correctly. See issue #73849', async () => {
       const agent = new Http.Agent({
         keepAlive: true,
       });
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       await performRequest();
-      const defaultHeadersTimeout = 40 * oneSec;
+      const defaultHeadersTimeout = 60 * oneSec;
       await delay(defaultHeadersTimeout + oneSec);
       await performRequest();
     });

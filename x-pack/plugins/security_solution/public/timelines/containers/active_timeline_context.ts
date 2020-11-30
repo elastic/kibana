@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimelineArgs } from '.';
+import { TimelineExpandedEvent } from '../../../common/types/timeline';
 import { TimelineEventsAllRequestOptions } from '../../../common/search_strategy/timeline';
+import { TimelineArgs } from '.';
 
 /*
  * Future Engineer
@@ -17,9 +18,10 @@ import { TimelineEventsAllRequestOptions } from '../../../common/search_strategy
  * I did not want to put in the store because I was feeling it will feel less temporarily and I did not want other engineer using it
  *
  */
+
 class ActiveTimelineEvents {
   private _activePage: number = 0;
-  private _expandedEventIds: Record<string, boolean> = {};
+  private _expandedEvent: TimelineExpandedEvent = {};
   private _pageName: string = '';
   private _request: TimelineEventsAllRequestOptions | null = null;
   private _response: TimelineArgs | null = null;
@@ -32,19 +34,20 @@ class ActiveTimelineEvents {
     this._activePage = activePage;
   }
 
-  getExpandedEventIds() {
-    return this._expandedEventIds;
+  getExpandedEvent() {
+    return this._expandedEvent;
   }
 
-  toggleExpandedEvent(eventId: string) {
-    this._expandedEventIds = {
-      ...this._expandedEventIds,
-      [eventId]: !this._expandedEventIds[eventId],
-    };
+  toggleExpandedEvent(expandedEvent: TimelineExpandedEvent) {
+    if (expandedEvent.eventId === this._expandedEvent.eventId) {
+      this._expandedEvent = {};
+    } else {
+      this._expandedEvent = expandedEvent;
+    }
   }
 
-  setExpandedEventIds(expandedEventIds: Record<string, boolean>) {
-    this._expandedEventIds = expandedEventIds;
+  setExpandedEvent(expandedEvent: TimelineExpandedEvent) {
+    this._expandedEvent = expandedEvent;
   }
 
   getPageName() {
