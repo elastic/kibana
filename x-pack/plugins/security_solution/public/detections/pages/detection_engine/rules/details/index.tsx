@@ -111,16 +111,19 @@ const getRuleDetailsTabs = (rule: Rule | null) => {
       id: RuleDetailTabs.alerts,
       name: detectionI18n.ALERT,
       disabled: false,
+      dataTestSubj: 'alertsTab',
     },
     {
       id: RuleDetailTabs.exceptions,
       name: i18n.EXCEPTIONS_TAB,
       disabled: !canUseExceptions,
+      dataTestSubj: 'exceptionsTab',
     },
     {
       id: RuleDetailTabs.failures,
       name: i18n.FAILURE_HISTORY_TAB,
       disabled: false,
+      dataTestSubj: 'failureHistoryTab',
     },
   ];
 };
@@ -273,6 +276,7 @@ const RuleDetailsPageComponent = () => {
             isSelected={tab.id === ruleDetailTab}
             disabled={tab.disabled}
             key={tab.id}
+            data-test-subj={tab.dataTestSubj}
           >
             {tab.name}
           </EuiTab>
