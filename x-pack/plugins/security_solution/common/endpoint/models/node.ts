@@ -6,9 +6,6 @@
 import { ResolverNode } from '../types';
 import { firstNonNullValue } from './ecs_safety_helpers';
 
-interface DataTimestamp {
-  '@timestamp': number | undefined;
-}
 /**
  * @description - Extract the first non null value from the nodeId depending on the datasource. Returns
  * undefined if the field was never set.

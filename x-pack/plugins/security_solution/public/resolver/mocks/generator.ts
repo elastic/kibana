@@ -21,16 +21,29 @@ import {
 } from '../../../common/endpoint/generate_data';
 import * as eventModel from '../../../common/endpoint/models/event';
 
+/**
+ * A structure for holding the generated tree.
+ */
 export interface GeneratedTreeResponse {
   genTree: Tree;
   tree: NewResolverTree;
   allNodes: Map<string, TreeNode>;
 }
 
+/**
+ * Generates a tree consisting of endpoint data using the specified options.
+ *
+ * The returned object includes the tree in the raw form that is easier to navigate because it leverages maps and
+ * the formatted tree that can be used wherever NewResolverTree is expected.
+ *
+ * @param treeOptions options for how the tree should be generated, like number of ancestors, descendants, etc
+ */
 export function generateTree(treeOptions?: TreeOptions): GeneratedTreeResponse {
   const generator = new EndpointDocGenerator('resolver');
   const genTree = generator.generateTree({
     ...treeOptions,
+    // Force the tree generation to not randomize the number of children per node, it will always be the max specified
+    // in the passed in options
     alwaysGenMaxChildrenPerNode: true,
   });
 
@@ -60,6 +73,12 @@ const buildFieldsObj = (event: Event): FieldsObject => {
   };
 };
 
+/**
+ * Builds a ResolverNode from an endpoint event.
+ *
+ * @param event an endpoint event
+ * @param stats the related events stats to associate with the node
+ */
 export function convertEventToResolverNode(
   event: Event,
   stats: EventStats = { total: 0, byCategory: {} }
@@ -73,6 +92,13 @@ export function convertEventToResolverNode(
   };
 }
 
+/**
+ * Creates a ResolverNode object.
+ *
+ * @param generator a document generator
+ * @param options the configuration options to use when creating the node
+ * @param stats the related events stats to associate with the node
+ */
 export function genResolverNode(
   generator: EndpointDocGenerator,
   options?: EventOptions,
@@ -81,6 +107,11 @@ export function genResolverNode(
   return convertEventToResolverNode(generator.generateEvent(options), stats);
 }
 
+/**
+ * Converts a generated Tree to the new resolver tree format.
+ *
+ * @param tree a generated tree.
+ */
 export function formatTree(tree: Tree): NewResolverTree {
   const allData = new Map([[tree.origin.id, tree.origin], ...tree.children, ...tree.ancestry]);
 
