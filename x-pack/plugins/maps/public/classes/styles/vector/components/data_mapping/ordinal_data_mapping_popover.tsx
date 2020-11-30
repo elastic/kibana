@@ -30,11 +30,11 @@ import {
 import { PercentilesForm } from './percentiles_form';
 
 const easingTitle = i18n.translate('xpack.maps.styles.ordinalDataMapping.easingTitle', {
-  defaultMessage: `Easing between min and max`,
+  defaultMessage: `Ease between min and max`,
 });
 
 const percentilesTitle = i18n.translate('xpack.maps.styles.ordinalDataMapping.percentilesTitle', {
-  defaultMessage: `Percentiles`,
+  defaultMessage: `Use percentiles`,
 });
 
 const STEP_FUNCTION_OPTIONS = [
@@ -48,7 +48,7 @@ const STEP_FUNCTION_OPTIONS = [
           <p className="euiTextColor--subdued">
             <FormattedMessage
               id="xpack.maps.styles.ordinalDataMapping.easingDescription"
-              defaultMessage="Values are fit from the data domain to the style on a linear scale"
+              defaultMessage="Fit values from the data domain to the style on a linear scale"
             />
           </p>
         </EuiText>
@@ -65,7 +65,7 @@ const STEP_FUNCTION_OPTIONS = [
           <p className="euiTextColor--subdued">
             <FormattedMessage
               id="xpack.maps.styles.ordinalDataMapping.percentilesDescription"
-              defaultMessage="Use percentiles to divide style into bands, values are mapped into style bands"
+              defaultMessage="Divide style into bands that map to values"
             />
           </p>
         </EuiText>
@@ -131,7 +131,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
           <EuiToolTip
             anchorClassName="eui-alignMiddle"
             content={i18n.translate('xpack.maps.styles.ordinalDataMapping.sigmaTooltipContent', {
-              defaultMessage: `Set sigma to a smaller value to minimize outliers by moving the min and max closer to the median.`,
+              defaultMessage: `To minimize outliers, set sigma to a smaller value. Smaller sigmas move the min and max closer to the median.`,
             })}
           >
             <span>
@@ -175,14 +175,14 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
                 <EuiText>
                   <p>
                     <FormattedMessage
-                      id="xpack.maps.styles.ordinalDataMapping.isEnabled.local"
-                      defaultMessage="When disabled, min and max are calculated from local data. Min and max are re-calculated when layer data changes. Style bands might be inconsistent as users pan, zoom, and filter the map."
+                      id="xpack.maps.styles.ordinalDataMapping.isEnabled.server"
+                      defaultMessage="Calculate min and max from the entire data set. Styling is consistent when users pan, zoom, and filter. To minimize outliers, min and max are clamped to the standard deviation (sigma) from the medium."
                     />
                   </p>
                   <p>
                     <FormattedMessage
-                      id="xpack.maps.styles.ordinalDataMapping.isEnabled.server"
-                      defaultMessage="When enabled, min and max are calculated for the entire data set. Style bands are consistent as users pan, zoom, and filter the map. Min and max are clamped to the standard deviation (sigma) from the median to minimize outliers."
+                      id="xpack.maps.styles.ordinalDataMapping.isEnabled.local"
+                      defaultMessage="When disabled, calculate min and max from local data and recalculate min and max when the data changes. Styling may be inconsistent when users pan, zoom, and filter."
                     />
                   </p>
                 </EuiText>
@@ -235,7 +235,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
           helpText={i18n.translate(
             'xpack.maps.styles.ordinalDataMapping.stepFunctionTooltipContent',
             {
-              defaultMessage: `Specify how values are fit from the data domain to the style`,
+              defaultMessage: `Fit values from the data domain to the style`,
             }
           )}
         >
