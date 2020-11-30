@@ -15,6 +15,10 @@ export function getDefaultExplorationPageUrlState(): ExplorationPageUrlState {
     queryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
     pageIndex: 0,
     pageSize: 25,
+    analysis: false,
+    evaluation: true,
+    feature_importance: true,
+    results: true,
   };
 }
 

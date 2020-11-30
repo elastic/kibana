@@ -205,10 +205,13 @@ export type FilterEditUrlState = MLPageState<
   }
 >;
 
+export type ExpandablePanels = 'analysis' | 'evaluation' | 'feature_importance' | 'results';
+
 export type ExplorationPageUrlState = {
   queryText: string;
   queryLanguage: SearchQueryLanguage;
-} & Pick<ListingPageUrlState, 'pageIndex' | 'pageSize'>;
+} & Pick<ListingPageUrlState, 'pageIndex' | 'pageSize'> &
+  { [key in ExpandablePanels]: boolean };
 
 /**
  * Union type of ML URL state based on page
