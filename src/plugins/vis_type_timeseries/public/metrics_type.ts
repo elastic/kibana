@@ -90,7 +90,7 @@ export const metricsVisDefinition = {
     if (indexes) {
       return (
         await Promise.all(
-          indexes.split(INDEXES_SEPARATOR).map((title) => indexPatterns.findByTitle(title))
+          indexes.split(INDEXES_SEPARATOR).map((title) => indexPatterns.getByTitle(title))
         )
       ).filter((index) => Boolean(index)) as IndexPattern[];
     }

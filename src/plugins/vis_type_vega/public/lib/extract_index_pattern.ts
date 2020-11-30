@@ -36,7 +36,7 @@ export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {
     await Promise.all(
       data.reduce<Data[]>((accumulator, currentValue) => {
         if (currentValue.url?.index) {
-          accumulator.push(indexPatterns.findByTitle(currentValue.url.index));
+          accumulator.push(indexPatterns.getByTitle(currentValue.url.index));
         }
 
         return accumulator;
