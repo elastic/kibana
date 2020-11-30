@@ -10,7 +10,7 @@ import React from 'react';
 export const LogEntryExampleMessagesFailureIndicator: React.FunctionComponent<{
   onRetry: () => void;
 }> = ({ onRetry }) => (
-  <EuiFlexGroup alignItems="center" justifyContent="center">
+  <EuiFlexGroup alignItems="center">
     <EuiFlexItem grow={false} className="eui-textNoWrap">
       <EuiTextColor color="danger">
         <FormattedMessage
