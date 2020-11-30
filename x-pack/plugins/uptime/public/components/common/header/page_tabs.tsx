@@ -53,7 +53,7 @@ export const PageTabs = () => {
     if (isSettings) {
       setSelectedTabId(SETTINGS_ROUTE);
     }
-  }, []);
+  }, [isCerts, isSettings, isOverView]);
 
   const renderTabs = () => {
     return tabs.map(({ dataTestSubj, name, id }, index) => (

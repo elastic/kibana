@@ -5,7 +5,6 @@
  */
 
 import React, { useContext } from 'react';
-import * as labels from '../../pages/translations';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,6 +13,7 @@ import {
   EuiHideFor,
   EuiShowFor,
 } from '@elastic/eui';
+import * as labels from '../../pages/translations';
 import { UptimeRefreshContext } from '../../contexts';
 
 export const CertRefreshBtn = () => {
