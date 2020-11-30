@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/82915
-  describe.skip('discover test', function describeIndexTests() {
+  describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
@@ -317,10 +316,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const getRequestTimestamp = async () => {
           const requestStats = await inspector.getTableData();
-          const requestTimestamp = requestStats.filter((r) =>
-            r[0].includes('Request timestamp')
-          )[0][1];
-          return requestTimestamp;
+          const requestStatsRow = requestStats.filter(
+            (r) => r && r[0] && r[0].includes('Request timestamp')
+          );
+          if (!requestStatsRow || !requestStatsRow[0] || !requestStatsRow[0][1]) {
+            return '';
+          }
+          return requestStatsRow[0][1];
         };
 
         const requestTimestampBefore = await getRequestTimestamp();
@@ -329,7 +331,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.debug(
             `Timestamp before: ${requestTimestampBefore}, Timestamp after: ${requestTimestampAfter}`
           );
-          return requestTimestampBefore !== requestTimestampAfter;
+          return requestTimestampAfter && requestTimestampBefore !== requestTimestampAfter;
         });
       });
 

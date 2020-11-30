@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const deployment = getService('deployment');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/80104
-  describe.skip('shared links', function describeIndexTests() {
+  describe('shared links', function describeIndexTests() {
     let baseUrl: string;
 
     async function setup({ storeStateInSessionStorage }: { storeStateInSessionStorage: boolean }) {
