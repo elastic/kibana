@@ -7,6 +7,7 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingChart } from '@elastic/eui';
 import { TabContent, TabProps } from '../shared';
 import { Source } from '../../../../../../../containers/source';
 import { findInventoryModel } from '../../../../../../../../common/inventory_models';
@@ -59,7 +60,7 @@ const TabComponent = (props: TabProps) => {
   );
 
   if (metadataLoading) {
-    return <LoadingSpinner />;
+    return <LoadingPlaceholder />;
   }
 
   return (
@@ -105,10 +106,22 @@ const TableWrapper = euiStyled.div`
   margin-bottom: 20px
 `;
 
-const LoadingSpinner = euiStyled(EuiLoadingSpinner).attrs({ size: 'm' })`
-  margin-top: 2px;
-  margin-bottom: 3px;
-`;
+const LoadingPlaceholder = () => {
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '200px',
+        padding: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <EuiLoadingChart size="xl" />
+    </div>
+  );
+};
 
 export const PropertiesTab = {
   id: 'properties',

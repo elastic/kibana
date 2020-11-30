@@ -17,6 +17,7 @@ import {
   PointerEvent,
 } from '@elastic/charts';
 import moment from 'moment';
+import { EuiLoadingChart } from '@elastic/eui';
 import { TabContent, TabProps } from '../shared';
 import { useSnapshot } from '../../../../hooks/use_snaphot';
 import { useWaffleOptionsContext } from '../../../../hooks/use_waffle_options';
@@ -239,7 +240,7 @@ const TabComponent = (props: TabProps) => {
     !usedMemoryMetricsTs ||
     !freeMemoryMetricsTs
   ) {
-    return <div />;
+    return <LoadingPlaceholder />;
   }
 
   const cpuChartMetrics = buildChartMetricLabels([SYSTEM_METRIC_NAME, USER_METRIC_NAME], 'avg');
@@ -466,6 +467,23 @@ const ChartContainer: React.FC = ({ children }) => (
     {children}
   </div>
 );
+
+const LoadingPlaceholder = () => {
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        padding: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <EuiLoadingChart size="xl" />
+    </div>
+  );
+};
 
 export const MetricsTab = {
   id: 'metrics',
