@@ -265,15 +265,16 @@ export class VectorStyle implements IVectorStyle {
     });
 
     let hasChanges = false;
-    for (let i = 0; i < previousFields.length; i++) {
-      const previousField = previousFields[i];
-      const nextField = nextFields[i];
-      if (previousField.isEqual(nextField)) {
-        continue;
-      }
 
-      // Check if the updated field can be assigned to any of the broken style-properties.
-      for (let j = 0; j < invalidStyleNames.length; j++) {
+    for (let j = 0; j < invalidStyleNames.length; j++) {
+      for (let i = 0; i < previousFields.length; i++) {
+        const previousField = previousFields[i];
+        const nextField = nextFields[i];
+        if (previousField.isEqual(nextField)) {
+          continue;
+        }
+
+        // Check if the updated field can be assigned to any of the broken style-properties.
         const dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions> = this.getAllStyleProperties().find(
           (d) => d.getStyleName() === invalidStyleNames[j]
         ) as IDynamicStyleProperty<DynamicStylePropertyOptions>;
@@ -295,8 +296,8 @@ export class VectorStyle implements IVectorStyle {
 
           if (newFieldDescriptor) {
             hasChanges = true;
-            invalidStyleNames.splice(j, 1);
-            j--;
+            // invalidStyleNames.splice(j, 1);
+            // j--;
           }
         }
 
