@@ -20,6 +20,8 @@
 import { cloneDeep, get, omit, has, flow } from 'lodash';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
+import { Fit } from '@elastic/charts';
+
 import { ChartType } from '../../../vis_type_xy/common';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
@@ -792,6 +794,8 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
       [ChartType.Area, ChartType.Line, ChartType.Histogram].includes(visState?.params?.type)
     ) {
       const isHorizontalBar = visState.type === 'horizontal_bar';
+      const isLineOrArea =
+        visState?.params?.type === ChartType.Area || visState?.params?.type === ChartType.Line;
       return {
         ...doc,
         attributes: {
@@ -808,6 +812,9 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
                 decorateAxes(visState.params.valueAxes, isHorizontalBar),
               isVislibVis: true,
               detailedTooltip: true,
+              ...(isLineOrArea && {
+                fittingFunction: Fit.Zero,
+              }),
             },
           }),
         },
