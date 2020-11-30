@@ -65,7 +65,7 @@ describe('EnableAlertComponent', () => {
     expect(wrapper.find(EuiPopover)).toHaveLength(1);
     wrapper.find('button').simulate('click');
     expect(wrapper.find(EuiText).text()).toBe(
-      'To start enabling alerts, please define a default alert action connector in '
+      'To start enabling alerts, please define a default alert action connector in Settings'
     );
     expect(wrapper.find(ReactRouterEuiLink)).toMatchInlineSnapshot(`
       <ReactRouterEuiLink
@@ -86,7 +86,9 @@ describe('EnableAlertComponent', () => {
               href="/settings?focusConnectorField=true"
               onClick={[Function]}
               rel="noreferrer"
-            />
+            >
+              Settings
+            </a>
           </EuiLink>
         </ReactRouterHelperForEui>
       </ReactRouterEuiLink>
