@@ -37,12 +37,14 @@ export class IndexPatternDatasource {
         getIndexPatternDatasource,
         renameColumns,
         formatColumn,
+        counterRate,
         getTimeScaleFunction,
         getSuffixFormatter,
       } = await import('../async_services');
       return core.getStartServices().then(([coreStart, { data }]) => {
         data.fieldFormats.register([getSuffixFormatter(data.fieldFormats.deserialize)]);
         expressions.registerFunction(getTimeScaleFunction(data));
+        expressions.registerFunction(counterRate);
         expressions.registerFunction(renameColumns);
         expressions.registerFunction(formatColumn);
         return getIndexPatternDatasource({
