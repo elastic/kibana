@@ -11,7 +11,6 @@ import React from 'react';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { useEnvironments } from '../../../hooks/useEnvironments';
-import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
@@ -22,6 +21,7 @@ import {
   TransactionTypeField,
   IsAboveField,
 } from '../fields';
+import { useApmService } from '../../../hooks/use_apm_service';
 
 interface AlertParams {
   windowSize: number;
@@ -63,7 +63,7 @@ interface Props {
 export function TransactionDurationAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
-  const transactionTypes = useServiceTransactionTypes(urlParams);
+  const { transactionTypes } = useApmService();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end, transactionType } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });

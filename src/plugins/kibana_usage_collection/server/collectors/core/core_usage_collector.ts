@@ -24,7 +24,7 @@ export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
   getCoreUsageDataService: () => CoreUsageDataStart
 ) {
-  return usageCollection.makeUsageCollector<CoreUsageData, { core: CoreUsageData }>({
+  return usageCollection.makeUsageCollector<CoreUsageData>({
     type: 'core',
     isReady: () => typeof getCoreUsageDataService() !== 'undefined',
     schema: {

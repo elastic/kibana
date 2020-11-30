@@ -8,7 +8,6 @@ import { LegacyCallAPIOptions } from 'src/core/server';
 import { take } from 'rxjs/operators';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
-import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { PluginsSetup } from '../plugin';
 import { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
 
@@ -160,11 +159,6 @@ interface CollectorDeps {
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
 }
 
-interface BulkUpload {
-  usage: {
-    spaces: UsageData;
-  };
-}
 /*
  * @param {Object} server
  * @return {Object} kibana usage stats type collection object
@@ -173,7 +167,7 @@ export function getSpacesUsageCollector(
   usageCollection: UsageCollectionSetup,
   deps: CollectorDeps
 ) {
-  return usageCollection.makeUsageCollector<UsageData, BulkUpload>({
+  return usageCollection.makeUsageCollector<UsageData>({
     type: 'spaces',
     isReady: () => true,
     schema: {
@@ -246,22 +240,6 @@ export function getSpacesUsageCollector(
         ...usageData,
         ...usageStats,
       } as UsageData;
-    },
-
-    /*
-     * Format the response data into a model for internal upload
-     * 1. Make this data part of the "kibana_stats" type
-     * 2. Organize the payload in the usage.xpack.spaces namespace of the data payload
-     */
-    formatForBulkUpload: (result: UsageData) => {
-      return {
-        type: KIBANA_STATS_TYPE_MONITORING,
-        payload: {
-          usage: {
-            spaces: result,
-          },
-        },
-      };
     },
   });
 }
