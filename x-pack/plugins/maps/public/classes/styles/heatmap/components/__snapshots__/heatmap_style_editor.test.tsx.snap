@@ -121,6 +121,7 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
           "value": "Blue to Red",
         },
         Object {
+          "getPalette": [Function],
           "palette": Array [
             "rgb(65, 105, 225)",
             "rgb(0, 256, 256)",
