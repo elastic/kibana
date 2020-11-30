@@ -131,7 +131,7 @@ export const TagTable: FC<TagTableProps> = ({
             name: i18n.translate('xpack.savedObjectsTagging.management.table.columns.actions', {
               defaultMessage: 'Actions',
             }),
-            width: '150px',
+            width: '100px',
             actions,
           },
         ]
