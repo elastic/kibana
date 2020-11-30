@@ -22,6 +22,16 @@ interface Props {
 }
 
 export function GeoLineForm(props: Props) {
+  function onSortFieldChange(fieldName: string | undefined) {
+    if (fieldName !== undefined) {
+      props.onSortFieldChange(fieldName);
+    }
+  }
+  function onSplitFieldChange(fieldName: string | undefined) {
+    if (fieldName !== undefined) {
+      props.onSplitFieldChange(fieldName);
+    }
+  }
   return (
     <>
       <EuiFormRow
@@ -34,7 +44,7 @@ export function GeoLineForm(props: Props) {
             defaultMessage: 'Select entity field',
           })}
           value={props.splitField}
-          onChange={props.onSplitFieldChange}
+          onChange={onSplitFieldChange}
           fields={getTermsFields(props.indexPattern.fields)}
           isClearable={false}
         />
@@ -50,7 +60,7 @@ export function GeoLineForm(props: Props) {
             defaultMessage: 'Select sort field',
           })}
           value={props.sortField}
-          onChange={props.onSortFieldChange}
+          onChange={onSortFieldChange}
           fields={props.indexPattern.fields.filter(
             (field) => field.sortable && !indexPatterns.isNestedField(field)
           )}

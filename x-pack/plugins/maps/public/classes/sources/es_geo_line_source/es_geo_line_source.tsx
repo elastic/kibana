@@ -10,6 +10,7 @@ import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getField, addFieldToDSL, makeESBbox } from '../../../../common/elasticsearch_util';
+import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -18,6 +19,7 @@ import { convertToGeoJson } from './convert_to_geojson';
 import { ESDocField } from '../../fields/es_doc_field';
 import { UpdateSourceEditor } from './update_source_editor';
 import { SourceEditorArgs } from '../source';
+import { isValidStringConfig } from '../../util/valid_string_config';
 
 const MAX_TRACKS = 1000;
 
@@ -25,21 +27,33 @@ export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
   defaultMessage: 'Tracks',
 });
 
-export interface GeoLineSourceConfig {
-  indexPatternId: string;
-  geoField: string;
-  splitField: string;
-  sortField: string;
-}
-
 export class ESGeoLineSource extends AbstractESAggSource {
-  static createDescriptor(sourceConfig: GeoLineSourceConfig) {
+  static createDescriptor(descriptor: Partial<ESGeoLineSourceDescriptor>) {
+    const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
+    if (!isValidStringConfig(normalizedDescriptor.geoField)) {
+      throw new Error('Cannot create an ESGeoLineSource without a geoField');
+    }
+    if (!isValidStringConfig(normalizedDescriptor.splitField)) {
+      throw new Error('Cannot create an ESGeoLineSource without a splitField');
+    }
+    if (!isValidStringConfig(normalizedDescriptor.sortField)) {
+      throw new Error('Cannot create an ESGeoLineSource without a sortField');
+    }
     return {
+      ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_GEO_LINE,
-      id: uuid(),
-      metrics: [DEFAULT_METRIC],
-      ...sourceConfig,
+      geoField: normalizedDescriptor.geoField!,
+      splitField: normalizedDescriptor.splitField!,
+      sortField: normalizedDescriptor.sortField!,
     };
+  }
+
+  readonly _descriptor: ESGeoLineSourceDescriptor;
+
+  constructor(descriptor: Partial<ESGeoLineSourceDescriptor>, inspectorAdapters?: Adapters) {
+    const sourceDescriptor = ESGeoLineSource.createDescriptor(descriptor);
+    super(sourceDescriptor, inspectorAdapters, true);
+    this._descriptor = sourceDescriptor;
   }
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {

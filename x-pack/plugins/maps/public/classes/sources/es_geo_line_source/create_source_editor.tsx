@@ -11,14 +11,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiPanel } from '@elastic/eui';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
+import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
 
 import { getGeoPointFields } from '../../../index_pattern_util';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
-import { GeoLineSourceConfig } from './es_geo_line_source';
 import { GeoLineForm } from './geo_line_form';
 
 interface Props {
-  onSourceConfigChange: (sourceConfig: GeoLineSourceConfig) => void;
+  onSourceConfigChange: (sourceConfig: Partial<ESGeoLineSourceDescriptor>) => void;
 }
 
 interface State {

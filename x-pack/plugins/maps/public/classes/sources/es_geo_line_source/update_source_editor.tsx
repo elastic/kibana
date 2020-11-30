@@ -14,7 +14,6 @@ import {
   IndexPattern,
   indexPatterns,
 } from '../../../../../../../src/plugins/data/public';
-// @ts-expect-error
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { GeoLineForm } from './geo_line_form';
@@ -56,16 +55,6 @@ export class UpdateSourceEditor extends Component<Props, State> {
     try {
       indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
     } catch (err) {
-      if (this._isMounted) {
-        this.setState({
-          loadError: i18n.translate('xpack.maps.source.esGrid.noIndexPatternErrorMessage', {
-            defaultMessage: `Unable to find Index pattern {id}`,
-            values: {
-              id: this.props.indexPatternId,
-            },
-          }),
-        });
-      }
       return;
     }
 
@@ -79,7 +68,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
     });
   }
 
-  _onMetricsChange = (metrics) => {
+  _onMetricsChange = (metrics: AggDescriptor[]) => {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
@@ -129,7 +118,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <EuiSpacer size="m" />
           <GeoLineForm
             indexPattern={this.state.indexPattern}
-            onSortFieldChange={this._onSortFieldSelect}
+            onSortFieldChange={this._onSortFieldChange}
             onSplitFieldChange={this._onSplitFieldChange}
             sortField={this.props.sortField}
             splitField={this.props.splitField}

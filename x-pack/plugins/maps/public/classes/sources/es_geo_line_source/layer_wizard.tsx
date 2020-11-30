@@ -7,12 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
-import { ESGeoLineSource, GeoLineSourceConfig, geoLineTitle } from './es_geo_line_source';
+import { ESGeoLineSource, geoLineTitle } from './es_geo_line_source';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
+import {
+  ColorDynamicOptions,
+  ESGeoLineSourceDescriptor,
+} from '../../../../common/descriptor_types';
 import {
   COLOR_MAP_TYPE,
-  COUNT_PROP_NAME,
   FIELD_ORIGIN,
   LAYER_WIZARD_CATEGORY,
   STYLE_TYPE,
@@ -38,7 +40,7 @@ export const geoLineLayerWizardConfig: LayerWizard = {
     return !getIsGoldPlus();
   },
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: GeoLineSourceConfig) => {
+    const onSourceConfigChange = (sourceConfig: Partial<ESGeoLineSourceDescriptor>) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;
