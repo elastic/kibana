@@ -23,6 +23,7 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/m
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
+  TimelineExpandedEvent,
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
@@ -142,7 +143,7 @@ export const addTimelineToStore = ({
 }: AddTimelineParams): TimelineById => {
   if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
     activeTimeline.setActivePage(0);
-    activeTimeline.setExpandedEventIds({});
+    activeTimeline.setExpandedEvent({});
   }
   return {
     ...timelineById,
@@ -169,6 +170,7 @@ interface AddNewTimelineParams {
     end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
+  expandedEvent?: TimelineExpandedEvent;
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
@@ -190,6 +192,7 @@ export const addNewTimeline = ({
   dataProviders = [],
   dateRange: maybeDateRange,
   excludedRowRendererIds = [],
+  expandedEvent = {},
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
@@ -218,6 +221,7 @@ export const addNewTimeline = ({
       columns,
       dataProviders,
       dateRange,
+      expandedEvent,
       excludedRowRendererIds,
       filters,
       itemsPerPage,
@@ -299,39 +303,6 @@ export const updateGraphEventId = ({
     [id]: {
       ...timeline,
       graphEventId,
-    },
-  };
-};
-
-interface ApplyDeltaToCurrentWidthParams {
-  id: string;
-  delta: number;
-  bodyClientWidthPixels: number;
-  minWidthPixels: number;
-  maxWidthPercent: number;
-  timelineById: TimelineById;
-}
-
-export const applyDeltaToCurrentWidth = ({
-  id,
-  delta,
-  bodyClientWidthPixels,
-  minWidthPixels,
-  maxWidthPercent,
-  timelineById,
-}: ApplyDeltaToCurrentWidthParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  const requestedWidth = timeline.width + delta * -1; // raw change in width
-  const maxWidthPixels = (maxWidthPercent / 100) * bodyClientWidthPixels;
-  const clampedWidth = Math.min(requestedWidth, maxWidthPixels);
-  const width = Math.max(minWidthPixels, clampedWidth); // if the clamped width is smaller than the min, use the min
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      width,
     },
   };
 };

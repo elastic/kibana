@@ -51,6 +51,7 @@ export const findThresholdSignals = async ({
             terms: {
               field: threshold.field,
               min_doc_count: threshold.value,
+              size: 10000, // max 10k buckets
             },
             aggs: {
               // Get the most recent hit per bucket

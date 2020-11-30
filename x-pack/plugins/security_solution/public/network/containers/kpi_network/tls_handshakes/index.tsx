@@ -74,9 +74,10 @@ export const useNetworkKpiTlsHandshakes = ({
       : null
   );
 
-  const [networkKpiTlsHandshakesResponse, setNetworkKpiTlsHandshakesResponse] = useState<
-    NetworkKpiTlsHandshakesArgs
-  >({
+  const [
+    networkKpiTlsHandshakesResponse,
+    setNetworkKpiTlsHandshakesResponse,
+  ] = useState<NetworkKpiTlsHandshakesArgs>({
     tlsHandshakes: 0,
     id: ID,
     inspect: {

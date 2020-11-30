@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CommentRequest } from '../../../../../case/common/api';
+import { CommentRequestUserType } from '../../../../../case/common/api';
 import { FIELD_TYPES, fieldValidators, FormSchema } from '../../../shared_imports';
 import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;
 
-export const schema: FormSchema<CommentRequest> = {
+export interface AddCommentFormSchema {
+  comment: CommentRequestUserType['comment'];
+}
+
+export const schema: FormSchema<AddCommentFormSchema> = {
   comment: {
     type: FIELD_TYPES.TEXTAREA,
     validations: [

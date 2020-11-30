@@ -21,6 +21,12 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
       type: {
         type: 'keyword',
       },
+      alertId: {
+        type: 'keyword',
+      },
+      index: {
+        type: 'keyword',
+      },
       created_at: {
         type: 'date',
       },

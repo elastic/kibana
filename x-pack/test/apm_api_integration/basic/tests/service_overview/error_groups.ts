@@ -99,9 +99,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
         `);
 
-        expectSnapshot(
-          firstItem.occurrences.timeseries.filter(({ y }: any) => y > 0).length
-        ).toMatchInline(`7`);
+        const visibleDataPoints = firstItem.occurrences.timeseries.filter(({ y }: any) => y > 0);
+        expectSnapshot(visibleDataPoints.length).toMatchInline(`7`);
       });
 
       it('sorts items in the correct order', async () => {

@@ -27,6 +27,7 @@ import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_tr
 // get list of configurations
 export const agentConfigurationRoute = createRoute({
   endpoint: 'GET /api/apm/settings/agent-configuration',
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return await listConfigurations({ setup });
@@ -39,6 +40,7 @@ export const getSingleAgentConfigurationRoute = createRoute({
   params: t.partial({
     query: serviceRt,
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { name, environment } = context.params.query;
@@ -148,6 +150,7 @@ export const agentConfigurationSearchRoute = createRoute({
   params: t.type({
     body: searchParamsRt,
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const {
       service,
@@ -194,6 +197,7 @@ export const agentConfigurationSearchRoute = createRoute({
 // get list of services
 export const listAgentConfigurationServicesRoute = createRoute({
   endpoint: 'GET /api/apm/settings/agent-configuration/services',
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
@@ -212,6 +216,7 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute({
   params: t.partial({
     query: t.partial({ serviceName: t.string }),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;
@@ -233,6 +238,7 @@ export const agentConfigurationAgentNameRoute = createRoute({
   params: t.type({
     query: t.type({ serviceName: t.string }),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;

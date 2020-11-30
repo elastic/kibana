@@ -13,7 +13,13 @@ import {
 } from '../common';
 
 export { default as apm } from 'elastic-apm-node';
-export { AgentService, ESIndexPatternService, getRegistryUrl, PackageService } from './services';
+export {
+  AgentService,
+  ESIndexPatternService,
+  getRegistryUrl,
+  PackageService,
+  AgentPolicyServiceInterface,
+} from './services';
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';
 
 export const config: PluginConfigDescriptor = {

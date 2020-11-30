@@ -115,6 +115,26 @@ export default ({ getService }: FtrProviderContext) => {
         moduleIds: [],
       },
     },
+    {
+      testTitleSuffix: 'for heartbeat dataset',
+      sourceDataArchive: 'ml/module_heartbeat',
+      indexPattern: 'ft_module_heartbeat',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['uptime_heartbeat'],
+      },
+    },
+    {
+      testTitleSuffix: 'for auditbeat dataset',
+      sourceDataArchive: 'ml/module_auditbeat',
+      indexPattern: 'ft_module_auditbeat',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['auditbeat_process_hosts_ecs', 'siem_auditbeat'],
+      },
+    },
   ];
 
   async function executeRecognizeModuleRequest(indexPattern: string, user: USER, rspCode: number) {

@@ -31,7 +31,7 @@ const executeParams = {
   request: {} as KibanaRequest,
 };
 
-const spacesMock = spacesServiceMock.createSetupContract();
+const spacesMock = spacesServiceMock.createStartContract();
 const loggerMock = loggingSystemMock.create().get();
 const getActionsClientWithRequest = jest.fn();
 actionExecutor.initialize({
@@ -322,7 +322,7 @@ test('throws an error when passing isESOUsingEphemeralEncryptionKey with value o
   await expect(
     customActionExecutor.execute(executeParams)
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+    `"Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
   );
 });
 

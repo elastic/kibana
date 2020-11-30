@@ -13,11 +13,13 @@ import {
   CaseConfigurationSchema,
   ExecutorSubActionAddCommentParamsSchema,
   ConnectorSchema,
+  CommentSchema,
 } from './schema';
 import { CaseResponse, CasesResponse } from '../../../common/api';
 
 export type CaseConfiguration = TypeOf<typeof CaseConfigurationSchema>;
 export type Connector = TypeOf<typeof ConnectorSchema>;
+export type Comment = TypeOf<typeof CommentSchema>;
 
 export type ExecutorSubActionCreateParams = TypeOf<typeof ExecutorSubActionCreateParamsSchema>;
 export type ExecutorSubActionUpdateParams = TypeOf<typeof ExecutorSubActionUpdateParamsSchema>;

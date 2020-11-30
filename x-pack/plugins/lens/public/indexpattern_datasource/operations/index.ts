@@ -6,4 +6,11 @@
 
 export * from './operations';
 export * from './layer_helpers';
-export { OperationType, IndexPatternColumn, FieldBasedIndexPatternColumn } from './definitions';
+export {
+  OperationType,
+  IndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  IncompleteColumn,
+} from './definitions';
+
+export { createMockedReferenceOperation } from './mocks';

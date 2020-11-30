@@ -20,7 +20,7 @@ import {
   EuiButton,
   EuiCallOut,
 } from '@elastic/eui';
-import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useCore } from '../../../hooks';
+import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
 import { Loading } from '../../../components';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
 
@@ -32,7 +32,7 @@ const FlyoutBody = styled(EuiFlyoutBody)`
 
 export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => void }>(
   ({ policyId, onClose }) => {
-    const core = useCore();
+    const core = useStartServices();
     const { isLoading: isLoadingYaml, data: yamlData, error } = useGetOneAgentPolicyFull(policyId);
     const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
     const body = isLoadingYaml ? (

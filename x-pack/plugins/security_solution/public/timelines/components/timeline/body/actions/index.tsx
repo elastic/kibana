@@ -6,7 +6,7 @@
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiLoadingSpinner, EuiCheckbox } from '@elastic/eui';
 
-import { EventsLoading, EventsTd, EventsTdContent, EventsTdGroupActions } from '../../styles';
+import { EventsTd, EventsTdContent, EventsTdGroupActions } from '../../styles';
 import * as i18n from '../translations';
 import { OnRowSelected } from '../../events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
@@ -18,7 +18,6 @@ interface Props {
   onRowSelected: OnRowSelected;
   expanded: boolean;
   eventId: string;
-  loading: boolean;
   loadingEventIds: Readonly<string[]>;
   onEventToggled: () => void;
   showCheckboxes: boolean;
@@ -30,7 +29,6 @@ const ActionsComponent: React.FC<Props> = ({
   checked,
   expanded,
   eventId,
-  loading = false,
   loadingEventIds,
   onEventToggled,
   onRowSelected,
@@ -68,17 +66,14 @@ const ActionsComponent: React.FC<Props> = ({
       )}
       <EventsTd key="expand-event">
         <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-          {loading ? (
-            <EventsLoading />
-          ) : (
-            <EuiButtonIcon
-              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
-              data-test-subj="expand-event"
-              iconType={expanded ? 'arrowDown' : 'arrowRight'}
-              id={eventId}
-              onClick={onEventToggled}
-            />
-          )}
+          <EuiButtonIcon
+            aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
+            data-test-subj="expand-event"
+            disabled={expanded}
+            iconType="arrowRight"
+            id={eventId}
+            onClick={onEventToggled}
+          />
         </EventsTdContent>
       </EventsTd>
 
