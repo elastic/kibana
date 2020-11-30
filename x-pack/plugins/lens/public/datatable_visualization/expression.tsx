@@ -280,13 +280,14 @@ export function DatatableComponent(props: DatatableRenderProps) {
         }}
         onChange={(event: { sort?: { field: string } }) => {
           if (event.sort && onEditAction) {
+            const isNewColumn = sortBy !== event.sort.field;
             // unfortunately the neutral state is not propagated and we need to manually handle it
             const nextDirection = getNextOrderValue(
-              sortDirection as LensEditEvent['data']['direction']
+              (isNewColumn ? 'none' : sortDirection) as LensEditEvent['data']['direction']
             );
             return onEditAction({
               action: 'sort',
-              columnId: nextDirection !== 'none' ? event.sort.field : undefined,
+              columnId: nextDirection !== 'none' || isNewColumn ? event.sort.field : undefined,
               direction: nextDirection,
             });
           }

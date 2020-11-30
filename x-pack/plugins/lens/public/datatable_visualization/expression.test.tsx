@@ -306,14 +306,33 @@ describe('datatable_expression', () => {
         />
       );
 
-      expect(wrapper.exists('[data-test-subj="tableHeaderSortButton"]')).toBe(true);
-      // check that the sorting is passing the right next state
-      wrapper.find('[data-test-subj="tableHeaderSortButton"]').first().simulate('click');
+      // there's currently no way to detect the sorting column via DOM
+      expect(
+        wrapper.exists('[className*="isSorted"][data-test-subj="tableHeaderSortButton"]')
+      ).toBe(true);
+      // check that the sorting is passing the right next state for the same column
+      wrapper
+        .find('[className*="isSorted"][data-test-subj="tableHeaderSortButton"]')
+        .first()
+        .simulate('click');
 
       expect(onEditAction).toHaveBeenCalledWith({
         action: 'sort',
         columnId: undefined,
         direction: 'none',
+      });
+
+      // check that the sorting is passing the right next state for another column
+      wrapper
+        .find('[data-test-subj="tableHeaderSortButton"]')
+        .not('[className*="isSorted"]')
+        .first()
+        .simulate('click');
+
+      expect(onEditAction).toHaveBeenCalledWith({
+        action: 'sort',
+        columnId: 'a',
+        direction: 'asc',
       });
     });
   });
