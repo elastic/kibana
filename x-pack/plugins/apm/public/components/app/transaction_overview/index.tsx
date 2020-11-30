@@ -24,11 +24,9 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTransactionType } from '../../../hooks/use_transaction_type';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
@@ -39,6 +37,7 @@ import { Correlations } from '../Correlations';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
 import { UserExperienceCallout } from './user_experience_callout';
+import { useApmService } from '../../../hooks/use_apm_service';
 
 function getRedirectLocation({
   location,
@@ -69,8 +68,7 @@ interface TransactionOverviewProps {
 export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const transactionType = useTransactionType();
-  const serviceTransactionTypes = useServiceTransactionTypes(urlParams);
+  const { transactionType, transactionTypes } = useApmService();
 
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
@@ -122,9 +120,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
           <EuiFlexItem grow={1}>
             <Correlations />
             <LocalUIFilters {...localFiltersConfig}>
-              <TransactionTypeFilter
-                transactionTypes={serviceTransactionTypes}
-              />
+              <TransactionTypeFilter transactionTypes={transactionTypes} />
               <EuiSpacer size="m" />
               <EuiHorizontalRule margin="none" />
             </LocalUIFilters>

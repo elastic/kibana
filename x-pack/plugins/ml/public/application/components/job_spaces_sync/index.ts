@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { JobSpacesRepairFlyout } from './job_spaces_repair_flyout';
+export { JobSpacesSyncFlyout } from './job_spaces_sync_flyout';

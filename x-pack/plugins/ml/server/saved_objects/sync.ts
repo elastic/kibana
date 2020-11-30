@@ -9,7 +9,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import type { JobObject, JobSavedObjectService } from './service';
 import {
   JobType,
-  RepairSavedObjectResponse,
+  SyncSavedObjectResponse,
   InitializeSavedObjectResponse,
 } from '../../common/types/saved_objects';
 import { checksFactory } from './checks';
@@ -23,14 +23,14 @@ export interface JobSpaceOverrides {
   };
 }
 
-export function repairFactory(
+export function syncSavedObjectsFactory(
   client: IScopedClusterClient,
   jobSavedObjectService: JobSavedObjectService
 ) {
   const { checkStatus } = checksFactory(client, jobSavedObjectService);
 
-  async function repairJobs(simulate: boolean = false) {
-    const results: RepairSavedObjectResponse = {
+  async function syncSavedObjects(simulate: boolean = false) {
+    const results: SyncSavedObjectResponse = {
       savedObjectsCreated: {},
       savedObjectsDeleted: {},
       datafeedsAdded: {},
@@ -232,5 +232,5 @@ export function repairFactory(
     return results;
   }
 
-  return { checkStatus, repairJobs, initSavedObjects };
+  return { checkStatus, syncSavedObjects, initSavedObjects };
 }
