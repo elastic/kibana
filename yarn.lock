@@ -1461,10 +1461,10 @@
     pump "^3.0.0"
     secure-json-parse "^2.1.0"
 
-"@elastic/ems-client@7.10.0":
-  version "7.10.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.10.0.tgz#6d0e12ce99acd122d8066aa0a8685ecfd21637d3"
-  integrity sha512-84XqAhY4iaKwo2PnDwskNLvnprR3EYcS1AhN048xa8mIZlRJuycB4DwWnB699qvUTQqKcg5qLS0o5sEUs2HDeA==
+"@elastic/ems-client@7.11.0":
+  version "7.11.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.11.0.tgz#d2142d0ef5bd1aff7ae67b37c1394b73cdd48d8b"
+  integrity sha512-7+gDEkBr8nRS7X9i/UPg1WkS7bEBuNbBBjXCchQeYwqPRmw6vOb4wjlNzVwmOFsp2OH4lVFfZ+XU4pxTt32EXA==
   dependencies:
     lodash "^4.17.15"
     semver "7.3.2"
@@ -14180,9 +14180,9 @@ fp-ts@^1.0.0:
   integrity sha512-fWwnAgVlTsV26Ruo9nx+fxNHIm6l1puE1VJ/C0XJ3nRQJJJIgRHYw6sigB3MuNFZL1o4fpGlhwFhcbxHK0RsOA==
 
 fp-ts@^2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.3.1.tgz#8068bfcca118227932941101e062134d7ecd9119"
-  integrity sha512-KevPBnYt0aaJiuUzmU9YIxjrhC9AgJ8CLtLlXmwArovlNTeYM5NtEoKd86B0wHd7FIbzeE8sNXzCoYIOr7e6Iw==
+  version "2.8.6"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.8.6.tgz#1a0e6c3f29f5b0fbfa3120f034ea266aa73c811b"
+  integrity sha512-fGGpKf/Jy3UT4s16oM+hr/8F5QXFcZ+20NAvaZXH5Y5jsiLPMDCaNqffXq0z1Kr6ZUJj0346cH9tq+cI2SoJ4w==
 
 fragment-cache@^0.2.1:
   version "0.2.1"
