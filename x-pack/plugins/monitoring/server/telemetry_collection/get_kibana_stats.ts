@@ -114,7 +114,6 @@ export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
     } = currUsage;
 
     // Stats filtered by telemetry collectors need to be flattened since they're pulled in a generic way.
-    // A plugin might not provide flat stats if it implements formatForBulkUpload in its collector.
     // e.g: we want `xpack.reporting` to just be `reporting`
     const plugins = { ...pluginsTop, ...xpack };
 
