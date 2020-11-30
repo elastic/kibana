@@ -37,13 +37,6 @@ export const createUsageCollectionSetupMock = () => {
     bulkFetch: jest.fn(),
     bulkFetchUsage: jest.fn(),
     getCollectorByType: jest.fn(),
-    getFilteredCollectorSet: jest.fn(),
-    // @ts-ignore jest.fn doesn't play nice with type guards
-    isUsageCollector: jest.fn(),
-    makeCollectorSetFromArray: jest.fn(),
-    map: jest.fn(),
-    maximumWaitTimeForAllCollectorsInS: 0,
-    some: jest.fn(),
     toApiFieldNames: jest.fn(),
     toObject: jest.fn(),
     makeStatsCollector: jest.fn().mockImplementation((cfg) => new Collector(logger, cfg)),
