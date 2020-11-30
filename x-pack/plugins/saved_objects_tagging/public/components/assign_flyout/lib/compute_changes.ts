@@ -8,6 +8,10 @@ import { AssignableObject } from '../../../../common/assignments';
 import { AssignmentStatusMap, AssignmentOverrideMap } from '../types';
 import { getAssignmentAction, getKey } from '../utils';
 
+/**
+ * Compute the list of objects that need to be added or removed from the
+ * tag assignation, given their initial status and their current manual override.
+ */
 export const computeRequiredChanges = ({
   objects,
   initialStatus,

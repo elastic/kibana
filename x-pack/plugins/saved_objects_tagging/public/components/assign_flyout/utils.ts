@@ -15,6 +15,10 @@ import {
 
 export { getKey } from '../../../common/assignments';
 
+/**
+ * Returns the assignment status resulting from applying
+ * given `override` to given `initialStatus`.
+ */
 export const getOverriddenStatus = (
   initialStatus: AssignmentStatus,
   override: AssignmentOverride | undefined
@@ -25,6 +29,10 @@ export const getOverriddenStatus = (
   return initialStatus;
 };
 
+/**
+ * Returns the assignment action that was effectively performed,
+ * given an object's `initialStatus` and `override`
+ */
 export const getAssignmentAction = (
   initialStatus: AssignmentStatus,
   override: AssignmentOverride | undefined
@@ -47,6 +55,10 @@ const statusPriority: Record<AssignmentStatus, number> = {
   none: 3,
 };
 
+/**
+ * Return a new array sorted by assignment status (full->partial->none) and then
+ * by object title (desc).
+ */
 export const sortByStatusAndTitle = (
   objects: AssignableObject[],
   statusMap: AssignmentStatusMap

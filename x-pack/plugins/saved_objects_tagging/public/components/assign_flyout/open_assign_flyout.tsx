@@ -18,6 +18,9 @@ export interface GetAssignFlyoutOpenerOptions {
 }
 
 export interface OpenAssignFlyoutOptions {
+  /**
+   * The list of tag ids to change assignments to.
+   */
   tagIds: string[];
 }
 
