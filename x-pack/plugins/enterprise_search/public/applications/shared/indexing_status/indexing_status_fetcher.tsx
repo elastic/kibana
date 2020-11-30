@@ -6,8 +6,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 
-import { Motion, spring } from 'react-motion';
-
 import { HttpLogic } from '../http';
 import { flashAPIErrors } from '../flash_messages';
 
@@ -20,33 +18,6 @@ interface IIndexingStatusFetcherProps {
   getStatusPath(itemId: string, activeReindexJobId: number): string;
   children(percentageComplete: number, numDocumentsWithErrors: number): JSX.Element;
 }
-
-interface IIndexingStatus {
-  numDocumentsWithErrors: number;
-  percentageComplete: number;
-}
-
-interface IMotionStatusProps {
-  defaultStatus: IIndexingStatus;
-  currentStatus: IIndexingStatus;
-  children(percentageComplete: number, numDocumentsWithErrors: number): JSX.Element;
-}
-
-const MotionStatus: React.FC<IMotionStatusProps> = ({ defaultStatus, currentStatus, children }) => (
-  <Motion
-    defaultStyle={{
-      percentageComplete: defaultStatus.percentageComplete,
-    }}
-    style={{
-      percentageComplete: spring(currentStatus.percentageComplete),
-      numDocumentsWithErrors: currentStatus.numDocumentsWithErrors,
-    }}
-  >
-    {({ percentageComplete, numDocumentsWithErrors }) =>
-      children(percentageComplete, numDocumentsWithErrors)
-    }
-  </Motion>
-);
 
 export const IndexingStatusFetcher: React.FC<IIndexingStatusFetcherProps> = ({
   activeReindexJobId,
@@ -89,11 +60,5 @@ export const IndexingStatusFetcher: React.FC<IIndexingStatusFetcherProps> = ({
     };
   }, []);
 
-  return (
-    <MotionStatus
-      currentStatus={indexingStatus}
-      defaultStatus={{ percentageComplete, numDocumentsWithErrors }}
-      children={children}
-    />
-  );
+  return children(indexingStatus.percentageComplete, indexingStatus.numDocumentsWithErrors);
 };
