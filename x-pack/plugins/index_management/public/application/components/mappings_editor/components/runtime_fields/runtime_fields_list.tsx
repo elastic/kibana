@@ -115,7 +115,7 @@ export const RuntimeFieldsList = () => {
       <EuiText size="s" color="subdued">
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.runtimeFieldsDescription"
-          defaultMessage="Define the runtime fields accessible at query time. {docsLink}"
+          defaultMessage="Define the runtime fields accessible at search time. {docsLink}"
           values={{
             docsLink: (
               <EuiLink href={runtimeFieldsDocsUri} target="_blank" external>
