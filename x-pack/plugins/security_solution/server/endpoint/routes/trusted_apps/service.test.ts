@@ -7,7 +7,7 @@
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
 import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListClient } from '../../../../../lists/server';
-import { ConditionEntryField } from '../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '../../../../common/endpoint/types';
 import { createConditionEntry, createEntryMatch } from './mapping';
 import {
   createTrustedApp,
@@ -48,7 +48,7 @@ const TRUSTED_APP = {
   created_by: 'admin',
   name: 'linux trusted app 1',
   description: 'Linux trusted app 1',
-  os: 'linux',
+  os: OperatingSystem.LINUX,
   entries: [
     createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
     createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
@@ -91,7 +91,7 @@ describe('service', () => {
       const result = await createTrustedApp(exceptionsListClient, {
         name: 'linux trusted app 1',
         description: 'Linux trusted app 1',
-        os: 'linux',
+        os: OperatingSystem.LINUX,
         entries: [
           createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
           createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),

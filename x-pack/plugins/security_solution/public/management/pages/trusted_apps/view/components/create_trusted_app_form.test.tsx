@@ -8,7 +8,7 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { fireEvent, getByTestId } from '@testing-library/dom';
 
-import { ConditionEntryField } from '../../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '../../../../../../common/endpoint/types';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
@@ -244,7 +244,7 @@ describe('When showing the Trusted App Create Form', () => {
             },
           ],
           name: '',
-          os: 'windows',
+          os: OperatingSystem.WINDOWS,
         },
       });
     });
@@ -299,7 +299,7 @@ describe('When showing the Trusted App Create Form', () => {
             },
           ],
           name: 'Some Process',
-          os: 'windows',
+          os: OperatingSystem.WINDOWS,
         },
       });
     });

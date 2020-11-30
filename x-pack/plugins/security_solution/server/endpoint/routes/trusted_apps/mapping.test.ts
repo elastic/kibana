@@ -7,7 +7,12 @@
 import { CreateExceptionListItemOptions } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
 
-import { ConditionEntryField, NewTrustedApp, TrustedApp } from '../../../../common/endpoint/types';
+import {
+  ConditionEntryField,
+  NewTrustedApp,
+  OperatingSystem,
+  TrustedApp,
+} from '../../../../common/endpoint/types';
 
 import {
   createConditionEntry,
@@ -69,7 +74,7 @@ describe('mapping', () => {
         {
           name: 'linux trusted app',
           description: 'Linux Trusted App',
-          os: 'linux',
+          os: OperatingSystem.LINUX,
           entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
         },
         createExceptionListItemOptions({
@@ -86,7 +91,7 @@ describe('mapping', () => {
         {
           name: 'macos trusted app',
           description: 'MacOS Trusted App',
-          os: 'macos',
+          os: OperatingSystem.MAC,
           entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
         },
         createExceptionListItemOptions({
@@ -103,7 +108,7 @@ describe('mapping', () => {
         {
           name: 'windows trusted app',
           description: 'Windows Trusted App',
-          os: 'windows',
+          os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.PATH, 'C:\\Program Files\\Malware')],
         },
         createExceptionListItemOptions({
@@ -120,7 +125,7 @@ describe('mapping', () => {
         {
           name: 'Signed trusted app',
           description: 'Signed Trusted App',
-          os: 'windows',
+          os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.SIGNER, 'Microsoft Windows')],
         },
         createExceptionListItemOptions({
@@ -142,7 +147,7 @@ describe('mapping', () => {
         {
           name: 'MD5 trusted app',
           description: 'MD5 Trusted App',
-          os: 'linux',
+          os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
           ],
@@ -161,7 +166,7 @@ describe('mapping', () => {
         {
           name: 'SHA1 trusted app',
           description: 'SHA1 Trusted App',
-          os: 'linux',
+          os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(
               ConditionEntryField.HASH,
@@ -185,7 +190,7 @@ describe('mapping', () => {
         {
           name: 'SHA256 trusted app',
           description: 'SHA256 Trusted App',
-          os: 'linux',
+          os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(
               ConditionEntryField.HASH,
@@ -212,7 +217,7 @@ describe('mapping', () => {
         {
           name: 'MD5 trusted app',
           description: 'MD5 Trusted App',
-          os: 'linux',
+          os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(ConditionEntryField.HASH, '1234234659Af249ddf3e40864E9FB241'),
           ],
@@ -249,7 +254,7 @@ describe('mapping', () => {
           description: 'Linux Trusted App',
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
-          os: 'linux',
+          os: OperatingSystem.LINUX,
           entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
         }
       );
@@ -272,7 +277,7 @@ describe('mapping', () => {
           description: 'MacOS Trusted App',
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
-          os: 'macos',
+          os: OperatingSystem.MAC,
           entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
         }
       );
@@ -295,7 +300,7 @@ describe('mapping', () => {
           created_by: 'admin',
           name: 'windows trusted app',
           description: 'Windows Trusted App',
-          os: 'windows',
+          os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.PATH, 'C:\\Program Files\\Malware')],
         }
       );
@@ -323,7 +328,7 @@ describe('mapping', () => {
           description: 'Signed trusted app',
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
-          os: 'windows',
+          os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.SIGNER, 'Microsoft Windows')],
         }
       );
@@ -346,7 +351,7 @@ describe('mapping', () => {
           description: 'MD5 Trusted App',
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
-          os: 'linux',
+          os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
           ],
@@ -373,7 +378,7 @@ describe('mapping', () => {
           description: 'SHA1 Trusted App',
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
-          os: 'linux',
+          os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(
               ConditionEntryField.HASH,
@@ -406,7 +411,7 @@ describe('mapping', () => {
           description: 'SHA256 Trusted App',
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
-          os: 'linux',
+          os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(
               ConditionEntryField.HASH,

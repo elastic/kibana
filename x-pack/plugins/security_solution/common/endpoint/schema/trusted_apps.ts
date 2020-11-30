@@ -36,25 +36,13 @@ export const GetTrustedAppsRequestSchema = {
   }),
 };
 
-const NameSchema = schema.string({ minLength: 1, maxLength: 256 });
-const DescriptionSchema = schema.maybe(
-  schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })
-);
-const LinuxSchema = schema.literal('linux');
-const MacosSchema = schema.literal('macos');
-const WindowsSchema = schema.literal('windows');
-
-const HashFieldSchema = schema.literal(ConditionEntryField.HASH);
-const PathFieldSchema = schema.literal(ConditionEntryField.PATH);
-const SignerFieldSchema = schema.literal(ConditionEntryField.SIGNER);
-
 const createNewTrustedAppForOsScheme = <O extends OperatingSystem, F extends ConditionEntryField>(
   osSchema: Type<O>,
   fieldSchema: Type<F>
 ) =>
   schema.object({
-    name: NameSchema,
-    description: DescriptionSchema,
+    name: schema.string({ minLength: 1, maxLength: 256 }),
+    description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
     os: osSchema,
     entries: schema.arrayOf(
       schema.object({
@@ -90,12 +78,19 @@ const createNewTrustedAppForOsScheme = <O extends OperatingSystem, F extends Con
 export const PostTrustedAppCreateRequestSchema = {
   body: schema.oneOf([
     createNewTrustedAppForOsScheme(
-      schema.oneOf([LinuxSchema, MacosSchema]),
-      schema.oneOf([HashFieldSchema, PathFieldSchema])
+      schema.oneOf([schema.literal(OperatingSystem.LINUX), schema.literal(OperatingSystem.MAC)]),
+      schema.oneOf([
+        schema.literal(ConditionEntryField.HASH),
+        schema.literal(ConditionEntryField.PATH),
+      ])
     ),
     createNewTrustedAppForOsScheme(
-      WindowsSchema,
-      schema.oneOf([HashFieldSchema, PathFieldSchema, SignerFieldSchema])
+      schema.literal(OperatingSystem.WINDOWS),
+      schema.oneOf([
+        schema.literal(ConditionEntryField.HASH),
+        schema.literal(ConditionEntryField.PATH),
+        schema.literal(ConditionEntryField.SIGNER),
+      ])
     ),
   ]),
 };

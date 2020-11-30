@@ -5,7 +5,8 @@
  */
 
 import { GetTrustedAppsRequestSchema, PostTrustedAppCreateRequestSchema } from './trusted_apps';
-import { ConditionEntryField } from '../types';
+import { ConditionEntryField, OperatingSystem } from '../types';
+import { OPERATING_SYSTEMS } from '../constants';
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {
@@ -113,7 +114,7 @@ describe('When invoking Trusted Apps Schema', () => {
 
       expect(() => body.validate({ ...bodyMsg, os: 'winz' })).toThrow();
 
-      ['linux', 'macos', 'windows'].forEach((os) => {
+      OPERATING_SYSTEMS.forEach((os) => {
         expect(() => body.validate({ ...bodyMsg, os })).not.toThrow();
       });
     });
@@ -155,7 +156,7 @@ describe('When invoking Trusted Apps Schema', () => {
       });
 
       it('should validate `entry.field` accepts hash field name for all os values', () => {
-        ['linux', 'macos', 'windows'].forEach((os) => {
+        OPERATING_SYSTEMS.forEach((os) => {
           const bodyMsg3 = createNewTrustedApp({
             os,
             entries: [
@@ -171,7 +172,7 @@ describe('When invoking Trusted Apps Schema', () => {
       });
 
       it('should validate `entry.field` accepts path field name for all os values', () => {
-        ['linux', 'macos', 'windows'].forEach((os) => {
+        OPERATING_SYSTEMS.forEach((os) => {
           const bodyMsg3 = createNewTrustedApp({
             os,
             entries: [
@@ -195,7 +196,7 @@ describe('When invoking Trusted Apps Schema', () => {
       });
 
       it('should validate `entry.field` does not accept signer field name for linux and macos os values', () => {
-        ['linux', 'macos'].forEach((os) => {
+        [OperatingSystem.LINUX, OperatingSystem.MAC].forEach((os) => {
           const bodyMsg3 = createNewTrustedApp({
             os,
             entries: [

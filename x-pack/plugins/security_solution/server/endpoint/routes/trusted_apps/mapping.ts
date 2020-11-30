@@ -17,8 +17,8 @@ import {
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 import { CreateExceptionListItemOptions } from '../../../../../lists/server';
 import {
-  ConditionEntryField,
   ConditionEntry,
+  ConditionEntryField,
   NewTrustedApp,
   OperatingSystem,
   TrustedApp,
@@ -28,15 +28,15 @@ type ConditionEntriesMap = { [K in ConditionEntryField]?: ConditionEntry<K> };
 type Mapping<T extends string, U> = { [K in T]: U };
 
 const OS_TYPE_TO_OPERATING_SYSTEM: Mapping<OsType, OperatingSystem> = {
-  linux: 'linux',
-  macos: 'macos',
-  windows: 'windows',
+  linux: OperatingSystem.LINUX,
+  macos: OperatingSystem.MAC,
+  windows: OperatingSystem.WINDOWS,
 };
 
 const OPERATING_SYSTEM_TO_OS_TYPE: Mapping<OperatingSystem, OsType> = {
-  linux: 'linux',
-  macos: 'macos',
-  windows: 'windows',
+  [OperatingSystem.LINUX]: 'linux',
+  [OperatingSystem.MAC]: 'macos',
+  [OperatingSystem.WINDOWS]: 'windows',
 };
 
 const filterUndefined = <T>(list: Array<T | undefined>): T[] => {
@@ -99,7 +99,7 @@ export const exceptionListItemToTrustedApp = (
       description: exceptionListItem.description,
       created_at: exceptionListItem.created_at,
       created_by: exceptionListItem.created_by,
-      ...(os === 'linux' || os === 'macos'
+      ...(os === OperatingSystem.LINUX || os === OperatingSystem.MAC
         ? {
             os,
             entries: filterUndefined([

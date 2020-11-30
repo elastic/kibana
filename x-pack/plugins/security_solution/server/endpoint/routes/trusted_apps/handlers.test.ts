@@ -13,7 +13,7 @@ import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 
-import { ConditionEntryField } from '../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '../../../../common/endpoint/types';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createConditionEntry, createEntryMatch } from './mapping';
 import {
@@ -74,7 +74,7 @@ const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
 const NEW_TRUSTED_APP = {
   name: 'linux trusted app 1',
   description: 'Linux trusted app 1',
-  os: 'linux',
+  os: OperatingSystem.LINUX,
   entries: [
     createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
     createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
@@ -87,7 +87,7 @@ const TRUSTED_APP = {
   created_by: 'admin',
   name: 'linux trusted app 1',
   description: 'Linux trusted app 1',
-  os: 'linux',
+  os: OperatingSystem.LINUX,
   entries: [
     createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
     createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
