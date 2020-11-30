@@ -88,9 +88,9 @@ export class BackgroundSessionService {
         type: BACKGROUND_SESSION_TYPE,
       };
     });
-    const res = await this.internalSavedObjectsClient.bulkGet<
-      BackgroundSessionSavedObjectAttributes
-    >(activeMappingIds);
+    const res = await this.internalSavedObjectsClient.bulkGet<BackgroundSessionSavedObjectAttributes>(
+      activeMappingIds
+    );
     return res.saved_objects;
   }
 
@@ -155,9 +155,9 @@ export class BackgroundSessionService {
         return sessionSavedObject;
       });
 
-    const updateResults = await this.internalSavedObjectsClient.bulkUpdate<
-      BackgroundSessionSavedObjectAttributes
-    >(updatedSessions);
+    const updateResults = await this.internalSavedObjectsClient.bulkUpdate<BackgroundSessionSavedObjectAttributes>(
+      updatedSessions
+    );
     return updateResults.saved_objects;
   }
 
