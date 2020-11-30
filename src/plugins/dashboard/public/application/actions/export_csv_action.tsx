@@ -48,7 +48,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
 
   public readonly type = ACTION_EXPORT_CSV;
 
-  public readonly order = 200;
+  public readonly order = 20;
 
   constructor(protected readonly params: Params) {}
 
@@ -66,7 +66,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
   }
 
   private hasDatatableContent = (adapters: Adapters | undefined) => {
-    return adapters && adapters[Object.keys(adapters)[0]]?.columns;
+    return Object.keys(adapters?.tables || {}).length > 0;
   };
 
   private getFormatter = (): FormatFactory | undefined => {
@@ -77,7 +77,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
 
   private getDataTableContent = (adapters: Adapters | undefined) => {
     if (this.hasDatatableContent(adapters)) {
-      return adapters;
+      return adapters?.tables;
     }
     return;
   };
@@ -88,12 +88,12 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
     if (!formatFactory) {
       return;
     }
-    const adapters = this.getDataTableContent(
+    const tableAdapters = this.getDataTableContent(
       context?.embeddable?.getInspectorAdapters()
     ) as Record<string, Datatable>;
 
-    if (adapters) {
-      const datatables = Object.values(adapters);
+    if (tableAdapters) {
+      const datatables = Object.values(tableAdapters);
       const content = datatables.reduce<Record<string, { content: string; type: string }>>(
         (memo, datatable, i) => {
           // skip empty datatables

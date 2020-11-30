@@ -152,6 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
 
       await panelActions.openContextMenu();
+      await panelActions.clickContextMenuMoreItem();
       await testSubjects.existOrFail(ACTION_TEST_SUBJ);
     });
   });

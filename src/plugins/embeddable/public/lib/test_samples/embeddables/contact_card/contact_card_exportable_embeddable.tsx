@@ -22,18 +22,20 @@ import { ContactCardEmbeddable } from './contact_card_embeddable';
 export class ContactCardExportableEmbeddable extends ContactCardEmbeddable {
   public getInspectorAdapters = () => {
     return {
-      layer1: {
-        type: 'datatable',
-        columns: [
-          { id: 'firstName', name: 'First Name' },
-          { id: 'originalLastName', name: 'Last Name' },
-        ],
-        rows: [
-          {
-            firstName: this.getInput().firstName,
-            orignialLastName: this.getInput().lastName,
-          },
-        ],
+      tables: {
+        layer1: {
+          type: 'datatable',
+          columns: [
+            { id: 'firstName', name: 'First Name' },
+            { id: 'originalLastName', name: 'Last Name' },
+          ],
+          rows: [
+            {
+              firstName: this.getInput().firstName,
+              orignialLastName: this.getInput().lastName,
+            },
+          ],
+        },
       },
     };
   };

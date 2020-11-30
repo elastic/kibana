@@ -184,9 +184,7 @@ export class Embeddable
   }
 
   private updateActiveData = (data: unknown, inspectorAdapters?: Adapters | undefined) => {
-    if (inspectorAdapters?.tables) {
-      this.activeData = inspectorAdapters.tables;
-    }
+    this.activeData = inspectorAdapters;
   };
 
   /**
