@@ -44,9 +44,14 @@ export const toExpressionAst = (vis: Vis<TagCloudVisParams>, params: BuildPipeli
   });
 
   const schemas = getVisSchemas(vis, params);
+  const { scale, orientation, minFontSize, maxFontSize, showLabel } = vis.params;
 
   const tagcloud = buildExpressionFunction<TagcloudExpressionFunctionDefinition>('tagcloud', {
-    ...vis.params,
+    scale,
+    orientation,
+    minFontSize,
+    maxFontSize,
+    showLabel,
     metric: prepareDimension(schemas.metric[0]),
   });
 

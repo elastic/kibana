@@ -31,6 +31,7 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
           sourceId,
           query,
           size,
+          columns,
         } = payload;
 
         let entries;
@@ -47,7 +48,8 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
               query: parseFilterQuery(query),
               center: payload.center,
               size,
-            }
+            },
+            columns
           ));
         } else {
           let cursor: LogEntriesParams['cursor'];
@@ -66,7 +68,8 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
               query: parseFilterQuery(query),
               cursor,
               size,
-            }
+            },
+            columns
           ));
         }
 

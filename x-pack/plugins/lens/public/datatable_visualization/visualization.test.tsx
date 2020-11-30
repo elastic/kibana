@@ -410,7 +410,7 @@ describe('Datatable Visualization', () => {
 
       const error = datatableVisualization.getErrorMessages({ layers: [layer] }, frame);
 
-      expect(error).not.toBeDefined();
+      expect(error).toBeUndefined();
     });
 
     it('returns undefined if the metric dimension is defined', () => {
@@ -427,7 +427,7 @@ describe('Datatable Visualization', () => {
 
       const error = datatableVisualization.getErrorMessages({ layers: [layer] }, frame);
 
-      expect(error).not.toBeDefined();
+      expect(error).toBeUndefined();
     });
   });
 });

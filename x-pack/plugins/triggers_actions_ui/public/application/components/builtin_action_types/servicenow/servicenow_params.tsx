@@ -23,9 +23,9 @@ import { TextAreaWithMessageVariables } from '../../text_area_with_message_varia
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { extractActionVariable } from '../extract_action_variable';
 
-const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
-  ServiceNowActionParams
->> = ({ actionParams, editAction, index, errors, messageVariables }) => {
+const ServiceNowParamsFields: React.FunctionComponent<
+  ActionParamsProps<ServiceNowActionParams>
+> = ({ actionParams, editAction, index, errors, messageVariables }) => {
   const { title, description, comment, severity, urgency, impact, savedObjectId } =
     actionParams.subActionParams || {};
 

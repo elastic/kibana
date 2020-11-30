@@ -19,7 +19,7 @@ import { AgentPolicy, PackageInfo, UpdatePackagePolicy } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
-  useCore,
+  useStartServices,
   useConfig,
   sendUpdatePackagePolicy,
   sendGetAgentStatus,
@@ -47,7 +47,7 @@ import { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest
 import { PackagePolicyEditExtensionComponentProps } from '../../../types';
 
 export const EditPackagePolicyPage: React.FunctionComponent = () => {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();

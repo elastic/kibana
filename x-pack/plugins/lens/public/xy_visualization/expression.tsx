@@ -8,7 +8,6 @@ import './expression.scss';
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import moment from 'moment';
 import {
   Chart,
   Settings,
@@ -22,6 +21,8 @@ import {
   StackMode,
   VerticalAlignment,
   HorizontalAlignment,
+  ElementClickListener,
+  BrushEndListener,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -32,6 +33,7 @@ import {
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { RenderMode } from 'src/plugins/expressions';
 import {
   LensMultiTable,
   FormatFactory,
@@ -39,10 +41,14 @@ import {
   LensFilterEvent,
   LensBrushEvent,
 } from '../types';
-import { XYArgs, SeriesType, visualizationTypes } from './types';
+import { XYArgs, SeriesType, visualizationTypes, LayerArgs } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
-import { ExpressionValueSearchContext, search } from '../../../../../src/plugins/data/public';
+import {
+  DataPublicPluginStart,
+  ExpressionValueSearchContext,
+  search,
+} from '../../../../../src/plugins/data/public';
 import {
   ChartsPluginSetup,
   PaletteRegistry,
@@ -75,9 +81,10 @@ type XYChartRenderProps = XYChartProps & {
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
   timeZone: string;
-  histogramBarTarget: number;
+  minInterval: number | undefined;
   onClickValue: (data: LensFilterEvent['data']) => void;
   onSelectRange: (data: LensBrushEvent['data']) => void;
+  renderMode: RenderMode;
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -174,11 +181,31 @@ export const xyChart: ExpressionFunctionDefinition<
   },
 };
 
+export async function calculateMinInterval(
+  { args: { layers }, data }: XYChartProps,
+  getIntervalByColumn: DataPublicPluginStart['search']['aggs']['getDateMetaByDatatableColumn']
+) {
+  const filteredLayers = getFilteredLayers(layers, data);
+  if (filteredLayers.length === 0) return;
+  const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
+
+  if (!isTimeViz) return;
+  const dateColumn = data.tables[filteredLayers[0].layerId].columns.find(
+    (column) => column.id === filteredLayers[0].xAccessor
+  );
+  if (!dateColumn) return;
+  const dateMetaData = await getIntervalByColumn(dateColumn);
+  if (!dateMetaData) return;
+  const intervalDuration = search.aggs.parseInterval(dateMetaData.interval);
+  if (!intervalDuration) return;
+  return intervalDuration.as('milliseconds');
+}
+
 export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
-  histogramBarTarget: number;
+  getIntervalByColumn: DataPublicPluginStart['search']['aggs']['getDateMetaByDatatableColumn'];
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
@@ -209,9 +236,10 @@ export const getXyChartRenderer = (dependencies: {
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
-          histogramBarTarget={dependencies.histogramBarTarget}
+          minInterval={await calculateMinInterval(config, dependencies.getIntervalByColumn)}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
+          renderMode={handlers.getRenderMode()}
         />
       </I18nProvider>,
       domNode,
@@ -277,27 +305,16 @@ export function XYChart({
   timeZone,
   chartsThemeService,
   paletteService,
-  histogramBarTarget,
+  minInterval,
   onClickValue,
   onSelectRange,
+  renderMode,
 }: XYChartRenderProps) {
   const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
-  const filteredLayers = layers.filter(({ layerId, xAccessor, accessors, splitAccessor }) => {
-    return !(
-      !accessors.length ||
-      !data.tables[layerId] ||
-      data.tables[layerId].rows.length === 0 ||
-      (xAccessor &&
-        data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
-      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
-      (!xAccessor &&
-        splitAccessor &&
-        data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
-    );
-  });
+  const filteredLayers = getFilteredLayers(layers, data);
 
   if (filteredLayers.length === 0) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
@@ -348,37 +365,6 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => layer.splitAccessor);
 
-  function calculateMinInterval() {
-    // check all the tables to see if all of the rows have the same timestamp
-    // that would mean that chart will draw a single bar
-    const isSingleTimestampInXDomain = () => {
-      const firstRowValue =
-        data.tables[filteredLayers[0].layerId].rows[0][filteredLayers[0].xAccessor!];
-      for (const layer of filteredLayers) {
-        if (
-          layer.xAccessor &&
-          data.tables[layer.layerId].rows.some((row) => row[layer.xAccessor!] !== firstRowValue)
-        ) {
-          return false;
-        }
-      }
-      return true;
-    };
-
-    // add minInterval only for single point in domain
-    if (data.dateRange && isSingleTimestampInXDomain()) {
-      const params = xAxisColumn?.meta?.sourceParams?.params as Record<string, string>;
-      if (params?.interval !== 'auto')
-        return search.aggs.parseInterval(params?.interval)?.asMilliseconds();
-
-      const { fromDate, toDate } = data.dateRange;
-      const duration = moment(toDate).diff(moment(fromDate));
-      const targetMs = duration / histogramBarTarget;
-      return isNaN(targetMs) ? 0 : Math.max(Math.floor(targetMs), 1);
-    }
-    return undefined;
-  }
-
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
@@ -386,7 +372,7 @@ export function XYChart({
     ? {
         min: data.dateRange?.fromDate.getTime(),
         max: data.dateRange?.toDate.getTime(),
-        minInterval: calculateMinInterval(),
+        minInterval,
       }
     : undefined;
 
@@ -435,6 +421,87 @@ export function XYChart({
 
   const colorAssignments = getColorAssignments(args.layers, data, formatFactory);
 
+  const clickHandler: ElementClickListener = ([[geometry, series]]) => {
+    // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
+    const xySeries = series as XYChartSeriesIdentifier;
+    const xyGeometry = geometry as GeometryValue;
+
+    const layer = filteredLayers.find((l) =>
+      xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
+    );
+    if (!layer) {
+      return;
+    }
+
+    const table = data.tables[layer.layerId];
+
+    const points = [
+      {
+        row: table.rows.findIndex((row) => {
+          if (layer.xAccessor) {
+            if (layersAlreadyFormatted[layer.xAccessor]) {
+              // stringify the value to compare with the chart value
+              return xAxisFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
+            }
+            return row[layer.xAccessor] === xyGeometry.x;
+          }
+        }),
+        column: table.columns.findIndex((col) => col.id === layer.xAccessor),
+        value: xyGeometry.x,
+      },
+    ];
+
+    if (xySeries.seriesKeys.length > 1) {
+      const pointValue = xySeries.seriesKeys[0];
+
+      points.push({
+        row: table.rows.findIndex(
+          (row) => layer.splitAccessor && row[layer.splitAccessor] === pointValue
+        ),
+        column: table.columns.findIndex((col) => col.id === layer.splitAccessor),
+        value: pointValue,
+      });
+    }
+
+    const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta?.field;
+    const timeFieldName = xDomain && xAxisFieldName;
+
+    const context: LensFilterEvent['data'] = {
+      data: points.map((point) => ({
+        row: point.row,
+        column: point.column,
+        value: point.value,
+        table,
+      })),
+      timeFieldName,
+    };
+    onClickValue(desanitizeFilterContext(context));
+  };
+
+  const brushHandler: BrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [min, max] = x;
+    if (!xAxisColumn || !isHistogramViz) {
+      return;
+    }
+
+    const table = data.tables[filteredLayers[0].layerId];
+
+    const xAxisColumnIndex = table.columns.findIndex((el) => el.id === filteredLayers[0].xAccessor);
+
+    const timeFieldName = isTimeViz ? table.columns[xAxisColumnIndex]?.meta?.field : undefined;
+
+    const context: LensBrushEvent['data'] = {
+      range: [min, max],
+      table,
+      column: xAxisColumnIndex,
+      timeFieldName,
+    };
+    onSelectRange(context);
+  };
+
   return (
     <Chart>
       <Settings
@@ -461,89 +528,8 @@ export function XYChart({
         }}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
-        onBrushEnd={({ x }) => {
-          if (!x) {
-            return;
-          }
-          const [min, max] = x;
-          if (!xAxisColumn || !isHistogramViz) {
-            return;
-          }
-
-          const table = data.tables[filteredLayers[0].layerId];
-
-          const xAxisColumnIndex = table.columns.findIndex(
-            (el) => el.id === filteredLayers[0].xAccessor
-          );
-
-          const timeFieldName = isTimeViz
-            ? table.columns[xAxisColumnIndex]?.meta?.field
-            : undefined;
-
-          const context: LensBrushEvent['data'] = {
-            range: [min, max],
-            table,
-            column: xAxisColumnIndex,
-            timeFieldName,
-          };
-          onSelectRange(context);
-        }}
-        onElementClick={([[geometry, series]]) => {
-          // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
-          const xySeries = series as XYChartSeriesIdentifier;
-          const xyGeometry = geometry as GeometryValue;
-
-          const layer = filteredLayers.find((l) =>
-            xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
-          );
-          if (!layer) {
-            return;
-          }
-
-          const table = data.tables[layer.layerId];
-
-          const points = [
-            {
-              row: table.rows.findIndex((row) => {
-                if (layer.xAccessor) {
-                  if (layersAlreadyFormatted[layer.xAccessor]) {
-                    // stringify the value to compare with the chart value
-                    return xAxisFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
-                  }
-                  return row[layer.xAccessor] === xyGeometry.x;
-                }
-              }),
-              column: table.columns.findIndex((col) => col.id === layer.xAccessor),
-              value: xyGeometry.x,
-            },
-          ];
-
-          if (xySeries.seriesKeys.length > 1) {
-            const pointValue = xySeries.seriesKeys[0];
-
-            points.push({
-              row: table.rows.findIndex(
-                (row) => layer.splitAccessor && row[layer.splitAccessor] === pointValue
-              ),
-              column: table.columns.findIndex((col) => col.id === layer.splitAccessor),
-              value: pointValue,
-            });
-          }
-
-          const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta?.field;
-          const timeFieldName = xDomain && xAxisFieldName;
-
-          const context: LensFilterEvent['data'] = {
-            data: points.map((point) => ({
-              row: point.row,
-              column: point.column,
-              value: point.value,
-              table,
-            })),
-            timeFieldName,
-          };
-          onClickValue(desanitizeFilterContext(context));
-        }}
+        onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}
+        onElementClick={renderMode !== 'noInteractivity' ? clickHandler : undefined}
       />
 
       <Axis
@@ -800,6 +786,22 @@ export function XYChart({
       )}
     </Chart>
   );
+}
+
+function getFilteredLayers(layers: LayerArgs[], data: LensMultiTable) {
+  return layers.filter(({ layerId, xAccessor, accessors, splitAccessor }) => {
+    return !(
+      !accessors.length ||
+      !data.tables[layerId] ||
+      data.tables[layerId].rows.length === 0 ||
+      (xAccessor &&
+        data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
+      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
+      (!xAccessor &&
+        splitAccessor &&
+        data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
+    );
+  });
 }
 
 function assertNever(x: never): never {

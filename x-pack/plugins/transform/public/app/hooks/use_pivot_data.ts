@@ -69,9 +69,10 @@ export const usePivotData = (
   aggs: PivotAggsConfigDict,
   groupBy: PivotGroupByConfigDict
 ): UseIndexDataReturnType => {
-  const [previewMappingsProperties, setPreviewMappingsProperties] = useState<
-    PreviewMappingsProperties
-  >({});
+  const [
+    previewMappingsProperties,
+    setPreviewMappingsProperties,
+  ] = useState<PreviewMappingsProperties>({});
   const api = useApi();
   const {
     ml: { formatHumanReadableDateTimeSeconds, multiColumnSortFactory, useDataGrid, INDEX_STATUS },
