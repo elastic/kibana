@@ -241,7 +241,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       tooltipContent: entitiesFoundMsg,
       // Used to show trimmed icon in legend
       // user only needs to be notified of trimmed results when entities are trimmed
-      areResultsTrimmed: !!meta.areEntitiesTrimmed,
+      areResultsTrimmed: meta.areEntitiesTrimmed,
     };
   }
 
