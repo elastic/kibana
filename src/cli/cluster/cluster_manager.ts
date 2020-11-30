@@ -33,8 +33,6 @@ import { BasePathProxyServer } from '../../core/server/http';
 import { Log } from './log';
 import { Worker } from './worker';
 
-process.env.kbnWorkerType = 'managr';
-
 export type SomeCliArgs = Pick<
   CliArgs,
   | 'quiet'
@@ -74,6 +72,19 @@ export class ClusterManager {
     this.log = new Log(opts.quiet, opts.silent);
     this.inReplMode = !!opts.repl;
     this.basePathProxy = basePathProxy;
+
+    if (!this.basePathProxy) {
+      this.log.warn(
+        '===================================================================================================='
+      );
+      this.log.warn(
+        'no-base-path',
+        'Running Kibana in dev mode with --no-base-path disables several useful features and is not recommended'
+      );
+      this.log.warn(
+        '===================================================================================================='
+      );
+    }
 
     // run @kbn/optimizer and write it's state to kbnOptimizerReady$
     if (opts.disableOptimizer) {

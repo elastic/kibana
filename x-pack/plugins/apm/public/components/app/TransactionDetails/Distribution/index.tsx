@@ -224,7 +224,7 @@ export function TransactionDistribution({
             id="y-axis"
             position={Position.Left}
             ticks={3}
-            showGridLines
+            gridLine={{ visible: true }}
             tickFormat={(value: number) => formatYShort(value)}
           />
           <HistogramBarSeries
