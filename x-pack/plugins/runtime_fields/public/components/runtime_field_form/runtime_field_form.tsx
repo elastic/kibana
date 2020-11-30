@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PainlessLang } from '@kbn/monaco';
+import { PainlessLang, PainlessContext, PainlessAutocompleteField } from '@kbn/monaco';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,7 +28,7 @@ import {
   ValidationFunc,
   FieldConfig,
 } from '../../shared_imports';
-import { RuntimeField } from '../../types';
+import { RuntimeField, RuntimeType } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 import { schema } from './schema';
 
@@ -56,6 +56,8 @@ export interface Props {
      * to indicate that this runtime field will shadow the concrete field.
      */
     existingConcreteFields?: string[];
+    /** An array of fields to provide autocompletion for */
+    fieldsToAutocomplete?: PainlessAutocompleteField[];
   };
 }
 
@@ -105,23 +107,56 @@ const getNameFieldConfig = (
   };
 };
 
+const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessContext => {
+  switch (runtimeType) {
+    case 'keyword':
+      return 'string_script_field_script_field';
+    case 'long':
+      return 'long_script_field_script_field';
+    case 'double':
+      return 'double_script_field_script_field';
+    case 'date':
+      return 'date_script_field';
+    case 'ip':
+      return 'ip_script_field_script_field';
+    case 'boolean':
+      return 'boolean_script_field_script_field';
+    default:
+      return 'painless_test';
+  }
+};
+
 const RuntimeFieldFormComp = ({
   defaultValue,
   onChange,
   links,
-  ctx: { namesNotAllowed, existingConcreteFields = [] } = {},
+  ctx: { namesNotAllowed, existingConcreteFields = [], fieldsToAutocomplete } = {},
 }: Props) => {
   const { form } = useForm<RuntimeField>({ defaultValue, schema });
   const { submit, isValid: isFormValid, isSubmitted } = form;
-  const [{ name }] = useFormData<RuntimeField>({ form, watch: 'name' });
+
+  const [{ type: runtimeType }] = useFormData({ form, watch: 'type' });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, defaultValue);
+
+  const [painlessContext, setPainlessContext] = useState<PainlessContext>('painless_test');
 
   useEffect(() => {
     if (onChange) {
       onChange({ isValid: isFormValid, isSubmitted, submit });
     }
   }, [onChange, isFormValid, isSubmitted, submit]);
+
+  useEffect(() => {
+    if (runtimeType?.length) {
+      setPainlessContext(mapReturnTypeToPainlessContext(runtimeType[0]!.value as RuntimeType));
+    }
+  }, [setPainlessContext, runtimeType]);
+
+  const suggestionProvider = PainlessLang.getSuggestionProvider(
+    painlessContext,
+    fieldsToAutocomplete
+  );
 
   return (
     <Form form={form} className="runtimeFieldEditor_form">
@@ -237,6 +272,7 @@ const RuntimeFieldFormComp = ({
             >
               <CodeEditor
                 languageId={PainlessLang.ID}
+                suggestionProvider={suggestionProvider}
                 width="100%"
                 height="300px"
                 value={value}
@@ -250,6 +286,9 @@ const RuntimeFieldFormComp = ({
                   wordWrap: 'on',
                   wrappingIndent: 'indent',
                   automaticLayout: true,
+                  suggest: {
+                    snippetsPreventQuickSuggestions: false,
+                  },
                 }}
                 data-test-subj="scriptField"
                 aria-label={i18n.translate('xpack.runtimeFields.form.scriptEditorAriaLabel', {

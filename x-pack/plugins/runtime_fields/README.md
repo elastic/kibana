@@ -92,6 +92,11 @@ interface Context {
    * to indicate that this runtime field will shadow the concrete field.
    */
   existingConcreteFields?: string[];
+  /**
+   * An array of existing concrete fields, consisting of its type and name. If provided, the editor
+   * will include autocomplete suggestions for the fields.
+   */
+  fieldsToAutocomplete?: PainlessAutocompleteField[];
 }
 ```
 
