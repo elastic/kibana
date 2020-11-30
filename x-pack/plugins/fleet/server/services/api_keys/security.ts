@@ -5,6 +5,7 @@
  */
 
 import { KibanaRequest, FakeRequest, SavedObjectsClientContract } from 'src/core/server';
+import { FleetAdminUserInvalidError, isLegacyESClientError } from '../../errors';
 import { CallESAsCurrentUser } from '../../types';
 import { appContextService } from '../app_context';
 import { outputService } from '../output';
@@ -30,10 +31,22 @@ export async function createAPIKey(
     throw new Error('Missing security plugin');
   }
 
-  return security.authc.createAPIKey(request as KibanaRequest, {
-    name,
-    role_descriptors: roleDescriptors,
-  });
+  try {
+    const key = await security.authc.createAPIKey(request as KibanaRequest, {
+      name,
+      role_descriptors: roleDescriptors,
+    });
+
+    return key;
+  } catch (err) {
+    if (isLegacyESClientError(err) && err.statusCode === 401) {
+      // Clear Fleet admin user cache as the user is probably not valid anymore
+      outputService.invalidateCache();
+      throw new FleetAdminUserInvalidError(`Fleet Admin user is invalid: ${err.message}`);
+    }
+
+    throw err;
+  }
 }
 export async function authenticate(callCluster: CallESAsCurrentUser) {
   try {
@@ -64,7 +77,19 @@ export async function invalidateAPIKey(soClient: SavedObjectsClientContract, id:
     throw new Error('Missing security plugin');
   }
 
-  return security.authc.invalidateAPIKey(request as KibanaRequest, {
-    id,
-  });
+  try {
+    const res = await security.authc.invalidateAPIKey(request as KibanaRequest, {
+      id,
+    });
+
+    return res;
+  } catch (err) {
+    if (isLegacyESClientError(err) && err.statusCode === 401) {
+      // Clear Fleet admin user cache as the user is probably not valid anymore
+      outputService.invalidateCache();
+      throw new FleetAdminUserInvalidError(`Fleet Admin user is invalid: ${err.message}`);
+    }
+
+    throw err;
+  }
 }
