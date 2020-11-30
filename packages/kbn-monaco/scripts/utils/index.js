@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import { ID } from './constants';
-import { lexerRules } from './lexer_rules';
-import { getSuggestionProvider } from './language';
+const cloneAndCheckout = require('./clone_es');
+const { createAutocompleteDefinitions } = require('./create_autocomplete_definitions');
+const createAutocompleteExports = require('./create_autocomplete_exports');
 
-export const PainlessLang = { ID, getSuggestionProvider, lexerRules };
-
-export { PainlessContext } from './types';
+module.exports = {
+  cloneAndCheckout,
+  createAutocompleteDefinitions,
+  createAutocompleteExports,
+};
