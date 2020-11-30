@@ -165,23 +165,22 @@ export const getGeoContainmentExecutor = (log: Logger) =>
     );
 
     // Cycle through instances that received no updates and keep active
-    const activeAlertsList = state.activeAlertsList || {};
-
-    _.forEach(activeAlertsList, (val, key) => {
-      if (!currLocationMap.has(key)) {
-        const containingBoundaryName =
-          shapesIdsNamesMap[val.containingBoundaryId] || val.containingBoundaryId;
-        const alertInstanceId = `${val.entityName}-${containingBoundaryName}`;
-        services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, val);
-      }
-    });
-
+    // const activeAlertsList = state.activeAlertsList || {};
+    // _.forEach(activeAlertsList, (val, key) => {
+    //   if (!currLocationMap.has(key)) {
+    //     const containingBoundaryName =
+    //       shapesIdsNamesMap[val.containingBoundaryId] || val.containingBoundaryId;
+    //     const alertInstanceId = `${key}-${containingBoundaryName}`;
+    //     services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, val);
+    //   }
+    // });
+    //
     // Cycle through new alert statuses and set active
     currLocationMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
       const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
       const context = {
         entityId: entityName,
-        entityDateTime: new Date(dateInShape).getTime(),
+        entityDateTime: dateInShape,
         entityDocumentId: docId,
         detectionDateTime: new Date(currIntervalEndTime).getTime(),
         entityLocation: `POINT (${location[0]} ${location[1]})`,
@@ -190,15 +189,15 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       };
       const alertInstanceId = `${entityName}-${containingBoundaryName}`;
       if (shapeLocationId !== OTHER_CATEGORY) {
-        activeAlertsList[entityName] = context;
+        // activeAlertsList[entityName] = context;
         services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
       } else {
-        delete activeAlertsList[entityName];
+        // delete activeAlertsList[entityName];
       }
     });
 
     return {
-      activeAlertsList,
+      // activeAlertsList,
       shapesFilters,
       shapesIdsNamesMap,
     };
