@@ -16,7 +16,7 @@ import {
 export { getKey } from '../../../common/assignments';
 
 /**
- * Returns the assignment status resulting from applying
+ * Return the assignment status resulting from applying
  * given `override` to given `initialStatus`.
  */
 export const getOverriddenStatus = (
@@ -30,7 +30,7 @@ export const getOverriddenStatus = (
 };
 
 /**
- * Returns the assignment action that was effectively performed,
+ * Return the assignment action that was effectively performed,
  * given an object's `initialStatus` and `override`
  */
 export const getAssignmentAction = (
