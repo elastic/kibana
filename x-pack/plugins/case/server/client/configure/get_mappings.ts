@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorMappingsAttributes } from '../../../common/api';
+import { ConnectorMappingsAttributes, ConnectorTypes } from '../../../common/api';
 import { CaseClientFactoryArguments, MappingsClient } from '../types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server/saved_objects';
@@ -18,6 +18,9 @@ export const getMappings = ({
   connectorType,
   connectorId,
 }: MappingsClient): Promise<ConnectorMappingsAttributes[]> => {
+  if (connectorType === ConnectorTypes.none) {
+    return [];
+  }
   const myConnectorMappings = await connectorMappingsService.find({
     client: savedObjectsClient,
     options: {
