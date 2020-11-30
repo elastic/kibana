@@ -110,6 +110,7 @@ it(`forks the script with execa.node, passes it the args, and subs/unsubs to cor
         Array [
           "foo",
           "bar",
+          "--logging.json=false",
         ],
         Object {
           "env": Object {
