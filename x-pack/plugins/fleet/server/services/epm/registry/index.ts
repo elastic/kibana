@@ -128,11 +128,10 @@ export async function fetchCategories(params?: CategoriesParams): Promise<Catego
 }
 
 export async function getInfo(name: string, version: string) {
-  const installSource = 'registry';
-  let packageInfo = getPackageInfo({ name, version, installSource });
+  let packageInfo = getPackageInfo({ name, version });
   if (!packageInfo) {
     packageInfo = await fetchInfo(name, version);
-    setPackageInfo({ name, version, packageInfo, installSource });
+    setPackageInfo({ name, version, packageInfo });
   }
   return packageInfo as RegistryPackage;
 }
@@ -142,7 +141,7 @@ export async function getRegistryPackage(
   version: string
 ): Promise<{ paths: string[]; packageInfo: RegistryPackage }> {
   const installSource = 'registry';
-  let paths = getArchiveFilelist({ name, version, installSource });
+  let paths = getArchiveFilelist({ name, version });
   if (!paths || paths.length === 0) {
     const { archiveBuffer, archivePath } = await fetchArchiveBuffer(name, version);
     paths = await unpackBufferToCache({
@@ -172,7 +171,7 @@ export async function ensureCachedArchiveInfo(
   version: string,
   installSource: InstallSource = 'registry'
 ) {
-  const paths = getArchiveFilelist({ name, version, installSource });
+  const paths = getArchiveFilelist({ name, version });
   if (!paths || paths.length === 0) {
     if (installSource === 'registry') {
       await getRegistryPackage(name, version);

@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import Boom from '@hapi/boom';
+import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
 import type { JobSavedObjectService } from './service';
-import { JobType } from '../../common/types/saved_objects';
+import { JobType, DeleteJobCheckResponse } from '../../common/types/saved_objects';
 
 import { Job } from '../../common/types/anomaly_detection_jobs';
 import { Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
+import { ResolveMlCapabilities } from '../../common/types/capabilities';
 
 interface JobSavedObjectStatus {
   jobId: string;
@@ -154,5 +156,105 @@ export function checksFactory(
     };
   }
 
-  return { checkStatus };
+  async function canDeleteJobs(
+    request: KibanaRequest,
+    jobType: JobType,
+    jobIds: string[],
+    spacesEnabled: boolean,
+    resolveMlCapabilities: ResolveMlCapabilities
+  ) {
+    if (jobType !== 'anomaly-detector' && jobType !== 'data-frame-analytics') {
+      throw Boom.badRequest('Job type must be "anomaly-detector" or "data-frame-analytics"');
+    }
+
+    const mlCapabilities = await resolveMlCapabilities(request);
+    if (mlCapabilities === null) {
+      throw Boom.internal('mlCapabilities is not defined');
+    }
+
+    if (
+      (jobType === 'anomaly-detector' && mlCapabilities.canDeleteJob === false) ||
+      (jobType === 'data-frame-analytics' && mlCapabilities.canDeleteDataFrameAnalytics === false)
+    ) {
+      // user does not have access to delete jobs.
+      return jobIds.reduce((results, jobId) => {
+        results[jobId] = {
+          canDelete: false,
+          canUntag: false,
+        };
+        return results;
+      }, {} as DeleteJobCheckResponse);
+    }
+
+    if (spacesEnabled === false) {
+      // spaces are disabled, delete only no untagging
+      return jobIds.reduce((results, jobId) => {
+        results[jobId] = {
+          canDelete: true,
+          canUntag: false,
+        };
+        return results;
+      }, {} as DeleteJobCheckResponse);
+    }
+    const canCreateGlobalJobs = await jobSavedObjectService.canCreateGlobalJobs(request);
+
+    const jobObjects = await Promise.all(
+      jobIds.map((id) => jobSavedObjectService.getJobObject(jobType, id))
+    );
+
+    return jobIds.reduce((results, jobId) => {
+      const jobObject = jobObjects.find((j) => j?.attributes.job_id === jobId);
+      if (jobObject === undefined || jobObject.namespaces === undefined) {
+        // job saved object not found
+        results[jobId] = {
+          canDelete: false,
+          canUntag: false,
+        };
+        return results;
+      }
+
+      const { namespaces } = jobObject;
+      const isGlobalJob = namespaces.includes('*');
+
+      // job is in * space, user can see all spaces - delete and no option to untag
+      if (canCreateGlobalJobs && isGlobalJob) {
+        results[jobId] = {
+          canDelete: true,
+          canUntag: false,
+        };
+        return results;
+      }
+
+      // job is in * space, user cannot see all spaces - no untagging, no deleting
+      if (isGlobalJob) {
+        results[jobId] = {
+          canDelete: false,
+          canUntag: false,
+        };
+        return results;
+      }
+
+      // jobs with are in individual spaces can only be untagged
+      // from current space if the job is in more than 1 space
+      const canUntag = namespaces.length > 1;
+
+      // job is in individual spaces, user cannot see all of them - untag only, no delete
+      if (namespaces.includes('?')) {
+        results[jobId] = {
+          canDelete: false,
+          canUntag,
+        };
+        return results;
+      }
+
+      // job is individual spaces, user can see all of them - delete and option to untag
+      results[jobId] = {
+        canDelete: true,
+        canUntag,
+      };
+      return results;
+    }, {} as DeleteJobCheckResponse);
+  }
+
+  return { checkStatus, canDeleteJobs };
 }

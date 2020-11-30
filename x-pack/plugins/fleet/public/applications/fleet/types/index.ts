@@ -67,6 +67,8 @@ export {
   PutAgentReassignResponse,
   PostBulkAgentReassignRequest,
   PostBulkAgentReassignResponse,
+  PostNewAgentActionResponse,
+  PostNewAgentActionRequest,
   // API schemas - Enrollment API Keys
   GetEnrollmentAPIKeysResponse,
   GetEnrollmentAPIKeysRequest,
