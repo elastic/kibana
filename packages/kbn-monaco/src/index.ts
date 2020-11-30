@@ -22,7 +22,7 @@ import './register_globals';
 
 export { monaco } from './monaco_imports';
 export { XJsonLang } from './xjson';
-export { PainlessLang } from './painless';
+export { PainlessLang, PainlessContext } from './painless';
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';

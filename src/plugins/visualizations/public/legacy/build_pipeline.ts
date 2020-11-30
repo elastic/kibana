@@ -222,13 +222,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   input_control_vis: (params) => {
     return `input_control_vis ${prepareJson('visConfig', params)}`;
   },
-  metrics: ({ title, ...params }, schemas, uiState = {}) => {
-    const paramsJson = prepareJson('params', params);
-    const uiStateJson = prepareJson('uiState', uiState);
-
-    const paramsArray = [paramsJson, uiStateJson].filter((param) => Boolean(param));
-    return `tsvb ${paramsArray.join(' ')}`;
-  },
   region_map: (params, schemas) => {
     const visConfig = {
       ...params,
@@ -308,8 +301,10 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
     } else {
       const visConfig = { ...vis.params };
       visConfig.dimensions = schemas;
+      visConfig.title = title;
       pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visConfig)}
+    ${prepareJson('uiState', uiState)}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.params.showPartialRows || false} `;
       if (indexPattern) {

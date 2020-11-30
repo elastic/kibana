@@ -15,7 +15,7 @@ import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { TelemetryManagementSectionPluginSetup } from '../../../../src/plugins/telemetry_management_section/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { IngestManagerStart } from '../../fleet/public';
+import { FleetStart } from '../../fleet/public';
 import { PluginStart as ListsPluginStart } from '../../lists/public';
 import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
@@ -48,7 +48,7 @@ export interface StartPlugins {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
-  ingestManager?: IngestManagerStart;
+  fleet?: FleetStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;

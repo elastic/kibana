@@ -36,7 +36,7 @@ function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   const { data: errorDistributionData } = useFetcher(() => {
     if (start && end) {
       return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors/distribution',
+        endpoint: 'GET /api/apm/services/{serviceName}/errors/distribution',
         params: {
           path: {
             serviceName,
@@ -56,7 +56,7 @@ function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
 
     if (start && end) {
       return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors',
+        endpoint: 'GET /api/apm/services/{serviceName}/errors',
         params: {
           path: {
             serviceName,

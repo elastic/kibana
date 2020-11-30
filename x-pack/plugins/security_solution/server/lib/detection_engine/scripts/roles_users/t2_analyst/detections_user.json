@@ -1,0 +1,6 @@
+{
+  "password": "changeme",
+  "roles": ["t2_analyst"],
+  "full_name": "t2 analyst",
+  "email": "detections-reader@example.com"
+}

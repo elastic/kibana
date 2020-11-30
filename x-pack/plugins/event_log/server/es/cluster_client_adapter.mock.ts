@@ -9,6 +9,7 @@ import { IClusterClientAdapter } from './cluster_client_adapter';
 const createClusterClientMock = () => {
   const mock: jest.Mocked<IClusterClientAdapter> = {
     indexDocument: jest.fn(),
+    indexDocuments: jest.fn(),
     doesIlmPolicyExist: jest.fn(),
     createIlmPolicy: jest.fn(),
     doesIndexTemplateExist: jest.fn(),
@@ -16,6 +17,7 @@ const createClusterClientMock = () => {
     doesAliasExist: jest.fn(),
     createIndex: jest.fn(),
     queryEventsBySavedObject: jest.fn(),
+    shutdown: jest.fn(),
   };
   return mock;
 };

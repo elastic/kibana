@@ -21,7 +21,7 @@ export function useWaterfall(urlParams: IUrlParams) {
     (callApmApi) => {
       if (traceId && start && end) {
         return callApmApi({
-          pathname: '/api/apm/traces/{traceId}',
+          endpoint: 'GET /api/apm/traces/{traceId}',
           params: {
             path: { traceId },
             query: {

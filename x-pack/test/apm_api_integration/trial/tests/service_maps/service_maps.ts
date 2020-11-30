@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { isEmpty, uniq } from 'lodash';
 import archives_metadata from '../../../common/archives_metadata';
 import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {

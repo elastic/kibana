@@ -1,6 +1,6 @@
 {
   "author": "Elastic",
-  "name": "ingest-manager",
+  "name": "fleet",
   "version": "8.0.0",
   "private": true,
   "license": "Elastic-License"

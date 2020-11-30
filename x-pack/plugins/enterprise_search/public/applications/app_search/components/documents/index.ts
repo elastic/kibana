@@ -6,3 +6,5 @@
 
 export { DocumentDetailLogic } from './document_detail_logic';
 export { DocumentsLogic } from './documents_logic';
+export { Documents } from './documents';
+export { DocumentDetail } from './document_detail';

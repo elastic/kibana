@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
             // JSDOM doesn't support changing of `window.location` and throws an exception if script
             // tries to do that and we have to workaround this behaviour. We also need to wait until our
             // script is loaded and executed, __isScriptExecuted__ is used exactly for that.
-            (window as Record<string, any>).__isScriptExecuted__ = new Promise((resolve) => {
+            (window as Record<string, any>).__isScriptExecuted__ = new Promise<void>((resolve) => {
               Object.defineProperty(window, 'location', {
                 value: {
                   href:

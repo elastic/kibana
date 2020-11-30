@@ -6,7 +6,7 @@
 export * from './models';
 export * from './rest_spec';
 
-export interface IngestManagerConfigType {
+export interface FleetConfigType {
   enabled: boolean;
   registryUrl?: string;
   registryProxyUrl?: string;
