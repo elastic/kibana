@@ -117,45 +117,48 @@ Array [
         role="tablist"
         style="padding-left:16px"
       >
-        <button
+        <a
           aria-selected="false"
           class="euiTab"
           data-test-subj="uptimeSettingsToOverviewLink"
+          href="/"
+          rel="noreferrer"
           role="tab"
-          type="button"
         >
           <span
             class="euiTab__content"
           >
             Overview
           </span>
-        </button>
-        <button
+        </a>
+        <a
           aria-selected="false"
           class="euiTab"
           data-test-subj="uptimeCertificatesLink"
+          href="/certificates"
+          rel="noreferrer"
           role="tab"
-          type="button"
         >
           <span
             class="euiTab__content"
           >
             Certificates
           </span>
-        </button>
-        <button
+        </a>
+        <a
           aria-selected="false"
           class="euiTab"
           data-test-subj="settings-page-link"
+          href="/settings"
+          rel="noreferrer"
           role="tab"
-          type="button"
         >
           <span
             class="euiTab__content"
           >
             Settings
           </span>
-        </button>
+        </a>
       </div>
     </div>
     <div
@@ -263,30 +266,6 @@ Array [
 
 <div
     class="euiSpacer euiSpacer--m"
-  />,
-  @media only screen and (max-width:1024px) and (min-width:868px) {
-
-}
-
-@media only screen and (max-width:880px) {
-
-}
-
-<h1
-    class="euiTitle euiTitle--medium eui-textNoWrap"
-  >
-    TestingHeading
-  </h1>,
-  @media only screen and (max-width:1024px) and (min-width:868px) {
-
-}
-
-@media only screen and (max-width:880px) {
-
-}
-
-<div
-    class="euiSpacer euiSpacer--xs"
   />,
 ]
 `;
@@ -408,45 +387,48 @@ Array [
         role="tablist"
         style="padding-left:16px"
       >
-        <button
+        <a
           aria-selected="false"
           class="euiTab"
           data-test-subj="uptimeSettingsToOverviewLink"
+          href="/"
+          rel="noreferrer"
           role="tab"
-          type="button"
         >
           <span
             class="euiTab__content"
           >
             Overview
           </span>
-        </button>
-        <button
+        </a>
+        <a
           aria-selected="false"
           class="euiTab"
           data-test-subj="uptimeCertificatesLink"
+          href="/certificates"
+          rel="noreferrer"
           role="tab"
-          type="button"
         >
           <span
             class="euiTab__content"
           >
             Certificates
           </span>
-        </button>
-        <button
+        </a>
+        <a
           aria-selected="false"
           class="euiTab"
           data-test-subj="settings-page-link"
+          href="/settings"
+          rel="noreferrer"
           role="tab"
-          type="button"
         >
           <span
             class="euiTab__content"
           >
             Settings
           </span>
-        </button>
+        </a>
       </div>
     </div>
     <div
@@ -555,19 +537,11 @@ Array [
 <div
     class="euiSpacer euiSpacer--m"
   />,
-  @media only screen and (max-width:1024px) and (min-width:868px) {
+]
+`;
 
-}
-
-@media only screen and (max-width:880px) {
-
-}
-
-<h1
-    class="euiTitle euiTitle--medium eui-textNoWrap"
-  >
-    TestingHeading
-  </h1>,
+exports[`PageHeader shallow renders without the date picker: page_header_no_date_picker 1`] = `
+Array [
   @media only screen and (max-width:1024px) and (min-width:868px) {
 
 }
@@ -577,14 +551,6 @@ Array [
 }
 
 <div
-    class="euiSpacer euiSpacer--xs"
-  />,
-]
-`;
-
-exports[`PageHeader shallow renders without the date picker: page_header_no_date_picker 1`] = `
-Array [
-  <div
     class="euiCallOut euiCallOut--primary"
   >
     <div
@@ -650,10 +616,37 @@ Array [
       </div>
     </div>
   </div>,
-  <div
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
     class="euiSpacer euiSpacer--s"
   />,
-  <div
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+  .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
+    width: 500px;
+  }
+}
+
+@media only screen and (max-width:880px) {
+  .c0.c0.c0 {
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+  }
+
+  .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
+    width: calc(100% + 8px);
+  }
+}
+
+<div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
@@ -664,58 +657,155 @@ Array [
         role="tablist"
         style="padding-left:16px"
       >
-        <button
+        <a
           aria-selected="false"
           class="euiTab"
           data-test-subj="uptimeSettingsToOverviewLink"
+          href="/"
+          rel="noreferrer"
           role="tab"
-          type="button"
         >
           <span
             class="euiTab__content"
           >
             Overview
           </span>
-        </button>
-        <button
+        </a>
+        <a
           aria-selected="false"
           class="euiTab"
           data-test-subj="uptimeCertificatesLink"
+          href="/certificates"
+          rel="noreferrer"
           role="tab"
-          type="button"
         >
           <span
             class="euiTab__content"
           >
             Certificates
           </span>
-        </button>
-        <button
+        </a>
+        <a
           aria-selected="false"
           class="euiTab"
           data-test-subj="settings-page-link"
+          href="/settings"
+          rel="noreferrer"
           role="tab"
-          type="button"
         >
           <span
             class="euiTab__content"
           >
             Settings
           </span>
-        </button>
+        </a>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero c0"
+      style="flex-basis:485px"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+          >
+            <div
+              class="euiPopover euiPopover--anchorDownLeft"
+              id="QuickSelectPopover"
+            >
+              <div
+                class="euiPopover__anchor euiQuickSelectPopover__anchor"
+              >
+                <button
+                  aria-label="Date quick select"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
+                  data-test-subj="superDatePickerToggleQuickMenuButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  >
+                    <span
+                      class="euiButtonContent__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                    <span
+                      class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
+                    >
+                      <span
+                        data-euiicon-type="clock"
+                      />
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <div
+                class="euiDatePickerRange euiDatePickerRange--inGroup"
+              >
+                <button
+                  class="euiSuperDatePicker__prettyFormat"
+                  data-test-subj="superDatePickerShowDatesButton"
+                >
+                  Last 15 minutes
+                  <span
+                    class="euiSuperDatePicker__prettyFormatLink"
+                  >
+                    Show dates
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            <button
+              class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
+              data-test-subj="superDatePickerApplyTimeButton"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButtonContent__icon"
+                  data-euiicon-type="refresh"
+                />
+                <span
+                  class="euiButton__text euiSuperUpdateButton__text"
+                >
+                  Refresh
+                </span>
+              </span>
+            </button>
+          </span>
+        </div>
       </div>
     </div>
   </div>,
-  <div
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
     class="euiSpacer euiSpacer--m"
-  />,
-  <h1
-    class="euiTitle euiTitle--medium eui-textNoWrap"
-  >
-    TestingHeading
-  </h1>,
-  <div
-    class="euiSpacer euiSpacer--xs"
   />,
 ]
 `;
