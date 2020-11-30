@@ -242,6 +242,7 @@ const getSavedObjectTypes = (
             enabled: { type: 'boolean' },
             vars: { type: 'flattened' },
             config: { type: 'flattened' },
+            compiled_input: { type: 'flattened' },
             streams: {
               type: 'nested',
               properties: {
