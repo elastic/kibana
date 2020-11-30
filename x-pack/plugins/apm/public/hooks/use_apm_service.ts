@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useRef } from 'react';
+import { useContext } from 'react';
+import { APMServiceContext } from '../context/apm_service_context';
 
-let uniqueId = 0;
-const getUniqueId = () => uniqueId++;
-
-export function useComponentId() {
-  const idRef = useRef(getUniqueId());
-  return idRef.current;
+export function useApmService() {
+  return useContext(APMServiceContext);
 }
