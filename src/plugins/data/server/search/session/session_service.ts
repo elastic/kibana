@@ -68,6 +68,7 @@ export class BackgroundSessionService {
   constructor(private readonly logger: Logger) {}
 
   private setupMonitoring = (savedObjects: SavedObjectsServiceStart) => {
+    // TODO: setup monitoring only if BGS is enabled
     const internalRepo = savedObjects.createInternalRepository();
     this.internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
     this.monitorInterval = setInterval(this.monitorMappedIds.bind(this), INMEM_TRACKING_INTERVAL);
