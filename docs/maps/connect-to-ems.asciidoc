@@ -37,14 +37,14 @@ To disable EMS, change your <<settings, kibana.yml>> file.
 . (Optional) Set `map.regionmap` to the vector shapes of the administrative boundaries that you want to use.
 
 [float]
-[[self-hosted]]
-=== Self-Hosted Elastic Maps Service
+[id=self-managed, titleabbrev="Self-managed EMS"]
+=== Self-managed Elastic Maps Service
 
 beta::[]
 
 If you cannot connect to Elastic Maps Service from the Kibana server or browser clients, and your cluster has the appropriate license level, you can opt to host the service on your own infrastructure.
 
-The self-hosted version of Elastic Maps Service is offered as a Docker image that will provide both the EMS basemaps and EMS boundaries. You need first to download and run the image and after connecting it to your Elasticsearch cluster for license validation, it will guide you to download and configure the basemaps database that needs to be retrieved separately.
+The self-managed version of Elastic Maps Service is offered as a Docker image that will provide both the EMS basemaps and EMS boundaries. You need first to download and run the image and after connecting it to your {es} cluster for license validation, it will guide you to download and configure the basemaps database that needs to be retrieved separately.
 
 IMPORTANT: This version of Elastic Maps Service basemaps does not support Vega, Coordinate, or the Region Visualizations, as it does not offer raster tiles.
 
@@ -59,14 +59,18 @@ docker run --rm --init --publish 8080:8080 \
 
 Once the server is running, follow instructions from the webpage served at the root.
 
+// TODO: to be replaced by an screenshot from another computer 😓
 [role="screenshot"]
-image::images/self-hosted-instructions.png[Set-up instructions]
+image::images/self-managed-instructions.png[Set-up instructions]
 
 
 [float]
+[[self-managed-configuration]]
 ==== Configuration
 
-Self-hosted Elastic Maps Service reads properties from a configuration file in YAML format that will be validated on startup. The location of this file is provided by the `EMS_PATH_CONF` environment variable and defaults to `/usr/src/app/server/config/ems-server.yaml`.
+Self-managed Elastic Maps Service reads properties from a configuration file in YAML format that will be validated on startup. The location of this file is provided by the `EMS_PATH_CONF` environment variable and defaults to `/usr/src/app/server/config/ems-server.yaml`.
+
+General settings:
 
 // TODO Configuration settings are still in flux
 [cols="2*<"]
@@ -79,57 +83,82 @@ Self-hosted Elastic Maps Service reads properties from a configuration file in Y
 
 | `path.planet:`
   | Path of the basemaps database. *Default: `/usr/src/app/data/planet.mbtiles`*
+|===
+
+
+{es} connection and security settings:
+
+[cols="2*<"]
+|===
 
 | `elasticsearch.host:`
- | URL of the Elasticsearch instance to use for license validation.
+ | URL of the {es} instance to use for license validation.
 
 | `elasticsearch.username:` and `elasticsearch.password`
   | Credentials of a user with at least the `monitor` role.
 
 | `elasticsearch.ssl.certificateAuthorities`
- | Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates which make up a trusted certificate chain for the server. This chain is used by the server to establish trust when connecting to your Elasticsearch cluster.
+ | Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates which make up a trusted certificate chain for the server. This chain is used by the server to establish trust when connecting to your {es} cluster. <<elasticsearch-ssl-certificateAuthorities,Equivalent {kib} setting>>.
 
 | `elasticsearch.ssl.certificate` and `elasticsearch.ssl.key`, and `elasticsearch.ssl.keyPassphrase`:
- | Optional settings that provide the paths to the PEM-format SSL certificate and key files and the key password. These files are used to verify the identity of Elastic Maps Service to Elasticsearch and are required when `xpack.security.http.ssl.client_authentication` in Elasticsearch is set to required.
+ | Optional settings that provide the paths to the PEM-format SSL certificate and key files and the key password. These files are used to verify the identity of Elastic Maps Service to {es} and are required when `xpack.security.http.ssl.client_authentication` in {es} is set to required. <<elasticsearch-ssl-cert-key,Equivalent {kib} setting>>.
 
 | `elasticsearch.ssl.verificationMode`
- | Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to Elasticsearch. Valid values are "`full`", "`certificate`", and "`none`". Using "`full`" performs hostname verification, using "`certificate`" skips hostname verification, and using "`none`" skips verification entirely. *Default: `full`*
-
-| `ssl.enabled`
- | Enables SSL/TLS for inbound connections to the server. When set to `true`, a certificate and its corresponding private key must be provided. *Default: `false`*
-
-| `ssl.certificateAuthorities`
- | Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates which make up a trusted certificate chain for the server. This chain is used by the server to establish trust when receiving inbound SSL/TLS connections from end users.
-
-| `ssl.key`, `ssl.certificate`, and `ssl.keyPassphrase`:
-  | Location of yor SSL key and certificate files and the password that decrypts the private key that is specified via `ssl.key`. This password is optional, as the key may not be encrypted.
+ | Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to {es}. Valid values are "`full`", "`certificate`", and "`none`". Using "`full`" performs hostname verification, using "`certificate`" skips hostname verification, and using "`none`" skips verification entirely. *Default: `full`*. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
 
 |===
 
+Server security settings:
+
+[cols="2*<"]
+|===
+
+| `ssl.enabled`
+ | Enables SSL/TLS for inbound connections to the server. When set to `true`, a certificate and its corresponding private key must be provided. *Default: `false`*. <<server-ssl-enabled,Equivalent {kib} setting>>.
+
+| `ssl.certificateAuthorities`
+ | Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates which make up a trusted certificate chain for the server. This chain is used by the server to establish trust when receiving inbound SSL/TLS connections from end users. <<server-ssl-certificateAuthorities,Equivalent {kib} setting>>.
+
+| `ssl.key`, `ssl.certificate`, and `ssl.keyPassphrase`:
+  | Location of yor SSL key and certificate files and the password that decrypts the private key that is specified via `ssl.key`. This password is optional, as the key may not be encrypted. <<server-ssl-cert-key,Equivalent {kib} setting>>.
+
+| `ssl.supportedProtocols:`
+ | An array of supported protocols with versions.
+Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: `TLSv1.1`, `TLSv1.2`, `TLSv1.3`*. <<server-ssl-supportedProtocols,Equivalent {kib} setting>>.
+
+| `ssl.cipherSuites:`
+ | Details on the format, and the valid options, are available via the
+https://www.openssl.org/docs/man1.1.1/man1/ciphers.html#CIPHER-LIST-FORMAT[OpenSSL cipher list format documentation].
+*Default: `TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_AES_128_GCM_SHA256 ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA`*. <<server-ssl-cipherSuites,Equivalent {kib} setting>>.
+|===
+
 // TODO this is still a work in progress
-All configuration settings can be overridden by environment variables that are named with the following conditions: all letters are uppercase and replace YAML periods by underscores. For example `elasticsearch.username` could be overridden by the environment variable `ELASTICSEARCH_USERNAME`.
+All configuration settings can be overridden by environment variables that are named with the following conditions: all letters are uppercase and replace YAML periods by underscores. For example `elasticsearch.ssl.certificate` could be overridden by the environment variable `ELASTICSEARCH_SSL_CERTIFICATE`.
 
 
 [float]
+[[self-managed-data]]
 ==== Data
 
 Boundaries:: World countries, global administrative regions, and countries regions datasets are available.
 
 Basemaps:: A minimal basemap is provided with the Docker image. This can be used for testing environments but won't be functional for normal operations. The full basemap (around 90GB file) needs to be mounted on the image for the server to run normally.
 
-TIP: Basemaps and boundaries available can be explored from the `/maps` endpoint in a web page that is your self-hosted equivalent to https://maps.elastic.co
+TIP: Basemaps and boundaries available can be explored from the `/maps` endpoint in a web page that is your self-managed equivalent to https://maps.elastic.co
 
 
 [float]
+[[self-managed-kibana]]
 ==== Kibana configuration
 
-Once the self-hosted Elastic Maps Service is running, you need to add the `map.emsUrl` configuration key in your `kibana.yml` file pointing to the root of the service. This setting is enough to configure Kibana to ask for EMS basemaps and boundaries from the new instance.
+Once the self-managed Elastic Maps Service is running, you need to add the `map.emsUrl` configuration key in your `kibana.yml` file pointing to the root of the service. This setting is enough to configure Kibana to ask for EMS basemaps and boundaries from the new instance.
 
 
 [float]
+[[self-managed-check]]
 ==== Status check
 
-The self-hosted Elastic Maps Service will run a status check periodically and it will be exposed in two different forms:
+The self-managed Elastic Maps Service will run a status check periodically and it will be exposed in two different forms:
 
 * The `/status` endpoint will expose details of the different components of the service.
 * The Docker https://docs.docker.com/engine/reference/builder/#healthcheck[`HEALTHCHECK`] instruction is run by default and will inform about the healthiness of the service.
@@ -138,6 +167,7 @@ IMPORTANT: The server won't respond to any data request if the license validatio
 
 
 [float]
+[[self-managed-logging]]
 ==== Logging
 
 Logs are generated in JSON format and emitted to the standard output and to the file set by `path.logs` setting. The instance won't rotate the logs but it has the `logrotate` linux tool installed in the image. If no logging is desired, `/dev/null` can be mounted to the default log path at `/var/log/ems/ems.log`.
