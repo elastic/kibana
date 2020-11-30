@@ -204,14 +204,16 @@ export default function ({ getService }: FtrProviderContext) {
           title,
           fieldAttrs: {
             foo: {
-              customName: 'bar',
+              count: 123,
+              customLabel: 'test',
             },
           },
         },
       });
 
       expect(response.status).to.be(200);
-      expect(response.body.index_pattern.fieldAttrs.foo.customName).to.be('bar');
+      expect(response.body.index_pattern.fieldAttrs.foo.count).to.be(123);
+      expect(response.body.index_pattern.fieldAttrs.foo.customLabel).to.be('test');
     });
 
     describe('when creating index pattern with existing title', () => {
