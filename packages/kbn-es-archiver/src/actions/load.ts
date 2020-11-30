@@ -23,7 +23,7 @@ import { Readable } from 'stream';
 import { ToolingLog, KbnClient } from '@kbn/dev-utils';
 import { Client } from 'elasticsearch';
 
-import { createPromiseFromStreams, concatStreamProviders } from '../lib/streams';
+import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 
 import {
   isGzip,

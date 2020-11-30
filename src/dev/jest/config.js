@@ -39,17 +39,5 @@ export default {
     '<rootDir>/test/functional/services/remote',
     '<rootDir>/src/dev/code_coverage/ingest_coverage',
   ],
-  collectCoverageFrom: [
-    'src/plugins/**/*.{ts,tsx}',
-    '!src/plugins/**/{__test__,__snapshots__,__examples__,mocks,tests}/**/*',
-    '!src/plugins/**/*.d.ts',
-    '!src/plugins/**/test_helpers/**',
-    'packages/kbn-ui-framework/src/components/**/*.js',
-    '!packages/kbn-ui-framework/src/components/index.js',
-    '!packages/kbn-ui-framework/src/components/**/*/index.js',
-    'packages/kbn-ui-framework/src/services/**/*.js',
-    '!packages/kbn-ui-framework/src/services/index.js',
-    '!packages/kbn-ui-framework/src/services/**/*/index.js',
-  ],
   testRunner: 'jasmine2',
 };

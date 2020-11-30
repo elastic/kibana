@@ -58,19 +58,6 @@ const mappingConflictHeader = i18n.translate(
   }
 );
 
-const confirmMessage = i18n.translate('indexPatternManagement.editIndexPattern.refreshLabel', {
-  defaultMessage: 'This action resets the popularity counter of each field.',
-});
-
-const confirmModalOptionsRefresh = {
-  confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.refreshButton', {
-    defaultMessage: 'Refresh',
-  }),
-  title: i18n.translate('indexPatternManagement.editIndexPattern.refreshHeader', {
-    defaultMessage: 'Refresh field list?',
-  }),
-};
-
 const confirmModalOptionsDelete = {
   confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.deleteButton', {
     defaultMessage: 'Delete',
@@ -117,16 +104,6 @@ export const EditIndexPattern = withRouter(
       uiSettings.set('defaultIndex', indexPattern.id);
       setDefaultIndex(indexPattern.id || '');
     }, [uiSettings, indexPattern.id]);
-
-    const refreshFields = () => {
-      overlays.openConfirm(confirmMessage, confirmModalOptionsRefresh).then(async (isConfirmed) => {
-        if (isConfirmed) {
-          await data.indexPatterns.refreshFields(indexPattern);
-          await data.indexPatterns.updateSavedObject(indexPattern);
-          setFields(indexPattern.getNonScriptedFields());
-        }
-      });
-    };
 
     const removePattern = () => {
       async function doRemove() {
@@ -190,7 +167,6 @@ export const EditIndexPattern = withRouter(
           <IndexHeader
             indexPattern={indexPattern}
             setDefault={setDefaultPattern}
-            refreshFields={refreshFields}
             deleteIndexPatternClick={removePattern}
             defaultIndex={defaultIndex}
           />

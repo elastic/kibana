@@ -100,7 +100,9 @@ const Application = (props: UptimeAppProps) => {
     <EuiErrorBoundary>
       <i18nCore.Context>
         <ReduxProvider store={store}>
-          <KibanaContextProvider services={{ ...core, ...plugins }}>
+          <KibanaContextProvider
+            services={{ ...core, ...plugins, triggersActionsUi: startPlugins.triggersActionsUi }}
+          >
             <Router history={appMountParameters.history}>
               <UptimeRefreshContextProvider>
                 <UptimeSettingsContextProvider {...props}>

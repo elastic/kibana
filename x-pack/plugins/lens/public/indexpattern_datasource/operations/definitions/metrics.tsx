@@ -52,6 +52,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
+    getDefaultLabel: (column, indexPattern, columns) =>
+      ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
     buildColumn: ({ field, previousColumn }) => ({
       label: ofName(field.displayName),
       dataType: 'number',

@@ -1544,12 +1544,5 @@ In other use cases the message field can be used to concatenate different values
       ]
     }
   />
-  <CollapseLink
-    aria-label="Collapse"
-    data-test-subj="collapse"
-    onClick={[MockFunction]}
-  >
-    Collapse event
-  </CollapseLink>
 </Details>
 `;
