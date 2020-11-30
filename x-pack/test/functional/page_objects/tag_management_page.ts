@@ -162,6 +162,10 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
   class TagAssignmentFlyout {
     constructor(private readonly page: TagManagementPage) {}
 
+    /**
+     * Open the tag assignment flyout, by selected given `tagNames` in the table, then clicking on the `assign`
+     * action in the bulk action menu.
+     */
     async open(tagNames: string[]) {
       for (const tagName of tagNames) {
         await this.page.selectTagByName(tagName);
@@ -179,7 +183,7 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     /**
-     * Click on the 'cancel' button in the assign flyout.
+     * Click on the 'confirm' button in the assign flyout.
      */
     async clickConfirm() {
       await testSubjects.click('assignFlyoutConfirmButton');
@@ -187,16 +191,25 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
       await this.page.waitUntilTableIsLoaded();
     }
 
+    /**
+     * Click on an assignable object result line in the flyout result list.
+     */
     async clickOnResult(type: string, id: string) {
       await testSubjects.click(`assign-result-${type}-${id}`);
     }
 
+    /**
+     * Wait until the assignable object results are displayed in the flyout.
+     */
     async waitUntilResultsAreLoaded() {
       return find.waitForDeletedByCssSelector(
         '*[data-test-subj="assignFlyoutResultList"] .euiLoadingSpinner'
       );
     }
 
+    /**
+     * Wait until the flyout is closed.
+     */
     async waitForFlyoutToClose() {
       return testSubjects.waitForDeleted('assignFlyoutResultList');
     }
