@@ -6,7 +6,6 @@
 
 import { GetTrustedAppsRequestSchema, PostTrustedAppCreateRequestSchema } from './trusted_apps';
 import { ConditionEntryField, OperatingSystem } from '../types';
-import { OPERATING_SYSTEMS } from '../constants';
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {
@@ -114,7 +113,7 @@ describe('When invoking Trusted Apps Schema', () => {
 
       expect(() => body.validate({ ...bodyMsg, os: 'winz' })).toThrow();
 
-      OPERATING_SYSTEMS.forEach((os) => {
+      [OperatingSystem.LINUX, OperatingSystem.MAC, OperatingSystem.WINDOWS].forEach((os) => {
         expect(() => body.validate({ ...bodyMsg, os })).not.toThrow();
       });
     });
@@ -156,7 +155,7 @@ describe('When invoking Trusted Apps Schema', () => {
       });
 
       it('should validate `entry.field` accepts hash field name for all os values', () => {
-        OPERATING_SYSTEMS.forEach((os) => {
+        [OperatingSystem.LINUX, OperatingSystem.MAC, OperatingSystem.WINDOWS].forEach((os) => {
           const bodyMsg3 = createNewTrustedApp({
             os,
             entries: [
@@ -172,7 +171,7 @@ describe('When invoking Trusted Apps Schema', () => {
       });
 
       it('should validate `entry.field` accepts path field name for all os values', () => {
-        OPERATING_SYSTEMS.forEach((os) => {
+        [OperatingSystem.LINUX, OperatingSystem.MAC, OperatingSystem.WINDOWS].forEach((os) => {
           const bodyMsg3 = createNewTrustedApp({
             os,
             entries: [

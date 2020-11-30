@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
-import { OPERATING_SYSTEMS } from '../../../../../../common/endpoint/constants';
 import { LogicalConditionBuilder } from './logical_condition';
 import {
   ConditionEntry,
@@ -30,6 +29,12 @@ import {
   isMacosLinuxTrustedAppCondition,
   isWindowsTrustedAppCondition,
 } from '../../state/type_guards';
+
+const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
+  OperatingSystem.MAC,
+  OperatingSystem.WINDOWS,
+  OperatingSystem.LINUX,
+];
 
 const generateNewEntry = (): ConditionEntry<ConditionEntryField.HASH> => {
   return {

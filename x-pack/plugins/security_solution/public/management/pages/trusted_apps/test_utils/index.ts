@@ -5,8 +5,7 @@
  */
 
 import { combineReducers, createStore } from 'redux';
-import { TrustedApp } from '../../../../../common/endpoint/types';
-import { OPERATING_SYSTEMS } from '../../../../../common/endpoint/constants';
+import { TrustedApp, OperatingSystem } from '../../../../../common/endpoint/types';
 import { RoutingAction } from '../../../../common/store/routing';
 
 import {
@@ -31,6 +30,12 @@ import {
 
 import { trustedAppsPageReducer } from '../store/reducer';
 import { TrustedAppsListResourceStateChanged } from '../store/action';
+
+const OPERATING_SYSTEMS: OperatingSystem[] = [
+  OperatingSystem.WINDOWS,
+  OperatingSystem.MAC,
+  OperatingSystem.LINUX,
+];
 
 const generate = <T>(count: number, generator: (i: number) => T) =>
   [...new Array(count).keys()].map(generator);
