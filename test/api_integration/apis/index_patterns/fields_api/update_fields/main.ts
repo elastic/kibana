@@ -135,6 +135,43 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response3.body.index_pattern.fieldAttrs.foo.count).to.be(2);
       });
 
+      it('can delete "count" attribute from index_pattern attribute map', async () => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
+          index_pattern: {
+            title,
+            fieldAttrs: {
+              foo: {
+                count: 1,
+              },
+            },
+          },
+        });
+
+        expect(response1.status).to.be(200);
+        expect(response1.body.index_pattern.fieldAttrs.foo.count).to.be(1);
+
+        const response2 = await supertest
+          .post(`/api/index_patterns/index_pattern/${response1.body.index_pattern.id}/fields`)
+          .send({
+            fields: {
+              foo: {
+                count: null,
+              },
+            },
+          });
+
+        expect(response2.status).to.be(200);
+        expect(response2.body.index_pattern.fieldAttrs.foo.count).to.be(undefined);
+
+        const response3 = await supertest.get(
+          `/api/index_patterns/index_pattern/${response1.body.index_pattern.id}`
+        );
+
+        expect(response3.status).to.be(200);
+        expect(response3.body.index_pattern.fieldAttrs.foo.count).to.be(undefined);
+      });
+
       it('can set field "count" attribute on an existing field', async () => {
         const title = `foo-${Date.now()}-${Math.random()}*`;
         const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
@@ -246,6 +283,43 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response3.status).to.be(200);
         expect(response3.body.index_pattern.fieldAttrs.foo.customLabel).to.be('bar');
+      });
+
+      it('can delete "customLabel" attribute from index_pattern attribute map', async () => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
+          index_pattern: {
+            title,
+            fieldAttrs: {
+              foo: {
+                customLabel: 'foo',
+              },
+            },
+          },
+        });
+
+        expect(response1.status).to.be(200);
+        expect(response1.body.index_pattern.fieldAttrs.foo.customLabel).to.be('foo');
+
+        const response2 = await supertest
+          .post(`/api/index_patterns/index_pattern/${response1.body.index_pattern.id}/fields`)
+          .send({
+            fields: {
+              foo: {
+                customLabel: null,
+              },
+            },
+          });
+
+        expect(response2.status).to.be(200);
+        expect(response2.body.index_pattern.fieldAttrs.foo.customLabel).to.be(undefined);
+
+        const response3 = await supertest.get(
+          `/api/index_patterns/index_pattern/${response1.body.index_pattern.id}`
+        );
+
+        expect(response3.status).to.be(200);
+        expect(response3.body.index_pattern.fieldAttrs.foo.customLabel).to.be(undefined);
       });
 
       it('can set field "customLabel" attribute on an existing field', async () => {
@@ -386,6 +460,51 @@ export default function ({ getService }: FtrProviderContext) {
           id: 'bar-2',
           params: { baz: 'qux-2' },
         });
+      });
+
+      it('can remove "format" attribute from index_pattern format map', async () => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
+          index_pattern: {
+            title,
+            fieldFormats: {
+              foo: {
+                id: 'bar',
+                params: {
+                  baz: 'qux',
+                },
+              },
+            },
+          },
+        });
+
+        expect(response1.status).to.be(200);
+        expect(response1.body.index_pattern.fieldFormats.foo).to.eql({
+          id: 'bar',
+          params: {
+            baz: 'qux',
+          },
+        });
+
+        const response2 = await supertest
+          .post(`/api/index_patterns/index_pattern/${response1.body.index_pattern.id}/fields`)
+          .send({
+            fields: {
+              foo: {
+                format: null,
+              },
+            },
+          });
+
+        expect(response2.status).to.be(200);
+        expect(response2.body.index_pattern.fieldFormats.foo).to.be(undefined);
+
+        const response3 = await supertest.get(
+          `/api/index_patterns/index_pattern/${response1.body.index_pattern.id}`
+        );
+
+        expect(response3.status).to.be(200);
+        expect(response3.body.index_pattern.fieldFormats.foo).to.be(undefined);
       });
 
       it('can set field "format" on an existing field', async () => {
