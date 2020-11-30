@@ -8,6 +8,8 @@ import React from 'react';
 
 import { EuiProgress, EuiSpacer, EuiTitle } from '@elastic/eui';
 
+import { INDEXING_STATUS_PROGRESS_TITLE } from './constants';
+
 interface IIndexingStatusContentProps {
   percentageComplete: number;
 }
@@ -17,7 +19,7 @@ export const IndexingStatusContent: React.FC<IIndexingStatusContentProps> = ({
 }) => (
   <div data-test-subj="IndexingStatusProgressMeter">
     <EuiTitle size="s">
-      <h3>Indexing progress</h3>
+      <h3>{INDEXING_STATUS_PROGRESS_TITLE}</h3>
     </EuiTitle>
     <EuiSpacer size="s" />
     <EuiProgress color="primary" size="m" value={percentageComplete} max={100} />

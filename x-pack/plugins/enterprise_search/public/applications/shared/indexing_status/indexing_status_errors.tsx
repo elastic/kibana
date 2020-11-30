@@ -10,6 +10,8 @@ import { EuiButton, EuiCallOut } from '@elastic/eui';
 
 import { EuiLinkTo } from '../react_router_helpers';
 
+import { INDEXING_STATUS_HAS_ERRORS_TITLE, INDEXING_STATUS_HAS_ERRORS_BUTTON } from './constants';
+
 interface IIndexingStatusErrorsProps {
   viewLinkPath: string;
 }
@@ -22,9 +24,9 @@ export const IndexingStatusErrors: React.FC<IIndexingStatusErrorsProps> = ({ vie
     title="There was an error"
     data-test-subj="IndexingStatusErrors"
   >
-    <p>Several documents have field conversion errors.</p>
+    <p>{INDEXING_STATUS_HAS_ERRORS_TITLE}</p>
     <EuiButton color="danger" fill={true} size="s" data-test-subj="ViewErrorsButton">
-      <EuiLinkTo to={viewLinkPath}>View Errors</EuiLinkTo>
+      <EuiLinkTo to={viewLinkPath}>{INDEXING_STATUS_HAS_ERRORS_BUTTON}</EuiLinkTo>
     </EuiButton>
   </EuiCallOut>
 );
