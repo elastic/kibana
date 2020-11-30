@@ -616,7 +616,7 @@
             }
           }
         },
-        "ingestManager": {
+        "fleet": {
           "properties": {
             "clicks_total": {
               "type": "long"
