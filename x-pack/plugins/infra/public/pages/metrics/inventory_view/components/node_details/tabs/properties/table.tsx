@@ -75,7 +75,7 @@ export const Table = (props: Props) => {
           <h3>{title}</h3>
         </EuiText>
       </TitleWrapper>
-      <TableWithoutHeader columns={columns} items={rows} />
+      <TableWithoutHeader compressed columns={columns} items={rows} />
     </>
   );
 };
