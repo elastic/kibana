@@ -76,6 +76,19 @@ export class VisEditor extends Component {
     });
   }, VIS_STATE_DEBOUNCE_DELAY);
 
+  debouncedFetchFields = debounce(
+    (extractedIndexPatterns) => {
+      if (this.abortControllerFetchFields) {
+        this.abortControllerFetchFields.abort();
+      }
+      this.abortControllerFetchFields = new AbortController();
+
+      return fetchFields(extractedIndexPatterns, this.abortControllerFetchFields.signal);
+    },
+    VIS_STATE_DEBOUNCE_DELAY,
+    { leading: true }
+  );
+
   handleChange = (partialModel) => {
     if (isEmpty(partialModel)) {
       return;
@@ -94,7 +107,7 @@ export class VisEditor extends Component {
 
     const extractedIndexPatterns = extractIndexPatterns(nextModel);
     if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-      fetchFields(extractedIndexPatterns).then((visFields) =>
+      this.debouncedFetchFields(extractedIndexPatterns).then((visFields) =>
         this.setState({
           visFields,
           extractedIndexPatterns,
