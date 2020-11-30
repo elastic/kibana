@@ -32,6 +32,7 @@ export const getConfiguration = ({
 export const getConfigurationOutput = (update = false): Partial<CasesConfigureResponse> => {
   return {
     ...getConfiguration(),
+    mappings: [],
     created_by: { email: null, full_name: null, username: 'elastic' },
     updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,
   };
@@ -82,32 +83,6 @@ export const getMappings = () => [
 
 export const getResilientConnector = () => ({
   name: 'Resilient Connector',
-  actionTypeId: '.resilient',
-  secrets: {
-    apiKeyId: 'id',
-    apiKeySecret: 'secret',
-  },
-  config: {
-    apiUrl: 'http://some.non.existent.com',
-    orgId: 'pkey',
-  },
-});
-
-export const getConnectorWithoutCaseOwned = () => ({
-  name: 'Connector without isCaseOwned',
-  actionTypeId: '.resilient',
-  secrets: {
-    apiKeyId: 'id',
-    apiKeySecret: 'secret',
-  },
-  config: {
-    apiUrl: 'http://some.non.existent.com',
-    orgId: 'pkey',
-  },
-});
-
-export const getConnectorWithoutMapping = () => ({
-  name: 'Connector without mapping',
   actionTypeId: '.resilient',
   secrets: {
     apiKeyId: 'id',

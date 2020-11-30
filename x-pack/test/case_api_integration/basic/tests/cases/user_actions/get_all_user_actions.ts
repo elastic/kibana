@@ -20,14 +20,25 @@ import {
 } from '../../../../common/lib/utils';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import {
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const actionsRemover = new ActionsRemover(supertest);
+  const kibanaServer = getService('kibanaServer');
 
   describe('get_all_user_actions', () => {
+    let servicenowSimulatorURL: string = '<could not determine kibana url>';
+    before(() => {
+      servicenowSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+      );
+    });
     afterEach(async () => {
       await deleteCases(es);
       await deleteComments(es);
@@ -311,7 +322,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: connector } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
-        .send(getServiceNowConnector())
+        .send({
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        })
         .expect(200);
 
       actionsRemover.add('default', connector.id, 'action', 'actions');
