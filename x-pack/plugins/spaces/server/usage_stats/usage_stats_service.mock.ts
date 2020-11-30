@@ -9,7 +9,7 @@ import { UsageStatsServiceSetup } from './usage_stats_service';
 
 const createSetupContractMock = (usageStatsClient = usageStatsClientMock.create()) => {
   const setupContract: jest.Mocked<UsageStatsServiceSetup> = {
-    getClient: jest.fn().mockResolvedValue(usageStatsClient),
+    getClient: jest.fn().mockReturnValue(usageStatsClient),
   };
   return setupContract;
 };

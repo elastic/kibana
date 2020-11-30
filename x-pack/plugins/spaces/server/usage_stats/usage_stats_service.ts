@@ -9,7 +9,7 @@ import { UsageStatsClient } from './usage_stats_client';
 import { SPACES_USAGE_STATS_TYPE } from './constants';
 
 export interface UsageStatsServiceSetup {
-  getClient(): Promise<UsageStatsClient>;
+  getClient(): UsageStatsClient;
 }
 
 interface UsageStatsServiceDeps {
@@ -24,12 +24,9 @@ export class UsageStatsService {
       coreStart.savedObjects.createInternalRepository([SPACES_USAGE_STATS_TYPE])
     );
 
-    const getClient = async () => {
-      const internalRepository = await internalRepositoryPromise;
-
-      return new UsageStatsClient((message: string) => {
-        this.log.debug(message);
-      }, internalRepository);
+    const getClient = () => {
+      const debugLogger = (message: string) => this.log.debug(message);
+      return new UsageStatsClient(debugLogger, internalRepositoryPromise);
     };
 
     return { getClient };

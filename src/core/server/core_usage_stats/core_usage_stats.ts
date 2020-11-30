@@ -17,8 +17,16 @@
  * under the License.
  */
 
-/** @internal */
-export const CORE_USAGE_STATS_TYPE = 'core-usage-stats';
+import { SavedObjectsType } from '../saved_objects';
+import { CORE_USAGE_STATS_TYPE } from './constants';
 
 /** @internal */
-export const CORE_USAGE_STATS_ID = 'core-usage-stats';
+export const coreUsageStatsType: SavedObjectsType = {
+  name: CORE_USAGE_STATS_TYPE,
+  hidden: true,
+  namespaceType: 'agnostic',
+  mappings: {
+    dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+    properties: {},
+  },
+};

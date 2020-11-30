@@ -18,7 +18,7 @@
  */
 
 import { savedObjectsRepositoryMock } from '../mocks';
-import { CORE_USAGE_STATS_TYPE } from './constants';
+import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
 import { CoreUsageStats } from './types';
 import {
   IncrementSavedObjectsImportOptions,
@@ -31,19 +31,22 @@ describe('CoreUsageStatsClient', () => {
   const setup = () => {
     const debugLoggerMock = jest.fn();
     const repositoryMock = savedObjectsRepositoryMock.create();
-    const usageStatsClient = new CoreUsageStatsClient(debugLoggerMock, repositoryMock);
+    const usageStatsClient = new CoreUsageStatsClient(
+      debugLoggerMock,
+      Promise.resolve(repositoryMock)
+    );
     return { usageStatsClient, debugLoggerMock, repositoryMock };
   };
 
   const createMockData = (attributes: CoreUsageStats) => ({
-    id: CORE_USAGE_STATS_TYPE,
+    id: CORE_USAGE_STATS_ID,
     type: CORE_USAGE_STATS_TYPE,
     attributes,
     references: [],
   });
 
   const firstPartyRequestHeaders = { 'kbn-version': 'a', origin: 'b', referer: 'c' }; // as long as these three header fields are truthy, this will be treated like a first-party request
-  const createOptions = { overwrite: true, id: CORE_USAGE_STATS_TYPE };
+  const createOptions = { id: CORE_USAGE_STATS_ID, overwrite: true, refresh: false };
 
   // mock data for existing fields
   const savedObjectsImport = {

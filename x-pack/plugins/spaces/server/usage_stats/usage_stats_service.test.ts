@@ -31,7 +31,7 @@ describe('UsageStatsService', () => {
       it('returns client', async () => {
         const { usageStatsService } = await setup();
 
-        const usageStatsClient = await usageStatsService.getClient();
+        const usageStatsClient = usageStatsService.getClient();
         expect(usageStatsClient).toBeInstanceOf(UsageStatsClient);
       });
     });

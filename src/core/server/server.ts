@@ -81,7 +81,7 @@ export class Server {
   private readonly i18n: I18nService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
-  private resolveSavedObjectsStartPromise!: (value: SavedObjectsServiceStart) => void;
+  private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -253,7 +253,7 @@ export class Server {
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
     });
-    await this.resolveSavedObjectsStartPromise(savedObjectsStart);
+    await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();

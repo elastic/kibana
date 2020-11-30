@@ -37,8 +37,10 @@ interface FileStream extends Readable {
   };
 }
 
-export const registerResolveImportErrorsRoute = (router: IRouter, deps: RouteDependencies) => {
-  const { config, coreUsageStats } = deps;
+export const registerResolveImportErrorsRoute = (
+  router: IRouter,
+  { config, coreUsageStats }: RouteDependencies
+) => {
   const { maxImportExportSize, maxImportPayloadBytes } = config;
 
   router.post(
@@ -82,8 +84,10 @@ export const registerResolveImportErrorsRoute = (router: IRouter, deps: RouteDep
       const { createNewCopies } = req.query;
 
       const { headers } = req;
-      const usageStatsClient = await coreUsageStats.getClient();
-      await usageStatsClient.incrementSavedObjectsResolveImportErrors({ headers, createNewCopies });
+      const usageStatsClient = coreUsageStats.getClient();
+      usageStatsClient
+        .incrementSavedObjectsResolveImportErrors({ headers, createNewCopies })
+        .catch(() => {});
 
       const file = req.body.file as FileStream;
       const fileExtension = extname(file.hapi.filename).toLowerCase();

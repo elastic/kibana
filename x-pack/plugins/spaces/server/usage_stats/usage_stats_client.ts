@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { deepFreeze } from '@kbn/std';
 import { ISavedObjectsRepository, Headers } from 'src/core/server';
-import { SPACES_USAGE_STATS_TYPE } from './constants';
+import { SPACES_USAGE_STATS_TYPE, SPACES_USAGE_STATS_ID } from './constants';
 import { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
 import { UsageStats } from './types';
 
@@ -17,31 +18,32 @@ export type IncrementCopySavedObjectsOptions = BaseIncrementOptions &
 export type IncrementResolveCopySavedObjectsErrorsOptions = BaseIncrementOptions &
   Pick<ResolveConflictsOptions, 'createNewCopies'>;
 
-const COPY_DEFAULT = Object.freeze({
+const COPY_DEFAULT = deepFreeze({
   total: 0,
-  kibanaRequest: Object.freeze({ yes: 0, no: 0 }),
-  createNewCopiesEnabled: Object.freeze({ yes: 0, no: 0 }),
-  overwriteEnabled: Object.freeze({ yes: 0, no: 0 }),
+  kibanaRequest: { yes: 0, no: 0 },
+  createNewCopiesEnabled: { yes: 0, no: 0 },
+  overwriteEnabled: { yes: 0, no: 0 },
 });
-const RESOLVE_COPY_ERRORS_DEFAULT = Object.freeze({
+const RESOLVE_COPY_ERRORS_DEFAULT = deepFreeze({
   total: 0,
-  kibanaRequest: Object.freeze({ yes: 0, no: 0 }),
-  createNewCopiesEnabled: Object.freeze({ yes: 0, no: 0 }),
+  kibanaRequest: { yes: 0, no: 0 },
+  createNewCopiesEnabled: { yes: 0, no: 0 },
 });
 
 export class UsageStatsClient {
   constructor(
     private readonly debugLogger: (message: string) => void,
-    private readonly repository: ISavedObjectsRepository
+    private readonly repositoryPromise: Promise<ISavedObjectsRepository>
   ) {}
 
   public async getUsageStats() {
     this.debugLogger('getUsageStats() called');
     let usageStats: UsageStats = {};
     try {
-      const result = await this.repository.get<UsageStats>(
+      const repository = await this.repositoryPromise;
+      const result = await repository.get<UsageStats>(
         SPACES_USAGE_STATS_TYPE,
-        SPACES_USAGE_STATS_TYPE
+        SPACES_USAGE_STATS_ID
       );
       usageStats = result.attributes;
     } catch (err) {
@@ -103,9 +105,10 @@ export class UsageStatsClient {
   }
 
   private async updateUsageStats(attributes: UsageStats) {
-    const options = { id: SPACES_USAGE_STATS_TYPE, overwrite: true };
+    const options = { id: SPACES_USAGE_STATS_ID, overwrite: true, refresh: false };
     try {
-      await this.repository.create(SPACES_USAGE_STATS_TYPE, attributes, options);
+      const repository = await this.repositoryPromise;
+      await repository.create(SPACES_USAGE_STATS_TYPE, attributes, options);
     } catch (err) {
       // do nothing
     }

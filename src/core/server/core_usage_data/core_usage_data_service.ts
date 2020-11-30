@@ -245,9 +245,7 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
       .pipe(takeUntil(this.stop$))
       .subscribe((opsMetrics) => (this.opsMetrics = opsMetrics));
 
-    coreUsageStats.getClient().then((coreUsageStatsClient) => {
-      this.coreUsageStatsClient = coreUsageStatsClient;
-    });
+    this.coreUsageStatsClient = coreUsageStats.getClient();
 
     this.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')

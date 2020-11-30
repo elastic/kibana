@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { CORE_USAGE_STATS_TYPE } from './constants';
+import { deepFreeze } from '@kbn/std';
+import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
 import { CoreUsageStats } from './types';
 import {
   Headers,
@@ -40,37 +41,38 @@ export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptio
 export type IncrementSavedObjectsExportOptions = BaseIncrementOptions &
   Pick<SavedObjectsExportOptions, 'types'> & { supportedTypes: string[] };
 
-const SAVED_OBJECTS_IMPORT_DEFAULT = Object.freeze({
+const SAVED_OBJECTS_IMPORT_DEFAULT = deepFreeze({
   total: 0,
-  kibanaRequest: Object.freeze({ yes: 0, no: 0 }),
-  createNewCopiesEnabled: Object.freeze({ yes: 0, no: 0 }),
-  overwriteEnabled: Object.freeze({ yes: 0, no: 0 }),
+  kibanaRequest: { yes: 0, no: 0 },
+  createNewCopiesEnabled: { yes: 0, no: 0 },
+  overwriteEnabled: { yes: 0, no: 0 },
 });
-const SAVED_OBJECTS_RESOLVE_IMPORT_ERRORS_DEFAULT = Object.freeze({
+const SAVED_OBJECTS_RESOLVE_IMPORT_ERRORS_DEFAULT = deepFreeze({
   total: 0,
-  kibanaRequest: Object.freeze({ yes: 0, no: 0 }),
-  createNewCopiesEnabled: Object.freeze({ yes: 0, no: 0 }),
+  kibanaRequest: { yes: 0, no: 0 },
+  createNewCopiesEnabled: { yes: 0, no: 0 },
 });
-const SAVED_OBJECTS_EXPORT_DEFAULT = Object.freeze({
+const SAVED_OBJECTS_EXPORT_DEFAULT = deepFreeze({
   total: 0,
-  kibanaRequest: Object.freeze({ yes: 0, no: 0 }),
-  allTypesSelected: Object.freeze({ yes: 0, no: 0 }),
+  kibanaRequest: { yes: 0, no: 0 },
+  allTypesSelected: { yes: 0, no: 0 },
 });
 
 /** @internal */
 export class CoreUsageStatsClient {
   constructor(
     private readonly debugLogger: (message: string) => void,
-    private readonly repository: ISavedObjectsRepository
+    private readonly repositoryPromise: Promise<ISavedObjectsRepository>
   ) {}
 
   public async getUsageStats() {
     this.debugLogger('getUsageStats() called');
     let coreUsageStats: CoreUsageStats = {};
     try {
-      const result = await this.repository.get<CoreUsageStats>(
+      const repository = await this.repositoryPromise;
+      const result = await repository.get<CoreUsageStats>(
         CORE_USAGE_STATS_TYPE,
-        CORE_USAGE_STATS_TYPE
+        CORE_USAGE_STATS_ID
       );
       coreUsageStats = result.attributes;
     } catch (err) {
@@ -158,9 +160,10 @@ export class CoreUsageStatsClient {
   }
 
   private async updateUsageStats(attributes: CoreUsageStats) {
-    const options = { id: CORE_USAGE_STATS_TYPE, overwrite: true };
+    const options = { id: CORE_USAGE_STATS_ID, overwrite: true, refresh: false };
     try {
-      await this.repository.create(CORE_USAGE_STATS_TYPE, attributes, options);
+      const repository = await this.repositoryPromise;
+      await repository.create(CORE_USAGE_STATS_TYPE, attributes, options);
     } catch (err) {
       // do nothing
     }

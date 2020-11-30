@@ -5,3 +5,4 @@
  */
 
 export const SPACES_USAGE_STATS_TYPE = 'spaces-usage-stats';
+export const SPACES_USAGE_STATS_ID = 'spaces-usage-stats';

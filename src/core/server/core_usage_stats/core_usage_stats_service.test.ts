@@ -65,7 +65,7 @@ describe('CoreUsageStatsService', () => {
       it('returns client', async () => {
         const { coreUsageStats } = setup();
 
-        const usageStatsClient = await coreUsageStats.getClient();
+        const usageStatsClient = coreUsageStats.getClient();
         expect(usageStatsClient).toBeInstanceOf(CoreUsageStatsClient);
       });
     });

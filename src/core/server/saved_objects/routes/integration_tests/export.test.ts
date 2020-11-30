@@ -25,12 +25,12 @@ import * as exportMock from '../../export';
 import supertest from 'supertest';
 import type { UnwrapPromise } from '@kbn/utility-types';
 import { createListStream } from '@kbn/utils';
+import { CoreUsageStatsClient } from '../../../core_usage_stats';
+import { coreUsageStatsClientMock } from '../../../core_usage_stats/core_usage_stats_client.mock';
+import { coreUsageStatsServiceMock } from '../../../core_usage_stats/core_usage_stats_service.mock';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
 import { setupServer, createExportableType } from '../test_utils';
-import { CoreUsageStatsClient } from 'src/core/server/core_usage_stats';
-import { coreUsageStatsClientMock } from 'src/core/server/core_usage_stats/core_usage_stats_client.mock';
-import { coreUsageStatsServiceMock } from 'src/core/server/core_usage_stats/core_usage_stats_service.mock';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
@@ -54,6 +54,7 @@ describe('POST /api/saved_objects/_export', () => {
 
     const router = httpSetup.createRouter('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
+    coreUsageStatsClient.incrementSavedObjectsExport.mockRejectedValue(new Error('Oh no!')); // this error is intentionally swallowed so the export does not fail
     const coreUsageStats = coreUsageStatsServiceMock.createSetupContract(coreUsageStatsClient);
     registerExportRoute(router, { config, coreUsageStats });
 

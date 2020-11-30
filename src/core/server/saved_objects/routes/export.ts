@@ -32,8 +32,10 @@ interface RouteDependencies {
   coreUsageStats: CoreUsageStatsServiceSetup;
 }
 
-export const registerExportRoute = (router: IRouter, deps: RouteDependencies) => {
-  const { config, coreUsageStats } = deps;
+export const registerExportRoute = (
+  router: IRouter,
+  { config, coreUsageStats }: RouteDependencies
+) => {
   const { maxImportExportSize } = config;
 
   const referenceSchema = schema.object({
@@ -103,8 +105,10 @@ export const registerExportRoute = (router: IRouter, deps: RouteDependencies) =>
       }
 
       const { headers } = req;
-      const usageStatsClient = await coreUsageStats.getClient();
-      await usageStatsClient.incrementSavedObjectsExport({ headers, types, supportedTypes });
+      const usageStatsClient = coreUsageStats.getClient();
+      usageStatsClient
+        .incrementSavedObjectsExport({ headers, types, supportedTypes })
+        .catch(() => {});
 
       const exportStream = await exportSavedObjectsToStream({
         savedObjectsClient,

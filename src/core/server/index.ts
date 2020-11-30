@@ -74,15 +74,9 @@ import {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
-import { CoreUsageStats } from './core_usage_stats';
 
-export {
-  CoreUsageData,
-  CoreConfigUsageData,
-  CoreEnvironmentUsageData,
-  CoreServicesUsageData,
-  CoreUsageStats,
-};
+export { CoreUsageStats } from './core_usage_stats';
+export { CoreUsageData, CoreConfigUsageData, CoreEnvironmentUsageData, CoreServicesUsageData };
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
