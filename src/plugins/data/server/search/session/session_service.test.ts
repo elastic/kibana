@@ -108,6 +108,7 @@ describe('BackgroundSessionService', () => {
     savedObjectsClient = savedObjectsClientMock.create();
     const mockLogger: any = {
       debug: jest.fn(),
+      warn: jest.fn(),
       error: jest.fn(),
     };
     service = new BackgroundSessionService(mockLogger);
@@ -339,8 +340,8 @@ describe('BackgroundSessionService', () => {
 
       const mockIdMapping = createMockIdMapping(
         [[MOCK_KEY_HASH, MOCK_ASYNC_ID]],
-        moment().subtract(1, 'm'),
-        MAX_UPDATE_RETRIES + 1
+        moment(),
+        MAX_UPDATE_RETRIES
       );
 
       const deleteSpy = jest.spyOn(mockIdMapping, 'delete');
