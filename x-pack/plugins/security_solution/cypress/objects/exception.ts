@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useRef } from 'react';
-
-let uniqueId = 0;
-const getUniqueId = () => uniqueId++;
-
-export function useComponentId() {
-  const idRef = useRef(getUniqueId());
-  return idRef.current;
+export interface Exception {
+  field: string;
+  operator: string;
+  values: string[];
 }
+
+export const exception: Exception = {
+  field: 'host.name',
+  operator: 'is',
+  values: ['suricata-iowa'],
+};
