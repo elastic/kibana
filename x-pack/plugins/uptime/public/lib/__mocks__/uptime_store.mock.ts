@@ -5,13 +5,12 @@
  */
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
-import { AppState } from '../../state';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
-export const mockStore: AppState = {
+export const mockStore = {
   overviewFilters: {
     filters: {
       locations: [],

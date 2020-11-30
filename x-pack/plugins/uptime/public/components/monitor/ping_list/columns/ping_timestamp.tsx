@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { useIntersection } from 'react-use';
+import useIntersection from 'react-use/lib/useIntersection';
 import moment from 'moment';
 import styled from 'styled-components';
 import { Ping } from '../../../../../common/runtime_types/ping';

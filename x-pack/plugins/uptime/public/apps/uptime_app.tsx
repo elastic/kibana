@@ -38,7 +38,6 @@ export interface UptimeAppColors {
   danger: string;
   dangerBehindText: string;
   success: string;
-  dangerBehindText: string;
   gray: string;
   range: string;
   mean: string;

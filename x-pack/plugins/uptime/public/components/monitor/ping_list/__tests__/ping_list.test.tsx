@@ -57,9 +57,12 @@ describe('PingList component', () => {
       ],
     };
 
-    jest
-      .spyOn(pingListHook, 'usePingsList')
-      .mockReturnValue({ ...response, error: undefined, loading: false, failedSteps: [] });
+    jest.spyOn(pingListHook, 'usePingsList').mockReturnValue({
+      ...response,
+      error: undefined,
+      loading: false,
+      failedSteps: { steps: [], checkGroup: '1-f-4d-4f' },
+    });
   });
 
   it('renders sorted list without errors', () => {

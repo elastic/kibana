@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { Ping } from '../../../../../common/runtime_types/ping';
+import { Ping, SyntheticsJourneyApiResponse } from '../../../../../common/runtime_types/ping';
 
 interface Props {
   ping: Ping;
-  failedSteps: Ping[];
+  failedSteps?: SyntheticsJourneyApiResponse;
 }
 
 export const FailedStep = ({ ping, failedSteps }: Props) => {
@@ -22,7 +22,7 @@ export const FailedStep = ({ ping, failedSteps }: Props) => {
   }
   return (
     <div>
-      {thisFailedStep.synthetics.step.index}. {thisFailedStep.synthetics.step.name}
+      {thisFailedStep.synthetics?.step?.index}. {thisFailedStep.synthetics?.step?.name}
     </div>
   );
 };

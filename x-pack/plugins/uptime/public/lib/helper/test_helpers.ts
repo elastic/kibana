@@ -22,7 +22,7 @@ export function mockMoment() {
   });
 }
 
-export function mockReduxHooks(response: any) {
+export function mockReduxHooks(response?: any) {
   jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
 
   jest.spyOn(redux, 'useSelector').mockReturnValue(response);
