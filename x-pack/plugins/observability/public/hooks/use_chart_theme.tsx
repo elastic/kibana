@@ -8,5 +8,19 @@ import { useTheme } from './use_theme';
 
 export function useChartTheme() {
   const theme = useTheme();
-  return theme.darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
+  const baseChartTheme = theme.darkMode
+    ? EUI_CHARTS_THEME_DARK.theme
+    : EUI_CHARTS_THEME_LIGHT.theme;
+
+  return {
+    ...baseChartTheme,
+    background: {
+      ...baseChartTheme.background,
+      color: 'transparent',
+    },
+    lineSeriesStyle: {
+      ...baseChartTheme.lineSeriesStyle,
+      point: { visible: false },
+    },
+  };
 }

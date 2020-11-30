@@ -5,6 +5,7 @@
  */
 
 import React, { ChangeEventHandler, memo, useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,8 +15,8 @@ import {
   EuiButtonIcon,
   EuiSuperSelectOption,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { TrustedApp } from '../../../../../../../../common/endpoint/types';
+
+import { ConditionEntryField, TrustedApp } from '../../../../../../../../common/endpoint/types';
 import { CONDITION_FIELD_TITLE } from '../../../translations';
 
 const ConditionEntryCell = memo<{
@@ -73,12 +74,12 @@ export const ConditionEntry = memo<ConditionEntryProps>(
     const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
       return [
         {
-          inputDisplay: CONDITION_FIELD_TITLE['process.hash.*'],
-          value: 'process.hash.*',
+          inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.HASH],
+          value: ConditionEntryField.HASH,
         },
         {
-          inputDisplay: CONDITION_FIELD_TITLE['process.executable.caseless'],
-          value: 'process.executable.caseless',
+          inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.PATH],
+          value: ConditionEntryField.PATH,
         },
       ];
     }, []);

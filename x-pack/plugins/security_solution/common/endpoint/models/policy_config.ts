@@ -68,3 +68,8 @@ export const factory = (): PolicyConfig => {
     },
   };
 };
+
+/**
+ * Reflects what string the Endpoint will use when message field is default/empty
+ */
+export const DefaultMalwareMessage = 'Elastic Security { action } { filename }';
