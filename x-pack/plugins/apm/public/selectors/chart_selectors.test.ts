@@ -23,13 +23,10 @@ describe('chart selectors', () => {
     it('should return anomalyScoreSeries', () => {
       const data = [{ x0: 0, x: 10 }];
       expect(getAnomalyScoreSeries(data)).toEqual({
-        areaColor: 'rgba(231,102,76,0.1)',
-        color: 'none',
+        color: '#e7664c',
         data: [{ x0: 0, x: 10 }],
-        hideLegend: true,
-        hideTooltipValue: true,
         title: 'Anomaly score',
-        type: 'areaMaxHeight',
+        type: 'rectAnnotation',
       });
     });
   });
@@ -55,9 +52,7 @@ describe('chart selectors', () => {
     };
 
     it('should produce correct series', () => {
-      expect(
-        getResponseTimeSeries({ apmTimeseries, anomalyTimeseries: undefined })
-      ).toEqual([
+      expect(getResponseTimeSeries({ apmTimeseries })).toEqual([
         {
           color: '#6092c0',
           data: [
@@ -92,10 +87,7 @@ describe('chart selectors', () => {
     });
 
     it('should return 3 series', () => {
-      expect(
-        getResponseTimeSeries({ apmTimeseries, anomalyTimeseries: undefined })
-          .length
-      ).toBe(3);
+      expect(getResponseTimeSeries({ apmTimeseries }).length).toBe(3);
     });
   });
 
