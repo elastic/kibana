@@ -8,8 +8,14 @@ exports[`renderDataMappingPopover Should disable toggle when field is not backed
     }
   }
   onChange={[Function]}
-  stepFunction="EASING_BETWEEN_MIN_AND_MAX"
+  stepFunction="EASING"
   styleName="lineColor"
+  supportedStepFunctions={
+    Array [
+      "EASING",
+      "PERCENTILES",
+    ]
+  }
   switchDisabled={true}
 />
 `;
@@ -22,8 +28,14 @@ exports[`renderDataMappingPopover Should enable toggle when field is backed by g
     }
   }
   onChange={[Function]}
-  stepFunction="EASING_BETWEEN_MIN_AND_MAX"
+  stepFunction="EASING"
   styleName="lineColor"
+  supportedStepFunctions={
+    Array [
+      "EASING",
+      "PERCENTILES",
+    ]
+  }
   switchDisabled={false}
 />
 `;
