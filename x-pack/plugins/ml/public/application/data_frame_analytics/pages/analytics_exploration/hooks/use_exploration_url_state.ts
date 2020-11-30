@@ -5,17 +5,9 @@
  */
 
 import { usePageUrlState } from '../../../../util/url_state';
-import { ListingPageUrlState } from '../../../../../../common/types/common';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
-import {
-  SEARCH_QUERY_LANGUAGE,
-  SearchQueryLanguage,
-} from '../../../../../../common/constants/search';
-
-export type ExplorationPageUrlState = {
-  queryText: string;
-  queryLanguage: SearchQueryLanguage;
-} & Pick<ListingPageUrlState, 'pageIndex' | 'pageSize'>;
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
+import { ExplorationPageUrlState } from '../../../../../../common/types/ml_url_generator';
 
 export function getDefaultExplorationPageUrlState(): ExplorationPageUrlState {
   return {

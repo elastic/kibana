@@ -14,7 +14,6 @@ import { FeatureImportanceSummaryPanel } from '../total_feature_importance_summa
 
 interface Props {
   jobId: string;
-  defaultIsTraining?: boolean;
 }
 
 export const ClassificationExploration: FC<Props> = ({ jobId }) => (
