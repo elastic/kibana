@@ -50,11 +50,15 @@ const chartBase: ChartBase = {
   series,
 };
 
-export async function getHeapMemoryChart(
-  setup: Setup & SetupTimeRange,
-  serviceName: string,
-  serviceNodeName?: string
-) {
+export async function getHeapMemoryChart({
+  setup,
+  serviceName,
+  serviceNodeName,
+}: {
+  setup: Setup & SetupTimeRange;
+  serviceName: string;
+  serviceNodeName?: string;
+}) {
   return fetchAndTransformMetrics({
     setup,
     serviceName,
