@@ -90,14 +90,6 @@ describe('Resolver Data Middleware', () => {
         };
         store.dispatch(relatedAction);
       });
-      it('should have the correct related events', () => {
-        const selectedEventsByEntityId = selectors.relatedEventsByEntityId(store.getState());
-        const selectedEventsForFirstChildNode = selectedEventsByEntityId.get(
-          firstChildNodeInTree.id
-        )!.events;
-
-        expect(selectedEventsForFirstChildNode).toBe(firstChildNodeInTree.relatedEvents);
-      });
     });
   });
 });

@@ -16,28 +16,28 @@ const initialState: DataState = {
     loading: false,
     data: null,
   },
-  relatedEvents: new Map(),
   resolverComponentInstanceID: undefined,
-  dataInvalidatedCount: 0,
+  dataRefreshRequestsMade: 0,
 };
 /* eslint-disable complexity */
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
   if (action.type === 'appReceivedNewExternalProperties') {
-    const requestsMade = state.dataInvalidatedCount;
-    let dataInvalidatedCount: number;
+    const requestsMade = state.dataRefreshRequestsMade;
+    let dataRefreshRequestsMade: number;
     if (action.payload.shouldUpdate) {
-      dataInvalidatedCount = requestsMade !== undefined ? requestsMade + 1 : 0;
+      dataRefreshRequestsMade = requestsMade !== undefined ? requestsMade + 1 : 0;
     } else {
-      dataInvalidatedCount = requestsMade !== undefined ? requestsMade : 0;
+      dataRefreshRequestsMade = requestsMade !== undefined ? requestsMade : 0;
     }
     const nextState: DataState = {
       ...state,
-      dataInvalidatedCount,
+      dataRefreshRequestsMade,
       tree: {
         ...state.tree,
         currentParameters: {
           databaseDocumentID: action.payload.databaseDocumentID,
           indices: action.payload.indices,
+          dataRequestID: requestsMade,
         },
       },
       resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
@@ -124,12 +124,21 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     } else {
       return state;
     }
-  } else if (action.type === 'serverReturnedRelatedEventData') {
-    const nextState: DataState = {
-      ...state,
-      relatedEvents: new Map([...state.relatedEvents, [action.payload.entityID, action.payload]]),
-    };
-    return nextState;
+  } else if (action.type === 'appRequestedNodeEventsInCategory') {
+    if (state.nodeEventsInCategory) {
+      const next: DataState = {
+        ...state,
+        nodeEventsInCategory: {
+          ...state.nodeEventsInCategory,
+          events: [],
+          loading: true,
+          pendingRequestParameters: action.payload,
+        },
+      };
+      return next;
+    } else {
+      return state;
+    }
   } else if (action.type === 'serverReturnedNodeEventsInCategory') {
     // The data in the action could be irrelevant if the panel view or parameters have changed since the corresponding request was made. In that case, ignore this action.
     if (
@@ -148,7 +157,11 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         if (updated) {
           const next: DataState = {
             ...state,
-            nodeEventsInCategory: updated,
+            nodeEventsInCategory: {
+              ...updated,
+              loading: false,
+              pendingRequestParameters: null,
+            },
           };
           return next;
         } else {
@@ -159,7 +172,11 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         // There is no existing data, use the new data.
         const next: DataState = {
           ...state,
-          nodeEventsInCategory: action.payload,
+          nodeEventsInCategory: {
+            ...action.payload,
+            loading: false,
+            pendingRequestParameters: null,
+          },
         };
         return next;
       }
@@ -187,6 +204,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         nodeEventsInCategory: {
           ...state.nodeEventsInCategory,
           error: true,
+          loading: false,
         },
       };
       return nextState;

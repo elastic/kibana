@@ -243,17 +243,24 @@ export interface NodeEventsInCategoryState {
    * Flag for showing an error message when fetching additional related events.
    */
   error?: boolean;
+
+  /**
+   * Flag for showing a loading state in the related event panel.
+   */
+  loading?: boolean;
+
+  /**
+   * Request ID for the currently displayed events.
+   */
+  dataRequestID?: number;
+
+  pendingRequestParameters?: (PanelViewAndParameters & { dataRequestID?: number }) | null;
 }
 
 /**
  * State for `data` reducer which handles receiving Resolver data from the back-end.
  */
 export interface DataState {
-  /**
-   * @deprecated Use the API
-   */
-  readonly relatedEvents: Map<string, ResolverRelatedEvents>;
-
   /**
    * Used when the panelView is `nodeEventsInCategory`.
    * Store the `nodeEventsInCategory` data for the current panel view. If the panel view or parameters change, the reducer may delete this.
@@ -264,7 +271,7 @@ export interface DataState {
   /**
    * A counter used to have resolver fetch updated data.
    */
-  readonly dataInvalidatedCount: number;
+  readonly dataRefreshRequestsMade: number;
 
   /**
    * Used when the panelView is `eventDetail`.
@@ -272,7 +279,7 @@ export interface DataState {
    */
   readonly currentRelatedEvent: {
     loading: boolean;
-    data: SafeResolverEvent | null;
+    data: (SafeResolverEvent & { dataRequestID?: number }) | null;
   };
 
   filters?: object;

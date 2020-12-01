@@ -34,12 +34,15 @@ export function RelatedEventsFetcher(
       nodeID,
       eventCategory,
       cursor,
+      dataRequestID,
     }: {
       nodeID: string;
       eventCategory: string;
       cursor: string | null;
+      dataRequestID?: number;
     }) {
       let result: ResolverPaginatedEvents | null = null;
+
       try {
         if (cursor) {
           result = await dataAccessLayer.eventsWithEntityIDAndCategory(
@@ -69,19 +72,32 @@ export function RelatedEventsFetcher(
             eventCategory,
             cursor: result.nextEvent,
             nodeID,
+            dataRequestID,
           },
         });
       }
     }
-
+    const oldID = selectors.currentNodeEventsInCategoryRequestID(state);
+    const newID = state.data.dataRefreshRequestsMade;
+    const shouldRefetch = oldID !== undefined && newID !== undefined && oldID !== newID;
     // If the panel view params have changed and the current panel view is either `nodeEventsInCategory` or `eventDetail`, then fetch the related events for that nodeID.
-    if (!isEqual(newParams, oldParams)) {
+    if (!isEqual(newParams, oldParams) || shouldRefetch) {
       if (newParams.panelView === 'nodeEventsInCategory') {
         const nodeID = newParams.panelParameters.nodeID;
+        const dataRequestID = state.data.dataRefreshRequestsMade;
+        api.dispatch({
+          type: 'appRequestedNodeEventsInCategory',
+          payload: {
+            ...newParams,
+            dataRequestID,
+          },
+        });
         fetchEvents({
           nodeID,
           eventCategory: newParams.panelParameters.eventCategory,
           cursor: null,
+          // only use the id for initial requests, reuse for load more.
+          dataRequestID,
         });
       }
     } else if (isLoadingMoreEvents) {

@@ -62,11 +62,6 @@ export const isProcessTerminated = composeSelectors(
 );
 
 /**
- * Retrieve an event from memory using the event's ID.
- */
-export const eventByID = composeSelectors(dataStateSelector, dataSelectors.eventByID);
-
-/**
  * Given a nodeID (aka entity_id) get the indexed process event.
  * Legacy functions take process events instead of nodeID, use this to get
  * process events for them.
@@ -92,11 +87,6 @@ export const layout: (state: ResolverState) => IsometricTaxiLayout = composeSele
 export const treeParametersToFetch = composeSelectors(
   dataStateSelector,
   dataSelectors.treeParametersToFetch
-);
-
-export const resolverDataIsStale = composeSelectors(
-  dataStateSelector,
-  dataSelectors.resolverDataIsStale
 );
 
 export const lastResponseParameters = composeSelectors(
@@ -156,31 +146,17 @@ export const isCurrentRelatedEventLoading = composeSelectors(
   dataSelectors.isCurrentRelatedEventLoading
 );
 
+export const dataRefreshRequestsMade = composeSelectors(
+  dataStateSelector,
+  dataSelectors.dataRefreshRequestsMade
+);
+
 /**
  * the current related event data for the `event_detail` view
  */
 export const currentRelatedEventData = composeSelectors(
   dataStateSelector,
   dataSelectors.currentRelatedEventData
-);
-
-/**
- * Map of related events... by entity id
- * @deprecated
- */
-export const relatedEventsByEntityId = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventsByEntityId
-);
-
-/**
- * Returns a function that returns a function (when supplied with an entity id for a node)
- * that returns related events for a node that match an event.category (when supplied with the category)
- * @deprecated
- */
-export const relatedEventsByCategory = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventsByCategory
 );
 
 /**
@@ -403,6 +379,18 @@ export const isLoadingNodeEventsInCategory = composeSelectors(
 export const isLoadingMoreNodeEventsInCategory = composeSelectors(
   dataStateSelector,
   dataSelectors.isLoadingMoreNodeEventsInCategory
+);
+
+export const currentRelatedEventRequestID = composeSelectors(
+  dataStateSelector,
+  dataSelectors.currentRelatedEventRequestID
+);
+/**
+ * The request id of the most recent response for nodeEventsInCategory panel
+ */
+export const currentNodeEventsInCategoryRequestID = composeSelectors(
+  dataStateSelector,
+  dataSelectors.currentNodeEventsInCategoryRequestID
 );
 
 /**

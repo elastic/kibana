@@ -25,7 +25,6 @@ import * as nodeEventsInCategoryModel from './node_events_in_category_model';
 import {
   ResolverTree,
   ResolverNodeStats,
-  ResolverRelatedEvents,
   SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
@@ -64,6 +63,24 @@ export function resolverComponentInstanceID(state: DataState): string {
 const resolverTreeResponse = (state: DataState): ResolverTree | undefined => {
   return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
 };
+
+export function currentRelatedEventRequestID(state: DataState): number | undefined {
+  if (state.currentRelatedEvent?.data) {
+    return state.currentRelatedEvent?.data.dataRequestID;
+  } else {
+    return undefined;
+  }
+}
+
+export function currentNodeEventsInCategoryRequestID(state: DataState): number | undefined {
+  if (state.nodeEventsInCategory?.pendingRequestParameters) {
+    return state.nodeEventsInCategory.pendingRequestParameters?.dataRequestID;
+  } else if (state.nodeEventsInCategory) {
+    return state.nodeEventsInCategory?.dataRequestID;
+  } else {
+    return undefined;
+  }
+}
 
 /**
  * the node ID of the node representing the databaseDocumentID.
@@ -175,13 +192,13 @@ export const relatedEventTotalCount: (
   }
 );
 
-/**
- * returns a map of entity_ids to related event data.
- * @deprecated
- */
-export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRelatedEvents> {
-  return data.relatedEvents;
-}
+// /**
+//  * returns a map of entity_ids to related event data.
+//  * @deprecated
+//  */
+// export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRelatedEvents> {
+//   return data.relatedEvents;
+// }
 
 /**
  *
@@ -194,6 +211,14 @@ export function isCurrentRelatedEventLoading(state: DataState) {
   return state.currentRelatedEvent.loading;
 }
 
+export function dataRefreshRequestsMade(state: DataState) {
+  return state.dataRefreshRequestsMade;
+}
+
+export function dataRefreshIsPending(state: DataState) {
+  return state.dataRefreshIsPending;
+}
+
 /**
  *
  *
@@ -204,87 +229,87 @@ export function isCurrentRelatedEventLoading(state: DataState) {
 export function currentRelatedEventData(state: DataState): SafeResolverEvent | null {
   return state.currentRelatedEvent.data;
 }
-/**
- * Get an event (from memory) by its `event.id`.
- * @deprecated Use the API to find events by ID
- */
-export const eventByID = createSelector(relatedEventsByEntityId, (relatedEvents) => {
-  // A map of nodeID to a map of eventID to events. Lazily populated.
-  const memo = new Map<string, Map<string | number, SafeResolverEvent>>();
-  return ({ eventID, nodeID }: { eventID: string; nodeID: string }) => {
-    // We keep related events in a map by their nodeID.
-    const eventsWrapper = relatedEvents.get(nodeID);
-    if (!eventsWrapper) {
-      return undefined;
-    }
-    // When an event from a nodeID is requested, build a map for all events related to that node.
-    if (!memo.has(nodeID)) {
-      const map = new Map<string | number, SafeResolverEvent>();
-      for (const event of eventsWrapper.events) {
-        const id = eventModel.eventIDSafeVersion(event);
-        if (id !== undefined) {
-          map.set(id, event);
-        }
-      }
-      memo.set(nodeID, map);
-    }
-    const eventMap = memo.get(nodeID);
-    if (!eventMap) {
-      // This shouldn't be possible.
-      return undefined;
-    }
-    return eventMap.get(eventID);
-  };
-});
+// /**
+//  * Get an event (from memory) by its `event.id`.
+//  * @deprecated Use the API to find events by ID
+//  */
+// export const eventByID = createSelector(relatedEventsByEntityId, (relatedEvents) => {
+//   // A map of nodeID to a map of eventID to events. Lazily populated.
+//   const memo = new Map<string, Map<string | number, SafeResolverEvent>>();
+//   return ({ eventID, nodeID }: { eventID: string; nodeID: string }) => {
+//     // We keep related events in a map by their nodeID.
+//     const eventsWrapper = relatedEvents.get(nodeID);
+//     if (!eventsWrapper) {
+//       return undefined;
+//     }
+//     // When an event from a nodeID is requested, build a map for all events related to that node.
+//     if (!memo.has(nodeID)) {
+//       const map = new Map<string | number, SafeResolverEvent>();
+//       for (const event of eventsWrapper.events) {
+//         const id = eventModel.eventIDSafeVersion(event);
+//         if (id !== undefined) {
+//           map.set(id, event);
+//         }
+//       }
+//       memo.set(nodeID, map);
+//     }
+//     const eventMap = memo.get(nodeID);
+//     if (!eventMap) {
+//       // This shouldn't be possible.
+//       return undefined;
+//     }
+//     return eventMap.get(eventID);
+//   };
+// });
 
 /**
  * Returns a function that returns a function (when supplied with an entity id for a node)
  * that returns related events for a node that match an event.category (when supplied with the category)
  * @deprecated
  */
-export const relatedEventsByCategory: (
-  state: DataState
-) => (node: string, eventCategory: string) => SafeResolverEvent[] = createSelector(
-  relatedEventsByEntityId,
-  function (
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    relatedEventsByEntityId
-  ) {
-    // A map of nodeID -> event category -> SafeResolverEvent[]
-    const nodeMap: Map<string, Map<string, SafeResolverEvent[]>> = new Map();
-    for (const [nodeID, events] of relatedEventsByEntityId) {
-      // A map of eventCategory -> SafeResolverEvent[]
-      let categoryMap = nodeMap.get(nodeID);
-      if (!categoryMap) {
-        categoryMap = new Map();
-        nodeMap.set(nodeID, categoryMap);
-      }
+// export const relatedEventsByCategory: (
+//   state: DataState
+// ) => (node: string, eventCategory: string) => SafeResolverEvent[] = createSelector(
+//   relatedEventsByEntityId,
+//   function (
+//     // eslint-disable-next-line @typescript-eslint/no-shadow
+//     relatedEventsByEntityId
+//   ) {
+//     // A map of nodeID -> event category -> SafeResolverEvent[]
+//     const nodeMap: Map<string, Map<string, SafeResolverEvent[]>> = new Map();
+//     for (const [nodeID, events] of relatedEventsByEntityId) {
+//       // A map of eventCategory -> SafeResolverEvent[]
+//       let categoryMap = nodeMap.get(nodeID);
+//       if (!categoryMap) {
+//         categoryMap = new Map();
+//         nodeMap.set(nodeID, categoryMap);
+//       }
 
-      for (const event of events.events) {
-        for (const category of eventModel.eventCategory(event)) {
-          let eventsInCategory = categoryMap.get(category);
-          if (!eventsInCategory) {
-            eventsInCategory = [];
-            categoryMap.set(category, eventsInCategory);
-          }
-          eventsInCategory.push(event);
-        }
-      }
-    }
+//       for (const event of events.events) {
+//         for (const category of eventModel.eventCategory(event)) {
+//           let eventsInCategory = categoryMap.get(category);
+//           if (!eventsInCategory) {
+//             eventsInCategory = [];
+//             categoryMap.set(category, eventsInCategory);
+//           }
+//           eventsInCategory.push(event);
+//         }
+//       }
+//     }
 
-    // Use the same empty array for all values that are missing
-    const emptyArray: SafeResolverEvent[] = [];
+//     // Use the same empty array for all values that are missing
+//     const emptyArray: SafeResolverEvent[] = [];
 
-    return (entityID: string, category: string): SafeResolverEvent[] => {
-      const categoryMap = nodeMap.get(entityID);
-      if (!categoryMap) {
-        return emptyArray;
-      }
-      const eventsInCategory = categoryMap.get(category);
-      return eventsInCategory ?? emptyArray;
-    };
-  }
-);
+//     return (entityID: string, category: string): SafeResolverEvent[] => {
+//       const categoryMap = nodeMap.get(entityID);
+//       if (!categoryMap) {
+//         return emptyArray;
+//       }
+//       const eventsInCategory = categoryMap.get(category);
+//       return eventsInCategory ?? emptyArray;
+//     };
+//   }
+// );
 
 export const relatedEventCountByCategory: (
   state: DataState
@@ -328,34 +353,45 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
   /**
    * If there are current tree parameters that don't match the parameters used in the pending request (if there is a pending request) and that don't match the parameters used in the last completed request (if there was a last completed request) then we need to fetch the tree resource using the current parameters.
    */
-  if (
-    state.tree?.currentParameters !== undefined &&
-    !treeFetcherParametersModel.equal(
-      state.tree?.currentParameters,
-      state.tree?.lastResponse?.parameters
-    ) &&
-    !treeFetcherParametersModel.equal(
-      state.tree?.currentParameters,
-      state.tree?.pendingRequestParameters
-    )
-  ) {
-    return state.tree.currentParameters;
+  if (state.tree?.currentParameters !== undefined) {
+    if (
+      !treeFetcherParametersModel.equal(
+        state.tree?.currentParameters,
+        state.tree?.lastResponse?.parameters
+      ) &&
+      !treeFetcherParametersModel.equal(
+        state.tree?.currentParameters,
+        state.tree?.pendingRequestParameters
+      )
+    ) {
+      return state.tree.currentParameters;
+    } else {
+      return null;
+    }
   } else {
     return null;
-  }
-}
-
-export function resolverDataIsStale(state: DataState): boolean {
-  if (state.tree?.lastResponse) {
-    return state.dataInvalidatedCount !== state.tree?.lastResponse?.parameters.dataRequestID;
-  } else {
-    return false;
   }
 }
 
 export function lastResponseParameters(state: DataState): TreeFetcherParameters | null {
   if (state.tree?.lastResponse) {
     return state.tree?.lastResponse?.parameters;
+  } else {
+    return null;
+  }
+}
+
+export function pendingResponseParameters(state: DataState): TreeFetcherParameters | null {
+  if (state.tree?.pendingRequestParameters) {
+    return state.tree?.pendingRequestParameters;
+  } else {
+    return null;
+  }
+}
+
+export function currentParameters(state: DataState): TreeFetcherParameters | null {
+  if (state.tree?.currentParameters) {
+    return state.tree?.currentParameters;
   } else {
     return null;
   }
@@ -724,7 +760,9 @@ export const isLoadingNodeEventsInCategory = createSelector(
   // eslint-disable-next-line @typescript-eslint/no-shadow
   function (nodeEventsInCategory, panelViewAndParameters) {
     const { panelView } = panelViewAndParameters;
-    return panelView === 'nodeEventsInCategory' && nodeEventsInCategory === undefined;
+    if (panelView === 'nodeEventsInCategory') {
+      return nodeEventsInCategory?.loading;
+    }
   }
 );
 
