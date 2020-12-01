@@ -9,7 +9,6 @@ import { ServerLogLevelOptions } from '.././types';
 import ServerLogParamsFields from './server_log_params';
 
 describe('ServerLogParamsFields renders', () => {
-  const editAction = jest.fn();
   test('all params fields is rendered', () => {
     const editAction = jest.fn();
     const actionParams = {
