@@ -6,8 +6,8 @@
 
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
-import { checksFactory, repairFactory } from '../saved_objects';
-import { jobsAndSpaces, repairJobObjects, jobTypeSchema } from './schemas/saved_objects';
+import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
+import { jobsAndSpaces, syncJobObjects, jobTypeSchema } from './schemas/saved_objects';
 import { jobIdsSchema } from './schemas/job_service_schema';
 
 /**
@@ -50,8 +50,8 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/repair Repair job saved objects
-   * @apiName RepairJobSavedObjects
+   * @api {get} /api/ml/saved_objects/sync Sync job saved objects
+   * @apiName SyncJobSavedObjects
    * @apiDescription Create saved objects for jobs which are missing them.
    *                 Delete saved objects for jobs which no longer exist.
    *                 Update missing datafeed ids in saved objects for datafeeds which exist.
@@ -60,9 +60,9 @@ export function savedObjectsRoutes(
    */
   router.get(
     {
-      path: '/api/ml/saved_objects/repair',
+      path: '/api/ml/saved_objects/sync',
       validate: {
-        query: repairJobObjects,
+        query: syncJobObjects,
       },
       options: {
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
@@ -71,8 +71,8 @@ export function savedObjectsRoutes(
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
       try {
         const { simulate } = request.query;
-        const { repairJobs } = repairFactory(client, jobSavedObjectService);
-        const savedObjects = await repairJobs(simulate);
+        const { syncSavedObjects } = syncSavedObjectsFactory(client, jobSavedObjectService);
+        const savedObjects = await syncSavedObjects(simulate);
 
         return response.ok({
           body: savedObjects,
@@ -95,7 +95,7 @@ export function savedObjectsRoutes(
     {
       path: '/api/ml/saved_objects/initialize',
       validate: {
-        query: repairJobObjects,
+        query: syncJobObjects,
       },
       options: {
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
@@ -104,7 +104,7 @@ export function savedObjectsRoutes(
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
       try {
         const { simulate } = request.query;
-        const { initSavedObjects } = repairFactory(client, jobSavedObjectService);
+        const { initSavedObjects } = syncSavedObjectsFactory(client, jobSavedObjectService);
         const savedObjects = await initSavedObjects(simulate);
 
         return response.ok({

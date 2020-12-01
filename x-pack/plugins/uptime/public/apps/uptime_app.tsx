@@ -36,6 +36,7 @@ import { EuiThemeProvider } from '../../../observability/public';
 
 export interface UptimeAppColors {
   danger: string;
+  dangerBehindText: string;
   success: string;
   gray: string;
   range: string;
@@ -104,9 +105,9 @@ const Application = (props: UptimeAppProps) => {
             services={{ ...core, ...plugins, triggersActionsUi: startPlugins.triggersActionsUi }}
           >
             <Router history={props.history}>
-              <UptimeRefreshContextProvider>
-                <UptimeSettingsContextProvider {...props}>
-                  <EuiThemeProvider darkMode={darkMode}>
+              <EuiThemeProvider darkMode={darkMode}>
+                <UptimeRefreshContextProvider>
+                  <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
                         <UptimeAlertsContextProvider>
@@ -121,9 +122,9 @@ const Application = (props: UptimeAppProps) => {
                         </UptimeAlertsContextProvider>
                       </UptimeStartupPluginsContextProvider>
                     </UptimeThemeContextProvider>
-                  </EuiThemeProvider>
-                </UptimeSettingsContextProvider>
-              </UptimeRefreshContextProvider>
+                  </UptimeSettingsContextProvider>
+                </UptimeRefreshContextProvider>
+              </EuiThemeProvider>
             </Router>
           </KibanaContextProvider>
         </ReduxProvider>
