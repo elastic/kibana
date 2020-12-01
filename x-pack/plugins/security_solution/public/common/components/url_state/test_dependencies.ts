@@ -17,6 +17,7 @@ import { Query } from '../../../../../../../src/plugins/data/public';
 import { networkModel } from '../../../network/store';
 import { hostsModel } from '../../../hosts/store';
 import { HostsTableType } from '../../../hosts/store/model';
+import { TimelineTabs } from '../../../timelines/store/timeline/model';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -116,6 +117,7 @@ export const defaultProps: UrlStateContainerPropTypes = {
     [CONSTANTS.timeline]: {
       id: '',
       isOpen: false,
+      activeTab: TimelineTabs.query,
     },
     [CONSTANTS.sourcerer]: {},
   },

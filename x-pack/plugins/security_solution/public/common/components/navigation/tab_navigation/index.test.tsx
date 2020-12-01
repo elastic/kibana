@@ -7,6 +7,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
+import { TimelineTabs } from '../../../../timelines/store/timeline/model';
 import { navTabs } from '../../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../../app/types';
 import { navTabsHostDetails } from '../../../../hosts/pages/details/nav_tabs';
@@ -72,6 +73,7 @@ describe('Tab Navigation', () => {
       [CONSTANTS.timeline]: {
         id: '',
         isOpen: false,
+        activeTab: TimelineTabs.query,
         graphEventId: '',
       },
     };
@@ -131,6 +133,7 @@ describe('Tab Navigation', () => {
       [CONSTANTS.timeline]: {
         id: '',
         isOpen: false,
+        activeTab: TimelineTabs.query,
         graphEventId: '',
       },
     };
