@@ -15,8 +15,10 @@ export const dynamicActionFactoriesCollector = (
 
   for (const event of state.events) {
     const factory = getActionFactory(event.action.factoryId);
+
     if (factory) {
       let factoryStats: Record<string, any> = {};
+
       factoryStats = factory.telemetry(event, factoryStats);
       for (const [stat, value] of Object.entries(factoryStats)) {
         stats[`dynamicActions.factories.${factory.id}.${stat}`] = value;

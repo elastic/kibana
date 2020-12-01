@@ -20,8 +20,12 @@ export const dynamicActionsCollector = (state: DynamicActionsState): Record<stri
 
     for (const trigger of event.triggers) {
       const triggerCountMetric = getMetricKey(`triggers.${trigger}.count`);
+      const actionXTriggerCountMetric = getMetricKey(
+        `action_triggers.${factoryId}_${trigger}.count`
+      );
 
       stats[triggerCountMetric] = 1 + (stats[triggerCountMetric] || 0);
+      stats[actionXTriggerCountMetric] = 1 + (stats[actionXTriggerCountMetric] || 0);
     }
   }
 
