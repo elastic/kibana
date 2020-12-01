@@ -148,6 +148,9 @@ export function dataAccessLayerFactory(
       timerange,
       indexPatterns,
     }: {
+      nodeID: string;
+      eventCategory: string[];
+      eventTimestamp: string;
       eventID: string;
       timerange: Timerange;
       indexPatterns: string[];
