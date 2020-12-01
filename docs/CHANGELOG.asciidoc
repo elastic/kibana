@@ -69,7 +69,7 @@ APM::
 Canvas::
 * Fixes elements not being updated properly when filter is changed on workpad {kibana-pull}81863[#81863]
 Dashboard::
-* Makes sure `to` is 'now' and not the same as `from` {kibana-pull}81524[#81524]
+* Fixes an issue when exporting a Saved Search visualization, inside of a dashboard,ß to CSV was returning blank rows {kibana-pull}81524[#81524]
 Discover::
 * Fixes double fetching of saved search embeddable  {kibana-pull}84060[#84060]
 Ingest Management::
