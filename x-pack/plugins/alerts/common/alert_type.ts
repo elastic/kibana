@@ -13,7 +13,7 @@ export interface AlertType {
   producer: string;
 }
 
-export interface ActionGroup {
-  id: string;
+export interface ActionGroup<ActionGroupId = string> {
+  id: ActionGroupId;
   name: string;
 }

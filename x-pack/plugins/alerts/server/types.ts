@@ -53,21 +53,25 @@ export interface Services {
 
 export interface AlertServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+  ActionGroupIds extends string = string
 > extends Services {
-  alertInstanceFactory: (id: string) => AlertInstance<InstanceState, InstanceContext>;
+  alertInstanceFactory: (
+    id: string
+  ) => AlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
 }
 
 export interface AlertExecutorOptions<
   Params extends AlertTypeParams = AlertTypeParams,
   State extends AlertTypeState = AlertTypeState,
   InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+  ActionGroupIds extends string = string
 > {
   alertId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
-  services: AlertServices<InstanceState, InstanceContext>;
+  services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
   params: Params;
   state: State;
   spaceId: string;
@@ -87,20 +91,27 @@ export interface AlertType<
   Params extends AlertTypeParams = AlertTypeParams,
   State extends AlertTypeState = AlertTypeState,
   InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+  ActionGroupIds extends string = string
 > {
   id: string;
   name: string;
   validate?: {
     params?: { validate: (object: unknown) => Params };
   };
-  actionGroups: ActionGroup[];
-  defaultActionGroupId: ActionGroup['id'];
+  actionGroups: Array<ActionGroup<ActionGroupIds>>;
+  defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];
   executor: ({
     services,
     params,
     state,
-  }: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>) => Promise<State | void>;
+  }: AlertExecutorOptions<
+    Params,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds
+  >) => Promise<State | void>;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];

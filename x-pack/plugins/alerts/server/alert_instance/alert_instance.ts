@@ -13,13 +13,18 @@ import {
 
 import { parseDuration } from '../lib';
 
-export type AlertInstances = Record<string, AlertInstance>;
+export type AlertInstances<
+  State extends AlertInstanceState = AlertInstanceState,
+  Context extends AlertInstanceContext = AlertInstanceContext,
+  ActionGroupIds extends string = string
+> = Record<string, AlertInstance<State, Context, ActionGroupIds>>;
 export class AlertInstance<
   State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext
+  Context extends AlertInstanceContext = AlertInstanceContext,
+  ActionGroupIds extends string = string
 > {
   private scheduledExecutionOptions?: {
-    actionGroup: string;
+    actionGroup: ActionGroupIds;
     context: Context;
     state: State;
   };
@@ -68,13 +73,13 @@ export class AlertInstance<
     return this.state;
   }
 
-  scheduleActions(actionGroup: string, context?: Context) {
+  scheduleActions(actionGroup: ActionGroupIds, context: Context = {} as Context) {
     if (this.hasScheduledActions()) {
       throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
     this.scheduledExecutionOptions = {
       actionGroup,
-      context: (context || {}) as Context,
+      context,
       state: this.state,
     };
     return this;
