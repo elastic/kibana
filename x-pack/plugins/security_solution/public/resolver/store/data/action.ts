@@ -141,6 +141,17 @@ interface AppRequestingNodeData {
 }
 
 /**
+ * When the user clicks on a node that was in an error state to reload the node data.
+ */
+interface UserReloadedResolverNode {
+  readonly type: 'userReloadedResolverNode';
+  /**
+   * The nodeID (aka entity_id) that was select.
+   */
+  readonly payload: string;
+}
+
+/**
  * When the server returns an error after the app requests node data for a set of nodes.
  */
 interface ServerFailedToReturnNodeData {
@@ -180,4 +191,5 @@ export type DataAction =
   | AppAbortedResolverDataRequest
   | ServerReturnedNodeData
   | ServerFailedToReturnNodeData
-  | AppRequestingNodeData;
+  | AppRequestingNodeData
+  | UserReloadedResolverNode;

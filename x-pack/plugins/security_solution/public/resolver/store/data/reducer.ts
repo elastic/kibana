@@ -196,6 +196,12 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       ...state,
       nodeData: updatedNodeData,
     };
+  } else if (action.type === 'userReloadedResolverNode') {
+    const updatedNodeData = nodeDataModel.setReloadedNodes(state.nodeData, action.payload);
+    return {
+      ...state,
+      nodeData: updatedNodeData,
+    };
   } else if (action.type === 'appRequestingNodeData') {
     const updatedNodeData = nodeDataModel.setRequestedNodes(
       state.nodeData,

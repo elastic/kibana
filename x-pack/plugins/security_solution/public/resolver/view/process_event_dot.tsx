@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import classNames from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { NodeSubMenu } from './styles';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
@@ -258,18 +260,31 @@ const UnstyledProcessEventDot = React.memo(
         if (animationTarget.current?.beginElement) {
           animationTarget.current.beginElement();
         }
-        dispatch({
-          type: 'userSelectedResolverNode',
-          payload: nodeID,
-        });
-        processDetailNavProps.onClick(clickEvent);
+
+        if (nodeState === 'error') {
+          dispatch({
+            type: 'userReloadedResolverNode',
+            payload: nodeID,
+          });
+        } else {
+          dispatch({
+            type: 'userSelectedResolverNode',
+            payload: nodeID,
+          });
+          processDetailNavProps.onClick(clickEvent);
+        }
       },
-      [animationTarget, dispatch, nodeID, processDetailNavProps]
+      [animationTarget, dispatch, nodeID, processDetailNavProps, nodeState]
     );
 
     const grandTotal: number | null = useSelector((state: ResolverState) =>
       selectors.statsTotalForNode(state)(node)
     );
+
+    const nodeName = nodeModel.nodeName(node);
+    const euiTextClassName = classNames('euiButton__content', {
+      euiButtonReload: nodeState === 'error' || nodeState === 'loading',
+    });
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     /**
@@ -399,9 +414,11 @@ const UnstyledProcessEventDot = React.memo(
             }}
           >
             <EuiButton
+              iconSide={isNodeLoading ? 'right' : 'left'}
               isLoading={isNodeLoading}
               color={labelButtonFill}
               fill={isLabelFilled}
+              iconType={nodeState === 'error' ? 'refresh' : ''}
               size="s"
               style={{
                 maxHeight: `${Math.min(26 + xScale * 3, 32)}px`,
@@ -412,9 +429,15 @@ const UnstyledProcessEventDot = React.memo(
               data-test-subj="resolver:node:primary-button"
               data-test-resolver-node-id={nodeID}
             >
-              <span className="euiButton__content">
+              <span className={euiTextClassName}>
                 <span className="euiButton__text" data-test-subj={'euiButton__text'}>
-                  {nodeModel.nodeName(node)}
+                  {i18n.translate('xpack.securitySolution.resolver.node_button_name', {
+                    defaultMessage: `{nodeState, select, error {Reload {nodeName}} other {{nodeName}}}`,
+                    values: {
+                      nodeState,
+                      nodeName,
+                    },
+                  })}
                 </span>
               </span>
             </EuiButton>
@@ -485,6 +508,10 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
 
   & .euiButton {
     width: fit-content;
+  }
+
+  & .euiButtonReload {
+    padding: 0px;
   }
 
   & .euiSelectableList-bordered {

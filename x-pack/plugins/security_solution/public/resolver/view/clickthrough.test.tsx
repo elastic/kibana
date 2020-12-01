@@ -11,7 +11,7 @@ import { Simulator } from '../test_utilities/simulator';
 import '../test_utilities/extend_jest';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { urlSearch } from '../test_utilities/url_search';
-import { Vector2, AABB, Timerange } from '../types';
+import { Vector2, AABB, Timerange, DataAccessLayer } from '../types';
 import { generateTreeWithDAL } from '../data_access_layer/mocks/using_generator';
 import { ReactWrapper } from 'enzyme';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
@@ -326,47 +326,48 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
 });
 
 describe('Resolver, when using a generated tree with 20 generations, 4 children per child, and 10 ancestors, that returns an error state for node data', () => {
+  let generatorDAL: DataAccessLayer;
   beforeEach(async () => {
-    const {
-      metadata: dataAccessLayerMetadata,
-      dataAccessLayer: generatorDAL,
-    } = generateTreeWithDAL({
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = generateTreeWithDAL({
       ancestors: 3,
       children: 3,
       generations: 4,
     });
 
-    const nodeDataError = ({
-      ids,
-      timerange,
-      indexPatterns,
-      limit,
-    }: {
-      ids: string[];
-      timerange: Timerange;
-      indexPatterns: string[];
-      limit: number;
-    }): Promise<SafeResolverEvent[]> => {
-      if (ids.includes('2kt059pl3i')) {
-        throw new Error('fake error');
-      }
-
-      return generatorDAL.nodeData({ ids, timerange, indexPatterns, limit });
-    };
-
+    generatorDAL = dataAccessLayer;
     // save a reference to the `_id` supported by the mock data layer
     databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
-    // create a resolver simulator, using the data access layer and an arbitrary component instance ID
-    simulator = new Simulator({
-      databaseDocumentID,
-      dataAccessLayer: { ...generatorDAL, nodeData: nodeDataError },
-      resolverComponentInstanceID,
-      indices: [],
-    });
   });
 
   describe('when clicking on a node in the panel whose node data has not yet been loaded', () => {
+    let throwError = true;
     beforeEach(async () => {
+      const nodeDataError = ({
+        ids,
+        timerange,
+        indexPatterns,
+        limit,
+      }: {
+        ids: string[];
+        timerange: Timerange;
+        indexPatterns: string[];
+        limit: number;
+      }): Promise<SafeResolverEvent[]> => {
+        if (throwError && ids.includes('2kt059pl3i')) {
+          throw new Error('fake error');
+        }
+
+        return generatorDAL.nodeData({ ids, timerange, indexPatterns, limit });
+      };
+
+      // create a resolver simulator, using the data access layer and an arbitrary component instance ID
+      simulator = new Simulator({
+        databaseDocumentID,
+        dataAccessLayer: { ...generatorDAL, nodeData: nodeDataError },
+        resolverComponentInstanceID,
+        indices: [],
+      });
+
       // If the camera has not moved it will return a node with ID 2kt059pl3i, this is the first node with the state
       // loading that is outside of the initial loaded view
       const getLoadingNodeInList = async () => {
@@ -390,6 +391,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
     });
 
     it('should receive an error while loading the node data', async () => {
+      throwError = true;
       const node: () => Promise<ReactWrapper | undefined> = () =>
         simulator.resolveWrapper(() => simulator.selectedProcessNode('2kt059pl3i'));
 
@@ -399,6 +401,33 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
         }))
       ).toYieldEqualTo({
         nodeState: 'error',
+      });
+    });
+
+    it('should load data after receiving an error', async () => {
+      throwError = true;
+      // ensure that the node is in view
+      const node: () => Promise<ReactWrapper | undefined> = () =>
+        simulator.resolveWrapper(() => simulator.selectedProcessNode('2kt059pl3i'));
+
+      // at this point the node's state should be error
+
+      throwError = false;
+      const button = await simulator.resolveWrapper(() =>
+        simulator.processNodePrimaryButton('2kt059pl3i')
+      );
+      // Click the primary button to reload the node's data
+      if (button) {
+        button.simulate('click', { button: 0 });
+      }
+
+      // we should receive the node's data now so we'll know that it is terminated
+      await expect(
+        simulator.map(async () => ({
+          nodeState: (await node())?.prop('data-test-resolver-node-state'),
+        }))
+      ).toYieldEqualTo({
+        nodeState: 'terminated',
       });
     });
   });

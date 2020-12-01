@@ -9,6 +9,7 @@ import { FetchedNodeData, IDToNodeInfo } from '../types';
 import {
   idsNotInBase,
   setErrorNodes,
+  setReloadedNodes,
   setRequestedNodes,
   updateWithReceivedNodes,
 } from './node_data';
@@ -24,6 +25,10 @@ describe('node data model', () => {
 
     it('creates a copy when using setErrorNodes', () => {
       expect(setErrorNodes(original, new Set()) === original).toBeFalsy();
+    });
+
+    it('creates a copy when using setReloadedNodes', () => {
+      expect(setReloadedNodes(original, '5') === original).toBeFalsy();
     });
 
     it('creates a copy when using updateWithReceivedNodes', () => {
@@ -74,6 +79,13 @@ describe('node data model', () => {
         ['1', { events: [generator.generateEvent()], status: 'error' }],
       ]);
       expect(idsNotInBase(state, new Set(['1', '2', '3']))).toEqual(new Set(['2', '3']));
+    });
+  });
+
+  describe('setReloadedNodes', () => {
+    it('removes the id from the map', () => {
+      const state: IDToNodeInfo = new Map([['1', { events: [], status: 'error' }]]);
+      expect(setReloadedNodes(state, '1')).toEqual(new Map());
     });
   });
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createStore, Store } from 'redux';
-import { RelatedEventCategory, TreeNode } from '../../../../common/endpoint/generate_data';
+import { RelatedEventCategory } from '../../../../common/endpoint/generate_data';
 import { dataReducer } from './reducer';
 import * as selectors from './selectors';
 import { DataState } from '../../types';

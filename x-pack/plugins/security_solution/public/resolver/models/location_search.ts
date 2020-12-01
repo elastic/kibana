@@ -42,6 +42,7 @@ export const isPanelViewAndParameters: (
       nodeID: schema.string(),
       eventCategory: schema.string(),
       eventID: schema.string(),
+      eventTimestamp: schema.string(),
     }),
   }),
 ]);

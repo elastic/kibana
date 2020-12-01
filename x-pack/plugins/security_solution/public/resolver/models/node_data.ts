@@ -49,6 +49,22 @@ export function setErrorNodes(
 }
 
 /**
+ * Marks the node id to be reloaded by the middleware. It removes the entry in the map to mark it to be reloaded.
+ *
+ * @param storedNodeInfo the node data from state
+ * @param nodeID the ID to remove from state to mark it to be reloaded in the middleware.
+ */
+export function setReloadedNodes(
+  storedNodeInfo: IDToNodeInfo | undefined,
+  nodeID: string
+): IDToNodeInfo {
+  const originalData = storedNodeInfo ?? [];
+  const newData = new Map<string, NodeData>([...originalData]);
+  newData.delete(nodeID);
+  return newData;
+}
+
+/**
  * Creates a copy of the node data map and updates it with the data returned by the server. If the server did not return
  * data for a particular ID we will determine whether no data exists for that ID or if the server reached the limit we
  * requested by using the reachedLimit flag.

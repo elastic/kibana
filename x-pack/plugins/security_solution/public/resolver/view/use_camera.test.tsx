@@ -13,7 +13,7 @@ import { useCamera } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
 import { Matrix3, ResolverStore, SideEffectors, SideEffectSimulator } from '../types';
-import { ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
+import { ResolverNode } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../models/vector2';
 import { sideEffectSimulatorFactory } from './side_effect_simulator_factory';

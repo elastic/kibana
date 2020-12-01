@@ -31,7 +31,9 @@ export const CubeForProcess = memo(function ({
   'data-test-subj'?: string;
   /**
    * 'running' if the process represented by the node is still running.
-   * 'loading' if the process represented
+   * 'loading' if we don't have the data yet to determine if the node is running or terminated.
+   * 'terminated' if the process represented by the node is terminated.
+   * 'error' if we were unable to retrieve data associated with the node.
    */
   state: NodeDataStatus;
   isOrigin?: boolean;
@@ -51,8 +53,7 @@ export const CubeForProcess = memo(function ({
     >
       <desc>
         {i18n.translate('xpack.securitySolution.resolver.node_icon', {
-          defaultMessage:
-            '{state, select, running {Running Process} terminated {Terminated Process} loading {Loading Process} error {Error Process}}',
+          defaultMessage: `{state, select, running {Running Process} terminated {Terminated Process} loading {Loading Process} error {Error Process}}`,
           values: { state },
         })}
       </desc>
