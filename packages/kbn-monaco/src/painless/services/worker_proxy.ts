@@ -17,5 +17,28 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/run_find_plugin_circular_deps');
+import { monaco } from '../../monaco_imports';
+import { PainlessWorker } from '../worker';
+import { ID } from '../constants';
+
+export class WorkerProxyService {
+  private worker: monaco.editor.MonacoWebWorker<PainlessWorker> | undefined;
+
+  public async getWorker(resources: monaco.Uri[]) {
+    if (!this.worker) {
+      throw new Error('Worker Proxy Service has not been setup!');
+    }
+
+    await this.worker.withSyncedResources(resources);
+    const proxy = await this.worker.getProxy();
+    return proxy;
+  }
+
+  public setup() {
+    this.worker = monaco.editor.createWebWorker({ label: ID, moduleId: '' });
+  }
+
+  public stop() {
+    if (this.worker) this.worker.dispose();
+  }
+}
