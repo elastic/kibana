@@ -111,8 +111,8 @@ export function createTableRowDirective($compile: ng.ICompileService) {
 
       $scope.getContextAppHref = () => {
         return getContextUrl(
-          $scope.indexPattern.id,
           $scope.row._id,
+          $scope.indexPattern.id,
           $scope.columns,
           getServices().filterManager
         );
