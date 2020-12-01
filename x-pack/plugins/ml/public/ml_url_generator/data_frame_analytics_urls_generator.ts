@@ -7,10 +7,12 @@
 /**
  * Creates URL to the DataFrameAnalytics page
  */
+import { isEmpty } from 'lodash';
 import {
   DataFrameAnalyticsExplorationQueryState,
   DataFrameAnalyticsExplorationUrlState,
   DataFrameAnalyticsUrlState,
+  ExplorationPageUrlState,
   MlCommonGlobalState,
 } from '../../common/types/ml_url_generator';
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
@@ -72,16 +74,30 @@ export function createDataFrameAnalyticsExplorationUrl(
   let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION}`;
 
   if (mlUrlGeneratorState) {
-    const { jobId, analysisType, defaultIsTraining, globalState } = mlUrlGeneratorState;
+    const { jobId, analysisType, queryText, globalState } = mlUrlGeneratorState;
 
     const queryState: DataFrameAnalyticsExplorationQueryState = {
       ml: {
         jobId,
         analysisType,
-        defaultIsTraining,
       },
       ...globalState,
     };
+
+    const appState = {
+      [ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION]: {
+        ...(queryText ? { queryText } : {}),
+      },
+    };
+
+    if (!isEmpty(appState[ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION])) {
+      url = setStateToKbnUrl<AppPageState<ExplorationPageUrlState>>(
+        '_a',
+        appState,
+        { useHash: false, storeInHashQuery: false },
+        url
+      );
+    }
 
     url = setStateToKbnUrl<DataFrameAnalyticsExplorationQueryState>(
       '_g',
@@ -104,17 +120,31 @@ export function createDataFrameAnalyticsMapUrl(
   let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_MAP}`;
 
   if (mlUrlGeneratorState) {
-    const { jobId, modelId, analysisType, defaultIsTraining, globalState } = mlUrlGeneratorState;
+    const { jobId, modelId, analysisType, globalState, queryText } = mlUrlGeneratorState;
 
     const queryState: DataFrameAnalyticsExplorationQueryState = {
       ml: {
         jobId,
         modelId,
         analysisType,
-        defaultIsTraining,
       },
       ...globalState,
     };
+
+    const appState = {
+      [ML_PAGES.DATA_FRAME_ANALYTICS_MAP]: {
+        ...(queryText ? { queryText } : {}),
+      },
+    };
+
+    if (!isEmpty(appState[ML_PAGES.DATA_FRAME_ANALYTICS_MAP])) {
+      url = setStateToKbnUrl<AppPageState<ExplorationPageUrlState>>(
+        '_a',
+        appState,
+        { useHash: false, storeInHashQuery: false },
+        url
+      );
+    }
 
     url = setStateToKbnUrl<DataFrameAnalyticsExplorationQueryState>(
       '_g',

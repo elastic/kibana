@@ -43,7 +43,11 @@ import {
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../../timelines/store/timeline/actions';
-import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
+import {
+  ColumnHeaderOptions,
+  TimelineModel,
+  TimelineTabs,
+} from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 import {
@@ -309,6 +313,7 @@ export const formatTimelineResultToModel = (
 };
 
 export interface QueryTimelineById<TCache> {
+  activeTimelineTab?: TimelineTabs;
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate?: boolean;
   graphEventId?: string;
@@ -327,6 +332,7 @@ export interface QueryTimelineById<TCache> {
 }
 
 export const queryTimelineById = <TCache>({
+  activeTimelineTab = TimelineTabs.query,
   apolloClient,
   duplicate = false,
   graphEventId = '',
@@ -370,6 +376,7 @@ export const queryTimelineById = <TCache>({
             notes,
             timeline: {
               ...timeline,
+              activeTab: activeTimelineTab,
               graphEventId,
               show: openTimeline,
               dateRange: { start: from, end: to },
