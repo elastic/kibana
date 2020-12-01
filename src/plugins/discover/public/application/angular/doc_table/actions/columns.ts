@@ -33,11 +33,11 @@ function buildColumns(columns: string[], useNewFieldsApi: boolean) {
   return useNewFieldsApi ? ['fields'] : ['_source'];
 }
 
-export function addColumn(columns: string[], columnName: string) {
+export function addColumn(columns: string[], columnName: string, useNewFieldsApi: boolean) {
   if (columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns([...columns, columnName], false);
+  return buildColumns([...columns, columnName], useNewFieldsApi);
 }
 
 export function removeColumn(columns: string[], columnName: string, useNewFieldsApi: boolean) {

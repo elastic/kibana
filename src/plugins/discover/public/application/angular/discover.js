@@ -747,7 +747,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       services,
       sort,
       columns,
-      useNewFieldsApi
+      useNewFieldsApi,
     });
     return Promise.resolve();
   };
@@ -775,11 +775,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   };
 
   $scope.addColumn = function addColumn(columnName) {
-    const { indexPattern } = $scope;
+    const { indexPattern, useNewFieldsApi } = $scope;
     if (uiCapabilities.discover.save) {
       popularizeField(indexPattern, columnName, indexPatterns);
     }
-    const columns = columnActions.addColumn($scope.state.columns, columnName);
+    const columns = columnActions.addColumn($scope.state.columns, columnName, useNewFieldsApi);
     setAppState({ columns });
   };
 
