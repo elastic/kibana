@@ -38,6 +38,14 @@ export function apmInstanceRoute(server) {
       const ccs = req.payload.ccs;
       const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
+      const showCgroupMetrics = config.get('monitoring.ui.container.apm.enabled');
+      if (showCgroupMetrics) {
+        const metricCpu = metricSet.find((m) => m.name === 'apm_cpu');
+        if (showCgroupMetrics) {
+          metricCpu.keys = ['apm_cgroup_cpu'];
+        }
+      }
+
       try {
         const [metrics, apmSummary] = await Promise.all([
           getMetrics(req, apmIndexPattern, metricSet, [
