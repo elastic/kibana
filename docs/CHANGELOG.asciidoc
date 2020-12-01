@@ -185,7 +185,7 @@ image::images/highlights-7.0.0-filters.png[Filters menu]
 [float]
 === Saved objects structure improvements
 
-The {kibana-ref}/breaking-changes-7.0.0.html#breaking-changes-7.0-saved-objects[structure of saved objects changed],
+The structure of saved objects changed,
 so that they are now aware of each other.  
 This means you can now export a dashboard, including all visualization dependencies, 
 from the Saved objects page. 
