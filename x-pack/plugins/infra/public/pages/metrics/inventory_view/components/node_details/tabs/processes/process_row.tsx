@@ -34,6 +34,7 @@ import { MetricsExplorerAggregation } from '../../../../../../../../common/http_
 import { Color } from '../../../../../../../../common/color_palette';
 import { euiStyled } from '../../../../../../../../../observability/public';
 import { Process } from './types';
+import { ProcessRowCharts } from './process_row_charts';
 
 interface Props {
   cells: React.ReactNode[];
@@ -118,26 +119,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
                         <CodeLine>{item.user}</CodeLine>
                       </EuiDescriptionListDescription>
                     </EuiFlexItem>
-                    {/* <EuiFlexItem>
-                      <EuiDescriptionListTitle>{cpuMetricLabel}</EuiDescriptionListTitle>
-                      <EuiDescriptionListDescription>
-                        <ProcessChart
-                          timeseries={item.timeseries.cpu}
-                          color={Color.color2}
-                          label={cpuMetricLabel}
-                        />
-                      </EuiDescriptionListDescription>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiDescriptionListTitle>{memoryMetricLabel}</EuiDescriptionListTitle>
-                      <EuiDescriptionListDescription>
-                        <ProcessChart
-                          timeseries={item.timeseries.memory}
-                          color={Color.color0}
-                          label={memoryMetricLabel}
-                        />
-                      </EuiDescriptionListDescription>
-                    </EuiFlexItem> */}
+                    <ProcessRowCharts command={item.command} />
                   </EuiFlexGrid>
                 </EuiDescriptionList>
               </ExpandedRowCell>

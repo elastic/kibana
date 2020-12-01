@@ -6,6 +6,7 @@
 
 import { ProcessListAPIRequest, ProcessListAPIQueryAggregation } from '../../../common/http_api';
 import { ESSearchClient } from '../metrics/types';
+import { CMDLINE_FIELD } from './common';
 
 export const getProcessList = async (
   search: ESSearchClient,
@@ -33,7 +34,7 @@ export const getProcessList = async (
     aggs: {
       processCount: {
         cardinality: {
-          field: 'system.process.cmdline',
+          field: CMDLINE_FIELD,
         },
       },
       states: {
@@ -44,7 +45,7 @@ export const getProcessList = async (
         aggs: {
           count: {
             cardinality: {
-              field: 'system.process.cmdline',
+              field: CMDLINE_FIELD,
             },
           },
         },
@@ -58,7 +59,7 @@ export const getProcessList = async (
         aggs: {
           filteredProcs: {
             terms: {
-              field: 'system.process.cmdline',
+              field: CMDLINE_FIELD,
               size: 20,
               order: {
                 [sortBy.name]: sortBy.isAscending ? 'asc' : 'desc',
@@ -107,6 +108,7 @@ export const getProcessList = async (
     const { buckets: processListBuckets } = result.aggregations!.processes.filteredProcs;
     const processList = processListBuckets.map((bucket) => {
       const meta = bucket.meta.hits.hits[0]._source;
+
       return {
         cpu: bucket.cpu.value,
         memory: bucket.memory.value,
@@ -119,7 +121,7 @@ export const getProcessList = async (
     });
     const { processCount, states } = result.aggregations!;
     const statesCount = states.buckets.reduce(
-      (resultRecord, { key, count }) => ({ ...resultRecord, [key]: count.value }),
+      (stateResult, { key, count }) => ({ ...stateResult, [key]: count.value }),
       {}
     );
     return {

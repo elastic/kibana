@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import createContainter from 'constate';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -10,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../../common/http_api';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
+import { useSourceContext } from '../../../../containers/source';
 
 export interface SortBy {
   name: string;
@@ -18,12 +20,14 @@ export interface SortBy {
 
 export function useProcessList(
   hostTerm: Record<string, string>,
-  indexPattern: string,
   timefield: string,
   to: number,
   sortBy: SortBy,
   searchFilter: object
 ) {
+  const { createDerivedIndexPattern } = useSourceContext();
+  const indexPattern = createDerivedIndexPattern('metrics').title;
+
   const [inErrorState, setInErrorState] = useState(false);
   const decodeResponse = (response: any) => {
     return pipe(
@@ -68,3 +72,16 @@ export function useProcessList(
     makeRequest,
   };
 }
+
+function useProcessListParams(props: {
+  hostTerm: Record<string, string>;
+  timefield: string;
+  to: number;
+}) {
+  const { hostTerm, timefield, to } = props;
+  const { createDerivedIndexPattern } = useSourceContext();
+  const indexPattern = createDerivedIndexPattern('metrics').title;
+  return { hostTerm, indexPattern, timefield, to };
+}
+const ProcessListContext = createContainter(useProcessListParams);
+export const [ProcessListContextProvider, useProcessListContext] = ProcessListContext;

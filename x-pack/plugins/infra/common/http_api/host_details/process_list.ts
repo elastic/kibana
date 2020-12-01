@@ -5,6 +5,11 @@
  */
 
 import * as rt from 'io-ts';
+import { MetricsAPISeriesRT, MetricsAPIRow } from '../metrics_api';
+
+const AggValueRT = rt.type({
+  value: rt.number,
+});
 
 export const ProcessListAPIRequestRT = rt.type({
   hostTerm: rt.record(rt.string, rt.string),
@@ -19,16 +24,12 @@ export const ProcessListAPIRequestRT = rt.type({
 });
 
 export const ProcessListAPIQueryAggregationRT = rt.type({
-  processCount: rt.type({
-    value: rt.number,
-  }),
+  processCount: AggValueRT,
   states: rt.type({
     buckets: rt.array(
       rt.type({
         key: rt.string,
-        count: rt.type({
-          value: rt.number,
-        }),
+        count: AggValueRT,
       })
     ),
   }),
@@ -37,12 +38,8 @@ export const ProcessListAPIQueryAggregationRT = rt.type({
       buckets: rt.array(
         rt.type({
           key: rt.string,
-          cpu: rt.type({
-            value: rt.number,
-          }),
-          memory: rt.type({
-            value: rt.number,
-          }),
+          cpu: AggValueRT,
+          memory: AggValueRT,
           startTime: rt.type({
             value_as_string: rt.string,
           }),
@@ -82,6 +79,7 @@ export const ProcessListAPIResponseRT = rt.type({
       pid: rt.number,
       state: rt.string,
       user: rt.string,
+      command: rt.string,
     })
   ),
   summary: rt.type({
@@ -95,3 +93,46 @@ export type ProcessListAPIQueryAggregation = rt.TypeOf<typeof ProcessListAPIQuer
 export type ProcessListAPIRequest = rt.TypeOf<typeof ProcessListAPIRequestRT>;
 
 export type ProcessListAPIResponse = rt.TypeOf<typeof ProcessListAPIResponseRT>;
+
+export const ProcessListAPIChartRequestRT = rt.type({
+  hostTerm: rt.record(rt.string, rt.string),
+  timefield: rt.string,
+  indexPattern: rt.string,
+  to: rt.number,
+  command: rt.string,
+});
+
+export const ProcessListAPIChartQueryAggregationRT = rt.type({
+  process: rt.type({
+    filteredProc: rt.type({
+      buckets: rt.array(
+        rt.type({
+          timeseries: rt.type({
+            buckets: rt.array(
+              rt.type({
+                key: rt.number,
+                memory: AggValueRT,
+                cpu: AggValueRT,
+              })
+            ),
+          }),
+        })
+      ),
+    }),
+  }),
+});
+
+export const ProcessListAPIChartResponseRT = rt.type({
+  cpu: MetricsAPISeriesRT,
+  memory: MetricsAPISeriesRT,
+});
+
+export type ProcessListAPIChartQueryAggregation = rt.TypeOf<
+  typeof ProcessListAPIChartQueryAggregationRT
+>;
+
+export type ProcessListAPIChartRequest = rt.TypeOf<typeof ProcessListAPIChartRequestRT>;
+
+export type ProcessListAPIChartResponse = rt.TypeOf<typeof ProcessListAPIChartResponseRT>;
+
+export type ProcessListAPIRow = MetricsAPIRow;

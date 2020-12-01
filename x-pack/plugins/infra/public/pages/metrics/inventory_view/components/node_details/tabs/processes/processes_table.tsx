@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -13,8 +13,6 @@ import {
   EuiTableBody,
   EuiTableHeaderCell,
   EuiTableRowCell,
-  EuiSpacer,
-  EuiTablePagination,
   EuiLoadingChart,
   EuiEmptyPrompt,
   SortableProperties,
@@ -137,15 +135,6 @@ export const ProcessesTable = ({
           <ProcessesTableBody items={currentItems} currentTime={currentTime} />
         </StyledTableBody>
       </EuiTable>
-      {/* <EuiSpacer size="m" />
-      <EuiTablePagination
-        itemsPerPage={itemsPerPage}
-        activePage={currentPage}
-        pageCount={pageCount}
-        itemsPerPageOptions={[10, 20, 50]}
-        onChangePage={setCurrentPage}
-        onChangeItemsPerPage={setItemsPerPage}
-      /> */}
     </>
   );
 };
