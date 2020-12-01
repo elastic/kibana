@@ -175,6 +175,7 @@ export const getPackagePolicyUpdateCallback = (logger: Logger): ExternalCallback
     if (newPackagePolicy.package?.name !== 'endpoint') {
       return newPackagePolicy;
     }
+
     const licenseError: Error & { statusCode?: number } = new Error('Requires Platinum license');
     licenseError.statusCode = 403;
     throw licenseError;

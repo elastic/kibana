@@ -80,7 +80,13 @@ export const createPackagePolicyHandler: RequestHandler<
   const logger = appContextService.getLogger();
   let newData = { ...request.body };
   try {
-    newData = await packagePolicyService.runCreateExternalCallbacks(newData, context, request);
+    newData = await packagePolicyService.runExternalCallbacks(
+      'packagePolicyCreate',
+      CreatePackagePolicyRequestSchema.body, // or use newpackagepolicyschema type directly?
+      newData,
+      context,
+      request
+    );
 
     // Create package policy
     const packagePolicy = await packagePolicyService.create(soClient, callCluster, newData, {
@@ -120,25 +126,13 @@ export const updatePackagePolicyHandler: RequestHandler<
   const inputs = newData.inputs || packagePolicy.inputs;
 
   try {
-    const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyUpdate');
-    if (externalCallbacks && externalCallbacks.size > 0) {
-      let updatedNewData: NewPackagePolicy = newData;
-
-      for (const callback of externalCallbacks) {
-        try {
-          updatedNewData = UpdatePackagePolicyRequestSchema.body.validate(
-            await callback(updatedNewData, context, request)
-          );
-        } catch (error) {
-          logger.error(
-            'An external registered [ packagePolicyUpdate ] callback failed when executed.'
-          );
-          logger.error(error);
-          throw error;
-        }
-      }
-      newData = updatedNewData;
-    }
+    newData = await packagePolicyService.runExternalCallbacks(
+      'packagePolicyUpdate',
+      UpdatePackagePolicyRequestSchema.body,
+      newData,
+      context,
+      request
+    );
 
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
