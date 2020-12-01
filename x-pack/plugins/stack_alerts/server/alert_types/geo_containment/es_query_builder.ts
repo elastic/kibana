@@ -191,18 +191,12 @@ export async function executeEsQueryFactory(
       },
     };
 
-
-    console.log('************************');
-    console.log(JSON.stringify(esQuery.body));
-
     let esResult: SearchResponse<unknown> | undefined;
     try {
       esResult = await callCluster('search', esQuery);
     } catch (err) {
       log.warn(`${err.message}`);
     }
-    console.log('_______________________');
-    console.log(JSON.stringify(esResult));
     return esResult;
   };
 }

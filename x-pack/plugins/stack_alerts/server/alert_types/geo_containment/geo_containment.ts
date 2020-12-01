@@ -164,17 +164,6 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       params.geoField
     );
 
-    // Cycle through instances that received no updates and keep active
-    // const activeAlertsList = state.activeAlertsList || {};
-    // _.forEach(activeAlertsList, (val, key) => {
-    //   if (!currLocationMap.has(key)) {
-    //     const containingBoundaryName =
-    //       shapesIdsNamesMap[val.containingBoundaryId] || val.containingBoundaryId;
-    //     const alertInstanceId = `${key}-${containingBoundaryName}`;
-    //     services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, val);
-    //   }
-    // });
-    //
     // Cycle through new alert statuses and set active
     currLocationMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
       const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
@@ -189,15 +178,11 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       };
       const alertInstanceId = `${entityName}-${containingBoundaryName}`;
       if (shapeLocationId !== OTHER_CATEGORY) {
-        // activeAlertsList[entityName] = context;
         services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
-      } else {
-        // delete activeAlertsList[entityName];
       }
     });
 
     return {
-      // activeAlertsList,
       shapesFilters,
       shapesIdsNamesMap,
     };
