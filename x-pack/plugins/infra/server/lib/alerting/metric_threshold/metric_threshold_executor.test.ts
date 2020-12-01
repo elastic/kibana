@@ -6,7 +6,7 @@
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { Comparator, AlertStates } from './types';
 import * as mocks from './test_mocks';
-import { ResolvedActionGroup } from '../../../../../alerts/common';
+import { RecoveredActionGroup } from '../../../../../alerts/common';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import {
   alertsMock,
@@ -367,7 +367,7 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
       expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute([2]);
-      expect(mostRecentAction(instanceID).id).toBe(ResolvedActionGroup.id);
+      expect(mostRecentAction(instanceID).id).toBe(RecoveredActionGroup.id);
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
     test('does not continue to send a recovery alert if the metric is still OK', async () => {
@@ -383,7 +383,7 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
       expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute([2]);
-      expect(mostRecentAction(instanceID).id).toBe(ResolvedActionGroup.id);
+      expect(mostRecentAction(instanceID).id).toBe(RecoveredActionGroup.id);
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
   });
