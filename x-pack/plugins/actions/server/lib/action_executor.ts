@@ -120,7 +120,7 @@ export class ActionExecutor {
     }
 
     const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
-    logger.debug(`executing action ${actionLabel}`);
+    logger.debug(`executing action ${actionLabel} at ${new Date().toISOString()}`);
 
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
