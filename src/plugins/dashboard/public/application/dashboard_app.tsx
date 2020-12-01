@@ -36,7 +36,7 @@ import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 import { useDashboardStateManager } from './hooks/use_dashboard_state_manager';
 import { useDashboardCommonActions } from './hooks/use_dashboard_common_actions';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from './types';
-import { dashboardBreadcrumb, getDashboardTitle, leaveConfirmStrings } from './dashboard_strings';
+import { dashboardBreadcrumb, leaveConfirmStrings } from './dashboard_strings';
 import {
   getFiltersSubscription,
   getInputSubscription,
@@ -70,10 +70,15 @@ export function DashboardApp({
   const services = useKibana<DashboardAppServices>().services;
 
   const savedDashboard = useSavedDashboard(services, history, savedDashboardId);
-  const dashboardStateManager = useDashboardStateManager(services, history, savedDashboard);
+  const { dashboardStateManager, getTitle } = useDashboardStateManager(
+    services,
+    history,
+    savedDashboard
+  );
   const dashboardContainer = useDashboardContainer(
     services,
     history,
+    getTitle,
     embedSettings,
     dashboardStateManager
   );
@@ -101,7 +106,7 @@ export function DashboardApp({
       uiSettings,
       indexPatterns,
       core: { http },
-      data: { query },
+      data: { query, search },
     } = services;
 
     const timeFilter = query.timefilter.timefilter;
@@ -131,6 +136,11 @@ export function DashboardApp({
       merge(
         ...[timeFilter.getRefreshIntervalUpdate$(), timeFilter.getTimeUpdate$()]
       ).subscribe(() => refreshDashboardContainer())
+    );
+    subscriptions.add(
+      search.session.onRefresh$.subscribe(() => {
+        setLastReloadTime(() => new Date().getTime());
+      })
     );
     dashboardStateManager.registerChangeListener(() => {
       // we aren't checking dirty state because there are changes the container needs to know about
@@ -179,11 +189,7 @@ export function DashboardApp({
       return;
     }
 
-    const {
-      chrome,
-      data: { query },
-      core: { overlays },
-    } = services;
+    const { chrome, core } = services;
 
     chrome.setBreadcrumbs([
       {
@@ -191,7 +197,7 @@ export function DashboardApp({
         'data-test-subj': 'dashboardListingBreadcrumb',
         onClick: () => {
           if (dashboardStateManager.getIsDirty()) {
-            overlays
+            core.overlays
               .openConfirm(leaveConfirmStrings.leaveSubtitle, {
                 confirmButtonText: leaveConfirmStrings.confirmButtonText,
                 cancelButtonText: leaveConfirmStrings.cancelButtonText,
@@ -209,15 +215,10 @@ export function DashboardApp({
         },
       },
       {
-        text: getDashboardTitle(
-          dashboardStateManager.getTitle(),
-          dashboardStateManager.getViewMode(),
-          dashboardStateManager.getIsDirty(query.timefilter.timefilter),
-          dashboardStateManager.isNew()
-        ),
+        text: getTitle(),
       },
     ]);
-  }, [dashboardStateManager, redirectTo, services]);
+  }, [dashboardStateManager, redirectTo, services, getTitle]);
 
   // Build onAppLeave when Dashboard State Manager changes
   useEffect(() => {

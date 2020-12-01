@@ -31,10 +31,12 @@ import {
   isErrorEmbeddable,
 } from '../../../../embeddable/public';
 import { getDashboardContainerInput, getSearchSessionIdFromURL } from '../dashboard_app_functions';
+import { createSessionRestorationDataProvider } from '../lib';
 
 export function useDashboardContainer(
   services: DashboardAppServices,
   history: History,
+  getTitle: () => string,
   embedSettings?: DashboardEmbedSettings,
   dashboardStateManager?: DashboardStateManager
 ) {
@@ -45,12 +47,15 @@ export function useDashboardContainer(
       return;
     }
 
-    const {
-      embeddable,
-      scopedHistory,
-      dashboardCapabilities,
-      data: { search, query },
-    } = services;
+    const { embeddable, scopedHistory, dashboardCapabilities, data } = services;
+    data.search.session.setSearchSessionInfoProvider(
+      createSessionRestorationDataProvider({
+        data,
+        getDashboardTitle: () => getTitle(),
+        getDashboardId: () => dashboardStateManager.savedDashboard.id ?? '',
+        getAppState: () => dashboardStateManager.getAppState(),
+      })
+    );
 
     const dashboardFactory = embeddable.getEmbeddableFactory<
       DashboardContainerInput,
@@ -64,7 +69,7 @@ export function useDashboardContainer(
     }
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
     if (searchSessionIdFromURL) {
-      search.session.restore(searchSessionIdFromURL);
+      data.search.session.restore(searchSessionIdFromURL);
     }
     // get incoming embeddable from the state transfer service.
     const incomingEmbeddable = embeddable
@@ -74,12 +79,12 @@ export function useDashboardContainer(
     dashboardFactory
       .create(
         getDashboardContainerInput({
-          searchSessionId: searchSessionIdFromURL ?? search.session.start(),
+          searchSessionId: searchSessionIdFromURL ?? data.search.session.start(),
           isEmbeddedExternally: Boolean(embedSettings),
           dashboardStateManager,
           dashboardCapabilities,
           incomingEmbeddable,
-          query,
+          query: data.query,
         })
       )
       .then((newDashboardContainer: DashboardContainer | ErrorEmbeddable | undefined) => {
@@ -107,7 +112,7 @@ export function useDashboardContainer(
         return undefined;
       });
     };
-  }, [dashboardStateManager, services, history, embedSettings]);
+  }, [dashboardStateManager, services, history, embedSettings, getTitle]);
 
   return dashboardContainer;
 }

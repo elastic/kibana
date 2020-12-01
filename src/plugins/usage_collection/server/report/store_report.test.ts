@@ -69,7 +69,7 @@ describe('store_report', () => {
     expect(savedObjectClient.incrementCounter).toHaveBeenCalledWith(
       'ui-metric',
       'test-app-name:test-event-name',
-      'count'
+      ['count']
     );
     expect(savedObjectClient.bulkCreate).toHaveBeenCalledWith([
       {

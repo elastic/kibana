@@ -34,6 +34,7 @@ import {
   QueryState,
   syncQueryStateWithUrl,
 } from '../../../../data/public';
+import { getDashboardTitle } from '../dashboard_strings';
 
 export function useDashboardStateManager(
   services: DashboardAppServices,
@@ -152,5 +153,16 @@ export function useDashboardStateManager(
     };
   }, [savedDashboard, history, services]);
 
-  return dashboardStateManager;
+  return {
+    dashboardStateManager,
+    getTitle: () =>
+      dashboardStateManager
+        ? getDashboardTitle(
+            dashboardStateManager.getTitle(),
+            dashboardStateManager.getViewMode(),
+            dashboardStateManager.getIsDirty(services.data.query.timefilter.timefilter),
+            dashboardStateManager.isNew()
+          )
+        : '',
+  };
 }
