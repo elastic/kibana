@@ -17,26 +17,31 @@
  * under the License.
  */
 
-import type { IndexPatternSavedObjectAttrs } from './index_patterns';
-import type { SavedObjectsClientCommon } from '../types';
+import { flatten } from 'lodash';
+import { getData } from '../services';
 
-/**
- * Returns an object matching a given title
- *
- * @param client {SavedObjectsClientCommon}
- * @param title {string}
- * @returns {Promise<SavedObject|undefined>}
- */
-export async function findByTitle(client: SavedObjectsClientCommon, title: string) {
-  if (title) {
-    const savedObjects = await client.find<IndexPatternSavedObjectAttrs>({
-      type: 'index-pattern',
-      perPage: 10,
-      search: `"${title}"`,
-      searchFields: ['title'],
-      fields: ['title'],
-    });
+import type { Data, VegaSpec } from '../data_model/types';
+import type { IndexPattern } from '../../../data/public';
 
-    return savedObjects.find((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
+export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {
+  const { indexPatterns } = getData();
+  let data: Data[] = [];
+
+  if (Array.isArray(spec.data)) {
+    data = spec.data;
+  } else if (spec.data) {
+    data = [spec.data];
   }
-}
+
+  return flatten<IndexPattern>(
+    await Promise.all(
+      data.reduce<Array<Promise<IndexPattern[]>>>((accumulator, currentValue) => {
+        if (currentValue.url?.index) {
+          accumulator.push(indexPatterns.find(currentValue.url.index));
+        }
+
+        return accumulator;
+      }, [])
+    )
+  );
+};

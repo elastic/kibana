@@ -18,11 +18,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { parse } from 'hjson';
 import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';
 
+import type { VegaSpec } from './data_model/types';
+
+import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
 import { createVegaRequestHandler } from './vega_request_handler';
 // @ts-expect-error
 import { createVegaVisualization } from './vega_visualization';
@@ -63,6 +67,16 @@ export const createVegaTypeDefinition = (
     },
     getSupportedTriggers: () => {
       return [VIS_EVENT_TO_TRIGGER.applyFilter];
+    },
+    getUsedIndexPattern: async (visParams) => {
+      try {
+        const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
+
+        return extractIndexPatternsFromSpec(spec as VegaSpec);
+      } catch (e) {
+        // spec is invalid
+      }
+      return [];
     },
     inspectorAdapters: createInspectorAdapters,
   };

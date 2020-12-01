@@ -32,7 +32,7 @@ import { SearchAPI } from './data_model/search_api';
 
 import { createVegaTypeDefinition } from './vega_type';
 
-import { setInjectedVars, setData, setSavedObjects, setNotifications } from './services';
+import { setInjectedVars, setData, setNotifications } from './services';
 import { coreMock } from '../../../core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 
@@ -80,7 +80,6 @@ describe('VegaVisualizations', () => {
       enableExternalUrls: true,
     });
     setData(dataPluginStart);
-    setSavedObjects(coreStart.savedObjects);
     setNotifications(coreStart.notifications);
 
     vegaVisualizationDependencies = {
