@@ -9,6 +9,7 @@ import { FleetSetup } from '../../fleet/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginStart } from '../../../../src/plugins/share/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
@@ -22,4 +23,11 @@ export interface SetupDependencies {
 
 export interface StartDependencies {
   share: SharePluginStart;
+  data?: DataPublicPluginStart;
+}
+
+export interface AppPluginsDependencies {
+  usageCollection: UsageCollectionSetup;
+  fleet?: FleetSetup;
+  data?: DataPublicPluginStart;
 }

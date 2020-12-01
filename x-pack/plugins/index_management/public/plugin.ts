@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup } from '../../../../src/core/public';
+import { CoreSetup, CoreStart } from '../../../../src/core/public';
 
 import { UIM_APP_NAME, PLUGIN } from '../common/constants';
 
@@ -22,6 +22,7 @@ import { ExtensionsService } from './services';
 export class IndexMgmtUIPlugin {
   private uiMetricService = new UiMetricService(UIM_APP_NAME);
   private extensionsService = new ExtensionsService();
+  private dataPlugin: StartDependencies['data'] | undefined;
 
   constructor() {
     // Temporary hack to provide the service instances in module files in order to avoid a big refactor
@@ -53,7 +54,14 @@ export class IndexMgmtUIPlugin {
           uiMetricService: this.uiMetricService,
           extensionsService: this.extensionsService,
         };
-        return mountManagementSection(coreSetup, usageCollection, services, params, fleet);
+
+        const appPlugins = {
+          usageCollection,
+          fleet,
+          data: this.data,
+        };
+
+        return mountManagementSection(coreSetup, services, params, appPlugins);
       },
     });
 
@@ -62,6 +70,17 @@ export class IndexMgmtUIPlugin {
     };
   }
 
-  public start() {}
+  public start(core: CoreStart, plugins: StartDependencies) {
+    this.dataPlugin = plugins.data;
+  }
+
   public stop() {}
+
+  public get data() {
+    if (!this.dataPlugin) {
+      throw new Error(`Can't access data plugin as it has not been provided`);
+    }
+
+    return this.dataPlugin;
+  }
 }

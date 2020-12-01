@@ -7,12 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public/';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
-import { FleetSetup } from '../../../fleet/public';
 import { PLUGIN } from '../../common/constants';
 import { ExtensionsService } from '../services';
-import { StartDependencies } from '../types';
+import { StartDependencies, AppPluginsDependencies } from '../types';
 import { AppDependencies } from './app_context';
 import { breadcrumbService } from './services/breadcrumbs';
 import { documentationService } from './services/documentation';
@@ -29,10 +27,9 @@ interface InternalServices {
 
 export async function mountManagementSection(
   coreSetup: CoreSetup<StartDependencies>,
-  usageCollection: UsageCollectionSetup,
   services: InternalServices,
   params: ManagementAppMountParams,
-  fleet?: FleetSetup
+  plugins: AppPluginsDependencies
 ) {
   const { element, setBreadcrumbs, history } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
@@ -55,10 +52,7 @@ export async function mountManagementSection(
       fatalErrors,
       getUrlForApp: application.getUrlForApp,
     },
-    plugins: {
-      usageCollection,
-      fleet,
-    },
+    plugins,
     services,
     history,
     setBreadcrumbs,
