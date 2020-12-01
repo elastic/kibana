@@ -31,11 +31,12 @@ export async function getFields(
   indexPatternString: string
 ) {
   const getIndexPatternsService = async () => {
-    const [{ savedObjects, elasticsearch }, { data }] = await framework.core.getStartServices();
-    const savedObjectsClient = savedObjects.getScopedClient(request);
-    const clusterClient = elasticsearch.client.asScoped(request).asCurrentUser;
+    const [, { data }] = await framework.core.getStartServices();
 
-    return await data.indexPatterns.indexPatternsServiceFactory(savedObjectsClient, clusterClient);
+    return await data.indexPatterns.indexPatternsServiceFactory(
+      requestContext.core.savedObjects.client,
+      requestContext.core.elasticsearch.client.asCurrentUser
+    );
   };
 
   const indexPatternsService = await getIndexPatternsService();
