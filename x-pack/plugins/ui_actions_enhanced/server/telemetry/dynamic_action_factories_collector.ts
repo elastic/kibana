@@ -6,6 +6,7 @@
 
 import { DynamicActionsState } from '../../common';
 import { ActionFactory } from '../types';
+import { getMetricKey } from './get_metric_key';
 
 export const dynamicActionFactoriesCollector = (
   getActionFactory: (id: string) => undefined | ActionFactory,
@@ -21,7 +22,9 @@ export const dynamicActionFactoriesCollector = (
 
       factoryStats = factory.telemetry(event, factoryStats);
       for (const [stat, value] of Object.entries(factoryStats)) {
-        stats[`dynamicActions.factories.${factory.id}.${stat}`] = value;
+        const key = getMetricKey(`factories.${factory.id}.${stat}`);
+
+        stats[key] = value;
       }
     }
   }
