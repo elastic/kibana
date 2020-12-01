@@ -39,7 +39,7 @@ import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/a
 import { AccessDeniedPage } from '../access_denied_page';
 import { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
 import { SpacesPluginStart } from '../../../../../../../spaces/public';
-import { JobSpacesRepairFlyout } from '../../../../components/job_spaces_repair';
+import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
 import { getDefaultAnomalyDetectionJobsListState } from '../../../../jobs/jobs_list/jobs';
 import { getMlGlobalServices } from '../../../../app';
 import { ListingPageUrlState } from '../../../../../../common/types/common';
@@ -125,7 +125,7 @@ export const JobsListPage: FC<{
   const spacesEnabled = spaces !== undefined;
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
-  const [showRepairFlyout, setShowRepairFlyout] = useState(false);
+  const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
   const tabs = useTabs(isMlEnabledInSpace, spacesEnabled);
   const [currentTabId, setCurrentTabId] = useState(tabs[0].id);
@@ -184,8 +184,8 @@ export const JobsListPage: FC<{
     );
   }
 
-  function onCloseRepairFlyout() {
-    setShowRepairFlyout(false);
+  function onCloseSyncFlyout() {
+    setShowSyncFlyout(false);
   }
 
   if (accessDenied) {
@@ -244,12 +244,12 @@ export const JobsListPage: FC<{
                 <EuiPageContentBody>
                   {spacesEnabled && (
                     <>
-                      <EuiButtonEmpty onClick={() => setShowRepairFlyout(true)}>
-                        {i18n.translate('xpack.ml.management.jobsList.repairFlyoutButton', {
-                          defaultMessage: 'Repair saved objects',
+                      <EuiButtonEmpty onClick={() => setShowSyncFlyout(true)}>
+                        {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                          defaultMessage: 'Synchronize saved objects',
                         })}
                       </EuiButtonEmpty>
-                      {showRepairFlyout && <JobSpacesRepairFlyout onClose={onCloseRepairFlyout} />}
+                      {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
                       <EuiSpacer size="s" />
                     </>
                   )}

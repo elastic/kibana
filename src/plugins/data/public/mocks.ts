@@ -64,6 +64,7 @@ const createStartContract = (): Start => {
       SearchBar: jest.fn().mockReturnValue(null),
     },
     indexPatterns: ({
+      find: jest.fn((search) => [{ id: search, title: search }]),
       createField: jest.fn(() => {}),
       createFieldList: jest.fn(() => []),
       ensureDefaultIndexPattern: jest.fn(),

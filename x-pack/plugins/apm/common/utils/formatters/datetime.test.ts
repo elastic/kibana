@@ -73,19 +73,37 @@ describe('date time formatters', () => {
         const dateRange = asRelativeDateTimeRange(start, end);
         expect(dateRange).toEqual('Oct 29, 2019, 10:01 - 15:01 (UTC+1)');
       });
-    });
-    describe('MMM D, YYYY, HH:mm:ss - HH:mm:ss (UTC)', () => {
       it('range: 14 minutes', () => {
         const start = formatDateToTimezone('2019-10-29 10:01:01');
         const end = formatDateToTimezone('2019-10-29 10:15:01');
         const dateRange = asRelativeDateTimeRange(start, end);
-        expect(dateRange).toEqual('Oct 29, 2019, 10:01:01 - 10:15:01 (UTC+1)');
+        expect(dateRange).toEqual('Oct 29, 2019, 10:01 - 10:15 (UTC+1)');
       });
       it('range: 5 minutes', () => {
         const start = formatDateToTimezone('2019-10-29 10:01:01');
         const end = formatDateToTimezone('2019-10-29 10:06:01');
         const dateRange = asRelativeDateTimeRange(start, end);
-        expect(dateRange).toEqual('Oct 29, 2019, 10:01:01 - 10:06:01 (UTC+1)');
+        expect(dateRange).toEqual('Oct 29, 2019, 10:01 - 10:06 (UTC+1)');
+      });
+      it('range: 1 minute', () => {
+        const start = formatDateToTimezone('2019-10-29 10:01:01');
+        const end = formatDateToTimezone('2019-10-29 10:02:01');
+        const dateRange = asRelativeDateTimeRange(start, end);
+        expect(dateRange).toEqual('Oct 29, 2019, 10:01 - 10:02 (UTC+1)');
+      });
+    });
+    describe('MMM D, YYYY, HH:mm:ss - HH:mm:ss (UTC)', () => {
+      it('range: 50 seconds', () => {
+        const start = formatDateToTimezone('2019-10-29 10:01:01');
+        const end = formatDateToTimezone('2019-10-29 10:01:50');
+        const dateRange = asRelativeDateTimeRange(start, end);
+        expect(dateRange).toEqual('Oct 29, 2019, 10:01:01 - 10:01:50 (UTC+1)');
+      });
+      it('range: 10 seconds', () => {
+        const start = formatDateToTimezone('2019-10-29 10:01:01');
+        const end = formatDateToTimezone('2019-10-29 10:01:11');
+        const dateRange = asRelativeDateTimeRange(start, end);
+        expect(dateRange).toEqual('Oct 29, 2019, 10:01:01 - 10:01:11 (UTC+1)');
       });
     });
     describe('MMM D, YYYY, HH:mm:ss.SSS - HH:mm:ss.SSS (UTC)', () => {

@@ -27,6 +27,7 @@
       "src/plugins/management"
     ],
     "maps_legacy": "src/plugins/maps_legacy",
+    "monaco": "packages/kbn-monaco/src",
     "indexPatternManagement": "src/plugins/index_pattern_management",
     "advancedSettings": "src/plugins/advanced_settings",
     "kibana_legacy": "src/plugins/kibana_legacy",
