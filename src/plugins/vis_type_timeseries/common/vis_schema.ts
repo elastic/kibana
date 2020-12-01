@@ -253,7 +253,7 @@ export const panel = schema.object({
   markdown_vertical_align: stringOptionalNullable,
   markdown_less: stringOptionalNullable,
   markdown_css: stringOptionalNullable,
-  pivot_id: stringOptionalNullable,
+  pivot_id: timeFieldObject,
   pivot_label: stringOptionalNullable,
   pivot_type: stringOptionalNullable,
   pivot_rows: stringOptionalNullable,
