@@ -241,8 +241,7 @@ export function LayerPanel(
                     const isFromTheSameGroup =
                       isDraggedOperation(dragging) &&
                       dragging.groupId === group.groupId &&
-                      dragging.columnId !== accessor &&
-                      dragging.groupId !== 'y'; // TODO: remove this line when https://github.com/elastic/elastic-charts/issues/868 is fixed
+                      dragging.columnId !== accessor;
 
                     const isDroppable = isDraggedOperation(dragging)
                       ? dragType === 'reorder'
