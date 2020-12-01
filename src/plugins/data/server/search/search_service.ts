@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject, from, Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { pick } from 'lodash';
 import {
   CoreSetup,
@@ -29,7 +29,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { catchError, first, map, switchMap } from 'rxjs/operators';
+import { catchError, first, map } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import {
@@ -50,7 +50,11 @@ import { DataPluginStart } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
-import { BACKGROUND_SESSION_TYPE, searchTelemetry } from '../saved_objects';
+import {
+  BACKGROUND_SESSION_TYPE,
+  backgroundSessionMapping,
+  searchTelemetry,
+} from '../saved_objects';
 import {
   IEsSearchRequest,
   IEsSearchResponse,
@@ -73,8 +77,6 @@ import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { BackgroundSessionService, ISearchSessionClient } from './session';
 import { registerSessionRoutes } from './routes/session';
-import { backgroundSessionMapping } from '../saved_objects';
-import { tapFirst } from '../../common/utils';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
@@ -295,7 +297,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    searchRequest: SearchStrategyRequest,
+    request: SearchStrategyRequest,
     options: ISearchOptions,
     deps: SearchStrategyDependencies
   ) => {
@@ -303,24 +305,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       options.strategy
     );
 
-    // If this is a restored background search session, look up the ID using the provided sessionId
-    const getSearchRequest = async () =>
-      !options.isRestore || searchRequest.id
-        ? searchRequest
-        : {
-            ...searchRequest,
-            id: await this.sessionService.getId(searchRequest, options, deps),
-          };
-
-    return from(getSearchRequest()).pipe(
-      switchMap((request) => strategy.search(request, options, deps)),
-      tapFirst((response) => {
-        if (searchRequest.id || !options.sessionId || !response.id || options.isRestore) return;
-        this.sessionService.trackId(searchRequest, response.id, options, {
-          savedObjectsClient: deps.savedObjectsClient,
-        });
-      })
-    );
+    return options.sessionId
+      ? this.sessionService.search(strategy, request, options, deps)
+      : strategy.search(request, options, deps);
   };
 
   private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {
