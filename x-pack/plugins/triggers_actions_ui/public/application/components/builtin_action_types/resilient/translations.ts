@@ -140,8 +140,8 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
   }
 );
 
-export const TITLE_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.requiredTitleTextField',
+export const NAME_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.requiredNameTextField',
   {
     defaultMessage: 'Name is required.',
   }

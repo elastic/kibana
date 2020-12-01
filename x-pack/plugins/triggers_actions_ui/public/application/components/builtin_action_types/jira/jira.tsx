@@ -65,7 +65,7 @@ export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraAc
       };
       validationResult.errors = errors;
       if (!actionParams.subActionParams?.title?.length) {
-        errors.title.push(i18n.TITLE_REQUIRED);
+        errors.title.push(i18n.SUMMARY_REQUIRED);
       }
       return validationResult;
     },
