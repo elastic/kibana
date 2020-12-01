@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const config = getService('config');
   const randomness = getService('randomness');
   const [basicUsername, basicPassword] = config.get('servers.elasticsearch.auth').split(':');
@@ -35,9 +35,8 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function getNumberOfSessionDocuments() {
-    return (((await es.search({ index: '.kibana_security_session*' })).hits.total as unknown) as {
-      value: number;
-    }).value;
+    return (await es.search({ index: '.kibana_security_session*' })).body.hits.total
+      .value as number;
   }
 
   async function loginWithSAML(providerName: string) {
@@ -67,11 +66,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Session Lifespan cleanup', () => {
     beforeEach(async () => {
-      await es.cluster.health({ index: '.kibana_security_session*', waitForStatus: 'green' });
-      await es.indices.delete({
-        index: '.kibana_security_session*',
-        ignore: [404],
-      });
+      await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
+      await es.indices.delete({ index: '.kibana_security_session*' }, { ignore: [404] });
     });
 
     it('should properly clean up session expired because of lifespan', async function () {
