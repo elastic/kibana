@@ -29,7 +29,6 @@ elastic.apm.transactionSampleRate: 0.1
 elastic.apm.metricsInterval: '120s'
 ----------
 
-Take a look at the {apm-node-ref} configuration options for more information about optional metrics to adjust performance.
 7. Start Kibana with APM active using:
 ** `ELASTIC_APM_ACTIVE=true yarn start`
 8. After Kibana starts up, navigate to the APM app, where you should see some transactions.
