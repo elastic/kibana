@@ -118,7 +118,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
                         <CodeLine>{item.user}</CodeLine>
                       </EuiDescriptionListDescription>
                     </EuiFlexItem>
-                    <EuiFlexItem>
+                    {/* <EuiFlexItem>
                       <EuiDescriptionListTitle>{cpuMetricLabel}</EuiDescriptionListTitle>
                       <EuiDescriptionListDescription>
                         <ProcessChart
@@ -137,7 +137,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
                           label={memoryMetricLabel}
                         />
                       </EuiDescriptionListDescription>
-                    </EuiFlexItem>
+                    </EuiFlexItem> */}
                   </EuiFlexGrid>
                 </EuiDescriptionList>
               </ExpandedRowCell>

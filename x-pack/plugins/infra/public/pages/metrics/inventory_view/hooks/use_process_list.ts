@@ -11,11 +11,18 @@ import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../..
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 
+export interface SortBy {
+  name: string;
+  isAscending: boolean;
+}
+
 export function useProcessList(
   hostTerm: Record<string, string>,
   indexPattern: string,
   timefield: string,
-  to: number
+  to: number,
+  sortBy: SortBy,
+  searchFilter: object
 ) {
   const decodeResponse = (response: any) => {
     return pipe(
@@ -24,20 +31,24 @@ export function useProcessList(
     );
   };
 
-  const timerange = {
-    field: timefield,
-    interval: 'modules',
-    to,
-    from: to - 15 * 60 * 1000, // 15 minutes
-  };
+  const parsedSortBy =
+    sortBy.name === 'runtimeLength'
+      ? {
+          ...sortBy,
+          name: 'startTime',
+        }
+      : sortBy;
 
   const { error, loading, response, makeRequest } = useHTTPRequest<ProcessListAPIResponse>(
     '/api/metrics/process_list',
     'POST',
     JSON.stringify({
       hostTerm,
-      timerange,
+      timefield,
       indexPattern,
+      to,
+      sortBy: parsedSortBy,
+      searchFilter: {},
     }),
     decodeResponse
   );

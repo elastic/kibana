@@ -7,7 +7,7 @@
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar, EuiSpacer, EuiEmptyPrompt, EuiButton, Query } from '@elastic/eui';
-import { useProcessList } from '../../../../hooks/use_process_list';
+import { useProcessList, SortBy } from '../../../../hooks/use_process_list';
 import { TabContent, TabProps } from '../shared';
 import { STATE_NAMES } from './states';
 import { SummaryTable } from './summary_table';
@@ -15,6 +15,10 @@ import { ProcessesTable } from './processes_table';
 
 const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
   const [searchFilter, setSearchFilter] = useState<Query>(EuiSearchBar.Query.MATCH_ALL);
+  const [sortBy, setSortBy] = useState<SortBy>({
+    name: 'cpu',
+    isAscending: false,
+  });
 
   const hostTerm = useMemo(() => {
     const field =
@@ -28,8 +32,12 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
     hostTerm,
     'metricbeat-*',
     options.fields!.timestamp,
-    currentTime
+    currentTime,
+    sortBy,
+    Query.toESQuery(searchFilter)
   );
+
+  console.log(Query.toESQuery(searchFilter), Query.toESQueryString(searchFilter));
 
   if (error) {
     return (
@@ -57,7 +65,10 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
 
   return (
     <TabContent>
-      <SummaryTable isLoading={loading} processList={response ?? []} />
+      <SummaryTable
+        isLoading={loading}
+        processSummary={response?.summary ?? { total: 0, statesCount: {} }}
+      />
       <EuiSpacer size="m" />
       <EuiSearchBar
         query={searchFilter}
@@ -86,8 +97,9 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
       <ProcessesTable
         currentTime={currentTime}
         isLoading={loading || !response}
-        processList={response ?? []}
-        searchFilter={searchFilter}
+        processList={response?.processList ?? []}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
     </TabContent>
   );
