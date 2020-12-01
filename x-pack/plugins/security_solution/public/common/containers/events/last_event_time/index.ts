@@ -31,7 +31,7 @@ export interface UseTimelineLastEventTimeArgs {
   errorMessage?: string;
 }
 
-interface UseTimelineLastEventTimeProps {
+export interface UseTimelineLastEventTimeProps {
   indexKey: LastEventIndexKey;
   details: LastTimeDetails;
 }

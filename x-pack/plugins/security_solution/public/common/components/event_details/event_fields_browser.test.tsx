@@ -184,10 +184,8 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
           />
         </TestProviders>
