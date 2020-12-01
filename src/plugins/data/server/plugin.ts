@@ -47,6 +47,7 @@ export interface DataPluginSetup {
 
 export interface DataPluginStart {
   search: ISearchStart;
+
   fieldFormats: FieldFormatsStart;
   indexPatterns: IndexPatternsServiceStart;
 }
