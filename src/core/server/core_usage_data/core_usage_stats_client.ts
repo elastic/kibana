@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { deepFreeze } from '@kbn/std';
 import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
 import { CoreUsageStats } from './types';
 import {
@@ -41,22 +40,28 @@ export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptio
 export type IncrementSavedObjectsExportOptions = BaseIncrementOptions &
   Pick<SavedObjectsExportOptions, 'types'> & { supportedTypes: string[] };
 
-const SAVED_OBJECTS_IMPORT_DEFAULT = deepFreeze({
-  total: 0,
-  kibanaRequest: { yes: 0, no: 0 },
-  createNewCopiesEnabled: { yes: 0, no: 0 },
-  overwriteEnabled: { yes: 0, no: 0 },
-});
-const SAVED_OBJECTS_RESOLVE_IMPORT_ERRORS_DEFAULT = deepFreeze({
-  total: 0,
-  kibanaRequest: { yes: 0, no: 0 },
-  createNewCopiesEnabled: { yes: 0, no: 0 },
-});
-const SAVED_OBJECTS_EXPORT_DEFAULT = deepFreeze({
-  total: 0,
-  kibanaRequest: { yes: 0, no: 0 },
-  allTypesSelected: { yes: 0, no: 0 },
-});
+export const IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsImport';
+export const RESOLVE_IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsResolveImportErrors';
+export const EXPORT_STATS_PREFIX = 'apiCalls.savedObjectsExport';
+const ALL_COUNTER_FIELDS = [
+  `${IMPORT_STATS_PREFIX}.total`,
+  `${IMPORT_STATS_PREFIX}.kibanaRequest.yes`,
+  `${IMPORT_STATS_PREFIX}.kibanaRequest.no`,
+  `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+  `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
+  `${IMPORT_STATS_PREFIX}.overwriteEnabled.yes`,
+  `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
+  `${RESOLVE_IMPORT_STATS_PREFIX}.total`,
+  `${RESOLVE_IMPORT_STATS_PREFIX}.kibanaRequest.yes`,
+  `${RESOLVE_IMPORT_STATS_PREFIX}.kibanaRequest.no`,
+  `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+  `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
+  `${EXPORT_STATS_PREFIX}.total`,
+  `${EXPORT_STATS_PREFIX}.kibanaRequest.yes`,
+  `${EXPORT_STATS_PREFIX}.kibanaRequest.no`,
+  `${EXPORT_STATS_PREFIX}.allTypesSelected.yes`,
+  `${EXPORT_STATS_PREFIX}.allTypesSelected.no`,
+];
 
 /** @internal */
 export class CoreUsageStatsClient {
@@ -70,9 +75,11 @@ export class CoreUsageStatsClient {
     let coreUsageStats: CoreUsageStats = {};
     try {
       const repository = await this.repositoryPromise;
-      const result = await repository.get<CoreUsageStats>(
+      const result = await repository.incrementCounter<CoreUsageStats>(
         CORE_USAGE_STATS_TYPE,
-        CORE_USAGE_STATS_ID
+        CORE_USAGE_STATS_ID,
+        ALL_COUNTER_FIELDS,
+        { initialize: true } // set all counter fields to 0 if they don't exist
       );
       coreUsageStats = result.attributes;
     } catch (err) {
@@ -86,53 +93,27 @@ export class CoreUsageStatsClient {
     createNewCopies,
     overwrite,
   }: IncrementSavedObjectsImportOptions) {
-    const coreUsageStats = await this.getUsageStats();
-    const { apiCalls = {} } = coreUsageStats;
-    const { savedObjectsImport: current = SAVED_OBJECTS_IMPORT_DEFAULT } = apiCalls;
-
-    const attributes = {
-      ...coreUsageStats,
-      apiCalls: {
-        ...apiCalls,
-        savedObjectsImport: {
-          total: current.total + 1,
-          kibanaRequest: incrementKibanaRequestCounter(current.kibanaRequest, headers),
-          createNewCopiesEnabled: incrementBooleanCounter(
-            current.createNewCopiesEnabled,
-            createNewCopies
-          ),
-          overwriteEnabled: incrementBooleanCounter(current.overwriteEnabled, overwrite),
-        },
-      },
-    };
-    await this.updateUsageStats(attributes);
+    const isKibanaRequest = getIsKibanaRequest(headers);
+    const counterFieldNames = [
+      'total',
+      `kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
+      `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
+      `overwriteEnabled.${overwrite ? 'yes' : 'no'}`,
+    ];
+    await this.updateUsageStats(counterFieldNames, IMPORT_STATS_PREFIX);
   }
 
   public async incrementSavedObjectsResolveImportErrors({
     headers,
     createNewCopies,
   }: IncrementSavedObjectsResolveImportErrorsOptions) {
-    const coreUsageStats = await this.getUsageStats();
-    const { apiCalls = {} } = coreUsageStats;
-    const {
-      savedObjectsResolveImportErrors: current = SAVED_OBJECTS_RESOLVE_IMPORT_ERRORS_DEFAULT,
-    } = apiCalls;
-
-    const attributes = {
-      ...coreUsageStats,
-      apiCalls: {
-        ...apiCalls,
-        savedObjectsResolveImportErrors: {
-          total: current.total + 1,
-          kibanaRequest: incrementKibanaRequestCounter(current.kibanaRequest, headers),
-          createNewCopiesEnabled: incrementBooleanCounter(
-            current.createNewCopiesEnabled,
-            createNewCopies
-          ),
-        },
-      },
-    };
-    await this.updateUsageStats(attributes);
+    const isKibanaRequest = getIsKibanaRequest(headers);
+    const counterFieldNames = [
+      'total',
+      `kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
+      `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
+    ];
+    await this.updateUsageStats(counterFieldNames, RESOLVE_IMPORT_STATS_PREFIX);
   }
 
   public async incrementSavedObjectsExport({
@@ -140,49 +121,34 @@ export class CoreUsageStatsClient {
     types,
     supportedTypes,
   }: IncrementSavedObjectsExportOptions) {
-    const coreUsageStats = await this.getUsageStats();
-    const { apiCalls = {} } = coreUsageStats;
-    const { savedObjectsExport: current = SAVED_OBJECTS_EXPORT_DEFAULT } = apiCalls;
+    const isKibanaRequest = getIsKibanaRequest(headers);
     const isAllTypesSelected = !!types && supportedTypes.every((x) => types.includes(x));
-
-    const attributes = {
-      ...coreUsageStats,
-      apiCalls: {
-        ...apiCalls,
-        savedObjectsExport: {
-          total: current.total + 1,
-          kibanaRequest: incrementKibanaRequestCounter(current.kibanaRequest, headers),
-          allTypesSelected: incrementBooleanCounter(current.allTypesSelected, isAllTypesSelected),
-        },
-      },
-    };
-    await this.updateUsageStats(attributes);
+    const counterFieldNames = [
+      'total',
+      `kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
+      `allTypesSelected.${isAllTypesSelected ? 'yes' : 'no'}`,
+    ];
+    await this.updateUsageStats(counterFieldNames, EXPORT_STATS_PREFIX);
   }
 
-  private async updateUsageStats(attributes: CoreUsageStats) {
-    const options = { id: CORE_USAGE_STATS_ID, overwrite: true, refresh: false };
+  private async updateUsageStats(counterFieldNames: string[], prefix: string) {
+    const options = { refresh: false };
     try {
       const repository = await this.repositoryPromise;
-      await repository.create(CORE_USAGE_STATS_TYPE, attributes, options);
+      await repository.incrementCounter(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        counterFieldNames.map((x) => `${prefix}.${x}`),
+        options
+      );
     } catch (err) {
       // do nothing
     }
   }
 }
 
-function incrementKibanaRequestCounter(current: { yes: number; no: number }, headers?: Headers) {
+function getIsKibanaRequest(headers?: Headers) {
   // The presence of these three request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
-  const isKibanaRequest = headers && headers['kbn-version'] && headers.origin && headers.referer;
-  return {
-    yes: current.yes + (isKibanaRequest ? 1 : 0),
-    no: current.no + (isKibanaRequest ? 0 : 1),
-  };
-}
-
-function incrementBooleanCounter(current: { yes: number; no: number }, value: boolean) {
-  return {
-    yes: current.yes + (value ? 1 : 0),
-    no: current.no + (value ? 0 : 1),
-  };
+  return headers && headers['kbn-version'] && headers.origin && headers.referer;
 }

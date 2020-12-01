@@ -5,32 +5,16 @@
  */
 
 export interface UsageStats {
-  apiCalls?: {
-    copySavedObjects?: {
-      total: number;
-      kibanaRequest: {
-        yes: number;
-        no: number;
-      };
-      createNewCopiesEnabled: {
-        yes: number;
-        no: number;
-      };
-      overwriteEnabled: {
-        yes: number;
-        no: number;
-      };
-    };
-    resolveCopySavedObjectsErrors?: {
-      total: number;
-      kibanaRequest: {
-        yes: number;
-        no: number;
-      };
-      createNewCopiesEnabled: {
-        yes: number;
-        no: number;
-      };
-    };
-  };
+  ['apiCalls.copySavedObjects.total']?: number;
+  ['apiCalls.copySavedObjects.kibanaRequest.yes']?: number;
+  ['apiCalls.copySavedObjects.kibanaRequest.no']?: number;
+  ['apiCalls.copySavedObjects.createNewCopiesEnabled.yes']?: number;
+  ['apiCalls.copySavedObjects.createNewCopiesEnabled.no']?: number;
+  ['apiCalls.copySavedObjects.overwriteEnabled.yes']?: number;
+  ['apiCalls.copySavedObjects.overwriteEnabled.no']?: number;
+  ['apiCalls.resolveCopySavedObjectsErrors.total']?: number;
+  ['apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes']?: number;
+  ['apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no']?: number;
+  ['apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes']?: number;
+  ['apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no']?: number;
 }

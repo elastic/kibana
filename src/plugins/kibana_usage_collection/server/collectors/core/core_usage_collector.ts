@@ -115,45 +115,23 @@ export function getCoreUsageCollector(
           },
         },
       },
-      apiCalls: {
-        savedObjectsImport: {
-          total: { type: 'long' },
-          kibanaRequest: {
-            yes: { type: 'long' },
-            no: { type: 'long' },
-          },
-          createNewCopiesEnabled: {
-            yes: { type: 'long' },
-            no: { type: 'long' },
-          },
-          overwriteEnabled: {
-            yes: { type: 'long' },
-            no: { type: 'long' },
-          },
-        },
-        savedObjectsResolveImportErrors: {
-          total: { type: 'long' },
-          kibanaRequest: {
-            yes: { type: 'long' },
-            no: { type: 'long' },
-          },
-          createNewCopiesEnabled: {
-            yes: { type: 'long' },
-            no: { type: 'long' },
-          },
-        },
-        savedObjectsExport: {
-          total: { type: 'long' },
-          kibanaRequest: {
-            yes: { type: 'long' },
-            no: { type: 'long' },
-          },
-          allTypesSelected: {
-            yes: { type: 'long' },
-            no: { type: 'long' },
-          },
-        },
-      },
+      ['apiCalls.savedObjectsImport.total']: { type: 'long' },
+      ['apiCalls.savedObjectsImport.kibanaRequest.yes']: { type: 'long' },
+      ['apiCalls.savedObjectsImport.kibanaRequest.no']: { type: 'long' },
+      ['apiCalls.savedObjectsImport.createNewCopiesEnabled.yes']: { type: 'long' },
+      ['apiCalls.savedObjectsImport.createNewCopiesEnabled.no']: { type: 'long' },
+      ['apiCalls.savedObjectsImport.overwriteEnabled.yes']: { type: 'long' },
+      ['apiCalls.savedObjectsImport.overwriteEnabled.no']: { type: 'long' },
+      ['apiCalls.savedObjectsResolveImportErrors.total']: { type: 'long' },
+      ['apiCalls.savedObjectsResolveImportErrors.kibanaRequest.yes']: { type: 'long' },
+      ['apiCalls.savedObjectsResolveImportErrors.kibanaRequest.no']: { type: 'long' },
+      ['apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes']: { type: 'long' },
+      ['apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no']: { type: 'long' },
+      ['apiCalls.savedObjectsExport.total']: { type: 'long' },
+      ['apiCalls.savedObjectsExport.kibanaRequest.yes']: { type: 'long' },
+      ['apiCalls.savedObjectsExport.kibanaRequest.no']: { type: 'long' },
+      ['apiCalls.savedObjectsExport.allTypesSelected.yes']: { type: 'long' },
+      ['apiCalls.savedObjectsExport.allTypesSelected.no']: { type: 'long' },
     },
     fetch() {
       return getCoreUsageDataService().getCoreUsageData();

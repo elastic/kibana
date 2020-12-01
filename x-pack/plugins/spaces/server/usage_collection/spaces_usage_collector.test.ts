@@ -21,19 +21,18 @@ interface SetupOpts {
 }
 
 const MOCK_USAGE_STATS: UsageStats = {
-  apiCalls: {
-    copySavedObjects: {
-      total: 5,
-      kibanaRequest: { yes: 5, no: 0 },
-      createNewCopiesEnabled: { yes: 2, no: 3 },
-      overwriteEnabled: { yes: 1, no: 4 },
-    },
-    resolveCopySavedObjectsErrors: {
-      total: 13,
-      kibanaRequest: { yes: 13, no: 0 },
-      createNewCopiesEnabled: { yes: 6, no: 7 },
-    },
-  },
+  ['apiCalls.copySavedObjects.total']: 5,
+  ['apiCalls.copySavedObjects.kibanaRequest.yes']: 5,
+  ['apiCalls.copySavedObjects.kibanaRequest.no']: 0,
+  ['apiCalls.copySavedObjects.createNewCopiesEnabled.yes']: 2,
+  ['apiCalls.copySavedObjects.createNewCopiesEnabled.no']: 3,
+  ['apiCalls.copySavedObjects.overwriteEnabled.yes']: 1,
+  ['apiCalls.copySavedObjects.overwriteEnabled.no']: 4,
+  ['apiCalls.resolveCopySavedObjectsErrors.total']: 13,
+  ['apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes']: 13,
+  ['apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no']: 0,
+  ['apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes']: 6,
+  ['apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no']: 7,
 };
 
 function setup({

@@ -19,11 +19,13 @@
 
 import { savedObjectsRepositoryMock } from '../mocks';
 import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
-import { CoreUsageStats } from './types';
 import {
   IncrementSavedObjectsImportOptions,
   IncrementSavedObjectsResolveImportErrorsOptions,
   IncrementSavedObjectsExportOptions,
+  IMPORT_STATS_PREFIX,
+  RESOLVE_IMPORT_STATS_PREFIX,
+  EXPORT_STATS_PREFIX,
 } from './core_usage_stats_client';
 import { CoreUsageStatsClient } from '.';
 
@@ -38,33 +40,8 @@ describe('CoreUsageStatsClient', () => {
     return { usageStatsClient, debugLoggerMock, repositoryMock };
   };
 
-  const createMockData = (attributes: CoreUsageStats) => ({
-    id: CORE_USAGE_STATS_ID,
-    type: CORE_USAGE_STATS_TYPE,
-    attributes,
-    references: [],
-  });
-
   const firstPartyRequestHeaders = { 'kbn-version': 'a', origin: 'b', referer: 'c' }; // as long as these three header fields are truthy, this will be treated like a first-party request
-  const createOptions = { id: CORE_USAGE_STATS_ID, overwrite: true, refresh: false };
-
-  // mock data for existing fields
-  const savedObjectsImport = {
-    total: 5,
-    kibanaRequest: { yes: 5, no: 0 },
-    createNewCopiesEnabled: { yes: 2, no: 3 },
-    overwriteEnabled: { yes: 1, no: 4 },
-  };
-  const savedObjectsResolveImportErrors = {
-    total: 13,
-    kibanaRequest: { yes: 13, no: 0 },
-    createNewCopiesEnabled: { yes: 6, no: 7 },
-  };
-  const savedObjectsExport = {
-    total: 17,
-    kibanaRequest: { yes: 17, no: 0 },
-    allTypesSelected: { yes: 8, no: 9 },
-  };
+  const incrementOptions = { refresh: false };
 
   describe('#getUsageStats', () => {
     it('returns empty object when encountering a repository error', async () => {
@@ -77,85 +54,67 @@ describe('CoreUsageStatsClient', () => {
 
     it('returns object attributes when usage stats exist', async () => {
       const { usageStatsClient, repositoryMock } = setup();
-      const attributes = { foo: 'bar' } as CoreUsageStats;
-      repositoryMock.get.mockResolvedValue(createMockData(attributes));
+      const usageStats = { foo: 'bar' };
+      repositoryMock.incrementCounter.mockResolvedValue({
+        type: CORE_USAGE_STATS_TYPE,
+        id: CORE_USAGE_STATS_ID,
+        attributes: usageStats,
+        references: [],
+      });
 
       const result = await usageStatsClient.getUsageStats();
-      expect(result).toEqual(attributes);
+      expect(result).toEqual(usageStats);
     });
   });
 
   describe('#incrementSavedObjectsImport', () => {
     it('does not throw an error if repository create operation fails', async () => {
       const { usageStatsClient, repositoryMock } = setup();
-      repositoryMock.create.mockRejectedValue(new Error('Oh no!'));
+      repositoryMock.incrementCounter.mockRejectedValue(new Error('Oh no!'));
 
       await expect(
         usageStatsClient.incrementSavedObjectsImport({} as IncrementSavedObjectsImportOptions)
       ).resolves.toBeUndefined();
-      expect(repositoryMock.create).toHaveBeenCalled();
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
     });
 
-    it('creates fields if attributes are empty', async () => {
+    it('handles falsy options appropriately', async () => {
       const { usageStatsClient, repositoryMock } = setup();
-      repositoryMock.get.mockResolvedValue(createMockData({}));
 
       await usageStatsClient.incrementSavedObjectsImport({} as IncrementSavedObjectsImportOptions);
-      expect(repositoryMock.create).toHaveBeenCalledWith(
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
-        {
-          apiCalls: {
-            savedObjectsImport: {
-              total: 1,
-              kibanaRequest: { yes: 0, no: 1 },
-              createNewCopiesEnabled: { yes: 0, no: 1 },
-              overwriteEnabled: { yes: 0, no: 1 },
-            },
-          },
-        },
-        createOptions
+        CORE_USAGE_STATS_ID,
+        [
+          `${IMPORT_STATS_PREFIX}.total`,
+          `${IMPORT_STATS_PREFIX}.kibanaRequest.no`,
+          `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
+          `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
+        ],
+        incrementOptions
       );
     });
 
-    it('increments existing fields, leaves other fields unchanged, and handles options appropriately', async () => {
+    it('handles truthy options appropriately', async () => {
       const { usageStatsClient, repositoryMock } = setup();
-      repositoryMock.get.mockResolvedValue(
-        createMockData({
-          apiCalls: { savedObjectsImport, savedObjectsResolveImportErrors, savedObjectsExport },
-        })
-      );
 
       await usageStatsClient.incrementSavedObjectsImport({
         headers: firstPartyRequestHeaders,
         createNewCopies: true,
         overwrite: true,
       } as IncrementSavedObjectsImportOptions);
-      expect(repositoryMock.create).toHaveBeenCalledWith(
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
-        {
-          apiCalls: {
-            // these fields are changed
-            savedObjectsImport: {
-              total: savedObjectsImport.total + 1,
-              kibanaRequest: {
-                yes: savedObjectsImport.kibanaRequest.yes + 1,
-                no: savedObjectsImport.kibanaRequest.no,
-              },
-              createNewCopiesEnabled: {
-                yes: savedObjectsImport.createNewCopiesEnabled.yes + 1,
-                no: savedObjectsImport.createNewCopiesEnabled.no,
-              },
-              overwriteEnabled: {
-                yes: savedObjectsImport.overwriteEnabled.yes + 1,
-                no: savedObjectsImport.overwriteEnabled.no,
-              },
-            },
-            // these fields are unchanged
-            savedObjectsResolveImportErrors,
-            savedObjectsExport,
-          },
-        },
-        createOptions
+        CORE_USAGE_STATS_ID,
+        [
+          `${IMPORT_STATS_PREFIX}.total`,
+          `${IMPORT_STATS_PREFIX}.kibanaRequest.yes`,
+          `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+          `${IMPORT_STATS_PREFIX}.overwriteEnabled.yes`,
+        ],
+        incrementOptions
       );
     });
   });
@@ -163,72 +122,52 @@ describe('CoreUsageStatsClient', () => {
   describe('#incrementSavedObjectsResolveImportErrors', () => {
     it('does not throw an error if repository create operation fails', async () => {
       const { usageStatsClient, repositoryMock } = setup();
-      repositoryMock.create.mockRejectedValue(new Error('Oh no!'));
+      repositoryMock.incrementCounter.mockRejectedValue(new Error('Oh no!'));
 
       await expect(
         usageStatsClient.incrementSavedObjectsResolveImportErrors(
           {} as IncrementSavedObjectsResolveImportErrorsOptions
         )
       ).resolves.toBeUndefined();
-      expect(repositoryMock.create).toHaveBeenCalled();
+      expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
-    it('creates fields if attributes are empty', async () => {
+    it('handles falsy options appropriately', async () => {
       const { usageStatsClient, repositoryMock } = setup();
-      repositoryMock.get.mockResolvedValue(createMockData({}));
 
       await usageStatsClient.incrementSavedObjectsResolveImportErrors(
         {} as IncrementSavedObjectsResolveImportErrorsOptions
       );
-      expect(repositoryMock.create).toHaveBeenCalledWith(
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
-        {
-          apiCalls: {
-            savedObjectsResolveImportErrors: {
-              total: 1,
-              kibanaRequest: { yes: 0, no: 1 },
-              createNewCopiesEnabled: { yes: 0, no: 1 },
-            },
-          },
-        },
-        createOptions
+        CORE_USAGE_STATS_ID,
+        [
+          `${RESOLVE_IMPORT_STATS_PREFIX}.total`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.kibanaRequest.no`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
+        ],
+        incrementOptions
       );
     });
 
-    it('increments existing fields, leaves other fields unchanged, and handles options appropriately', async () => {
+    it('handles truthy options appropriately', async () => {
       const { usageStatsClient, repositoryMock } = setup();
-      repositoryMock.get.mockResolvedValue(
-        createMockData({
-          apiCalls: { savedObjectsImport, savedObjectsResolveImportErrors, savedObjectsExport },
-        })
-      );
 
       await usageStatsClient.incrementSavedObjectsResolveImportErrors({
         headers: firstPartyRequestHeaders,
         createNewCopies: true,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
-      expect(repositoryMock.create).toHaveBeenCalledWith(
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
-        {
-          apiCalls: {
-            // these fields are changed
-            savedObjectsResolveImportErrors: {
-              total: savedObjectsResolveImportErrors.total + 1,
-              kibanaRequest: {
-                yes: savedObjectsResolveImportErrors.kibanaRequest.yes + 1,
-                no: savedObjectsResolveImportErrors.kibanaRequest.no,
-              },
-              createNewCopiesEnabled: {
-                yes: savedObjectsResolveImportErrors.createNewCopiesEnabled.yes + 1,
-                no: savedObjectsResolveImportErrors.createNewCopiesEnabled.no,
-              },
-            },
-            // these fields are unchanged
-            savedObjectsImport,
-            savedObjectsExport,
-          },
-        },
-        createOptions
+        CORE_USAGE_STATS_ID,
+        [
+          `${RESOLVE_IMPORT_STATS_PREFIX}.total`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.kibanaRequest.yes`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+        ],
+        incrementOptions
       );
     });
   });
@@ -236,72 +175,52 @@ describe('CoreUsageStatsClient', () => {
   describe('#incrementSavedObjectsExport', () => {
     it('does not throw an error if repository create operation fails', async () => {
       const { usageStatsClient, repositoryMock } = setup();
-      repositoryMock.create.mockRejectedValue(new Error('Oh no!'));
+      repositoryMock.incrementCounter.mockRejectedValue(new Error('Oh no!'));
 
       await expect(
         usageStatsClient.incrementSavedObjectsExport({} as IncrementSavedObjectsExportOptions)
       ).resolves.toBeUndefined();
-      expect(repositoryMock.create).toHaveBeenCalled();
+      expect(repositoryMock.incrementCounter).toHaveBeenCalled();
     });
 
-    it('creates fields if attributes are empty', async () => {
+    it('handles falsy options appropriately', async () => {
       const { usageStatsClient, repositoryMock } = setup();
-      repositoryMock.get.mockResolvedValue(createMockData({}));
 
       await usageStatsClient.incrementSavedObjectsExport({
         types: undefined,
         supportedTypes: ['foo', 'bar'],
       } as IncrementSavedObjectsExportOptions);
-      expect(repositoryMock.create).toHaveBeenCalledWith(
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
-        {
-          apiCalls: {
-            savedObjectsExport: {
-              total: 1,
-              kibanaRequest: { yes: 0, no: 1 },
-              allTypesSelected: { yes: 0, no: 1 },
-            },
-          },
-        },
-        createOptions
+        CORE_USAGE_STATS_ID,
+        [
+          `${EXPORT_STATS_PREFIX}.total`,
+          `${EXPORT_STATS_PREFIX}.kibanaRequest.no`,
+          `${EXPORT_STATS_PREFIX}.allTypesSelected.no`,
+        ],
+        incrementOptions
       );
     });
 
-    it('increments existing fields, leaves other fields unchanged, and handles options appropriately', async () => {
+    it('handles truthy options appropriately', async () => {
       const { usageStatsClient, repositoryMock } = setup();
-      repositoryMock.get.mockResolvedValue(
-        createMockData({
-          apiCalls: { savedObjectsImport, savedObjectsResolveImportErrors, savedObjectsExport },
-        })
-      );
 
       await usageStatsClient.incrementSavedObjectsExport({
         headers: firstPartyRequestHeaders,
         types: ['foo', 'bar'],
         supportedTypes: ['foo', 'bar'],
       } as IncrementSavedObjectsExportOptions);
-      expect(repositoryMock.create).toHaveBeenCalledWith(
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
         CORE_USAGE_STATS_TYPE,
-        {
-          apiCalls: {
-            // these fields are changed
-            savedObjectsExport: {
-              total: savedObjectsExport.total + 1,
-              kibanaRequest: {
-                yes: savedObjectsExport.kibanaRequest.yes + 1,
-                no: savedObjectsExport.kibanaRequest.no,
-              },
-              allTypesSelected: {
-                yes: savedObjectsExport.allTypesSelected.yes + 1,
-                no: savedObjectsExport.allTypesSelected.no,
-              },
-            },
-            // these fields are unchanged
-            savedObjectsImport,
-            savedObjectsResolveImportErrors,
-          },
-        },
-        createOptions
+        CORE_USAGE_STATS_ID,
+        [
+          `${EXPORT_STATS_PREFIX}.total`,
+          `${EXPORT_STATS_PREFIX}.kibanaRequest.yes`,
+          `${EXPORT_STATS_PREFIX}.allTypesSelected.yes`,
+        ],
+        incrementOptions
       );
     });
   });

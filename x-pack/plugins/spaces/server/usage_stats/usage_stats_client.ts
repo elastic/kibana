@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { deepFreeze } from '@kbn/std';
 import { ISavedObjectsRepository, Headers } from 'src/core/server';
 import { SPACES_USAGE_STATS_TYPE, SPACES_USAGE_STATS_ID } from './constants';
 import { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
@@ -18,18 +17,22 @@ export type IncrementCopySavedObjectsOptions = BaseIncrementOptions &
 export type IncrementResolveCopySavedObjectsErrorsOptions = BaseIncrementOptions &
   Pick<ResolveConflictsOptions, 'createNewCopies'>;
 
-const COPY_DEFAULT = deepFreeze({
-  total: 0,
-  kibanaRequest: { yes: 0, no: 0 },
-  createNewCopiesEnabled: { yes: 0, no: 0 },
-  overwriteEnabled: { yes: 0, no: 0 },
-});
-const RESOLVE_COPY_ERRORS_DEFAULT = deepFreeze({
-  total: 0,
-  kibanaRequest: { yes: 0, no: 0 },
-  createNewCopiesEnabled: { yes: 0, no: 0 },
-});
-
+export const COPY_STATS_PREFIX = 'apiCalls.copySavedObjects';
+export const RESOLVE_COPY_STATS_PREFIX = 'apiCalls.resolveCopySavedObjectsErrors';
+const ALL_COUNTER_FIELDS = [
+  `${COPY_STATS_PREFIX}.total`,
+  `${COPY_STATS_PREFIX}.kibanaRequest.yes`,
+  `${COPY_STATS_PREFIX}.kibanaRequest.no`,
+  `${COPY_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+  `${COPY_STATS_PREFIX}.createNewCopiesEnabled.no`,
+  `${COPY_STATS_PREFIX}.overwriteEnabled.yes`,
+  `${COPY_STATS_PREFIX}.overwriteEnabled.no`,
+  `${RESOLVE_COPY_STATS_PREFIX}.total`,
+  `${RESOLVE_COPY_STATS_PREFIX}.kibanaRequest.yes`,
+  `${RESOLVE_COPY_STATS_PREFIX}.kibanaRequest.no`,
+  `${RESOLVE_COPY_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+  `${RESOLVE_COPY_STATS_PREFIX}.createNewCopiesEnabled.no`,
+];
 export class UsageStatsClient {
   constructor(
     private readonly debugLogger: (message: string) => void,
@@ -41,9 +44,11 @@ export class UsageStatsClient {
     let usageStats: UsageStats = {};
     try {
       const repository = await this.repositoryPromise;
-      const result = await repository.get<UsageStats>(
+      const result = await repository.incrementCounter<UsageStats>(
         SPACES_USAGE_STATS_TYPE,
-        SPACES_USAGE_STATS_ID
+        SPACES_USAGE_STATS_ID,
+        ALL_COUNTER_FIELDS,
+        { initialize: true }
       );
       usageStats = result.attributes;
     } catch (err) {
@@ -57,77 +62,47 @@ export class UsageStatsClient {
     createNewCopies,
     overwrite,
   }: IncrementCopySavedObjectsOptions) {
-    const usageStats = await this.getUsageStats();
-    const { apiCalls = {} } = usageStats;
-    const { copySavedObjects: current = COPY_DEFAULT } = apiCalls;
-
-    const attributes = {
-      ...usageStats,
-      apiCalls: {
-        ...apiCalls,
-        copySavedObjects: {
-          total: current.total + 1,
-          kibanaRequest: incrementKibanaRequestCounter(current.kibanaRequest, headers),
-          createNewCopiesEnabled: incrementBooleanCounter(
-            current.createNewCopiesEnabled,
-            createNewCopies
-          ),
-          overwriteEnabled: incrementBooleanCounter(current.overwriteEnabled, overwrite),
-        },
-      },
-    };
-    await this.updateUsageStats(attributes);
+    const isKibanaRequest = getIsKibanaRequest(headers);
+    const counterFieldNames = [
+      'total',
+      `kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
+      `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
+      `overwriteEnabled.${overwrite ? 'yes' : 'no'}`,
+    ];
+    await this.updateUsageStats(counterFieldNames, COPY_STATS_PREFIX);
   }
 
   public async incrementResolveCopySavedObjectsErrors({
     headers,
     createNewCopies,
   }: IncrementResolveCopySavedObjectsErrorsOptions) {
-    const usageStats = await this.getUsageStats();
-    const { apiCalls = {} } = usageStats;
-    const { resolveCopySavedObjectsErrors: current = RESOLVE_COPY_ERRORS_DEFAULT } = apiCalls;
-
-    const attributes = {
-      ...usageStats,
-      apiCalls: {
-        ...apiCalls,
-        resolveCopySavedObjectsErrors: {
-          total: current.total + 1,
-          kibanaRequest: incrementKibanaRequestCounter(current.kibanaRequest, headers),
-          createNewCopiesEnabled: incrementBooleanCounter(
-            current.createNewCopiesEnabled,
-            createNewCopies
-          ),
-        },
-      },
-    };
-    await this.updateUsageStats(attributes);
+    const isKibanaRequest = getIsKibanaRequest(headers);
+    const counterFieldNames = [
+      'total',
+      `kibanaRequest.${isKibanaRequest ? 'yes' : 'no'}`,
+      `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
+    ];
+    await this.updateUsageStats(counterFieldNames, RESOLVE_COPY_STATS_PREFIX);
   }
 
-  private async updateUsageStats(attributes: UsageStats) {
-    const options = { id: SPACES_USAGE_STATS_ID, overwrite: true, refresh: false };
+  private async updateUsageStats(counterFieldNames: string[], prefix: string) {
+    const options = { refresh: false };
     try {
       const repository = await this.repositoryPromise;
-      await repository.create(SPACES_USAGE_STATS_TYPE, attributes, options);
+      await repository.incrementCounter(
+        SPACES_USAGE_STATS_TYPE,
+        SPACES_USAGE_STATS_ID,
+        counterFieldNames.map((x) => `${prefix}.${x}`),
+        options
+      );
     } catch (err) {
       // do nothing
     }
   }
 }
 
-function incrementKibanaRequestCounter(current: { yes: number; no: number }, headers?: Headers) {
+function getIsKibanaRequest(headers?: Headers) {
   // The presence of these three request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
-  const isKibanaRequest = headers && headers['kbn-version'] && headers.origin && headers.referer;
-  return {
-    yes: current.yes + (isKibanaRequest ? 1 : 0),
-    no: current.no + (isKibanaRequest ? 0 : 1),
-  };
-}
-
-function incrementBooleanCounter(current: { yes: number; no: number }, value: boolean) {
-  return {
-    yes: current.yes + (value ? 1 : 0),
-    no: current.no + (value ? 0 : 1),
-  };
+  return headers && headers['kbn-version'] && headers.origin && headers.referer;
 }
