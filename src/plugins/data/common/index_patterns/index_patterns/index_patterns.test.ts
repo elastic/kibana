@@ -200,15 +200,6 @@ describe('IndexPatterns', () => {
       expect(indexPatterns.createSavedObject).toBeCalled();
       expect(indexPatterns.setDefault).toBeCalled();
     });
-
-    test('when `makeDefault` is false, does not make the new index pattern the default index pattern', async () => {
-      const title = 'kibana-*';
-      indexPatterns.createSavedObject = jest.fn();
-      indexPatterns.setDefault = jest.fn();
-      await indexPatterns.createAndSave({ title }, false, false);
-      expect(indexPatterns.createSavedObject).toBeCalled();
-      expect(indexPatterns.setDefault).not.toBeCalled();
-    });
   });
 
   test('savedObjectToSpec', () => {
