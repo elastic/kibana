@@ -138,12 +138,12 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async clickDocSortAsc() {
       await find.clickByCssSelector('.euiDataGridHeaderCell__button');
-      await find.clickByButtonText('Sort ASC');
+      await find.clickByButtonText('Sort New-Old');
     }
 
     public async clickDocSortDesc() {
       await find.clickByCssSelector('.euiDataGridHeaderCell__button');
-      await find.clickByButtonText('Sort Desc');
+      await find.clickByButtonText('Sort Old-New');
     }
     public async getDetailsRow(): Promise<WebElementWrapper> {
       const detailRows = await this.getDetailsRows();
