@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { Request } from '@hapi/hapi';
+import type { Request } from 'hapi';
 import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { FleetAdminUserInvalidError, isLegacyESClientError } from '../../errors';
 import { CallESAsCurrentUser } from '../../types';
