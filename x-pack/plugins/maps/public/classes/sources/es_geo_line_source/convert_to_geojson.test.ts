@@ -40,7 +40,7 @@ const esResponse = {
               ],
             },
             properties: {
-              complete: true,
+              complete: false,
             },
           },
         },
@@ -51,6 +51,7 @@ const esResponse = {
 
 it('Should convert elasticsearch aggregation response into feature collection', () => {
   const geoJson = convertToGeoJson(esResponse, 'machine.os.keyword');
+  expect(geoJson.numTrimmedTracks).toBe(1);
   expect(geoJson.featureCollection.features.length).toBe(2);
   expect(geoJson.featureCollection.features[0]).toEqual({
     geometry: {

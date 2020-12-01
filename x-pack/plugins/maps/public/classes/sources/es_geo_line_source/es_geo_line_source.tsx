@@ -34,6 +34,7 @@ interface SourceMeta {
   areResultsTrimmed: boolean;
   areEntitiesTrimmed: boolean;
   entityCount: number;
+  numTrimmedTracks: number;
   totalEntities: number;
 }
 
@@ -204,12 +205,17 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
     const totalEntities = _.get(resp, 'aggregations.totalEntities.value', 0);
     const areEntitiesTrimmed = entityBuckets.length >= MAX_TRACKS;
+    const { featureCollection, numTrimmedTracks } = convertToGeoJson(
+      resp,
+      this._descriptor.splitField
+    );
     return {
-      data: convertToGeoJson(resp, this._descriptor.splitField).featureCollection,
+      data: featureCollection,
       meta: {
-        areResultsTrimmed: areEntitiesTrimmed,
+        areResultsTrimmed: areEntitiesTrimmed || numTrimmedTracks > 0,
         areEntitiesTrimmed,
         entityCount: entityBuckets.length,
+        numTrimmedTracks,
         totalEntities,
       } as SourceMeta,
     };
@@ -227,7 +233,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     }
 
     const entitiesFoundMsg = meta.areEntitiesTrimmed
-      ? i18n.translate('xpack.maps.esGeoLine.tracksTrimmedMsg', {
+      ? i18n.translate('xpack.maps.esGeoLine.areEntitiesTrimmedMsg', {
           defaultMessage: `Results limited to first {entityCount} tracks of ~{totalEntities}.`,
           values: {
             entityCount: meta.entityCount,
@@ -238,10 +244,23 @@ export class ESGeoLineSource extends AbstractESAggSource {
           defaultMessage: `Found {entityCount} tracks.`,
           values: { entityCount: meta.entityCount },
         });
+    const tracksTrimmedMsg =
+      meta.numTrimmedTracks > 0
+        ? i18n.translate('xpack.maps.esGeoLine.tracksTrimmedMsg', {
+            defaultMessage: `{numTrimmedTracks} of {entityCount} tracks are incomplete.`,
+            values: {
+              entityCount: meta.entityCount,
+              numTrimmedTracks: meta.numTrimmedTracks,
+            },
+          })
+        : undefined;
     return {
-      tooltipContent: entitiesFoundMsg,
-      // Used to show trimmed icon in legend
-      // user only needs to be notified of trimmed results when entities are trimmed
+      tooltipContent: tracksTrimmedMsg
+        ? `${entitiesFoundMsg} ${tracksTrimmedMsg}`
+        : entitiesFoundMsg,
+      // Used to show trimmed icon in legend. Trimmed icon signals the following
+      // 1) number of entities are trimmed.
+      // 2) one or more tracks are incomplete.
       areResultsTrimmed: meta.areEntitiesTrimmed,
     };
   }
@@ -266,7 +285,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         i18n.translate('xpack.maps.source.esGeoLine.isTrackCompleteLabel', {
           defaultMessage: 'track is complete',
         }),
-        properties.complete
+        properties.complete.toString()
       )
     );
     return tooltipProperties;
