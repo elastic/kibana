@@ -18,6 +18,7 @@ import {
   registerAccountPreSourceRoute,
   registerAccountPrepareSourcesRoute,
   registerAccountSourceSearchableRoute,
+  registerAccountSourceDisplaySettingsConfig,
   registerOrgSourcesRoute,
   registerOrgSourcesStatusRoute,
   registerOrgSourceRoute,
@@ -29,6 +30,7 @@ import {
   registerOrgPreSourceRoute,
   registerOrgPrepareSourcesRoute,
   registerOrgSourceSearchableRoute,
+  registerOrgSourceDisplaySettingsConfig,
   registerOrgSourceOauthConfigurationsRoute,
   registerOrgSourceOauthConfigurationRoute,
 } from './sources';
@@ -328,10 +330,8 @@ describe('sources routes', () => {
       const mockRequest = {
         params: { id: '123' },
         body: {
-          query: {
-            content_source: {
-              name: 'foo',
-            },
+          content_source: {
+            name: 'foo',
           },
         },
       };
@@ -406,7 +406,7 @@ describe('sources routes', () => {
       mockRouter.callRoute(mockRequest);
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/pre_content_sources/zendesk',
+        path: '/ws/sources/zendesk/prepare',
       });
     });
   });
@@ -443,6 +443,81 @@ describe('sources routes', () => {
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/sources/123/searchable',
+        body: mockRequest.body,
+      });
+    });
+  });
+
+  describe('GET /api/workplace_search/account/sources/{id}/display_settings/config', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('creates a request handler', () => {
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/account/sources/{id}/display_settings/config',
+        payload: 'params',
+      });
+
+      registerAccountSourceDisplaySettingsConfig({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+
+      const mockRequest = {
+        params: {
+          id: '123',
+        },
+      };
+
+      mockRouter.callRoute(mockRequest);
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/123/display_settings/config',
+      });
+    });
+  });
+
+  describe('POST /api/workplace_search/account/sources/{id}/display_settings/config', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/account/sources/{id}/display_settings/config',
+        payload: 'body',
+      });
+
+      registerAccountSourceDisplaySettingsConfig({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      const mockRequest = {
+        params: { id: '123' },
+        body: {
+          titleField: 'foo',
+          subtitleField: 'bar',
+          descriptionField: 'this is a thing',
+          urlField: 'http://youknowfor.search',
+          color: '#aaa',
+          detailFields: {
+            fieldName: 'myField',
+            label: 'My Field',
+          },
+        },
+      };
+
+      mockRouter.callRoute(mockRequest);
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/123/display_settings/config',
         body: mockRequest.body,
       });
     });
@@ -732,10 +807,8 @@ describe('sources routes', () => {
       const mockRequest = {
         params: { id: '123' },
         body: {
-          query: {
-            content_source: {
-              name: 'foo',
-            },
+          content_source: {
+            name: 'foo',
           },
         },
       };
@@ -810,7 +883,7 @@ describe('sources routes', () => {
       mockRouter.callRoute(mockRequest);
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/pre_content_sources/zendesk',
+        path: '/ws/org/sources/zendesk/prepare',
       });
     });
   });
@@ -847,6 +920,81 @@ describe('sources routes', () => {
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/sources/123/searchable',
+        body: mockRequest.body,
+      });
+    });
+  });
+
+  describe('GET /api/workplace_search/org/sources/{id}/display_settings/config', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('creates a request handler', () => {
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/org/sources/{id}/display_settings/config',
+        payload: 'params',
+      });
+
+      registerOrgSourceDisplaySettingsConfig({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+
+      const mockRequest = {
+        params: {
+          id: '123',
+        },
+      };
+
+      mockRouter.callRoute(mockRequest);
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/sources/123/display_settings/config',
+      });
+    });
+  });
+
+  describe('POST /api/workplace_search/org/sources/{id}/display_settings/config', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/org/sources/{id}/display_settings/config',
+        payload: 'body',
+      });
+
+      registerOrgSourceDisplaySettingsConfig({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      const mockRequest = {
+        params: { id: '123' },
+        body: {
+          titleField: 'foo',
+          subtitleField: 'bar',
+          descriptionField: 'this is a thing',
+          urlField: 'http://youknowfor.search',
+          color: '#aaa',
+          detailFields: {
+            fieldName: 'myField',
+            label: 'My Field',
+          },
+        },
+      };
+
+      mockRouter.callRoute(mockRequest);
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/sources/123/display_settings/config',
         body: mockRequest.body,
       });
     });

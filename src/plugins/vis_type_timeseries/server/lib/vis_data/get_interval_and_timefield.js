@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { AUTO_INTERVAL } from '../../../common/constants';
+
 const DEFAULT_TIME_FIELD = '@timestamp';
 
 export function getIntervalAndTimefield(panel, series = {}, indexPatternObject) {
@@ -26,10 +28,18 @@ export function getIntervalAndTimefield(panel, series = {}, indexPatternObject) 
     (series.override_index_pattern && series.series_time_field) ||
     panel.time_field ||
     getDefaultTimeField();
-  const interval = (series.override_index_pattern && series.series_interval) || panel.interval;
+
+  let interval = panel.interval;
+  let maxBars = panel.max_bars;
+
+  if (series.override_index_pattern) {
+    interval = series.series_interval;
+    maxBars = series.series_max_bars;
+  }
 
   return {
     timeField,
-    interval,
+    interval: interval || AUTO_INTERVAL,
+    maxBars,
   };
 }

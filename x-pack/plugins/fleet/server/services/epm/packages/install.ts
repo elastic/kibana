@@ -313,7 +313,6 @@ async function installPackageByUpload({
   setPackageInfo({
     name: packageInfo.name,
     version: packageInfo.version,
-    installSource,
     packageInfo,
   });
 

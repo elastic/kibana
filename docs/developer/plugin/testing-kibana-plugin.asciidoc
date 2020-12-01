@@ -1,0 +1,63 @@
+[[testing-kibana-plugin]]
+== Testing {kib} Plugins
+=== Writing tests
+Learn about <<development-tests, recommended testing approaches >>.
+
+=== Mock {kib} Core services in tests
+
+Core services already provide mocks to simplify testing and make sure
+plugins always rely on valid public contracts:
+
+*my_plugin/server/plugin.test.ts*
+[source,typescript]
+----
+import { configServiceMock } from 'kibana/server/mocks';
+
+const configService = configServiceMock.create();
+configService.atPath.mockReturnValue(config$);
+…
+const plugin = new MyPlugin({ configService }, …);
+----
+
+Or if you need to get the whole core `setup` or `start` contracts:
+
+*my_plugin/server/plugin.test.ts*
+[source,typescript] 
+----
+import { coreMock } from 'kibana/public/mocks';
+
+const coreSetup = coreMock.createSetup();
+coreSetup.uiSettings.get.mockImplementation((key: string) => {
+  …
+});
+…
+const plugin = new MyPlugin(coreSetup, ...);
+----
+
+=== Writing mocks for your plugin
+Although it isn’t mandatory, we strongly recommended you export your
+plugin mocks as well, in order for dependent plugins to use them in
+tests. Your plugin mocks should be exported from the root `/server` and
+`/public` directories in your plugin:
+
+*my_plugin/(server|public)/mocks.ts*
+[source,typescript]
+----
+const createSetupContractMock = () => {
+  const startContract: jest.Mocked<MyPluginStartContract>= {
+    isValid: jest.fn(),
+  }
+  // here we already type check as TS infers to the correct type declared above
+  startContract.isValid.mockReturnValue(true);
+  return startContract;
+}
+
+export const myPluginMocks = {
+  createSetup: createSetupContractMock,
+  createStart: …
+}
+----
+
+Plugin mocks should consist of mocks for _public APIs only_:
+`setup`, `start` & `stop` contracts. Mocks aren’t necessary for pure functions as
+other plugins can call the original implementation in tests.
