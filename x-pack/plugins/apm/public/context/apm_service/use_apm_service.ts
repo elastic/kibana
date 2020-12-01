@@ -5,7 +5,7 @@
  */
 
 import { useContext } from 'react';
-import { APMServiceContext } from '../context/apm_service_context';
+import { APMServiceContext } from './apm_service_context';
 
 export function useApmService() {
   return useContext(APMServiceContext);

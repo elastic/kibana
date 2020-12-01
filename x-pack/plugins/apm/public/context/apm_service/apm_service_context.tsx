@@ -5,15 +5,15 @@
  */
 
 import React, { createContext, ReactNode } from 'react';
-import { isRumAgentName } from '../../common/agent_name';
+import { isRumAgentName } from '../../../common/agent_name';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
-} from '../../common/transaction_types';
-import { useServiceTransactionTypes } from '../hooks/use_service_transaction_types';
-import { useUrlParams } from '../hooks/useUrlParams';
-import { useServiceAgentName } from '../hooks/use_service_agent_name';
-import { IUrlParams } from './UrlParamsContext/types';
+} from '../../../common/transaction_types';
+import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
+import { useUrlParams } from '../url_params_context/use_url_params';
+import { useServiceAgentNameFetcher } from './use_service_agent_name_fetcher';
+import { IUrlParams } from '../url_params_context/types';
 
 export const APMServiceContext = createContext<{
   agentName?: string;
@@ -27,8 +27,8 @@ export function ApmServiceContextProvider({
   children: ReactNode;
 }) {
   const { urlParams } = useUrlParams();
-  const { agentName } = useServiceAgentName();
-  const transactionTypes = useServiceTransactionTypes();
+  const { agentName } = useServiceAgentNameFetcher();
+  const transactionTypes = useServiceTransactionTypesFetcher();
   const transactionType = getTransactionType({
     urlParams,
     transactionTypes,

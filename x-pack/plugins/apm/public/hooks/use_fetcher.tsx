@@ -9,7 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { APMClient, callApmApi } from '../services/rest/createCallApmApi';
-import { useApmPluginContext } from './useApmPluginContext';
+import { useApmPluginContext } from '../context/apm_plugin_context/use_apm_plugin_context';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',

@@ -5,14 +5,8 @@
  */
 
 import { useContext } from 'react';
-import { AnnotationsContext } from '../context/annotations_context';
+import { UrlParamsContext } from './url_params_context';
 
-export function useAnnotations() {
-  const context = useContext(AnnotationsContext);
-
-  if (!context) {
-    throw new Error('Missing Annotations context provider');
-  }
-
-  return context;
+export function useUrlParams() {
+  return useContext(UrlParamsContext);
 }

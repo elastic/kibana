@@ -23,10 +23,10 @@ import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
-import { useTransactionList } from '../../../hooks/useTransactionList';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { IUrlParams } from '../../../context/url_params_context/types';
+import { useTransactionChartsFetcher } from '../../../hooks/use_transaction_charts_fetcher';
+import { useTransactionListFetcher } from './use_transaction_list';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
@@ -37,7 +37,7 @@ import { Correlations } from '../Correlations';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
 import { UserExperienceCallout } from './user_experience_callout';
-import { useApmService } from '../../../hooks/use_apm_service';
+import { useApmService } from '../../../context/apm_service/use_apm_service';
 
 function getRedirectLocation({
   location,
@@ -74,16 +74,16 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
 
   const {
-    data: transactionCharts,
-    status: transactionChartsStatus,
-  } = useTransactionCharts();
+    transactionChartsData,
+    transactionChartsStatus,
+  } = useTransactionChartsFetcher();
 
   useTrackPageview({ app: 'apm', path: 'transaction_overview' });
   useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
   const {
-    data: transactionListData,
-    status: transactionListStatus,
-  } = useTransactionList(urlParams);
+    transactionListData,
+    transactionListStatus,
+  } = useTransactionListFetcher();
 
   const localFiltersConfig: React.ComponentProps<
     typeof LocalUIFilters
@@ -134,7 +134,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
             )}
             <TransactionCharts
               fetchStatus={transactionChartsStatus}
-              charts={transactionCharts}
+              charts={transactionChartsData}
               urlParams={urlParams}
             />
             <EuiSpacer size="s" />

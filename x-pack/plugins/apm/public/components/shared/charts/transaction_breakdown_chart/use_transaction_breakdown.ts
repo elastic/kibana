@@ -5,9 +5,9 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { useFetcher } from './useFetcher';
-import { useUrlParams } from './useUrlParams';
-import { useApmService } from './use_apm_service';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useApmService } from '../../../../context/apm_service/use_apm_service';
 
 export function useTransactionBreakdown() {
   const { serviceName } = useParams<{ serviceName?: string }>();

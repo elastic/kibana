@@ -5,7 +5,7 @@
  */
 
 import { useContext } from 'react';
-import { LicenseContext } from '../context/LicenseContext';
+import { LicenseContext } from './license_context';
 
 export function useLicense() {
   return useContext(LicenseContext);

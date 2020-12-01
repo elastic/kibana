@@ -15,7 +15,7 @@ import { withRouter } from 'react-router-dom';
 import { uniqueId, mapValues } from 'lodash';
 import { IUrlParams } from './types';
 import { getParsedDate } from './helpers';
-import { resolveUrlParams } from './resolveUrlParams';
+import { resolveUrlParams } from './resolve_url_params';
 import { UIFilters } from '../../../typings/ui_filters';
 import {
   localUIFilterNames,

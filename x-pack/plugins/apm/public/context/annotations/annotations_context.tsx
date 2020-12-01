@@ -6,10 +6,10 @@
 
 import React, { createContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { Annotation } from '../../common/annotations';
-import { useFetcher } from '../hooks/useFetcher';
-import { useUrlParams } from '../hooks/useUrlParams';
-import { callApmApi } from '../services/rest/createCallApmApi';
+import { Annotation } from '../../../common/annotations';
+import { useFetcher } from '../../hooks/use_fetcher';
+import { useUrlParams } from '../url_params_context/use_url_params';
+import { callApmApi } from '../../services/rest/createCallApmApi';
 
 export const AnnotationsContext = createContext({ annotations: [] } as {
   annotations: Annotation[];

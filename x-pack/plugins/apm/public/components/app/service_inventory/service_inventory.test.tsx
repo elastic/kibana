@@ -13,17 +13,17 @@ import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import { ServiceInventory } from '.';
 import { EuiThemeProvider } from '../../../../../observability/public';
-import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
+import { ApmPluginContextValue } from '../../../context/apm_plugin_context/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../../../context/ApmPluginContext/MockApmPluginContext';
+} from '../../../context/apm_plugin_context/mock_apm_plugin_context';
 import * as useAnomalyDetectionJobs from '../../../hooks/useAnomalyDetectionJobs';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import * as useLocalUIFilters from '../../../hooks/useLocalUIFilters';
 import * as useDynamicIndexPatternHooks from '../../../hooks/useDynamicIndexPattern';
 import { SessionStorageMock } from '../../../services/__test__/SessionStorageMock';
-import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/MockUrlParamsContextProvider';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiStats: () => {} },

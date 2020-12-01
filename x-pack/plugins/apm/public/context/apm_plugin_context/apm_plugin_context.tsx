@@ -6,7 +6,7 @@
 
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import { createContext } from 'react';
-import { ConfigSchema } from '../../';
+import { ConfigSchema } from '../..';
 import { ApmPluginSetupDeps } from '../../plugin';
 
 export interface ApmPluginContextValue {

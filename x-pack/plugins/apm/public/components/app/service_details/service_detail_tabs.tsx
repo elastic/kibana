@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../context/apm_plugin_context/use_apm_plugin_context';
 import { useErrorOverviewHref } from '../../shared/Links/apm/ErrorOverviewLink';
 import { useMetricOverviewHref } from '../../shared/Links/apm/MetricOverviewLink';
 import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
@@ -23,7 +23,7 @@ import { ServiceMetrics } from '../service_metrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../transaction_overview';
-import { useApmService } from '../../../hooks/use_apm_service';
+import { useApmService } from '../../../context/apm_service/use_apm_service';
 
 interface Tab {
   key: string;

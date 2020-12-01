@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { UrlParamsContext, UrlParamsProvider } from './';
+import { UrlParamsContext, UrlParamsProvider } from './url_params_context';
 import { mount } from 'enzyme';
 import { Location, History } from 'history';
 import { MemoryRouter, Router } from 'react-router-dom';

@@ -5,7 +5,7 @@
  */
 
 import { useMemo } from 'react';
-import { useFetcher } from './useFetcher';
+import { useFetcher } from './use_fetcher';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -23,7 +23,7 @@ function getEnvironmentOptions(environments: string[]) {
   return [ENVIRONMENT_ALL, ...environmentOptions];
 }
 
-export function useEnvironments({
+export function useEnvironmentsFetcher({
   serviceName,
   start,
   end,

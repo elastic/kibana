@@ -5,7 +5,7 @@
  */
 
 import { useContext } from 'react';
-import { ApmPluginContext } from '../context/ApmPluginContext';
+import { ApmPluginContext } from './apm_plugin_context';
 
 export function useApmPluginContext() {
   return useContext(ApmPluginContext);

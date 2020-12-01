@@ -20,11 +20,11 @@ import {
   TRANSACTION_ROUTE_CHANGE,
 } from '../../../../../common/transaction_types';
 import { asTransactionRate } from '../../../../../common/utils/formatters';
-import { AnnotationsContextProvider } from '../../../../context/annotations_context';
-import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event_context';
-import { LicenseContext } from '../../../../context/LicenseContext';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { LicenseContext } from '../../../../context/license_context/license_context';
+import { IUrlParams } from '../../../../context/url_params_context/types';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ITransactionChartData } from '../../../../selectors/chart_selectors';
 import { TimeseriesChart } from '../timeseries_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';

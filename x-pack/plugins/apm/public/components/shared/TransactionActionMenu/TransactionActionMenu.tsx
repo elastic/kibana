@@ -18,9 +18,9 @@ import {
   SectionTitle,
 } from '../../../../../observability/public';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useLicense } from '../../../hooks/useLicense';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useApmPluginContext } from '../../../context/apm_plugin_context/useApmPluginContext';
+import { useLicense } from '../../../context/license_context/use_license';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { CustomLinkMenuSection } from './CustomLinkMenuSection';
 import { getSections } from './sections';
 

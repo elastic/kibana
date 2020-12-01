@@ -5,7 +5,7 @@
  */
 
 import { useContext } from 'react';
-import { ChartPointerEventContext } from '../context/chart_pointer_event_context';
+import { ChartPointerEventContext } from './chart_pointer_event_context';
 
 export function useChartPointerEvent() {
   const context = useContext(ChartPointerEventContext);

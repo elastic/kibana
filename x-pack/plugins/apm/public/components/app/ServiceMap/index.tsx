@@ -13,10 +13,10 @@ import {
   isActivePlatinumLicense,
   SERVICE_MAP_TIMEOUT_ERROR,
 } from '../../../../common/service_map';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
-import { useLicense } from '../../../hooks/useLicense';
-import { useTheme } from '../../../hooks/useTheme';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useLicense } from '../../../context/license_context/use_license';
+import { useTheme } from '../../../hooks/use_theme';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { DatePicker } from '../../shared/DatePicker';
 import { LicensePrompt } from '../../shared/LicensePrompt';

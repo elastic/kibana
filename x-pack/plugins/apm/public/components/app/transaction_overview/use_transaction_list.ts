@@ -5,10 +5,9 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { useUiFilters } from '../context/UrlParamsContext';
-import { IUrlParams } from '../context/UrlParamsContext/types';
-import { APIReturnType } from '../services/rest/createCallApmApi';
-import { useFetcher } from './useFetcher';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 
 type TransactionsAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups'>;
 
@@ -18,10 +17,10 @@ const DEFAULT_RESPONSE: Partial<TransactionsAPIResponse> = {
   bucketSize: 0,
 };
 
-export function useTransactionList(urlParams: IUrlParams) {
+export function useTransactionListFetcher() {
+  const { urlParams, uiFilters } = useUrlParams();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { transactionType, start, end } = urlParams;
-  const uiFilters = useUiFilters(urlParams);
   const { data = DEFAULT_RESPONSE, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
@@ -43,8 +42,8 @@ export function useTransactionList(urlParams: IUrlParams) {
   );
 
   return {
-    data,
-    status,
-    error,
+    transactionListData: data,
+    transactionListStatus: status,
+    transactionListError: error,
   };
 }

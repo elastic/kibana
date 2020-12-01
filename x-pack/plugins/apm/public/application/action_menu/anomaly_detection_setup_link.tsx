@@ -16,10 +16,10 @@ import {
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import { getAPMHref } from '../../components/shared/Links/apm/APMLink';
-import { useApmPluginContext } from '../../hooks/useApmPluginContext';
-import { FETCH_STATUS, useFetcher } from '../../hooks/useFetcher';
-import { useLicense } from '../../hooks/useLicense';
-import { useUrlParams } from '../../hooks/useUrlParams';
+import { useApmPluginContext } from '../../context/apm_plugin_context/use_apm_plugin_context';
+import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
+import { useLicense } from '../../context/license_context/use_license';
+import { useUrlParams } from '../../context/url_params_context/use_url_params';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { units } from '../../style/variables';
 

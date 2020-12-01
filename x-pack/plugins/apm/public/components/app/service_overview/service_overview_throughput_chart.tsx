@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { asTransactionRate } from '../../../../common/utils/formatters';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { useTheme } from '../../../hooks/useTheme';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useApmService } from '../../../hooks/use_apm_service';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { useTheme } from '../../../hooks/use_theme';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmService } from '../../../context/apm_service/use_apm_service';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 

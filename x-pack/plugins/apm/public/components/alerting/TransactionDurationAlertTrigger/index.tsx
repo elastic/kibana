@@ -10,8 +10,8 @@ import { map } from 'lodash';
 import React from 'react';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
-import { useEnvironments } from '../../../hooks/useEnvironments';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
@@ -21,7 +21,7 @@ import {
   TransactionTypeField,
   IsAboveField,
 } from '../fields';
-import { useApmService } from '../../../hooks/use_apm_service';
+import { useApmService } from '../../../context/apm_service/use_apm_service';
 
 interface AlertParams {
   windowSize: number;
@@ -66,7 +66,11 @@ export function TransactionDurationAlertTrigger(props: Props) {
   const { transactionTypes } = useApmService();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end, transactionType } = urlParams;
-  const { environmentOptions } = useEnvironments({ serviceName, start, end });
+  const { environmentOptions } = useEnvironmentsFetcher({
+    serviceName,
+    start,
+    end,
+  });
 
   if (!transactionTypes.length || !serviceName) {
     return null;

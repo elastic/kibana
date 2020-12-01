@@ -28,11 +28,11 @@ import {
   asPercent,
 } from '../../../../../common/utils/formatters';
 import { TimeSeries } from '../../../../../typings/timeseries';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { useTheme } from '../../../../hooks/useTheme';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useAnnotations } from '../../../../hooks/use_annotations';
-import { useChartPointerEvent } from '../../../../hooks/use_chart_pointer_event';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useTheme } from '../../../../hooks/use_theme';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useAnnotations } from '../../../../context/annotations/use_annotations';
+import { useChartPointerEvent } from '../../../../context/chart_pointer_event/use_chart_pointer_event';
 import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../charts/chart_container';
 import { onBrushEnd } from '../../charts/helper/helper';

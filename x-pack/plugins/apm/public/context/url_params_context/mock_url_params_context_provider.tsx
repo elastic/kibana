@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { IUrlParams } from './types';
-import { UrlParamsContext, useUiFilters } from '.';
+import { UrlParamsContext, useUiFilters } from './url_params_context';
 
 const defaultUrlParams = {
   page: 0,

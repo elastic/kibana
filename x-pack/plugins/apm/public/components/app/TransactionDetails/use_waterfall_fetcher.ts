@@ -5,9 +5,9 @@
  */
 
 import { useMemo } from 'react';
-import { IUrlParams } from '../context/UrlParamsContext/types';
-import { useFetcher } from './useFetcher';
-import { getWaterfall } from '../components/app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { getWaterfall } from './WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 const INITIAL_DATA = {
   root: undefined,
@@ -15,7 +15,8 @@ const INITIAL_DATA = {
   errorsPerTransaction: {},
 };
 
-export function useWaterfall(urlParams: IUrlParams) {
+export function useWaterfallFetcher() {
+  const { urlParams } = useUrlParams();
   const { traceId, start, end, transactionId } = urlParams;
   const { data = INITIAL_DATA, status, error } = useFetcher(
     (callApmApi) => {

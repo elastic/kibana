@@ -7,22 +7,23 @@
 import { useParams } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
-import { useUiFilters } from '../context/UrlParamsContext';
-import { IUrlParams } from '../context/UrlParamsContext/types';
-import { useFetcher } from './useFetcher';
+import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useApmService } from '../context/apm_service/use_apm_service';
+import { useFetcher } from './use_fetcher';
 
 const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
   charts: [],
 };
 
-export function useServiceMetricCharts(
-  urlParams: IUrlParams,
-  agentName?: string,
-  serviceNodeName?: string
-) {
+export function useServiceMetricChartsFetcher({
+  serviceNodeName,
+}: {
+  serviceNodeName: string | undefined;
+}) {
+  const { urlParams, uiFilters } = useUrlParams();
+  const { agentName } = useApmService();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end } = urlParams;
-  const uiFilters = useUiFilters(urlParams);
   const { data = INITIAL_DATA, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && agentName) {

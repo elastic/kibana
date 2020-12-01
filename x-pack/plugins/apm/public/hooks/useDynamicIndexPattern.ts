@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useFetcher } from './useFetcher';
+import { useFetcher } from './use_fetcher';
 import { UIProcessorEvent } from '../../common/processor_event';
 
 export function useDynamicIndexPattern(

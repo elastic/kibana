@@ -5,7 +5,7 @@
  */
 import React, { ReactNode } from 'react';
 import { Observable, of } from 'rxjs';
-import { ApmPluginContext, ApmPluginContextValue } from '.';
+import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';

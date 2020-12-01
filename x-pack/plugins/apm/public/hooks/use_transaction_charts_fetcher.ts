@@ -7,10 +7,10 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { getTransactionCharts } from '../selectors/chart_selectors';
-import { useFetcher } from './useFetcher';
-import { useUrlParams } from './useUrlParams';
+import { useFetcher } from './use_fetcher';
+import { useUrlParams } from '../context/url_params_context/use_url_params';
 
-export function useTransactionCharts() {
+export function useTransactionChartsFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const {
     urlParams: { transactionType, start, end, transactionName },
@@ -45,8 +45,8 @@ export function useTransactionCharts() {
   );
 
   return {
-    data: memoizedData,
-    status,
-    error,
+    transactionChartsData: memoizedData,
+    transactionChartsStatus: status,
+    transactionChartsError: error,
   };
 }

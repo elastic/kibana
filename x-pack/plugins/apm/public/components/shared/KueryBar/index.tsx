@@ -14,9 +14,9 @@ import {
   IIndexPattern,
   QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../context/apm_plugin_context/use_apm_plugin_context';
 import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
 // @ts-expect-error

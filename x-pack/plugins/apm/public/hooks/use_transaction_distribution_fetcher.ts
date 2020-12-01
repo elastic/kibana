@@ -6,12 +6,11 @@
 
 import { flatten, omit, isEmpty } from 'lodash';
 import { useHistory, useParams } from 'react-router-dom';
-import { IUrlParams } from '../context/UrlParamsContext/types';
-import { useFetcher } from './useFetcher';
-import { useUiFilters } from '../context/UrlParamsContext';
+import { useFetcher } from './use_fetcher';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { maybe } from '../../common/utils/maybe';
 import { APIReturnType } from '../services/rest/createCallApmApi';
+import { useUrlParams } from '../context/url_params_context/use_url_params';
 
 type APIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups/distribution'>;
 
@@ -21,8 +20,9 @@ const INITIAL_DATA = {
   bucketSize: 0,
 };
 
-export function useTransactionDistribution(urlParams: IUrlParams) {
+export function useTransactionDistributionFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
+  const { urlParams, uiFilters } = useUrlParams();
   const {
     start,
     end,
@@ -31,10 +31,8 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
     traceId,
     transactionName,
   } = urlParams;
-  const uiFilters = useUiFilters(urlParams);
 
   const history = useHistory();
-
   const { data = INITIAL_DATA, status, error } = useFetcher(
     async (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
@@ -96,5 +94,9 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
     [serviceName, start, end, transactionType, transactionName, uiFilters]
   );
 
-  return { data, status, error };
+  return {
+    distributionData: data,
+    distributionStatus: status,
+    distributionError: error,
+  };
 }
