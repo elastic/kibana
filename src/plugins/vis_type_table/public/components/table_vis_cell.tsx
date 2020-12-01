@@ -31,7 +31,7 @@ export const createTableVisCell = (formattedColumns: FormattedColumn[], rows: Ta
 }: EuiDataGridCellValueElementProps) => {
   const rowValue = rows[rowIndex][columnId];
   const column = formattedColumns[colIndex];
-  const content = column?.formatter?.convert(rowValue, 'html') || (rowValue as string) || '';
+  const content = column.formatter.convert(rowValue, 'html');
 
   const cellContent = (
     <div

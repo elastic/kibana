@@ -31,12 +31,13 @@ export const useFormattedColumnsAndRows = (table: Table, visConfig: TableVisConf
     let formattedRows = table.rows;
 
     let formattedColumns = table.columns
-      .map<FormattedColumn | undefined>((col, i) => {
+      .map((col, i) => {
         const isBucket = buckets.find(({ accessor }) => accessor === i);
         const dimension = isBucket || metrics.find(({ accessor }) => accessor === i);
 
-        const formatter = dimension ? getFormatService().deserialize(dimension.format) : undefined;
+        if (!dimension) return undefined;
 
+        const formatter = getFormatService().deserialize(dimension.format);
         const formattedColumn: FormattedColumn = {
           id: col.id,
           title: col.name,
@@ -44,11 +45,9 @@ export const useFormattedColumnsAndRows = (table: Table, visConfig: TableVisConf
           filterable: !!isBucket,
         };
 
-        if (!dimension) return undefined;
-
-        const isDate = dimension.format?.id === 'date' || dimension.format?.params?.id === 'date';
+        const isDate = dimension.format.id === 'date' || dimension.format.params?.id === 'date';
         // @ts-expect-error
-        const allowsNumericalAggregations: boolean = formatter?.allowsNumericalAggregations;
+        const allowsNumericalAggregations: boolean = formatter.allowsNumericalAggregations;
 
         if (allowsNumericalAggregations || isDate || visConfig.totalFunc === AggTypes.COUNT) {
           const sumOfColumnValues = table.rows.reduce((prev, curr) => {
@@ -63,7 +62,7 @@ export const useFormattedColumnsAndRows = (table: Table, visConfig: TableVisConf
           switch (visConfig.totalFunc) {
             case AggTypes.SUM: {
               if (!isDate) {
-                formattedColumn.formattedTotal = formatter?.convert(sumOfColumnValues);
+                formattedColumn.formattedTotal = formatter.convert(sumOfColumnValues);
                 formattedColumn.total = sumOfColumnValues;
               }
               break;
@@ -71,20 +70,20 @@ export const useFormattedColumnsAndRows = (table: Table, visConfig: TableVisConf
             case AggTypes.AVG: {
               if (!isDate) {
                 const total = sumOfColumnValues / table.rows.length;
-                formattedColumn.formattedTotal = formatter?.convert(total);
+                formattedColumn.formattedTotal = formatter.convert(total);
                 formattedColumn.total = total;
               }
               break;
             }
             case AggTypes.MIN: {
               const total = chain(table.rows).map(col.id).min().value() as number;
-              formattedColumn.formattedTotal = formatter?.convert(total);
+              formattedColumn.formattedTotal = formatter.convert(total);
               formattedColumn.total = total;
               break;
             }
             case AggTypes.MAX: {
               const total = chain(table.rows).map(col.id).max().value() as number;
-              formattedColumn.formattedTotal = formatter?.convert(total);
+              formattedColumn.formattedTotal = formatter.convert(total);
               formattedColumn.total = total;
               break;
             }

@@ -57,10 +57,7 @@ const toCsv = (formatted: boolean, { cols, rows, table, uiSettings }: ToCsvData)
     const rowArray: string[] = [];
     for (const col of cols) {
       const value = row[col.id];
-      const formattedValue =
-        formatted && (col as FormattedColumn).formatter
-          ? escape((col as FormattedColumn).formatter?.convert(value))
-          : escape(value);
+      const formattedValue = formatted ? escape(col.formatter.convert(value)) : escape(value);
       rowArray.push(formattedValue);
     }
     csvRows.push(rowArray);

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { SchemaConfig } from '../../visualizations/public';
+import { IFieldFormat } from 'src/plugins/data/public';
+import { SchemaConfig } from 'src/plugins/visualizations/public';
 
 export enum AggTypes {
   SUM = 'sum',
@@ -60,7 +60,7 @@ export interface TableVisConfig extends TableVisParams {
 export interface FormattedColumn {
   id: string;
   title: string;
-  formatter?: ReturnType<DataPublicPluginStart['fieldFormats']['deserialize']>;
+  formatter: IFieldFormat;
   formattedTotal?: string | number;
   filterable: boolean;
   sumTotal?: number;
