@@ -23,26 +23,22 @@ export interface IIndexingStatusProps extends IIndexingStatus {
   setGlobalIndexingStatus?(activeReindexJob: IIndexingStatus): void;
 }
 
-export const IndexingStatus: React.FC<IIndexingStatusProps> = (props) => {
-  const statusPanel = (percentComplete: number) => (
-    <EuiPanel paddingSize="l" hasShadow>
-      <IndexingStatusContent percentageComplete={percentComplete} />
-    </EuiPanel>
-  );
-
-  return (
-    <IndexingStatusFetcher {...props}>
-      {(percentageComplete, numDocumentsWithErrors) => (
-        <div className="c-stui-indexing-status-wrapper">
-          {percentageComplete < 100 && statusPanel(percentageComplete)}
-          {percentageComplete === 100 && numDocumentsWithErrors > 0 && (
-            <>
-              <EuiSpacer />
-              <IndexingStatusErrors viewLinkPath={props.viewLinkPath} />
-            </>
-          )}
-        </div>
-      )}
-    </IndexingStatusFetcher>
-  );
-};
+export const IndexingStatus: React.FC<IIndexingStatusProps> = (props) => (
+  <IndexingStatusFetcher {...props}>
+    {(percentageComplete, numDocumentsWithErrors) => (
+      <div>
+        {percentageComplete < 100 && (
+          <EuiPanel paddingSize="l" hasShadow>
+            <IndexingStatusContent percentageComplete={percentageComplete} />
+          </EuiPanel>
+        )}
+        {percentageComplete === 100 && numDocumentsWithErrors > 0 && (
+          <>
+            <EuiSpacer />
+            <IndexingStatusErrors viewLinkPath={props.viewLinkPath} />
+          </>
+        )}
+      </div>
+    )}
+  </IndexingStatusFetcher>
+);
