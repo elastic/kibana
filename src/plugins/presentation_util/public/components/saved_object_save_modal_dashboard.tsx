@@ -22,7 +22,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiFormRow, EuiRadio, EuiIconTip, EuiComboBox, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiRadio,
+  EuiIconTip,
+  EuiComboBox,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import { SavedObjectsClientContract } from '../../../../core/public';
 import { SavedObjectDashboard } from '../../../../plugins/dashboard/public';
 
@@ -31,6 +40,8 @@ import {
   SaveModalState,
   SavedObjectSaveModal,
 } from '../../../../plugins/saved_objects/public';
+
+import './saved_object_save_modal_dashboard.scss';
 
 interface SaveModalDocumentInfo {
   id?: string;
@@ -87,26 +98,27 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
     <>
       <EuiFormRow
         label={
-          <>
-            <span>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
               <FormattedMessage
                 id="presentationUtil.saveModalDashboard.addToDashboardLabel"
                 defaultMessage="Add to dashboard"
               />
-            </span>
-            <EuiIconTip
-              type="iInCircle"
-              content={
-                <FormattedMessage
-                  id="presentationUtil.saveModalDashboard.dashboardInfoTooltip"
-                  defaultMessage="Items added to a dashboard will not appear in the library and must be edited from the dashboard."
-                />
-              }
-            />
-          </>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="iInCircle"
+                content={
+                  <FormattedMessage
+                    id="presentationUtil.saveModalDashboard.dashboardInfoTooltip"
+                    defaultMessage="Items added to a dashboard will not appear in the library and must be edited from the dashboard."
+                  />
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         hasChildLabel={false}
-        style={!state.copyOnSave && documentInfo.id ? { pointerEvents: 'none', opacity: 0.2 } : {}}
       >
         <EuiPanel color="subdued" hasShadow={false}>
           <div>
@@ -121,30 +133,33 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
                 }
               )}
               onChange={() => setDashboardOption('existing')}
+              disabled={!state.copyOnSave && documentInfo.id ? true : false}
             />
 
-            <EuiComboBox
-              placeholder={i18n.translate(
-                'presentationUtil.saveModalDashboard.searchDashboardPlaceholder',
-                {
-                  defaultMessage: 'Search dashboards...',
-                }
-              )}
-              singleSelection={{ asPlainText: true }}
-              options={dashboards || []}
-              selectedOptions={!!selectedDashboard ? [selectedDashboard] : undefined}
-              onChange={(e) => {
-                if (e.length) {
-                  setSelectedDashboard({ value: e[0].value || '', label: e[0].label });
-                } else {
-                  setSelectedDashboard(null);
-                }
-              }}
-              onSearchChange={fetchDashboards}
-              isDisabled={dashboardOption !== 'existing'}
-              isLoading={isLoadingDashboards}
-              style={{ paddingLeft: 24 }}
-            />
+            <div className="savAddDashboard__searchDashboards">
+              <EuiComboBox
+                placeholder={i18n.translate(
+                  'presentationUtil.saveModalDashboard.searchDashboardPlaceholder',
+                  {
+                    defaultMessage: 'Search dashboards...',
+                  }
+                )}
+                singleSelection={{ asPlainText: true }}
+                options={dashboards || []}
+                selectedOptions={!!selectedDashboard ? [selectedDashboard] : undefined}
+                onChange={(e) => {
+                  if (e.length) {
+                    setSelectedDashboard({ value: e[0].value || '', label: e[0].label });
+                  } else {
+                    setSelectedDashboard(null);
+                  }
+                }}
+                onSearchChange={fetchDashboards}
+                isDisabled={dashboardOption !== 'existing'}
+                isLoading={isLoadingDashboards}
+                compressed={true}
+              />
+            </div>
 
             <EuiSpacer size="s" />
 
@@ -156,6 +171,7 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
                 defaultMessage: 'New',
               })}
               onChange={() => setDashboardOption('new')}
+              disabled={!state.copyOnSave && documentInfo.id ? true : false}
             />
 
             <EuiSpacer size="s" />
@@ -168,6 +184,7 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
                 defaultMessage: 'No dashboard, but add to library',
               })}
               onChange={() => setDashboardOption(null)}
+              disabled={!state.copyOnSave && documentInfo.id ? true : false}
             />
           </div>
         </EuiPanel>
