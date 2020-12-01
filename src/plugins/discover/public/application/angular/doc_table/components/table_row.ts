@@ -26,6 +26,7 @@ import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 import { getServices } from '../../../../kibana_services';
+import { getContextUrl } from '../../../helpers/get_context_url';
 
 const TAGS_WITH_WS = />\s+</g;
 
@@ -109,7 +110,12 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       };
 
       $scope.getContextAppHref = () => {
-        return getContextUrl($scope.indexPattern.id, $scope.row._id, getServices().filterManager);
+        return getContextUrl(
+          $scope.indexPattern.id,
+          $scope.row._id,
+          $scope.columns,
+          getServices().filterManager
+        );
       };
 
       // create a tr element that lists the value for each *column*
