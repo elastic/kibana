@@ -33,9 +33,9 @@ export interface FieldChoice {
 
 export interface FieldSelectProps extends EuiComboBoxProps<{}> {
   currentIndexPattern: IndexPattern;
-  incompleteOperation: OperationType | null;
   selectedOperationType?: OperationType;
   selectedField?: string;
+  incompleteOperation?: OperationType;
   operationSupportMatrix: OperationSupportMatrix;
   onChoose: (choice: FieldChoice) => void;
   onDeleteColumn: () => void;

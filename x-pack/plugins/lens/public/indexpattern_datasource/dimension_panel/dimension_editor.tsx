@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { OperationSupportMatrix } from './operation_support';
-import { IndexPatternColumn, OperationType } from '../indexpattern';
+import { IndexPatternColumn } from '../indexpattern';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -113,7 +113,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     selectedColumn && operationDefinitionMap[selectedColumn.operationType];
 
   const incompleteInfo = (state.layers[layerId].incompleteColumns ?? {})[columnId];
-  const incompleteOperation = (incompleteInfo?.operationType as OperationType) ?? null;
+  const incompleteOperation = incompleteInfo?.operationType;
   const incompleteField = incompleteInfo?.sourceField ?? null;
 
   const ParamEditor = selectedOperationDefinition?.paramEditor;
