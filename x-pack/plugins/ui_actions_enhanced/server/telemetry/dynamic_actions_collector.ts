@@ -11,17 +11,17 @@ export const dynamicActionsCollector = (state: DynamicActionsState): Record<stri
 
   stats['dynamicActions.count'] = state.events.length;
 
-  const factoryFrequency: Record<string, number | undefined> = {};
+  const factoryCount: Record<string, number | undefined> = {};
 
   for (const event of state.events) {
     const factoryId = event.action.factoryId;
-    factoryFrequency[factoryId] = 1 + (factoryFrequency[factoryId] || 0);
+    factoryCount[factoryId] = 1 + (factoryCount[factoryId] || 0);
   }
 
-  const factoryIds = Object.keys(factoryFrequency);
+  const factoryIds = Object.keys(factoryCount);
 
   for (const factoryId of factoryIds) {
-    stats[`dynamicActions.actions.${factoryId}.count`] = factoryFrequency[factoryId];
+    stats[`dynamicActions.actions.${factoryId}.count`] = factoryCount[factoryId];
   }
 
   return stats;
