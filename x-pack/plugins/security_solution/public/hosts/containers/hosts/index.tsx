@@ -73,26 +73,7 @@ export const useAllHost = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          docValueFields: docValueFields ?? [],
-          factoryQueryType: HostsQueries.hosts,
-          filterQuery: createFilter(filterQuery),
-          pagination: generateTablePaginationOptions(activePage, limit),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-          sort: {
-            direction,
-            field: sortField,
-          },
-        }
-      : null
-  );
+  const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -132,7 +113,7 @@ export const useAllHost = ({
 
   const hostsSearch = useCallback(
     (request: HostsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -185,7 +166,7 @@ export const useAllHost = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -207,7 +188,7 @@ export const useAllHost = ({
           field: sortField,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
@@ -220,7 +201,6 @@ export const useAllHost = ({
     filterQuery,
     indexNames,
     limit,
-    skip,
     startDate,
     sortField,
   ]);

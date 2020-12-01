@@ -76,24 +76,7 @@ export const useNetworkTopCountries = ({
   const [
     networkTopCountriesRequest,
     setHostRequest,
-  ] = useState<NetworkTopCountriesRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkQueries.topCountries,
-          filterQuery: createFilter(filterQuery),
-          flowTarget,
-          ip,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort,
-          timerange: {
-            interval: '12h',
-            from: startDate ? startDate : '',
-            to: endDate ? endDate : new Date(Date.now()).toISOString(),
-          },
-        }
-      : null
-  );
+  ] = useState<NetworkTopCountriesRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -134,7 +117,7 @@ export const useNetworkTopCountries = ({
 
   const networkTopCountriesSearch = useCallback(
     (request: NetworkTopCountriesRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -190,7 +173,7 @@ export const useNetworkTopCountries = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -210,12 +193,12 @@ export const useNetworkTopCountries = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, skip, flowTarget]);
+  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, flowTarget]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);

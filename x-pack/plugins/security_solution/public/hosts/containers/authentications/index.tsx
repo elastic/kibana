@@ -78,23 +78,7 @@ export const useAuthentications = ({
   const [
     authenticationsRequest,
     setAuthenticationsRequest,
-  ] = useState<HostAuthenticationsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          docValueFields: docValueFields ?? [],
-          factoryQueryType: HostsQueries.authentications,
-          filterQuery: createFilter(filterQuery),
-          pagination: generateTablePaginationOptions(activePage, limit),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-          sort: {} as SortField,
-        }
-      : null
-  );
+  ] = useState<HostAuthenticationsRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -133,7 +117,7 @@ export const useAuthentications = ({
 
   const authenticationsSearch = useCallback(
     (request: HostAuthenticationsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -188,7 +172,7 @@ export const useAuthentications = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -207,12 +191,12 @@ export const useAuthentications = ({
         },
         sort: {} as SortField,
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, docValueFields, endDate, filterQuery, indexNames, limit, skip, startDate]);
+  }, [activePage, docValueFields, endDate, filterQuery, indexNames, limit, startDate]);
 
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);

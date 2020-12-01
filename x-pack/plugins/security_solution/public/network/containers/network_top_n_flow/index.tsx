@@ -75,24 +75,7 @@ export const useNetworkTopNFlow = ({
   const [
     networkTopNFlowRequest,
     setTopNFlowRequest,
-  ] = useState<NetworkTopNFlowRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkQueries.topNFlow,
-          filterQuery: createFilter(filterQuery),
-          flowTarget,
-          ip,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort,
-          timerange: {
-            interval: '12h',
-            from: startDate ? startDate : '',
-            to: endDate ? endDate : new Date(Date.now()).toISOString(),
-          },
-        }
-      : null
-  );
+  ] = useState<NetworkTopNFlowRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -130,7 +113,7 @@ export const useNetworkTopNFlow = ({
 
   const networkTopNFlowSearch = useCallback(
     (request: NetworkTopNFlowRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -186,7 +169,7 @@ export const useNetworkTopNFlow = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -206,12 +189,12 @@ export const useNetworkTopNFlow = ({
         },
         sort,
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, endDate, filterQuery, indexNames, ip, limit, startDate, sort, skip, flowTarget]);
+  }, [activePage, endDate, filterQuery, indexNames, ip, limit, startDate, sort, flowTarget]);
 
   useEffect(() => {
     networkTopNFlowSearch(networkTopNFlowRequest);

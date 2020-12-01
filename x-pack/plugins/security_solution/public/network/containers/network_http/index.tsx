@@ -71,23 +71,7 @@ export const useNetworkHttp = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkQueries.http,
-          filterQuery: createFilter(filterQuery),
-          ip,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort: sort as SortField,
-          timerange: {
-            interval: '12h',
-            from: startDate ? startDate : '',
-            to: endDate ? endDate : new Date(Date.now()).toISOString(),
-          },
-        }
-      : null
-  );
+  const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -125,7 +109,7 @@ export const useNetworkHttp = ({
 
   const networkHttpSearch = useCallback(
     (request: NetworkHttpRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -181,7 +165,7 @@ export const useNetworkHttp = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -200,12 +184,12 @@ export const useNetworkHttp = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort]);
 
   useEffect(() => {
     networkHttpSearch(networkHttpRequest);

@@ -72,24 +72,7 @@ export const useNetworkDns = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          docValueFields: docValueFields ?? [],
-          factoryQueryType: NetworkQueries.dns,
-          filterQuery: createFilter(filterQuery),
-          isPtrIncluded,
-          pagination: generateTablePaginationOptions(activePage, limit, true),
-          sort,
-          timerange: {
-            interval: '12h',
-            from: startDate ? startDate : '',
-            to: endDate ? endDate : new Date(Date.now()).toISOString(),
-          },
-        }
-      : null
-  );
+  const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -128,7 +111,7 @@ export const useNetworkDns = ({
 
   const networkDnsSearch = useCallback(
     (request: NetworkDnsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -185,7 +168,7 @@ export const useNetworkDns = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -205,7 +188,7 @@ export const useNetworkDns = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
@@ -218,7 +201,6 @@ export const useNetworkDns = ({
     limit,
     startDate,
     sort,
-    skip,
     isPtrIncluded,
     docValueFields,
   ]);
