@@ -46,12 +46,24 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>teamcity</id>
+      <url>https://artifactory.elstc.co/artifactory/teamcity</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+    </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
       <id>JetBrains</id>
       <url>https://download.jetbrains.com/teamcity-repository</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>teamcity</id>
+      <url>https://artifactory.elstc.co/artifactory/teamcity</url>
     </pluginRepository>
   </pluginRepositories>
 
@@ -123,6 +135,11 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.13</version>
+    </dependency>
+    <dependency>
+      <groupId>co.elastic.teamcity</groupId>
+      <artifactId>teamcity-common</artifactId>
+      <version>1.0.1-gcloud-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

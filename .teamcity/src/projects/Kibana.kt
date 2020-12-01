@@ -5,9 +5,10 @@ import builds.*
 import builds.default.*
 import builds.oss.*
 import builds.test.*
+import CloudProfile
+import co.elastic.teamcity.common.googleCloudProfile
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.projectFeatures.slackConnection
-import kibanaAgent
 import templates.KibanaTemplate
 import templates.DefaultTemplate
 import vcs.Elasticsearch
@@ -46,42 +47,9 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
 
     defaultTemplate = DefaultTemplate
 
+    googleCloudProfile(CloudProfile)
+
     features {
-      val sizes = listOf("2", "4", "8", "16")
-      for (size in sizes) {
-        kibanaAgent(size)
-      }
-
-      kibanaAgent {
-        id = "KIBANA_C2_16"
-        param("source-id", "kibana-c2-16-")
-        param("machineType", "c2-standard-16")
-      }
-
-      kibanaAgent {
-        id = "KIBANA_custom"
-        param("source-id", "kibana-custom-")
-        param("machineType", "custom-4-15360")
-      }
-
-      feature {
-        id = "kibana"
-        type = "CloudProfile"
-        param("agentPushPreset", "")
-        param("profileId", "kibana")
-        param("profileServerUrl", "")
-        param("name", "kibana")
-        param("total-work-time", "")
-        param("credentialsType", "key")
-        param("description", "")
-        param("next-hour", "")
-        param("cloud-code", "google")
-        param("terminate-after-build", "true")
-        param("terminate-idle-time", "30")
-        param("enabled", "true")
-        param("secure:accessKey", "credentialsJSON:447fdd4d-7129-46b7-9822-2e57658c7422")
-      }
-
       slackConnection {
         id = "KIBANA_SLACK"
         displayName = "Kibana Slack"
