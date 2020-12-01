@@ -31,45 +31,25 @@ const hostSchema = schema.string();
 
 const protocolSchema = schema.string({
   validate: (value) => {
-    if (value.indexOf('/') >= 0) {
-      throw new Error(`protocols should not include slashes`);
-    }
+    // tools.ietf.org/html/rfc3986#section-3.1
+    // scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+    const schemaRegex = /^[a-zA-Z][a-zA-Z0-9\+\-\.]*$/;
+    if (!schemaRegex.test(value))
+      throw new Error(
+        'Protocol must begin with a letter, and can only contain letters, numbers, and the following characters: `+ - .`'
+      );
   },
 });
 
-const policySchema = schema.oneOf([
-  schema.object({
-    allow: allowSchema,
-    host: hostSchema,
-  }),
-  schema.object({
-    allow: allowSchema,
-    protocol: protocolSchema,
-  }),
-  schema.object({
-    allow: allowSchema,
-    protocol: protocolSchema,
-    host: hostSchema,
-  }),
-]);
-
-schema.object(
+const policySchema = schema.object(
   {
-    allow: schema.boolean(),
-    protocol: schema.maybe(
-      schema.string({
-        validate: (value) => {
-          if (value.indexOf('/') >= 0) {
-            throw new Error(`protocols should not include slashes`);
-          }
-        },
-      })
-    ),
-    host: schema.maybe(schema.string()),
+    allow: allowSchema,
+    protocol: schema.maybe(protocolSchema),
+    host: schema.maybe(hostSchema),
   },
   {
-    validate: (value) => {
-      if (!value.host && !value.protocol) {
+    validate: ({ protocol, host }) => {
+      if (!host && !protocol) {
         throw new Error(`policy must include a 'host', 'protocol', or both.`);
       }
     },
@@ -82,9 +62,9 @@ export const config = {
     policy: schema.arrayOf<IExternalUrlPolicy>(policySchema, {
       defaultValue: [
         {
-          host: '*',
-          protocol: '*',
           allow: true,
+          protocol: '*',
+          host: '*',
         },
       ],
     }),

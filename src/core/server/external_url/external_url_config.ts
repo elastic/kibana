@@ -38,7 +38,7 @@ export interface IExternalUrlConfig {
  */
 export interface IExternalUrlPolicy {
   /**
-   * Indicates of this policy allows or denies access to the described destination.
+   * Indicates if this policy allows or denies access to the described destination.
    */
   allow: boolean;
 
@@ -85,6 +85,6 @@ export class ExternalUrlConfig implements IExternalUrlConfig {
   constructor(rawConfig: Partial<IExternalUrlConfig> = {}) {
     const source = { ...DEFAULT_CONFIG, ...rawConfig };
 
-    this.policy = (source.policy as unknown) as IExternalUrlPolicy[];
+    this.policy = source.policy;
   }
 }

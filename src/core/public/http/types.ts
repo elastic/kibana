@@ -105,8 +105,21 @@ export interface IBasePath {
    */
   readonly serverBasePath: string;
 }
-
+/**
+ * APIs for working with external URLs.
+ *
+ * @public
+ */
 export interface IExternalUrl {
+  /**
+   * Determines if the provided URL is a valid location to send users.
+   * Validation is based on the configured allow list in kibana.yml.
+   *
+   * If the URL is valid, then a URL will be returned.
+   * Otherwise, this will return null.
+   *
+   * @param relativeOrAbsoluteUrl
+   */
   validateUrl(relativeOrAbsoluteUrl: string): URL | null;
 }
 

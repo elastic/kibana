@@ -22,7 +22,6 @@ import { deepFreeze } from '@kbn/std';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import {
   EnvironmentMode,
-  ExternalUrlConfig,
   IExternalUrlPolicy,
   PackageInfo,
   UiSettingsParams,
@@ -51,7 +50,7 @@ export interface InjectedMetadataParams {
       warnLegacyBrowsers: boolean;
     };
     externalUrl: {
-      policy: ExternalUrlConfig['policy'];
+      policy: IExternalUrlPolicy[];
     };
     vars: {
       [key: string]: unknown;

@@ -94,6 +94,36 @@ describe('External Url Service', () => {
 
         expect(result).toBeNull();
       });
+
+      describe('handles protocol resolution bypass', () => {
+        it('does not allow relative URLs that include a host', () => {
+          const { setup } = setupService({ location, serverBasePath, policy: [] });
+          const urlCandidate = `/some/path?foo=bar`;
+          const result = setup.validateUrl(`//www.google.com${serverBasePath}${urlCandidate}`);
+
+          expect(result).toBeNull();
+        });
+
+        it('does allow relative URLs that include a host if allowed by policy', () => {
+          const { setup } = setupService({
+            location,
+            serverBasePath,
+            policy: [
+              {
+                allow: true,
+                host: 'www.google.com',
+              },
+            ],
+          });
+          const urlCandidate = `/some/path?foo=bar`;
+          const result = setup.validateUrl(`//www.google.com${serverBasePath}${urlCandidate}`);
+
+          expect(result).toBeInstanceOf(URL);
+          expect(result?.toString()).toEqual(
+            `https://www.google.com${serverBasePath}${urlCandidate}`
+          );
+        });
+      });
     });
 
     describe('internal requests without a server base path', () => {
@@ -118,6 +148,34 @@ describe('External Url Service', () => {
 
         expect(result).toBeInstanceOf(URL);
         expect(result?.toString()).toEqual(`${kibanaRoot}/some/path?foo=bar`);
+      });
+
+      describe('handles protocol resolution bypass', () => {
+        it('does not allow relative URLs that include a host', () => {
+          const { setup } = setupService({ location, serverBasePath, policy: [] });
+          const urlCandidate = `/some/path?foo=bar`;
+          const result = setup.validateUrl(`//www.google.com${urlCandidate}`);
+
+          expect(result).toBeNull();
+        });
+
+        it('allows relative URLs that include a host in the allow list', () => {
+          const { setup } = setupService({
+            location,
+            serverBasePath,
+            policy: [
+              {
+                allow: true,
+                host: 'www.google.com',
+              },
+            ],
+          });
+          const urlCandidate = `/some/path?foo=bar`;
+          const result = setup.validateUrl(`//www.google.com${urlCandidate}`);
+
+          expect(result).toBeInstanceOf(URL);
+          expect(result?.toString()).toEqual(`https://www.google.com${urlCandidate}`);
+        });
       });
     });
 
@@ -206,6 +264,27 @@ describe('External Url Service', () => {
 
         expect(result).toBeInstanceOf(URL);
         expect(result?.toString()).toEqual(urlCandidate);
+      });
+
+      it('disallows external urls that match multiple rules, one of which denies the request', () => {
+        const { setup } = setupService({
+          location,
+          serverBasePath,
+          policy: [
+            {
+              allow: true,
+              protocol: 'https',
+            },
+            {
+              allow: false,
+              host: 'www.google.com',
+            },
+          ],
+        });
+        const urlCandidate = `https://www.google.com/foo?bar=baz`;
+        const result = setup.validateUrl(urlCandidate);
+
+        expect(result).toBeNull();
       });
     });
   });

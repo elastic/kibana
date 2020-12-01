@@ -17,7 +17,5 @@
  * under the License.
  */
 
-import { ExternalUrlConfig, IExternalUrlConfig, IExternalUrlPolicy } from './external_url_config';
-import { ExternalUrlConfigType, config } from './config';
-
-export { ExternalUrlConfig, ExternalUrlConfigType, config, IExternalUrlConfig, IExternalUrlPolicy };
+export { ExternalUrlConfig, IExternalUrlConfig, IExternalUrlPolicy } from './external_url_config';
+export { ExternalUrlConfigType, config } from './config';

@@ -60,23 +60,18 @@ const createExternalUrlValidation = (
       return url;
     }
 
-    // Accumulator has three potential values here:
-    // True => allow request, don't check other rules
-    // False => reject request, don't check other rules
-    // Undefined => Not yet known, proceed to next rule
-    const allowed = rules.reduce((result: boolean | undefined, rule) => {
-      if (typeof result === 'boolean') {
-        return result;
-      }
-
+    let allowed: null | boolean = null;
+    rules.forEach((rule) => {
       const hostMatch = rule.host ? isHostMatch(url.hostname || '', rule.host) : true;
 
       const protocolMatch = rule.protocol ? isProtocolMatch(url.protocol, rule.protocol) : true;
 
       const isRuleMatch = hostMatch && protocolMatch;
 
-      return isRuleMatch ? rule.allow : undefined;
-    }, undefined);
+      if (isRuleMatch && allowed !== false) {
+        allowed = rule.allow;
+      }
+    });
 
     return allowed === true ? url : null;
   };

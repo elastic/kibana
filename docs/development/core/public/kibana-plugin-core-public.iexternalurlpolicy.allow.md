@@ -4,7 +4,7 @@
 
 ## IExternalUrlPolicy.allow property
 
-Indicates of this policy allows or denies access to the described destination.
+Indicates if this policy allows or denies access to the described destination.
 
 <b>Signature:</b>
 

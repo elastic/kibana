@@ -720,8 +720,6 @@ export interface HttpSetup {
     anonymousPaths: IAnonymousPaths;
     basePath: IBasePath;
     delete: HttpHandler;
-    // Warning: (ae-forgotten-export) The symbol "IExternalUrl" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     externalUrl: IExternalUrl;
     fetch: HttpHandler;
@@ -772,6 +770,11 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
 //
 // @public
 export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: PartialExceptFor<HandlerContextType<THandler>, 'core'>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+
+// @public
+export interface IExternalUrl {
+    validateUrl(relativeOrAbsoluteUrl: string): URL | null;
+}
 
 // @public
 export interface IExternalUrlPolicy {
