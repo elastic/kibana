@@ -41,13 +41,13 @@ export const isTrustedAppCreateFailureState = (
 };
 
 export const isWindowsTrustedAppCondition = (
-  condition: ConditionEntry<ConditionEntryField>
+  condition: ConditionEntry
 ): condition is WindowsConditionEntry => {
   return condition.field === ConditionEntryField.SIGNER || true;
 };
 
 export const isMacosLinuxTrustedAppCondition = (
-  condition: ConditionEntry<ConditionEntryField>
+  condition: ConditionEntry
 ): condition is MacosLinuxConditionEntry => {
   return condition.field !== ConditionEntryField.SIGNER;
 };
