@@ -12,7 +12,6 @@ import {
   EuiHorizontalRule,
   EuiToolTip,
 } from '@elastic/eui';
-import { noop, pick } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -22,14 +21,12 @@ import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/tr
 import { DEFAULT_INDEX_KEY, FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import { useFullScreen } from '../../../common/containers/use_full_screen';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { TimelineId, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
-import { NewCase, ExistingCase } from '../timeline/properties/helpers';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
-import { useAllCasesModal } from '../../../cases/components/use_all_cases_modal';
 
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../common/lib/kibana';
@@ -81,22 +78,24 @@ const NavigationComponent: React.FC<NavigationProps> = ({
         {i18n.CLOSE_ANALYZER}
       </EuiButtonEmpty>
     </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : FULL_SCREEN}>
-        <FullScreenButtonIcon
-          aria-label={
-            isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
-              ? EXIT_FULL_SCREEN
-              : FULL_SCREEN
-          }
-          className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
-          color={fullScreen ? 'ghost' : 'primary'}
-          data-test-subj="full-screen"
-          iconType="fullScreen"
-          onClick={toggleFullScreen}
-        />
-      </EuiToolTip>
-    </EuiFlexItem>
+    {timelineId !== TimelineId.active && (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : FULL_SCREEN}>
+          <FullScreenButtonIcon
+            aria-label={
+              isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
+                ? EXIT_FULL_SCREEN
+                : FULL_SCREEN
+            }
+            className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
+            color={fullScreen ? 'ghost' : 'primary'}
+            data-test-subj="full-screen"
+            iconType="fullScreen"
+            onClick={toggleFullScreen}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    )}
   </EuiFlexGroup>
 );
 
@@ -110,14 +109,9 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
   }, [dispatch, timelineId]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { graphEventId, timelineType, status, title } = useDeepEqualSelector((state) =>
-    pick(
-      ['graphEventId', 'timelineType', 'status', 'title'],
-      getTimeline(state, timelineId) ?? timelineDefaults
-    )
+  const graphEventId = useDeepEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
   );
-
-  const { Modal: AllCasesModal, onOpenModal: onOpenCaseModal } = useAllCasesModal({ timelineId });
 
   const {
     timelineFullScreen,
@@ -172,33 +166,10 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
             toggleFullScreen={toggleFullScreen}
           />
         </EuiFlexItem>
-        {timelineId === TimelineId.active && timelineType === TimelineType.default && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <NewCase
-                  compact={true}
-                  graphEventId={graphEventId}
-                  onClosePopover={noop}
-                  timelineId={timelineId}
-                  timelineTitle={title}
-                  timelineStatus={status}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ExistingCase
-                  compact={true}
-                  onClosePopover={noop}
-                  onOpenCaseModal={onOpenCaseModal}
-                  timelineStatus={status}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="none" />
+
       {graphEventId !== undefined && indices !== null && (
         <StyledResolver
           databaseDocumentID={graphEventId}
@@ -206,7 +177,6 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
           indices={indices}
         />
       )}
-      <AllCasesModal />
     </OverlayContainer>
   );
 };

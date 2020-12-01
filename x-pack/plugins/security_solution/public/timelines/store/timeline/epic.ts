@@ -284,7 +284,7 @@ export const createTimelineEpic = <State>(): Epic<
                       id: action.payload.id,
                       timeline: {
                         ...savedTimeline,
-                        updated: response.timeline.updated ?? null,
+                        updated: response.timeline.updated ?? undefined,
                         savedObjectId: response.timeline.savedObjectId,
                         version: response.timeline.version,
                         status: response.timeline.status ?? TimelineStatus.active,
