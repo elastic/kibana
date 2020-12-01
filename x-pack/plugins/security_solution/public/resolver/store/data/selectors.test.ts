@@ -139,6 +139,8 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            shouldUpdate: false,
+            filters: {},
           },
         },
       ];
@@ -163,7 +165,7 @@ describe('data state', () => {
       actions = [
         {
           type: 'appRequestedResolverData',
-          payload: { databaseDocumentID, indices: [] },
+          payload: { databaseDocumentID, indices: [], filters: {} },
         },
       ];
     });
@@ -200,11 +202,13 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            shouldUpdate: false,
+            filters: {},
           },
         },
         {
           type: 'appRequestedResolverData',
-          payload: { databaseDocumentID, indices: [] },
+          payload: { databaseDocumentID, indices: [], filters: {} },
         },
       ];
     });
@@ -228,7 +232,7 @@ describe('data state', () => {
       beforeEach(() => {
         actions.push({
           type: 'serverFailedToReturnResolverData',
-          payload: { databaseDocumentID, indices: [] },
+          payload: { databaseDocumentID, indices: [], filters: {} },
         });
       });
       it('should not be loading', () => {
@@ -265,12 +269,14 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            shouldUpdate: false,
+            filters: {},
           },
         },
         // this happens when the middleware starts the request
         {
           type: 'appRequestedResolverData',
-          payload: { databaseDocumentID: firstDatabaseDocumentID, indices: [] },
+          payload: { databaseDocumentID: firstDatabaseDocumentID, indices: [], filters: {} },
         },
         // receive a different databaseDocumentID. this should cause the middleware to abort the existing request and start a new one
         {
@@ -281,6 +287,8 @@ describe('data state', () => {
             // `locationSearch` doesn't matter for this test
             locationSearch: '',
             indices: [],
+            shouldUpdate: false,
+            filters: {},
           },
         },
       ];
@@ -311,11 +319,99 @@ describe('data state', () => {
         requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[]}"
       `);
     });
+    describe('when after initial load resolver is told to refresh', () => {
+      const databaseDocumentID = 'doc id';
+      const resolverComponentInstanceID = 'instance';
+      const originID = 'origin';
+      const firstChildID = 'first';
+      const secondChildID = 'second';
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID,
+        firstChildID,
+        secondChildID,
+      });
+      const { schema, dataSource } = endpointSourceSchema();
+      beforeEach(() => {
+        actions = [
+          // receive the document ID, this would cause the middleware to start the request
+          {
+            type: 'appReceivedNewExternalProperties',
+            payload: {
+              databaseDocumentID,
+              resolverComponentInstanceID,
+              locationSearch: '',
+              indices: [],
+              shouldUpdate: false,
+              filters: {},
+            },
+          },
+          // this happens when the middleware starts the request
+          {
+            type: 'appRequestedResolverData',
+            payload: { databaseDocumentID, indices: [], dataRequestID: 99, filters: {} },
+          },
+          {
+            type: 'serverReturnedResolverData',
+            payload: {
+              result: resolverTree,
+              dataSource,
+              schema,
+              parameters: { databaseDocumentID, indices: [], dataRequestID: 0, filters: {} },
+            },
+          },
+          // receive all the same parameters except shouldUpdate is true
+          {
+            type: 'appReceivedNewExternalProperties',
+            payload: {
+              databaseDocumentID,
+              resolverComponentInstanceID,
+              locationSearch: '',
+              indices: [],
+              shouldUpdate: true,
+              filters: {},
+            },
+          },
+          {
+            type: 'appReceivedNewExternalProperties',
+            payload: {
+              databaseDocumentID,
+              resolverComponentInstanceID,
+              locationSearch: '',
+              indices: [],
+              shouldUpdate: false,
+              filters: {},
+            },
+          },
+          {
+            type: 'appRequestedResolverData',
+            payload: { databaseDocumentID, indices: [], dataRequestID: 2, filters: {} },
+          },
+        ];
+      });
+      it('should need to request the tree using the same parameters as the first request', () => {
+        expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(
+          databaseDocumentID
+        );
+      });
+      it('should have a newer id', () => {
+        expect(selectors.treeParametersToFetch(state())?.dataRequestID).toBe(1);
+      });
+      it('should not have an error, more children, or more ancestors.', () => {
+        expect(viewAsAString(state())).toMatchInlineSnapshot(`
+          "is loading: true
+          has an error: false
+          has more children: true
+          has more ancestors: true
+          parameters to fetch: {\\"databaseDocumentID\\":\\"doc id\\",\\"indices\\":[],\\"dataRequestID\\":1}
+          requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"doc id\\",\\"indices\\":[],\\"dataRequestID\\":2}"
+        `);
+      });
+    });
     describe('and when the old request was aborted', () => {
       beforeEach(() => {
         actions.push({
           type: 'appAbortedResolverDataRequest',
-          payload: { databaseDocumentID: firstDatabaseDocumentID, indices: [] },
+          payload: { databaseDocumentID: firstDatabaseDocumentID, indices: [], filters: {} },
         });
       });
       it('should not require a pending request to be aborted', () => {
@@ -343,7 +439,7 @@ describe('data state', () => {
         beforeEach(() => {
           actions.push({
             type: 'appRequestedResolverData',
-            payload: { databaseDocumentID: secondDatabaseDocumentID, indices: [] },
+            payload: { databaseDocumentID: secondDatabaseDocumentID, indices: [], filters: {} },
           });
         });
         it('should not have a document ID to fetch', () => {

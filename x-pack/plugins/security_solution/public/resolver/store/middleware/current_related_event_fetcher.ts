@@ -35,10 +35,14 @@ export function CurrentRelatedEventFetcher(
     const indices = selectors.treeParameterIndices(state);
 
     const oldParams = last;
+    const newID = selectors.refreshCount(state);
     last = newParams;
 
     // If the panel view params have changed and the current panel view is the `eventDetail`, then fetch the event details for that eventID.
-    if (!isEqual(newParams, oldParams) && newParams.panelView === 'eventDetail') {
+    if (
+      (!isEqual(newParams, oldParams) && newParams.panelView === 'eventDetail') ||
+      (selectors.currentRelatedEventIsStale(state) && newParams.panelView === 'eventDetail')
+    ) {
       const currentEventID = newParams.panelParameters.eventID;
       const currentNodeID = newParams.panelParameters.nodeID;
       const currentEventCategory = newParams.panelParameters.eventCategory;
@@ -48,8 +52,10 @@ export function CurrentRelatedEventFetcher(
       api.dispatch({
         type: 'appRequestedCurrentRelatedEventData',
       });
+      const timeRangeFilters = selectors.timeRangeFilters(state);
 
       let result: SafeResolverEvent | null = null;
+      let payload: { data: SafeResolverEvent; dataRequestID: number } | null = null;
       try {
         result = await dataAccessLayer.event({
           nodeID: currentNodeID,
@@ -58,7 +64,7 @@ export function CurrentRelatedEventFetcher(
           eventID: currentEventID,
           winlogRecordID,
           indexPatterns: indices,
-          timeRange: createRange(),
+          timeRange: timeRangeFilters,
         });
       } catch (error) {
         api.dispatch({
@@ -67,9 +73,13 @@ export function CurrentRelatedEventFetcher(
       }
 
       if (result) {
+        payload = {
+          data: result,
+          dataRequestID: newID,
+        };
         api.dispatch({
           type: 'serverReturnedCurrentRelatedEventData',
-          payload: result,
+          payload,
         });
       } else {
         api.dispatch({
