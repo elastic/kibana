@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
-import { Keystore } from '../legacy/server/keystore';
+import { Keystore } from '../cli/keystore';
 
 import { createCli } from './create';
 import { listCli } from './list';

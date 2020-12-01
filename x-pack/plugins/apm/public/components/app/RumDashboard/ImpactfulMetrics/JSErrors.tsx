@@ -39,7 +39,7 @@ export function JSErrors() {
     (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/js-errors',
+          endpoint: 'GET /api/apm/rum-client/js-errors',
           params: {
             query: {
               start,

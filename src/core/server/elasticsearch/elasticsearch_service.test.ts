@@ -57,7 +57,9 @@ let coreContext: CoreContext;
 const logger = loggingSystemMock.create();
 
 let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
-let mockLegacyClusterClientInstance: ReturnType<typeof elasticsearchServiceMock.createLegacyCustomClusterClient>;
+let mockLegacyClusterClientInstance: ReturnType<
+  typeof elasticsearchServiceMock.createLegacyCustomClusterClient
+>;
 
 beforeEach(() => {
   env = Env.createDefault(REPO_ROOT, getEnvOptions());

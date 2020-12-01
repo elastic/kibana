@@ -79,6 +79,56 @@ export interface EventStats {
 }
 
 /**
+ * Represents the object structure of a returned document when using doc value fields to filter the fields
+ * returned in a document from an Elasticsearch query.
+ *
+ * Here is an example:
+ *
+ * {
+ *  "_index": ".ds-logs-endpoint.events.process-default-000001",
+ *  "_id": "bc7brnUBxO0aE7QcCVHo",
+ *  "_score": null,
+ *  "fields": { <----------- The FieldsObject represents this portion
+ *    "@timestamp": [
+ *      "2020-11-09T21:13:25.246Z"
+ *    ],
+ *    "process.name": "explorer.exe",
+ *    "process.parent.entity_id": [
+ *      "0i17c2m22c"
+ *    ],
+ *    "process.Ext.ancestry": [ <------------ Notice that the keys are flattened
+ *      "0i17c2m22c",
+ *      "2z9j8dlx72",
+ *      "oj61pr6g62",
+ *      "x0leonbrc9"
+ *    ],
+ *    "process.entity_id": [
+ *      "6k8waczi22"
+ *    ]
+ *  },
+ *  "sort": [
+ *    0,
+ *    1604956405246
+ *  ]
+ * }
+ */
+export interface FieldsObject {
+  [key: string]: ECSField<number | string>;
+}
+
+/**
+ * A node in a resolver graph.
+ */
+export interface ResolverNode {
+  data: FieldsObject;
+  id: string | number;
+  // the very root node might not have the parent field defined
+  parent?: string | number;
+  name?: string;
+  stats: EventStats;
+}
+
+/**
  * Statistical information for a node in a resolver tree.
  */
 export interface ResolverNodeStats {
@@ -299,6 +349,8 @@ export interface HostResultList {
   request_page_index: number;
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
+  /* policy IDs and versions */
+  policy_info?: HostInfo['policy_info'];
 }
 
 /**
@@ -520,9 +572,30 @@ export enum MetadataQueryStrategyVersions {
   VERSION_2 = 'v2',
 }
 
+export type PolicyInfo = Immutable<{
+  revision: number;
+  id: string;
+}>;
+
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
   host_status: HostStatus;
+  policy_info?: {
+    agent: {
+      /**
+       * As set in Kibana
+       */
+      configured: PolicyInfo;
+      /**
+       * Last reported running in agent (may lag behind configured)
+       */
+      applied: PolicyInfo;
+    };
+    /**
+     * Current intended 'endpoint' package policy
+     */
+    endpoint: PolicyInfo;
+  };
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
 }>;
@@ -558,6 +631,8 @@ export type HostMetadata = Immutable<{
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
+        endpoint_policy_version: number;
+        version: number;
       };
     };
   };
@@ -796,9 +871,46 @@ export interface SafeLegacyEndpointEvent {
 }
 
 /**
+ * The fields to use to identify nodes within a resolver tree.
+ */
+export interface ResolverSchema {
+  /**
+   * the ancestry field should be set to a field that contains an order array representing
+   * the ancestors of a node.
+   */
+  ancestry?: string;
+  /**
+   * id represents the field to use as the unique ID for a node.
+   */
+  id: string;
+  /**
+   * field to use for the name of the node
+   */
+  name?: string;
+  /**
+   * parent represents the field that is the edge between two nodes.
+   */
+  parent: string;
+}
+
+/**
  * The response body for the resolver '/entity' index API
  */
-export type ResolverEntityIndex = Array<{ entity_id: string }>;
+export type ResolverEntityIndex = Array<{
+  /**
+   * A name for the schema that is being used (e.g. endpoint, winlogbeat, etc)
+   */
+  name: string;
+  /**
+   * The schema to pass to the /tree api and other backend requests, based on the contents of the document found using
+   * the _id
+   */
+  schema: ResolverSchema;
+  /**
+   * Unique ID value for the requested document using the `_id` field passed to the /entity route
+   */
+  id: string;
+}>;
 
 /**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
@@ -816,9 +928,7 @@ export type ResolverEntityIndex = Array<{ entity_id: string }>;
  * `Type` types, we process the result of `TypeOf` instead, as this will be consistent.
  */
 export type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
-  ? KbnConfigSchemaInputObjectTypeOf<
-      T
-    > /** `schema.number()` accepts strings, so this type should accept them as well. */
+  ? KbnConfigSchemaInputObjectTypeOf<T> /** `schema.number()` accepts strings, so this type should accept them as well. */
   : number extends T
   ? T | string
   : T;
@@ -1068,7 +1178,8 @@ export interface HostPolicyResponse {
   Endpoint: {
     policy: {
       applied: {
-        version: string;
+        version: number;
+        endpoint_policy_version: number;
         id: string;
         name: string;
         status: HostPolicyResponseActionStatus;

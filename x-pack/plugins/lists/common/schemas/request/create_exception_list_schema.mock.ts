@@ -46,3 +46,13 @@ export const getCreateExceptionListMinimalSchemaMockWithoutId = (): CreateExcept
   name: NAME,
   type: ENDPOINT_TYPE,
 });
+
+/**
+ * Useful for end to end testing with detections
+ */
+export const getCreateExceptionListDetectionSchemaMock = (): CreateExceptionListSchema => ({
+  description: DESCRIPTION,
+  list_id: LIST_ID,
+  name: NAME,
+  type: 'detection',
+});

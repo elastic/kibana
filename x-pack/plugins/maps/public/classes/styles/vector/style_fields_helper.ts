@@ -34,7 +34,7 @@ export async function createStyleFieldsHelper(fields: IField[]): Promise<StyleFi
   return new StyleFieldsHelper(styleFields);
 }
 
-class StyleFieldsHelper {
+export class StyleFieldsHelper {
   private readonly _styleFields: StyleField[];
   private readonly _ordinalAndCategoricalFields: StyleField[];
   private readonly _numberFields: StyleField[];

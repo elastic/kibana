@@ -39,6 +39,7 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
         "euiBorderColor": "#343741",
         "euiBorderEditable": "2px dotted #343741",
         "euiBorderRadius": "4px",
+        "euiBorderRadiusSmall": "2px",
         "euiBorderThick": "2px solid #343741",
         "euiBorderThin": "1px solid #343741",
         "euiBorderWidthThick": "2px",
@@ -375,6 +376,15 @@ exports[`NoteCardBody renders correctly against snapshot 1`] = `
           },
         },
         "euiPaletteColorBlindKeys": "'euiColorVis0', 'euiColorVis1', 'euiColorVis2', 'euiColorVis3', 'euiColorVis4', 'euiColorVis5', 'euiColorVis6', 'euiColorVis7', 'euiColorVis8', 'euiColorVis9'",
+        "euiPanelBackgroundColorModifiers": Object {
+          "plain": "#1d1e24",
+          "subdued": "#25262e",
+          "transparent": "rgba(0, 0, 0, 0)",
+        },
+        "euiPanelBorderRadiusModifiers": Object {
+          "borderRadiusMedium": "4px",
+          "borderRadiusNone": 0,
+        },
         "euiPanelPaddingModifiers": Object {
           "paddingLarge": "24px",
           "paddingMedium": "16px",

@@ -375,7 +375,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       maxResultWindow,
       initialSearchContext
     );
-    searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
+    searchSource.setField('fieldsFromSource', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     if (sourceOnlyFields.length === 0) {
       searchSource.setField('source', false); // do not need anything from _source
     } else {
@@ -499,7 +499,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
 
     searchSource.setField('query', query);
-    searchSource.setField('fields', this._getTooltipPropertyNames());
+    searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
 
     const resp = await searchSource.fetch();
 
@@ -702,7 +702,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       indexSettings.maxResultWindow,
       initialSearchContext
     );
-    searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
+    searchSource.setField('fieldsFromSource', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     if (sourceOnlyFields.length === 0) {
       searchSource.setField('source', false); // do not need anything from _source
     } else {

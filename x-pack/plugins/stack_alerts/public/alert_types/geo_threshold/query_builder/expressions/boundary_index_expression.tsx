@@ -36,10 +36,12 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   setBoundaryGeoField,
   setBoundaryNameField,
 }) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];
   const { dataUi, dataIndexPatterns, http } = alertsContext;
   const IndexPatternSelect = (dataUi && dataUi.IndexPatternSelect) || null;
   const { boundaryGeoField } = alertParams;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const nothingSelected: IFieldType = {
     name: '<nothing selected>',
     type: 'string',

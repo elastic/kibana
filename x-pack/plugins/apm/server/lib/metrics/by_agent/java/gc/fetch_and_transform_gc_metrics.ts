@@ -40,7 +40,7 @@ export async function fetchAndTransformGcMetrics({
 }) {
   const { start, end, apmEventClient, config } = setup;
 
-  const { bucketSize } = getBucketSize(start, end);
+  const { bucketSize } = getBucketSize({ start, end });
 
   const projection = getMetricsProjection({
     setup,

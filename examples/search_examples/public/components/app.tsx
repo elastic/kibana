@@ -191,11 +191,7 @@ export const SearchExamplesApp = ({
   };
 
   const doSearchSourceSearch = async () => {
-    if (!indexPattern || !selectedNumericField) return;
-
-    const aggs = data.search.aggs.createAggConfigs(indexPattern, [
-      { type: 'avg', params: { field: selectedNumericField!.name } },
-    ]);
+    if (!indexPattern) return;
 
     const query = data.query.queryString.getQuery();
     const filters = data.query.filterManager.getFilters();
@@ -209,15 +205,18 @@ export const SearchExamplesApp = ({
 
       searchSource
         .setField('index', indexPattern)
-        .setField('aggs', () => aggs.toDsl())
         .setField('filter', filters)
-        .setField('query', query);
+        .setField('query', query)
+        .setField('fields', selectedFields.length ? selectedFields.map((f) => f.name) : ['*']);
 
-      if (selectedFields.length) {
-        searchSource.setField(
-          'fields',
-          selectedFields.map((f) => f.name)
-        );
+      if (selectedNumericField) {
+        searchSource.setField('aggs', () => {
+          return data.search.aggs
+            .createAggConfigs(indexPattern, [
+              { type: 'avg', params: { field: selectedNumericField.name } },
+            ])
+            .toDsl();
+        });
       }
 
       setRequest(await searchSource.getSearchRequestBody());
@@ -230,6 +229,7 @@ export const SearchExamplesApp = ({
         text: mountReactNode(message),
       });
     } catch (e) {
+      setResponse(e.body);
       notifications.toasts.addWarning(`An error has occurred: ${e.message}`);
     }
   };

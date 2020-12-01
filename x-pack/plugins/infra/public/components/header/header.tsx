@@ -17,6 +17,7 @@ interface HeaderProps {
 export const Header = ({ breadcrumbs = [], readOnlyBadge = false }: HeaderProps) => {
   const chrome = useKibana().services.chrome;
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const badge = readOnlyBadge
     ? {
         text: i18n.translate('xpack.infra.header.badge.readOnly.text', {
@@ -31,12 +32,10 @@ export const Header = ({ breadcrumbs = [], readOnlyBadge = false }: HeaderProps)
 
   const setBreadcrumbs = useCallback(() => {
     return chrome?.setBreadcrumbs(breadcrumbs || []);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [breadcrumbs, chrome]);
 
   const setBadge = useCallback(() => {
     return chrome?.setBadge(badge);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [badge, chrome]);
 
   useEffect(() => {

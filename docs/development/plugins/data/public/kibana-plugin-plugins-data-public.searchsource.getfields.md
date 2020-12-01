@@ -21,7 +21,8 @@ getFields(): {
         size?: number | undefined;
         source?: string | boolean | string[] | undefined;
         version?: boolean | undefined;
-        fields?: string | boolean | string[] | undefined;
+        fields?: SearchFieldValue[] | undefined;
+        fieldsFromSource?: string | boolean | string[] | undefined;
         index?: import("../..").IndexPattern | undefined;
         searchAfter?: import("./types").EsQuerySearchAfter | undefined;
         timeout?: string | undefined;
@@ -42,7 +43,8 @@ getFields(): {
         size?: number | undefined;
         source?: string | boolean | string[] | undefined;
         version?: boolean | undefined;
-        fields?: string | boolean | string[] | undefined;
+        fields?: SearchFieldValue[] | undefined;
+        fieldsFromSource?: string | boolean | string[] | undefined;
         index?: import("../..").IndexPattern | undefined;
         searchAfter?: import("./types").EsQuerySearchAfter | undefined;
         timeout?: string | undefined;
