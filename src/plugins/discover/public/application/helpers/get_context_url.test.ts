@@ -19,16 +19,23 @@
 
 import { getContextUrl } from './get_context_url';
 import { FilterManager } from '../../../../data/public/query/filter_manager';
+const filterManager = ({
+  getGlobalFilters: () => [],
+  getAppFilters: () => [],
+} as unknown) as FilterManager;
 
 describe('Get context url', () => {
-  test('returns a valid context url', async () => {
-    const filterManager = ({
-      getGlobalFilters: () => [],
-      getAppFilters: () => [],
-    } as unknown) as FilterManager;
+  test('returning a valid context url', async () => {
     const url = await getContextUrl('docId', 'ipId', ['test1', 'test2'], filterManager);
     expect(url).toMatchInlineSnapshot(
       `"#/context/ipId/docId?_g=(filters:!())&_a=(columns:!(test1,test2),filters:!())"`
+    );
+  });
+
+  test('returning a valid context url when docId contains whitespace', async () => {
+    const url = await getContextUrl('doc Id', 'ipId', ['test1', 'test2'], filterManager);
+    expect(url).toMatchInlineSnapshot(
+      `"#/context/ipId/doc%20Id?_g=(filters:!())&_a=(columns:!(test1,test2),filters:!())"`
     );
   });
 });
