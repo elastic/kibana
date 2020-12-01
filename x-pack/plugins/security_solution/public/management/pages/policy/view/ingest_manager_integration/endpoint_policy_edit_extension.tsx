@@ -52,7 +52,7 @@ export const EndpointPolicyEditExtension = memo<PackagePolicyEditExtensionCompon
             <EditFlowMessage agentPolicyId={policy.policy_id} integrationPolicyId={policy.id} />
           </EuiText>
         </EuiCallOut>
-
+        <EuiSpacer size="m" />
         <WrappedPolicyDetailsForm policyId={policy.id} onChange={onChange} />
       </>
     );
@@ -119,7 +119,11 @@ const WrappedPolicyDetailsForm = memo<{
     });
   }, [onChange, updatedPolicy]);
 
-  return <PolicyDetailsForm />;
+  return (
+    <div data-test-subj="endpointPolicyForm">
+      <PolicyDetailsForm />
+    </div>
+  );
 });
 WrappedPolicyDetailsForm.displayName = 'WrappedPolicyDetailsForm';
 
@@ -152,17 +156,6 @@ const EditFlowMessage = memo<{
   }, [agentPolicyId, integrationPolicyId]);
 
   const handleClosePopup = useCallback(() => setIsMenuOpen(false), []);
-
-  const handleSecurityPolicyAction = useNavigateToAppEventHandler<PolicyDetailsRouteState>(
-    MANAGEMENT_APP_ID,
-    {
-      path: getPolicyDetailPath(integrationPolicyId),
-      state: {
-        onSaveNavigateTo: navigateBackToIngest,
-        onCancelNavigateTo: navigateBackToIngest,
-      },
-    }
-  );
 
   const handleTrustedAppsAction = useNavigateToAppEventHandler<TrustedAppsListPageRouteState>(
     MANAGEMENT_APP_ID,
@@ -201,16 +194,6 @@ const EditFlowMessage = memo<{
   const actionItems = useMemo<EuiContextMenuPanelProps['items']>(() => {
     return [
       <EuiContextMenuItem
-        key="policyDetails"
-        onClick={handleSecurityPolicyAction}
-        data-test-subj="securityPolicy"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.fleet.editPackagePolicy.actionSecurityPolicy"
-          defaultMessage="Edit Policy"
-        />
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
         key="trustedApps"
         onClick={handleTrustedAppsAction}
         data-test-subj="trustedAppsAction"
@@ -221,7 +204,7 @@ const EditFlowMessage = memo<{
         />
       </EuiContextMenuItem>,
     ];
-  }, [handleSecurityPolicyAction, handleTrustedAppsAction]);
+  }, [handleTrustedAppsAction]);
 
   return (
     <EuiFlexGroup>
