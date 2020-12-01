@@ -5,3 +5,6 @@
  */
 
 export { FollowerIndexActionsProvider } from './follower_index_actions_provider';
+export { FollowerIndexPauseProvider } from './follower_index_pause_provider';
+export { FollowerIndexResumeProvider } from './follower_index_resume_provider';
+export { FollowerIndexUnfollowProvider } from './follower_index_unfollow_provider';
