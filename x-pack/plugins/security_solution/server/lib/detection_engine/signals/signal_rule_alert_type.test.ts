@@ -16,6 +16,7 @@ import {
   getListsClient,
   getExceptions,
   sortExceptionItems,
+  preCheckRuleExecution,
 } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
@@ -42,6 +43,7 @@ jest.mock('./utils', () => {
     getListsClient: jest.fn(),
     getExceptions: jest.fn(),
     sortExceptionItems: jest.fn(),
+    preCheckRuleExecution: jest.fn(),
   };
 });
 jest.mock('../notifications/schedule_notification_actions');
@@ -121,6 +123,12 @@ describe('rules_notification_alert_type', () => {
       searchAfterTimes: [],
       createdSignalsCount: 10,
     });
+    (preCheckRuleExecution as jest.Mock).mockImplementation((indices, t, s, l, b) => ({
+      result: 'success',
+      resultMessages: [],
+      successIndexes: [...indices],
+      failingIndexes: [],
+    }));
     alertServices.callCluster.mockResolvedValue({
       hits: {
         total: { value: 10 },
