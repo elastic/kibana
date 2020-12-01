@@ -183,7 +183,7 @@ export class TelemetryCollectionManagerPlugin
   }
 
   private async areAllCollectorsReady() {
-    return this.usageCollection?.areAllCollectorsReady();
+    return await this.usageCollection?.areAllCollectorsReady();
   }
 
   private getOptInStatsForCollection = async (
