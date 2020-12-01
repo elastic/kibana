@@ -1,0 +1,38 @@
+[[running-kibana-with-apm]]
+== Running Kibana with the APM Agent Locally
+
+The easiest and recommended way of running Kibana with the APM agent locally is to use the solution provided by the https://github.com/elastic/apm-integration-testing[apm-integration-testing repo]. You’ll need https://www.docker.com/community-edition[Docker] and https://docs.docker.com/compose/install/[Docker Compose] to use the tool.
+
+
+[discrete]
+== Quick start guide
+
+1. Clone https://github.com/elastic/apm-integration-testing[elastic/apm-integration-testing]
+2. Change into the apm-integration-testing repo:
+** `cd apm-integration-testing`
+3. Run {es} and the APM servers without Kibana using:
+** `./scripts/compose.py start master --no-kibana`
+4. Change into the {kib} repo:
+** `cd ../kibana`
+5. Change the elasticsearch credentials in your `kibana.yml` configuration file to match those needed by elasticsearch and the APM server (see the apm-integration-testing repo's https://github.com/elastic/apm-integration-testing#logging-in[README] for users provided to test different scenarios).
+6. Make sure that the APM agent is active and points to the local APM server by adding the following configuration settings to your `kibana.yml` configuration file:
++
+["source","shell"]
+----------
+elastic.apm.active: true
+elastic.apm.serverUrl: 'http://127.0.0.1:8200'
+# elastic.apm.secretToken: ... <-- might be required in prod/cloud
+# optional metrics to adjust performance 
+# see https://www.elastic.co/guide/en/apm/agent/nodejs/master/configuration.html[APM agent configuration]
+elastic.apm.centralConfig: false
+elastic.apm.breakdownMetrics: false
+elastic.apm.transactionSampleRate: 0.1
+elastic.apm.metricsInterval: '120s'
+----------
+
+7. Start Kibana with APM active using:
+** `ELASTIC_APM_ACTIVE=true yarn start`
+8. After Kibana starts up, navigate to the APM app, where you should see some transactions.
+9. You can now continue doing what you want to in Kibana (e.g. install sample data sets, issue queries in dashboards, build new visualizations etc).
+10. Once you're finished, you can stop Kibana normally, then stop the {es} and APM servers in the apm-integration-testing clone with the following script:
+** `./scripts/compose.py stop`

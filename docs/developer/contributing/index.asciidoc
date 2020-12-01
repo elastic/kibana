@@ -17,6 +17,7 @@ Read <<development-getting-started>> to get your environment up and running, the
 * <<kibana-localization>>
 * <<kibana-release-notes-process>>
 * <<kibana-linting>>
+* <<running-kibana-with-apm>>
 
 [discrete]
 [[signing-contributor-agreement]]
@@ -90,3 +91,5 @@ include::kibana-issue-reporting.asciidoc[leveloffset=+1]
 include::pr-review.asciidoc[leveloffset=+1]
 
 include::linting.asciidoc[leveloffset=+1]
+
+include::running-kibana-with-apm.asciidoc[leveloffset=+1]
