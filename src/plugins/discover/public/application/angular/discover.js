@@ -741,18 +741,14 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.updateDataSource = () => {
     const { indexPattern, searchSource, useNewFieldsApi } = $scope;
+    const { columns, sort } = $scope.state;
     updateSearchSource(searchSource, {
       indexPattern,
       services,
-      sort: $scope.state.sort,
+      sort,
+      columns,
+      useNewFieldsApi
     });
-    if (useNewFieldsApi) {
-      const { columns } = $scope.state;
-      if (columns.length === 0 || columns.includes('fields')) {
-        searchSource.setField('fields', ['*']);
-        searchSource.setField('source', false);
-      }
-    }
     return Promise.resolve();
   };
 
