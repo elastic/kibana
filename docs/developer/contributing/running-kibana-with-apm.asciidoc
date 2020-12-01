@@ -1,11 +1,11 @@
 [[running-kibana-with-apm]]
 == Running Kibana with the APM Agent Locally
 
-The easiest and recommended way of running Kibana with the APM agent locally is to use the solution provided by the https://github.com/elastic/apm-integration-testing[apm-integration-testing repo]. You’ll need https://www.docker.com/community-edition[Docker] and https://docs.docker.com/compose/install/[Docker Compose] to use the tool.
+The easiest and recommended way of running Kibana with the APM agent locally is to use the solution provided by the https://github.com/elastic/apm-integration-testing[apm-integration-testing] repo. You’ll need https://www.docker.com/community-edition[Docker] and https://docs.docker.com/compose/install/[Docker Compose] to use the tool.
 
 
 [discrete]
-== Quick start guide
+=== Quick start guide
 
 1. Clone https://github.com/elastic/apm-integration-testing[elastic/apm-integration-testing]
 2. Change into the apm-integration-testing repo:
@@ -23,13 +23,13 @@ elastic.apm.active: true
 elastic.apm.serverUrl: 'http://127.0.0.1:8200'
 # elastic.apm.secretToken: ... <-- might be required in prod/cloud
 # optional metrics to adjust performance 
-# see https://www.elastic.co/guide/en/apm/agent/nodejs/master/configuration.html[APM agent configuration]
 elastic.apm.centralConfig: false
 elastic.apm.breakdownMetrics: false
 elastic.apm.transactionSampleRate: 0.1
 elastic.apm.metricsInterval: '120s'
 ----------
 
+Take a look at the {apm-node-ref} configuration options for more information about optional metrics to adjust performance.
 7. Start Kibana with APM active using:
 ** `ELASTIC_APM_ACTIVE=true yarn start`
 8. After Kibana starts up, navigate to the APM app, where you should see some transactions.
