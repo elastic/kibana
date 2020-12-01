@@ -26,6 +26,7 @@ import { GeoJsonWithMeta } from '../vector_source';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 
 const MAX_TRACKS = 1000;
 
@@ -255,6 +256,20 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   async getSupportedShapeTypes() {
     return [VECTOR_SHAPE_TYPE.LINE];
+  }
+
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+    const tooltipProperties = await super.getTooltipProperties(properties);
+    tooltipProperties.push(
+      new TooltipProperty(
+        'isTrackTrimmed',
+        i18n.translate('xpack.maps.source.esGeoLine.isTrackTrimmedLabel', {
+          defaultMessage: 'trimmed',
+        }),
+        !properties.complete
+      )
+    );
+    return tooltipProperties;
   }
 }
 
