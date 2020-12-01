@@ -460,8 +460,6 @@ export class IndexPatternsService {
    * @param spec
    * @param override Overwrite if existing index pattern exists.
    * @param skipFetchFields Whether to skip field refresh step.
-   * @param makeDefault Whether to make the new index pattern the default
-   *                    index pattern.
    */
 
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {

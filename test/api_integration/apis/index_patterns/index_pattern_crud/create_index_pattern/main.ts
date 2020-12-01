@@ -123,13 +123,8 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'number',
               count: 123,
               script: '',
-              lang: 'test-lang',
-              conflictDescriptions: {
-                foo: ['bar'],
-              },
               esTypes: ['test-type'],
-              scripted: false,
-              readFromDocValues: false,
+              scripted: true,
             },
           },
         },
@@ -145,11 +140,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.index_pattern.fields.bar.type).to.be('number');
       expect(response.body.index_pattern.fields.bar.count).to.be(123);
       expect(response.body.index_pattern.fields.bar.script).to.be('');
-      expect(response.body.index_pattern.fields.bar.lang).to.be('test-lang');
-      expect(response.body.index_pattern.fields.bar.conflictDescriptions.foo[0]).to.be('bar');
       expect(response.body.index_pattern.fields.bar.esTypes[0]).to.be('test-type');
-      expect(response.body.index_pattern.fields.bar.scripted).to.be(false);
-      expect(response.body.index_pattern.fields.bar.readFromDocValues).to.be(false);
+      expect(response.body.index_pattern.fields.bar.scripted).to.be(true);
     });
 
     it('can specify optional typeMeta attribute when creating an index pattern', async () => {

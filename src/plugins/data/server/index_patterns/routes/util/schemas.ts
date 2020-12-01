@@ -42,18 +42,9 @@ export const fieldSpecSchemaFields = {
       maxLength: 1_000_000,
     })
   ),
-  lang: schema.maybe(
-    schema.string({
-      maxLength: 1_000,
-    })
-  ),
-  conflictDescriptions: schema.maybe(
-    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
-  ),
   format: schema.maybe(serializedFieldFormatSchema),
   esTypes: schema.maybe(schema.arrayOf(schema.string())),
   scripted: schema.maybe(schema.boolean()),
-  readFromDocValues: schema.maybe(schema.boolean()),
   subType: schema.maybe(
     schema.object({
       multi: schema.maybe(
