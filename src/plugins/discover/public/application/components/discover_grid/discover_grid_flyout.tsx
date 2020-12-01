@@ -65,7 +65,11 @@ export const DiscoverGridFlyout = function DiscoverGridInner({
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
             <EuiFlexItem>
-              <EuiTitle size="s" className="dscTable__flyoutHeader">
+              <EuiTitle
+                size="s"
+                className="dscTable__flyoutHeader"
+                data-test-subj="docTableRowDetailsTitle"
+              >
                 <h2>
                   <EuiIcon type="expand" size="m" />{' '}
                   {i18n.translate('discover.grid.tableRow.detailHeading', {

@@ -84,6 +84,11 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       return await table.findAllByTestSubject('dataGridRow');
     }
 
+    public async getDocTableRows() {
+      const table = await this.getTable();
+      return await table.findAllByTestSubject('dataGridRow');
+    }
+
     public async getAnchorRow(): Promise<WebElementWrapper> {
       const table = await this.getTable();
       return await table.findByTestSubject('~docTableAnchorRow');
@@ -104,7 +109,11 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     public async getDetailsRows(): Promise<WebElementWrapper[]> {
-      return [await testSubjects.find('docTableDetailsFlyout')];
+      return await testSubjects.findAll('docTableDetailsFlyout');
+    }
+
+    public async closeFlyout() {
+      await testSubjects.click('euiFlyoutCloseButton');
     }
 
     public async getHeaderFields(): Promise<string[]> {
