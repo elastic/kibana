@@ -27,7 +27,7 @@ describe('sortByNewestAlert', () => {
         cluster,
         ui: {
           ...ui,
-          triggeredMS: +new Date() - 2,
+          triggeredMS: 2,
         },
         stackProduct: 'elasticsearch',
         stackProductUuid: `es1`,
@@ -41,7 +41,7 @@ describe('sortByNewestAlert', () => {
         cluster,
         ui: {
           ...ui,
-          triggeredMS: +new Date() - 3,
+          triggeredMS: 1,
         },
         stackProduct: 'elasticsearch',
         stackProductUuid: `es1`,
