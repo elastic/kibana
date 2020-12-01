@@ -319,7 +319,7 @@ describe('BackgroundSessionService', () => {
 
       const mockIdMapping = createMockIdMapping(
         [[MOCK_KEY_HASH, MOCK_ASYNC_ID]],
-        moment().subtract(1, 'm')
+        moment().subtract(2, 'm')
       );
 
       const deleteSpy = jest.spyOn(mockIdMapping, 'delete');
