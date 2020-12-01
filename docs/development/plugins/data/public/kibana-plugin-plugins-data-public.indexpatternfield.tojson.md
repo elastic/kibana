@@ -8,7 +8,7 @@
 
 ```typescript
 toJSON(): {
-        count: number;
+        count: number | undefined;
         script: string | undefined;
         lang: string | undefined;
         conflictDescriptions: Record<string, string[]> | undefined;
@@ -26,7 +26,7 @@ toJSON(): {
 <b>Returns:</b>
 
 `{
-        count: number;
+        count: number | undefined;
         script: string | undefined;
         lang: string | undefined;
         conflictDescriptions: Record<string, string[]> | undefined;
