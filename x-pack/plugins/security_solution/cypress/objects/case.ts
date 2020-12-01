@@ -90,14 +90,6 @@ export const mockConnectorsResponse = [
     actionTypeId: '.jira',
     name: 'Jira',
     config: {
-      incidentConfiguration: {
-        mapping: [
-          { source: 'title', target: 'summary', actionType: 'overwrite' },
-          { source: 'description', target: 'description', actionType: 'overwrite' },
-          { source: 'comments', target: 'comments', actionType: 'append' },
-        ],
-      },
-      isCaseOwned: true,
       apiUrl: 'https://siem-kibana.atlassian.net',
       projectKey: 'RJ',
     },
@@ -109,14 +101,6 @@ export const mockConnectorsResponse = [
     actionTypeId: '.resilient',
     name: 'Resilient',
     config: {
-      incidentConfiguration: {
-        mapping: [
-          { source: 'title', target: 'name', actionType: 'overwrite' },
-          { source: 'description', target: 'description', actionType: 'overwrite' },
-          { source: 'comments', target: 'comments', actionType: 'append' },
-        ],
-      },
-      isCaseOwned: true,
       apiUrl: 'https://ibm-resilient.siem.estc.dev',
       orgId: '201',
     },
@@ -128,14 +112,6 @@ export const mockConnectorsResponse = [
     actionTypeId: '.servicenow',
     name: 'ServiceNow',
     config: {
-      incidentConfiguration: {
-        mapping: [
-          { source: 'title', target: 'short_description', actionType: 'overwrite' },
-          { source: 'description', target: 'description', actionType: 'overwrite' },
-          { source: 'comments', target: 'comments', actionType: 'append' },
-        ],
-      },
-      isCaseOwned: true,
       apiUrl: 'https://dev65287.service-now.com',
     },
     isPreconfigured: false,
