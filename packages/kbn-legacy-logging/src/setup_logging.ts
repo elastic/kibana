@@ -34,7 +34,7 @@ export async function setupLogging(
   // thrown every time we start the server.
   // In order to keep using the legacy logger until we remove it I'm just adding
   // a new hard limit here.
-  process.stdout.setMaxListeners(25);
+  process.stdout.setMaxListeners(40);
 
   return await server.register({
     plugin: good,

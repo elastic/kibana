@@ -3,13 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { ActionParamsProps } from '../../../../types';
 import { ServerLogActionParams } from '.././types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
-import { resolvedActionGroupMessage } from '../../../constants';
 
 export const ServerLogParamsFields: React.FunctionComponent<
   ActionParamsProps<ServerLogActionParams>
@@ -23,25 +22,26 @@ export const ServerLogParamsFields: React.FunctionComponent<
     { value: 'error', text: 'Error' },
     { value: 'fatal', text: 'Fatal' },
   ];
-
   useEffect(() => {
-    if (!actionParams?.level) {
+    if (!actionParams.level) {
       editAction('level', 'info', index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
+    [boolean, string | undefined]
+  >([false, defaultMessage]);
   useEffect(() => {
-    if (defaultMessage === resolvedActionGroupMessage) {
-      editAction('message', defaultMessage, index);
-    } else if (
-      (!message || message === resolvedActionGroupMessage) &&
-      defaultMessage &&
-      defaultMessage.length > 0
+    if (
+      !actionParams?.message ||
+      (isUsingDefault &&
+        actionParams?.message === defaultMessageUsed &&
+        defaultMessageUsed !== defaultMessage)
     ) {
+      setDefaultMessageUsage([true, defaultMessage]);
       editAction('message', defaultMessage, index);
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultMessage]);
 
