@@ -4,23 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonIcon,
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiBasicTable, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './columns/monitor_status_column';
 import { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../../common/charts';
-import { OverviewPageLink } from './overview_page_link';
-import { MonitorPageLink } from '../../common/monitor_page_link';
 import * as labels from './translations';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 import { MonitorListProps } from './monitor_list_container';

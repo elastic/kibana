@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import { get } from 'lodash';
 import { QueryContext } from './query_context';
 

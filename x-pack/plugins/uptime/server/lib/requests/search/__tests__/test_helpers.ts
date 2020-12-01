@@ -5,7 +5,8 @@
  */
 
 import { QueryContext } from '../query_context';
+import { getUptimeESMockClient } from '../../__tests__/helper';
 
 export const simpleQueryContext = (): QueryContext => {
-  return new QueryContext(undefined, '', '', undefined, 0, '');
+  return new QueryContext(getUptimeESMockClient().uptimeEsClient, '', '', undefined, 0, '');
 };
