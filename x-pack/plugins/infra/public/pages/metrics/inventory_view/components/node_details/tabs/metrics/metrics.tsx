@@ -83,9 +83,9 @@ const TabComponent = (props: TabProps) => {
   }
 
   const buildCustomMetric = useCallback(
-    (field: string, id: string) => ({
+    (field: string, id: string, aggregation: string = 'avg') => ({
       type: 'custom' as SnapshotMetricType,
-      aggregation: 'avg',
+      aggregation,
       field,
       id,
     }),
@@ -111,6 +111,7 @@ const TabComponent = (props: TabProps) => {
       buildCustomMetric('system.load.15', 'load15m'),
       buildCustomMetric('system.memory.actual.used.bytes', 'usedMemory'),
       buildCustomMetric('system.memory.actual.free', 'freeMemory'),
+      buildCustomMetric('system.cpu.cores', 'cores', 'max'),
     ],
     [],
     nodeType,
@@ -166,7 +167,7 @@ const TabComponent = (props: TabProps) => {
     base.rows = base.rows.map((b, rowIdx) => {
       const newRow = { ...b };
       otherSeries.forEach((o, idx) => {
-        newRow[`metric_${idx + 1}`] = o.rows[rowIdx].metric_0;
+        newRow[`metric_${idx + 1}`] = o.rows[rowIdx].metric_0 as number;
       });
       return newRow;
     });
@@ -224,6 +225,7 @@ const TabComponent = (props: TabProps) => {
   const load15mMetricsTs = useMemo(() => getTimeseries('load15m'), [getTimeseries]);
   const usedMemoryMetricsTs = useMemo(() => getTimeseries('usedMemory'), [getTimeseries]);
   const freeMemoryMetricsTs = useMemo(() => getTimeseries('freeMemory'), [getTimeseries]);
+  const coresMetricsTs = useMemo(() => getTimeseries('cores'), [getTimeseries]);
 
   useEffect(() => {
     reload();
@@ -254,6 +256,23 @@ const TabComponent = (props: TabProps) => {
     'rate'
   );
 
+  systemMetricsTs.rows = systemMetricsTs.rows.slice().map((r, idx) => {
+    if (r.metric_0 && coresMetricsTs?.rows[idx].metric_0) {
+      const metric0: number = r.metric_0! as number;
+      const cores: number = coresMetricsTs!.rows[idx].metric_0! as number;
+      r.metric_0 = metric0 / cores;
+    }
+    return r;
+  });
+
+  userMetricsTs.rows = userMetricsTs.rows.slice().map((r, idx) => {
+    if (r.metric_0 && coresMetricsTs?.rows[idx].metric_0) {
+      const metric0: number = r.metric_0! as number;
+      const cores: number = coresMetricsTs!.rows[idx].metric_0! as number;
+      r.metric_0 = metric0 / cores;
+    }
+    return r;
+  });
   const cpuTimeseries = mergeTimeseries(systemMetricsTs, userMetricsTs);
   const networkTimeseries = mergeTimeseries(rxMetricsTs, txMetricsTs);
   const loadTimeseries = mergeTimeseries(load1mMetricsTs, load5mMetricsTs, load15mMetricsTs);
