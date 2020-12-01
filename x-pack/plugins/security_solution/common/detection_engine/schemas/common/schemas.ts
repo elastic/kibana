@@ -320,7 +320,12 @@ export type SeverityMappingOrUndefined = t.TypeOf<typeof severityMappingOrUndefi
 export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
 export type Status = t.TypeOf<typeof status>;
 
-export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
+export const job_status = t.keyof({
+  succeeded: null,
+  failed: null,
+  'going to run': null,
+  'partial failure': null,
+});
 export type JobStatus = t.TypeOf<typeof job_status>;
 
 export const conflicts = t.keyof({ abort: null, proceed: null });
