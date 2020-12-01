@@ -43,6 +43,7 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
     logUncaughtExceptions: true,
     globalLabels: {},
     centralConfig: false,
+    metricsInterval: '120s',
 
     // Can be performance intensive, disabling by default
     breakdownMetrics: isDistributable ? false : true,
