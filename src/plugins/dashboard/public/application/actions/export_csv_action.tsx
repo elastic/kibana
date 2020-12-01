@@ -48,7 +48,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
 
   public readonly type = ACTION_EXPORT_CSV;
 
-  public readonly order = 20;
+  public readonly order = 5;
 
   constructor(protected readonly params: Params) {}
 
