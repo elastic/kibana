@@ -77,6 +77,9 @@ describe('filterByAgent', () => {
         'stress_monitor_system_cpu_stress_threshold',
         'transaction_max_spans',
         'transaction_sample_rate',
+        'log_level',
+        'sanitize_field_names',
+        'transaction_ignore_urls',
       ]);
     });
 
