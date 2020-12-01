@@ -88,19 +88,16 @@ POST /api/index_patterns/index_pattern
 
 Customize creation behavior with:
 
-- `override` --- if set to `true`, replaces an existing index pattern if an
+- `override` &mdash; if set to `true`, replaces an existing index pattern if an
   index pattern with the provided title already exists. Defaults to `false`.
-- `refresh_fields` --- if set to `false` skips reloading index pattern fields after
-  the index pattern is stored. Defaults to `true`.
-- `make_default` --- if set to `true`, makes the new index pattern the default
-  index pattern. Defaults to `true`.
+- `refresh_fields` &mdash; if set to `true` reloads index pattern fields after
+  the index pattern is stored. Defaults to `false`.
 
 ```
 POST /api/index_patterns/index_pattern
 {
     "override": false,
     "refresh_fields": true,
-    "make_default": true,
     "index_pattern": {
         "title": "hello"
     }
@@ -221,13 +218,13 @@ POST /api/index_patterns/index_pattern
 }
 ```
 
-When you are updating fields, you can skip field refresh using `refresh_fields` flag.
-`refresh_fields` defaults to `true`.
+- `refresh_fields` &mdash; if set to `true` reloads index pattern fields after
+  the index pattern is stored. Defaults to `false`.
 
 ```
 POST /api/index_patterns/index_pattern
 {
-    "refresh_fields": false,
+    "refresh_fields": true,
     "index_pattern": {
         "fields": {}
     }
@@ -299,12 +296,13 @@ POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fiel
 }
 ```
 
-You can skip field refresh using `refresh_fields` flag. `refresh_fields` defaults to `true`.
+- `refresh_fields` &mdash; if set to `true` reloads index pattern fields after
+  the index pattern is stored. Defaults to `false`.
 
 ```
 POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fields
 {
-    "refresh_fields": false,
+    "refresh_fields": true,
     "fields": {}
 }
 ```
