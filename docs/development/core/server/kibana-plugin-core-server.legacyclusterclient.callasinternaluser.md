@@ -4,6 +4,11 @@
 
 ## LegacyClusterClient.callAsInternalUser property
 
+> Warning: This API is now obsolete.
+> 
+> Use [IClusterClient.asInternalUser](./kibana-plugin-core-server.iclusterclient.asinternaluser.md)<!-- -->.
+> 
+
 Calls specified endpoint with provided clientParams on behalf of the Kibana internal user. See [LegacyAPICaller](./kibana-plugin-core-server.legacyapicaller.md)<!-- -->.
 
 <b>Signature:</b>
