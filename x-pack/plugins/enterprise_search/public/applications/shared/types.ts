@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getActionType as getCaseConnectorUI } from './case';
+export interface IIndexingStatus {
+  percentageComplete: number;
+  numDocumentsWithErrors: number;
+  activeReindexJobId: number;
+}
