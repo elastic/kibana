@@ -257,19 +257,19 @@ const TabComponent = (props: TabProps) => {
   );
 
   systemMetricsTs.rows = systemMetricsTs.rows.slice().map((r, idx) => {
-    if (r.metric_0 && coresMetricsTs?.rows[idx].metric_0) {
-      const metric0: number = r.metric_0! as number;
-      const cores: number = coresMetricsTs!.rows[idx].metric_0! as number;
-      r.metric_0 = metric0 / cores;
+    const metric = r.metric_0 as number | undefined;
+    const cores = coresMetricsTs!.rows[idx].metric_0 as number | undefined;
+    if (metric && cores) {
+      r.metric_0 = metric / cores;
     }
     return r;
   });
 
   userMetricsTs.rows = userMetricsTs.rows.slice().map((r, idx) => {
-    if (r.metric_0 && coresMetricsTs?.rows[idx].metric_0) {
-      const metric0: number = r.metric_0! as number;
-      const cores: number = coresMetricsTs!.rows[idx].metric_0! as number;
-      r.metric_0 = metric0 / cores;
+    const metric = r.metric_0 as number | undefined;
+    const cores = coresMetricsTs!.rows[idx].metric_0 as number | undefined;
+    if (metric && cores) {
+      r.metric_0 = metric / cores;
     }
     return r;
   });
