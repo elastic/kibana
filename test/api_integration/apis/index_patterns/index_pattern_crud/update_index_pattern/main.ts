@@ -79,11 +79,10 @@ export default function ({ getService }: FtrProviderContext) {
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
         index_pattern: {
           title,
-          intervalName: 'intervalName1',
         },
       });
 
-      expect(response1.body.index_pattern.intervalName).to.be('intervalName1');
+      expect(response1.body.index_pattern.intervalName).to.be(undefined);
 
       const id = response1.body.index_pattern.id;
       const response2 = await supertest.post('/api/index_patterns/index_pattern/' + id).send({
@@ -311,19 +310,18 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response3.body.index_pattern.fields.bar.aggregatable).to.be(true);
     });
 
-    it('can multiple index pattern fields at once', async () => {
+    it('can update multiple index pattern fields at once', async () => {
       const title = `foo-${Date.now()}-${Math.random()}*`;
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
         index_pattern: {
           title,
           timeFieldName: 'timeFieldName1',
-          intervalName: 'intervalName1',
           typeMeta: { foo: 'bar' },
         },
       });
 
       expect(response1.body.index_pattern.timeFieldName).to.be('timeFieldName1');
-      expect(response1.body.index_pattern.intervalName).to.be('intervalName1');
+      expect(response1.body.index_pattern.intervalName).to.be(undefined);
       expect(response1.body.index_pattern.typeMeta.foo).to.be('bar');
 
       const id = response1.body.index_pattern.id;
