@@ -19,8 +19,13 @@
 
 import { IndexPattern, indexPatterns } from '../kibana_services';
 import { IIndexPatternFieldList } from '../../../data/common/index_patterns/fields';
-
 const fields = [
+  {
+    name: '_source',
+    type: '_source',
+    scripted: false,
+    filterable: false,
+  },
   {
     name: '_index',
     type: 'string',
@@ -61,6 +66,7 @@ const indexPattern = ({
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',
   metaFields: ['_index', '_score'],
+  formatField: jest.fn(),
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
   fields,
@@ -70,5 +76,8 @@ const indexPattern = ({
 } as unknown) as IndexPattern;
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
+indexPattern.formatField = (hit: Record<string, any>, fieldName: string) => {
+  return fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
+};
 
 export const indexPatternMock = indexPattern;

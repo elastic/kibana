@@ -26,11 +26,11 @@ export const getRenderCellValueFn = (
   rows: ElasticSearchHit[] | undefined
 ) => ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
   const row = rows ? (rows[rowIndex] as Record<string, unknown>) : undefined;
-
-  if (typeof row === 'undefined') {
-    return '-';
-  }
   const field = indexPattern.fields.getByName(columnId);
+
+  if (typeof row === 'undefined' || !field) {
+    return <span>-</span>;
+  }
   const formatSource = () => {
     const formatted = indexPattern.formatHit(row);
 
@@ -59,7 +59,8 @@ export const getRenderCellValueFn = (
     );
 
   if (isDetails && field && field.type === '_source') {
-    return JSON.stringify(row[columnId], null, 2);
+    // nicely formatted JSON for the expanded view
+    return <span>{JSON.stringify(row[columnId], null, 2)}</span>;
   }
   return value;
 };
