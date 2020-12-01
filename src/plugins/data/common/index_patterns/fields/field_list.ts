@@ -22,7 +22,6 @@ import { IFieldType } from './types';
 import { IndexPatternField } from './index_pattern_field';
 import { FieldSpec, IndexPatternFieldMap } from '../types';
 import { IndexPattern } from '../index_patterns';
-import { shortenDottedString } from '../../utils';
 
 type FieldMap = Map<IndexPatternField['name'], IndexPatternField>;
 
@@ -58,8 +57,7 @@ export const fieldList = (
       this.groups.get(field.type)!.set(field.name, field);
     };
     private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
-    private calcDisplayName = (name: string) =>
-      shortDotsEnable ? shortenDottedString(name) : name;
+
     constructor() {
       super();
       specs.map((field) => this.add(field));
@@ -71,7 +69,7 @@ export const fieldList = (
       ...(this.groups.get(type) || new Map()).values(),
     ];
     public readonly add = (field: FieldSpec) => {
-      const newField = new IndexPatternField(field, this.calcDisplayName(field.name));
+      const newField = new IndexPatternField({ ...field, shortDotsEnable });
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);
@@ -86,7 +84,7 @@ export const fieldList = (
     };
 
     public readonly update = (field: FieldSpec) => {
-      const newField = new IndexPatternField(field, this.calcDisplayName(field.name));
+      const newField = new IndexPatternField(field);
       const index = this.findIndex((f) => f.name === newField.name);
       this.splice(index, 1, newField);
       this.setByName(newField);

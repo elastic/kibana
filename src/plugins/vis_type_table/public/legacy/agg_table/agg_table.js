@@ -58,12 +58,8 @@ export function KbnAggTable(config, RecursionHelper) {
       };
 
       self.toCsv = function (formatted) {
-        const rows = formatted ? $scope.rows : $scope.table.rows;
-        const columns = formatted ? [...$scope.formattedColumns] : [...$scope.table.columns];
-
-        if ($scope.splitRow && formatted) {
-          columns.unshift($scope.splitRow);
-        }
+        const rows = $scope.rows;
+        const columns = $scope.formattedColumns;
 
         const nonAlphaNumRE = /[^a-zA-Z0-9]/;
         const allDoubleQuoteRE = /"/g;
@@ -77,7 +73,7 @@ export function KbnAggTable(config, RecursionHelper) {
           return val;
         }
 
-        let csvRows = [];
+        const csvRows = [];
         for (const row of rows) {
           const rowArray = [];
           for (const col of columns) {
@@ -86,15 +82,11 @@ export function KbnAggTable(config, RecursionHelper) {
               formatted && col.formatter ? escape(col.formatter.convert(value)) : escape(value);
             rowArray.push(formattedValue);
           }
-          csvRows = [...csvRows, rowArray];
+          csvRows.push(rowArray);
         }
 
         // add the columns to the rows
-        csvRows.unshift(
-          columns.map(function (col) {
-            return escape(formatted ? col.title : col.name);
-          })
-        );
+        csvRows.unshift(columns.map(({ title }) => escape(title)));
 
         return csvRows
           .map(function (row) {
@@ -112,7 +104,6 @@ export function KbnAggTable(config, RecursionHelper) {
           if (!table) {
             $scope.rows = null;
             $scope.formattedColumns = null;
-            $scope.splitRow = null;
             return;
           }
 
@@ -122,19 +113,12 @@ export function KbnAggTable(config, RecursionHelper) {
 
           if (typeof $scope.dimensions === 'undefined') return;
 
-          const { buckets, metrics, splitColumn, splitRow } = $scope.dimensions;
+          const { buckets, metrics } = $scope.dimensions;
 
           $scope.formattedColumns = table.columns
             .map(function (col, i) {
               const isBucket = buckets.find((bucket) => bucket.accessor === i);
-              const isSplitColumn = splitColumn
-                ? splitColumn.find((splitColumn) => splitColumn.accessor === i)
-                : undefined;
-              const isSplitRow = splitRow
-                ? splitRow.find((splitRow) => splitRow.accessor === i)
-                : undefined;
-              const dimension =
-                isBucket || isSplitColumn || metrics.find((metric) => metric.accessor === i);
+              const dimension = isBucket || metrics.find((metric) => metric.accessor === i);
 
               const formatter = dimension
                 ? getFormatService().deserialize(dimension.format)
@@ -146,10 +130,6 @@ export function KbnAggTable(config, RecursionHelper) {
                 formatter: formatter,
                 filterable: !!isBucket,
               };
-
-              if (isSplitRow) {
-                $scope.splitRow = formattedColumn;
-              }
 
               if (!dimension) return;
 

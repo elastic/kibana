@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ValuesType } from 'utility-types';
-import { PromiseReturnType } from '../../../../../../observability/typings/common';
+
 import {
   SERVICE_NAME,
   TRACE_ID,
@@ -196,7 +195,3 @@ export async function getBuckets({
     buckets,
   };
 }
-
-export type DistributionBucket = ValuesType<
-  PromiseReturnType<typeof getBuckets>['buckets']
->;

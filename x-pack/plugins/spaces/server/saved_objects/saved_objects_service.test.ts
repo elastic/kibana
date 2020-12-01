@@ -12,10 +12,10 @@ describe('SpacesSavedObjectsService', () => {
   describe('#setup', () => {
     it('registers the "space" saved object type with appropriate mappings and migrations', () => {
       const core = coreMock.createSetup();
-      const spacesService = spacesServiceMock.createSetupContract();
+      const spacesService = spacesServiceMock.createStartContract();
 
       const service = new SpacesSavedObjectsService();
-      service.setup({ core, spacesService });
+      service.setup({ core, getSpacesService: () => spacesService });
 
       expect(core.savedObjects.registerType).toHaveBeenCalledTimes(1);
       expect(core.savedObjects.registerType.mock.calls[0]).toMatchInlineSnapshot(`
@@ -66,10 +66,10 @@ describe('SpacesSavedObjectsService', () => {
 
     it('registers the client wrapper', () => {
       const core = coreMock.createSetup();
-      const spacesService = spacesServiceMock.createSetupContract();
+      const spacesService = spacesServiceMock.createStartContract();
 
       const service = new SpacesSavedObjectsService();
-      service.setup({ core, spacesService });
+      service.setup({ core, getSpacesService: () => spacesService });
 
       expect(core.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
       expect(core.savedObjects.addClientWrapper).toHaveBeenCalledWith(

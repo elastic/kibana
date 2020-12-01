@@ -628,6 +628,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     calculateModelMemoryLimit$({
+      datafeedConfig,
       analysisConfig,
       indexPattern,
       query,
@@ -635,6 +636,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       earliestMs,
       latestMs,
     }: {
+      datafeedConfig?: Datafeed;
       analysisConfig: AnalysisConfig;
       indexPattern: string;
       query: any;
@@ -643,6 +645,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       latestMs: number;
     }) {
       const body = JSON.stringify({
+        datafeedConfig,
         analysisConfig,
         indexPattern,
         query,

@@ -50,6 +50,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         'test.unrestricted-noop',
         'test.patternFiring',
         'test.throw',
+        'test.longRunning',
       ],
       privileges: {
         all: {
@@ -72,6 +73,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
               'test.unrestricted-noop',
               'test.patternFiring',
               'test.throw',
+              'test.longRunning',
             ],
           },
           ui: [],
@@ -96,6 +98,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
               'test.unrestricted-noop',
               'test.patternFiring',
               'test.throw',
+              'test.longRunning',
             ],
           },
           ui: [],

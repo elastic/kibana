@@ -7,6 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../common/test_utils';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
@@ -30,7 +31,9 @@ describe('Port', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="port"]').first().text()).toEqual('443');
+    expect(removeExternalLinkText(wrapper.find('[data-test-subj="port"]').first().text())).toEqual(
+      '443'
+    );
   });
 
   test('it hyperlinks links destination.port to an external service that describes the purpose of the port', () => {

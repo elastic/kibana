@@ -16,6 +16,7 @@ export interface IFieldType
 |  --- | --- | --- |
 |  [aggregatable](./kibana-plugin-plugins-data-server.ifieldtype.aggregatable.md) | <code>boolean</code> |  |
 |  [count](./kibana-plugin-plugins-data-server.ifieldtype.count.md) | <code>number</code> |  |
+|  [customLabel](./kibana-plugin-plugins-data-server.ifieldtype.customlabel.md) | <code>string</code> |  |
 |  [displayName](./kibana-plugin-plugins-data-server.ifieldtype.displayname.md) | <code>string</code> |  |
 |  [esTypes](./kibana-plugin-plugins-data-server.ifieldtype.estypes.md) | <code>string[]</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-server.ifieldtype.filterable.md) | <code>boolean</code> |  |

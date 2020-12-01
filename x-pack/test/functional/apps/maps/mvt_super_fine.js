@@ -19,7 +19,7 @@ export default function ({ getPageObjects, getService }) {
         ['global_maps_all', 'test_logstash_reader', 'geoshape_data_reader'],
         false
       );
-      await PageObjects.maps.loadSavedMap('geo grid vector grid example (SUPER_FINE resolution)');
+      await PageObjects.maps.loadSavedMap('geo grid vector grid example SUPER_FINE resolution');
     });
 
     after(async () => {

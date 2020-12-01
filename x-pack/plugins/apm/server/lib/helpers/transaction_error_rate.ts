@@ -20,6 +20,8 @@ export function getOutcomeAggregation({
   return {
     terms: { field: EVENT_OUTCOME },
     aggs: {
+      // simply using the doc count to get the number of requests is not possible for transaction metrics (histograms)
+      // to work around this we get the number of transactions by counting the number of latency values
       count: {
         value_count: {
           field: getTransactionDurationFieldForAggregatedTransactions(

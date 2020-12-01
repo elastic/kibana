@@ -19,6 +19,14 @@ export function transformActionVariables(actionVariables: ActionVariables): Acti
   return alwaysProvidedVars.concat(contextVars, paramsVars, stateVars);
 }
 
+export enum AlertProvidedActionVariables {
+  alertId = 'alertId',
+  alertName = 'alertName',
+  spaceId = 'spaceId',
+  tags = 'tags',
+  alertInstanceId = 'alertInstanceId',
+}
+
 function prefixKeys(actionVariables: ActionVariable[], prefix: string): ActionVariable[] {
   return actionVariables.map((actionVariable) => {
     return { name: `${prefix}${actionVariable.name}`, description: actionVariable.description };
@@ -31,30 +39,37 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   const result: ActionVariable[] = [];
 
   result.push({
-    name: 'alertId',
+    name: AlertProvidedActionVariables.alertId,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertIdLabel', {
       defaultMessage: 'The id of the alert.',
     }),
   });
 
   result.push({
-    name: 'alertName',
+    name: AlertProvidedActionVariables.alertName,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertNameLabel', {
       defaultMessage: 'The name of the alert.',
     }),
   });
 
   result.push({
-    name: 'spaceId',
+    name: AlertProvidedActionVariables.spaceId,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.spaceIdLabel', {
       defaultMessage: 'The spaceId of the alert.',
     }),
   });
 
   result.push({
-    name: 'tags',
+    name: AlertProvidedActionVariables.tags,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.tagsLabel', {
       defaultMessage: 'The tags of the alert.',
+    }),
+  });
+
+  result.push({
+    name: 'date',
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.dateLabel', {
+      defaultMessage: 'The date the alert scheduled the action.',
     }),
   });
 
@@ -62,6 +77,13 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     name: 'alertInstanceId',
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertInstanceIdLabel', {
       defaultMessage: 'The alert instance id that scheduled actions for the alert.',
+    }),
+  });
+
+  result.push({
+    name: 'alertActionGroup',
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertActionGroupLabel', {
+      defaultMessage: 'The alert action group that was used to scheduled actions for the alert.',
     }),
   });
 

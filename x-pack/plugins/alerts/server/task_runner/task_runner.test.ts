@@ -18,6 +18,7 @@ import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/serv
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  httpServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
@@ -25,12 +26,12 @@ import { alertsMock, alertsClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { Alert, ResolvedActionGroup } from '../../common';
+import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
 const alertType = {
   id: 'test',
   name: 'My test alert',
-  actionGroups: [{ id: 'default', name: 'Default' }, ResolvedActionGroup],
+  actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
   defaultActionGroupId: 'default',
   executor: jest.fn(),
   producer: 'alerts',
@@ -78,7 +79,7 @@ describe('Task Runner', () => {
     encryptedSavedObjectsClient,
     logger: loggingSystemMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    getBasePath: jest.fn().mockReturnValue(undefined),
+    basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
   };
@@ -113,7 +114,7 @@ describe('Task Runner', () => {
         },
       },
       {
-        group: ResolvedActionGroup.id,
+        group: RecoveredActionGroup.id,
         id: '2',
         actionTypeId: 'action',
         params: {
@@ -375,23 +376,24 @@ describe('Task Runner', () => {
     await taskRunner.run();
     expect(
       taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest
-    ).toHaveBeenCalledWith({
-      getBasePath: expect.anything(),
-      headers: {
-        // base64 encoded "123:abc"
-        authorization: 'ApiKey MTIzOmFiYw==',
-      },
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: {
+          // base64 encoded "123:abc"
+          authorization: 'ApiKey MTIzOmFiYw==',
         },
-      },
-    });
+      })
+    );
+
+    const [
+      request,
+    ] = taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mock.calls[0];
+
+    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+      request,
+      '/'
+    );
+
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -515,7 +517,7 @@ describe('Task Runner', () => {
     `);
   });
 
-  test('fire resolved actions for execution for the alertInstances which is in the resolved state', async () => {
+  test('fire recovered actions for execution for the alertInstances which is in the recovered state', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
 
@@ -648,7 +650,7 @@ describe('Task Runner', () => {
         Array [
           Object {
             "event": Object {
-              "action": "resolved-instance",
+              "action": "recovered-instance",
             },
             "kibana": Object {
               "alerting": Object {
@@ -664,7 +666,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' resolved instance: '2'",
+            "message": "test:1: 'alert-name' instance '2' has recovered",
           },
         ],
         Array [
@@ -768,23 +770,20 @@ describe('Task Runner', () => {
     });
 
     await taskRunner.run();
-    expect(taskRunnerFactoryInitializerParams.getServices).toHaveBeenCalledWith({
-      getBasePath: expect.anything(),
-      headers: {
-        // base64 encoded "123:abc"
-        authorization: 'ApiKey MTIzOmFiYw==',
-      },
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
+    expect(taskRunnerFactoryInitializerParams.getServices).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: {
+          // base64 encoded "123:abc"
+          authorization: 'ApiKey MTIzOmFiYw==',
         },
-      },
-    });
+      })
+    );
+    const [request] = taskRunnerFactoryInitializerParams.getServices.mock.calls[0];
+
+    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+      request,
+      '/'
+    );
   });
 
   test(`doesn't use API key when not provided`, async () => {
@@ -803,20 +802,18 @@ describe('Task Runner', () => {
 
     await taskRunner.run();
 
-    expect(taskRunnerFactoryInitializerParams.getServices).toHaveBeenCalledWith({
-      getBasePath: expect.anything(),
-      headers: {},
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    });
+    expect(taskRunnerFactoryInitializerParams.getServices).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: {},
+      })
+    );
+
+    const [request] = taskRunnerFactoryInitializerParams.getServices.mock.calls[0];
+
+    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+      request,
+      '/'
+    );
   });
 
   test('rescheduled the Alert if the schedule has update during a task run', async () => {

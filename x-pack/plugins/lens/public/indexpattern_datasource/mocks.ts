@@ -6,7 +6,7 @@
 
 import { DragContextState } from '../drag_drop';
 import { getFieldByNameFactory } from './pure_helpers';
-import { IndexPattern } from './types';
+import type { IndexPattern } from './types';
 
 export const createMockedIndexPattern = (): IndexPattern => {
   const fields = [

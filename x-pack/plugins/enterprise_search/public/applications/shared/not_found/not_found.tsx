@@ -13,7 +13,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton as EuiButtonExternal,
+  EuiButton,
 } from '@elastic/eui';
 
 import {
@@ -22,7 +22,7 @@ import {
   LICENSED_SUPPORT_URL,
 } from '../../../../common/constants';
 
-import { EuiButton } from '../react_router_helpers';
+import { EuiButtonTo } from '../react_router_helpers';
 import { SetAppSearchChrome, SetWorkplaceSearchChrome } from '../kibana_chrome';
 import { SendAppSearchTelemetry, SendWorkplaceSearchTelemetry } from '../telemetry';
 import { LicensingLogic } from '../licensing';
@@ -89,18 +89,18 @@ export const NotFound: React.FC<NotFoundProps> = ({ product = {} }) => {
           actions={
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiButton to="/" color="primary" fill>
+                <EuiButtonTo to="/" color="primary" fill>
                   {i18n.translate('xpack.enterpriseSearch.notFound.action1', {
                     defaultMessage: 'Back to your dashboard',
                   })}
-                </EuiButton>
+                </EuiButtonTo>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButtonExternal href={supportUrl} target="_blank">
+                <EuiButton href={supportUrl} target="_blank">
                   {i18n.translate('xpack.enterpriseSearch.notFound.action2', {
                     defaultMessage: 'Contact support',
                   })}
-                </EuiButtonExternal>
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           }

@@ -16,9 +16,11 @@ import {
 interface AppValues extends WorkplaceSearchInitialData {
   hasInitialized: boolean;
   isFederatedAuth: boolean;
+  isOrganization: boolean;
 }
 interface AppActions {
   initializeAppData(props: InitialAppData): InitialAppData;
+  setContext(isOrganization: boolean): boolean;
 }
 
 const emptyOrg = {} as Organization;
@@ -31,6 +33,7 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
       workplaceSearch,
       isFederatedAuth,
     }),
+    setContext: (isOrganization) => isOrganization,
   },
   reducers: {
     hasInitialized: [
@@ -43,6 +46,12 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
       true,
       {
         initializeAppData: (_, { isFederatedAuth }) => !!isFederatedAuth,
+      },
+    ],
+    isOrganization: [
+      false,
+      {
+        setContext: (_, isOrganization) => isOrganization,
       },
     ],
     organization: [

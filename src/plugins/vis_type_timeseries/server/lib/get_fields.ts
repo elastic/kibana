@@ -38,7 +38,7 @@ export async function getFields(
   // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
-  const reqFacade: ReqFacade = {
+  const reqFacade: ReqFacade<{}> = {
     requestContext,
     ...request,
     framework,

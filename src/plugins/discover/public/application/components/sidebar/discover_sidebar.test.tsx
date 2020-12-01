@@ -51,8 +51,6 @@ jest.mock('../../../kibana_services', () => ({
       get: (key: string) => {
         if (key === 'fields:popularLimit') {
           return 5;
-        } else if (key === 'shortDots:enable') {
-          return false;
         }
       },
     },

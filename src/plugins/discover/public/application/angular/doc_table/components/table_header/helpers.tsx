@@ -17,7 +17,6 @@
  * under the License.
  */
 import { IndexPattern } from '../../../../../kibana_services';
-import { shortenDottedString } from '../../../../helpers';
 
 export type SortOrder = [string, string];
 export interface ColumnProps {
@@ -67,7 +66,7 @@ export function getDisplayedColumns(
     const field = indexPattern.getFieldByName(column);
     return {
       name: column,
-      displayName: isShortDots ? shortenDottedString(column) : column,
+      displayName: field ? field.displayName : column,
       isSortable: field && field.sortable ? true : false,
       isRemoveable: column !== '_source' || columns.length > 1,
       colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,

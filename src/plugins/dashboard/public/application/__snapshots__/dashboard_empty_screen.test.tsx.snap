@@ -297,7 +297,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                     paddingSize="none"
                   >
                     <div
-                      className="euiPanel euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     >
                       <EuiImage
                         alt=""
@@ -1016,7 +1016,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                     paddingSize="none"
                   >
                     <div
-                      className="euiPanel euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     >
                       <EuiImage
                         alt=""

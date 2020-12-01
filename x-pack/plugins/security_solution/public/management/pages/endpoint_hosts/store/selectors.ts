@@ -55,6 +55,8 @@ export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.i
 
 export const autoRefreshInterval = (state: Immutable<EndpointState>) => state.autoRefreshInterval;
 
+export const policyVersionInfo = (state: Immutable<EndpointState>) => state.policyVersionInfo;
+
 export const areEndpointsEnrolling = (state: Immutable<EndpointState>) => {
   return state.agentsWithEndpointsTotal > state.endpointsTotal;
 };

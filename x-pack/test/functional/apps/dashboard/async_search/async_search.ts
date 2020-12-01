@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const queryBar = getService('queryBar');
   const browser = getService('browser');
+  const sendToBackground = getService('sendToBackground');
 
   describe('dashboard with async search', () => {
     before(async function () {
@@ -78,21 +79,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(panel1SessionId1).not.to.be(panel1SessionId2);
     });
 
-    // NOTE: this test will be revised when session functionality is really working
-    it('Opens a dashboard with existing session', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
-      const url = await browser.getCurrentUrl();
-      const fakeSessionId = '__fake__';
-      const savedSessionURL = `${url}&searchSessionId=${fakeSessionId}`;
-      await browser.navigateTo(savedSessionURL);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const session1 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
-      expect(session1).to.be(fakeSessionId);
-      await queryBar.clickQuerySubmitButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const session2 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
-      expect(session2).not.to.be(fakeSessionId);
+    describe('Send to background', () => {
+      before(async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+      });
+
+      it('Restore using non-existing sessionId errors out. Refresh starts a new session and completes.', async () => {
+        await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
+        const url = await browser.getCurrentUrl();
+        const fakeSessionId = '__fake__';
+        const savedSessionURL = `${url}&searchSessionId=${fakeSessionId}`;
+        await browser.get(savedSessionURL);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await sendToBackground.expectState('restored');
+        await testSubjects.existOrFail('embeddableErrorLabel'); // expected that panel errors out because of non existing session
+
+        const session1 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
+        expect(session1).to.be(fakeSessionId);
+
+        await sendToBackground.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await sendToBackground.expectState('completed');
+        await testSubjects.missingOrFail('embeddableErrorLabel');
+        const session2 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
+        expect(session2).not.to.be(fakeSessionId);
+      });
+
+      it('Saves and restores a session', async () => {
+        await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
+        await PageObjects.dashboard.waitForRenderComplete();
+        await sendToBackground.expectState('completed');
+        await sendToBackground.save();
+        await sendToBackground.expectState('backgroundCompleted');
+        const savedSessionId = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
+
+        // load URL to restore a saved session
+        const url = await browser.getCurrentUrl();
+        const savedSessionURL = `${url}&searchSessionId=${savedSessionId}`;
+        await browser.get(savedSessionURL);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        // Check that session is restored
+        await sendToBackground.expectState('restored');
+        await testSubjects.missingOrFail('embeddableErrorLabel');
+        const data = await PageObjects.visChart.getBarChartData('Sum of bytes');
+        expect(data.length).to.be(5);
+      });
     });
   });
 
