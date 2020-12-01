@@ -81,7 +81,10 @@ export enum AppNavLinkStatus {
  * Defines the list of fields that can be updated via an {@link AppUpdater}.
  * @public
  */
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
+export type AppUpdatableFields = Pick<
+  App,
+  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'searchDeepLinks'
+>;
 
 /**
  * Updater for applications.
@@ -222,7 +225,7 @@ export interface App<HistoryLocationState = unknown> {
    * ```ts
    * core.application.register({
    *   id: 'my_app',
-   *   title: 'My App'
+   *   title: 'My App',
    *   exactRoute: true,
    *   mount: () => { ... },
    * })
@@ -232,18 +235,89 @@ export interface App<HistoryLocationState = unknown> {
    * ```
    */
   exactRoute?: boolean;
+
+  /**
+   * Array of links that represent secondary in-app locations for the app.
+   *
+   * @remarks
+   * Used to populate navigational search results (where available).
+   * Can be updated using the {@link App.updater$} observable. See {@link AppSubLink} for more details.
+   *
+   * @example
+   * The `path` property on deep links should not include the application's `appRoute`:
+   * ```ts
+   * core.application.register({
+   *   id: 'my_app',
+   *   title: 'My App',
+   *   searchDeepLinks: [
+   *     { id: 'sub1', title: 'Sub1', path: '/sub1' },
+   *     {
+   *       id: 'sub2',
+   *       title: 'Sub2',
+   *       searchDeepLinks: [
+   *         { id: 'subsub', title: 'SubSub', path: '/sub2/sub' }
+   *       ]
+   *     }
+   *   ],
+   *   mount: () => { ... },
+   * })
+   * ```
+   *
+   * Will produce deep links on these paths:
+   * - `/app/my_app/sub1`
+   * - `/app/my_app/sub2/sub`
+   */
+  searchDeepLinks?: AppSearchDeepLink[];
 }
+
+/**
+ * Input type for registering secondary in-app locations for an application.
+ *
+ * Deep links must include at least one of `path` or `searchDeepLinks`. A deep link that does not have a `path`
+ * represents a topological level in the application's hierarchy, but does not have a destination URL that is
+ * user-accessible.
+ * @public
+ */
+export type AppSearchDeepLink = {
+  /** Identifier to represent this sublink, should be unique for this application */
+  id: string;
+  /** Title to label represent this deep link */
+  title: string;
+} & (
+  | {
+      /** URL path to access this link, relative to the application's appRoute. */
+      path: string;
+      /** Optional array of links that are 'underneath' this section in the hierarchy */
+      searchDeepLinks?: AppSearchDeepLink[];
+    }
+  | {
+      /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
+      path?: string;
+      /** Array links that are 'underneath' this section in this hierarchy. */
+      searchDeepLinks: AppSearchDeepLink[];
+    }
+);
+
+/**
+ * Public information about a registered app's {@link AppSearchDeepLink | searchDeepLinks}
+ *
+ * @public
+ */
+export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks'> & {
+  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+};
 
 /**
  * Public information about a registered {@link App | application}
  *
  * @public
  */
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'searchDeepLinks'> & {
   // remove optional on fields populated with default values
   status: AppStatus;
   navLinkStatus: AppNavLinkStatus;
   appRoute: string;
+  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
 };
 
 /**

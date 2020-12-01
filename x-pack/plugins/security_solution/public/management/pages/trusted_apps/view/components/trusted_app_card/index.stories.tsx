@@ -10,7 +10,11 @@ import { action } from '@storybook/addon-actions';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { KibanaContextProvider } from '../../../../../../../../../../src/plugins/kibana_react/public';
-import { TrustedApp, WindowsConditionEntry } from '../../../../../../../common/endpoint/types';
+import {
+  ConditionEntryField,
+  TrustedApp,
+  WindowsConditionEntry,
+} from '../../../../../../../common/endpoint/types';
 
 import { createSampleTrustedApp } from '../../../test_utils';
 
@@ -25,14 +29,14 @@ addDecorator((storyFn) => (
 ));
 
 const PATH_CONDITION: WindowsConditionEntry = {
-  field: 'process.executable.caseless',
+  field: ConditionEntryField.PATH,
   operator: 'included',
   type: 'match',
   value: '/some/path/on/file/system',
 };
 
 const SIGNER_CONDITION: WindowsConditionEntry = {
-  field: 'process.code_signature',
+  field: ConditionEntryField.SIGNER,
   operator: 'included',
   type: 'match',
   value: 'Elastic',
