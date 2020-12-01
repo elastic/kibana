@@ -52,27 +52,24 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
     params: {
       subAction: 'pushToService',
       subActionParams: {
-        savedObjectId: '123',
-        createdAt: '2020-03-13T08:34:53.450Z',
-        createdBy: { fullName: 'Elastic User', username: 'elastic' },
+        incident: {
+          createdAt: '2020-03-13T08:34:53.450Z',
+          createdBy: { fullName: 'Elastic User', username: 'elastic' },
+          description: 'a description',
+          externalId: null,
+          impact: '1',
+          severity: '1',
+          short_description: 'a title',
+          updatedAt: '2020-06-17T04:37:45.147Z',
+          updatedBy: { fullName: null, username: 'elastic' },
+          urgency: '1',
+        },
         comments: [
           {
-            commentId: '456',
             comment: 'first comment',
-            createdAt: '2020-03-13T08:34:53.450Z',
-            createdBy: { fullName: 'Elastic User', username: 'elastic' },
-            updatedAt: null,
-            updatedBy: null,
+            commentId: '456',
           },
         ],
-        description: 'a description',
-        externalId: null,
-        title: 'a title',
-        severity: '1',
-        urgency: '1',
-        impact: '1',
-        updatedAt: '2020-06-17T04:37:45.147Z',
-        updatedBy: { fullName: null, username: 'elastic' },
       },
     },
   };
@@ -96,8 +93,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
-              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
-              isCaseOwned: true,
             },
             secrets: mockServiceNow.secrets,
           })
@@ -110,8 +105,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           actionTypeId: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
-            incidentConfiguration: mockServiceNow.config.incidentConfiguration,
-            isCaseOwned: true,
           },
         });
 
@@ -126,8 +119,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           actionTypeId: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
-            incidentConfiguration: mockServiceNow.config.incidentConfiguration,
-            isCaseOwned: true,
           },
         });
       });
@@ -161,8 +152,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: 'http://servicenow.mynonexistent.com',
-              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
-              isCaseOwned: true,
             },
             secrets: mockServiceNow.secrets,
           })
@@ -186,8 +175,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
-              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
-              isCaseOwned: true,
             },
           })
           .expect(400)
@@ -199,72 +186,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 'error validating action type secrets: [password]: expected value of type [string] but got [undefined]',
             });
           });
-      });
-
-      it('should create a servicenow action without incidentConfiguration', async () => {
-        await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
-            config: {
-              apiUrl: servicenowSimulatorURL,
-              isCaseOwned: true,
-            },
-            secrets: mockServiceNow.secrets,
-          })
-          .expect(200);
-      });
-
-      it('should respond with a 400 Bad Request when creating a servicenow action with empty mapping', async () => {
-        await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
-            config: {
-              apiUrl: servicenowSimulatorURL,
-              incidentConfiguration: { mapping: [] },
-              isCaseOwned: true,
-            },
-            secrets: mockServiceNow.secrets,
-          })
-          .expect(400)
-          .then((resp: any) => {
-            expect(resp.body).to.eql({
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'error validating action type config: [incidentConfiguration.mapping]: expected non-empty but got empty',
-            });
-          });
-      });
-
-      it('should respond with a 400 Bad Request when creating a servicenow action with wrong actionType', async () => {
-        await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
-            config: {
-              apiUrl: servicenowSimulatorURL,
-              incidentConfiguration: {
-                mapping: [
-                  {
-                    source: 'title',
-                    target: 'description',
-                    actionType: 'non-supported',
-                  },
-                ],
-              },
-              isCaseOwned: true,
-            },
-            secrets: mockServiceNow.secrets,
-          })
-          .expect(400);
       });
     });
 
@@ -281,8 +202,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
-              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
-              isCaseOwned: true,
             },
             secrets: mockServiceNow.secrets,
           });
@@ -408,7 +327,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 subActionParams: {
                   ...mockServiceNow.params.subActionParams,
                   savedObjectId: 'success',
-                  title: 'success',
+                  short_description: 'success',
                   createdAt: 'success',
                   createdBy: { username: 'elastic' },
                   comments: [{}],
@@ -434,11 +353,12 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockServiceNow.params,
                 subActionParams: {
-                  ...mockServiceNow.params.subActionParams,
-                  savedObjectId: 'success',
-                  title: 'success',
-                  createdAt: 'success',
-                  createdBy: { username: 'elastic' },
+                  incident: {
+                    ...mockServiceNow.params.subActionParams.incident,
+                    name: 'success',
+                    createdAt: 'success',
+                    createdBy: { username: 'elastic' },
+                  },
                   comments: [{ commentId: 'success' }],
                 },
               },
@@ -464,7 +384,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockServiceNow.params,
                 subActionParams: {
-                  ...mockServiceNow.params.subActionParams,
+                  incident: mockServiceNow.params.subActionParams.incident,
                   comments: [],
                 },
               },
@@ -477,7 +397,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionId: simulatedActionId,
             data: {
               id: '123',
-              title: 'INC01',
+              short_description: 'INC01',
               pushedDate: '2020-03-10T12:24:20.000Z',
               url: `${servicenowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
             },

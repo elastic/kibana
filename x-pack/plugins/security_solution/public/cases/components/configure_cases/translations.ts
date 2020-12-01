@@ -200,7 +200,7 @@ export const BLANK_MAPPINGS = (connectorName: string): string => {
 };
 
 export const REQUIRED_MAPPINGS = (connectorName: string, fields: string): string => {
-  return i18n.translate('xpack.securitySolution.case.configureCases.blankMappings', {
+  return i18n.translate('xpack.securitySolution.case.configureCases.requiredMappings', {
     values: { connectorName, fields },
     defaultMessage:
       'At least one Case field needs to be mapped to the following required { connectorName } fields: { fields }',
