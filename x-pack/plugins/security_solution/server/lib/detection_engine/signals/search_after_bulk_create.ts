@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable complexity */
 
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -59,6 +58,7 @@ export const searchAfterAndBulkCreate = async ({
     ? [ruleParams.timestampOverride, '@timestamp']
     : ['@timestamp'];
 
+  // tomorrow I need to figure out how to get rid of this
   const timestampsAndIndices = await checkMappingForTimestampFields(
     inputIndexPattern,
     timestampsToSort,
@@ -70,11 +70,6 @@ export const searchAfterAndBulkCreate = async ({
   if (Object.keys(timestampsAndIndices).length === 0) {
     throw Error(`No indices contained timestamp fields: ${JSON.stringify(timestampsToSort)}`);
   }
-
-  const indexPatternRegEx = inputIndexPattern.reduce(
-    (acc, indexPattern) => ({ [indexPattern]: new RegExp(indexPattern), ...acc }),
-    {} as Record<string, RegExp>
-  );
 
   for (const timestamp of timestampsToSort) {
     const totalToFromTuples = getSignalTimeTuples({
@@ -115,67 +110,11 @@ export const searchAfterAndBulkCreate = async ({
             )}`
           );
 
-          if (
-            timestampsAndIndices[timestamp] == null ||
-            timestampsAndIndices[timestamp].length === 0
-          ) {
-            logger.error(
-              buildRuleMessage(
-                `The field ${timestamp} was not found in any of the following index patterns ${JSON.stringify(
-                  inputIndexPattern,
-                  null,
-                  2
-                )}`
-              )
-            );
-            if (timestampsToSort.length === 1) {
-              // couldn't find @timestamp on any of the given indices, fail the rule
-              throw Error(
-                `The field ${timestamp} was not found in any of the following index patterns ${JSON.stringify(
-                  inputIndexPattern,
-                  null,
-                  2
-                )}`
-              );
-            }
-            break;
-          } else if (inputIndexPattern.length !== timestampsAndIndices[timestamp].length) {
-            // find the full name indices which match one of the index patterns
-            const indexPatternsMissing = Object.keys(indexPatternRegEx).filter(
-              (regEx) =>
-                !timestampsAndIndices[timestamp].some((index) =>
-                  indexPatternRegEx[regEx].test(index)
-                )
-            );
-
-            // open a separate PR to not only log this out but also write a "failure" status
-            // so that these are logged and visible to the user through the UI.
-            logger.error(
-              buildRuleMessage(
-                `indices matching index pattern ${JSON.stringify(
-                  indexPatternsMissing,
-                  null,
-                  2
-                )} are missing required field ${timestamp}. ${timestamp} was found in ${JSON.stringify(
-                  timestampsAndIndices[timestamp],
-                  null,
-                  2
-                )}`
-              )
-            );
-          }
           // perform search_after with optionally undefined sortId
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
             searchAfterSortId: sortId,
-            // we are logging the index patterns that do not have the timestamp we are about to sort on
-            // so filtering those index patterns out so that we do not have to do weird things with the
-            // errors that we get back.
-            index: inputIndexPattern.filter((indexPattern) =>
-              timestampsAndIndices[timestamp].some((index) =>
-                indexPatternRegEx[indexPattern].test(index)
-              )
-            ),
+            index: Object.keys(timestampsAndIndices[timestamp]),
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,

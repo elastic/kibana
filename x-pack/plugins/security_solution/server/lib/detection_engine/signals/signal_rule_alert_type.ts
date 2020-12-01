@@ -42,6 +42,7 @@ import {
   createErrorsFromShard,
   createSearchAfterReturnType,
   mergeReturns,
+  preCheckRuleExecution,
   createSearchAfterReturnTypeFromResponse,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
@@ -163,7 +164,37 @@ export const signalRulesAlertType = ({
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
       logger.debug(buildRuleMessage(`interval: ${interval}`));
-      await ruleStatusService.goingToRun();
+
+      const inputIndexPattern = await getInputIndex(services, version, index);
+      const timestampsToSort = timestampOverride
+        ? [timestampOverride, '@timestamp']
+        : ['@timestamp'];
+
+      const preCheckResult = await preCheckRuleExecution(
+        inputIndexPattern,
+        timestampsToSort,
+        services,
+        logger,
+        buildRuleMessage
+      );
+
+      const filteredIndexPattern = preCheckResult.successIndexes;
+      let wroteStatus = false;
+
+      if (preCheckResult.result === 'error') {
+        // write the error
+        await ruleStatusService.error(preCheckResult.resultMessages.join(' | '));
+        wroteStatus = true;
+      } else if (preCheckResult.result === 'partial failure') {
+        // write the partial failure here
+        // but continue with the execution, ensuring no further statuses are written.
+        await ruleStatusService.error(
+          `There was a partial failure: ${preCheckResult.resultMessages.join(' | ')}`
+        );
+        wroteStatus = true;
+      } else {
+        await ruleStatusService.goingToRun();
+      }
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
       if (gap != null && gap.asMilliseconds() > 0) {
@@ -306,7 +337,7 @@ export const signalRulesAlertType = ({
             }),
           ]);
         } else if (isThresholdRule(type) && threshold) {
-          const inputIndex = await getInputIndex(services, version, index);
+          // const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
             filters,
@@ -314,7 +345,7 @@ export const signalRulesAlertType = ({
             query,
             savedId,
             services,
-            index: inputIndex,
+            index: filteredIndexPattern,
             lists: exceptionItems ?? [],
           });
 
@@ -359,7 +390,7 @@ export const signalRulesAlertType = ({
           });
 
           const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
-            inputIndexPattern: inputIndex,
+            inputIndexPattern: filteredIndexPattern,
             from,
             to,
             services,
@@ -385,7 +416,7 @@ export const signalRulesAlertType = ({
             services,
             logger,
             id: alertId,
-            inputIndexPattern: inputIndex,
+            inputIndexPattern: filteredIndexPattern,
             signalsIndex: outputIndex,
             timestampOverride,
             startedAt,
@@ -430,11 +461,11 @@ export const signalRulesAlertType = ({
               ].join(' ')
             );
           }
-          const inputIndex = await getInputIndex(services, version, index);
+          // const inputIndex = await getInputIndex(services, version, index);
           result = await createThreatSignals({
             threatMapping,
             query,
-            inputIndex,
+            inputIndex: filteredIndexPattern,
             type,
             filters: filters ?? [],
             language,
@@ -470,7 +501,7 @@ export const signalRulesAlertType = ({
             itemsPerSearch: itemsPerSearch ?? 9000,
           });
         } else if (type === 'query' || type === 'saved_query') {
-          const inputIndex = await getInputIndex(services, version, index);
+          // const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
             filters,
@@ -478,7 +509,7 @@ export const signalRulesAlertType = ({
             query,
             savedId,
             services,
-            index: inputIndex,
+            index: filteredIndexPattern,
             lists: exceptionItems ?? [],
           });
 
@@ -492,7 +523,7 @@ export const signalRulesAlertType = ({
             logger,
             eventsTelemetry,
             id: alertId,
-            inputIndexPattern: inputIndex,
+            inputIndexPattern: filteredIndexPattern,
             signalsIndex: outputIndex,
             filter: esFilter,
             actions,
@@ -529,10 +560,10 @@ export const signalRulesAlertType = ({
               throw err;
             }
           }
-          const inputIndex = await getInputIndex(services, version, index);
+          // const inputIndex = await getInputIndex(services, version, index);
           const request = buildEqlSearchRequest(
             query,
-            inputIndex,
+            filteredIndexPattern,
             from,
             to,
             searchAfterSize,
@@ -615,7 +646,7 @@ export const signalRulesAlertType = ({
               `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
             )
           );
-          if (!hasError) {
+          if (!hasError && !wroteStatus) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,
