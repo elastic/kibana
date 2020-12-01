@@ -429,6 +429,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
+          // Delay before performing update to avoid 409 errors
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
           await supertest
             .put(
               `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`

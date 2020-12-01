@@ -196,6 +196,9 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
       let executionStatus = await waitForStatus(alertId, new Set(['ok']));
 
+      // Delay before performing update to avoid 409 errors
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // break the validation of the params
       await supertest
         .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerts_fixture/saved_object/alert/${alertId}`)

@@ -37,6 +37,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       const alertId = response.body.id;
       objectRemover.add(spaceId, alertId, 'alert', 'alerts');
 
+      // Delay before performing update to avoid 409 errors
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // break AAD
       await supertest
         .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${alertId}`)
