@@ -110,6 +110,13 @@ describe('core deprecations', () => {
         ]
       `);
     });
+    it('does not log deprecation message when server.cors.enabled set', () => {
+      const { migrated, messages } = applyCoreDeprecations({
+        server: { cors: { enabled: true } },
+      });
+      expect(migrated.server.cors).toEqual({ enabled: true });
+      expect(messages.length).toBe(0);
+    });
   });
 
   describe('rewriteBasePath', () => {

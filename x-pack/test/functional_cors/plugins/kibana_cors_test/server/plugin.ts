@@ -15,7 +15,7 @@ import type { ConfigSchema } from './config';
 const apiToken = abab.btoa(kbnTestConfig.getUrlParts().auth!);
 
 function renderBody(kibanaUrl: string) {
-  const url = Url.resolve(kibanaUrl, '/core-test');
+  const url = Url.resolve(kibanaUrl, '/cors-test');
   return `
 <!DOCTYPE html>
 <html>
@@ -47,7 +47,7 @@ export class CorsTestPlugin implements Plugin {
 
   async setup(core: CoreSetup) {
     const router = core.http.createRouter();
-    router.get({ path: '/core-test', validate: false }, (_context, req, res) =>
+    router.get({ path: '/cors-test', validate: false }, (_context, req, res) =>
       res.ok({ body: 'content from kibana' })
     );
   }
