@@ -538,45 +538,39 @@ export interface CoreUsageDataStart {
 // @internal
 export interface CoreUsageStats {
     // (undocumented)
-    apiCalls?: {
-        savedObjectsImport?: {
-            total: number;
-            kibanaRequest: {
-                yes: number;
-                no: number;
-            };
-            createNewCopiesEnabled: {
-                yes: number;
-                no: number;
-            };
-            overwriteEnabled: {
-                yes: number;
-                no: number;
-            };
-        };
-        savedObjectsResolveImportErrors?: {
-            total: number;
-            kibanaRequest: {
-                yes: number;
-                no: number;
-            };
-            createNewCopiesEnabled: {
-                yes: number;
-                no: number;
-            };
-        };
-        savedObjectsExport?: {
-            total: number;
-            kibanaRequest: {
-                yes: number;
-                no: number;
-            };
-            allTypesSelected: {
-                yes: number;
-                no: number;
-            };
-        };
-    };
+    ['apiCalls.savedObjectsExport.allTypesSelected.no']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsExport.allTypesSelected.yes']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsExport.kibanaRequest.no']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsExport.kibanaRequest.yes']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsExport.total']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsImport.createNewCopiesEnabled.no']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsImport.createNewCopiesEnabled.yes']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsImport.kibanaRequest.no']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsImport.kibanaRequest.yes']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsImport.overwriteEnabled.no']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsImport.overwriteEnabled.yes']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsImport.total']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsResolveImportErrors.kibanaRequest.no']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsResolveImportErrors.kibanaRequest.yes']?: number;
+    // (undocumented)
+    ['apiCalls.savedObjectsResolveImportErrors.total']?: number;
 }
 
 // @public (undocumented)
@@ -2492,7 +2486,7 @@ export class SavedObjectsRepository {
     // (undocumented)
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
-    incrementCounter(type: string, id: string, counterFieldNames: string[], options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
+    incrementCounter<T = unknown>(type: string, id: string, counterFieldNames: string[], options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
