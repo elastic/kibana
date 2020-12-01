@@ -29,9 +29,14 @@
 //
 // See all cli options in https://facebook.github.io/jest/docs/cli.html
 
-var resolve = require('path').resolve;
-process.argv.push('--config', resolve(__dirname, '../jest.config.integration.js'));
 process.argv.push('--runInBand');
+
+if (process.argv.indexOf('--config') === -1) {
+  // append correct jest.config if none is provided
+  var configPath = require('path').resolve(__dirname, '../jest.config.integration.js');
+  process.argv.push('--config', configPath);
+  console.log('Running Jest with --config', configPath);
+}
 
 if (process.env.NODE_ENV == null) {
   process.env.NODE_ENV = 'test';
