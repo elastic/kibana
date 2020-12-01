@@ -27,6 +27,7 @@ export const WarningsPopover = ({
   const warningsCount = React.Children.count(children);
   return (
     <EuiPopover
+      panelPaddingSize="none"
       button={
         <EuiButtonEmpty
           onClick={onButtonClick}

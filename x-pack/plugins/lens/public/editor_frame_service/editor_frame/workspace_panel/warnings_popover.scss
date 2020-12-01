@@ -3,13 +3,15 @@
 }
 
 .lnsWorkspaceWarningList {
-  overflow-y: auto;
+  @include euiYScroll;
   max-height: $euiSize * 20;
   width: $euiSize * 16;
 }
 
-.lnsWorkspaceWarningList__item:not(:last-child) {
-  border-bottom: 1px $euiColorLightShade solid;
-  padding-bottom: $euiSize;
-  margin-bottom: $euiSize;
+.lnsWorkspaceWarningList__item {
+  padding: $euiSize;
+
+  & + & {
+    border-top: $euiBorderThin;
+  }
 }
