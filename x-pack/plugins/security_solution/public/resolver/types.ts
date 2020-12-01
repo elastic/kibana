@@ -18,6 +18,7 @@ import {
   SafeResolverEvent,
   ResolverPaginatedEvents,
   NewResolverTree,
+  ResolverSchema,
 } from '../../common/endpoint/types';
 
 /**
@@ -637,20 +638,6 @@ export interface IsometricTaxiLayout {
 }
 
 /**
- *
- * The schema that defines which parameter to use as the id of the given node
- * and which parameter to use to define the edge or relationship. Currently keyed off by parent
- * as those are the existing relationships.
- * @export
- * @interface TreeIdSchema
- */
-export interface TreeIdSchema {
-  id: string;
-  parent: string;
-  name: string;
-}
-
-/**
  * Defines the type for bounding a search by a time box.
  */
 export interface Timerange {
@@ -743,7 +730,7 @@ export interface DataAccessLayer {
     descendants,
   }: {
     dataId: string;
-    schema: TreeIdSchema;
+    schema: ResolverSchema;
     timerange: Timerange;
     indices: string[];
     ancestors: number;

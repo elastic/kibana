@@ -5,7 +5,7 @@
  */
 
 import { Tree, TreeOptions } from '../../../../common/endpoint/generate_data';
-import { DataAccessLayer, Timerange, TreeIdSchema } from '../../types';
+import { DataAccessLayer, Timerange } from '../../types';
 
 import {
   ResolverRelatedEvents,
@@ -13,6 +13,7 @@ import {
   SafeResolverEvent,
   ResolverNode,
   NewResolverTree,
+  ResolverSchema,
 } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { generateTree } from '../../mocks/generator';
@@ -147,7 +148,7 @@ export function generateTreeWithDAL(
       descendants,
     }: {
       dataId: string;
-      schema: TreeIdSchema;
+      schema: ResolverSchema;
       timerange: Timerange;
       indices: string[];
       ancestors: number;
@@ -160,7 +161,18 @@ export function generateTreeWithDAL(
      * Get entities matching a document.
      */
     async entities(): Promise<ResolverEntityIndex> {
-      return [{ entity_id: genTree.origin.id }];
+      return [
+        {
+          name: 'endpoint',
+          schema: {
+            id: 'process.entity_id',
+            parent: 'process.parent.entity_id',
+            ancestry: 'process.Ext.ancestry',
+            name: 'process.name',
+          },
+          id: genTree.origin.id,
+        },
+      ];
     },
   };
 

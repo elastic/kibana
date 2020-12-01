@@ -6,13 +6,14 @@
 
 import { KibanaReactContextValue } from '../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../types';
-import { DataAccessLayer, TreeIdSchema, Timerange } from '../types';
+import { DataAccessLayer, Timerange } from '../types';
 import {
   ResolverNode,
   ResolverRelatedEvents,
   ResolverEntityIndex,
   ResolverPaginatedEvents,
   SafeResolverEvent,
+  ResolverSchema,
 } from '../../../common/endpoint/types';
 
 /**
@@ -204,7 +205,7 @@ export function dataAccessLayerFactory(
       descendants,
     }: {
       dataId: string;
-      schema: TreeIdSchema;
+      schema: ResolverSchema;
       timerange: Timerange;
       indices: string[];
       ancestors: number;

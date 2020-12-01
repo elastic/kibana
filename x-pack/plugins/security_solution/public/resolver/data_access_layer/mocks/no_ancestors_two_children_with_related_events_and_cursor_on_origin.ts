@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataAccessLayer, Timerange, TreeIdSchema } from '../../types';
+import { DataAccessLayer, Timerange } from '../../types';
 import {
   mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin,
   firstRelatedEventID,
@@ -15,6 +15,7 @@ import {
   ResolverEntityIndex,
   SafeResolverEvent,
   ResolverNode,
+  ResolverSchema,
 } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
 
@@ -187,7 +188,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
         descendants,
       }: {
         dataId: string;
-        schema: TreeIdSchema;
+        schema: ResolverSchema;
         timerange: Timerange;
         indices: string[];
         ancestors: number;

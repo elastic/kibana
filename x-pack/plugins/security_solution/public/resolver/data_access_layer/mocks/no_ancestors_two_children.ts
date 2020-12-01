@@ -9,9 +9,10 @@ import {
   SafeResolverEvent,
   ResolverEntityIndex,
   ResolverNode,
+  ResolverSchema,
 } from '../../../../common/endpoint/types';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
-import { DataAccessLayer, Timerange, TreeIdSchema } from '../../types';
+import { DataAccessLayer, Timerange } from '../../types';
 
 interface Metadata {
   /**
@@ -138,7 +139,7 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
         descendants,
       }: {
         dataId: string;
-        schema: TreeIdSchema;
+        schema: ResolverSchema;
         timerange: Timerange;
         indices: string[];
         ancestors: number;

@@ -9,10 +9,11 @@ import {
   ResolverEntityIndex,
   SafeResolverEvent,
   ResolverNode,
+  ResolverSchema,
 } from '../../../../common/endpoint/types';
 import { mockEndpointEvent } from '../../mocks/endpoint_event';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
-import { DataAccessLayer, Timerange, TreeIdSchema } from '../../types';
+import { DataAccessLayer, Timerange } from '../../types';
 
 interface Metadata {
   /**
@@ -156,7 +157,7 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         descendants,
       }: {
         dataId: string;
-        schema: TreeIdSchema;
+        schema: ResolverSchema;
         timerange: Timerange;
         indices: string[];
         ancestors: number;

@@ -9,6 +9,7 @@ import {
   ResolverEntityIndex,
   ResolverNode,
   NewResolverTree,
+  ResolverSchema,
 } from '../../../../common/endpoint/types';
 import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
@@ -47,14 +48,8 @@ export function ResolverTreeFetcher(
       to,
     };
 
-    const treeRequestIDSchema = {
-      id: 'process.entity_id',
-      name: 'process.name',
-      parent: 'process.parent.entity_id',
-      // ancestry: 'process.Ext.ancestry',
-    };
-
     let entityIDToFetch: string | null = null;
+    let dataSourceSchema: ResolverSchema | null = null;
 
     if (selectors.treeRequestParametersToAbort(state) && lastRequestAbortController) {
       lastRequestAbortController.abort();
@@ -83,11 +78,11 @@ export function ResolverTreeFetcher(
           });
           return;
         }
-        entityIDToFetch = matchingEntities[0].entity_id;
+        ({ id: entityIDToFetch, schema: dataSourceSchema } = matchingEntities[0]);
 
         result = await dataAccessLayer.resolverTree({
           dataId: entityIDToFetch,
-          schema: treeRequestIDSchema,
+          schema: dataSourceSchema,
           timerange,
           indices: databaseParameters.indices ?? [],
           ancestors: numberOfAncestors,
