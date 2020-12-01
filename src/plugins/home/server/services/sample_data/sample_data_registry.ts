@@ -38,6 +38,8 @@ const flightsSampleDataset = flightsSpecProvider();
 const logsSampleDataset = logsSpecProvider();
 const ecommerceSampleDataset = ecommerceSpecProvider();
 
+export type DatasetUpdater = (object: SavedObject<unknown>) => void;
+
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
   private readonly sampleDatasets: SampleDatasetSchema[] = [
@@ -106,6 +108,18 @@ export class SampleDataRegistry {
         }
 
         sampleDataset.savedObjects = sampleDataset.savedObjects.concat(savedObjects);
+      },
+
+      updateSavedObjects: (id: string, updater: DatasetUpdater) => {
+        const sampleDataset = this.sampleDatasets.find((dataset) => {
+          return dataset.id === id;
+        });
+
+        if (!sampleDataset) {
+          throw new Error(`Unable to find sample dataset with id: ${id}`);
+        }
+
+        sampleDataset.savedObjects.forEach((object) => updater(object));
       },
 
       addAppLinksToSampleDataset: (id: string, appLinks: AppLinkSchema[]) => {

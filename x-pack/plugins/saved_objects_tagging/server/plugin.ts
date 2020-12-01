@@ -14,16 +14,19 @@ import {
 } from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { savedObjectsTaggingFeature } from './features';
 import { tagType } from './saved_objects';
 import { ITagsRequestHandlerContext } from './types';
 import { TagsRequestHandlerContext } from './request_handler_context';
 import { registerRoutes } from './routes';
 import { createTagUsageCollector } from './usage';
+import { addTagsToSampleData } from './sample_data';
 
 interface SetupDeps {
   features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  home?: HomeServerPluginSetup;
 }
 
 export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
@@ -33,7 +36,7 @@ export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
     this.legacyConfig$ = context.config.legacy.globalConfig$;
   }
 
-  public setup({ savedObjects, http }: CoreSetup, { features, usageCollection }: SetupDeps) {
+  public setup({ savedObjects, http }: CoreSetup, { features, usageCollection, home }: SetupDeps) {
     savedObjects.registerType(tagType);
 
     const router = http.createRouter();
@@ -55,6 +58,10 @@ export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
           legacyConfig$: this.legacyConfig$,
         })
       );
+    }
+
+    if (home) {
+      addTagsToSampleData(home);
     }
 
     return {};
