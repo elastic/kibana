@@ -60,7 +60,7 @@ describe('chart selectors', () => {
             { x: 1000, y: 200 },
           ],
           legendValue: '200 μs',
-          title: 'Avg.',
+          title: 'Average',
           type: 'linemark',
         },
         {
