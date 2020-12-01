@@ -27,17 +27,7 @@ import { Correlations } from '../Correlations';
 import { NoServicesMessage } from './no_services_message';
 import { ServiceList } from './ServiceList';
 import { MLCallout } from './ServiceList/MLCallout';
-
-function useAnomalyDetectionJobsFetcher() {
-  const { data, status } = useFetcher(
-    (callApmApi) =>
-      callApmApi({ endpoint: `GET /api/apm/settings/anomaly-detection/jobs` }),
-    [],
-    { showToastOnError: false }
-  );
-
-  return { anomalyDetectionJobsData: data, anomalyDetectionJobsStatus: status };
-}
+import { useAnomalyDetectionJobsFetcher } from './use_anomaly_detection_jobs_fetcher';
 
 const initialData = {
   items: [],

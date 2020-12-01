@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { px, truncate, unit } from '../../../../style/variables';

@@ -46,15 +46,17 @@ function setup({
 
   // mock transaction types
   jest
-    .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypes')
+    .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher')
     .mockReturnValue(serviceTransactionTypes);
 
   // mock agent
-  jest.spyOn(useServiceAgentNameHook, 'useServiceAgentName').mockReturnValue({
-    agentName: 'nodejs',
-    error: undefined,
-    status: useFetcherHook.FETCH_STATUS.SUCCESS,
-  });
+  jest
+    .spyOn(useServiceAgentNameHook, 'useServiceAgentNameFetcher')
+    .mockReturnValue({
+      agentName: 'nodejs',
+      error: undefined,
+      status: useFetcherHook.FETCH_STATUS.SUCCESS,
+    });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 

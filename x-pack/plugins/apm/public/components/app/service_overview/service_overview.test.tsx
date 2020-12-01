@@ -14,7 +14,7 @@ import {
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin_context/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
-import * as useDynamicIndexPatternHooks from '../../../hooks/useDynamicIndexPattern';
+import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
 import * as useFetcherHooks from '../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import * as useAnnotationsHooks from '../../../context/annotations/use_annotations';
@@ -59,7 +59,7 @@ describe('ServiceOverview', () => {
       .spyOn(useAnnotationsHooks, 'useAnnotations')
       .mockReturnValue({ annotations: [] });
     jest
-      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPattern')
+      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPatternFetcher')
       .mockReturnValue({
         indexPattern: undefined,
         status: FETCH_STATUS.SUCCESS,

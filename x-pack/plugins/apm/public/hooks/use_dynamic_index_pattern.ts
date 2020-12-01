@@ -7,7 +7,7 @@
 import { useFetcher } from './use_fetcher';
 import { UIProcessorEvent } from '../../common/processor_event';
 
-export function useDynamicIndexPattern(
+export function useDynamicIndexPatternFetcher(
   processorEvent: UIProcessorEvent | undefined
 ) {
   const { data, status } = useFetcher(
