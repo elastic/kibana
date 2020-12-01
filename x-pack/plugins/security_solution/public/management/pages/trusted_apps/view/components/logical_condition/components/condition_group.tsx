@@ -8,7 +8,7 @@ import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiHideFor, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NewTrustedApp, TrustedApp } from '../../../../../../../../common/endpoint/types';
+import { TrustedApp, WindowsConditionEntry } from '../../../../../../../../common/endpoint/types';
 import { ConditionEntry, ConditionEntryProps } from './condition_entry';
 import { AndOrBadge } from '../../../../../../../common/components/and_or_badge';
 
@@ -85,7 +85,7 @@ export const ConditionGroup = memo<ConditionGroupProps>(
         )}
         <EuiFlexItem grow={1}>
           <div data-test-subj={getTestId('entries')} className="group-entries">
-            {(entries as (NewTrustedApp & { os: 'windows' })['entries']).map((entry, index) => (
+            {(entries as WindowsConditionEntry[]).map((entry, index) => (
               <ConditionEntry
                 key={index}
                 os={os}
