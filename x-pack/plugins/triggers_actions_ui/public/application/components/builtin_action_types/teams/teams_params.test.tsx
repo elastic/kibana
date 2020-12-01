@@ -6,12 +6,10 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import TeamsParamsFields from './teams_params';
-import { DocLinksStart } from 'kibana/public';
-import { coreMock } from 'src/core/public/mocks';
+jest.mock('../../../../common/lib/kibana');
 
 describe('TeamsParamsFields renders', () => {
   test('all params fields is rendered', () => {
-    const mocks = coreMock.createSetup();
     const actionParams = {
       message: 'test message',
     };
@@ -22,9 +20,6 @@ describe('TeamsParamsFields renders', () => {
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
       />
     );
     expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();

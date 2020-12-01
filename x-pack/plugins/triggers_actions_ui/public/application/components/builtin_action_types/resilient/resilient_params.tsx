@@ -28,6 +28,7 @@ import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import { extractActionVariable } from '../extract_action_variable';
 import { AlertProvidedActionVariables } from '../../../lib/action_variables';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
   actionParams,
@@ -36,9 +37,11 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   errors,
   messageVariables,
   actionConnector,
-  http,
-  toastNotifications,
 }) => {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const [firstLoad, setFirstLoad] = useState(false);
   const { title, description, comments, incidentTypes, severityCode, savedObjectId } =
     actionParams.subActionParams || {};
@@ -66,13 +69,13 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     incidentTypes: allIncidentTypes,
   } = useGetIncidentTypes({
     http,
-    toastNotifications,
+    toastNotifications: toasts,
     actionConnector,
   });
 
   const { isLoading: isLoadingSeverity, severity } = useGetSeverity({
     http,
-    toastNotifications,
+    toastNotifications: toasts,
     actionConnector,
   });
 
