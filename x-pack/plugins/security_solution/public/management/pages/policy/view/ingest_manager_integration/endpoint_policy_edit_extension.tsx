@@ -120,7 +120,7 @@ const WrappedPolicyDetailsForm = memo<{
   }, [onChange, updatedPolicy]);
 
   return (
-    <div data-test-subj="endpointPolicyForm">
+    <div data-test-subj="endpointIntegrationPolicyForm">
       <PolicyDetailsForm />
     </div>
   );
