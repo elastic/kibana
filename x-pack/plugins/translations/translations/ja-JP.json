@@ -10586,7 +10586,6 @@
     "xpack.lens.chartSwitch.dataLossDescription": "このチャートに切り替えると構成の一部が失われます",
     "xpack.lens.chartSwitch.dataLossLabel": "データ喪失",
     "xpack.lens.chartSwitch.noResults": "{term}の結果が見つかりませんでした。",
-    "xpack.lens.chartTitle.unsaved": "未保存",
     "xpack.lens.configPanel.chartType": "チャートタイプ",
     "xpack.lens.configPanel.color.tooltip.auto": "カスタム色を指定しない場合、Lensは自動的に色を選択します。",
     "xpack.lens.configPanel.color.tooltip.custom": "［自動］モードに戻すには、カスタム色をオフにしてください。",

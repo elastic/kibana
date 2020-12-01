@@ -31,7 +31,6 @@
 }
 
 .lnsDimensionContainer__headerLink {
-
   &:focus-within {
     background-color: transparentize($euiColorVis1, .9);
 
@@ -41,6 +40,12 @@
   }
 }
 
-.lnsDimensionContainer__backIcon:focus {
-  background-color: transparent;
+.lnsDimensionContainer__backIcon {
+  &:hover {
+    transform: none !important; // sass-lint:disable-line no-important
+  }
+
+  &:focus {
+    background-color: transparent;
+  }
 }

@@ -10599,7 +10599,6 @@
     "xpack.lens.chartSwitch.dataLossDescription": "切换到此图表将会丢失部分配置",
     "xpack.lens.chartSwitch.dataLossLabel": "数据丢失",
     "xpack.lens.chartSwitch.noResults": "找不到 {term} 的结果。",
-    "xpack.lens.chartTitle.unsaved": "未保存",
     "xpack.lens.configPanel.chartType": "图表类型",
     "xpack.lens.configPanel.color.tooltip.auto": "Lens 自动为您选取颜色，除非您指定定制颜色。",
     "xpack.lens.configPanel.color.tooltip.custom": "清除定制颜色以返回到“自动”模式。",

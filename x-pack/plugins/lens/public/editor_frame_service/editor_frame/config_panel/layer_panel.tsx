@@ -357,12 +357,12 @@ export function LayerPanel(
                             aria-label={i18n.translate(
                               'xpack.lens.indexPattern.removeColumnLabel',
                               {
-                                defaultMessage: 'Remove configuration from {groupLabel}',
+                                defaultMessage: 'Remove configuration from "{groupLabel}"',
                                 values: { groupLabel: group.groupLabel },
                               }
                             )}
                             title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-                              defaultMessage: 'Remove configuration from {groupLabel}',
+                              defaultMessage: 'Remove configuration from "{groupLabel}"',
                               values: { groupLabel: group.groupLabel },
                             })}
                             onClick={() => {
