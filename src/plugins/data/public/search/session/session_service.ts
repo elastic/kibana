@@ -122,7 +122,6 @@ export class SessionService {
       this.appChangeSubscription$.unsubscribe();
     }
     this.clear();
-    this.setSearchSessionInfoProvider(undefined);
   }
 
   /**
