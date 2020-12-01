@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSelect } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useTransactionCharts } from '../../../../hooks/useTransactionCharts';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { getResponseTimeTickFormatter } from '../../../shared/charts/transaction_charts/helper';
@@ -20,7 +20,7 @@ interface Props {
 export function LatencyChart({ height }: Props) {
   const [selectedOption, setSelectedOption] = useState(0);
   const { data, status } = useTransactionCharts();
-  const { responseTimeSeries } = data;
+  const { responseTimeSeries, anomalySeries } = data;
   const { formatter } = useFormatter(responseTimeSeries);
   const options = responseTimeSeries?.map(({ title }, index) => ({
     value: index,
@@ -42,6 +42,7 @@ export function LatencyChart({ height }: Props) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSelect
+              isLoading={status === FETCH_STATUS.LOADING}
               prepend={i18n.translate(
                 'xpack.apm.serviceOverview.latencyChartTitle.prepend',
                 { defaultMessage: 'Metric' }
@@ -57,6 +58,7 @@ export function LatencyChart({ height }: Props) {
       </EuiFlexItem>
       <EuiFlexItem>
         <TimeseriesChart
+          anomalySeries={anomalySeries}
           height={height}
           fetchStatus={status}
           id="letency"

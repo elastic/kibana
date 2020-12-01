@@ -9,17 +9,19 @@ import { useParams } from 'react-router-dom';
 import { getTransactionCharts } from '../selectors/chart_selectors';
 import { useFetcher } from './use_fetcher';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useApmService } from './use_apm_service';
 
 export function useTransactionChartsFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
+  const { transactionType } = useApmService();
   const {
-    urlParams: { transactionType, start, end, transactionName },
+    urlParams: { start, end, transactionName },
     uiFilters,
   } = useUrlParams();
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
-      if (serviceName && start && end) {
+      if (serviceName && start && end && transactionType) {
         return callApmApi({
           endpoint: 'GET /api/apm/services/{serviceName}/transactions/charts',
           params: {
