@@ -262,11 +262,11 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const tooltipProperties = await super.getTooltipProperties(properties);
     tooltipProperties.push(
       new TooltipProperty(
-        'isTrackTrimmed',
-        i18n.translate('xpack.maps.source.esGeoLine.isTrackTrimmedLabel', {
-          defaultMessage: 'trimmed',
+        'isTrackComplete',
+        i18n.translate('xpack.maps.source.esGeoLine.isTrackCompleteLabel', {
+          defaultMessage: 'track is complete',
         }),
-        !properties.complete
+        properties.complete
       )
     );
     return tooltipProperties;
