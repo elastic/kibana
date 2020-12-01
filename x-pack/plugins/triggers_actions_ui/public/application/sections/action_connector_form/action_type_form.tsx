@@ -43,6 +43,7 @@ import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
+import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -106,6 +107,12 @@ export const ActionTypeForm = ({
     setAvailableActionVariables(
       messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
     );
+    const paramsDefaults = getDefaultsForActionParams(actionItem.actionTypeId, actionItem.group);
+    if (paramsDefaults) {
+      for (const [key, paramValue] of Object.entries(paramsDefaults)) {
+        setActionParamsProperty(key, paramValue, index);
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem.group]);
 
