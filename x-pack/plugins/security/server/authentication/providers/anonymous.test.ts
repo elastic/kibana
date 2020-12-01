@@ -66,6 +66,7 @@ describe('AnonymousAuthenticationProvider', () => {
             authorization = new HTTPAuthorizationHeader('ApiKey', 'some-apiKey').toString();
             break;
           default:
+            credentials = 'elasticsearch_anonymous_user' as 'elasticsearch_anonymous_user';
             break;
         }
 

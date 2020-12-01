@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from '../../../../../../src/core/server';
+import { KibanaRequest, LegacyElasticsearchErrorHelpers } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -30,6 +30,11 @@ interface APIKeyCredentials {
 }
 
 /**
+ * Credentials that imply authentication based on the Elasticsearch native anonymous user.
+ */
+type ElasticsearchAnonymousUserCredentials = 'elasticsearch_anonymous_user';
+
+/**
  * Checks whether current request can initiate a new session.
  * @param request Request instance.
  */
@@ -44,7 +49,10 @@ function canStartNewSession(request: KibanaRequest) {
  * @param credentials
  */
 function isAPIKeyCredentials(
-  credentials: UsernameAndPasswordCredentials | APIKeyCredentials
+  credentials:
+    | ElasticsearchAnonymousUserCredentials
+    | APIKeyCredentials
+    | UsernameAndPasswordCredentials
 ): credentials is APIKeyCredentials {
   return !!(credentials as APIKeyCredentials).apiKey;
 }
@@ -67,37 +75,41 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
     anonymousOptions?: Readonly<{
-      credentials?: Readonly<UsernameAndPasswordCredentials | APIKeyCredentials>;
+      credentials?: Readonly<
+        ElasticsearchAnonymousUserCredentials | UsernameAndPasswordCredentials | APIKeyCredentials
+      >;
     }>
   ) {
     super(options);
 
     const credentials = anonymousOptions?.credentials;
-    if (credentials) {
-      if (isAPIKeyCredentials(credentials)) {
-        this.logger.debug('Anonymous requests will be authenticated via API key.');
-        this.httpAuthorizationHeader = new HTTPAuthorizationHeader(
-          'ApiKey',
-          typeof credentials.apiKey === 'string'
-            ? credentials.apiKey
-            : new BasicHTTPAuthorizationHeaderCredentials(
-                credentials.apiKey.id,
-                credentials.apiKey.key
-              ).toString()
-        );
-      } else {
-        this.logger.debug('Anonymous requests will be authenticated via username and password.');
-        this.httpAuthorizationHeader = new HTTPAuthorizationHeader(
-          'Basic',
-          new BasicHTTPAuthorizationHeaderCredentials(
-            credentials.username,
-            credentials.password
-          ).toString()
-        );
-      }
-    } else {
+    if (!credentials) {
+      throw new Error('Credentials must be specified');
+    }
+
+    if (credentials === 'elasticsearch_anonymous_user') {
       this.logger.debug(
-        'Anonymous requests will be authenticated using Elasticsearch native anonymous access.'
+        'Anonymous requests will be authenticated using Elasticsearch native anonymous user.'
+      );
+    } else if (isAPIKeyCredentials(credentials)) {
+      this.logger.debug('Anonymous requests will be authenticated via API key.');
+      this.httpAuthorizationHeader = new HTTPAuthorizationHeader(
+        'ApiKey',
+        typeof credentials.apiKey === 'string'
+          ? credentials.apiKey
+          : new BasicHTTPAuthorizationHeaderCredentials(
+              credentials.apiKey.id,
+              credentials.apiKey.key
+            ).toString()
+      );
+    } else {
+      this.logger.debug('Anonymous requests will be authenticated via username and password.');
+      this.httpAuthorizationHeader = new HTTPAuthorizationHeader(
+        'Basic',
+        new BasicHTTPAuthorizationHeaderCredentials(
+          credentials.username,
+          credentials.password
+        ).toString()
       );
     }
   }
@@ -178,7 +190,23 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
       // Create session only if it doesn't exist yet, otherwise keep it unchanged.
       return AuthenticationResult.succeeded(user, { authHeaders, state: state ? undefined : {} });
     } catch (err) {
-      this.logger.debug(`Failed to authenticate request : ${err.message}`);
+      if (LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
+        if (!this.httpAuthorizationHeader) {
+          this.logger.error(
+            `Failed to authenticate anonymous request using Elasticsearch reserved anonymous user. Anonymous access may not be properly configured in Elasticsearch: ${err.message}`
+          );
+        } else if (this.httpAuthorizationHeader.scheme.toLowerCase() === 'basic') {
+          this.logger.error(
+            `Failed to authenticate anonymous request using provided username/password credentials. The user with the provided username may not exist or the password is wrong: ${err.message}`
+          );
+        } else {
+          this.logger.error(
+            `Failed to authenticate anonymous request using provided API key. The key may not exist or expired: ${err.message}`
+          );
+        }
+      } else {
+        this.logger.error(`Failed to authenticate request : ${err.message}`);
+      }
       return AuthenticationResult.failed(err);
     }
   }

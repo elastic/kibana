@@ -31,7 +31,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           .get('kbnTestServer.serverArgs')
           .filter((arg: string) => !arg.startsWith('--xpack.security.authc.providers')),
         `--xpack.security.authc.providers=${JSON.stringify({
-          anonymous: { anonymous1: { order: 0 } },
+          anonymous: { anonymous1: { order: 0, credentials: 'elasticsearch_anonymous_user' } },
           basic: { basic1: { order: 1 } },
         })}`,
       ],
