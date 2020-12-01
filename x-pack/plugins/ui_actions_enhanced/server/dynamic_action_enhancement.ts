@@ -22,8 +22,15 @@ export const dynamicActionEnhancement = (
 
       for (const event of state.events) {
         const factory = getActionFactory(event.action.factoryId);
-        if (factory) stats = factory.telemetry(event, stats);
+        if (factory) {
+          let factoryStats: Record<string, any> = {};
+          factoryStats = factory.telemetry(event, factoryStats);
+          for (const [stat, value] of Object.entries(factoryStats)) {
+            stats[`dynamicActions.factories.${factory.id}.${stat}`] = value;
+          }
+        }
       }
+
       return stats;
     },
     extract: (state: SerializableState) => {

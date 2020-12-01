@@ -7,7 +7,7 @@
 import { DynamicActionsState } from '../../common';
 
 export const uiActionsCollector = (state: DynamicActionsState, stats: Record<string, any>) => {
-  stats.dynamicActionCount = state.events.length;
+  stats['dynamicActions.count'] = state.events.length;
 
   const factoryFrequency: Record<string, number | undefined> = {};
 
@@ -19,6 +19,6 @@ export const uiActionsCollector = (state: DynamicActionsState, stats: Record<str
   const factoryIds = Object.keys(factoryFrequency);
 
   for (const factoryId of factoryIds) {
-    stats[`dynamicAction.${factoryId}.count`] = factoryFrequency[factoryId];
+    stats[`dynamicActions.actions.${factoryId}.count`] = factoryFrequency[factoryId];
   }
 };
