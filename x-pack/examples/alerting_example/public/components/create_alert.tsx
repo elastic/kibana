@@ -8,20 +8,11 @@ import React, { useState } from 'react';
 
 import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
 
-import { AlertsContextProvider, AlertAdd } from '../../../../plugins/triggers_actions_ui/public';
+import { AlertAdd } from '../../../../plugins/triggers_actions_ui/public';
 import { AlertingExampleComponentParams } from '../application';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
-export const CreateAlert = ({
-  http,
-  triggersActionsUi,
-  charts,
-  uiSettings,
-  docLinks,
-  data,
-  toastNotifications,
-  capabilities,
-}: AlertingExampleComponentParams) => {
+export const CreateAlert = ({ triggersActionsUi }: AlertingExampleComponentParams) => {
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
   return (
@@ -35,25 +26,13 @@ export const CreateAlert = ({
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <AlertsContextProvider
-          value={{
-            http,
-            actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-            alertTypeRegistry: triggersActionsUi.alertTypeRegistry,
-            toastNotifications,
-            uiSettings,
-            docLinks,
-            charts,
-            dataFieldsFormats: data.fieldFormats,
-            capabilities,
-          }}
-        >
-          <AlertAdd
-            consumer={ALERTING_EXAMPLE_APP_ID}
-            addFlyoutVisible={alertFlyoutVisible}
-            setAddFlyoutVisibility={setAlertFlyoutVisibility}
-          />
-        </AlertsContextProvider>
+        <AlertAdd
+          consumer={ALERTING_EXAMPLE_APP_ID}
+          addFlyoutVisible={alertFlyoutVisible}
+          setAddFlyoutVisibility={setAlertFlyoutVisibility}
+          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+          alertTypeRegistry={triggersActionsUi.alertTypeRegistry}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -818,14 +818,8 @@ const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 // in render section of component
 <AlertsContextProvider
   value={{
-    http,
     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
     alertTypeRegistry: triggersActionsUi.alertTypeRegistry,
-    toastNotifications: toasts,
-    uiSettings,
-    docLinks,
-    charts,
-    dataFieldsFormats,
     metadata: { test: 'some value', fields: ['test'] },
   }}
 >

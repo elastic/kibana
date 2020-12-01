@@ -7,7 +7,7 @@
 import React, { useContext } from 'react';
 import { ApplicationStart, DocLinksStart, HttpStart, NotificationsStart } from 'src/core/public';
 
-import { AlertsContextProvider, AlertAdd } from '../../../../../triggers_actions_ui/public';
+import { AlertAdd } from '../../../../../triggers_actions_ui/public';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -33,7 +33,6 @@ interface KibanaDeps {
 
 export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {
   const { triggersActionsUI } = useContext(TriggerActionsContext);
-  const { services } = useKibana<KibanaDeps>();
 
   const { inventoryPrefill } = useAlertPrefillContext();
   const { customMetrics } = inventoryPrefill;
@@ -41,30 +40,21 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
   return (
     <>
       {triggersActionsUI && (
-        <AlertsContextProvider
-          value={{
-            metadata: {
-              options,
-              nodeType,
-              filter,
-              customMetrics,
-            },
-            toastNotifications: services.notifications?.toasts,
-            http: services.http,
-            docLinks: services.docLinks,
-            capabilities: services.application.capabilities,
-            actionTypeRegistry: triggersActionsUI.actionTypeRegistry,
-            alertTypeRegistry: triggersActionsUI.alertTypeRegistry,
+        <AlertAdd
+          addFlyoutVisible={visible!}
+          setAddFlyoutVisibility={setVisible}
+          alertTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
+          canChangeTrigger={false}
+          consumer={'infrastructure'}
+          metadata={{
+            options,
+            nodeType,
+            filter,
+            customMetrics,
           }}
-        >
-          <AlertAdd
-            addFlyoutVisible={visible!}
-            setAddFlyoutVisibility={setVisible}
-            alertTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
-            canChangeTrigger={false}
-            consumer={'infrastructure'}
-          />
-        </AlertsContextProvider>
+          actionTypeRegistry={triggersActionsUI.actionTypeRegistry}
+          alertTypeRegistry={triggersActionsUI.alertTypeRegistry}
+        />
       )}
     </>
   );

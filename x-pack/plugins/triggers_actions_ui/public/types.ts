@@ -168,7 +168,7 @@ export interface AlertTypeParamsExpressionProps<
   actionGroups: ActionGroup[];
 }
 
-export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any> {
+export interface AlertTypeModel<AlertParamsType = any> {
   id: string;
   name: string | JSX.Element;
   description: string;
@@ -177,9 +177,7 @@ export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any>
   validate: (alertParams: AlertParamsType) => ValidationResult;
   alertParamsExpression:
     | React.FunctionComponent<any>
-    | React.LazyExoticComponent<
-        ComponentType<AlertTypeParamsExpressionProps<AlertParamsType, AlertsContextValue>>
-      >;
+    | React.LazyExoticComponent<ComponentType<AlertTypeParamsExpressionProps<AlertParamsType>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
 }

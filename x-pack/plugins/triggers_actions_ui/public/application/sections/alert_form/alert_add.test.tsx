@@ -12,13 +12,11 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import AlertAdd from './alert_add';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { Alert, ValidationResult } from '../../../types';
-import { AlertsContextProvider, useAlertsContext } from '../../context/alerts_context';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('../../lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
@@ -29,15 +27,12 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
 export const TestExpression: React.FunctionComponent<any> = () => {
-  const alertsContext = useAlertsContext();
-  const { metadata } = alertsContext;
-
   return (
     <EuiFormLabel>
       <FormattedMessage
         defaultMessage="Metadata: {val}. Fields: {fields}."
         id="xpack.triggersActionsUI.sections.alertAdd.metadataTest"
-        values={{ val: metadata!.test, fields: metadata!.fields.join(' ') }}
+        values={{ val: 'test', fields: '' }}
       />
     </EuiFormLabel>
   );
@@ -131,37 +126,18 @@ describe('alert_add', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <KibanaContextProvider services={{ ...deps }}>
-        <AlertsContextProvider
-          value={{
-            reloadAlerts: () => {
-              return new Promise<void>(() => {});
-            },
-            http: deps.http,
-            actionTypeRegistry: deps.actionTypeRegistry,
-            alertTypeRegistry: deps.alertTypeRegistry,
-            toastNotifications: deps.toastNotifications,
-            uiSettings: deps.uiSettings,
-            docLinks: deps.docLinks,
-            metadata: { test: 'some value', fields: ['test'] },
-            capabilities: {
-              ...capabilities,
-              actions: {
-                delete: true,
-                save: true,
-                show: true,
-              },
-            },
-          }}
-        >
-          <AlertAdd
-            consumer={ALERTS_FEATURE_ID}
-            addFlyoutVisible={true}
-            setAddFlyoutVisibility={() => {}}
-            initialValues={initialValues}
-          />
-        </AlertsContextProvider>
-      </KibanaContextProvider>
+      <AlertAdd
+        consumer={ALERTS_FEATURE_ID}
+        addFlyoutVisible={true}
+        setAddFlyoutVisibility={() => {}}
+        initialValues={initialValues}
+        reloadAlerts={() => {
+          return new Promise<void>(() => {});
+        }}
+        actionTypeRegistry={deps.actionTypeRegistry}
+        alertTypeRegistry={deps.alertTypeRegistry}
+        metadata={{ test: 'some value', fields: ['test'] }}
+      />
     );
 
     // Wait for active space to resolve before requesting the component to update

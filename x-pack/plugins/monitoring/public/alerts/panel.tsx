@@ -21,7 +21,6 @@ import {
 import { CommonAlertStatus, CommonAlertState, AlertMessage } from '../../common/types/alerts';
 import { Legacy } from '../legacy_shims';
 import { replaceTokens } from './lib/replace_tokens';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 import { AlertEdit } from '../../../triggers_actions_ui/public';
 import { isInSetupMode, hideBottomBar, showBottomBar } from '../lib/setup_mode';
 import { BASE_ALERT_API_PATH } from '../../../alerts/common';
@@ -106,26 +105,15 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
   }
 
   const flyoutUi = showFlyout ? (
-    <AlertsContextProvider
-      value={{
-        http: Legacy.shims.http,
-        actionTypeRegistry: Legacy.shims.actionTypeRegistry,
-        alertTypeRegistry: Legacy.shims.alertTypeRegistry,
-        toastNotifications: Legacy.shims.toastNotifications,
-        uiSettings: Legacy.shims.uiSettings,
-        docLinks: Legacy.shims.docLinks,
-        reloadAlerts: async () => {},
-        capabilities: Legacy.shims.capabilities,
+    <AlertEdit
+      initialAlert={alert.rawAlert}
+      onClose={() => {
+        setShowFlyout(false);
+        showBottomBar();
       }}
-    >
-      <AlertEdit
-        initialAlert={alert.rawAlert}
-        onClose={() => {
-          setShowFlyout(false);
-          showBottomBar();
-        }}
-      />
-    </AlertsContextProvider>
+      actionTypeRegistry={Legacy.shims.actionTypeRegistry}
+      alertTypeRegistry={Legacy.shims.alertTypeRegistry}
+    />
   ) : null;
 
   const configurationUi = (

@@ -51,13 +51,6 @@ export const UptimeAlertsContextProvider: React.FC = ({ children }) => {
       value={{
         actionTypeRegistry,
         alertTypeRegistry,
-        charts,
-        docLinks,
-        dataFieldsFormats: fieldFormats,
-        http,
-        toastNotifications: notifications?.toasts,
-        uiSettings,
-        capabilities,
       }}
     >
       {children}

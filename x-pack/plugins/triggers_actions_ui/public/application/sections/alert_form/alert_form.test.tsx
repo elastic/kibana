@@ -11,7 +11,6 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ValidationResult, Alert } from '../../../types';
 import { AlertForm } from './alert_form';
-import { AlertsContextProvider } from '../../context/alerts_context';
 import { coreMock } from 'src/core/public/mocks';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
 
@@ -127,27 +126,14 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       wrapper = mountWithIntl(
-        <AlertsContextProvider
-          value={{
-            reloadAlerts: () => {
-              return new Promise<void>(() => {});
-            },
-            http: deps!.http,
-            docLinks: deps.docLinks,
-            actionTypeRegistry: deps!.actionTypeRegistry,
-            alertTypeRegistry: deps!.alertTypeRegistry,
-            toastNotifications: deps!.toastNotifications,
-            uiSettings: deps!.uiSettings,
-            capabilities: deps!.capabilities,
-          }}
-        >
-          <AlertForm
-            alert={initialAlert}
-            dispatch={() => {}}
-            errors={{ name: [], interval: [] }}
-            operation="create"
-          />
-        </AlertsContextProvider>
+        <AlertForm
+          alert={initialAlert}
+          dispatch={() => {}}
+          errors={{ name: [], interval: [] }}
+          operation="create"
+          actionTypeRegistry={deps!.actionTypeRegistry}
+          alertTypeRegistry={deps!.alertTypeRegistry}
+        />
       );
 
       await act(async () => {
@@ -299,27 +285,14 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       wrapper = mountWithIntl(
-        <AlertsContextProvider
-          value={{
-            reloadAlerts: () => {
-              return new Promise<void>(() => {});
-            },
-            http: deps!.http,
-            docLinks: deps.docLinks,
-            actionTypeRegistry: deps!.actionTypeRegistry,
-            alertTypeRegistry: deps!.alertTypeRegistry,
-            toastNotifications: deps!.toastNotifications,
-            uiSettings: deps!.uiSettings,
-            capabilities: deps!.capabilities,
-          }}
-        >
-          <AlertForm
-            alert={initialAlert}
-            dispatch={() => {}}
-            errors={{ name: [], interval: [] }}
-            operation="create"
-          />
-        </AlertsContextProvider>
+        <AlertForm
+          alert={initialAlert}
+          dispatch={() => {}}
+          errors={{ name: [], interval: [] }}
+          operation="create"
+          actionTypeRegistry={deps!.actionTypeRegistry}
+          alertTypeRegistry={deps!.alertTypeRegistry}
+        />
       );
 
       await act(async () => {
@@ -382,27 +355,14 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       wrapper = mountWithIntl(
-        <AlertsContextProvider
-          value={{
-            reloadAlerts: () => {
-              return new Promise<void>(() => {});
-            },
-            http: deps!.http,
-            docLinks: deps.docLinks,
-            actionTypeRegistry: deps!.actionTypeRegistry,
-            alertTypeRegistry: deps!.alertTypeRegistry,
-            toastNotifications: deps!.toastNotifications,
-            uiSettings: deps!.uiSettings,
-            capabilities: deps!.capabilities,
-          }}
-        >
-          <AlertForm
-            alert={initialAlert}
-            dispatch={() => {}}
-            errors={{ name: [], interval: [] }}
-            operation="create"
-          />
-        </AlertsContextProvider>
+        <AlertForm
+          alert={initialAlert}
+          dispatch={() => {}}
+          errors={{ name: [], interval: [] }}
+          operation="create"
+          actionTypeRegistry={deps!.actionTypeRegistry}
+          alertTypeRegistry={deps!.alertTypeRegistry}
+        />
       );
 
       await act(async () => {

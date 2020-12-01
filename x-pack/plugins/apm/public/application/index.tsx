@@ -78,10 +78,6 @@ export function ApmAppRoot({
       <ApmPluginContext.Provider value={apmPluginContextValue}>
         <AlertsContextProvider
           value={{
-            http: core.http,
-            docLinks: core.docLinks,
-            capabilities: core.application.capabilities,
-            toastNotifications: core.notifications.toasts,
             actionTypeRegistry: plugins.triggersActionsUi.actionTypeRegistry,
             alertTypeRegistry: plugins.triggersActionsUi.alertTypeRegistry,
           }}
