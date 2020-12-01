@@ -37,7 +37,7 @@ export async function createAPIKey(
   }
 
   try {
-    const key = await security.authc.createAPIKey(request as KibanaRequest, {
+    const key = await security.authc.createAPIKey(request, {
       name,
       role_descriptors: roleDescriptors,
     });
@@ -87,7 +87,7 @@ export async function invalidateAPIKey(soClient: SavedObjectsClientContract, id:
   }
 
   try {
-    const res = await security.authc.invalidateAPIKey(request as KibanaRequest, {
+    const res = await security.authc.invalidateAPIKey(request, {
       id,
     });
 
