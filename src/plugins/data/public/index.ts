@@ -383,6 +383,7 @@ export {
   SearchRequest,
   SearchSourceFields,
   SortDirection,
+  SessionState,
   // expression functions and types
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
@@ -393,7 +394,12 @@ export {
   PainlessError,
 } from './search';
 
-export type { SearchSource, ISessionService } from './search';
+export type {
+  SearchSource,
+  ISessionService,
+  SearchSessionInfoProvider,
+  ISessionsClient,
+} from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
