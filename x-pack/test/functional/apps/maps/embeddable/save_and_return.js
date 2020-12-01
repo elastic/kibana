@@ -13,22 +13,22 @@ export default function ({ getPageObjects, getService }) {
   const dashboardVisualizations = getService('dashboardVisualizations');
   const testSubjects = getService('testSubjects');
   const security = getService('security');
-  const toasts = getService('toasts');
 
   describe('save and return work flow', () => {
     before(async () => {
-      await toasts.dismissAllToasts();
-      await security.testUser.setRoles([
-        'test_logstash_reader',
-        'global_maps_all',
-        'geoshape_data_reader',
-        'global_dashboard_all',
-        'meta_for_geoshape_data_reader',
-      ]);
+      await security.testUser.setRoles(
+        [
+          'test_logstash_reader',
+          'global_maps_all',
+          'geoshape_data_reader',
+          'global_dashboard_all',
+          'meta_for_geoshape_data_reader',
+        ],
+        false
+      );
     });
 
     after(async () => {
-      await toasts.dismissAllToasts();
       await security.testUser.restoreDefaults();
     });
     describe('new map', () => {
