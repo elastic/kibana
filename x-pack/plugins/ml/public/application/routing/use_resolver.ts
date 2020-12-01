@@ -20,6 +20,14 @@ import { useNotifications } from '../contexts/kibana';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../common/constants/ml_url_generator';
 
+/**
+ * Hook to resolve route specific requirements
+ * @param indexPatternId optional Kibana index pattern id, used for wizards
+ * @param savedSearchId optional Kibana saved search id, used for wizards
+ * @param config Kibana UI Settings
+ * @param resolvers an array of resolvers to be executed for the route
+ * @return { context, results } returns the ML context and resolver results
+ */
 export const useResolver = (
   indexPatternId: string | undefined,
   savedSearchId: string | undefined,

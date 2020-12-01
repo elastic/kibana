@@ -74,6 +74,7 @@ describe('useResolver', () => {
       results: {},
     });
     expect(addError).toHaveBeenCalledTimes(0);
+    expect(redirectToJobsManagementPage).toHaveBeenCalledTimes(0);
   });
 
   it('should add an error toast and redirect if indexPatternId is an empty string.', async () => {
