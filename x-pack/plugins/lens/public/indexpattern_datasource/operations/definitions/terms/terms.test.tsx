@@ -7,7 +7,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiRange, EuiSelect } from '@elastic/eui';
+import { EuiRange, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
@@ -33,7 +33,11 @@ describe('terms', () => {
   beforeEach(() => {
     state = {
       indexPatternRefs: [],
-      indexPatterns: {},
+      indexPatterns: {
+        '1': {
+          hasRestrictions: false,
+        } as IndexPattern,
+      },
       existingFields: {},
       currentIndexPatternId: '1',
       isFirstExistenceFetch: false,
@@ -69,8 +73,9 @@ describe('terms', () => {
 
   describe('toEsAggsConfig', () => {
     it('should reflect params correctly', () => {
+      const termsColumn = state.layers.first.columns.col1 as TermsIndexPatternColumn;
       const esAggsConfig = termsOperation.toEsAggsConfig(
-        state.layers.first.columns.col1 as TermsIndexPatternColumn,
+        { ...termsColumn, params: { ...termsColumn.params, otherBucket: true } },
         'col1',
         {} as IndexPattern
       );
@@ -80,6 +85,27 @@ describe('terms', () => {
             orderBy: '_key',
             field: 'category',
             size: 3,
+            otherBucket: true,
+          }),
+        })
+      );
+    });
+
+    it('should not enable missing bucket if other bucket is not set', () => {
+      const termsColumn = state.layers.first.columns.col1 as TermsIndexPatternColumn;
+      const esAggsConfig = termsOperation.toEsAggsConfig(
+        {
+          ...termsColumn,
+          params: { ...termsColumn.params, otherBucket: false, missingBucket: true },
+        },
+        'col1',
+        {} as IndexPattern
+      );
+      expect(esAggsConfig).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            otherBucket: false,
+            missingBucket: false,
           }),
         })
       );
@@ -244,22 +270,56 @@ describe('terms', () => {
           name: 'test',
           displayName: 'test',
         },
-        columns: {},
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
       expect(termsColumn.dataType).toEqual('boolean');
+    });
+
+    it('should set other bucket to true by default', () => {
+      const termsColumn = termsOperation.buildColumn({
+        indexPattern: createMockedIndexPattern(),
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+      });
+      expect(termsColumn.params.otherBucket).toEqual(true);
+    });
+
+    it('should set other bucket to false if index pattern has restrictions', () => {
+      const termsColumn = termsOperation.buildColumn({
+        indexPattern: { ...createMockedIndexPattern(), hasRestrictions: true },
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+      });
+      expect(termsColumn.params.otherBucket).toEqual(false);
     });
 
     it('should use existing metric column as order column', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
-        columns: {
-          col1: {
-            label: 'Count',
-            dataType: 'number',
-            isBucketed: false,
-            sourceField: 'Records',
-            operationType: 'count',
+        layer: {
+          columns: {
+            col1: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
           },
+          columnOrder: [],
+          indexPatternId: '',
         },
         field: {
           aggregatable: true,
@@ -279,7 +339,7 @@ describe('terms', () => {
     it('should use the default size when there is an existing bucket', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
-        columns: state.layers.first.columns,
+        layer: state.layers.first,
         field: {
           aggregatable: true,
           searchable: true,
@@ -294,7 +354,7 @@ describe('terms', () => {
     it('should use a size of 5 when there are no other buckets', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
-        columns: {},
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
         field: {
           aggregatable: true,
           searchable: true,
@@ -400,6 +460,132 @@ describe('terms', () => {
   });
 
   describe('param editor', () => {
+    it('should render current other bucket value', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
+          layerId="first"
+        />
+      );
+
+      const select = instance
+        .find('[data-test-subj="indexPattern-terms-other-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select.prop('checked')).toEqual(false);
+    });
+
+    it('should hide other bucket setting for rollups', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          state={{ ...state, indexPatterns: { '1': { hasRestrictions: true } as IndexPattern } }}
+          setState={setStateSpy}
+          columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
+          layerId="first"
+        />
+      );
+
+      expect(instance.find('[data-test-subj="indexPattern-terms-other-bucket"]').length).toEqual(0);
+    });
+
+    it('should disable missing bucket setting as long as other bucket is not set', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
+          layerId="first"
+        />
+      );
+
+      const select = instance
+        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select.prop('disabled')).toEqual(true);
+    });
+
+    it('should enable missing bucket setting as long as other bucket is set', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          currentColumn={
+            {
+              ...state.layers.first.columns.col1,
+              params: {
+                ...state.layers.first.columns.col1.params,
+                otherBucket: true,
+              },
+            } as TermsIndexPatternColumn
+          }
+          layerId="first"
+        />
+      );
+
+      const select = instance
+        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select.prop('disabled')).toEqual(false);
+    });
+
+    it('should update state when clicking other bucket toggle', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
+          layerId="first"
+        />
+      );
+
+      instance
+        .find('[data-test-subj="indexPattern-terms-other-bucket"]')
+        .find(EuiSwitch)
+        .prop('onChange')!({
+        target: {
+          checked: true,
+        },
+      } as EuiSwitchEvent);
+
+      expect(setStateSpy).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                  otherBucket: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
     it('should render current order by value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(

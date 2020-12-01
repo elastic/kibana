@@ -221,7 +221,7 @@ export function registerBoostsGroupRoute({
   );
 }
 
-export const registerGroupsRoutes = (dependencies: IRouteDependencies) => {
+export const registerGroupsRoutes = (dependencies: RouteDependencies) => {
   registerGroupsRoute(dependencies);
   registerSearchGroupsRoute(dependencies);
   registerGroupRoute(dependencies);

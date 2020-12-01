@@ -48,6 +48,7 @@ export const getCoreI18n = () => coreStart.i18n;
 export const getSearchService = () => pluginsStart.data.search;
 export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
+export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
@@ -77,3 +78,6 @@ export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionma
 export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);
 
 export const getShareService = () => pluginsStart.share;
+
+export const getIsAllowByValueEmbeddables = () =>
+  pluginsStart.dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;

@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { keys } from '@elastic/eui';
 import { httpServiceMock } from '../../../../../../core/public/mocks';

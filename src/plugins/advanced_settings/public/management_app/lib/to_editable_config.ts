@@ -75,6 +75,7 @@ export function toEditableConfig({
     options: def.options,
     optionLabels: def.optionLabels,
     requiresPageReload: !!def.requiresPageReload,
+    metric: def.metric,
   };
 
   return conf;

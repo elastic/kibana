@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 import moment from 'moment-timezone';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { SinonFakeServer } from 'sinon';
 import { ReactWrapper } from 'enzyme';
 import axios from 'axios';
@@ -298,12 +298,12 @@ describe('edit policy', () => {
             phases: {
               hot: {
                 actions: {
+                  rollover: {
+                    max_age: '30d',
+                    max_size: '50gb',
+                  },
                   set_priority: {
                     priority: 100,
-                  },
-                  rollover: {
-                    max_size: '50gb',
-                    max_age: '30d',
                   },
                 },
                 min_age: '0ms',

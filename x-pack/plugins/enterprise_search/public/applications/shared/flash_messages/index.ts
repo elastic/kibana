@@ -7,4 +7,9 @@
 export { FlashMessages } from './flash_messages';
 export { FlashMessagesLogic, IFlashMessage, mountFlashMessagesLogic } from './flash_messages_logic';
 export { flashAPIErrors } from './handle_api_errors';
-export { setSuccessMessage, setErrorMessage, setQueuedSuccessMessage } from './set_message_helpers';
+export {
+  setSuccessMessage,
+  setErrorMessage,
+  setQueuedSuccessMessage,
+  setQueuedErrorMessage,
+} from './set_message_helpers';

@@ -160,6 +160,7 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { URL } from 'url';
@@ -1323,6 +1324,7 @@ export interface LegacyCallAPIOptions {
 export class LegacyClusterClient implements ILegacyClusterClient {
     constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient;
+    // @deprecated
     callAsInternalUser: LegacyAPICaller;
     close(): void;
     }
@@ -1370,7 +1372,9 @@ export interface LegacyRequest extends Request {
 // @public @deprecated
 export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     constructor(internalAPICaller: LegacyAPICaller, scopedAPICaller: LegacyAPICaller, headers?: Headers | undefined);
+    // @deprecated
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
+    // @deprecated
     callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     }
 
@@ -2365,6 +2369,7 @@ export interface SavedObjectsImportUnsupportedTypeError {
 
 // @public (undocumented)
 export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+    initialize?: boolean;
     // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     refresh?: MutatingOperationRefreshSetting;
@@ -2443,7 +2448,7 @@ export class SavedObjectsRepository {
     // (undocumented)
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
-    incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
+    incrementCounter(type: string, id: string, counterFieldNames: string[], options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
@@ -2746,6 +2751,11 @@ export interface UiSettingsParams<T = unknown> {
     category?: string[];
     deprecation?: DeprecationSettings;
     description?: string;
+    // @deprecated
+    metric?: {
+        type: UiStatsMetricType;
+        name: string;
+    };
     name?: string;
     optionLabels?: Record<string, string>;
     options?: string[];

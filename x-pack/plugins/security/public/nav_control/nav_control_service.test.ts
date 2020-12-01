@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { ILicense } from '../../../licensing/public';
 import { SecurityNavControlService } from '.';
 import { SecurityLicenseService } from '../../common/licensing';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { securityMock } from '../mocks';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 

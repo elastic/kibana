@@ -75,6 +75,7 @@ export function createExecutionHandler({
             spaceId,
             tags,
             alertInstanceId,
+            alertActionGroup: actionGroup,
             context,
             actionParams: action.params,
             state,
@@ -116,6 +117,7 @@ export function createExecutionHandler({
         kibana: {
           alerting: {
             instance_id: alertInstanceId,
+            action_group_id: actionGroup,
           },
           saved_objects: [
             { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },

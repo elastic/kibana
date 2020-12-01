@@ -11,7 +11,7 @@ import moment from 'moment';
 
 import { AppLogic } from '../../../../app_logic';
 import { LogRetentionLogic } from '../log_retention_logic';
-import { ELogRetentionOptions } from '../types';
+import { LogRetentionOptions } from '../types';
 
 import { determineTooltipContent } from './determine_tooltip_content';
 import { ANALYTICS_MESSAGES, API_MESSAGES } from './constants';
@@ -29,7 +29,7 @@ export const AnalyticsLogRetentionMessage: React.FC = () => {
       {determineTooltipContent(
         ANALYTICS_MESSAGES,
         ilmEnabled,
-        logRetention[ELogRetentionOptions.Analytics]
+        logRetention[LogRetentionOptions.Analytics]
       )}
     </>
   );
@@ -41,6 +41,6 @@ export const ApiLogRetentionMessage: React.FC = () => {
   if (!logRetention) return null;
 
   return (
-    <>{determineTooltipContent(API_MESSAGES, ilmEnabled, logRetention[ELogRetentionOptions.API])}</>
+    <>{determineTooltipContent(API_MESSAGES, ilmEnabled, logRetention[LogRetentionOptions.API])}</>
   );
 };

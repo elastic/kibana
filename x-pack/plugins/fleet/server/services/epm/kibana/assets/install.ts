@@ -10,7 +10,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
-import * as Registry from '../../registry';
+import { getAsset, getPathParts } from '../../archive';
 import {
   AssetType,
   KibanaAssetType,
@@ -57,7 +57,7 @@ const AssetInstallers: Record<
 };
 
 export async function getKibanaAsset(key: string): Promise<ArchiveAsset> {
-  const buffer = Registry.getAsset(key);
+  const buffer = getAsset(key);
 
   // cache values are buffers. convert to string / JSON
   return JSON.parse(buffer.toString('utf8'));
@@ -117,14 +117,14 @@ export async function getKibanaAssets(
 ): Promise<Record<KibanaAssetType, ArchiveAsset[]>> {
   const kibanaAssetTypes = Object.values(KibanaAssetType);
   const isKibanaAssetType = (path: string) => {
-    const parts = Registry.pathParts(path);
+    const parts = getPathParts(path);
 
     return parts.service === 'kibana' && (kibanaAssetTypes as string[]).includes(parts.type);
   };
 
   const filteredPaths = paths
     .filter(isKibanaAssetType)
-    .map<[string, AssetParts]>((path) => [path, Registry.pathParts(path)]);
+    .map<[string, AssetParts]>((path) => [path, getPathParts(path)]);
 
   const assetArrays: Array<Promise<ArchiveAsset[]>> = [];
   for (const assetType of kibanaAssetTypes) {

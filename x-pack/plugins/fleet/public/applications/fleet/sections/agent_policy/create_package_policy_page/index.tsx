@@ -28,7 +28,7 @@ import {
   useLink,
   useBreadcrumbs,
   sendCreatePackagePolicy,
-  useCore,
+  useStartServices,
   useConfig,
   sendGetAgentStatus,
 } from '../../../hooks';
@@ -46,6 +46,9 @@ import { StepSelectAgentPolicy } from './step_select_agent_policy';
 import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+import { useUIExtension } from '../../../hooks/use_ui_extension';
+import { ExtensionWrapper } from '../../../components/extension_wrapper';
+import { PackagePolicyEditExtensionComponentProps } from '../../../types';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -57,7 +60,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const {
     notifications,
     application: { navigateToApp },
-  } = useCore();
+  } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
@@ -74,15 +77,13 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
   const [isLoadingSecondStep, setIsLoadingSecondStep] = useState<boolean>(false);
 
-  const agentPolicyId = agentPolicy?.id;
   // Retrieve agent count
+  const agentPolicyId = agentPolicy?.id;
   useEffect(() => {
     const getAgentCount = async () => {
-      if (agentPolicyId) {
-        const { data } = await sendGetAgentStatus({ policyId: agentPolicyId });
-        if (data?.results.total) {
-          setAgentCount(data.results.total);
-        }
+      const { data } = await sendGetAgentStatus({ policyId: agentPolicyId });
+      if (data?.results.total !== undefined) {
+        setAgentCount(data.results.total);
       }
     };
 
@@ -191,6 +192,21 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     [packagePolicy, updatePackagePolicyValidation]
   );
 
+  const handleExtensionViewOnChange = useCallback<
+    PackagePolicyEditExtensionComponentProps['onChange']
+  >(
+    ({ isValid, updatedPolicy }) => {
+      updatePackagePolicy(updatedPolicy);
+      setFormState((prevState) => {
+        if (prevState === 'VALID' && !isValid) {
+          return 'INVALID';
+        }
+        return prevState;
+      });
+    },
+    [updatePackagePolicy]
+  );
+
   // Cancel path
   const cancelUrl = useMemo(() => {
     if (routeState && routeState.onCancelUrl) {
@@ -287,6 +303,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     [pkgkey, updatePackageInfo, agentPolicy, updateAgentPolicy]
   );
 
+  const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
+
   const stepSelectPackage = useMemo(
     () => (
       <StepSelectPackage
@@ -313,25 +331,38 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
           />
-          <StepConfigurePackagePolicy
-            packageInfo={packageInfo}
-            packagePolicy={packagePolicy}
-            updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
-            submitAttempted={formState === 'INVALID'}
-          />
+
+          {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
+          {!ExtensionView && (
+            <StepConfigurePackagePolicy
+              packageInfo={packageInfo}
+              packagePolicy={packagePolicy}
+              updatePackagePolicy={updatePackagePolicy}
+              validationResults={validationResults!}
+              submitAttempted={formState === 'INVALID'}
+            />
+          )}
+
+          {/* If an Agent Policy and a package has been selected, then show UI extension (if any) */}
+          {ExtensionView && packagePolicy.policy_id && packagePolicy.package?.name && (
+            <ExtensionWrapper>
+              <ExtensionView newPolicy={packagePolicy} onChange={handleExtensionViewOnChange} />
+            </ExtensionWrapper>
+          )}
         </>
       ) : (
         <div />
       ),
     [
-      agentPolicy,
-      formState,
       isLoadingSecondStep,
-      packagePolicy,
+      agentPolicy,
       packageInfo,
+      packagePolicy,
       updatePackagePolicy,
       validationResults,
+      formState,
+      ExtensionView,
+      handleExtensionViewOnChange,
     ]
   );
 

@@ -5,6 +5,7 @@
  */
 
 import { setMockValues, setMockActions } from '../../../../../__mocks__/kea.mock';
+import { rerender } from '../../../../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -60,7 +61,7 @@ describe('FormKeyEngineAccess', () => {
       ...values,
       fullEngineAccessChecked: false,
     });
-    wrapper.setProps({}); // Re-render
+    rerender(wrapper);
 
     expect(wrapper.find('#all_engines').prop('checked')).toEqual(false);
     expect(wrapper.find('#all_engines').prop('value')).toEqual('false');

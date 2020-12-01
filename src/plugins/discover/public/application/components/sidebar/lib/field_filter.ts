@@ -72,7 +72,9 @@ export function isFieldFiltered(
     field.type === '_source' ||
     field.scripted ||
     fieldCounts[field.name] > 0;
-  const matchName = !filterState.name || field.name.indexOf(filterState.name) !== -1;
+  const needle = filterState.name ? filterState.name.toLowerCase() : '';
+  const haystack = `${field.name}${field.displayName || ''}`.toLowerCase();
+  const matchName = !filterState.name || haystack.indexOf(needle) !== -1;
 
   return matchFilter && isAggregatable && isSearchable && scriptedOrMissing && matchName;
 }

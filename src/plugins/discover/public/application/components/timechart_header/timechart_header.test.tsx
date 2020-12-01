@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { TimechartHeader, TimechartHeaderProps } from './timechart_header';
 import { EuiIconTip } from '@elastic/eui';

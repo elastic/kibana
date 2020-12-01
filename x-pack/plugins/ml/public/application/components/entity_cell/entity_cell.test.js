@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { EntityCell } from './entity_cell';
 
 const defaultProps = {

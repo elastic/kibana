@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { APMConfig } from '../';
+import { PromiseReturnType } from '../../../observability/typings/common';
 import {
   ESFilter,
-  ESSearchResponse,
   ESSearchRequest,
-} from '../../typings/elasticsearch';
-import { PromiseReturnType } from '../../typings/common';
+  ESSearchResponse,
+} from '../../../../typings/elasticsearch';
 import { UIFilters } from '../../typings/ui_filters';
-import { APMConfig } from '..';
 
 interface Options {
   mockResponse?: (

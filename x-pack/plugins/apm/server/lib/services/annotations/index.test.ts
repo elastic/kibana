@@ -6,7 +6,7 @@
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../typings/elasticsearch';
+} from '../../../../../../typings/elasticsearch';
 import {
   inspectSearchParams,
   SearchParamsMock,

@@ -26,7 +26,7 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 
-import { Loading } from '../../../components/shared/loading';
+import { Loading } from '../../../../shared/loading';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { SourceIcon } from '../../../components/shared/source_icon';
 

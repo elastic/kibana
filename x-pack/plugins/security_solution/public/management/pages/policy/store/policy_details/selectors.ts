@@ -107,6 +107,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         events: windows.events,
         malware: windows.malware,
         popup: windows.popup,
+        antivirus_registration: windows.antivirus_registration,
       },
       mac: {
         advanced: mac.advanced,
@@ -121,6 +122,10 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
     };
   }
 );
+
+export const isAntivirusRegistrationEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
+  return uiPolicyConfig.windows.antivirus_registration.enabled;
+});
 
 /** Returns the total number of possible windows eventing configurations */
 export const totalWindowsEvents = (state: PolicyDetailsState): number => {

@@ -19,8 +19,13 @@
 
 import { CspConfig, ICspConfig } from '../../../../../core/server';
 import { createCspCollector } from './csp_collector';
-import { httpServiceMock } from '../../../../../core/server/mocks';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+import { httpServiceMock, loggingSystemMock } from '../../../../../core/server/mocks';
+import {
+  Collector,
+  createCollectorFetchContextMock,
+} from 'src/plugins/usage_collection/server/mocks';
+
+const logger = loggingSystemMock.createLogger();
 
 describe('csp collector', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
@@ -36,7 +41,7 @@ describe('csp collector', () => {
   });
 
   test('fetches whether strict mode is enabled', async () => {
-    const collector = createCspCollector(httpMock);
+    const collector = new Collector(logger, createCspCollector(httpMock));
 
     expect((await collector.fetch(mockedFetchContext)).strict).toEqual(true);
 
@@ -45,7 +50,7 @@ describe('csp collector', () => {
   });
 
   test('fetches whether the legacy browser warning is enabled', async () => {
-    const collector = createCspCollector(httpMock);
+    const collector = new Collector(logger, createCspCollector(httpMock));
 
     expect((await collector.fetch(mockedFetchContext)).warnLegacyBrowsers).toEqual(true);
 
@@ -54,7 +59,7 @@ describe('csp collector', () => {
   });
 
   test('fetches whether the csp rules have been changed or not', async () => {
-    const collector = createCspCollector(httpMock);
+    const collector = new Collector(logger, createCspCollector(httpMock));
 
     expect((await collector.fetch(mockedFetchContext)).rulesChangedFromDefault).toEqual(false);
 
@@ -63,7 +68,7 @@ describe('csp collector', () => {
   });
 
   test('does not include raw csp rules under any property names', async () => {
-    const collector = createCspCollector(httpMock);
+    const collector = new Collector(logger, createCspCollector(httpMock));
 
     // It's important that we do not send the value of csp.rules here as it
     // can be customized with values that can be identifiable to given

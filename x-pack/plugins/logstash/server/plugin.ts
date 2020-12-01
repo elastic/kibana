@@ -44,10 +44,8 @@ export class LogstashPlugin implements Plugin {
       },
       privileges: [
         {
-          requiredClusterPrivileges: [],
-          requiredIndexPrivileges: {
-            ['.logstash']: ['read'],
-          },
+          requiredClusterPrivileges: ['manage_logstash_pipelines'],
+          requiredIndexPrivileges: {},
           ui: [],
         },
       ],

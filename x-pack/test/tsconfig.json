@@ -5,7 +5,7 @@
     "incremental": false,
     "types": ["mocha", "node", "flot"]
   },
-  "include": ["**/*", "../typings/**/*"],
+  "include": ["**/*", "../typings/**/*", "../../packages/kbn-test/types/ftr_globals/**/*"],
   "exclude": ["../typings/jest.d.ts"],
   "references": [
     { "path": "../../src/core/tsconfig.json" },

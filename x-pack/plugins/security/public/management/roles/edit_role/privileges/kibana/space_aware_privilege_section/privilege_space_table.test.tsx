@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiInMemoryTable } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeDisplay } from './privilege_display';
@@ -14,7 +14,7 @@ import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { KibanaFeature } from '../../../../../../../../features/public';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 
 interface TableRow {
   spaces: string[];

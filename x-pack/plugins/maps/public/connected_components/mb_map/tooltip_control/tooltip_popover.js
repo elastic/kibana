@@ -119,6 +119,7 @@ export class TooltipPopover extends Component {
       addFilters: this.props.addFilters,
       getFilterActions: this.props.getFilterActions,
       getActionContext: this.props.getActionContext,
+      onSingleValueTrigger: this.props.onSingleValueTrigger,
       closeTooltip: this.props.closeTooltip,
       features: this.props.features,
       isLocked: this.props.isLocked,

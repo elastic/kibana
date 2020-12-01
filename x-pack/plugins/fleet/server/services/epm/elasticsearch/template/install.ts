@@ -17,7 +17,7 @@ import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { generateMappings, generateTemplateName, getTemplate } from './template';
-import * as Registry from '../../registry';
+import { getAsset, getPathParts } from '../../archive';
 import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
 
 export const installTemplates = async (
@@ -76,9 +76,9 @@ export const installTemplates = async (
 const installPreBuiltTemplates = async (paths: string[], callCluster: CallESAsCurrentUser) => {
   const templatePaths = paths.filter((path) => isTemplate(path));
   const templateInstallPromises = templatePaths.map(async (path) => {
-    const { file } = Registry.pathParts(path);
+    const { file } = getPathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
-    const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
+    const content = JSON.parse(getAsset(path).toString('utf8'));
     let templateAPIPath = '_template';
 
     // v2 index templates need to be installed through the new API endpoint.
@@ -121,9 +121,9 @@ const installPreBuiltComponentTemplates = async (
 ) => {
   const templatePaths = paths.filter((path) => isComponentTemplate(path));
   const templateInstallPromises = templatePaths.map(async (path) => {
-    const { file } = Registry.pathParts(path);
+    const { file } = getPathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
-    const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
+    const content = JSON.parse(getAsset(path).toString('utf8'));
 
     const callClusterParams: {
       method: string;
@@ -151,12 +151,12 @@ const installPreBuiltComponentTemplates = async (
 };
 
 const isTemplate = (path: string) => {
-  const pathParts = Registry.pathParts(path);
+  const pathParts = getPathParts(path);
   return pathParts.type === ElasticsearchAssetType.indexTemplate;
 };
 
 const isComponentTemplate = (path: string) => {
-  const pathParts = Registry.pathParts(path);
+  const pathParts = getPathParts(path);
   return pathParts.type === ElasticsearchAssetType.componentTemplate;
 };
 

@@ -8,6 +8,7 @@ import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
 import {
   AppMountParameters,
   CoreSetup,
@@ -62,6 +63,7 @@ import {
   setLicensingPluginStart,
 } from './licensed_features';
 import { EMSSettings } from '../common/ems_settings';
+import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -84,6 +86,8 @@ export interface MapsPluginStartDependencies {
   share: SharePluginStart;
   visualizations: VisualizationsStart;
   savedObjects: SavedObjectsStart;
+  dashboard: DashboardStart;
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }
 
 /**

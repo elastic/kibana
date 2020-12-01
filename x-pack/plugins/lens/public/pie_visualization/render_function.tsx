@@ -20,7 +20,9 @@ import {
   RecursivePartial,
   Position,
   Settings,
+  ElementClickListener,
 } from '@elastic/charts';
+import { RenderMode } from 'src/plugins/expressions';
 import { FormatFactory, LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
@@ -44,6 +46,7 @@ export function PieComponent(
     chartsThemeService: ChartsPluginSetup['theme'];
     paletteService: PaletteRegistry;
     onClickValue: (data: LensFilterEvent['data']) => void;
+    renderMode: RenderMode;
   }
 ) {
   const [firstTable] = Object.values(props.data.tables);
@@ -65,6 +68,7 @@ export function PieComponent(
   } = props.args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
+  const isDarkMode = chartsThemeService.useDarkMode();
 
   if (!hideLabels) {
     firstTable.columns.forEach((column) => {
@@ -125,7 +129,9 @@ export function PieComponent(
           if (shape === 'treemap') {
             // Only highlight the innermost color of the treemap, as it accurately represents area
             if (layerIndex < bucketColumns.length - 1) {
-              return 'rgba(0,0,0,0)';
+              // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
+              // therefore change it for dask mode
+              return isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
             }
             // only use the top level series layer for coloring
             if (seriesLayers.length > 1) {
@@ -228,6 +234,12 @@ export function PieComponent(
       </EuiText>
     );
   }
+
+  const onElementClickHandler: ElementClickListener = (args) => {
+    const context = getFilterContext(args[0][0] as LayerValue[], groups, firstTable);
+
+    onClickValue(desanitizeFilterContext(context));
+  };
   return (
     <VisualizationContainer
       reportTitle={props.args.title}
@@ -248,12 +260,16 @@ export function PieComponent(
           }
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
-          onElementClick={(args) => {
-            const context = getFilterContext(args[0][0] as LayerValue[], groups, firstTable);
-
-            onClickValue(desanitizeFilterContext(context));
+          onElementClick={
+            props.renderMode !== 'noInteractivity' ? onElementClickHandler : undefined
+          }
+          theme={{
+            ...chartTheme,
+            background: {
+              ...chartTheme.background,
+              color: undefined, // removes background for embeddables
+            },
           }}
-          theme={chartTheme}
           baseTheme={chartBaseTheme}
         />
         <Partition

@@ -4,59 +4,71 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ArchivePackage } from '../../../../common/types';
+import { AssetParts, InstallSource } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 import {
-  cacheSet,
-  cacheDelete,
+  SharedKey,
+  getArchiveEntry,
+  setArchiveEntry,
+  deleteArchiveEntry,
   getArchiveFilelist,
   setArchiveFilelist,
   deleteArchiveFilelist,
+  deletePackageInfo,
 } from './cache';
-import { ArchiveEntry, getBufferExtractor } from '../registry/extract';
-import { parseAndVerifyArchive } from './validation';
+import { getBufferExtractor } from './extract';
 
 export * from './cache';
+export { getBufferExtractor, untarBuffer, unzipBuffer } from './extract';
+export { parseAndVerifyArchiveBuffer as parseAndVerifyArchiveEntries } from './validation';
 
-export async function loadArchivePackage({
-  archiveBuffer,
-  contentType,
-}: {
-  archiveBuffer: Buffer;
-  contentType: string;
-}): Promise<{ paths: string[]; archivePackageInfo: ArchivePackage }> {
-  const paths = await unpackArchiveToCache(archiveBuffer, contentType);
-  const archivePackageInfo = parseAndVerifyArchive(paths);
-  setArchiveFilelist(archivePackageInfo.name, archivePackageInfo.version, paths);
-
-  return {
-    paths,
-    archivePackageInfo,
-  };
+export interface ArchiveEntry {
+  path: string;
+  buffer?: Buffer;
 }
 
-export async function unpackArchiveToCache(
+export async function unpackBufferToCache({
+  name,
+  version,
+  contentType,
+  archiveBuffer,
+  installSource,
+}: {
+  name: string;
+  version: string;
+  contentType: string;
+  archiveBuffer: Buffer;
+  installSource: InstallSource;
+}): Promise<string[]> {
+  const entries = await unpackBufferEntries(archiveBuffer, contentType);
+  const paths: string[] = [];
+  entries.forEach((entry) => {
+    const { path, buffer } = entry;
+    if (buffer) {
+      setArchiveEntry(path, buffer);
+      paths.push(path);
+    }
+  });
+  setArchiveFilelist({ name, version }, paths);
+
+  return paths;
+}
+
+export async function unpackBufferEntries(
   archiveBuffer: Buffer,
-  contentType: string,
-  filter = (entry: ArchiveEntry): boolean => true
-): Promise<string[]> {
+  contentType: string
+): Promise<ArchiveEntry[]> {
   const bufferExtractor = getBufferExtractor({ contentType });
   if (!bufferExtractor) {
     throw new PackageUnsupportedMediaTypeError(
       `Unsupported media type ${contentType}. Please use 'application/gzip' or 'application/zip'`
     );
   }
-  const paths: string[] = [];
+  const entries: ArchiveEntry[] = [];
   try {
-    await bufferExtractor(archiveBuffer, filter, (entry: ArchiveEntry) => {
-      const { path, buffer } = entry;
-      // skip directories
-      if (path.endsWith('/')) return;
-      if (buffer) {
-        cacheSet(path, buffer);
-        paths.push(path);
-      }
-    });
+    const onlyFiles = ({ path }: ArchiveEntry): boolean => !path.endsWith('/');
+    const addToEntries = (entry: ArchiveEntry) => entries.push(entry);
+    await bufferExtractor(archiveBuffer, onlyFiles, addToEntries);
   } catch (error) {
     throw new PackageInvalidArchiveError(
       `Error during extraction of package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
@@ -65,22 +77,61 @@ export async function unpackArchiveToCache(
 
   // While unpacking a tar.gz file with unzipBuffer() will result in a thrown error in the try-catch above,
   // unpacking a zip file with untarBuffer() just results in nothing.
-  if (paths.length === 0) {
+  if (entries.length === 0) {
     throw new PackageInvalidArchiveError(
       `Archive seems empty. Assumed content type was ${contentType}, check if this matches the archive type.`
     );
   }
-  return paths;
+  return entries;
 }
 
-export const deletePackageCache = (name: string, version: string) => {
+export const deletePackageCache = ({ name, version }: SharedKey) => {
   // get cached archive filelist
-  const paths = getArchiveFilelist(name, version);
+  const paths = getArchiveFilelist({ name, version });
 
   // delete cached archive filelist
-  deleteArchiveFilelist(name, version);
+  deleteArchiveFilelist({ name, version });
 
   // delete cached archive files
-  // this has been populated in unpackArchiveToCache()
-  paths?.forEach((path) => cacheDelete(path));
+  // this has been populated in unpackBufferToCache()
+  paths?.forEach(deleteArchiveEntry);
+
+  deletePackageInfo({ name, version });
 };
+
+export function getPathParts(path: string): AssetParts {
+  let dataset;
+
+  let [pkgkey, service, type, file] = path.split('/');
+
+  // if it's a data stream
+  if (service === 'data_stream') {
+    // save the dataset name
+    dataset = type;
+    // drop the `data_stream/dataset-name` portion & re-parse
+    [pkgkey, service, type, file] = path.replace(`data_stream/${dataset}/`, '').split('/');
+  }
+
+  // This is to cover for the fields.yml files inside the "fields" directory
+  if (file === undefined) {
+    file = type;
+    type = 'fields';
+    service = '';
+  }
+
+  return {
+    pkgkey,
+    service,
+    type,
+    file,
+    dataset,
+    path,
+  } as AssetParts;
+}
+
+export function getAsset(key: string) {
+  const buffer = getArchiveEntry(key);
+  if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
+
+  return buffer;
+}

@@ -6,12 +6,14 @@
 
 import { RouteDependencies } from '../../plugin';
 
-import { registerEnginesRoute } from './engines';
+import { registerEnginesRoutes } from './engines';
 import { registerCredentialsRoutes } from './credentials';
 import { registerSettingsRoutes } from './settings';
+import { registerDocumentRoutes } from './documents';
 
 export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
-  registerEnginesRoute(dependencies);
+  registerEnginesRoutes(dependencies);
   registerCredentialsRoutes(dependencies);
   registerSettingsRoutes(dependencies);
+  registerDocumentRoutes(dependencies);
 };

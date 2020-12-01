@@ -81,7 +81,7 @@ export const buildColumns = (
             ) : (
               <EuiButtonIcon
                 aria-label={i18n.ACTION_DELETE_DESCRIPTION}
-                data-test-subj="action-delete-value-list"
+                data-test-subj={`action-delete-value-list-${item.name}`}
                 iconType="trash"
                 onClick={() => onDelete(item)}
               />

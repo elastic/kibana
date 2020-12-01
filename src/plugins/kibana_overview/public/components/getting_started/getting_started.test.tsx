@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { GettingStarted } from './getting_started';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));

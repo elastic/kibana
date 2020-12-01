@@ -6,7 +6,7 @@
 
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
-import semver from 'semver';
+import semverCoerce from 'semver/functions/coerce';
 import {
   AgentSOAttributes,
   PostAgentUpgradeResponse,
@@ -122,9 +122,9 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
 
 export const checkVersionIsSame = (version: string, kibanaVersion: string) => {
   // get version number only in case "-SNAPSHOT" is in it
-  const kibanaVersionNumber = semver.coerce(kibanaVersion)?.version;
+  const kibanaVersionNumber = semverCoerce(kibanaVersion)?.version;
   if (!kibanaVersionNumber) throw new Error(`kibanaVersion ${kibanaVersionNumber} is not valid`);
-  const versionToUpgradeNumber = semver.coerce(version)?.version;
+  const versionToUpgradeNumber = semverCoerce(version)?.version;
   if (!versionToUpgradeNumber)
     throw new Error(`version to upgrade ${versionToUpgradeNumber} is not valid`);
   // temporarily only allow upgrading to the same version as the installed kibana version

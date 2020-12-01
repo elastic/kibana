@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { OptedInNoticeBanner } from './opted_in_notice_banner';
 
 describe('OptInDetailsComponent', () => {

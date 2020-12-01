@@ -32,7 +32,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -94,11 +93,22 @@ describe('delete()', () => {
   });
 
   test('successfully removes an alert', async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '123',
+        createdAt: '2019-02-12T21:01:22.479Z',
+      },
+      references: [],
+    });
     const result = await alertsClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toBe(
+      'api_key_pending_invalidation'
+    );
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
@@ -107,12 +117,21 @@ describe('delete()', () => {
 
   test('falls back to SOC.get when getDecryptedAsInternalUser throws an error', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '123',
+        createdAt: '2019-02-12T21:01:22.479Z',
+      },
+      references: [],
+    });
 
     const result = await alertsClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to load API key to invalidate on alert 1: Fail'
@@ -133,6 +152,15 @@ describe('delete()', () => {
   });
 
   test(`doesn't invalidate API key when apiKey is null`, async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '123',
+        createdAt: '2019-02-12T21:01:22.479Z',
+      },
+      references: [],
+    });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
       ...existingAlert,
       attributes: {
@@ -142,24 +170,34 @@ describe('delete()', () => {
     });
 
     await alertsClient.delete({ id: '1' });
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
   test('swallows error when invalidate API key throws', async () => {
-    alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
-
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
     await alertsClient.delete({ id: '1' });
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toBe(
+      'api_key_pending_invalidation'
+    );
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to invalidate API Key: Fail'
+      'Failed to mark for API key [id="MTIzOmFiYw=="] for invalidation: Fail'
     );
   });
 
   test('swallows error when getDecryptedAsInternalUser throws an error', async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '123',
+        createdAt: '2019-02-12T21:01:22.479Z',
+      },
+      references: [],
+    });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
 
     await alertsClient.delete({ id: '1' });
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to load API key to invalidate on alert 1: Fail'
     );

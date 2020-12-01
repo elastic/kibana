@@ -15,13 +15,33 @@ import {
   RegistryVarsEntry,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
+import { unpackBufferEntries } from './index';
 import { pkgToPkgKey } from '../registry';
-import { cacheGet } from './cache';
+
+const MANIFESTS: Record<string, Buffer> = {};
+const MANIFEST_NAME = 'manifest.yml';
 
 // TODO: everything below performs verification of manifest.yml files, and hence duplicates functionality already implemented in the
 // package registry. At some point this should probably be replaced (or enhanced) with verification based on
 // https://github.com/elastic/package-spec/
-export function parseAndVerifyArchive(paths: string[]): ArchivePackage {
+export async function parseAndVerifyArchiveBuffer(
+  archiveBuffer: Buffer,
+  contentType: string
+): Promise<{ paths: string[]; packageInfo: ArchivePackage }> {
+  const entries = await unpackBufferEntries(archiveBuffer, contentType);
+  const paths: string[] = [];
+  entries.forEach(({ path, buffer }) => {
+    paths.push(path);
+    if (path.endsWith(MANIFEST_NAME) && buffer) MANIFESTS[path] = buffer;
+  });
+
+  return {
+    packageInfo: parseAndVerifyArchive(paths),
+    paths,
+  };
+}
+
+function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   // The top-level directory must match pkgName-pkgVersion, and no other top-level files or directories may be present
   const toplevelDir = paths[0].split('/')[0];
   paths.forEach((path) => {
@@ -31,10 +51,10 @@ export function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   });
 
   // The package must contain a manifest file ...
-  const manifestFile = `${toplevelDir}/manifest.yml`;
-  const manifestBuffer = cacheGet(manifestFile);
+  const manifestFile = `${toplevelDir}/${MANIFEST_NAME}`;
+  const manifestBuffer = MANIFESTS[manifestFile];
   if (!paths.includes(manifestFile) || !manifestBuffer) {
-    throw new PackageInvalidArchiveError('Package must contain a top-level manifest.yml file.');
+    throw new PackageInvalidArchiveError(`Package must contain a top-level ${MANIFEST_NAME} file.`);
   }
 
   // ... which must be valid YAML
@@ -97,8 +117,8 @@ function parseAndVerifyDataStreams(
   dataStreamPaths = uniq(dataStreamPaths);
 
   dataStreamPaths.forEach((dataStreamPath) => {
-    const manifestFile = `${pkgKey}/data_stream/${dataStreamPath}/manifest.yml`;
-    const manifestBuffer = cacheGet(manifestFile);
+    const manifestFile = `${pkgKey}/data_stream/${dataStreamPath}/${MANIFEST_NAME}`;
+    const manifestBuffer = MANIFESTS[manifestFile];
     if (!paths.includes(manifestFile) || !manifestBuffer) {
       throw new PackageInvalidArchiveError(
         `No manifest.yml file found for data stream '${dataStreamPath}'`

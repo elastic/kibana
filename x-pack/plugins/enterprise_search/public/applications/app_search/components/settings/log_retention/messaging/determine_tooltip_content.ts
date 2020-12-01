@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILogRetentionSettings } from '../types';
-import { TMessageStringOrFunction, ILogRetentionMessages } from './types';
+import { LogRetentionSettings } from '../types';
+import { TMessageStringOrFunction, LogRetentionMessages } from './types';
 
 export const determineTooltipContent = (
-  messages: ILogRetentionMessages,
+  messages: LogRetentionMessages,
   ilmEnabled: boolean,
-  logRetentionSettings?: ILogRetentionSettings
+  logRetentionSettings?: LogRetentionSettings
 ) => {
   if (typeof logRetentionSettings === 'undefined') {
     return;

@@ -72,7 +72,10 @@ run(
 
       await Promise.all([
         proc.then(() => log.debug(` - ${cmd} exited with 0`)),
-        Rx.merge(getLine$(proc.stdout), getLine$(proc.stderr))
+        Rx.merge(
+          getLine$(proc.stdout!), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+          getLine$(proc.stderr!) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
+        )
           .pipe(tap((line) => log.debug(line)))
           .toPromise(),
       ]);

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 
 import { Vis } from '../../../../visualizations/public';
 import { OptionsTab, OptionsTabProps } from './options_tab';

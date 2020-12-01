@@ -5,12 +5,12 @@
  */
 import React from 'react';
 import Boom from '@hapi/boom';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import { Space } from '../../../common/model/space';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { act } from '@testing-library/react';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';

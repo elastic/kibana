@@ -15,4 +15,5 @@ export { mockAllValues, mockAllActions, setMockValues, setMockActions } from './
 export { mountAsync } from './mount_async.mock';
 export { mountWithIntl } from './mount_with_i18n.mock';
 export { shallowWithIntl } from './shallow_with_i18n.mock';
+export { rerender } from './enzyme_rerender.mock';
 // Note: shallow_useeffect must be imported directly as a file

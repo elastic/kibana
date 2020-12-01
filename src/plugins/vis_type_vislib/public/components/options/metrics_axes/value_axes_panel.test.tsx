@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
 import { ValueAxis, SeriesParam } from '../../../types';
 import { Positions } from '../../../utils/collections';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { valueAxis, seriesParam, vis } from './mocks';
 
 describe('ValueAxesPanel component', () => {

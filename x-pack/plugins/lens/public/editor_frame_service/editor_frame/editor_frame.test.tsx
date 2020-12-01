@@ -7,7 +7,7 @@
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@kbn/test/jest';
 import { EditorFrame } from './editor_frame';
 import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
 import { act } from 'react-dom/test-utils';

@@ -19,6 +19,7 @@ import {
   POLICY_WITH_INCLUDE_EXCLUDE,
   POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION,
   POLICY_WITH_NODE_ROLE_ALLOCATION,
+  POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS,
   getDefaultHotPhasePolicy,
 } from './constants';
 
@@ -29,6 +30,70 @@ describe('<EditPolicy />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   afterAll(() => {
     server.restore();
+  });
+
+  describe('serialization', () => {
+    /**
+     * We assume that policies that populate this form are loaded directly from ES and so
+     * are valid according to ES. There may be settings in the policy created through the ILM
+     * API that the UI does not cater for, like the unfollow action. We do not want to overwrite
+     * the configuration for these actions in the UI.
+     */
+    it('preserves policy settings it did not configure', async () => {
+      httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS]);
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+      httpRequestsMockHelpers.setListNodes({
+        nodesByRoles: {},
+        nodesByAttributes: { test: ['123'] },
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component, actions } = testBed;
+      component.update();
+
+      // Set max docs to test whether we keep the unknown fields in that object after serializing
+      await actions.hot.setMaxDocs('1000');
+      // Remove the delete phase to ensure that we also correctly remove data
+      await actions.delete.enable(false);
+      await actions.savePolicy();
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+
+      expect(entirePolicy).toEqual({
+        foo: 'bar', // Made up value
+        name: 'my_policy',
+        phases: {
+          hot: {
+            actions: {
+              rollover: {
+                max_docs: 1000,
+                max_size: '50gb',
+                unknown_setting: 123, // Made up setting that should stay preserved
+              },
+              set_priority: {
+                priority: 100,
+              },
+            },
+            min_age: '0ms',
+          },
+          warm: {
+            actions: {
+              my_unfollow_action: {}, // Made up action
+              set_priority: {
+                priority: 22,
+                unknown_setting: true,
+              },
+            },
+            min_age: '0ms',
+          },
+        },
+      });
+    });
   });
 
   describe('hot phase', () => {

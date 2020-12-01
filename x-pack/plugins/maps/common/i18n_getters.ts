@@ -15,6 +15,12 @@ export function getAppTitle() {
   });
 }
 
+export function getMapEmbeddableDisplayName() {
+  return i18n.translate('xpack.maps.embeddableDisplayName', {
+    defaultMessage: 'map',
+  });
+}
+
 export function getDataSourceLabel() {
   return i18n.translate('xpack.maps.source.dataSourceLabel', {
     defaultMessage: 'Data source',

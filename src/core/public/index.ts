@@ -95,7 +95,6 @@ export {
   ApplicationSetup,
   ApplicationStart,
   App,
-  PublicAppInfo,
   AppMount,
   AppMountDeprecated,
   AppUnmount,
@@ -110,6 +109,9 @@ export {
   AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
+  AppSearchDeepLink,
+  PublicAppInfo,
+  PublicAppSearchDeepLinkInfo,
   ScopedHistory,
   NavigateToAppOptions,
 } from './application';
@@ -167,7 +169,16 @@ export {
   IHttpResponseInterceptorOverrides,
 } from './http';
 
-export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
+export {
+  OverlayStart,
+  OverlayBannersStart,
+  OverlayRef,
+  OverlayFlyoutStart,
+  OverlayFlyoutOpenOptions,
+  OverlayModalOpenOptions,
+  OverlayModalConfirmOptions,
+  OverlayModalStart,
+} from './overlays';
 
 export {
   Toast,

@@ -212,6 +212,28 @@ describe('Discover url generator', () => {
     });
   });
 
+  test('can specify a search session id', async () => {
+    const { generator } = await setup();
+    const url = await generator.createUrl({
+      searchSessionId: '__test__',
+    });
+    expect(url).toMatchInlineSnapshot(`"xyz/app/discover#/?_g=()&_a=()&searchSessionId=__test__"`);
+    expect(url).toContain('__test__');
+  });
+
+  test('can specify columns, interval, sort and savedQuery', async () => {
+    const { generator } = await setup();
+    const url = await generator.createUrl({
+      columns: ['_source'],
+      interval: 'auto',
+      sort: [['timestamp, asc']],
+      savedQuery: '__savedQueryId__',
+    });
+    expect(url).toMatchInlineSnapshot(
+      `"xyz/app/discover#/?_g=()&_a=(columns:!(_source),interval:auto,savedQuery:__savedQueryId__,sort:!(!('timestamp,%20asc')))"`
+    );
+  });
+
   describe('useHash property', () => {
     describe('when default useHash is set to false', () => {
       test('when using default, sets index pattern ID in the generated URL', async () => {

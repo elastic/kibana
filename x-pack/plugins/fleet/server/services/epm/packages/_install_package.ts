@@ -5,7 +5,7 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import { InstallablePackage, InstallSource } from '../../../../common';
+import { InstallablePackage, InstallSource, MAX_TIME_COMPLETE_INSTALL } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
@@ -16,12 +16,10 @@ import {
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { installTemplates } from '../elasticsearch/template/install';
-import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { isRequiredPackage } from './index';
 import { deleteKibanaSavedObjectsAssets } from './remove';
 import { installTransform } from '../elasticsearch/transform/install';
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
@@ -47,29 +45,35 @@ export async function _installPackage({
   installType: InstallType;
   installSource: InstallSource;
 }): Promise<AssetReference[]> {
-  const { internal = false, name: pkgName, version: pkgVersion } = packageInfo;
-  const removable = !isRequiredPackage(pkgName);
-  const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
-  // add the package installation to the saved object.
-  // if some installation already exists, just update install info
-  if (!installedPkg) {
+  const { name: pkgName, version: pkgVersion } = packageInfo;
+  // if some installation already exists
+  if (installedPkg) {
+    // if the installation is currently running, don't try to install
+    // instead, only return already installed assets
+    if (
+      installedPkg.attributes.install_status === 'installing' &&
+      Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
+        MAX_TIME_COMPLETE_INSTALL
+    ) {
+      let assets: AssetReference[] = [];
+      assets = assets.concat(installedPkg.attributes.installed_es);
+      assets = assets.concat(installedPkg.attributes.installed_kibana);
+      return assets;
+    } else {
+      // if no installation is running, or the installation has been running longer than MAX_TIME_COMPLETE_INSTALL
+      // (it might be stuck) update the saved object and proceed
+      await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+        install_version: pkgVersion,
+        install_status: 'installing',
+        install_started_at: new Date().toISOString(),
+        install_source: installSource,
+      });
+    }
+  } else {
     await createInstallation({
       savedObjectsClient,
-      pkgName,
-      pkgVersion,
-      internal,
-      removable,
-      installed_kibana: [],
-      installed_es: [],
-      toSaveESIndexPatterns,
+      packageInfo,
       installSource,
-    });
-  } else {
-    await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-      install_version: pkgVersion,
-      install_status: 'installing',
-      install_started_at: new Date().toISOString(),
-      install_source: installSource,
     });
   }
 
@@ -92,7 +96,8 @@ export async function _installPackage({
   const installIndexPatternPromise = installIndexPatterns(
     savedObjectsClient,
     pkgName,
-    pkgVersion
+    pkgVersion,
+    installSource
   ).catch((reason) => (installIndexPatternError = reason));
   const kibanaAssets = await getKibanaAssets(paths);
   if (installedPkg)

@@ -9,10 +9,14 @@ import { callApi } from './callApi';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMAPI } from '../../../server/routes/create_apm_api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Client, HttpMethod } from '../../../server/routes/typings';
+import { Client } from '../../../server/routes/typings';
 
 export type APMClient = Client<APMAPI['_S']>;
-export type APMClientOptions = Omit<FetchOptions, 'query' | 'body'> & {
+export type APMClientOptions = Omit<
+  FetchOptions,
+  'query' | 'body' | 'pathname'
+> & {
+  endpoint: string;
   params?: {
     body?: any;
     query?: any;
@@ -28,9 +32,10 @@ export let callApmApi: APMClient = () => {
 
 export function createCallApmApi(http: HttpSetup) {
   callApmApi = ((options: APMClientOptions) => {
-    const { pathname, params = {}, ...opts } = options;
+    const { endpoint, params = {}, ...opts } = options;
 
     const path = (params.path || {}) as Record<string, any>;
+    const [method, pathname] = endpoint.split(' ');
 
     const formattedPathname = Object.keys(path).reduce((acc, paramName) => {
       return acc.replace(`{${paramName}}`, path[paramName]);
@@ -38,6 +43,7 @@ export function createCallApmApi(http: HttpSetup) {
 
     return callApi(http, {
       ...opts,
+      method,
       pathname: formattedPathname,
       body: params.body,
       query: params.query,
@@ -47,8 +53,7 @@ export function createCallApmApi(http: HttpSetup) {
 
 // infer return type from API
 export type APIReturnType<
-  TPath extends keyof APMAPI['_S'],
-  TMethod extends HttpMethod = 'GET'
-> = APMAPI['_S'][TPath] extends { [key in TMethod]: { ret: any } }
-  ? APMAPI['_S'][TPath][TMethod]['ret']
+  TPath extends keyof APMAPI['_S']
+> = APMAPI['_S'][TPath] extends { ret: any }
+  ? APMAPI['_S'][TPath]['ret']
   : unknown;

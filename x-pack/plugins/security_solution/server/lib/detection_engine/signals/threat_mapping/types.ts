@@ -28,6 +28,8 @@ import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 
+export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
+
 export interface CreateThreatSignalsOptions {
   threatMapping: ThreatMapping;
   query: string;
@@ -146,7 +148,7 @@ export interface GetThreatListOptions {
   perPage?: number;
   searchAfter: string[] | undefined;
   sortField: string | undefined;
-  sortOrder: 'asc' | 'desc' | undefined;
+  sortOrder: SortOrderOrUndefined;
   threatFilters: PartialFilter[];
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
@@ -165,7 +167,7 @@ export interface ThreatListCountOptions {
 
 export interface GetSortWithTieBreakerOptions {
   sortField: string | undefined;
-  sortOrder: 'asc' | 'desc' | undefined;
+  sortOrder: SortOrderOrUndefined;
   index: string[];
   listItemIndex: string;
 }

@@ -18,18 +18,16 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import crypto from 'crypto';
+import { constants as cryptoConstants } from 'crypto';
 import { readFileSync } from 'fs';
 import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
-
-// `crypto` type definitions doesn't currently include `crypto.constants`, see
-// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fa5baf1733f49cf26228a4e509914572c1b74adf/types/node/v6/index.d.ts#L3412
-const cryptoConstants = (crypto as any).constants;
 
 const protocolMap = new Map<string, number>([
   ['TLSv1', cryptoConstants.SSL_OP_NO_TLSv1],
   ['TLSv1.1', cryptoConstants.SSL_OP_NO_TLSv1_1],
   ['TLSv1.2', cryptoConstants.SSL_OP_NO_TLSv1_2],
+  // @ts-expect-error According to the docs SSL_OP_NO_TLSv1_3 should exist (https://nodejs.org/docs/latest-v12.x/api/crypto.html)
+  ['TLSv1.3', cryptoConstants.SSL_OP_NO_TLSv1_3],
 ]);
 
 export const sslSchema = schema.object(
@@ -56,8 +54,13 @@ export const sslSchema = schema.object(
     }),
     redirectHttpFromPort: schema.maybe(schema.number()),
     supportedProtocols: schema.arrayOf(
-      schema.oneOf([schema.literal('TLSv1'), schema.literal('TLSv1.1'), schema.literal('TLSv1.2')]),
-      { defaultValue: ['TLSv1.1', 'TLSv1.2'], minSize: 1 }
+      schema.oneOf([
+        schema.literal('TLSv1'),
+        schema.literal('TLSv1.1'),
+        schema.literal('TLSv1.2'),
+        schema.literal('TLSv1.3'),
+      ]),
+      { defaultValue: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'], minSize: 1 }
     ),
     clientAuthentication: schema.oneOf(
       [schema.literal('none'), schema.literal('optional'), schema.literal('required')],

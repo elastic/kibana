@@ -89,10 +89,12 @@ describe('health check', () => {
     const [description, action] = queryAllByText(/TLS/i);
 
     expect(description.textContent).toMatchInlineSnapshot(
-      `"Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. Learn how to enable TLS."`
+      `"Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. Learn how to enable TLS.(opens in a new tab or window)"`
     );
 
-    expect(action.textContent).toMatchInlineSnapshot(`"Learn how to enable TLS."`);
+    expect(action.textContent).toMatchInlineSnapshot(
+      `"Learn how to enable TLS.(opens in a new tab or window)"`
+    );
 
     expect(action.getAttribute('href')).toMatchInlineSnapshot(
       `"elastic.co/guide/en/kibana/current/configuring-tls.html"`
@@ -118,11 +120,11 @@ describe('health check', () => {
 
     const description = queryByRole(/banner/i);
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"To create an alert, set a value for xpack.encryptedSavedObjects.encryptionKey in your kibana.yml file. Learn how."`
+      `"To create an alert, set a value for xpack.encryptedSavedObjects.encryptionKey in your kibana.yml file. Learn how.(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
-    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how."`);
+    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how.(opens in a new tab or window)"`);
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#general-alert-action-settings"`
     );
@@ -148,11 +150,11 @@ describe('health check', () => {
     const description = queryByText(/Transport Layer Security/i);
 
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. Learn how"`
+      `"You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. Learn how(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
-    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how"`);
+    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how(opens in a new tab or window)"`);
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"elastic.co/guide/en/kibana/current/alerting-getting-started.html#alerting-setup-prerequisites"`
     );

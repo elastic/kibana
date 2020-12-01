@@ -8,6 +8,7 @@
 
 import * as t from 'io-ts';
 import { language } from '../common/schemas';
+import { NonEmptyArray } from './non_empty_array';
 import { NonEmptyString } from './non_empty_string';
 import { PositiveIntegerGreaterThanZero } from './positive_integer_greater_than_zero';
 
@@ -41,7 +42,7 @@ export const threatMap = t.exact(
 );
 export type ThreatMap = t.TypeOf<typeof threatMap>;
 
-export const threat_mapping = t.array(threatMap);
+export const threat_mapping = NonEmptyArray(threatMap, 'NonEmptyArray<ThreatMap>');
 export type ThreatMapping = t.TypeOf<typeof threat_mapping>;
 
 export const threatMappingOrUndefined = t.union([threat_mapping, t.undefined]);

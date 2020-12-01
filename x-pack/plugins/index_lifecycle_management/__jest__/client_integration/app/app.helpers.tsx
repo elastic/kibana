@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
+import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 import { App } from '../../../public/application/app';
 import { TestSubjects } from '../helpers';
 import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';

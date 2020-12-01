@@ -7,7 +7,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
+import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
 
 import { EditPolicy } from '../../../public/application/sections/edit_policy';
 import { DataTierAllocationType } from '../../../public/application/sections/edit_policy/types';

@@ -9,19 +9,17 @@ import _ from 'lodash';
 import moment from 'moment-timezone';
 import { CoreSetup } from 'src/core/public';
 import {
-  UiActionsActionDefinition as ActionDefinition,
-  IncompatibleActionError,
-} from '../../../../../src/plugins/ui_actions/public';
-import { LicensingPluginSetup } from '../../../licensing/public';
-import { checkLicense } from '../lib/license_check';
-
-import { ViewMode, IEmbeddable } from '../../../../../src/plugins/embeddable/public';
-import {
   ISearchEmbeddable,
   SEARCH_EMBEDDABLE_TYPE,
 } from '../../../../../src/plugins/discover/public';
-
-import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../constants';
+import { IEmbeddable, ViewMode } from '../../../../../src/plugins/embeddable/public';
+import {
+  IncompatibleActionError,
+  UiActionsActionDefinition as ActionDefinition,
+} from '../../../../../src/plugins/ui_actions/public';
+import { LicensingPluginSetup } from '../../../licensing/public';
+import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../common/constants';
+import { checkLicense } from '../lib/license_check';
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable

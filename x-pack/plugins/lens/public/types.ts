@@ -50,6 +50,7 @@ export interface EditorFrameProps {
     filterableIndexPatterns: string[];
     doc: Document;
     isSaveable: boolean;
+    activeData?: Record<string, Datatable>;
   }) => void;
   showNoDataPopover: () => void;
 }
@@ -242,7 +243,6 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
   dragDropContext: DragContextState;
-  onClick: () => void;
 };
 
 export interface DatasourceLayerPanelProps<T> {
@@ -341,12 +341,19 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   setState: (newState: T) => void;
 };
 
+export interface AccessorConfig {
+  columnId: string;
+  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none';
+  color?: string;
+  palette?: string[];
+}
+
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
 
   /** ID is passed back to visualization. For example, `x` */
   groupId: string;
-  accessors: string[];
+  accessors: AccessorConfig[];
   supportsMoreColumns: boolean;
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;
@@ -533,7 +540,10 @@ export interface Visualization<T = unknown> {
    * Visualizations can provide a custom icon which will open a layer-specific popover
    * If no icon is provided, gear icon is default
    */
-  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
+  getLayerContextMenuIcon?: (opts: {
+    state: T;
+    layerId: string;
+  }) => { icon: IconType | 'gear'; label: string } | undefined;
 
   /**
    * The frame is telling the visualization to update or set a dimension based on user interaction

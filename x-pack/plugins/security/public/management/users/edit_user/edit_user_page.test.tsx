@@ -5,7 +5,7 @@
  */
 
 import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { EditUserPage } from './edit_user_page';
 import React from 'react';
 import { User, Role } from '../../../../common/model';
@@ -15,7 +15,7 @@ import { mockAuthenticatedUser } from '../../../../common/model/authenticated_us
 import { securityMock } from '../../../mocks';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 
 const createUser = (username: string, roles = ['idk', 'something']) => {
   const user: User = {

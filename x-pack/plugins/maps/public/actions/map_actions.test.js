@@ -10,6 +10,13 @@ jest.mock('./data_request_actions', () => {
     syncDataForAllLayers: () => {},
   };
 });
+jest.mock('../kibana_services', () => {
+  return {
+    getMapsCapabilities() {
+      return { save: true };
+    },
+  };
+});
 
 import { mapExtentChanged, setMouseCoordinates, setQuery } from './map_actions';
 

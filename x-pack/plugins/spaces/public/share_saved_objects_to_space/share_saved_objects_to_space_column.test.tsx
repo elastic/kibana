@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { SpacesManager } from '../spaces_manager';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { ShareToSpaceSavedObjectsManagementColumn } from './share_saved_objects_to_space_column';

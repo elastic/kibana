@@ -5,26 +5,21 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import {
-  ESLicense,
-  LicenseGetter,
-  StatsCollectionConfig,
-} from 'src/plugins/telemetry_collection_manager/server';
+import { ESLicense } from 'src/plugins/telemetry_collection_manager/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
-import { CustomContext } from './get_all_stats';
 
 /**
  * Get statistics for all selected Elasticsearch clusters.
  */
-export const getLicenses: LicenseGetter<CustomContext> = async (
-  clustersDetails,
-  { callCluster },
-  { maxBucketSize }
-) => {
-  const clusterUuids = clustersDetails.map(({ clusterUuid }) => clusterUuid);
+export async function getLicenses(
+  clusterUuids: string[],
+  callCluster: LegacyAPICaller, // TODO: To be changed to the new ES client when the plugin migrates
+  maxBucketSize: number
+): Promise<{ [clusterUuid: string]: ESLicense | undefined }> {
   const response = await fetchLicenses(callCluster, clusterUuids, maxBucketSize);
   return handleLicenses(response);
-};
+}
 
 /**
  * Fetch the Elasticsearch stats.
@@ -36,7 +31,7 @@ export const getLicenses: LicenseGetter<CustomContext> = async (
  * Returns the response for the aggregations to fetch details for the product.
  */
 export function fetchLicenses(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   maxBucketSize: number
 ) {

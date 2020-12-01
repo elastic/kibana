@@ -8,7 +8,7 @@ import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.jso
 
 import moment from 'moment-timezone';
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 
 import { AnnotationDescriptionList } from './index';
 

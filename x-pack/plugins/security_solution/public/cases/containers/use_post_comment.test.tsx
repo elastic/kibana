@@ -17,7 +17,7 @@ describe('usePostComment', () => {
   const abortCtrl = new AbortController();
   const samplePost = {
     comment: 'a comment',
-    type: CommentType.user,
+    type: CommentType.user as const,
   };
   const updateCaseCallback = jest.fn();
   beforeEach(() => {

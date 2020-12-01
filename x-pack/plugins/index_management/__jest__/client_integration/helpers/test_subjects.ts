@@ -13,6 +13,8 @@ export type TestSubjects =
   | 'createTemplateButton'
   | 'dataStreamsEmptyPromptTemplateLink'
   | 'dataStreamTable'
+  | 'deleteDataStreamsButton'
+  | 'deleteDataStreamButton'
   | 'deleteSystemTemplateCallOut'
   | 'deleteTemplateButton'
   | 'deleteTemplatesConfirmation'
@@ -21,6 +23,7 @@ export type TestSubjects =
   | 'filterList.filterItem'
   | 'ilmPolicyLink'
   | 'includeStatsSwitch'
+  | 'includeManagedSwitch'
   | 'indexTable'
   | 'indexTableIncludeHiddenIndicesToggle'
   | 'indexTableIndexNameLink'
@@ -51,4 +54,5 @@ export type TestSubjects =
   | 'templateList'
   | 'templatesTab'
   | 'templateTable'
+  | 'title'
   | 'viewButton';

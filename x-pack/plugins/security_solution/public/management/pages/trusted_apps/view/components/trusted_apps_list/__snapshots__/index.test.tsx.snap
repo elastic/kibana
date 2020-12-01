@@ -776,7 +776,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiPanel"
+                  class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
                 >
                   <div
                     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1061,7 +1061,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -1448,7 +1448,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -1835,7 +1835,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -2222,7 +2222,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -2609,7 +2609,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -2996,7 +2996,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -3383,7 +3383,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -4001,7 +4001,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -4388,7 +4388,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -4775,7 +4775,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -5162,7 +5162,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -5549,7 +5549,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -5936,7 +5936,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -6323,7 +6323,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -7099,7 +7099,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -7486,7 +7486,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -7873,7 +7873,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -8260,7 +8260,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -8647,7 +8647,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -9034,7 +9034,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -9421,7 +9421,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -10039,7 +10039,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -10426,7 +10426,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -10813,7 +10813,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -11200,7 +11200,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -11587,7 +11587,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -11974,7 +11974,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>
@@ -12361,7 +12361,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   class="euiToolTipAnchor eui-textTruncate"
                 >
                   <span>
-                    Mac OS
+                    Mac
                   </span>
                 </span>
               </div>

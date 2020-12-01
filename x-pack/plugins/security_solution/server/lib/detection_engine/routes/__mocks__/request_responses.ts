@@ -26,7 +26,7 @@ import { requestMock } from './request';
 import { RuleNotificationAlertType } from '../../notifications/types';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 
@@ -508,18 +508,14 @@ export const getMockPrivilegesResult = () => ({
   application: {},
 });
 
-export const getFindResultStatusEmpty = (): SavedObjectsFindResponse<
-  IRuleSavedAttributesSavedObjectAttributes
-> => ({
+export const getFindResultStatusEmpty = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
   page: 1,
   per_page: 1,
   total: 0,
   saved_objects: [],
 });
 
-export const getFindResultStatus = (): SavedObjectsFindResponse<
-  IRuleSavedAttributesSavedObjectAttributes
-> => ({
+export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
   page: 1,
   per_page: 6,
   total: 2,

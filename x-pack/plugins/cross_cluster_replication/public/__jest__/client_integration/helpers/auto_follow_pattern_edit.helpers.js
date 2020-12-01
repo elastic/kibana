@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../../test_utils';
+import { registerTestBed } from '@kbn/test/jest';
 import { AutoFollowPatternEdit } from '../../../app/sections/auto_follow_pattern_edit';
 import { ccrStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBedConfig, TestBed } from '../../../../../test_utils';
+import { registerTestBed, TestBedConfig, TestBed } from '@kbn/test/jest';
 import { PipelinesClone } from '../../../public/application/sections/pipelines_clone';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';

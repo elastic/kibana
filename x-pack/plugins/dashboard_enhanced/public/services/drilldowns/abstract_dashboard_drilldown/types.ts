@@ -6,12 +6,8 @@
 
 import { UiActionsEnhancedBaseActionFactoryContext } from '../../../../../ui_actions_enhanced/public';
 import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/ui_actions/public';
+import { DrilldownConfig } from '../../../../common';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type Config = {
-  dashboardId?: string;
-  useCurrentFilters: boolean;
-  useCurrentDateRange: boolean;
-};
+export type Config = DrilldownConfig;
 
 export type FactoryContext = UiActionsEnhancedBaseActionFactoryContext<typeof APPLY_FILTER_TRIGGER>;
