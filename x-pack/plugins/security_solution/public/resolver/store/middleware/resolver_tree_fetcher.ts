@@ -56,7 +56,7 @@ export function ResolverTreeFetcher(
           });
           return;
         }
-        const entityIDToFetch = matchingEntities[0].entity_id;
+        const entityIDToFetch = matchingEntities[0].id;
         result = await dataAccessLayer.resolverTree(
           entityIDToFetch,
           lastRequestAbortController.signal
