@@ -16,10 +16,10 @@ export const routeToConnectors = `/connectors`;
 export const routeToAlerts = `/alerts`;
 export const routeToAlertDetails = `/alert/:alertId`;
 
-export const resolvedActionGroupMessage = i18n.translate(
-  'xpack.triggersActionsUI.sections.actionForm.ResolvedMessage',
+export const recoveredActionGroupMessage = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionForm.RecoveredMessage',
   {
-    defaultMessage: 'Resolved',
+    defaultMessage: 'Recovered',
   }
 );
 
