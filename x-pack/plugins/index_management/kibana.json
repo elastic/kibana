@@ -4,11 +4,12 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["home", "licensing", "management", "features", "share"],
-  "optionalPlugins": ["security", "usageCollection", "fleet"],
+  "optionalPlugins": ["security", "usageCollection", "fleet", "data"],
   "configPath": ["xpack", "index_management"],
   "requiredBundles": [
     "kibanaReact",
     "esUiShared",
-    "runtimeFields"
+    "runtimeFields",
+    "data"
   ]
 }

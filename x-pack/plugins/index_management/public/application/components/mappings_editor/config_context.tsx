@@ -5,12 +5,14 @@
  */
 import React, { createContext, useContext, useState } from 'react';
 
-import { DocLinksStart } from './shared_imports';
+import { DocLinksStart, DataPublicPluginStart } from './shared_imports';
 import { IndexSettings } from './types';
 
 interface ContextState {
   indexSettings: IndexSettings;
+  indexPatterns?: string[];
   docLinks?: DocLinksStart;
+  data?: DataPublicPluginStart;
 }
 
 interface Context {

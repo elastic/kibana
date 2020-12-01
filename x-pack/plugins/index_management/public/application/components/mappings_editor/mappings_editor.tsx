@@ -28,7 +28,7 @@ import { extractMappingsDefinition } from './lib';
 import { useMappingsState } from './mappings_state_context';
 import { useMappingsStateListener } from './use_state_listener';
 import { useConfig } from './config_context';
-import { DocLinksStart } from './shared_imports';
+import { DocLinksStart, DataPublicPluginStart } from './shared_imports';
 
 type TabName = 'fields' | 'runtimeFields' | 'advanced' | 'templates';
 
@@ -46,10 +46,14 @@ interface Props {
   onChange: OnUpdateHandler;
   value?: { [key: string]: any };
   indexSettings?: IndexSettings;
-  docLinks: DocLinksStart;
+  ctx: {
+    docLinks: DocLinksStart;
+    data?: DataPublicPluginStart;
+    indexPatterns?: string[];
+  };
 }
 
-export const MappingsEditor = React.memo(({ onChange, value, docLinks, indexSettings }: Props) => {
+export const MappingsEditor = React.memo(({ onChange, value, ctx, indexSettings }: Props) => {
   const {
     parsedDefaultValue,
     multipleMappingsDeclared,
@@ -120,10 +124,10 @@ export const MappingsEditor = React.memo(({ onChange, value, docLinks, indexSett
   useEffect(() => {
     // Update the the config context so it is available globally (e.g in our Global flyout)
     updateConfig({
-      docLinks,
+      ...ctx,
       indexSettings: indexSettings ?? {},
     });
-  }, [updateConfig, docLinks, indexSettings]);
+  }, [updateConfig, ctx, indexSettings]);
 
   const changeTab = async (tab: TabName) => {
     if (selectedTab === 'advanced') {

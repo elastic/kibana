@@ -7,10 +7,9 @@
 import React, { createContext, useContext } from 'react';
 import { ScopedHistory } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { CoreSetup, CoreStart } from '../../../../../src/core/public';
 
-import { FleetSetup } from '../../../fleet/public';
+import { AppPluginsDependencies } from '../types';
 import { UiMetricService, NotificationService, HttpService } from './services';
 import { ExtensionsService } from '../services';
 import { SharePluginStart } from '../../../../../src/plugins/share/public';
@@ -22,10 +21,7 @@ export interface AppDependencies {
     fatalErrors: CoreStart['fatalErrors'];
     getUrlForApp: CoreStart['application']['getUrlForApp'];
   };
-  plugins: {
-    usageCollection: UsageCollectionSetup;
-    fleet?: FleetSetup;
-  };
+  plugins: AppPluginsDependencies;
   services: {
     uiMetricService: UiMetricService;
     extensionsService: ExtensionsService;

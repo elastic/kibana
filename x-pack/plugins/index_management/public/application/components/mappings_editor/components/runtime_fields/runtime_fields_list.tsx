@@ -38,7 +38,7 @@ export const RuntimeFieldsList = () => {
   } = useGlobalFlyout();
 
   const {
-    value: { docLinks },
+    value: { docLinks, data, indexPatterns },
   } = useConfig();
 
   const createField = useCallback(() => {
@@ -78,10 +78,9 @@ export const RuntimeFieldsList = () => {
           docLinks: docLinks!,
           ctx: {
             namesNotAllowed: Object.values(runtimeFields).map((field) => field.source.name),
-            existingConcreteFields: Object.values(fields.byId).map((field) => ({
-              name: field.source.name,
-              type: field.source.type,
-            })),
+            existingConcreteFields: Object.values(fields.byId).map((field) => field.source.name),
+            search: data?.search,
+            index: indexPatterns,
           },
         },
         flyoutProps: {
@@ -101,6 +100,7 @@ export const RuntimeFieldsList = () => {
     runtimeFields,
     fields,
     docLinks,
+    indexPatterns,
     addContentToGlobalFlyout,
     removeContentFromGlobalFlyout,
     saveRuntimeField,

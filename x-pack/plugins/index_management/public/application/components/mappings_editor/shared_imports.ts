@@ -63,3 +63,5 @@ export {
 export { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 
 export { DocLinksStart } from '../../../../../../../src/core/public';
+
+export { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
