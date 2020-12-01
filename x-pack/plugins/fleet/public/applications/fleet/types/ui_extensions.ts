@@ -38,7 +38,7 @@ export interface PackagePolicyEditExtensionComponentProps {
     /** is current form state is valid */
     isValid: boolean;
     /** The updated Integration Policy to be merged back and included in the API call */
-    updatedPolicy: NewPackagePolicy;
+    updatedPolicy: Partial<NewPackagePolicy>;
   }) => void;
 }
 

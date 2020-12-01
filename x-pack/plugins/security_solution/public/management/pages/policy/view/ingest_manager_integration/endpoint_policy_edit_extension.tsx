@@ -65,10 +65,7 @@ const WrappedPolicyDetailsForm = memo<{
   onChange: PackagePolicyEditExtensionComponentProps['onChange'];
 }>(({ policyId, onChange }) => {
   const dispatch = useDispatch<(a: AppAction) => void>();
-  // Type casting is needed here due to the use of `Immutable` for our store data
-  const updatedPolicy = (usePolicyDetailsSelector(
-    policyDetailsForUpdate
-  ) as unknown) as NewPackagePolicy;
+  const updatedPolicy = usePolicyDetailsSelector(policyDetailsForUpdate);
   const [, setLastUpdatedPolicy] = useState(updatedPolicy);
 
   // When the form is initially displayed, trigger the Redux middleware which is based on
@@ -105,10 +102,18 @@ const WrappedPolicyDetailsForm = memo<{
         return prevState;
       }
 
-      onChange({
-        isValid: true,
-        updatedPolicy,
-      });
+      if (updatedPolicy) {
+        onChange({
+          isValid: true,
+          // send up only the updated policy data which is stored in the `inputs` section.
+          // All other attributes (like name, id) are updated from the Fleet form, so we want to
+          // ensure we don't override it.
+          updatedPolicy: {
+            // Casting is needed due to the use of `Immutable<>` in our store data
+            inputs: (updatedPolicy.inputs as unknown) as NewPackagePolicy['inputs'],
+          },
+        });
+      }
 
       return updatedPolicy;
     });
