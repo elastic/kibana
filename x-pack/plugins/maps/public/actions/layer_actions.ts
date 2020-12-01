@@ -276,43 +276,47 @@ export function updateLayerOrder(newLayerOrder: number[]) {
   };
 }
 
+export function updateMetricsProp(layerId, value) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layer = getLayerById(layerId, getState());
+    await dispatch({
+      type: UPDATE_SOURCE_PROP,
+      layerId,
+      propName: 'metrics',
+      value,
+    });
+    const previousFields = await (layer as IVectorLayer).getFields();
+    await dispatch(updateStyleProperties(layerId, previousFields as IESAggField[]));
+    dispatch(syncDataForLayerId(layerId));
+  };
+}
+
 export function updateSourceProp(
   layerId: string,
   propName: string,
   value: unknown,
   newLayerType?: LAYER_TYPE
 ) {
-  return async (
-    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
-    getState: () => MapStoreState
-  ) => {
+  return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     if (propName === 'metrics') {
-      const layer = getLayerById(layerId, getState());
-      const oldFields = await (layer as IVectorLayer).getFields();
-      dispatch({
-        type: UPDATE_SOURCE_PROP,
-        layerId,
-        propName,
-        value,
-      });
       if (newLayerType) {
-        dispatch(updateLayerType(layerId, newLayerType));
+        throw new Error('May not change layer-type when modifying metrics source-property');
       }
-      await dispatch(updateStyleProperties(layerId, oldFields as IESAggField[]));
-      dispatch(syncDataForLayerId(layerId));
-    } else {
-      dispatch({
-        type: UPDATE_SOURCE_PROP,
-        layerId,
-        propName,
-        value,
-      });
-      if (newLayerType) {
-        dispatch(updateLayerType(layerId, newLayerType));
-      }
-      // await dispatch(updateStyleProperties(layerId));
-      dispatch(syncDataForLayerId(layerId));
+      return await dispatch(updateMetricsProp(layerId, value));
     }
+    dispatch({
+      type: UPDATE_SOURCE_PROP,
+      layerId,
+      propName,
+      value,
+    });
+    if (newLayerType) {
+      dispatch(updateLayerType(layerId, newLayerType));
+    }
+    dispatch(syncDataForLayerId(layerId));
   };
 }
 
@@ -507,13 +511,12 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor: StyleDescripto
 
 export function setJoinsForLayer(layer: ILayer, joins: JoinDescriptor[]) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    const previousFields = await (layer as IVectorLayer).getFields();
     await dispatch({
       type: SET_JOINS,
       layer,
       joins,
     });
-
-    const previousFields = await (layer as IVectorLayer).getFields();
     await dispatch(updateStyleProperties(layer.getId(), previousFields));
     dispatch(syncDataForLayerId(layer.getId()));
   };

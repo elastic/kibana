@@ -17,6 +17,7 @@ import {
   LAYER_STYLE_TYPE,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   STYLE_TYPE,
+  TOP_TERM_PERCENTAGE_SUFFIX,
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
@@ -83,7 +84,7 @@ export interface IVectorStyle extends IStyle {
   getStyleMeta(): StyleMeta;
   getDescriptorWithUpdatedStyleProps(
     nextFields: IField[],
-    oldFields: IField[],
+    previousFields: IField[],
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
@@ -172,6 +173,74 @@ export class VectorStyle implements IVectorStyle {
     return getDefaultStaticProperties(mapColors);
   }
 
+  constructor(
+    descriptor: VectorStyleDescriptor | null,
+    source: IVectorSource,
+    layer: IVectorLayer
+  ) {
+    this._source = source;
+    this._layer = layer;
+    this._descriptor = descriptor
+      ? {
+          ...descriptor,
+          ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
+        }
+      : VectorStyle.createDescriptor();
+
+    this._styleMeta = new StyleMeta(this._descriptor.__styleMeta);
+
+    this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
+      this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
+      VECTOR_STYLES.SYMBOLIZE_AS
+    );
+    this._lineColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
+      VECTOR_STYLES.LINE_COLOR
+    );
+    this._fillColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.FILL_COLOR],
+      VECTOR_STYLES.FILL_COLOR
+    );
+    this._lineWidthStyleProperty = this._makeSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LINE_WIDTH],
+      VECTOR_STYLES.LINE_WIDTH,
+      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
+    );
+    this._iconStyleProperty = this._makeIconProperty(
+      this._descriptor.properties[VECTOR_STYLES.ICON]
+    );
+    this._iconSizeStyleProperty = this._makeSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.ICON_SIZE],
+      VECTOR_STYLES.ICON_SIZE,
+      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
+    );
+    this._iconOrientationProperty = this._makeOrientationProperty(
+      this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION],
+      VECTOR_STYLES.ICON_ORIENTATION
+    );
+    this._labelStyleProperty = this._makeLabelProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_TEXT]
+    );
+    this._labelSizeStyleProperty = this._makeSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE],
+      VECTOR_STYLES.LABEL_SIZE,
+      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
+    );
+    this._labelColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
+      VECTOR_STYLES.LABEL_COLOR
+    );
+    this._labelBorderColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_COLOR],
+      VECTOR_STYLES.LABEL_BORDER_COLOR
+    );
+    this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
+      VECTOR_STYLES.LABEL_BORDER_SIZE,
+      this._labelSizeStyleProperty
+    );
+  }
+
   async _updateFieldsInDescriptor(
     nextFields: IField[],
     styleFieldsHelper: StyleFieldsHelper,
@@ -179,74 +248,56 @@ export class VectorStyle implements IVectorStyle {
     previousFields: IField[],
     mapColors: string[]
   ) {
-    const invalidDynamicProperties = (Object.keys(originalProperties) as VECTOR_STYLES[]).filter(
-      (key) => {
-        const dynamicOptions = getDynamicOptions(originalProperties, key);
-        if (!dynamicOptions || !dynamicOptions.field || !dynamicOptions.field.name) {
-          return;
-        }
-
-        const matchingField = nextFields.find((field) => {
-          return (
-            dynamicOptions && dynamicOptions.field && dynamicOptions.field.name === field.getName()
-          );
-        });
-        return !matchingField;
+    const invalidStyleNames: VECTOR_STYLES[] = (Object.keys(
+      originalProperties
+    ) as VECTOR_STYLES[]).filter((key) => {
+      const dynamicOptions = getDynamicOptions(originalProperties, key);
+      if (!dynamicOptions || !dynamicOptions.field || !dynamicOptions.field.name) {
+        return;
       }
-    );
+
+      const hasMatchingField = nextFields.some((field) => {
+        return (
+          dynamicOptions && dynamicOptions.field && dynamicOptions.field.name === field.getName()
+        );
+      });
+      return !hasMatchingField;
+    });
 
     let hasChanges = false;
-    for (let i = 0; i < previousFields.length; i++) {
-      const previousField = previousFields[i];
-      const nextField = nextFields[i];
-      if (previousField.isEqual(nextField)) {
-        continue;
-      }
 
-      // Check if the updated field can be assigned to any of the broken style-properties.
-      for (let j = 0; j < invalidDynamicProperties.length; j++) {
-        const dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions> = this.getAllStyleProperties().find(
-          (d) => d.getStyleName() === invalidDynamicProperties[j]
-        ) as IDynamicStyleProperty<DynamicStylePropertyOptions>;
-
-        if (!dynamicProperty) {
+    invalidStyleNames.forEach((invalidStyleName) => {
+      for (let i = 0; i < previousFields.length; i++) {
+        const previousField = previousFields[i];
+        const nextField = nextFields[i];
+        if (previousField.isEqual(nextField)) {
           continue;
         }
-
         let newFieldDescriptor: StylePropertyField | undefined;
-        const isFieldDataTypeCompatible = styleFieldsHelper.isFieldDataTypeCompatibleWithStyleType(
+        const isFieldDataTypeCompatible = styleFieldsHelper.hasFieldForStyle(
           nextField,
-          dynamicProperty.getStyleName()
+          invalidStyleName
         );
         if (isFieldDataTypeCompatible) {
-          newFieldDescriptor = await dynamicProperty.rectifyFieldDescriptor(
-            nextField as IESAggField,
-            {
-              origin: previousField.getOrigin(),
-              name: previousField.getName(),
-            }
-          );
+          newFieldDescriptor = rectifyFieldDescriptor(nextField as IESAggField, {
+            origin: previousField.getOrigin(),
+            name: previousField.getName(),
+          });
 
           if (newFieldDescriptor) {
             hasChanges = true;
-            invalidDynamicProperties.splice(j, 1);
-            j--;
           }
         }
 
-        (originalProperties[dynamicProperty.getStyleName()]!
+        (originalProperties[invalidStyleName]!
           .options! as DynamicStylePropertyOptions).field = newFieldDescriptor;
       }
-    }
+    });
 
-    // Revert left-over invalid props to static styling, if necessary
-    return this._deleteFieldsFromDescriptorAndUpdateStyling(
-      nextFields,
-      styleFieldsHelper,
-      originalProperties,
-      mapColors,
-      hasChanges
-    );
+    return {
+      hasChanges,
+      nextStyleDescriptor: VectorStyle.createDescriptor(originalProperties, this.isTimeAware()),
+    };
   }
 
   async _deleteFieldsFromDescriptorAndUpdateStyling(
@@ -318,74 +369,6 @@ export class VectorStyle implements IVectorStyle {
         nextStyleDescriptor: VectorStyle.createDescriptor(originalProperties, this.isTimeAware()),
       };
     }
-  }
-
-  constructor(
-    descriptor: VectorStyleDescriptor | null,
-    source: IVectorSource,
-    layer: IVectorLayer
-  ) {
-    this._source = source;
-    this._layer = layer;
-    this._descriptor = descriptor
-      ? {
-          ...descriptor,
-          ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
-        }
-      : VectorStyle.createDescriptor();
-
-    this._styleMeta = new StyleMeta(this._descriptor.__styleMeta);
-
-    this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
-      this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
-      VECTOR_STYLES.SYMBOLIZE_AS
-    );
-    this._lineColorStyleProperty = this._makeColorProperty(
-      this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
-      VECTOR_STYLES.LINE_COLOR
-    );
-    this._fillColorStyleProperty = this._makeColorProperty(
-      this._descriptor.properties[VECTOR_STYLES.FILL_COLOR],
-      VECTOR_STYLES.FILL_COLOR
-    );
-    this._lineWidthStyleProperty = this._makeSizeProperty(
-      this._descriptor.properties[VECTOR_STYLES.LINE_WIDTH],
-      VECTOR_STYLES.LINE_WIDTH,
-      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
-    );
-    this._iconStyleProperty = this._makeIconProperty(
-      this._descriptor.properties[VECTOR_STYLES.ICON]
-    );
-    this._iconSizeStyleProperty = this._makeSizeProperty(
-      this._descriptor.properties[VECTOR_STYLES.ICON_SIZE],
-      VECTOR_STYLES.ICON_SIZE,
-      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
-    );
-    this._iconOrientationProperty = this._makeOrientationProperty(
-      this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION],
-      VECTOR_STYLES.ICON_ORIENTATION
-    );
-    this._labelStyleProperty = this._makeLabelProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_TEXT]
-    );
-    this._labelSizeStyleProperty = this._makeSizeProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE],
-      VECTOR_STYLES.LABEL_SIZE,
-      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
-    );
-    this._labelColorStyleProperty = this._makeColorProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
-      VECTOR_STYLES.LABEL_COLOR
-    );
-    this._labelBorderColorStyleProperty = this._makeColorProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_COLOR],
-      VECTOR_STYLES.LABEL_BORDER_COLOR
-    );
-    this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
-      VECTOR_STYLES.LABEL_BORDER_SIZE,
-      this._labelSizeStyleProperty
-    );
   }
 
   /*
@@ -998,4 +981,19 @@ function getDynamicOptions(
     return null;
   }
   return propertyDescriptor.options as DynamicStylePropertyOptions;
+}
+
+function rectifyFieldDescriptor(
+  currentField: IESAggField,
+  previousFieldDescriptor: StylePropertyField
+): Promise<StylePropertyField | undefined> {
+  if (previousFieldDescriptor.name.endsWith(TOP_TERM_PERCENTAGE_SUFFIX)) {
+    // Don't support auto-switching for top-term-percentages
+    return;
+  }
+
+  return {
+    origin: previousFieldDescriptor.origin,
+    name: currentField.getName(),
+  };
 }

@@ -64,15 +64,9 @@ describe('StyleFieldHelper', () => {
         VECTOR_STYLES.LABEL_COLOR,
         VECTOR_STYLES.LABEL_BORDER_COLOR,
       ].forEach((styleType) => {
-        expect(
-          styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(stringField, styleType)
-        ).toEqual(true);
-        expect(
-          styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(numberField, styleType)
-        ).toEqual(true);
-        expect(
-          styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(dateField, styleType)
-        ).toEqual(true);
+        expect(styleFieldHelper.hasFieldForStyle(stringField, styleType)).toEqual(true);
+        expect(styleFieldHelper.hasFieldForStyle(numberField, styleType)).toEqual(true);
+        expect(styleFieldHelper.hasFieldForStyle(dateField, styleType)).toEqual(true);
       });
     });
 
@@ -81,15 +75,9 @@ describe('StyleFieldHelper', () => {
 
       [VECTOR_STYLES.LINE_WIDTH, VECTOR_STYLES.LABEL_SIZE, VECTOR_STYLES.ICON_SIZE].forEach(
         (styleType) => {
-          expect(
-            styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(stringField, styleType)
-          ).toEqual(false);
-          expect(
-            styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(numberField, styleType)
-          ).toEqual(true);
-          expect(
-            styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(dateField, styleType)
-          ).toEqual(true);
+          expect(styleFieldHelper.hasFieldForStyle(stringField, styleType)).toEqual(false);
+          expect(styleFieldHelper.hasFieldForStyle(numberField, styleType)).toEqual(true);
+          expect(styleFieldHelper.hasFieldForStyle(dateField, styleType)).toEqual(true);
         }
       );
     });
@@ -99,15 +87,9 @@ describe('StyleFieldHelper', () => {
 
       [VECTOR_STYLES.LINE_WIDTH, VECTOR_STYLES.LABEL_SIZE, VECTOR_STYLES.ICON_SIZE].forEach(
         (styleType) => {
-          expect(
-            styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(stringField, styleType)
-          ).toEqual(false);
-          expect(
-            styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(numberField, styleType)
-          ).toEqual(false);
-          expect(
-            styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(dateField, styleType)
-          ).toEqual(false);
+          expect(styleFieldHelper.hasFieldForStyle(stringField, styleType)).toEqual(false);
+          expect(styleFieldHelper.hasFieldForStyle(numberField, styleType)).toEqual(false);
+          expect(styleFieldHelper.hasFieldForStyle(dateField, styleType)).toEqual(false);
         }
       );
     });
@@ -116,15 +98,9 @@ describe('StyleFieldHelper', () => {
       const { styleFieldHelper, stringField, numberField, dateField } = await createHelper(true);
 
       [VECTOR_STYLES.ICON_ORIENTATION].forEach((styleType) => {
-        expect(
-          styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(stringField, styleType)
-        ).toEqual(false);
-        expect(
-          styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(numberField, styleType)
-        ).toEqual(true);
-        expect(
-          styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(dateField, styleType)
-        ).toEqual(false);
+        expect(styleFieldHelper.hasFieldForStyle(stringField, styleType)).toEqual(false);
+        expect(styleFieldHelper.hasFieldForStyle(numberField, styleType)).toEqual(true);
+        expect(styleFieldHelper.hasFieldForStyle(dateField, styleType)).toEqual(false);
       });
     });
 
@@ -132,15 +108,9 @@ describe('StyleFieldHelper', () => {
       const { styleFieldHelper, stringField, numberField, dateField } = await createHelper(true);
 
       [VECTOR_STYLES.LABEL_BORDER_SIZE].forEach((styleType) => {
-        expect(
-          styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(stringField, styleType)
-        ).toEqual(false);
-        expect(
-          styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(numberField, styleType)
-        ).toEqual(false);
-        expect(
-          styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(dateField, styleType)
-        ).toEqual(false);
+        expect(styleFieldHelper.hasFieldForStyle(stringField, styleType)).toEqual(false);
+        expect(styleFieldHelper.hasFieldForStyle(numberField, styleType)).toEqual(false);
+        expect(styleFieldHelper.hasFieldForStyle(dateField, styleType)).toEqual(false);
       });
     });
   });
