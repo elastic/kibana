@@ -11,13 +11,6 @@ export const getProcessList = async (
   search: ESSearchClient,
   { hostTerm, timefield, indexPattern, to, sortBy, searchFilter }: ProcessListAPIRequest
 ) => {
-  const boolFilter = searchFilter.bool ?? {};
-  const shouldAgg = [
-    {
-      match_all: {},
-    },
-  ];
-
   const body = {
     size: 0,
     query: {
@@ -59,7 +52,7 @@ export const getProcessList = async (
       processes: {
         filter: {
           bool: {
-            should: shouldAgg,
+            must: searchFilter ?? [{ match_all: {} }],
           },
         },
         aggs: {

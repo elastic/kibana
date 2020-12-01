@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiTablePagination,
   EuiLoadingChart,
-  Query,
+  EuiEmptyPrompt,
   SortableProperties,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
@@ -100,6 +100,20 @@ export const ProcessesTable = ({
   );
 
   if (isLoading) return <LoadingPlaceholder />;
+
+  if (currentItems.length === 0)
+    return (
+      <EuiEmptyPrompt
+        iconType="tableDensityNormal"
+        title={
+          <h4>
+            {i18n.translate('xpack.infra.metrics.nodeDetails.noProcesses', {
+              defaultMessage: 'No processes matched these search terms',
+            })}
+          </h4>
+        }
+      />
+    );
 
   return (
     <>

@@ -15,7 +15,7 @@ export const ProcessListAPIRequestRT = rt.type({
     name: rt.string,
     isAscending: rt.boolean,
   }),
-  searchFilter: rt.record(rt.string, rt.record(rt.string, rt.unknown)),
+  searchFilter: rt.array(rt.record(rt.string, rt.record(rt.string, rt.unknown))),
 });
 
 export const ProcessListAPIQueryAggregationRT = rt.type({

@@ -6,7 +6,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../../common/http_api';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
@@ -24,6 +24,7 @@ export function useProcessList(
   sortBy: SortBy,
   searchFilter: object
 ) {
+  const [inErrorState, setInErrorState] = useState(false);
   const decodeResponse = (response: any) => {
     return pipe(
       ProcessListAPIResponseRT.decode(response),
@@ -48,17 +49,20 @@ export function useProcessList(
       indexPattern,
       to,
       sortBy: parsedSortBy,
-      searchFilter: {},
+      searchFilter,
     }),
     decodeResponse
   );
+
+  useEffect(() => setInErrorState(true), [error]);
+  useEffect(() => setInErrorState(false), [loading]);
 
   useEffect(() => {
     makeRequest();
   }, [makeRequest]);
 
   return {
-    error,
+    error: inErrorState,
     loading,
     response,
     makeRequest,

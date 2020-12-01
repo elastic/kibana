@@ -5,16 +5,18 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiSearchBar, EuiSpacer, EuiEmptyPrompt, EuiButton, Query } from '@elastic/eui';
+import { EuiSearchBar, EuiSpacer, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { useProcessList, SortBy } from '../../../../hooks/use_process_list';
 import { TabContent, TabProps } from '../shared';
 import { STATE_NAMES } from './states';
 import { SummaryTable } from './summary_table';
 import { ProcessesTable } from './processes_table';
+import { parseSearchString } from './parse_search_string';
 
 const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
-  const [searchFilter, setSearchFilter] = useState<Query>(EuiSearchBar.Query.MATCH_ALL);
+  const [searchFilter, setSearchFilter] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortBy>({
     name: 'cpu',
     isAscending: false,
@@ -34,45 +36,27 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
     options.fields!.timestamp,
     currentTime,
     sortBy,
-    Query.toESQuery(searchFilter)
+    parseSearchString(searchFilter)
   );
 
-  console.log(Query.toESQuery(searchFilter), Query.toESQueryString(searchFilter));
-
-  if (error) {
-    return (
-      <TabContent>
-        <EuiEmptyPrompt
-          iconType="tableDensityNormal"
-          title={
-            <h4>
-              {i18n.translate('xpack.infra.metrics.nodeDetails.processListError', {
-                defaultMessage: 'Unable to show process data',
-              })}
-            </h4>
-          }
-          actions={
-            <EuiButton color="primary" fill onClick={reload}>
-              {i18n.translate('xpack.infra.metrics.nodeDetails.processListRetry', {
-                defaultMessage: 'Try again',
-              })}
-            </EuiButton>
-          }
-        />
-      </TabContent>
-    );
-  }
+  const debouncedSearchOnChange = useMemo(
+    () =>
+      debounce<(props: { queryText: string }) => void>(
+        ({ queryText }) => setSearchFilter(queryText),
+        500
+      ),
+    [setSearchFilter]
+  );
 
   return (
     <TabContent>
       <SummaryTable
         isLoading={loading}
-        processSummary={response?.summary ?? { total: 0, statesCount: {} }}
+        processSummary={(!error ? response?.summary : null) ?? { total: 0, statesCount: {} }}
       />
       <EuiSpacer size="m" />
       <EuiSearchBar
-        query={searchFilter}
-        onChange={({ query }) => setSearchFilter(query ?? EuiSearchBar.Query.MATCH_ALL)}
+        onChange={debouncedSearchOnChange}
         box={{
           incremental: true,
           placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForProcesses', {
@@ -94,13 +78,33 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
         ]}
       />
       <EuiSpacer size="m" />
-      <ProcessesTable
-        currentTime={currentTime}
-        isLoading={loading || !response}
-        processList={response?.processList ?? []}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-      />
+      {!error ? (
+        <ProcessesTable
+          currentTime={currentTime}
+          isLoading={loading || !response}
+          processList={response?.processList ?? []}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+        />
+      ) : (
+        <EuiEmptyPrompt
+          iconType="tableDensityNormal"
+          title={
+            <h4>
+              {i18n.translate('xpack.infra.metrics.nodeDetails.processListError', {
+                defaultMessage: 'Unable to show process data',
+              })}
+            </h4>
+          }
+          actions={
+            <EuiButton color="primary" fill onClick={reload}>
+              {i18n.translate('xpack.infra.metrics.nodeDetails.processListRetry', {
+                defaultMessage: 'Try again',
+              })}
+            </EuiButton>
+          }
+        />
+      )}
     </TabContent>
   );
 };
