@@ -38,6 +38,20 @@ export interface FormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
   submit: FormHook<RuntimeField>['submit'];
+  validate: FormHook<RuntimeField>['validate'];
+  getData: () => RuntimeField;
+}
+
+export interface Context {
+  /** An array of field name not allowed */
+  namesNotAllowed?: string[];
+  /**
+   * An array of existing concrete fields. If the user gives a name to the runtime
+   * field that matches one of the concrete fields, a callout will be displayed
+   * to indicate that this runtime field will shadow the concrete field.
+   * It is also used to provide the list of field autocomplete suggestions to the code editor.
+   */
+  existingConcreteFields?: string[];
 }
 
 interface Field {
@@ -50,21 +64,11 @@ export interface Props {
     runtimePainless: string;
   };
   defaultValue?: RuntimeField;
-  onChange?: (state: FormState) => void;
+  onChange?: (state: FormState) => void | Promise<void>;
   /**
    * Optional context object
    */
-  ctx?: {
-    /** An array of field name not allowed */
-    namesNotAllowed?: string[];
-    /**
-     * An array of existing concrete fields. If the user gives a name to the runtime
-     * field that matches one of the concrete fields, a callout will be displayed
-     * to indicate that this runtime field will shadow the concrete field.
-     * It is also used to provide the list of field autocomplete suggestions to the code editor.
-     */
-    existingConcreteFields?: Field[];
-  };
+  ctx?: Context;
 }
 
 const createNameNotAllowedValidator = (
@@ -144,8 +148,8 @@ const RuntimeFieldFormComp = ({
     mapReturnTypeToPainlessContext(typeFieldConfig!.defaultValue!)
   );
   const { form } = useForm<RuntimeField>({ defaultValue, schema });
-  const { submit, isValid: isFormValid, isSubmitted } = form;
-  const [{ name }] = useFormData<RuntimeField>({ form, watch: 'name' });
+  const { submit, validate, isValid: isFormValid, isSubmitted } = form;
+  const [{ name }, getData] = useFormData<RuntimeField>({ form });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, defaultValue);
 
@@ -160,9 +164,9 @@ const RuntimeFieldFormComp = ({
 
   useEffect(() => {
     if (onChange) {
-      onChange({ isValid: isFormValid, isSubmitted, submit });
+      onChange({ isValid: isFormValid, isSubmitted, submit, validate, getData });
     }
-  }, [onChange, isFormValid, isSubmitted, submit]);
+  }, [onChange, isFormValid, isSubmitted, submit, validate, getData]);
 
   return (
     <Form form={form} className="runtimeFieldEditor_form">
