@@ -24,12 +24,11 @@ import {
 } from '../screens/rule_details';
 
 export const activatesRule = () => {
-  cy.server();
-  cy.route('PATCH', '**/api/detection_engine/rules/_bulk_update').as('bulk_update');
+  cy.intercept('PATCH', '/api/detection_engine/rules/_bulk_update').as('bulk_update');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
-  cy.wait('@bulk_update').then((response) => {
-    cy.wrap(response.status).should('eql', 200);
+  cy.wait('@bulk_update').then(({ response }) => {
+    cy.wrap(response!.statusCode).should('eql', 200);
   });
 };
 

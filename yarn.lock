@@ -10729,10 +10729,10 @@ cypress-promise@^1.1.0:
   resolved "https://registry.yarnpkg.com/cypress-promise/-/cypress-promise-1.1.0.tgz#f2d66965945fe198431aaf692d5157cea9d47b25"
   integrity sha512-DhIf5PJ/a0iY+Yii6n7Rbwq+9TJxU4pupXYzf9mZd8nPG0AzQrj9i+pqINv4xbI2EV1p+PKW3maCkR7oPG4GrA==
 
-cypress@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-6.0.0.tgz#57050773c61e8fe1e5c9871cc034c616fcacded9"
-  integrity sha512-A/w9S15xGxX5UVeAQZacKBqaA0Uqlae9e5WMrehehAdFiLOZj08IgSVZOV8YqA9OH9Z0iBOnmsEkK3NNj43VrA==
+cypress@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-6.0.1.tgz#86857ca2f527c3723575737deab42fd8f2a209df"
+  integrity sha512-3xtQZ0YM65soLgKQUgn2wg2IbWsM6A2yBg6L4RF31mZHr5LNKdO2/9sgiwxEVMKu2C2m6+IQ75zHP41kZP5rPg==
   dependencies:
     "@cypress/listr-verbose-renderer" "^0.4.1"
     "@cypress/request" "^2.88.5"
