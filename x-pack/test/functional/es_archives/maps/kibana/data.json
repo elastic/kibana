@@ -20,6 +20,7 @@
     "index": ".kibana",
     "source": {
       "index-pattern": {
+        "fields" : "[{\"name\":\"hour_of_day\",\"type\":\"number\",\"count\":0,\"scripted\":true,\"script\":\"doc['@timestamp'].value.getHour()\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
         "timeFieldName": "@timestamp",
         "title": "logstash-*"
       },
@@ -35,6 +36,7 @@
     "index": ".kibana",
     "source": {
       "index-pattern": {
+        "fields" : "[]",
         "title": "geo_shapes*"
       },
       "type": "index-pattern"
@@ -49,6 +51,7 @@
     "index": ".kibana",
     "source": {
       "index-pattern": {
+        "fields" : "[]",
         "title": "meta_for_geo_shapes*"
       },
       "type": "index-pattern"
@@ -63,6 +66,7 @@
     "index": ".kibana",
     "source": {
       "index-pattern": {
+        "fields" : "[]",
         "title": "antimeridian_points"
       },
       "type": "index-pattern"
@@ -77,6 +81,7 @@
     "index": ".kibana",
     "source": {
       "index-pattern": {
+        "fields" : "[]",
         "title": "antimeridian_shapes"
       },
       "type": "index-pattern"
@@ -91,6 +96,7 @@
     "index": ".kibana",
     "source": {
       "index-pattern" : {
+        "fields" : "[]",
         "title" : "flights",
       },
       "type" : "index-pattern",
@@ -110,6 +116,7 @@
     "index": ".kibana",
     "source": {
       "index-pattern" : {
+        "fields" : "[]",
         "title" : "connections",
       },
       "type" : "index-pattern",
