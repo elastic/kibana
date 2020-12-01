@@ -97,4 +97,6 @@ function TileMapOptions(props: TileMapOptionsProps) {
   );
 }
 
-export { TileMapOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TileMapOptions as default };

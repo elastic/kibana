@@ -16,10 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { convertToGeoJson } from '../../maps_legacy/public';
-import { i18n } from '@kbn/i18n';
 
-export const createTileMapFn = () => ({
+import { i18n } from '@kbn/i18n';
+import { convertToGeoJson } from '../../maps_legacy/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+
+interface Arguments {
+  visConfig: string | null;
+}
+
+export interface TileMapVisRenderValue {
+  visData: any;
+  visType: 'tile_map';
+  visConfig: any;
+  params: any;
+}
+
+export type TileMapExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  'tilemap',
+  Datatable,
+  Arguments,
+  Render<TileMapVisRenderValue>
+>;
+
+export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
   name: 'tilemap',
   type: 'render',
   context: {
@@ -32,10 +52,11 @@ export const createTileMapFn = () => ({
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
+      help: '',
     },
   },
   fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
+    const visConfig = args.visConfig && JSON.parse(args.visConfig);
     const { geohash, metric, geocentroid } = visConfig.dimensions;
     const convertedData = convertToGeoJson(context, {
       geohash,

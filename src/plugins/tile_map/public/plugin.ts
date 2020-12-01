@@ -25,13 +25,6 @@ import {
 } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
-// TODO: Determine why visualizations don't populate without this
-import 'angular-sanitize';
-
-// @ts-ignore
-import { createTileMapFn } from './tile_map_fn';
-// @ts-ignore
-import { createTileMapTypeDefinition } from './tile_map_type';
 import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
 import { DataPublicPluginStart } from '../../data/public';
 import {
@@ -44,12 +37,15 @@ import {
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { SharePluginStart } from '../../share/public';
 
+import { createTileMapFn } from './tile_map_fn';
+import { createTileMapTypeDefinition } from './tile_map_type';
+
 export interface TileMapConfigType {
   tilemap: any;
 }
 
 /** @private */
-interface TileMapVisualizationDependencies {
+export interface TileMapVisualizationDependencies {
   uiSettings: IUiSettingsClient;
   getZoomPrecision: any;
   getPrecision: any;
@@ -98,7 +94,7 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
       getServiceSettings,
     };
 
-    expressions.registerFunction(() => createTileMapFn(visualizationDependencies));
+    expressions.registerFunction(createTileMapFn);
 
     visualizations.createBaseVisualization(createTileMapTypeDefinition(visualizationDependencies));
 
