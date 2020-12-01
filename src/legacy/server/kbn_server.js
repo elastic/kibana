@@ -123,10 +123,6 @@ export default class KbnServer {
     if (process.env.isDevCliChild) {
       // help parent process know when we are ready
       process.send(['SERVER_LISTENING']);
-      setTimeout(() => {
-        server.log(['error'], 'bailing out');
-        process.exit(100);
-      }, 10000);
     }
 
     server.log(
