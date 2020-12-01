@@ -121,13 +121,13 @@ Lens and visualizations::
 * Aligns the y axis position on toolbar and dimension editor on horizontal mode {kibana-pull}77585[#77585]
 * Navigate from discover to lens {kibana-pull}77873[#77873]
 * Shows runtime fields in field list and improve performance {kibana-pull}79167[#79167]
-* The search.aggs service in the data plugin is now available on the server. Usage is the same as on the client, except that a scoped saved objects 
+* The search.aggs service in the data plugin is now available on the server. Usage is the same as on the client, except that a scoped saved objects
 client must be provided on the server in order to retrieve the start contract {kibana-pull}74472[#74472]
 * Drilldowns for TSVB / Vega / Timelion {kibana-pull}74848[#74848]
 * Vega is now GA {kibana-pull}75157[#75157]
 * Uses prefix search in visualize editor's field and aggregation select {kibana-pull}75290[#75290]
-* TSVB Mardown now handles the case when a field has key_as_string value. Common case is the value is a date string (e.x. 2020-08-21T20:36:58.000Z) or a boolean stringified value ("true"/"false"). 
-Such a value will be first converted into a moment object and formatted with dateFormat from  Kibana UI settings. If the key_as_string value is not recognized by a known format in Moments.js, 
+* TSVB Mardown now handles the case when a field has key_as_string value. Common case is the value is a date string (e.x. 2020-08-21T20:36:58.000Z) or a boolean stringified value ("true"/"false").
+Such a value will be first converted into a moment object and formatted with dateFormat from  Kibana UI settings. If the key_as_string value is not recognized by a known format in Moments.js,
 a formatted value from elasticsearch will be returned {kibana-pull}75555[#75555]
 * Adds `auto` interval to histogram AggConfig {kibana-pull}76001[#76001]
 Logs::
@@ -169,17 +169,17 @@ Machine Learning::
 Management::
 * Empty index patterns page re-design  {kibana-pull}68819[#68819]
 * Adds inspector for VEGA {kibana-pull}70941[#70941]
-* Adds links to "wait for snapshot policy" combobox that navigate to the snapshot policy creation wizard, when there no policies created 
+* Adds links to "wait for snapshot policy" combobox that navigate to the snapshot policy creation wizard, when there no policies created
 yet or the value doesn't match any existing policies {kibana-pull}72473[#72473]
-* Adds the possibility to preview the final composite of a composable template. The user will be able to see this preview from the creation or 
+* Adds the possibility to preview the final composite of a composable template. The user will be able to see this preview from the creation or
 editing wizard flow, or when looking at the details of a composable template {kibana-pull}72598[#72598]
-* Refines the debugging user experience when creating or editing an ingest node pipeline in the existing Ingest Node Pipelines UI. Once a sample 
+* Refines the debugging user experience when creating or editing an ingest node pipeline in the existing Ingest Node Pipelines UI. Once a sample
 document(s) is provided, the pipeline is executed. The UI highlights the status of each processor, and shows the user how their sample documents change shape at each step in the pipeline {kibana-pull}74964[#74964]
 * The Data Streams tab in Index Management now allows users to view additional information for data streams {kibana-pull}75107[#75107]
 * Data tiers for 7.10 {kibana-pull}76126[#76126]
 * The mappings editor in the Index Templates UI now supports configuring the constant_keyword field type {kibana-pull}76564[#76564]
 * The mappings editor in the Index Templates UI now supports configuring the wildcard field type {kibana-pull}76574[#76574]
-* The mappings editor in the Index Templates UI now supports configuring the histogram field type. Support for the meta parameter was also added 
+* The mappings editor in the Index Templates UI now supports configuring the histogram field type. Support for the meta parameter was also added
 to the boolean, binary, completion, date, flattened, geo_point, numeric, range, search_as_you_type, token_count and text field types {kibana-pull}76671[#76671]
 * Time suffix for duration formatter {kibana-pull}76729[#76729]
 * The ingest node pipeline editor now has the ability to move processors into an empty tree {kibana-pull}76885[#76885]
@@ -236,18 +236,18 @@ Platform::
 * Adds support for version on create & bulkCreate when overwriting a document {kibana-pull}75172[#75172]
 * Monitors the Task Manager Poller and automatically recovers from failure {kibana-pull}75420[#75420]
 * Adds a new Enterprise Search overview plugin, which introduces and guides users to the App Search and Workplace Search plugins {kibana-pull}76734[#76734]
-* The deprecated Dashboard Import API (POST /api/kibana/dashboards/import) now accepts filesizes up to the savedObjects.maxImportPayloadBytes configuration 
+* The deprecated Dashboard Import API (POST /api/kibana/dashboards/import) now accepts filesizes up to the savedObjects.maxImportPayloadBytes configuration
 which is 10MB by default {kibana-pull}77409[#77409]
 Reporting::
-* Reporting configuration settings for time duration values allow "time unit" strings to be specified as well as number of milliseconds. 
+* Reporting configuration settings for time duration values allow "time unit" strings to be specified as well as number of milliseconds.
 For byte size values, "byte size" strings are allowed as well as number of bytes. See the Reporting configuration documentation for more details {kibana-pull}74202[#74202]
 * Reporting/diagnostics {kibana-pull}74314[#74314]
 * Removes the light gray border around the image in PDF reports {kibana-pull}78036[#78036]
 * Increases capture.timeouts.openUrl to 1 minute {kibana-pull}75207[#75207]
 Security::
 * Hides management sections based on cluster/index privileges {kibana-pull}67791[#67791]
-* xpack.encryptedSavedObjects.encryptionKey can now be rotated without losing access to existing encrypted Saved Objects (alerts, actions etc.). 
-Old key(s) can be moved to xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys to be used only to decrypt existing objects while new or updated objects will be encrypted using new primary encryption key. 
+* xpack.encryptedSavedObjects.encryptionKey can now be rotated without losing access to existing encrypted Saved Objects (alerts, actions etc.).
+Old key(s) can be moved to xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys to be used only to decrypt existing objects while new or updated objects will be encrypted using new primary encryption key.
 Administrators can also use dedicated API endpoint /api/encrypted_saved_objects/_rotate_key to trigger re-encryption of all existing objects with a new primary key so that old keys can be safely disposed {kibana-pull}72420[#72420]
 * Groups features for space management {kibana-pull}74151[#74151]
 * Allows passwords to be visible on security screens {kibana-pull}77394[#77394]
@@ -255,14 +255,23 @@ Administrators can also use dedicated API endpoint /api/encrypted_saved_objects/
 * Warns users when security is not configured {kibana-pull}78545[#78545]
 * Sharing saved-objects phase 1.5 {kibana-pull}75444[#75444]
 * [Detections] Handle conflicts on alert status update {kibana-pull}75492[#75492]
-* Improves the experience when Kibana returns a 403 HTTP status code or the user tries to access a page/app they do not have access to. In those instances, a new user-friendly error page is shown. 
-The user will get the option to go back to the page from where they came, or log in as a different user. Previously the user would just see a simple JSON document containing a short error message 
+* Improves the experience when Kibana returns a 403 HTTP status code or the user tries to access a page/app they do not have access to. In those instances, a new user-friendly error page is shown.
+The user will get the option to go back to the page from where they came, or log in as a different user. Previously the user would just see a simple JSON document containing a short error message
 without the ability to do anything {kibana-pull}75538[#75538]
 * Adds EQL search strategy {kibana-pull}78645[#78645]
 * Fetches related events from the server {kibana-pull}78780[#78780]
 * [Resolver] Requests data from new event api {kibana-pull}78782[#78782]
 * Updates copy styling {kibana-pull}79313[#79313]
 * Excludes cloud alias index from our query {kibana-pull}81551[#81551]
+* Implements server-side sessions. {kib} now stores user session information in a dedicated {es} index.
+By default, expired and invalid sessions are cleaned from the index every hour.
+You configure the cleanup interval with the `xpack.security.session.cleanupInterval` setting.
+After the upgrade, all existing sessions are invalid and users must log back in to {kib}.
+It is also no longer possible
+to host different {kib} tenants on different ports of the same host.
+Although this setup worked in the past, it was discouraged because browsers
+share cookie across all applications hosted using the same host name, ignoring ports.
+Cookies are now strictly tied to a particular tenant. {kibana-pull}68117[#68117]
 Uptime::
 * Pings Redirects {kibana-pull}65292[#65292]
 * Uses `service.name` to link from Uptime -> APM where available {kibana-pull}73618[#73618]
@@ -355,8 +364,8 @@ Lens and visualizations::
 * Fixes download filename when using split table {kibana-pull}74231[#74231]
 * Disables enableHistogramMode prop when user selects non-stacked bar {kibana-pull}74930[#74930]
 * Fixes bug on TopN weird behavior with zero values {kibana-pull}74942[#74942]
-* In some old TSVB visualization saved objects, queries and filters can be stored. This is not possible anymore for a while and there is no way to edit them besides changing the JSON of the saved object, 
-but they were still applied to the rendered output. In 7.10, these leftover queries and filters will be removed automatically from the saved object. In almost all cases, no change is necessary. 
+* In some old TSVB visualization saved objects, queries and filters can be stored. This is not possible anymore for a while and there is no way to edit them besides changing the JSON of the saved object,
+but they were still applied to the rendered output. In 7.10, these leftover queries and filters will be removed automatically from the saved object. In almost all cases, no change is necessary.
 If a visualization contained these local queries and filters deliberately, they should be converted to panel filters in the "Panel options" of the TSVB interface {kibana-pull}75137[#75137]
 * Horizontal Bar Percentiles Overlapping {kibana-pull}75315[#75315]
 * Fixes panel config updates on history changes {kibana-pull}75896[#75896]
@@ -452,9 +461,9 @@ Reporting::
 * Fixes a problem in the list of Reports jobs in Management would not refresh with the correct items immediately after deleting a report from the listing {kibana-pull}78516[#78516]
 Security::
 * Displays useful error when role creation fails {kibana-pull}77600[#77600]
-* Previously when user started SAML or OpenID authentication handshake, but didn't or couldn't finish it they weren't able to access Login Selector easily (e.g. to log in with another 
-authentication provider) unless they used /login URL directly or manually cleared the session cookies. That was a very confusing user experience. 
-The reason was that unauthenticated intermediate session that was created to support handshake forced Kibana to automatically restart the same handshake whenever user accessed Kibana. 
+* Previously when user started SAML or OpenID authentication handshake, but didn't or couldn't finish it they weren't able to access Login Selector easily (e.g. to log in with another
+authentication provider) unless they used /login URL directly or manually cleared the session cookies. That was a very confusing user experience.
+The reason was that unauthenticated intermediate session that was created to support handshake forced Kibana to automatically restart the same handshake whenever user accessed Kibana.
 We fixed that and now in certain cases we ignore unauthenticated intermediate session allowing user to easily access Login Selector whenever they need it {kibana-pull}79300[#79300]
 * Kibana can now properly handle values for xpack.security.session.idleTimeout and xpack.security.session.lifespan that are larger than ~24 days {kibana-pull}79858[#79858]
 * Properly encodes links to edit user page {kibana-pull}81562[#81562]
@@ -550,7 +559,7 @@ Discover::
 Lens and visualizations::
 * Shows tooltip on external pointer events {kibana-pull}77306[#77306]
 Management::
-* Fixes a bug in the index template wizard, which resulted in an error when the user tries to save an existing 
+* Fixes a bug in the index template wizard, which resulted in an error when the user tries to save an existing
 template or attempts to view the Elasticsearch request when the template does not have any mappings {kibana-pull}78653[#78653]
 * Fixes index pattern creation when using cross cluster search with clusters running <7.9 {kibana-pull}80006[#80006]
 Monitoring::
@@ -584,11 +593,11 @@ Machine Learning::
 * Swim lane pagination for viewing by job ID {kibana-pull}76847[#76847]
 * Fixes custom URLs processing for security app {kibana-pull}76957[#76957]
 Management::
-* Fixes an issue in Snapshot and Restore UI where creating a policy, repository, or snapshot with a special character, 
+* Fixes an issue in Snapshot and Restore UI where creating a policy, repository, or snapshot with a special character,
 like a colon, in the name would result in a 404 when viewing details or editing any of the aforementioned {kibana-pull}76278[#76278]
 * Indices that contain the characters % { [ @ no longer cause a 405 error in Index Management {kibana-pull}76584[#76584]
 * Fixes an issue in the snapshot and restore policy creation form that allowed a policy to be created without an index specified {kibana-pull}76855[#76855]
-* The snapshot and restore wizard now notifies users when a policy configured with a non-existing repository is being updated and requires that the user 
+* The snapshot and restore wizard now notifies users when a policy configured with a non-existing repository is being updated and requires that the user
 select a new repository {kibana-pull}76861[#76861]
 * Fixes an issue in the grok debugger where simulation error messages are not being displayed {kibana-pull}77499[#77499]
 Maps::
@@ -638,10 +647,10 @@ Machine Learning::
 * Removes encoding for scheduled events labels  {kibana-pull}75973[#75973]
 * Anomaly Explorer / Single Metric Viewer: Fix error reporting for annotations {kibana-pull}74953[#74953]
 Management::
-* The watch API considers an index action without a defined index name to be valid, but the Watcher UI 
-didn't validate accordingly. This resulted in a bug manifested as the UI rejecting attempts to create 
-Advanced Watches and Threshold Watches with this configuration, and as displaying watches configured 
-this way via Console with "Config error" states in the watches table. This change fixes the bug so that 
+* The watch API considers an index action without a defined index name to be valid, but the Watcher UI
+didn't validate accordingly. This resulted in a bug manifested as the UI rejecting attempts to create
+Advanced Watches and Threshold Watches with this configuration, and as displaying watches configured
+this way via Console with "Config error" states in the watches table. This change fixes the bug so that
 the UI accepts watches that are configured with index actions without a defined index name {kibana-pull}74684[#74684]
 * Fixes a bug in the index template wizard, which resulted in the UI crashing when the user tries to save an index template without visiting the "Mappings" step first {kibana-pull}75511[#75511]
 * Fixes an issue in the mappings editor when trying to clear the "Field type" select dropdown {kibana-pull}76263[#76263]
@@ -755,7 +764,7 @@ Machine Learning::
 * Adds siem_cloudtrail Module {kibana-pull}71323[#71323]
 Management::
 * Management apps are now organized into buckets that support common workflow-oriented use-cases: data ingestion, data management, insights and alerting, security, Kibana management, and Stack management {kibana-pull}65796[#65796]
-* The ES UI built a new component to assist with building ingest pipelines. Before, when building ingest pipelines, users would have to type and carefully curate JSON describing an ingest pipeline. With this new component a lot of 
+* The ES UI built a new component to assist with building ingest pipelines. Before, when building ingest pipelines, users would have to type and carefully curate JSON describing an ingest pipeline. With this new component a lot of
 that burden is removed and improved access to ES processors is provided. This component is the foundation of an improved pipeline building experience {kibana-pull}66021[#66021]
 * Transforms: Filter aggregation support {kibana-pull}67591[#67591]
 * Adds a "Data Streams" tab to Index Management to help users manage their data streams {kibana-pull}67806[#67806]
@@ -839,7 +848,7 @@ Dashboard::
 * Loses OriginatingApp Connection on Save As {kibana-pull}72725[#72725]
 * Sometimes when creating filters on a dashboard suggestions from default index patterns were shown by mistake {kibana-pull}72899[#72899]
 * Handles listing errors gracefully {kibana-pull}66986[#66986]
-* {kib} now sets the keep_alive parameter to 1m in _async_search requests to Elasticsearch to ensure that search requests are cancelled 
+* {kib} now sets the keep_alive parameter to 1m in _async_search requests to Elasticsearch to ensure that search requests are cancelled
 if a user closes the browser or navigates outside of Kibana before a request completes {kibana-pull}73712[#73712]
 Design::
 * Multiple chart actions context menu positioning fixes {kibana-pull}70705[#70705]
@@ -945,7 +954,7 @@ Platform::
 * Sets wrap to the errorLink so it doesn't go outside of box {kibana-pull}67797[#67797]
 * Fixes plugin lifecycle log to only include server plugins {kibana-pull}68686[#68686]
 Querying & Filtering::
-* When using KQL or the filter bar, if a request is issued to Elasticsearch for suggestions for a value for a specific field, the request 
+* When using KQL or the filter bar, if a request is issued to Elasticsearch for suggestions for a value for a specific field, the request
 will be cancelled when navigating away as well as when the input is updated (and a new request is issued {kibana-pull}69769[#69769]
 Reporting::
 * Fixes a bug where the Kibana server could crash if the Reporting server-side headless browser crashes {kibana-pull}71989[#71989]
@@ -979,7 +988,7 @@ https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-7016[CVE-2020-7016].
 +
 You must upgrade to 7.8.1. If you are unable to upgrade, set `timelion.enabled` to `false` in your kibana.yml file to disable Timelion.
 
-* In all {kib} versions, region map visualizations contain a stored XSS flaw. Attackers that can edit or create region map visualizations can obtain sensitive information 
+* In all {kib} versions, region map visualizations contain a stored XSS flaw. Attackers that can edit or create region map visualizations can obtain sensitive information
 or perform destructive actions on behalf of {kib} users who view the region map visualization,
 https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-7017[CVE-2020-7017].
 +
@@ -1009,7 +1018,7 @@ Management::
 * Adds AggConfig.toSerializedFieldFormat {pull}69114[#69114]
 * Fixes a bug in Cross-Cluster Replication where the "Status" column in the follower indices table did not update after pausing or resuming a follower index {pull}69228[#69228]
 * Fixes a bug in Index Lifecycle Management where it was not possible to clear the index priority value when saving a policy {pull}70154[#70154]
-* Fixes a bug in Cross-Cluster Replication where the user was prompted with an error message when attempting to use the UI with missing cluster privileges. The user should now be prompted 
+* Fixes a bug in Cross-Cluster Replication where the user was prompted with an error message when attempting to use the UI with missing cluster privileges. The user should now be prompted
 with a message indicating what privileges are missing {pull}70158[#70158]
 * Ignores url.url fields above 2048 characters {pull}69863[#69863]
 Maps::
@@ -1143,7 +1152,7 @@ Reporting::
 * Adds a new config flag to encode with BOM for our CSVs {kib-pull}63006[#63006]
 * Adds config flag to escape formula CSV values {kib-pull}63645[#63645]
 Security::
-* Every provider can now be configured with the access agreement message (markdown syntax) that will be presented to the 
+* Every provider can now be configured with the access agreement message (markdown syntax) that will be presented to the
 users after login. Users won't be able to use Kibana until they acknowledge this agreement {kib-pull}63563[#63563]
 * Login Selector UI was refined and can now offer much more customization options {kib-pull}64142[#64142]
 SIEM::
@@ -1284,7 +1293,7 @@ Platform::
 * New Kibana app link order {kib-pull}67991[#67991]
 Security::
 * Fix authentication loop when upgrading Kibana from 6.8 to 7.7+ {kib-pull}67687[#67687]
-* Previously, users couldn't log in with SAML Identity Provider Initiated flow (e.g. from Okta Dashboard) if they already had 
+* Previously, users couldn't log in with SAML Identity Provider Initiated flow (e.g. from Okta Dashboard) if they already had
 an existing, but expired session. Now it should be possible {kib-pull}59686[#59686]
 * Fixes EncryptedSavedObjectsClientWrapper fails on stripEncryptedAttributes for saved object with errors {kib-pull}61385[#61385]
 * Adds username/password validation to login form {kib-pull}60681[#60681]
@@ -1314,8 +1323,8 @@ See <<breaking-changes-7.7,breaking changes in 7.7>>.
 [float]
 [[security-update-7.1.1]]
 === Security update
-In {kib} 5.4.0 and later, TSVB visualizations contain a stored XSS flaw. Attackers that can 
-edit and create TSVB visualizations can obtain sensitive information, or perform 
+In {kib} 5.4.0 and later, TSVB visualizations contain a stored XSS flaw. Attackers that can
+edit and create TSVB visualizations can obtain sensitive information, or perform
 destructive actions, on behalf of the {kib} users who edit the TSVB visualization, CVE-2020-7015.
 
 You must upgrade to 7.7.1. If you are unable to upgrade, set `metrics.enabled:false` in your kibana.yml file to disable TSVB.
@@ -1347,7 +1356,7 @@ Lens and visualizations::
 * Don't lose dashboard/visualize/discover state when navigating to other applications {kib-pull}66766[#66766]
 * Fixes redirect on reload {kib-pull}66491[#66491]
 * Shows missing values on chart setting {kib-pull}66375[#66375]
-* Usage of custom plugins using the @plugin statement and inline JavaScript in less code used in the TSVB Markdown 
+* Usage of custom plugins using the @plugin statement and inline JavaScript in less code used in the TSVB Markdown
 visualization is not allowed anymore. Using it will simply not apply the styles {kib-pull}65467[#65467]
 * Fixes std deviation band mode {kib-pull}64413[#64413]
 * Reloads on ui state change and fix ui state for tsvb {kib-pull}63699[#63699]
@@ -1357,8 +1366,8 @@ Machine Learning:
 * Fixes optional plugin dependency types {kib-pull}64450[#64450]
 * Ensures both keyword/text types are excluded for selected excluded field {kib-pull}62712[#62712]
 Management::
-* Fixes an integration issue with the security plugin in Ingest Pipelines and Snapshot and Restore that would incorrectly 
-report requiring security to be enabled when the plugins should work normally without security. 
+* Fixes an integration issue with the security plugin in Ingest Pipelines and Snapshot and Restore that would incorrectly
+report requiring security to be enabled when the plugins should work normally without security.
 This affects the default docker distribution {kib-pull}67308[#67308]
 * Preserves saved object references when saving the object {kib-pull}66584[#66584]
 * Fixes detail panel for indices with % in the name {kib-pull}66435[#66435]
@@ -1398,16 +1407,16 @@ See <<breaking-changes-7.7,breaking changes in 7.7>>.
 [float]
 [[security-update-7.7.0]]
 === Security updates
-* In 7.7.0 to 7.6.2, the Upgrade Assistant contains a prototype pollution flaw. An authenticated attacker with 
-privileges to write to the {kib} index can insert data that could cause {kib} to execute arbitrary code. This 
+* In 7.7.0 to 7.6.2, the Upgrade Assistant contains a prototype pollution flaw. An authenticated attacker with
+privileges to write to the {kib} index can insert data that could cause {kib} to execute arbitrary code. This
 could lead to an attacker executing code with the permissions of the {kib} process on the host system, CVE-2020-7012.
 +
 By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
 +
 For all other installations, you must upgrade to 7.7.0. If you are unable to upgrade, set `xpack.upgrade_assistant_enabled:false` in your kibana.yml file to disable the Upgrade Assistant.
 
-* In 7.7.0 and earlier, TSVB contains a prototype pollution flaw. Authenticated attackers with privileges to create 
-TSVB visualizations can insert data that could cause {kib} to execute arbitrary code. This 
+* In 7.7.0 and earlier, TSVB contains a prototype pollution flaw. Authenticated attackers with privileges to create
+TSVB visualizations can insert data that could cause {kib} to execute arbitrary code. This
 could lead to an attacker executing code with the permissions of the {kib} process on the host system, CVE-2020-7013.
 +
 By default, the Upgrade Assistant flaw is mitigated in all {kib} instances accessed through {ess}.
