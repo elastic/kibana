@@ -15,10 +15,8 @@ const HostsTableManage = manageQuery(HostsTable);
 
 export const HostsQueryTabBody = ({
   deleteQuery,
-  docValueFields,
   endDate,
   filterQuery,
-  indexNames,
   skip,
   setQuery,
   startDate,
@@ -27,7 +25,7 @@ export const HostsQueryTabBody = ({
   const [
     loading,
     { hosts, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
-  ] = useAllHost({ docValueFields, endDate, filterQuery, indexNames, skip, startDate, type });
+  ] = useAllHost({ endDate, filterQuery, skip, startDate, type });
 
   return (
     <HostsTableManage

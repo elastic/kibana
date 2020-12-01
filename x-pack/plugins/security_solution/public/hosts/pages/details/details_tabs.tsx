@@ -29,9 +29,7 @@ import {
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
     detailName,
-    docValueFields,
     filterQuery,
-    indexNames,
     indexPattern,
     pageFilters,
     setAbsoluteRangeDatePicker,
@@ -74,7 +72,6 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       startDate: from,
       type,
       indexPattern,
-      indexNames,
       hostName: detailName,
       narrowDateRange,
       updateDateRange,
@@ -83,7 +80,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     return (
       <Switch>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
+          <AuthenticationsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody {...tabProps} />
@@ -94,7 +91,6 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
         </Route>
-
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody {...tabProps} pageFilters={pageFilters} />
         </Route>

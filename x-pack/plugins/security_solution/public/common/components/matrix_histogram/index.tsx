@@ -7,6 +7,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Position } from '@elastic/charts';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
@@ -240,4 +241,34 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   );
 };
 
-export const MatrixHistogram = React.memo(MatrixHistogramComponent);
+export const MatrixHistogram = React.memo(
+  MatrixHistogramComponent,
+  // eslint-disable-next-line complexity
+  (prevProps, nextProps) =>
+    prevProps.chartHeight === nextProps.chartHeight &&
+    prevProps.defaultStackByOption === nextProps.defaultStackByOption &&
+    prevProps.docValueFields === nextProps.docValueFields &&
+    prevProps.endDate === nextProps.endDate &&
+    prevProps.errorMessage === nextProps.errorMessage &&
+    prevProps.filterQuery === nextProps.filterQuery &&
+    prevProps.headerChildren === nextProps.headerChildren &&
+    prevProps.histogramType === nextProps.histogramType &&
+    prevProps.hideHistogramIfEmpty === nextProps.hideHistogramIfEmpty &&
+    prevProps.id === nextProps.id &&
+    prevProps.isPtrIncluded === nextProps.isPtrIncluded &&
+    prevProps.legendPosition === nextProps.legendPosition &&
+    prevProps.mapping === nextProps.mapping &&
+    prevProps.panelHeight === nextProps.panelHeight &&
+    prevProps.setAbsoluteRangeDatePickerTarget === nextProps.setAbsoluteRangeDatePickerTarget &&
+    prevProps.setQuery === nextProps.setQuery &&
+    prevProps.showLegend === nextProps.showLegend &&
+    prevProps.showSpacer === nextProps.showSpacer &&
+    prevProps.stackByOptions === nextProps.stackByOptions &&
+    prevProps.startDate === nextProps.startDate &&
+    prevProps.subtitle === nextProps.subtitle &&
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.title === nextProps.title &&
+    prevProps.titleSize === nextProps.titleSize &&
+    prevProps.yTickFormatter === nextProps.yTickFormatter &&
+    deepEqual(prevProps.indexNames, nextProps.indexNames)
+);

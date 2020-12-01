@@ -28,6 +28,7 @@ import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const ID = 'networkTopCountriesQuery';
 
@@ -45,7 +46,6 @@ export interface NetworkTopCountriesArgs {
 interface UseNetworkTopCountries {
   flowTarget: FlowTargetSourceDest;
   ip?: string;
-  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -57,7 +57,6 @@ export const useNetworkTopCountries = ({
   endDate,
   filterQuery,
   flowTarget,
-  indexNames,
   ip,
   skip,
   startDate,
@@ -72,6 +71,7 @@ export const useNetworkTopCountries = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
   const queryId = useMemo(() => `${ID}-${flowTarget}`, [flowTarget]);
+  const { selectedPatterns: indexNames } = useSourcererScope();
 
   const [
     networkTopCountriesRequest,

@@ -8,6 +8,7 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -36,7 +37,6 @@ export interface HostsKpiAuthenticationsArgs
 interface UseHostsKpiAuthentications {
   filterQuery?: ESTermQuery | string;
   endDate: string;
-  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -44,13 +44,13 @@ interface UseHostsKpiAuthentications {
 export const useHostsKpiAuthentications = ({
   filterQuery,
   endDate,
-  indexNames,
   skip = false,
   startDate,
 }: UseHostsKpiAuthentications): [boolean, HostsKpiAuthenticationsArgs] => {
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const { selectedPatterns: indexNames } = useSourcererScope();
   const [loading, setLoading] = useState(false);
   const [
     hostsKpiAuthenticationsRequest,

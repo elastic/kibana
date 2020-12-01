@@ -8,12 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/
 import React, { useCallback } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
-import {
-  Filter,
-  FilterManager,
-  IIndexPattern,
-} from '../../../../../../../../src/plugins/data/public';
-import { BrowserFields } from '../../../../common/containers/source';
+import { Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../../common/store';
 import { KqlMode } from '../../../../timelines/store/timeline/model';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
@@ -43,15 +38,12 @@ const SearchOrFilterGlobalStyle = createGlobalStyle`
 `;
 
 interface Props {
-  applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
-  browserFields: BrowserFields;
   dataProviders: DataProvider[];
   filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
   from: string;
   fromStr: string;
-  indexPattern: IIndexPattern;
   isRefreshPaused: boolean;
   kqlMode: KqlMode;
   timelineId: string;
@@ -90,10 +82,7 @@ ModeFlexItem.displayName = 'ModeFlexItem';
 
 export const SearchOrFilter = React.memo<Props>(
   ({
-    applyKqlFilterQuery,
-    browserFields,
     dataProviders,
-    indexPattern,
     isRefreshPaused,
     filters,
     filterManager,
@@ -138,8 +127,6 @@ export const SearchOrFilter = React.memo<Props>(
             </ModeFlexItem>
             <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
               <QueryBarTimeline
-                applyKqlFilterQuery={applyKqlFilterQuery}
-                browserFields={browserFields}
                 dataProviders={dataProviders}
                 filters={filters}
                 filterManager={filterManager}
@@ -148,7 +135,6 @@ export const SearchOrFilter = React.memo<Props>(
                 from={from}
                 fromStr={fromStr}
                 kqlMode={kqlMode}
-                indexPattern={indexPattern}
                 isRefreshPaused={isRefreshPaused}
                 refreshInterval={refreshInterval}
                 savedQueryId={savedQueryId}

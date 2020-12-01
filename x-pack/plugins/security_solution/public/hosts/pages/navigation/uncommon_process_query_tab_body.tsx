@@ -15,10 +15,8 @@ const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 
 export const UncommonProcessQueryTabBody = ({
   deleteQuery,
-  docValueFields,
   endDate,
   filterQuery,
-  indexNames,
   skip,
   setQuery,
   startDate,
@@ -28,14 +26,13 @@ export const UncommonProcessQueryTabBody = ({
     loading,
     { uncommonProcesses, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
   ] = useUncommonProcesses({
-    docValueFields,
     endDate,
     filterQuery,
-    indexNames,
     skip,
     startDate,
     type,
   });
+
   return (
     <UncommonProcessTableManage
       deleteQuery={deleteQuery}

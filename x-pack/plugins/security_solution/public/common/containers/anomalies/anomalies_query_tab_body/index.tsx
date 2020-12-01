@@ -13,6 +13,7 @@ import { useInstalledSecurityJobs } from '../../../components/ml/hooks/use_insta
 import { useUiSetting$ } from '../../../lib/kibana';
 import { MatrixHistogram } from '../../../components/matrix_histogram';
 import { histogramConfigs } from './histogram_configs';
+import { useSourcererScope } from '../../sourcerer';
 
 const ID = 'anomaliesHistogramQuery';
 
@@ -30,10 +31,11 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   flowTarget,
   ip,
   hostName,
-  indexNames,
 }) => {
   const { jobs } = useInstalledSecurityJobs();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
+
+  const { selectedPatterns: indexNames } = useSourcererScope();
 
   const mergedFilterQuery = getAnomaliesFilterQuery(
     filterQuery,

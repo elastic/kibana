@@ -30,7 +30,6 @@ export const TlsQueryTable = ({
     endDate,
     filterQuery,
     flowTarget,
-    indexNames: [],
     ip,
     skip,
     startDate,

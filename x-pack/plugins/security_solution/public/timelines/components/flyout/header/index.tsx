@@ -188,9 +188,12 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
     );
   }
 
+  // console.error('updated', updated);
+
   return (
     <EuiText size="xs">
       <EuiTextColor color="default">
+        {'Autosaved '}
         <FormattedRelative
           data-test-subj="timeline-status"
           key="timeline-status-autosaved"

@@ -6,12 +6,10 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
-import { FilterManager, IIndexPattern } from 'src/plugins/data/public';
-import deepEqual from 'fast-deep-equal';
+import { FilterManager } from 'src/plugins/data/public';
 
 import { DataProviders } from '../data_providers';
 import { StatefulSearchOrFilter } from '../search_or_filter';
-import { BrowserFields } from '../../../../common/containers/source';
 
 import * as i18n from './translations';
 import {
@@ -20,17 +18,13 @@ import {
 } from '../../../../../common/types/timeline';
 
 interface Props {
-  browserFields: BrowserFields;
   filterManager: FilterManager;
-  indexPattern: IIndexPattern;
   showCallOutUnauthorizedMsg: boolean;
   status: TimelineStatusLiteralWithNull;
   timelineId: string;
 }
 
 const TimelineHeaderComponent: React.FC<Props> = ({
-  browserFields,
-  indexPattern,
   filterManager,
   showCallOutUnauthorizedMsg,
   status,
@@ -57,22 +51,8 @@ const TimelineHeaderComponent: React.FC<Props> = ({
     )}
     <DataProviders timelineId={timelineId} />
 
-    <StatefulSearchOrFilter
-      browserFields={browserFields}
-      filterManager={filterManager}
-      indexPattern={indexPattern}
-      timelineId={timelineId}
-    />
+    <StatefulSearchOrFilter filterManager={filterManager} timelineId={timelineId} />
   </>
 );
 
-export const TimelineHeader = React.memo(
-  TimelineHeaderComponent,
-  (prevProps, nextProps) =>
-    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
-    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
-    prevProps.filterManager === nextProps.filterManager &&
-    prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
-    prevProps.status === nextProps.status &&
-    prevProps.timelineId === nextProps.timelineId
-);
+export const TimelineHeader = React.memo(TimelineHeaderComponent);

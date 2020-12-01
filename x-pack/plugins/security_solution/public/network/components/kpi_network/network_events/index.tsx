@@ -33,7 +33,6 @@ export const fieldsMapping: Readonly<StatItems[]> = [
 const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
   filterQuery,
   from,
-  indexNames,
   to,
   narrowDateRange,
   setQuery,
@@ -42,7 +41,6 @@ const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiNetworkEvents({
     filterQuery,
     endDate: to,
-    indexNames,
     startDate: from,
     skip,
   });

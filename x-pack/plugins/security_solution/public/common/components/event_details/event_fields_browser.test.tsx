@@ -12,7 +12,6 @@ import { TestProviders } from '../../mock/test_providers';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { defaultHeaders } from '../../mock/header';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../link_to');
@@ -37,10 +36,8 @@ describe('EventFieldsBrowser', () => {
           <TestProviders>
             <EventFieldsBrowser
               browserFields={mockBrowserFields}
-              columnHeaders={defaultHeaders}
               data={mockDetailItemData}
               eventId={mockDetailItemDataId}
-              onUpdateColumns={jest.fn()}
               timelineId="test"
             />
           </TestProviders>
@@ -57,10 +54,8 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
           />
         </TestProviders>
@@ -82,10 +77,8 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
           />
         </TestProviders>
@@ -103,10 +96,8 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
           />
         </TestProviders>
@@ -124,10 +115,8 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
           />
         </TestProviders>
@@ -157,10 +146,8 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
           />
         </TestProviders>
@@ -183,10 +170,8 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
           />
         </TestProviders>
@@ -225,10 +210,8 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
           />
         </TestProviders>
@@ -245,10 +228,8 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
           />
         </TestProviders>

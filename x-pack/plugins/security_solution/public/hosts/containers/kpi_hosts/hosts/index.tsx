@@ -8,6 +8,7 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -35,7 +36,6 @@ export interface HostsKpiHostsArgs extends Omit<HostsKpiHostsStrategyResponse, '
 interface UseHostsKpiHosts {
   filterQuery?: ESTermQuery | string;
   endDate: string;
-  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -43,7 +43,6 @@ interface UseHostsKpiHosts {
 export const useHostsKpiHosts = ({
   filterQuery,
   endDate,
-  indexNames,
   skip = false,
   startDate,
 }: UseHostsKpiHosts): [boolean, HostsKpiHostsArgs] => {
@@ -51,6 +50,7 @@ export const useHostsKpiHosts = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
+  const { selectedPatterns: indexNames } = useSourcererScope();
   const [
     hostsKpiHostsRequest,
     setHostsKpiHostsRequest,

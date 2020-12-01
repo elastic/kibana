@@ -112,11 +112,16 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
     [sort, dispatch, type, tableType]
   );
 
-  const field =
-    sort.field === NetworkTopTablesFields.bytes_out ||
-    sort.field === NetworkTopTablesFields.bytes_in
-      ? `node.network.${sort.field}`
-      : `node.${flowTargeted}.${sort.field}`;
+  const field = useMemo(
+    () =>
+      sort.field === NetworkTopTablesFields.bytes_out ||
+      sort.field === NetworkTopTablesFields.bytes_in
+        ? `node.network.${sort.field}`
+        : `node.${flowTargeted}.${sort.field}`,
+    [flowTargeted, sort.field]
+  );
+
+  const sorting = useMemo(() => ({ field, direction: sort.direction }), [field, sort.direction]);
 
   const updateActivePage = useCallback(
     (newPage) =>
@@ -159,7 +164,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
       onChange={onChange}
       pageOfItems={data}
       showMorePagesIndicator={showMorePagesIndicator}
-      sorting={{ field, direction: sort.direction }}
+      sorting={sorting}
       totalCount={fakeTotalCount}
       updateActivePage={updateActivePage}
       updateLimitPagination={updateLimitPagination}

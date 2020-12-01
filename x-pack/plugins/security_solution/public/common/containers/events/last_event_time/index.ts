@@ -23,7 +23,7 @@ import {
 } from '../../../../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
-import { DocValueFields } from '../../../../../common/search_strategy';
+import { useSourcererScope } from '../../sourcerer';
 
 export interface UseTimelineLastEventTimeArgs {
   lastSeen: string | null;
@@ -32,22 +32,19 @@ export interface UseTimelineLastEventTimeArgs {
 }
 
 interface UseTimelineLastEventTimeProps {
-  docValueFields: DocValueFields[];
   indexKey: LastEventIndexKey;
-  indexNames: string[];
   details: LastTimeDetails;
 }
 
 export const useTimelineLastEventTime = ({
-  docValueFields,
   indexKey,
-  indexNames,
   details,
 }: UseTimelineLastEventTimeProps): [boolean, UseTimelineLastEventTimeArgs] => {
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
+  const { docValueFields, selectedPatterns: indexNames } = useSourcererScope();
   const [
     TimelineLastEventTimeRequest,
     setTimelineLastEventTimeRequest,

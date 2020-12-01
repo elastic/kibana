@@ -79,10 +79,7 @@ describe('epicLocalStorage', () => {
       end: endDate,
       eventType: 'all',
       filters: [],
-      graphEventId: undefined,
       isLive: false,
-      isSaving: false,
-      isTimelineExists: true,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
@@ -94,7 +91,6 @@ describe('epicLocalStorage', () => {
       sort,
       timelineId: 'foo',
       timerangeKind: 'absolute',
-      noteIds: [],
       updateEventTypeAndIndexesName: jest.fn(),
     };
   });

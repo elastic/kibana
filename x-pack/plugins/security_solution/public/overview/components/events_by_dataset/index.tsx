@@ -8,6 +8,7 @@ import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo, useCallback } from 'react';
 import uuid from 'uuid';
+import deepEqual from 'fast-deep-equal';
 
 import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
@@ -178,4 +179,21 @@ const EventsByDatasetComponent: React.FC<Props> = ({
 
 EventsByDatasetComponent.displayName = 'EventsByDatasetComponent';
 
-export const EventsByDataset = React.memo(EventsByDatasetComponent);
+export const EventsByDataset = React.memo(
+  EventsByDatasetComponent,
+  (prevProps, nextProps) =>
+    prevProps.combinedQueries === nextProps.combinedQueries &&
+    prevProps.deleteQuery === nextProps.deleteQuery &&
+    prevProps.from === nextProps.from &&
+    prevProps.headerChildren === nextProps.headerChildren &&
+    prevProps.onlyField === nextProps.onlyField &&
+    prevProps.query === nextProps.query &&
+    prevProps.setAbsoluteRangeDatePickerTarget === nextProps.setAbsoluteRangeDatePickerTarget &&
+    prevProps.setQuery === nextProps.setQuery &&
+    prevProps.showSpacer === nextProps.showSpacer &&
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.to === nextProps.to &&
+    deepEqual(prevProps.filters, nextProps.filters) &&
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+    deepEqual(prevProps.indexNames, nextProps.indexNames)
+);
