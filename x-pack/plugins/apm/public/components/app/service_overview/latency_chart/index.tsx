@@ -21,7 +21,10 @@ export function LatencyChart({ height }: Props) {
   const [selectedOption, setSelectedOption] = useState(0);
   const { data, status } = useTransactionCharts();
   const { responseTimeSeries, anomalySeries } = data;
-  const { formatter } = useFormatter(responseTimeSeries);
+  const timeSeries = responseTimeSeries
+    ? [responseTimeSeries[selectedOption]]
+    : [];
+  const { formatter } = useFormatter(timeSeries);
   const options = responseTimeSeries?.map(({ title }, index) => ({
     value: index,
     text: title,
@@ -42,6 +45,7 @@ export function LatencyChart({ height }: Props) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSelect
+              compressed
               isLoading={status === FETCH_STATUS.LOADING}
               prepend={i18n.translate(
                 'xpack.apm.serviceOverview.latencyChartTitle.prepend',
@@ -62,9 +66,7 @@ export function LatencyChart({ height }: Props) {
           height={height}
           fetchStatus={status}
           id="letency"
-          timeseries={
-            responseTimeSeries ? [responseTimeSeries[selectedOption]] : []
-          }
+          timeseries={timeSeries}
           yLabelFormat={getResponseTimeTickFormatter(formatter)}
         />
       </EuiFlexItem>
