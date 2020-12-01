@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  BackgroundSessionIndicatorDeps,
-  createConnectedBackgroundSessionIndicator,
-} from './connected_background_session_indicator';
+export { SendToBackgroundProvider } from './send_to_background';
