@@ -35,6 +35,7 @@ import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from '../../components
 import { UpdateIcon } from '../../components/icons';
 import { Content } from './content';
 import './index.scss';
+import { useUIExtension } from '../../../../hooks/use_ui_extension';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
@@ -52,6 +53,9 @@ const PanelDisplayNames: Record<DetailViewPanelName, string> = {
   }),
   settings: i18n.translate('xpack.fleet.epm.packageDetailsNav.settingsLinkText', {
     defaultMessage: 'Settings',
+  }),
+  custom: i18n.translate('xpack.fleet.epm.packageDetailsNav.packageCustomLinkText', {
+    defaultMessage: 'Custom',
   }),
 };
 
@@ -72,8 +76,7 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 }
 
 export function Detail() {
-  // TODO: fix forced cast if possible
-  const { pkgkey, panel = DEFAULT_PANEL } = useParams() as DetailParams;
+  const { pkgkey, panel = DEFAULT_PANEL } = useParams<DetailParams>();
   const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
 
@@ -90,6 +93,10 @@ export function Detail() {
   const { data: packageInfoData, error: packageInfoError, isLoading } = useGetPackageInfoByKey(
     pkgkey
   );
+
+  const packageInstallStatus = packageInfoData?.response.status;
+  const showCustomTab =
+    useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
@@ -236,22 +243,31 @@ export function Detail() {
 
     return (entries(PanelDisplayNames)
       .filter(([panelId]) => {
-        return (
-          panelId !== 'policies' || packageInfoData?.response.status === InstallStatus.installed
-        );
+        // Don't show `Policies` tab if package is not installed
+        if (panelId === 'policies' && packageInstallStatus !== InstallStatus.installed) {
+          return false;
+        }
+
+        // Don't show `custom` tab if a custom component is not registered
+        if (panelId === 'custom' && !showCustomTab) {
+          return false;
+        }
+
+        return true;
       })
       .map(([panelId, display]) => {
         return {
           id: panelId,
           name: display,
           isSelected: panelId === panel,
+          'data-test-subj': `tab-${panelId}`,
           href: getHref('integration_details', {
             pkgkey: `${packageInfo?.name}-${packageInfo?.version}`,
             panel: panelId,
           }),
         };
       }) as unknown) as WithHeaderLayoutProps['tabs'];
-  }, [getHref, packageInfo, packageInfoData?.response?.status, panel]);
+  }, [getHref, packageInfo, panel, showCustomTab, packageInstallStatus]);
 
   return (
     <WithHeaderLayout
