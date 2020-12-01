@@ -23,6 +23,7 @@ describe('Resolver: panel loading and resolution states', () => {
       nodeID: 'origin',
       eventCategory: 'registry',
       eventID: firstRelatedEventID,
+      eventTimestamp: '0',
     },
     panelView: 'eventDetail',
   });
