@@ -25,6 +25,7 @@ import { VisualizationContainer } from '../../visualizations/public';
 // import { SplitChartWarning } from './components';
 
 import { RenderValue, vislibPieName } from './pie_fn';
+import { getThemeService } from './services';
 
 const PieComponent = lazy(() => import('./pie_component'));
 
@@ -49,6 +50,7 @@ export const pieVisRenderer: ExpressionRenderDefinition<RenderValue> = {
         {/* {isSplitChart && <SplitChartWarning />} */}
         <VisualizationContainer handlers={handlers} showNoResult={showNoResult || isSplitChart}>
           <PieComponent
+            chartsThemeService={getThemeService()}
             visParams={visConfig}
             visData={visData}
             renderComplete={handlers.done}

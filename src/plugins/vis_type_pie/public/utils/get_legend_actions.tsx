@@ -53,7 +53,7 @@ export const getLegendActions = (
 
     let formattedTitle = '';
     if (visParams.dimensions.buckets) {
-      const column = visParams.dimensions?.buckets.find(
+      const column = visParams.dimensions.buckets.find(
         (bucket) => bucket.accessor === filterData.data.data[0].column
       );
       formattedTitle = getFormatService().deserialize(column?.format).convert(series.key) ?? '';

@@ -18,25 +18,24 @@
  */
 
 import React from 'react';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getColorsService } from '../../services';
 
-interface PalettePickerProps<ParamName extends string> {
+export interface PalettePickerProps<ParamName extends string> {
   'data-test-subj'?: string;
   activePalette?: PaletteOutput;
+  palettes: PaletteRegistry;
   paramName: ParamName;
   setPalette: (paramName: ParamName, value: PaletteOutput) => void;
-  disabled?: boolean;
 }
 
 export function PalettePicker<ParamName extends string>({
   activePalette,
+  palettes,
   paramName,
   setPalette,
-  disabled,
 }: PalettePickerProps<ParamName>) {
   return (
     <EuiFormRow
@@ -46,10 +45,9 @@ export function PalettePicker<ParamName extends string>({
       })}
     >
       <EuiColorPalettePicker
-        disabled={disabled}
-        data-test-subj="pie-palettePicker"
+        data-test-subj="piePalettePicker"
         compressed
-        palettes={getColorsService()
+        palettes={palettes
           .getAll()
           .filter(({ internal }) => !internal)
           .map(({ id, title, getColors }) => {

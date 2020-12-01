@@ -28,6 +28,7 @@ import { PalettePicker } from './palette_picker';
 import { BasicOptions, SwitchOption, SelectOption } from '../../../../charts/public';
 import { PieVisParams } from '../../types';
 import { getLabelPositions, getValuesFormats } from '../collections';
+import { getColorsService } from '../../services';
 
 function PieOptions(props: VisOptionsProps<PieVisParams>) {
   const { stateParams, setValue } = props;
@@ -66,6 +67,7 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
           setValue={setValue}
         />
         <PalettePicker
+          palettes={getColorsService()}
           activePalette={stateParams.palette}
           paramName="palette"
           setPalette={setValue}

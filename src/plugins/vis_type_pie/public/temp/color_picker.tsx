@@ -103,7 +103,7 @@ export const ColorPicker = ({
   layerIndex,
 }: ColorPickerProps) => (
   <I18nProvider>
-    <div className="visColorPicker">
+    <div className="visColorPicker" data-test-subj="visColorPicker">
       <span id={`${id}ColorPickerDesc`} className="euiScreenReaderOnly">
         <FormattedMessage
           id="charts.colorPicker.setColor.screenReaderDescription"

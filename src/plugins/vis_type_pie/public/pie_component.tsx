@@ -33,7 +33,6 @@ import {
   Partition,
   PartitionConfig,
   PartitionLayout,
-  PartitionFillLabel,
   RecursivePartial,
   Position,
   Settings,
@@ -44,18 +43,25 @@ import {
 } from '@elastic/charts';
 import { keys } from '@elastic/eui';
 
-// import {
-//   getFilterFromChartClickEventFn,
-//   getFilterFromSeriesFn,
-//   LegendToggle,
-//   ClickTriggerEvent,
-// } from '../../charts/public';
+import {
+  // getFilterFromChartClickEventFn,
+  // getFilterFromSeriesFn,
+  // LegendToggle,
+  // ClickTriggerEvent,
+  ChartsPluginSetup,
+} from '../../charts/public';
 import { Datatable, DatatableColumn, IInterpreterRenderHandlers } from '../../expressions/public';
-import { ValueClickContext } from '../../embeddable/public';
-
 import { PieVisParams, BucketColumns, LabelPositions, ValueFormats } from './types';
-import { getThemeService, getFormatService, getDataActions } from './services';
-import { getColorPicker, getLayers, getLegendActions, ClickTriggerEvent } from './utils';
+import { getFormatService } from './services';
+import {
+  getColorPicker,
+  getLayers,
+  getLegendActions,
+  ClickTriggerEvent,
+  canFilter,
+  getFilterClickData,
+  getFilterEventData,
+} from './utils';
 import { LegendToggle } from './temp';
 
 import './chart.scss';
@@ -66,13 +72,14 @@ export interface PieComponentProps {
   uiState: IInterpreterRenderHandlers['uiState'];
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
+  chartsThemeService: ChartsPluginSetup['theme'];
 }
 
 export type PieComponentType = typeof PieComponent;
 
 const PieComponent = (props: PieComponentProps) => {
-  const chartTheme = getThemeService().useChartsTheme();
-  const chartBaseTheme = getThemeService().useChartsBaseTheme();
+  const chartTheme = props.chartsThemeService.useChartsTheme();
+  const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
   const [showLegend, setShowLegend] = useState(true);
 
   const onRenderChange = useCallback<RenderChangeListener>(
@@ -84,56 +91,21 @@ const PieComponent = (props: PieComponentProps) => {
     [props]
   );
 
-  // move it to utils
   const handleFilterClick = useCallback(
     (clickedLayers: LayerValue[], bucketColumns: BucketColumns[], visData: Datatable): void => {
-      const data: ValueClickContext['data']['data'] = [];
-      const matchingIndex = visData.rows.findIndex((row) =>
-        clickedLayers.every((layer, index) => {
-          const columnId = bucketColumns[index].id;
-          return row[columnId] === layer.groupByRollup;
-        })
-      );
-
-      data.push(
-        ...clickedLayers.map((clickedLayer, index) => ({
-          column: visData.columns.findIndex((col) => col.id === bucketColumns[index].id),
-          row: matchingIndex,
-          value: clickedLayer.groupByRollup,
-          table: visData,
-        }))
-      );
-
+      const data = getFilterClickData(clickedLayers, bucketColumns, visData);
       const event = {
         name: 'filterBucket',
         data: { data },
       };
-
       props.fireEvent(event);
     },
     [props]
   );
 
-  const getFilterEventData = useCallback(
+  const getFilterEventDataCallback = useCallback(
     (visData: Datatable) => (series: SeriesIdentifier): ClickTriggerEvent | null => {
-      // console.log(series.key);
-      const data = visData.columns.reduce<ValueClickContext['data']['data']>(
-        (acc, { id }, column) => {
-          const value = series.key;
-          const row = visData.rows.findIndex((r) => r[id] === value);
-          if (row > -1) {
-            acc.push({
-              table: visData,
-              column,
-              row,
-              value,
-            });
-          }
-
-          return acc;
-        },
-        []
-      );
+      const data = getFilterEventData(visData, series);
 
       return {
         name: 'filterBucket',
@@ -158,14 +130,6 @@ const PieComponent = (props: PieComponentProps) => {
     },
     [props]
   );
-
-  const canFilter = async (event: ClickTriggerEvent | null): Promise<boolean> => {
-    if (!event) {
-      return false;
-    }
-    const filters = await getDataActions().createFiltersFromValueClickAction(event.data);
-    return Boolean(filters.length);
-  };
 
   const toggleLegend = useCallback(() => {
     setShowLegend((value) => {
@@ -203,17 +167,7 @@ const PieComponent = (props: PieComponentProps) => {
     return Number.EPSILON;
   }
 
-  const fillLabel: Partial<PartitionFillLabel> = {
-    textInvertible: true,
-    valueFont: {
-      fontWeight: 700,
-    },
-  };
-
-  if (!visParams.labels.values) {
-    fillLabel.valueFormatter = () => '';
-  }
-
+  // move it to get_config file
   const config: RecursivePartial<PartitionConfig> = {
     partitionLayout: PartitionLayout.sunburst,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
@@ -268,6 +222,7 @@ const PieComponent = (props: PieComponentProps) => {
 
   const palette = visParams.palette.name;
 
+  // useCallback
   const layers = getLayers(
     layersColumns,
     visParams,
@@ -310,7 +265,7 @@ const PieComponent = (props: PieComponentProps) => {
             }}
             legendAction={getLegendActions(
               canFilter,
-              getFilterEventData(visData),
+              getFilterEventDataCallback(visData),
               handleFilterAction,
               visParams
             )}
