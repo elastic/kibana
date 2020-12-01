@@ -6,14 +6,14 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { EventsCheckbox } from './checkbox';
 import { OS } from '../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { selectedLinuxEvents, totalLinuxEvents } from '../../../store/policy_details/selectors';
 import { ConfigForm, ConfigFormHeading } from '../../components/config_form';
 import { getIn, setIn } from '../../../models/policy_details_config';
-import { UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import { OperatingSystem, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 import {
   COLLECTIONS_ENABLED_MESSAGE,
   EVENTS_FORM_TYPE_LABEL,
@@ -85,7 +85,7 @@ export const LinuxEvents = React.memo(() => {
   return (
     <ConfigForm
       type={EVENTS_FORM_TYPE_LABEL}
-      supportedOss={['linux']}
+      supportedOss={[OperatingSystem.LINUX]}
       dataTestSubj="linuxEventingForm"
       rightCorner={
         <EuiText size="s" color="subdued">

@@ -5,27 +5,35 @@
  */
 
 import {
+  AnnotationDomainTypes,
   AreaSeries,
   Axis,
   Chart,
   CurveType,
+  LineAnnotation,
   niceTimeFormatter,
   Placement,
   Position,
   ScaleType,
   Settings,
 } from '@elastic/charts';
+import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../../observability/public';
-import { asPercent } from '../../../../../common/utils/formatters';
+import {
+  asAbsoluteDateTime,
+  asPercent,
+} from '../../../../../common/utils/formatters';
 import { TimeSeries } from '../../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import { useTheme } from '../../../../hooks/useTheme';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useChartsSync as useChartsSync2 } from '../../../../hooks/use_charts_sync';
+import { useAnnotations } from '../../../../hooks/use_annotations';
+import { useChartPointerEvent } from '../../../../hooks/use_chart_pointer_event';
 import { unit } from '../../../../style/variables';
-import { Annotations } from '../../charts/annotations';
 import { ChartContainer } from '../../charts/chart_container';
 import { onBrushEnd } from '../../charts/helper/helper';
 
@@ -44,21 +52,29 @@ export function TransactionBreakdownChartContents({
 }: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
+  const { annotations } = useAnnotations();
   const chartTheme = useChartTheme();
-  const { event, setEvent } = useChartsSync2();
+  const { pointerEvent, setPointerEvent } = useChartPointerEvent();
   const { urlParams } = useUrlParams();
+  const theme = useTheme();
   const { start, end } = urlParams;
 
   useEffect(() => {
-    if (event.chartId !== 'timeSpentBySpan' && chartRef.current) {
-      chartRef.current.dispatchExternalPointerEvent(event);
+    if (
+      pointerEvent &&
+      pointerEvent.chartId !== 'timeSpentBySpan' &&
+      chartRef.current
+    ) {
+      chartRef.current.dispatchExternalPointerEvent(pointerEvent);
     }
-  }, [chartRef, event]);
+  }, [chartRef, pointerEvent]);
 
   const min = moment.utc(start).valueOf();
   const max = moment.utc(end).valueOf();
 
   const xFormatter = niceTimeFormatter([min, max]);
+
+  const annotationColor = theme.eui.euiColorSecondary;
 
   return (
     <ChartContainer height={height} hasData={!!timeseries} status={fetchStatus}>
@@ -71,9 +87,7 @@ export function TransactionBreakdownChartContents({
           theme={chartTheme}
           xDomain={{ min, max }}
           flatLegend
-          onPointerUpdate={(currEvent: any) => {
-            setEvent(currEvent);
-          }}
+          onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
             tooltip: { visible: true, placement: Placement.Bottom },
           }}
@@ -83,6 +97,7 @@ export function TransactionBreakdownChartContents({
           position={Position.Bottom}
           showOverlappingTicks
           tickFormat={xFormatter}
+          gridLine={{ visible: false }}
         />
         <Axis
           id="y-axis"
@@ -91,7 +106,24 @@ export function TransactionBreakdownChartContents({
           tickFormat={(y: number) => asPercent(y ?? 0, 1)}
         />
 
-        {showAnnotations && <Annotations />}
+        {showAnnotations && (
+          <LineAnnotation
+            id="annotations"
+            domainType={AnnotationDomainTypes.XDomain}
+            dataValues={annotations.map((annotation) => ({
+              dataValue: annotation['@timestamp'],
+              header: asAbsoluteDateTime(annotation['@timestamp']),
+              details: `${i18n.translate('xpack.apm.chart.annotation.version', {
+                defaultMessage: 'Version',
+              })} ${annotation.text}`,
+            }))}
+            style={{
+              line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
+            }}
+            marker={<EuiIcon type="dot" color={annotationColor} />}
+            markerPosition={Position.Top}
+          />
+        )}
 
         {timeseries?.length ? (
           timeseries.map((serie) => {
