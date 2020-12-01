@@ -31,10 +31,12 @@ type OptionalPropertyOf<T extends object> = Exclude<
 >;
 type RequiredPropertyOf<T extends object> = Exclude<keyof T, OptionalPropertyOf<T>>;
 
+type RequiredPackageProp = RequiredPropertyOf<ArchivePackage>;
+type OptionalPackageProp = OptionalPropertyOf<ArchivePackage>;
 // pro: guarantee only supplying known values. these keys must be in ArchivePackage. no typos or new values
 // pro: any values added to these lists will be passed through by default
 // pro & con: values do need to be shadowed / repeated from ArchivePackage, but perhaps we want to limit values
-const requiredArchivePackageProps: ReadonlyArray<RequiredPropertyOf<ArchivePackage>> = [
+const requiredArchivePackageProps: readonly RequiredPackageProp[] = [
   'name',
   'version',
   'description',
@@ -43,7 +45,7 @@ const requiredArchivePackageProps: ReadonlyArray<RequiredPropertyOf<ArchivePacka
   'format_version',
 ] as const;
 
-const optionalArchivePackageProps: ReadonlyArray<OptionalPropertyOf<ArchivePackage>> = [
+const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'title',
   'release',
   'readme',
