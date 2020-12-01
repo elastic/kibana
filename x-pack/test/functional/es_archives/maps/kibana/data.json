@@ -97,7 +97,7 @@
     "source": {
       "index-pattern" : {
         "fields" : "[]",
-        "title" : "flights",
+        "title" : "flights"
       },
       "type" : "index-pattern",
       "references" : [ ],
@@ -117,7 +117,7 @@
     "source": {
       "index-pattern" : {
         "fields" : "[]",
-        "title" : "connections",
+        "title" : "connections"
       },
       "type" : "index-pattern",
       "references" : [ ],
