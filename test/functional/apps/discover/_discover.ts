@@ -331,7 +331,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.debug(
             `Timestamp before: ${requestTimestampBefore}, Timestamp after: ${requestTimestampAfter}`
           );
-          return requestTimestampAfter && requestTimestampBefore !== requestTimestampAfter;
+          return Boolean(requestTimestampAfter) && requestTimestampBefore !== requestTimestampAfter;
         });
       });
 

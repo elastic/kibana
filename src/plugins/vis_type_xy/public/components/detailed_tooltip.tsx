@@ -32,6 +32,7 @@ import { BUCKET_TYPES } from '../../../data/public';
 import { Aspects } from '../types';
 
 import './_detailed_tooltip.scss';
+import { fillEmptyValue } from '../utils/get_series_name_fn';
 
 interface TooltipData {
   label: string;
@@ -87,8 +88,9 @@ const getTooltipData = (
   return data;
 };
 
-const renderData = ({ label, value }: TooltipData, index: number) =>
-  label && value ? (
+const renderData = ({ label, value: rawValue }: TooltipData, index: number) => {
+  const value = fillEmptyValue(rawValue);
+  return label && value ? (
     <tr key={label + value + index}>
       <td className="detailedTooltip__label">
         <div className="detailedTooltip__labelContainer">{label}</div>
@@ -99,6 +101,7 @@ const renderData = ({ label, value }: TooltipData, index: number) =>
       </td>
     </tr>
   ) : null;
+};
 
 export const getDetailedTooltip = (aspects: Aspects) => (
   headerFormatter?: TooltipValueFormatter

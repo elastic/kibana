@@ -31,12 +31,14 @@ import {
   LegendAction,
   LegendColorPicker,
   TooltipProps,
+  TickFormatter,
 } from '@elastic/charts';
 
 import { renderEndzoneTooltip } from '../../../charts/public';
 
 import { getThemeService, getUISettings } from '../services';
 import { VisConfig } from '../types';
+import { fillEmptyValue } from '../utils/get_series_name_fn';
 
 declare global {
   interface Window {
@@ -120,16 +122,21 @@ export const XYSettings: FC<XYSettingsProps> = ({
             right: 10,
           },
   };
+  const headerValueFormatter: TickFormatter<any> | undefined = xAxis.ticks?.formatter
+    ? (value) => fillEmptyValue(xAxis.ticks?.formatter?.(value)) ?? ''
+    : undefined;
   const headerFormatter =
     isTimeChart && xDomain && adjustedXDomain
       ? renderEndzoneTooltip(
-          adjustedXDomain.minInterval,
+          xDomain.minInterval,
           'min' in xDomain ? xDomain.min : undefined,
           'max' in xDomain ? xDomain.max : undefined,
-          xAxis.ticks?.formatter,
+          headerValueFormatter,
           !tooltip.detailedTooltip
         )
-      : undefined;
+      : headerValueFormatter &&
+        (tooltip.detailedTooltip ? undefined : ({ value }: any) => headerValueFormatter(value));
+
   const tooltipProps: TooltipProps = tooltip.detailedTooltip
     ? {
         ...tooltip,

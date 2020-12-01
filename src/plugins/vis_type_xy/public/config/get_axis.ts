@@ -38,6 +38,7 @@ import {
   YScaleType,
   SeriesParam,
 } from '../types';
+import { fillEmptyValue } from '../utils/get_series_name_fn';
 
 export function getAxis<S extends XScaleType | YScaleType>(
   { type, title: axisTitle, labels, scale: axisScale, ...axis }: CategoryAxis,
@@ -99,13 +100,14 @@ function getLabelFormatter(
   }
 
   return (value: any) => {
-    const formattedValue = formatter ? formatter(value) : value;
+    const formattedStringValue = `${formatter ? formatter(value) : value}`;
+    const finalValue = fillEmptyValue(formattedStringValue);
 
-    if (formattedValue.length > truncate) {
-      return `${formattedValue.slice(0, truncate)}...`;
+    if (finalValue.length > truncate) {
+      return `${finalValue.slice(0, truncate)}...`;
     }
 
-    return formattedValue;
+    return finalValue;
   };
 }
 

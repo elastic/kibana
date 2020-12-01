@@ -170,8 +170,8 @@ export const renderEndzoneTooltip = (
   const formattedValue = formatter ? formatter(headerDataValue) : headerDataValue;
 
   if (
-    (domainStart !== undefined && headerDataValue < domainStart) ||
-    (domainEnd !== undefined && xInterval !== undefined && headerDataValue + xInterval > domainEnd)
+    (domainStart !== undefined && domainStart > headerDataValue) ||
+    (domainEnd !== undefined && xInterval !== undefined && domainEnd - xInterval < headerDataValue)
   ) {
     return (
       <>

@@ -59,7 +59,7 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     params.seriesParams,
     params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM
   );
-  const tooltip = getTooltip(aspects, params, xAxis.ticks?.formatter);
+  const tooltip = getTooltip(aspects, params);
   const yAxes = params.valueAxes.map((a) =>
     getAxis<YScaleType>(a, params.grid, aspects.y[0], params.seriesParams)
   );

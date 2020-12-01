@@ -18,7 +18,6 @@
  */
 
 import React, { FC } from 'react';
-import { isUndefined } from 'lodash';
 
 import { DomainRange } from '@elastic/charts';
 
@@ -47,7 +46,7 @@ export const XYEndzones: FC<XYEndzones> = ({
     adjustedDomain &&
     'min' in domain &&
     'max' in domain &&
-    !isUndefined(domain.minInterval) &&
+    domain.minInterval !== undefined &&
     'min' in adjustedDomain &&
     'max' in adjustedDomain
   ) {
