@@ -218,6 +218,17 @@ export class TaskRunner {
     const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
       alertInstance.hasScheduledActions()
     );
+    const recoveredAlertInstances = pickBy(
+      alertInstances,
+      (alertInstance: AlertInstance) => !alertInstance.hasScheduledActions()
+    );
+
+    logActiveAndRecoveredInstances({
+      logger: this.logger,
+      activeAlertInstances: instancesWithScheduledActions,
+      recoveredAlertInstances,
+      alertLabel,
+    });
 
     generateNewAndRecoveredInstanceEvents({
       eventLogger,
@@ -229,26 +240,37 @@ export class TaskRunner {
     });
 
     if (!muteAll) {
-      scheduleActionsForRecoveredInstances(
-        alertInstances,
-        executionHandler,
-        originalAlertInstances,
-        instancesWithScheduledActions,
-        alert.mutedInstanceIds
-      );
-
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
+
+      scheduleActionsForRecoveredInstances({
+        recoveredAlertInstances,
+        executionHandler,
+        mutedInstanceIdsSet,
+        logger: this.logger,
+        alertLabel,
+      });
 
       await Promise.all(
         Object.entries(instancesWithScheduledActions)
-          .filter(
-            ([alertInstanceName, alertInstance]: [string, AlertInstance]) =>
-              !alertInstance.isThrottled(throttle) && !mutedInstanceIdsSet.has(alertInstanceName)
-          )
+          .filter(([alertInstanceName, alertInstance]: [string, AlertInstance]) => {
+            const throttled = alertInstance.isThrottled(throttle);
+            const muted = mutedInstanceIdsSet.has(alertInstanceName);
+            const shouldExecuteAction = !throttled && !muted;
+            if (!shouldExecuteAction) {
+              this.logger.debug(
+                `skipping action execution for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
+                  muted ? 'muted' : 'throttled'
+                }`
+              );
+            }
+            return shouldExecuteAction;
+          })
           .map(([id, alertInstance]: [string, AlertInstance]) =>
             this.executeAlertInstance(id, alertInstance, executionHandler)
           )
       );
+    } else {
+      this.logger.debug(`no actions executed for alert ${alertLabel}: alert is muted.`);
     }
 
     return {
@@ -332,12 +354,15 @@ export class TaskRunner {
       schedule: taskSchedule,
     } = this.taskInstance;
 
+    const runDate = new Date().toISOString();
+    this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDate}`);
+
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
     const event: IEvent = {
       // explicitly set execute timestamp so it will be before other events
       // generated here (new-instance, schedule-action, etc)
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': runDate,
       event: { action: EVENT_LOG_ACTIONS.execute },
       kibana: {
         saved_objects: [
@@ -498,31 +523,70 @@ function generateNewAndRecoveredInstanceEvents(
   }
 }
 
-function scheduleActionsForRecoveredInstances(
-  alertInstancesMap: Record<string, AlertInstance>,
-  executionHandler: ReturnType<typeof createExecutionHandler>,
-  originalAlertInstances: Record<string, AlertInstance>,
-  currentAlertInstances: Dictionary<AlertInstance>,
-  mutedInstanceIds: string[]
-) {
-  const currentAlertInstanceIds = Object.keys(currentAlertInstances);
-  const originalAlertInstanceIds = Object.keys(originalAlertInstances);
-  const recoveredIds = without(
-    originalAlertInstanceIds,
-    ...currentAlertInstanceIds,
-    ...mutedInstanceIds
-  );
+interface ScheduleActionsForRecoveredInstancesParams {
+  logger: Logger;
+  recoveredAlertInstances: Dictionary<AlertInstance>;
+  executionHandler: ReturnType<typeof createExecutionHandler>;
+  mutedInstanceIdsSet: Set<string>;
+  alertLabel: string;
+}
+
+function scheduleActionsForRecoveredInstances(params: ScheduleActionsForRecoveredInstancesParams) {
+  const {
+    logger,
+    recoveredAlertInstances,
+    executionHandler,
+    mutedInstanceIdsSet,
+    alertLabel,
+  } = params;
+  const recoveredIds = Object.keys(recoveredAlertInstances);
   for (const id of recoveredIds) {
-    const instance = alertInstancesMap[id];
-    instance.updateLastScheduledActions(RecoveredActionGroup.id);
-    instance.unscheduleActions();
-    executionHandler({
-      actionGroup: RecoveredActionGroup.id,
-      context: {},
-      state: {},
-      alertInstanceId: id,
-    });
-    instance.scheduleActions(RecoveredActionGroup.id);
+    if (mutedInstanceIdsSet.has(id)) {
+      logger.debug(
+        `skipping action execution for '${id}' in alert ${alertLabel}: instance is muted`
+      );
+    } else {
+      const instance = recoveredAlertInstances[id];
+      instance.updateLastScheduledActions(RecoveredActionGroup.id);
+      instance.unscheduleActions();
+      executionHandler({
+        actionGroup: RecoveredActionGroup.id,
+        context: {},
+        state: {},
+        alertInstanceId: id,
+      });
+      instance.scheduleActions(RecoveredActionGroup.id);
+    }
+  }
+}
+
+interface LogActiveAndRecoveredInstancesParams {
+  logger: Logger;
+  activeAlertInstances: Dictionary<AlertInstance>;
+  recoveredAlertInstances: Dictionary<AlertInstance>;
+  alertLabel: string;
+}
+
+function logActiveAndRecoveredInstances(params: LogActiveAndRecoveredInstancesParams) {
+  const { logger, activeAlertInstances, recoveredAlertInstances, alertLabel } = params;
+  const activeInstanceIds = Object.keys(activeAlertInstances);
+  const recoveredInstanceIds = Object.keys(recoveredAlertInstances);
+  if (activeInstanceIds.length > 0) {
+    logger.debug(
+      `alert ${alertLabel} has ${activeInstanceIds.length} active alert instances: ${JSON.stringify(
+        activeInstanceIds.map((instanceId) => ({
+          instanceId,
+          actionGroup: activeAlertInstances[instanceId].getScheduledActionOptions()?.actionGroup,
+        }))
+      )}`
+    );
+  }
+  if (recoveredInstanceIds.length > 0) {
+    logger.debug(
+      `alert ${alertLabel} has ${
+        recoveredInstanceIds.length
+      } recovered alert instances: ${JSON.stringify(recoveredInstanceIds)}`
+    );
   }
 }
 
