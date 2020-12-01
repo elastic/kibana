@@ -24,6 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
   firstFieldOption,
   getIndexPatterns,
@@ -39,7 +40,6 @@ import {
   WhenExpression,
   builtInAggregationTypes,
   AlertTypeParamsExpressionProps,
-  AlertsContextValue,
 } from '../../../../triggers_actions_ui/public';
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdAlertParams } from './types';
@@ -67,8 +67,8 @@ const expressionFieldsWithValidation = [
 ];
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<IndexThresholdAlertParams, AlertsContextValue>
-> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, alertsContext }) => {
+  AlertTypeParamsExpressionProps<IndexThresholdAlertParams>
+> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, charts, data }) => {
   const {
     index,
     timeField,
@@ -83,7 +83,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     timeWindowUnit,
   } = alertParams;
 
-  const { http } = alertsContext;
+  const { http } = useKibana().services;
 
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState([]);
@@ -123,7 +123,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     });
 
     if (index && index.length > 0) {
-      const currentEsFields = await getFields(http, index);
+      const currentEsFields = await getFields(http!, index);
       const timeFields = getTimeFieldOptions(currentEsFields);
 
       setEsFields(currentEsFields);
@@ -208,7 +208,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
               });
               return;
             }
-            const currentEsFields = await getFields(http, indices);
+            const currentEsFields = await getFields(http!, indices);
             const timeFields = getTimeFieldOptions(currentEsFields);
 
             setEsFields(currentEsFields);
@@ -216,7 +216,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           }}
           onSearchChange={async (search) => {
             setIsIndiciesLoading(true);
-            setIndexOptions(await getIndexOptions(http, search, indexPatterns));
+            setIndexOptions(await getIndexOptions(http!, search, indexPatterns));
             setIsIndiciesLoading(false);
           }}
           onBlur={() => {
@@ -433,7 +433,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
               alertInterval={alertInterval}
               aggregationTypes={builtInAggregationTypes}
               comparators={builtInComparators}
-              alertsContext={alertsContext}
+              charts={charts}
+              dataFieldsFormats={data!.fieldFormats}
             />
           </Fragment>
         )}

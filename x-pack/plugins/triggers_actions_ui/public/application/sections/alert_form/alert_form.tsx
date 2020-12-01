@@ -113,7 +113,7 @@ function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
 }
 
-interface AlertFormProps {
+interface AlertFormProps<MetaData = Record<string, any>> {
   alert: InitialAlert;
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
@@ -123,6 +123,7 @@ interface AlertFormProps {
   canChangeTrigger?: boolean; // to hide Change trigger button
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
+  metadata?: MetaData;
 }
 
 export const AlertForm = ({
@@ -135,6 +136,7 @@ export const AlertForm = ({
   operation,
   alertTypeRegistry,
   actionTypeRegistry,
+  metadata,
 }: AlertFormProps) => {
   const {
     http,
@@ -142,6 +144,8 @@ export const AlertForm = ({
     docLinks,
     application: { capabilities },
     kibanaFeatures,
+    charts,
+    data,
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
@@ -476,6 +480,9 @@ export const AlertForm = ({
               setAlertProperty={setAlertProperty}
               defaultActionGroupId={defaultActionGroupId}
               actionGroups={alertTypesIndex.get(alert.alertTypeId)!.actionGroups}
+              metadata={metadata}
+              charts={charts}
+              data={data}
             />
           </Suspense>
         </EuiErrorBoundary>

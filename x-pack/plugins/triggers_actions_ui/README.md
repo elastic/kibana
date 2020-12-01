@@ -86,7 +86,6 @@ interface IndexThresholdProps {
   setAlertParams: (property: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
-  alertsContext: AlertsContextValue;
 }
 ```
 
@@ -96,7 +95,6 @@ interface IndexThresholdProps {
 |setAlertParams|Alert reducer method, which is used to create a new copy of alert object with the changed params property any subproperty value.|
 |setAlertProperty|Alert reducer method, which is used to create a new copy of alert object with the changed any direct alert property value.|
 |errors|Alert level errors tracking object.|
-|alertsContext|Alert context, which is used to pass down common objects like http client.|
 
 
 Alert reducer is defined on the AlertAdd functional component level and passed down to the subcomponents to provide a new state of Alert object:
@@ -181,7 +179,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   setAlertParams,
   setAlertProperty,
   errors,
-  alertsContext,
 }) => {
 
   ....
@@ -244,7 +241,7 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
   iconClass: string;
   validate: (alertParams: any) => ValidationResult;
   alertParamsExpression: React.LazyExoticComponent<
-        ComponentType<AlertTypeParamsExpressionProps<AlertParamsType, AlertsContextValue>>
+        ComponentType<AlertTypeParamsExpressionProps<AlertParamsType>>
       >;
   defaultActionMessage?: string;
 ```
@@ -796,9 +793,6 @@ Then this dependency will be used to embed Create Alert flyout or register new a
 
 2. Add Create Alert flyout to React component:
 ```
-// import section
-import { AlertsContextProvider, AlertAdd } from '../../../../../../../triggers_actions_ui/public';
-
 // in the component state definition section
 const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
@@ -816,16 +810,9 @@ const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 </EuiButton>
 
 // in render section of component
-<AlertsContextProvider
-  value={{
-    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-    alertTypeRegistry: triggersActionsUi.alertTypeRegistry,
-    metadata: { test: 'some value', fields: ['test'] },
-  }}
->
   <AlertAdd consumer={'watcher'} addFlyoutVisible={alertFlyoutVisible}
-    setAddFlyoutVisibility={setAlertFlyoutVisibility} />
-</AlertsContextProvider>
+    setAddFlyoutVisibility={setAlertFlyoutVisibility}
+    metadata={{ test: 'some value', fields: ['test'] }} />
 ```
 
 AlertAdd Props definition:
@@ -846,25 +833,6 @@ interface AlertAddProps {
 |setAddFlyoutVisibility|Function for changing visibility state of the Create Alert flyout.|
 |alertTypeId|Optional property to preselect alert type.|
 |canChangeTrigger|Optional property, that hides change alert type possibility.|
-
-AlertsContextProvider value options:
-```
-export interface AlertsContextValue<MetaData = Record<string, any>> {
-  reloadAlerts?: () => Promise<void>;
-  http: HttpSetup;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  uiSettings?: IUiSettingsClient;
-  docLinks: DocLinksStart;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
-  charts?: ChartsPluginSetup;
-  dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
-  metadata?: MetaData;
-}
-```
 
 |Property|Description|
 |---|---|
@@ -1497,25 +1465,6 @@ interface ActionAccordionFormProps {
 |actionTypes|Optional property, which allowes to define a list of variables for action 'message' property.|
 |defaultActionMessage|Optional property, which allowes to define a message value for action with 'message' property.|
 |capabilities|Kibana core's Capabilities ApplicationStart['capabilities'].|
-
-
-AlertsContextProvider value options:
-```
-export interface AlertsContextValue {
-  reloadAlerts?: () => Promise<void>;
-  http: HttpSetup;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  uiSettings?: IUiSettingsClient;
-  docLinks: DocLinksStart;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
-  charts?: ChartsPluginSetup;
-  dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
-}
-```
 
 |Property|Description|
 |---|---|

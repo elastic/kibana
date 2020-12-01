@@ -5,11 +5,9 @@
  */
 
 import React, { useContext } from 'react';
-import { ApplicationStart, DocLinksStart, HttpStart, NotificationsStart } from 'src/core/public';
 
 import { AlertAdd } from '../../../../../triggers_actions_ui/public';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
@@ -22,13 +20,6 @@ interface Props {
   nodeType?: InventoryItemType;
   filter?: string;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-interface KibanaDeps {
-  notifications: NotificationsStart;
-  http: HttpStart;
-  docLinks: DocLinksStart;
-  application: ApplicationStart;
 }
 
 export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {

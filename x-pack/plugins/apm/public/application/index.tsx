@@ -19,7 +19,6 @@ import {
   RedirectAppLinks,
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import {
@@ -76,24 +75,17 @@ export function ApmAppRoot({
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <AlertsContextProvider
-          value={{
-            actionTypeRegistry: plugins.triggersActionsUi.actionTypeRegistry,
-            alertTypeRegistry: plugins.triggersActionsUi.alertTypeRegistry,
-          }}
-        >
-          <KibanaContextProvider services={{ ...core, ...plugins }}>
-            <i18nCore.Context>
-              <Router history={history}>
-                <UrlParamsProvider>
-                  <LicenseProvider>
-                    <App />
-                  </LicenseProvider>
-                </UrlParamsProvider>
-              </Router>
-            </i18nCore.Context>
-          </KibanaContextProvider>
-        </AlertsContextProvider>
+        <KibanaContextProvider services={{ ...core, ...plugins }}>
+          <i18nCore.Context>
+            <Router history={history}>
+              <UrlParamsProvider>
+                <LicenseProvider>
+                  <App />
+                </LicenseProvider>
+              </UrlParamsProvider>
+            </Router>
+          </i18nCore.Context>
+        </KibanaContextProvider>
       </ApmPluginContext.Provider>
     </RedirectAppLinks>
   );

@@ -6,6 +6,8 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ActionGroup, AlertActionParam } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
@@ -155,7 +157,7 @@ export interface AlertTableItem extends Alert {
 
 export interface AlertTypeParamsExpressionProps<
   AlertParamsType = unknown,
-  AlertsContextValue = unknown
+  MetaData = Record<string, any>
 > {
   alertParams: AlertParamsType;
   alertInterval: string;
@@ -163,9 +165,11 @@ export interface AlertTypeParamsExpressionProps<
   setAlertParams: (property: string, value: any) => void;
   setAlertProperty: <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => void;
   errors: IErrorObject;
-  alertsContext: AlertsContextValue;
   defaultActionGroupId: string;
   actionGroups: ActionGroup[];
+  metadata?: MetaData;
+  charts?: ChartsPluginSetup;
+  data?: DataPublicPluginStart;
 }
 
 export interface AlertTypeModel<AlertParamsType = any> {

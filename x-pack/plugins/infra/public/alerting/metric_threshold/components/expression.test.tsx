@@ -8,7 +8,6 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/alert_type_registry.mock';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 import { AlertContextMeta } from '../types';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 import React from 'react';
@@ -45,34 +44,17 @@ describe('Expression', () => {
       },
     ] = await mocks.getStartServices();
 
-    const context: AlertsContextValue<AlertContextMeta> = {
-      http: mocks.http,
-      toastNotifications: mocks.notifications.toasts,
-      actionTypeRegistry: actionTypeRegistryMock.create() as any,
-      alertTypeRegistry: alertTypeRegistryMock.create() as any,
-      docLinks: startMocks.docLinks,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
-        },
-      },
-      metadata: {
-        currentOptions,
-      },
-    };
-
     const wrapper = mountWithIntl(
       <Expressions
-        alertsContext={context}
         alertInterval="1m"
         alertThrottle="1m"
         alertParams={alertParams}
         errors={[]}
         setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
         setAlertProperty={() => {}}
+        metadata={{
+          currentOptions,
+        }}
       />
     );
 

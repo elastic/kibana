@@ -8,8 +8,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/alert_type_registry.mock';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
-import { AlertContextMeta, MetricExpression } from '../types';
+import { MetricExpression } from '../types';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import React from 'react';
@@ -34,7 +33,7 @@ describe('ExpressionChart', () => {
       },
     ] = await mocks.getStartServices();
 
-    const context: AlertsContextValue<AlertContextMeta> = {
+    /* const context: AlertsContextValue<AlertContextMeta> = {
       http: mocks.http,
       toastNotifications: mocks.notifications.toasts,
       actionTypeRegistry: actionTypeRegistryMock.create() as any,
@@ -48,7 +47,8 @@ describe('ExpressionChart', () => {
           show: true,
         },
       },
-    };
+    }; */
+
     const derivedIndexPattern: IIndexPattern = {
       title: 'metricbeat-*',
       fields: [],
@@ -80,7 +80,6 @@ describe('ExpressionChart', () => {
 
     const wrapper = mountWithIntl(
       <ExpressionChart
-        context={context}
         expression={expression}
         derivedIndexPattern={derivedIndexPattern}
         source={source}

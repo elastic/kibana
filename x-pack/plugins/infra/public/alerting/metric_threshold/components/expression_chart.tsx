@@ -21,8 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IIndexPattern } from 'src/plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import {
   Comparator,
@@ -40,7 +39,6 @@ import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
 
 interface Props {
-  context: AlertsContextValue<AlertContextMeta>;
   expression: MetricExpression;
   derivedIndexPattern: IIndexPattern;
   source: InfraSource | null;
@@ -62,7 +60,6 @@ const TIME_LABELS = {
 
 export const ExpressionChart: React.FC<Props> = ({
   expression,
-  context,
   derivedIndexPattern,
   source,
   filterQuery,
@@ -70,19 +67,20 @@ export const ExpressionChart: React.FC<Props> = ({
 }) => {
   const { loading, data } = useMetricsExplorerChartData(
     expression,
-    context,
     derivedIndexPattern,
     source,
     filterQuery,
     groupBy
   );
 
+  const { uiSettings } = useKibana().services;
+
   const metric = {
     field: expression.metric,
     aggregation: expression.aggType as MetricsExplorerAggregation,
     color: Color.color0,
   };
-  const isDarkMode = context.uiSettings?.get('theme:darkMode') || false;
+  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {
     const firstSeries = first(data?.series);
     const firstTimestamp = first(firstSeries?.rows)?.timestamp;

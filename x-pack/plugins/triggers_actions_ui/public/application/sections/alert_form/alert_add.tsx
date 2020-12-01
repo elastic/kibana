@@ -192,6 +192,7 @@ export const AlertAdd = ({
                 )}
                 actionTypeRegistry={actionTypeRegistry}
                 alertTypeRegistry={alertTypeRegistry}
+                metadata={metadata}
               />
             </EuiFlyoutBody>
             <AlertAddFooter
