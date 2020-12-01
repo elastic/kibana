@@ -16,6 +16,9 @@ import { LogsTab } from './tabs/logs';
 import { ProcessesTab } from './tabs/processes';
 import { PropertiesTab } from './tabs/properties/index';
 import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN, OVERLAY_HEADER_SIZE } from './tabs/shared';
+import { useLinkProps } from '../../../../../hooks/use_link_props';
+import { getNodeDetailUrl } from '../../../../link_to';
+import { findInventoryModel } from '../../../../../../common/inventory_models';
 
 interface Props {
   isOpen: boolean;
@@ -35,6 +38,8 @@ export const NodeContextPopover = ({
 }: Props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab];
+  const inventoryModel = findInventoryModel(nodeType);
+  const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
 
   const tabs = useMemo(() => {
     return tabConfigs.map((m) => {
@@ -49,6 +54,15 @@ export const NodeContextPopover = ({
   }, [tabConfigs, node, nodeType, currentTime, options]);
 
   const [selectedTab, setSelectedTab] = useState(0);
+
+  const nodeDetailMenuItemLinkProps = useLinkProps({
+    ...getNodeDetailUrl({
+      nodeType,
+      nodeId: node.id,
+      from: nodeDetailFrom,
+      to: currentTime,
+    }),
+  });
 
   if (!isOpen) {
     return null;
@@ -65,9 +79,28 @@ export const NodeContextPopover = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} iconType={'cross'}>
-                <FormattedMessage id="xpack.infra.infra.nodeDetails.close" defaultMessage="Close" />
-              </EuiButtonEmpty>
+              <EuiFlexGroup gutterSize={'xs'} alignItems={'flexEnd'}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconSide={'left'}
+                    iconType={'popout'}
+                    href={nodeDetailMenuItemLinkProps.href}
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.infra.nodeDetails.openAsPage"
+                      defaultMessage="Open as page"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={onClose} iconType={'cross'}>
+                    <FormattedMessage
+                      id="xpack.infra.infra.nodeDetails.close"
+                      defaultMessage="Close"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </OverlayHeaderTitleWrapper>
           <EuiTabs>
