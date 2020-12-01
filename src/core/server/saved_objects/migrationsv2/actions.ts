@@ -17,12 +17,15 @@
  * under the License.
  */
 
+/* eslint-disable no-console */
+
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { flow } from 'fp-ts/lib/function';
 import { ElasticsearchClient } from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '../serialization';
@@ -37,12 +40,6 @@ export type AllResponses =
   | UpdateByQueryResponse
   | UpdateAndPickupMappingsResponse;
 
-export type ExpectedErrors =
-  | EsErrors.NoLivingConnectionsError
-  | EsErrors.ConnectionError
-  | EsErrors.TimeoutError
-  | EsErrors.ResponseError;
-
 const retryResponseStatuses = [
   503, // ServiceUnavailable
   401, // AuthorizationException
@@ -51,7 +48,15 @@ const retryResponseStatuses = [
   410, // Gone
 ];
 
-const catchEsClientErrors = (e: ElasticsearchClientError) => {
+export interface RetryableEsClientError {
+  type: 'retryable_es_client_error';
+  message: string;
+  error?: Error;
+}
+
+const catchRetryableEsClientErrors = (
+  e: EsErrors.ElasticsearchClientError
+): Either.Either<RetryableEsClientError, never> => {
   if (
     e instanceof EsErrors.NoLivingConnectionsError ||
     e instanceof EsErrors.ConnectionError ||
@@ -60,7 +65,11 @@ const catchEsClientErrors = (e: ElasticsearchClientError) => {
       (retryResponseStatuses.includes(e.statusCode) ||
         e.body?.error?.type === 'snapshot_in_progress_exception'))
   ) {
-    return Either.left(e);
+    return Either.left({
+      type: 'retryable_es_client_error' as const,
+      message: e.message,
+      error: e,
+    });
   } else {
     throw e;
   }
@@ -81,7 +90,7 @@ export type FetchIndexResponse = Record<
 export const fetchIndices = (
   client: ElasticsearchClient,
   indicesToFetch: string[]
-): TaskEither.TaskEither<ExpectedErrors, FetchIndexResponse> => () => {
+): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> => () => {
   return client.indices
     .get(
       {
@@ -93,7 +102,7 @@ export const fetchIndices = (
     .then(({ body }) => {
       return Either.right(body);
     })
-    .catch(catchEsClientErrors);
+    .catch(catchRetryableEsClientErrors);
 };
 
 export interface SetIndexWriteBlockResponse {
@@ -116,29 +125,8 @@ export interface SetIndexWriteBlockResponse {
 export const setWriteBlock = (
   client: ElasticsearchClient,
   index: string
-): TaskEither.TaskEither<ExpectedErrors, SetIndexWriteBlockResponse> => () => {
-  return client.indices
-    .addBlock<{
-      acknowledged: boolean;
-      shards_acknowledged: boolean;
-    }>(
-      {
-        index,
-        block: 'write',
-      },
-      { maxRetries: 0 /** handle retry ourselves for now */ }
-    )
-    .then((res) => {
-      return Either.right(res.body);
-    })
-    .catch(catchEsClientErrors);
-};
-
-export const setWriteBlock2 = (
-  client: ElasticsearchClient,
-  index: string
 ): TaskEither.TaskEither<
-  'set_write_block_failed' | 'index_not_found_exception',
+  { type: 'index_not_found_exception' } | RetryableEsClientError,
   'set_write_block_succeeded'
 > => () => {
   return client.indices
@@ -155,29 +143,33 @@ export const setWriteBlock2 = (
     .then((res) => {
       return res.body.acknowledged === true
         ? Either.right('set_write_block_succeeded' as const)
-        : Either.left('set_write_block_failed' as const);
+        : Either.left({
+            type: 'retryable_es_client_error' as const,
+            message: 'set_write_block_failed',
+          });
     })
     .catch((e: ElasticsearchClientError) => {
       if (e instanceof EsErrors.ResponseError) {
         if (e.message === 'index_not_found_exception') {
-          return Either.left(e.message);
+          return Either.left({ type: 'index_not_found_exception' as const });
         }
       }
       throw e;
-    });
+    })
+    .catch(catchRetryableEsClientErrors);
 };
 
 const waitForStatus = (
   client: ElasticsearchClient,
   index: string,
   status: 'green' | 'yellow' | 'red'
-): TaskEither.TaskEither<ExpectedErrors, {}> => () => {
+): TaskEither.TaskEither<RetryableEsClientError, {}> => () => {
   return client.cluster
     .health({ index, wait_for_status: status, timeout: '30s' })
     .then(() => {
       return Either.right({});
     })
-    .catch(catchEsClientErrors);
+    .catch(catchRetryableEsClientErrors);
 };
 
 export type CloneIndexResponse = AcknowledgeResponse;
@@ -200,8 +192,8 @@ export const cloneIndex = (
   client: ElasticsearchClient,
   source: string,
   target: string
-): TaskEither.TaskEither<ExpectedErrors, CloneIndexResponse> => {
-  const cloneTask: TaskEither.TaskEither<ExpectedErrors, AcknowledgeResponse> = () => {
+): TaskEither.TaskEither<RetryableEsClientError, CloneIndexResponse> => {
+  const cloneTask: TaskEither.TaskEither<RetryableEsClientError, AcknowledgeResponse> = () => {
     return client.indices
       .clone(
         {
@@ -244,9 +236,10 @@ export const cloneIndex = (
             shardsAcknowledged: false,
           });
         } else {
-          return catchEsClientErrors(error);
+          throw error;
         }
-      });
+      })
+      .catch(catchRetryableEsClientErrors);
   };
 
   return pipe(
@@ -270,6 +263,7 @@ export const cloneIndex = (
 };
 
 export interface WaitForTaskResponse {
+  error: Option.Option<{ type: string; reason: string; index: string }>;
   completed: boolean;
   failures: Option.Option<any[]>;
   description: string;
@@ -288,13 +282,13 @@ export const waitForTask = (
   client: ElasticsearchClient,
   taskId: string,
   timeout: string
-): TaskEither.TaskEither<ExpectedErrors, WaitForTaskResponse> => () => {
+): TaskEither.TaskEither<never, WaitForTaskResponse> => () => {
   return client.tasks
     .get<{
       completed: boolean;
       response: { failures: any[] };
       task: { description: string };
-      error: { type: string; reason: string };
+      error: { type: string; reason: string; index: string };
     }>({
       task_id: taskId,
       wait_for_completion: true,
@@ -302,17 +296,17 @@ export const waitForTask = (
     })
     .then((res) => {
       const body = res.body;
-      if (res.body.error ?? false) {
-        return Either.left(new EsErrors.ResponseError(res));
-      }
+      console.log('\n' + JSON.stringify(res) + '\n');
       return Either.right({
         completed: body.completed,
+        error: Option.fromNullable(body.error),
         failures:
-          body.response.failures.length > 0 ? Option.some(body.response.failures) : Option.none,
+          (body.response.failures ?? []).length > 0
+            ? Option.some(body.response.failures)
+            : Option.none,
         description: body.task.description,
       });
-    })
-    .catch(catchEsClientErrors);
+    });
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -321,13 +315,13 @@ export interface DeleteIndexResponse {}
 export const deleteIndex = (
   client: ElasticsearchClient,
   index: string
-): TaskEither.TaskEither<ExpectedErrors, DeleteIndexResponse> => () => {
+): TaskEither.TaskEither<RetryableEsClientError, DeleteIndexResponse> => () => {
   return client.indices
     .delete({ index, timeout: '60s' })
     .then(() => {
       return Either.right({});
     })
-    .catch(catchEsClientErrors);
+    .catch(catchRetryableEsClientErrors);
 };
 
 export interface UpdateByQueryResponse {
@@ -352,7 +346,7 @@ export const updateByQuery = (
   client: ElasticsearchClient,
   index: string,
   script?: string
-): TaskEither.TaskEither<ExpectedErrors, UpdateByQueryResponse> => () => {
+): TaskEither.TaskEither<RetryableEsClientError, UpdateByQueryResponse> => () => {
   return client
     .updateByQuery({
       // Ignore version conflicts that can occur from parralel update by query operations
@@ -381,7 +375,7 @@ export const updateByQuery = (
     .then(({ body: { task: taskId } }) => {
       return Either.right({ taskId });
     })
-    .catch(catchEsClientErrors);
+    .catch(catchRetryableEsClientErrors);
 };
 
 export interface ReindexResponse {
@@ -407,16 +401,17 @@ export const reindex = (
   sourceIndex: string,
   targetIndex: string,
   reindexScript: Option.Option<string>
-): TaskEither.TaskEither<ExpectedErrors, ReindexResponse> => () => {
+): TaskEither.TaskEither<never, ReindexResponse> => () => {
   return client
     .reindex({
+      // Require targetIndex to be an alias. Prevents a new index from being
+      // created if targetIndex doesn't exist.
       body: {
         // Ignore version conflicts from existing documents
         conflicts: 'proceed',
         source: {
           index: sourceIndex,
-          // Set batch size to 100, not sure if it's necessary to make this
-          // smaller than the default of 1000?
+          // Set batch size to 100
           size: 100,
         },
         dest: {
@@ -439,12 +434,85 @@ export const reindex = (
     })
     .then(({ body: { task: taskId } }) => {
       return Either.right({ taskId });
-    })
-    .catch(catchEsClientErrors);
+    });
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UpdateAliasesResponse {}
+export const waitForReindexTask = flow(
+  waitForTask,
+  TaskEither.chain(
+    (
+      res
+    ): TaskEither.TaskEither<
+      | { type: 'index_not_found_exception'; index: string }
+      | { type: 'target_index_had_write_block' }
+      | RetryableEsClientError,
+      'reindex_succeded'
+    > => {
+      const failureIsAWriteBlock = ({ type, reason }: { type: string; reason: string }) =>
+        type === 'cluster_block_exception' &&
+        reason.match(/index \[.+] blocked by: \[FORBIDDEN\/8\/index write \(api\)\]/);
+      const failureIsSnapshotInProgress = ({ type }: { type: string }) =>
+        type === 'snapshot_in_progress_exception';
+
+      if (Option.isSome(res.error) && res.error.value.type === 'index_not_found_exception') {
+        return TaskEither.left({
+          type: 'index_not_found_exception' as const,
+          index: res.error.value.index,
+        });
+      } else if (Option.isSome(res.failures)) {
+        if (res.failures.value.every(failureIsAWriteBlock)) {
+          return TaskEither.left({ type: 'target_index_had_write_block' as const });
+        } else if (res.failures.value.some(failureIsSnapshotInProgress)) {
+          // TODO: Reindex will automatically retry read and write failures.
+          // Is it still necessary to handle retryable failures like
+          // snapshot_in_progress_exception ourselves? If this is rare enough
+          // it's sufficient to let the whole migration crash and retry the
+          // migration from scratch instead of retrying the reindex step only.
+          // TODO: I haven't been able to reproduce this error
+          return TaskEither.left({
+            type: 'retryable_es_client_error',
+            message: 'snapshot_in_progress_exception',
+          });
+        } else {
+          throw new Error(
+            'Reindex failed with the following failures:\n' + JSON.stringify(res.failures)
+          );
+        }
+      } else {
+        return TaskEither.right('reindex_succeded' as const);
+      }
+    }
+  )
+);
+
+export const waitForUpdateByQeuryTask = flow(
+  waitForTask,
+  TaskEither.chain(
+    (res): TaskEither.TaskEither<RetryableEsClientError, 'update_by_query_succeded'> => {
+      const failureIsSnapshotInProgress = ({ type }: { type: string }) =>
+        type === 'snapshot_in_progress_exception';
+      if (Option.isSome(res.failures)) {
+        if (res.failures.value.some(failureIsSnapshotInProgress)) {
+          // TODO: I haven't been able to reproduce this error
+          return TaskEither.left({
+            type: 'retryable_es_client_error',
+            message: 'snapshot_in_progress_exception',
+          });
+        }
+        throw new Error(
+          'update_by_query failed with the following failures:\n' +
+            JSON.stringify(res.failures.value)
+        );
+      } else if (Option.isSome(res.error)) {
+        throw new Error(
+          'update_by_query failed with the following error:\n' + JSON.stringify(res.error.value)
+        );
+      } else {
+        return TaskEither.right('update_by_query_succeded' as const);
+      }
+    }
+  )
+);
 
 export type AliasAction =
   | { remove_index: { index: string } }
@@ -459,7 +527,11 @@ export type AliasAction =
 export const updateAliases = (
   client: ElasticsearchClient,
   aliasActions: AliasAction[]
-): TaskEither.TaskEither<ExpectedErrors, UpdateAliasesResponse> => () => {
+): TaskEither.TaskEither<
+  | { type: 'index_not_found_exception'; index: string }
+  | { type: 'remove_index_not_a_concrete_index' },
+  'succeded'
+> => () => {
   return client.indices
     .updateAliases({
       body: {
@@ -467,21 +539,30 @@ export const updateAliases = (
       },
     })
     .then((res) => {
-      return Either.right({});
+      return Either.right('succeded' as const);
     })
-    .catch((err) => {
-      console.log(err.meta.body);
+    .catch((err: EsErrors.ElasticsearchClientError) => {
+      console.log(JSON.stringify(err));
+      if (err instanceof EsErrors.ResponseError) {
+        if (err.message === 'index_not_found_exception') {
+          return Either.left({ type: 'index_not_found_exception' as const, index: err.body.index });
+        } else if (
+          err.message === 'illegal_argument_exception' &&
+          err.body.reason.match(
+            /The provided expression \[.+\] matches an alias, specify the corresponding concrete indices instead./
+          )
+        ) {
+          return Either.left({ type: 'remove_index_not_a_concrete_index' });
+        }
+      }
       throw err;
-    })
-    .catch(catchEsClientErrors);
+    });
 };
 
 export interface AcknowledgeResponse {
   acknowledged: boolean;
   shardsAcknowledged: boolean;
 }
-
-export type CreateIndexResponse = AcknowledgeResponse;
 
 /**
  * Creates an index with the given mappings
@@ -500,8 +581,11 @@ export const createIndex = (
   client: ElasticsearchClient,
   indexName: string,
   mappings: IndexMapping
-): TaskEither.TaskEither<ExpectedErrors, CreateIndexResponse> => {
-  const createIndexTask: TaskEither.TaskEither<ExpectedErrors, AcknowledgeResponse> = () => {
+): TaskEither.TaskEither<RetryableEsClientError, 'create_index_succeeded'> => {
+  const createIndexTask: TaskEither.TaskEither<
+    RetryableEsClientError,
+    AcknowledgeResponse
+  > = () => {
     return client.indices
       .create(
         {
@@ -515,6 +599,7 @@ export const createIndex = (
           body: {
             mappings,
             settings: {
+              'index.blocks.write': true,
               // ES rule of thumb: shards should be several GB to 10's of GB, so
               // Kibana is unlikely to cross that limit.
               number_of_shards: 1,
@@ -555,9 +640,10 @@ export const createIndex = (
             shardsAcknowledged: false,
           });
         } else {
-          return catchEsClientErrors(error);
+          throw error;
         }
-      });
+      })
+      .catch(catchRetryableEsClientErrors);
   };
 
   return pipe(
@@ -565,14 +651,14 @@ export const createIndex = (
     TaskEither.chain((res) => {
       if (res.acknowledged && res.shardsAcknowledged) {
         // If the cluster state was updated and all shards ackd we're done
-        return TaskEither.right(res);
+        return TaskEither.right('create_index_succeeded');
       } else {
         // Otherwise, wait until the target index has a 'green' status.
         return pipe(
           waitForStatus(client, indexName, 'green'),
           TaskEither.map(() => {
             /** When the index status is 'green' we know that all shards were started */
-            return { acknowledged: true, shardsAcknowledged: true };
+            return 'create_index_succeeded';
           })
         );
       }
@@ -596,8 +682,11 @@ export const updateAndPickupMappings = (
   client: ElasticsearchClient,
   index: string,
   mappings: IndexMapping
-): TaskEither.TaskEither<ExpectedErrors, UpdateAndPickupMappingsResponse> => {
-  const putMappingTask: TaskEither.TaskEither<ExpectedErrors, { acknowledged: boolean }> = () => {
+): TaskEither.TaskEither<RetryableEsClientError, UpdateAndPickupMappingsResponse> => {
+  const putMappingTask: TaskEither.TaskEither<
+    RetryableEsClientError,
+    { acknowledged: boolean }
+  > = () => {
     return client.indices
       .putMapping<Record<string, any>, IndexMapping>({
         index,
@@ -608,7 +697,7 @@ export const updateAndPickupMappings = (
         // TODO do we need to check res.body.acknowledged?
         return Either.right({ acknowledged: res.body.acknowledged });
       })
-      .catch(catchEsClientErrors);
+      .catch(catchRetryableEsClientErrors);
   };
 
   return pipe(
@@ -626,7 +715,7 @@ export const search = (
   client: ElasticsearchClient,
   index: string,
   query: Record<string, unknown>
-): TaskEither.TaskEither<ExpectedErrors | Error, SearchResponse> => () => {
+): TaskEither.TaskEither<RetryableEsClientError, SearchResponse> => () => {
   return client
     .search<{
       // when `filter_path` is specified, ES doesn't return empty arrays, so if
@@ -666,14 +755,14 @@ export const search = (
       ],
     })
     .then((res) => Either.right({ hits: res.body.hits?.hits ?? [] }))
-    .catch(catchEsClientErrors);
+    .catch(catchRetryableEsClientErrors);
 };
 
 export const bulkIndex = (
   client: ElasticsearchClient,
   index: string,
   docs: SavedObjectsRawDoc[]
-): TaskEither.TaskEither<ExpectedErrors | Error, { succeeded: boolean }> => () => {
+): TaskEither.TaskEither<RetryableEsClientError, 'bulk_index_succeded'> => () => {
   return client
     .bulk<{
       took: number;
@@ -718,10 +807,10 @@ export const bulkIndex = (
         (item) => item.index.error.type !== 'version_conflict_engine_exception'
       );
       if (errors.length === 0) {
-        return Either.right({ succeeded: true });
+        return Either.right('bulk_index_succeded' as const);
       } else {
-        return Either.left(new Error(JSON.stringify(errors)));
+        throw new Error(JSON.stringify(errors));
       }
     })
-    .catch(catchEsClientErrors);
+    .catch(catchRetryableEsClientErrors);
 };

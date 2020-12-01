@@ -25,7 +25,6 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { cloneDeep } from 'lodash';
-import { errors as EsClientErrors } from '@elastic/elasticsearch';
 import * as Actions from './actions';
 import { IndexMapping } from '../mappings';
 import { Logger } from '../../logging';
@@ -90,6 +89,7 @@ export type CreateNewTargetState = PostInitState & {
   /** Blank ES cluster, create a new version-specific target index */
   controlState: 'CREATE_NEW_TARGET';
   source: Option.None;
+  versionIndexReadyActions: Option.Some<AliasAction[]>;
 };
 
 export type CloneSourceToTargetState = PostInitState & {
@@ -164,7 +164,7 @@ export type LegacyReindexState = LegacyBaseState & {
 export type LegacyReindexWaitForTaskState = LegacyBaseState & {
   /** Apply the pre-migration script to the legacy clone to prepare it for a migration */
   controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK';
-  preMigrationUpdateTaskId: string;
+  legacyReindexTaskId: string;
 };
 
 export type LegacyDeleteState = LegacyBaseState & {
@@ -234,14 +234,16 @@ const legacyIndex = (state: InitState) => state.indexPrefix;
 const versionIndex = (state: InitState) => `${state.indexPrefix}_${state.kibanaVersion}_001`;
 
 /**
- * Merge the _meta mappings of an index with the given target mappings.
+ * Merge the _meta.migrationMappingPropertyHashes mappings of an index with
+ * the given target mappings.
  *
  * @remarks Mapping updates are commutative (deeply merged) by Elasticsearch,
  * except for the _meta key. The source index we're migrating from might
  * contain documents created by a plugin that is disabled in the Kibana
- * instance performing this migration. We merge the _meta mappings from the
- * source index into the targetMappings to ensure that any
- * `migrationPropertyHashes` for disabled plugins aren't lost.
+ * instance performing this migration. We merge the
+ * _meta.migrationMappingPropertyHashes mappings from the source index into
+ * the targetMappings to ensure that any `migrationPropertyHashes` for
+ * disabled plugins aren't lost.
  *
  * Right now we don't use these `migrationPropertyHashes` but it could be used
  * in the future to optimize the `UPDATE_TARGET_MAPPINGS` step.
@@ -249,7 +251,10 @@ const versionIndex = (state: InitState) => `${state.indexPrefix}_${state.kibanaV
  * @param targetMappings
  * @param indexMappings
  */
-function mergeMappings(targetMappings: IndexMapping, indexMappings: IndexMapping) {
+function mergeMigrationMappingPropertyHashes(
+  targetMappings: IndexMapping,
+  indexMappings: IndexMapping
+) {
   return {
     ...targetMappings,
     _meta: {
@@ -282,99 +287,58 @@ export type ResponseType<ControlState extends AllActionStates> = Await<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-const isRetryableEsClientError = (e: EsClientErrors.ElasticsearchClientError): boolean => {
-  const retryResponseStatuses = [
-    503, // ServiceUnavailable
-    401, // AuthorizationException
-    403, // AuthenticationException
-    408, // RequestTimeout
-    410, // Gone
-    429, // TooManyRequests
-  ];
-
-  if (
-    e instanceof EsClientErrors.NoLivingConnectionsError ||
-    e instanceof EsClientErrors.ConnectionError ||
-    e instanceof EsClientErrors.TimeoutError ||
-    (e instanceof EsClientErrors.ResponseError &&
-      (retryResponseStatuses.includes(e.statusCode) ||
-        e.body?.error?.type === 'snapshot_in_progress_exception'))
-  ) {
-    return true;
+const delayRetryState = <S extends State>(state: S, left: Actions.RetryableEsClientError): S => {
+  if (state.retryCount === 5) {
+    return {
+      ...state,
+      controlState: 'FATAL',
+      logs: [
+        ...state.logs,
+        { level: 'error', message: 'Unable to complete action after 5 attempts, terminating.' },
+      ],
+    };
   } else {
-    return false;
+    const retryCount = state.retryCount + 1;
+    const retryDelay = 1000 * Math.pow(2, retryCount); // 2s, 4s, 8s, 16s, 32s, 64s
+
+    return {
+      ...state,
+      retryCount,
+      retryDelay,
+      logs: [
+        ...state.logs,
+        {
+          level: 'error',
+          message:
+            chalk.red('ERROR: ') +
+            `Action failed with '${left.message}'. Retrying attempt ${retryCount} out of 5 in ${
+              retryDelay / 1000
+            } seconds.`,
+        },
+      ],
+    };
   }
 };
-
-const delayOrResetRetryState = <S extends State>(
-  state: S,
-  resW: ResponseType<AllActionStates>
-): S => {
-  const delayRetryState = (error: Error): S => {
-    if (state.retryCount === 5) {
-      return {
-        ...state,
-        controlState: 'FATAL',
-        error,
-        logs: [
-          ...state.logs,
-          { level: 'error', message: 'Unable to complete action after 5 attempts, terminating.' },
-        ],
-      };
-    } else {
-      const retryCount = state.retryCount + 1;
-      const retryDelay = 1000 * Math.pow(2, retryCount); // 2s, 4s, 8s, 16s, 32s, 64s
-
-      return {
-        ...state,
-        retryCount,
-        retryDelay,
-        logs: [
-          ...state.logs,
-          {
-            level: 'error',
-            message:
-              chalk.red('ERROR: ') +
-              `Action failed with '${error.message}'. Retrying attempt ${retryCount} out of 5 in ${
-                retryDelay / 1000
-              } seconds.`,
-          },
-        ],
-      };
-    }
-  };
-  const resetRetryState = (): S => {
-    return { ...state, ...{ retryCount: 0, retryDelay: 0 } };
-  };
-
-  return Either.fold(delayRetryState, resetRetryState)((resW as unknown) as any);
+const resetRetryState = <S extends State>(state: S): S => {
+  return { ...state, ...{ retryCount: 0, retryDelay: 0 } };
 };
 
-export const model = (
-  currentState: State,
-  resW:
-    | ResponseType<AllActionStates>
-    | Either.Either<EsClientErrors.ElasticsearchClientError, never>
-): State => {
+export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
-  // responses and ElasticsearchClientErrors. Each control state only triggers
-  // one action so each control state only has one action response type. This
-  // allows us to narrow the response type to only the action response
-  // associated with a specific control state using:
+  // responses. Each control state only triggers one action so each control
+  // state only has one action response type. This allows us to narrow the
+  // response type to only the action response associated with a specific
+  // control state using:
   // `const res = resW as ResponseType<typeof stateP.controlState>;`
 
   let stateP: State = cloneDeep(currentState);
   if (Either.isLeft<unknown, unknown>(resW)) {
-    if (resW.left instanceof Error) {
-      if (isRetryableEsClientError(resW.left)) {
-        stateP = delayOrResetRetryState(stateP, resW);
-        return stateP;
-      } else {
-        throw resW.left;
-      }
+    if (resW.left.type === 'retryable_es_client_error') {
+      stateP = delayRetryState(stateP, resW.left);
+      return stateP;
     }
   } else {
-    stateP = delayOrResetRetryState(stateP, resW);
+    stateP = resetRetryState(stateP);
   }
 
   if (stateP.controlState === 'INIT') {
@@ -408,7 +372,7 @@ export const model = (
           // index
           source: Option.none,
           target: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
-          targetMappings: mergeMappings(
+          targetMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetMappings,
             indices[aliases[currentAlias(stateP)]].mappings
           ),
@@ -443,7 +407,10 @@ export const model = (
           controlState: 'SET_SOURCE_WRITE_BLOCK',
           source: Option.some(source) as Option.Some<string>,
           target,
-          targetMappings: mergeMappings(stateP.targetMappings, indices[source].mappings),
+          targetMappings: mergeMigrationMappingPropertyHashes(
+            stateP.targetMappings,
+            indices[source].mappings
+          ),
           versionIndexReadyActions: Option.some([
             { remove: { index: source, alias: currentAlias(stateP) /* must_exist: true*/ } }, // TODO: blocked by https://github.com/elastic/elasticsearch/issues/62642
             { add: { index: target, alias: currentAlias(stateP) } },
@@ -476,7 +443,7 @@ export const model = (
           controlState: 'LEGACY_SET_WRITE_BLOCK',
           source: Option.some(legacyReindexTarget) as Option.Some<string>,
           target,
-          targetMappings: mergeMappings(
+          targetMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetMappings,
             indices[legacyIndex(stateP)].mappings
           ),
@@ -496,7 +463,7 @@ export const model = (
               remove: {
                 index: legacyReindexTarget,
                 alias: currentAlias(stateP),
-                must_exist: true, // TODO: blocked by https://github.com/elastic/elasticsearch/issues/62642
+                must_exist: true,
               },
             },
             { add: { index: target, alias: currentAlias(stateP) } },
@@ -515,11 +482,9 @@ export const model = (
           versionIndexReadyActions: Option.some([
             { add: { index: target, alias: currentAlias(stateP) } },
             { add: { index: target, alias: versionAlias(stateP) } },
-          ]),
+          ]) as Option.Some<AliasAction[]>,
         };
       }
-    } else {
-      // return throwBadResponse(res);
     }
     return stateP;
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
@@ -532,70 +497,128 @@ export const model = (
       // If the write block failed because the index doesn't exist, it means
       // another instance already completed the legacy pre-migration. Proceed
       // to the next step.
-      if (res.left === 'index_not_found_exception') {
+      if (res.left.type === 'index_not_found_exception') {
         stateP = { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
-      } else if (res.left === 'set_write_block_failed') {
-        stateP = delayOrResetRetryState(stateP, res);
+      }
+    }
+
+    return stateP;
+  } else if (stateP.controlState === 'LEGACY_CREATE_REINDEX_TARGET') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'LEGACY_REINDEX',
+      };
+    } else {
+      return stateP;
+    }
+  } else if (stateP.controlState === 'LEGACY_REINDEX') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res)) {
+      stateP = {
+        ...stateP,
+        controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK',
+        legacyReindexTaskId: res.right.taskId,
+      };
+    }
+    return stateP;
+  } else if (stateP.controlState === 'LEGACY_REINDEX_WAIT_FOR_TASK') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'LEGACY_DELETE',
+      };
+    } else {
+      if (
+        (res.left.type === 'index_not_found_exception' && res.left.index === stateP.legacy) ||
+        res.left.type === 'target_index_had_write_block'
+      ) {
+        // index_not_found_exception for the legacy index, another instance
+        // already complete the LEGACY_DELETE step.
+        //
+        // target_index_had_write_block: another instance already completed the
+        // SET_SOURCE_WRITE_BLOCK step.
+        //
+        // If we detect that another instance has already completed a step, we
+        // can technically skip ahead in the process until after the completed
+        // step. However, by not skipping ahead we limit branches in the
+        // control state progression and simplify the implementation.
+        return { ...stateP, controlState: 'LEGACY_DELETE' };
+      } else if (
+        res.left.type === 'index_not_found_exception' &&
+        res.left.index === stateP.source.value
+      ) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'error',
+              message: `LEGACY_REINDEX failed because the reindex destination index [${stateP.source.value}] does not exist.`,
+            },
+          ],
+        };
+      }
+      return { ...stateP, controlState: 'FATAL' };
+    }
+  } else if (stateP.controlState === 'LEGACY_DELETE') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isLeft(res)) {
+      if (
+        res.left.type === 'remove_index_not_a_concrete_index' ||
+        (res.left.type === 'index_not_found_exception' && res.left.index === stateP.legacy)
+      ) {
+        // index_not_found_exception, another Kibana instance already
+        // deleted the legacy index
+        //
+        // remove_index_not_a_concrete_index, another Kibana instance already
+        // deleted the legacy index and created a .kibana alias
+        //
+        // If we detect that another instance has already completed a step, we
+        // can technically skip ahead in the process until after the completed
+        // step. However, by not skipping ahead we limit branches in the
+        // control state progression and simplify the implementation.
+        return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
+      } else if (
+        res.left.type === 'index_not_found_exception' &&
+        res.left.index === stateP.source.value
+      ) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'error',
+              message: `LEGACY_DELETE failed because the source index [${stateP.source.value}] does not exist.`,
+            },
+          ],
+        };
+      }
+    } else {
+      return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
+    }
+    return stateP;
+  } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    // If the write block is sucessfully in place, proceed to the next step.
+    if (Either.isRight(res)) {
+      stateP = { ...stateP, controlState: 'CLONE_SOURCE_TO_TARGET' };
+    } else if (Either.isLeft(res)) {
+      if (res.left.type === 'index_not_found_exception') {
+        // If the write block failed because the index doesn't exist, it means
+        // another instance already completed the legacy pre-migration. Proceed
+        // to the next step.
+        stateP = { ...stateP, controlState: 'CLONE_SOURCE_TO_TARGET' };
       }
     } else {
       return throwBadResponse(res);
     }
 
     return stateP;
-  } else if (stateP.controlState === 'LEGACY_CREATE_REINDEX_TARGET') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isLeft(res)) {
-      // Ignore if legacy index doesn't exist, this probably means another
-      // Kibana instance already completed the legacy pre-migration and
-      // deleted it
-      if (res.left.message === 'index_not_found_exception') {
-        return delayOrResetRetryState(stateP, Either.right({}));
-      } else {
-        return stateP;
-      }
-    } else {
-      return {
-        ...stateP,
-        controlState: 'LEGACY_REINDEX',
-      };
-    }
-  } else if (stateP.controlState === 'LEGACY_REINDEX') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK',
-        preMigrationUpdateTaskId: res.right.taskId,
-      };
-    } else {
-      return stateP;
-    }
-  } else if (stateP.controlState === 'LEGACY_REINDEX_WAIT_FOR_TASK') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isRight(res) && Option.isSome(res.right.failures)) {
-      // TODO: ignore index closed error
-      return { ...stateP, controlState: 'FATAL' };
-    }
-    return {
-      ...stateP,
-      controlState: 'LEGACY_DELETE',
-    };
-  } else if (stateP.controlState === 'LEGACY_DELETE') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isLeft(res)) {
-      // Ignore if legacy index doesn't exist, this probably means another
-      // Kibana instance already completed the legacy pre-migration and
-      // deleted it
-      if (res.left.message === 'index_not_found_exception') {
-        return delayOrResetRetryState(stateP, Either.right({}));
-      } else {
-        return stateP;
-      }
-    } else {
-      return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
-    }
-  } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
-    return { ...stateP, controlState: 'CLONE_SOURCE_TO_TARGET' };
   } else if (stateP.controlState === 'CLONE_SOURCE_TO_TARGET') {
     return { ...stateP, controlState: 'UPDATE_TARGET_MAPPINGS' };
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
@@ -610,24 +633,17 @@ export const model = (
     return stateP;
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
     const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isRight(res) && Option.isSome(res.right.failures)) {
+    if (Either.isRight(res) && res.right === 'update_by_query_succeded') {
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH',
+      };
+    } else {
       return {
         ...stateP,
         controlState: 'FATAL',
-        logs: [
-          ...stateP.logs,
-          {
-            level: 'error',
-            message:
-              'Failed to update target mappings: ' + JSON.stringify(res.right.failures.value),
-          },
-        ],
       };
     }
-    return {
-      ...stateP,
-      controlState: 'OUTDATED_DOCUMENTS_SEARCH',
-    };
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH') {
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res)) {
@@ -657,23 +673,23 @@ export const model = (
     }
     return stateP;
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
-    return {
-      ...stateP,
-      controlState: 'OUTDATED_DOCUMENTS_SEARCH',
-    };
-  } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
-    if (Option.isSome(stateP.versionIndexReadyActions)) {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res) && res.right === 'bulk_index_succeded') {
       return {
         ...stateP,
-        controlState: 'MARK_VERSION_INDEX_READY',
-        versionIndexReadyActions: stateP.versionIndexReadyActions,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH',
       };
     } else {
       return {
         ...stateP,
-        controlState: 'DONE',
+        controlState: 'FATAL',
       };
     }
+  } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
+    return {
+      ...stateP,
+      controlState: 'MARK_VERSION_INDEX_READY',
+    };
   } else if (stateP.controlState === 'MARK_VERSION_INDEX_READY') {
     // TODO Handle "required alias [.kibana] does not exist" errors blocked by https://github.com/elastic/elasticsearch/issues/62642
     return { ...stateP, controlState: 'DONE' };
@@ -700,7 +716,7 @@ export const nextActionMap = (
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
       Actions.updateAndPickupMappings(client, state.target, state.targetMappings),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
-      Actions.waitForTask(client, state.updateTargetMappingsTaskId, '60s'),
+      Actions.waitForUpdateByQeuryTask(client, state.updateTargetMappingsTaskId, '60s'),
     OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>
       Actions.search(client, state.target, state.outdatedDocumentsQuery),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
@@ -720,9 +736,9 @@ export const nextActionMap = (
     LEGACY_REINDEX: (state: LegacyReindexState) =>
       Actions.reindex(client, state.legacy, state.source.value, state.preMigrationScript),
     LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
-      Actions.setWriteBlock2(client, state.legacy),
+      Actions.setWriteBlock(client, state.legacy),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
-      Actions.waitForTask(client, state.preMigrationUpdateTaskId, '60s'),
+      Actions.waitForReindexTask(client, state.legacyReindexTaskId, '60s'),
     LEGACY_DELETE: (state: LegacyDeleteState) =>
       Actions.updateAliases(client, state.legacyPreMigrationDoneActions),
   };
@@ -741,12 +757,6 @@ export const next = (
     };
   };
 
-  const tryCatch = <F extends (...args: any) => any>(
-    fn: F
-  ): (() => ReturnType<F> | Promise<EsClientErrors.ElasticsearchClientError>) => {
-    return () => fn().catch((e: EsClientErrors.ElasticsearchClientError) => e);
-  };
-
   const map = nextActionMap(client, transformRawDocs);
 
   if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
@@ -759,7 +769,7 @@ export const next = (
     const nextAction = map[state.controlState] as (
       state: State
     ) => ReturnType<typeof map[AllActionStates]>;
-    return delay(tryCatch(nextAction(state)));
+    return delay(nextAction(state));
   }
 };
 
