@@ -52,7 +52,18 @@ const ServiceNowParamsFields: React.FunctionComponent<
     incident: { short_description, description, severity, urgency, impact },
     comments,
   } = useMemo(() => {
-    return actionParams.subActionParams ?? { incident: {}, comments: [] };
+    return (
+      actionParams.subActionParams ?? {
+        incident: {
+          short_description: null,
+          description: null,
+          severity: null,
+          urgency: null,
+          impact: null,
+        },
+        comments: [],
+      }
+    );
   }, [actionParams.subActionParams]);
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -169,7 +180,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'short_description'}
-          inputTargetValue={short_description}
+          inputTargetValue={short_description ?? undefined}
           errors={errors.short_description as string[]}
         />
       </EuiFormRow>

@@ -69,7 +69,7 @@ export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraAc
         actionParams.subActionParams.incident &&
         !actionParams.subActionParams.incident.summary?.length
       ) {
-        errors.summary.push(i18n.TITLE_REQUIRED);
+        errors.summary.push(i18n.SUMMARY_REQUIRED);
       }
       return validationResult;
     },

@@ -42,9 +42,21 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const {
     incident: { summary, description, issueType, priority, labels, parent },
     comments,
-  } = useMemo(() => actionParams.subActionParams ?? { incident: {}, comments: [] }, [
-    actionParams.subActionParams,
-  ]);
+  } = useMemo(
+    () =>
+      actionParams.subActionParams ?? {
+        incident: {
+          summary: null,
+          description: null,
+          issueType: null,
+          priority: null,
+          labels: null,
+          parent: null,
+        },
+        comments: [],
+      },
+    [actionParams.subActionParams]
+  );
 
   const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
     http,
@@ -226,7 +238,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               editAction={editSubActionProperty}
               messageVariables={messageVariables}
               paramsProperty={'summary'}
-              inputTargetValue={summary}
+              inputTargetValue={summary ?? undefined}
               errors={errors.summary as string[]}
             />
           </EuiFormRow>

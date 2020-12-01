@@ -40,9 +40,14 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   const {
     incident: { name, description, incidentTypes, severityCode },
     comments,
-  } = useMemo(() => actionParams.subActionParams ?? { incident: {}, comments: [] }, [
-    actionParams.subActionParams,
-  ]);
+  } = useMemo(
+    () =>
+      actionParams.subActionParams ?? {
+        incident: { name: null, description: null, incidentTypes: null, severityCode: null },
+        comments: [],
+      },
+    [actionParams.subActionParams]
+  );
   const {
     isLoading: isLoadingIncidentTypes,
     incidentTypes: allIncidentTypes,
@@ -199,7 +204,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'name'}
-          inputTargetValue={name}
+          inputTargetValue={name ?? undefined}
           errors={errors.name as string[]}
         />
       </EuiFormRow>

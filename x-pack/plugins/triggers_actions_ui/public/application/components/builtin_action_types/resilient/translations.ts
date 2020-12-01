@@ -134,14 +134,14 @@ export const MAPPING_FIELD_COMMENTS = i18n.translate(
 );
 
 export const DESCRIPTION_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredDescriptionTextField',
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.requiredDescriptionTextField',
   {
     defaultMessage: 'Description is required.',
   }
 );
 
-export const TITLE_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.common.requiredTitleTextField',
+export const NAME_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.requiredNameTextField',
   {
     defaultMessage: 'Name is required.',
   }

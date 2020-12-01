@@ -77,7 +77,7 @@ export function getActionType(): ActionTypeModel<
         actionParams.subActionParams.incident &&
         !actionParams.subActionParams.incident.name?.length
       ) {
-        errors.name.push(i18n.TITLE_REQUIRED);
+        errors.name.push(i18n.NAME_REQUIRED);
       }
       return validationResult;
     },
