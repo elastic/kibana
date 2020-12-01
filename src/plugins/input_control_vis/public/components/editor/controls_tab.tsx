@@ -18,7 +18,8 @@
  */
 
 import React, { PureComponent } from 'react';
-import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -50,12 +51,11 @@ interface ControlsTabUiState {
   type: CONTROL_TYPES;
 }
 
-export type ControlsTabUiProps = InjectedIntlProps &
-  VisOptionsProps<InputControlVisParams> & {
-    deps: InputControlVisDependencies;
-  };
+export type ControlsTabProps = VisOptionsProps<InputControlVisParams> & {
+  deps: InputControlVisDependencies;
+};
 
-class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState> {
+class ControlsTab extends PureComponent<ControlsTabProps, ControlsTabUiState> {
   state = {
     type: CONTROL_TYPES.LIST,
   };
@@ -157,8 +157,6 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
   }
 
   render() {
-    const { intl } = this.props;
-
     return (
       <div>
         {this.renderControls()}
@@ -172,25 +170,31 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
                   options={[
                     {
                       value: CONTROL_TYPES.RANGE,
-                      text: intl.formatMessage({
-                        id: 'inputControl.editor.controlsTab.select.rangeDropDownOptionLabel',
-                        defaultMessage: 'Range slider',
-                      }),
+                      text: i18n.translate(
+                        'inputControl.editor.controlsTab.select.rangeDropDownOptionLabel',
+                        {
+                          defaultMessage: 'Range slider',
+                        }
+                      ),
                     },
                     {
                       value: CONTROL_TYPES.LIST,
-                      text: intl.formatMessage({
-                        id: 'inputControl.editor.controlsTab.select.listDropDownOptionLabel',
-                        defaultMessage: 'Options list',
-                      }),
+                      text: i18n.translate(
+                        'inputControl.editor.controlsTab.select.listDropDownOptionLabel',
+                        {
+                          defaultMessage: 'Options list',
+                        }
+                      ),
                     },
                   ]}
                   value={this.state.type}
                   onChange={(event) => this.setState({ type: event.target.value as CONTROL_TYPES })}
-                  aria-label={intl.formatMessage({
-                    id: 'inputControl.editor.controlsTab.select.controlTypeAriaLabel',
-                    defaultMessage: 'Select control type',
-                  })}
+                  aria-label={i18n.translate(
+                    'inputControl.editor.controlsTab.select.controlTypeAriaLabel',
+                    {
+                      defaultMessage: 'Select control type',
+                    }
+                  )}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -201,10 +205,12 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
                   onClick={this.handleAddControl}
                   iconType="plusInCircle"
                   data-test-subj="inputControlEditorAddBtn"
-                  aria-label={intl.formatMessage({
-                    id: 'inputControl.editor.controlsTab.select.addControlAriaLabel',
-                    defaultMessage: 'Add control',
-                  })}
+                  aria-label={i18n.translate(
+                    'inputControl.editor.controlsTab.select.addControlAriaLabel',
+                    {
+                      defaultMessage: 'Add control',
+                    }
+                  )}
                 >
                   <FormattedMessage
                     id="inputControl.editor.controlsTab.addButtonLabel"
@@ -220,7 +226,6 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
   }
 }
 
-const ControlsTab = injectI18n(ControlsTabUi);
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
 export { ControlsTab as default };
