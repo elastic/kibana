@@ -69,6 +69,8 @@ interface DataVisualizerPageState {
   nonMetricShowFieldType: ML_JOB_FIELD_TYPES | '*';
   nonMetricFieldQuery?: string;
   documentCountStats?: FieldVisConfig;
+  visibleFieldTypes: string[];
+  visibleFieldNames: string[];
 }
 
 const defaultSearchQuery = {
@@ -98,6 +100,8 @@ function getDefaultPageState(): DataVisualizerPageState {
     showAllNonMetrics: false,
     nonMetricShowFieldType: '*',
     documentCountStats: undefined,
+    visibleFieldTypes: [],
+    visibleFieldNames: [],
   };
 }
 
@@ -198,6 +202,9 @@ export const Page: FC = () => {
 
   const [nonMetricFieldQuery, setNonMetricFieldQuery] = useState(defaults.nonMetricFieldQuery);
 
+  const [visibleFieldTypes, setVisibleFieldTypes] = useState(defaults.visibleFieldTypes);
+  const [visibleFieldNames, setVisibleFieldNames] = useState(defaults.visibleFieldNames);
+
   useEffect(() => {
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),
@@ -234,10 +241,6 @@ export const Page: FC = () => {
   useEffect(() => {
     createMetricCards();
   }, [showAllMetrics, metricFieldQuery]);
-
-  useEffect(() => {
-    createNonMetricCards();
-  }, [showAllNonMetrics, nonMetricShowFieldType, nonMetricFieldQuery]);
 
   /**
    * Extract query data from the saved search object.
@@ -644,10 +647,21 @@ export const Page: FC = () => {
 
   const wizardPanelWidth = '280px';
 
-  const configs = useMemo(() => [...nonMetricConfigs, ...metricConfigs], [
-    nonMetricConfigs,
-    metricConfigs,
-  ]);
+  const configs = useMemo(() => {
+    let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
+    if (visibleFieldTypes && visibleFieldTypes.length > 0) {
+      combinedConfigs = combinedConfigs.filter(
+        (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1
+      );
+    }
+    if (visibleFieldNames && visibleFieldNames.length > 0) {
+      combinedConfigs = combinedConfigs.filter(
+        (config) => visibleFieldNames.findIndex((field) => field === config.fieldName) > -1
+      );
+    }
+
+    return combinedConfigs;
+  }, [nonMetricConfigs, metricConfigs, visibleFieldTypes, visibleFieldNames]);
 
   return (
     <Fragment>
@@ -723,6 +737,10 @@ export const Page: FC = () => {
                     setSamplerShardSize={setSamplerShardSize}
                     overallStats={overallStats}
                     indexedFieldTypes={indexedFieldTypes}
+                    setVisibleFieldTypes={setVisibleFieldTypes}
+                    visibleFieldTypes={visibleFieldTypes}
+                    visibleFieldNames={visibleFieldNames}
+                    setVisibleFieldNames={setVisibleFieldNames}
                   />
                   <EuiSpacer size={'s'} />
                   <DataVisualizerDataGrid items={configs} />

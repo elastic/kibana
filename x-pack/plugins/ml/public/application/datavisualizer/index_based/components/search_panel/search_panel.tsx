@@ -21,7 +21,7 @@ import {
   QueryStringInput,
 } from '../../../../../../../../../src/plugins/data/public';
 import { ShardSizeFilter } from './shard_size_select';
-import { DatavisualizerFieldNameFilter } from './field_name_filter';
+import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DatavisualizerFieldTypeFilter } from './field_type_filter';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 interface Props {
@@ -36,6 +36,10 @@ interface Props {
   setSamplerShardSize(s: number): void;
   overallStats: any;
   indexedFieldTypes: ML_JOB_FIELD_TYPES[];
+  setVisibleFieldTypes(q: any): void;
+  visibleFieldTypes: string[];
+  setVisibleFieldNames(q: any): void;
+  visibleFieldNames: string[];
 }
 
 export const SearchPanel: FC<Props> = ({
@@ -49,6 +53,10 @@ export const SearchPanel: FC<Props> = ({
   setSamplerShardSize,
   overallStats,
   indexedFieldTypes,
+  setVisibleFieldTypes,
+  visibleFieldTypes,
+  setVisibleFieldNames,
+  visibleFieldNames,
 }) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
@@ -126,8 +134,16 @@ export const SearchPanel: FC<Props> = ({
           setSamplerShardSize={setSamplerShardSize}
         />
       </EuiFlexItem>
-      <DatavisualizerFieldNameFilter overallStats={overallStats} />
-      <DatavisualizerFieldTypeFilter indexedFieldTypes={indexedFieldTypes} />
+      <DataVisualizerFieldNamesFilter
+        overallStats={overallStats}
+        setVisibleFieldNames={setVisibleFieldNames}
+        visibleFieldNames={visibleFieldNames}
+      />
+      <DatavisualizerFieldTypeFilter
+        indexedFieldTypes={indexedFieldTypes}
+        setVisibleFieldTypes={setVisibleFieldTypes}
+        visibleFieldTypes={visibleFieldTypes}
+      />
 
       <EuiFlexItem grow={false} />
     </EuiFlexGroup>

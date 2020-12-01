@@ -41,7 +41,8 @@ export const MultiselectPicker: FC<{
   options: Option[];
   onChange: Function;
   title?: string;
-}> = ({ options, onChange, title }) => {
+  checkedOptions: string[];
+}> = ({ options, onChange, title, checkedOptions }) => {
   const [items, setItems] = useState<Option[]>(options);
 
   useEffect(() => {
@@ -58,28 +59,18 @@ export const MultiselectPicker: FC<{
     setIsPopoverOpen(false);
   };
 
-  function updateItem(index: number) {
-    if (!items[index]) {
+  const handleOnChange = (index: number) => {
+    if (!items[index] || !Array.isArray(checkedOptions) || onChange === undefined) {
       return;
     }
-
-    const newItems = [...items];
-
-    switch (newItems[index].checked) {
-      case 'on':
-        delete newItems[index].checked;
-        break;
-
-      case 'off':
-        newItems[index].checked = undefined;
-        break;
-
-      default:
-        newItems[index].checked = 'on';
+    const item = items[index];
+    const foundIndex = checkedOptions.findIndex((fieldValue) => fieldValue === item.value);
+    if (foundIndex > -1) {
+      onChange(checkedOptions.filter((_, idx) => idx !== foundIndex));
+    } else {
+      onChange([...checkedOptions, item.value]);
     }
-
-    setItems(newItems);
-  }
+  };
 
   const button = (
     <EuiFilterButton
@@ -87,8 +78,8 @@ export const MultiselectPicker: FC<{
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={items.length}
-      hasActiveFilters={!!items.find((item) => item.checked === 'on')}
-      numActiveFilters={items.filter((item) => item.checked === 'on').length}
+      hasActiveFilters={checkedOptions && checkedOptions.length > 0}
+      numActiveFilters={checkedOptions && checkedOptions.length}
     >
       {title}
     </EuiFilterButton>
@@ -110,12 +101,17 @@ export const MultiselectPicker: FC<{
           {Array.isArray(items) && items.length > 0 ? (
             items.map((item, index) => (
               <EuiFilterSelectItem
-                checked={item.checked}
+                checked={
+                  checkedOptions &&
+                  checkedOptions.findIndex((fieldValue) => fieldValue === item.value) > -1
+                    ? 'on'
+                    : undefined
+                }
                 key={index}
-                onClick={() => updateItem(index)}
+                onClick={() => handleOnChange(index)}
                 style={{ flexDirection: 'row' }}
               >
-                {item.name}
+                {item.name ?? item.value}
               </EuiFilterSelectItem>
             ))
           ) : (

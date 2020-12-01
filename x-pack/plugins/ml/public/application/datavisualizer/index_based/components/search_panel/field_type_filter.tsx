@@ -6,6 +6,7 @@
 
 import React, { FC, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Option, MultiselectPicker } from '../../../../components/multi_select_picker';
 import { FieldTypeIcon } from '../../../../components/field_type_icon';
 
@@ -35,12 +36,15 @@ export const ML_JOB_FIELD_TYPES_OPTIONS = {
 
 export const DatavisualizerFieldTypeFilter: FC<{
   indexedFieldTypes: MlJobFieldType[];
-}> = ({ indexedFieldTypes }) => {
+  setVisibleFieldTypes(q: any): void;
+  visibleFieldTypes: string[];
+}> = ({ indexedFieldTypes, setVisibleFieldTypes, visibleFieldTypes }) => {
   const options: Option[] = useMemo(() => {
     return indexedFieldTypes.map((indexedFieldName) => {
       const item = ML_JOB_FIELD_TYPES_OPTIONS[indexedFieldName];
 
       return {
+        value: indexedFieldName,
         name: (
           <EuiFlexGroup>
             <EuiFlexItem grow={true}> {item.name}</EuiFlexItem>
@@ -59,5 +63,19 @@ export const DatavisualizerFieldTypeFilter: FC<{
       };
     });
   }, [indexedFieldTypes]);
-  return <MultiselectPicker title={'Field type'} options={options} onChange={() => {}} />;
+  const fieldTypeTitle = useMemo(
+    () =>
+      i18n.translate('ml.dataVisualizer.indexBased.fieldTypeSelect', {
+        defaultMessage: 'Field type',
+      }),
+    []
+  );
+  return (
+    <MultiselectPicker
+      title={fieldTypeTitle}
+      options={options}
+      onChange={setVisibleFieldTypes}
+      checkedOptions={visibleFieldTypes}
+    />
+  );
 };
