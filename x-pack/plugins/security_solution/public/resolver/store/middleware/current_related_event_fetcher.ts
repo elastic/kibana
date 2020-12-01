@@ -35,7 +35,7 @@ export function CurrentRelatedEventFetcher(
     const oldParams = last;
     last = newParams;
     const oldID = selectors.currentRelatedEventRequestID(state);
-    const newID = state.data.dataRefreshRequestsMade;
+    const newID = selectors.dataRefreshRequestsMade(state);
     const shouldRefetch = oldID !== undefined && newID !== undefined && oldID !== newID;
     // If the panel view params have changed and the current panel view is the `eventDetail`, then fetch the event details for that eventID.
     if (

@@ -254,6 +254,9 @@ export interface NodeEventsInCategoryState {
    */
   dataRequestID?: number;
 
+  /**
+   * Parameters used for a request currently in progress.
+   */
   pendingRequestParameters?: (PanelViewAndParameters & { dataRequestID?: number }) | null;
 }
 
@@ -281,8 +284,6 @@ export interface DataState {
     loading: boolean;
     data: (SafeResolverEvent & { dataRequestID?: number }) | null;
   };
-
-  filters?: object;
 
   readonly tree?: {
     /**
@@ -672,15 +673,6 @@ export interface ResolverProps {
    * A flag to update data from an external source
    */
   shouldUpdate: boolean;
-
-  /**
-   * A filters object containing any optional filters to use with resolver
-   */
-
-  filters?: {
-    start?: string;
-    end?: string;
-  };
 }
 
 /**
