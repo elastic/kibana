@@ -4,36 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiBasicTable, EuiIcon, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
-import { MonitorListStatusColumn } from './monitor_list_status_column';
+import { MonitorListStatusColumn } from './columns/monitor_status_column';
 import { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../../common/charts';
+import { OverviewPageLink } from './overview_page_link';
 import { MonitorPageLink } from '../../common/monitor_page_link';
 import * as labels from './translations';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
-import { CertStatusColumn } from './cert_status_column';
+import { CertStatusColumn } from './columns/cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 import { URL_LABEL } from '../../common/translations';
 import { EnableMonitorAlert } from './columns/enable_alert';
 import { STATUS_ALERT_COLUMN } from './translations';
+import { MonitorNameColumn } from './columns/monitor_name_col';
 
 interface Props extends MonitorListProps {
   pageSize: number;
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
 }
-
-const TruncatedEuiLink = styled(EuiLink)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
 
 export const noItemsMessage = (loading: boolean, filters?: string) => {
   if (loading) return labels.LOADING;
@@ -108,22 +111,18 @@ export const MonitorListComponent: ({
       mobileOptions: {
         fullWidth: true,
       },
+      render: (name: string, summary: MonitorSummary) => <MonitorNameColumn summary={summary} />,
       sortable: true,
-      render: (_value: string, { monitor_id: monitorId, state: { monitor } }: MonitorSummary) => (
-        <MonitorPageLink monitorId={monitorId} linkParameters={linkParameters}>
-          {monitor.name ? monitor.name : `Unnamed - ${monitorId}`}
-        </MonitorPageLink>
-      ),
     },
     {
       align: 'left' as const,
       field: 'url.full',
       name: URL_LABEL,
-      sortable: true,
-      render: (_value: string, { state: { url } }: MonitorSummary) => (
-        <TruncatedEuiLink href={url.full} target="_blank" color="text">
-          {url.full} <EuiIcon size="s" type="popout" color="subbdued" />
-        </TruncatedEuiLink>
+      width: '40%',
+      render: (url: string) => (
+        <EuiLink href={url} target="_blank" color="text" external>
+          {url}
+        </EuiLink>
       ),
     },
     {
@@ -150,7 +149,7 @@ export const MonitorListComponent: ({
       align: 'center' as const,
       field: '',
       name: STATUS_ALERT_COLUMN,
-      width: '150px',
+      width: '100px',
       render: (item: MonitorSummary) => (
         <EnableMonitorAlert
           monitorId={item.monitor_id}
@@ -164,7 +163,7 @@ export const MonitorListComponent: ({
       name: '',
       sortable: true,
       isExpander: true,
-      width: '24px',
+      width: '40px',
       render: (id: string) => {
         return (
           <EuiButtonIcon
@@ -216,6 +215,7 @@ export const MonitorListComponent: ({
         items={items}
         noItemsMessage={noItemsMessage(loading, filters)}
         columns={columns}
+        tableLayout={'auto'}
         sorting={sorting}
         pagination={{ totalItemCount: list.totalMonitors ?? 0, pageSize, pageIndex }}
         onChange={onTableChange}

@@ -153,12 +153,10 @@ This content has moved. See {ref}/index-mgmt.html[Index management].
 
 This content has moved. See <<discover, **Discover**>>.
 
-
 [role="exclude",id="document-context"]
 == View a document in context
 
 This content has moved. See <<discover, **Discover**>>.
-
 
 [role="exclude",id="document-data"]
 == View document data
@@ -169,3 +167,29 @@ This content has moved. See <<discover, **Discover**>>.
 == View field data statistics
 
 This content has moved. See <<discover, **Discover**>>.
+
+[role="exclude",id="known-plugins"]
+== Known plugins
+
+This content has moved. See <<known-kibana-plugins>>.
+
+[role="exclude",id="url-drilldown"]
+== URL drilldown
+
+[float]
+[[trigger-picker]]
+=== Picking a trigger for a URL drilldown
+
+This page has moved. Refer to <<url-drilldowns>>.
+
+[float]
+[[templating]]
+=== URL templating
+
+This page has moved. Refer to <<url_templating-language>>.
+
+[float]
+[[variables]]
+=== Variables
+
+This page has moved. Refer to <<url-template-variables>>.
