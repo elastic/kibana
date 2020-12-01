@@ -30,7 +30,6 @@ const indexPatternSpecSchema = schema.object({
   id: schema.maybe(schema.string()),
   version: schema.maybe(schema.string()),
   type: schema.maybe(schema.string()),
-  intervalName: schema.maybe(schema.string()),
   timeFieldName: schema.maybe(schema.string()),
   sourceFilters: schema.maybe(
     schema.arrayOf(

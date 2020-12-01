@@ -58,7 +58,6 @@ export default function ({ getService }: FtrProviderContext) {
           id,
           version: 'test-version',
           type: 'test-type',
-          intervalName: 'test-intervalName',
           timeFieldName: 'test-timeFieldName',
         },
       });
@@ -68,7 +67,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.index_pattern.id).to.be(id);
       expect(response.body.index_pattern.version).to.be('test-version');
       expect(response.body.index_pattern.type).to.be('test-type');
-      expect(response.body.index_pattern.intervalName).to.be('test-intervalName');
       expect(response.body.index_pattern.timeFieldName).to.be('test-timeFieldName');
     });
 
@@ -239,22 +237,22 @@ export default function ({ getService }: FtrProviderContext) {
         const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
           index_pattern: {
             title,
-            intervalName: 'foo',
+            timeFieldName: 'foo',
           },
         });
         const response2 = await supertest.post('/api/index_patterns/index_pattern').send({
           override: true,
           index_pattern: {
             title,
-            intervalName: 'bar',
+            timeFieldName: 'bar',
           },
         });
 
         expect(response1.status).to.be(200);
         expect(response2.status).to.be(200);
 
-        expect(response1.body.index_pattern.intervalName).to.be('foo');
-        expect(response2.body.index_pattern.intervalName).to.be('bar');
+        expect(response1.body.index_pattern.timeFieldName).to.be('foo');
+        expect(response2.body.index_pattern.timeFieldName).to.be('bar');
 
         expect(response1.body.index_pattern.id).to.be(response1.body.index_pattern.id);
       });
