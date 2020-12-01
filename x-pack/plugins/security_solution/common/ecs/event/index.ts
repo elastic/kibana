@@ -4,6 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export enum EventKind {
+  alert = 'alert',
+  event = 'event',
+  metric = 'metric',
+  state = 'state',
+  pipeline_error = 'pipeline_error',
+  signal = 'pipeline_error',
+}
 export interface EventEcs {
   action?: string[];
 

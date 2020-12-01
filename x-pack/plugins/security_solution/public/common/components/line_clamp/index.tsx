@@ -28,7 +28,7 @@ const ReadMore = styled(EuiButtonEmpty)`
   }
 `;
 
-const LineClampComponent: React.FC<{ content?: string }> = ({ content }) => {
+const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) => {
   const [isOverflow, setIsOverflow] = useState<boolean | null>(null);
   const [readMoreButtonText, setReadMoreButtonText] = useState<string>(i18n.READ_MORE);
   const [isExpanded, setIsExpanded] = useState<boolean | null>(null);
@@ -57,7 +57,7 @@ const LineClampComponent: React.FC<{ content?: string }> = ({ content }) => {
     }
   }, [content, descriptionRef?.current?.clientHeight]);
 
-  return (
+  return content != null ? (
     <>
       {isExpanded ? (
         <p>{content}</p>
@@ -70,7 +70,7 @@ const LineClampComponent: React.FC<{ content?: string }> = ({ content }) => {
         </ReadMore>
       )}
     </>
-  );
+  ) : null;
 };
 
 export const LineClamp = React.memo(LineClampComponent);

@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import { get } from 'lodash/fp';
 import { BrowserFields } from '../../containers/source';
+import { EventKind } from '../../../../common/ecs/event';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
@@ -75,7 +76,7 @@ export const EventDetails = React.memo<Props>(
     );
     const tabs: EuiTabbedContentTab[] = useMemo(
       () => [
-        ...(eventKind !== 'event' ? alerts : []),
+        ...(eventKind !== EventKind.event ? alerts : []),
         {
           id: EventsViewType.tableView,
           name: i18n.TABLE,
@@ -111,7 +112,7 @@ export const EventDetails = React.memo<Props>(
     );
 
     useEffect(() => {
-      if (data != null && eventKind !== 'event') {
+      if (data != null && eventKind !== EventKind.event) {
         setView(EventsViewType.summaryView);
       }
     }, [data, eventKind]);

@@ -27,6 +27,7 @@ import { getColumnHeaders } from '../body/column_headers/helpers';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import * as i18n from './translations';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
+import { EventKind } from '../../../../../common/ecs/event';
 
 const ExpandableDetails = styled.div`
   .euiAccordion__button {
@@ -115,7 +116,7 @@ export const ExpandableEvent = React.memo<Props>(
     return (
       <>
         <EuiFlyoutHeader hasBorder>
-          <ExpandableEventTitle isAlert={eventKind !== 'event'} />
+          <ExpandableEventTitle isAlert={eventKind !== EventKind.event} />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <ExpandableDetails>

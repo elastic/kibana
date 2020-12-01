@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   EuiBadge,
@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 
 import { get, getOr } from 'lodash/fp';
-import styled from 'styled-components';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import * as i18n from './translations';
@@ -26,7 +25,6 @@ import {
 } from '../../../detections/components/alerts_table/translations';
 import {
   IP_FIELD_TYPE,
-  MESSAGE_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import {
@@ -35,6 +33,7 @@ import {
   SOURCE_IP_FIELD_NAME,
 } from '../../../network/components/ip';
 import { LineClamp } from '../line_clamp';
+import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
 
 type Summary = Array<{ title: string; description: JSX.Element }>;
 
@@ -112,9 +111,12 @@ export const SummaryViewComponent: React.FC<{
   eventId: string;
   timelineId: string;
 }> = ({ data, eventId, timelineId, browserFields }) => {
+  const [note, setNote] = useState<string | null>(null);
+
+  const ruleIdField = data.find((d) => d.field === 'signal.rule.id');
+  const ruleId = getOr(null, 'values.0', ruleIdField);
+  const { rule: maybeRule } = useRuleAsync(ruleId);
   const summaryList = useMemo(() => {
-    const ruleIdField = data.find((d) => d.field === 'signal.rule.rule_id');
-    const ruleId = getOr(null, 'values.0', ruleIdField);
     return data != null
       ? fields.reduce<Summary>((acc, item) => {
           const field = data.find((d) => d.field === item.id || d.field === item.linkField);
@@ -143,10 +145,13 @@ export const SummaryViewComponent: React.FC<{
           ];
         }, [])
       : [];
-  }, [browserFields, data, eventId, timelineId]);
+  }, [browserFields, data, eventId, timelineId, ruleId]);
 
-  const messageData = (data || []).find((item) => item.field === MESSAGE_FIELD_NAME);
-  const message = get('values.0', messageData);
+  useEffect(() => {
+    if (maybeRule != null && maybeRule.note != null) {
+      setNote(maybeRule.note);
+    }
+  }, [maybeRule]);
 
   return (
     <>
@@ -157,13 +162,13 @@ export const SummaryViewComponent: React.FC<{
         listItems={summaryList}
         compressed
       />
-      {message != null && (
+      {note != null && (
         <>
           <EuiSpacer />
           <EuiDescriptionList data-test-subj="summary-view-message" compressed>
             <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <LineClamp content={message} />
+              <LineClamp content={note} />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </>
