@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { getSessionServiceMock } from './search/session/mocks';
+require('../src/setup_node_env');
+require('../src/dev/run_find_plugins_with_circular_deps');
