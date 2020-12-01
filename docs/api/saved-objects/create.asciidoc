@@ -17,7 +17,6 @@ experimental[] Create {kib} saved objects.
 
 `POST <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
 
-`POST /s/<space_id>/saved_objects/<type>`
 
 [[saved-objects-api-create-path-params]]
 ==== Path parameters
