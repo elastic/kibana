@@ -12,9 +12,6 @@ import { Ping } from '../../../../common/runtime_types';
 import { JourneyState } from '../../../state/reducers/journey';
 import { ExecutedStep } from './executed_step';
 
-// TODO: This is rendered here purely for review
-import { WaterfallChartWrapper } from './waterfall/consumers/synthetics/waterfall_chart_wrapper';
-
 interface StepStatusCount {
   failed: number;
   skipped: number;
@@ -85,8 +82,6 @@ export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey }) => {
         ))}
         <EuiSpacer size="s" />
       </EuiFlexGroup>
-
-      <WaterfallChartWrapper />
     </div>
   );
 };
