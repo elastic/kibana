@@ -1,0 +1,15 @@
+.lnsWorkspaceWarning__button {
+  color: $euiColorWarningText;
+}
+
+.lnsWorkspaceWarningList {
+  overflow-y: auto;
+  max-height: $euiSize * 20;
+  width: $euiSize * 16;
+}
+
+.lnsWorkspaceWarningList__item:not(:last-child) {
+  border-bottom: 1px $euiColorLightShade solid;
+  padding-bottom: $euiSize;
+  margin-bottom: $euiSize;
+}

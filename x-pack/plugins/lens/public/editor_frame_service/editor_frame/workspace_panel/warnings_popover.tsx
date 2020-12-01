@@ -5,10 +5,11 @@
  */
 
 import './workspace_panel_wrapper.scss';
+import './warnings_popover.scss';
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
+import { EuiPopover, EuiText, EuiButtonEmpty } from '@elastic/eui';
 
 export const WarningsPopover = ({
   children,
@@ -30,7 +31,7 @@ export const WarningsPopover = ({
         <EuiButtonEmpty
           onClick={onButtonClick}
           iconType="alert"
-          className="lnsWorkspaceWarningButton"
+          className="lnsWorkspaceWarning__button"
         >
           {i18n.translate('xpack.lens.chartWarnings.number', {
             defaultMessage: `{warningsCount} {warningsCount, plural, one {warning} other {warnings}}`,
@@ -43,12 +44,13 @@ export const WarningsPopover = ({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      {React.Children.map(children, (child, index) => (
-        <>
-          <EuiText style={{ width: 280 }}>{child}</EuiText>
-          {warningsCount - 1 !== index && <EuiHorizontalRule margin="s" />}
-        </>
-      ))}
+      <ul className="lnsWorkspaceWarningList">
+        {React.Children.map(children, (child, index) => (
+          <li key={index} className="lnsWorkspaceWarningList__item">
+            <EuiText size="s">{child}</EuiText>
+          </li>
+        ))}
+      </ul>
     </EuiPopover>
   );
 };
