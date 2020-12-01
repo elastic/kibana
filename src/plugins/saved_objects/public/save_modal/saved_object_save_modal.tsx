@@ -160,12 +160,8 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
                     {this.props.description}
                   </EuiText>
                 )}
-
-                <EuiSpacer />
-
-                {this.renderCopyOnSave()}
-
                 {formBody}
+                {this.renderCopyOnSave()}
               </EuiForm>
             </EuiModalBody>
 
@@ -339,6 +335,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
     return (
       <>
+        <EuiSpacer />
         <EuiSwitch
           data-test-subj="saveAsNewCheckbox"
           checked={this.state.copyOnSave}
@@ -351,7 +348,6 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
             />
           }
         />
-        <EuiSpacer />
       </>
     );
   };
