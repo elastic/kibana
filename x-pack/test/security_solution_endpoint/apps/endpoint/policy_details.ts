@@ -130,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicy.inputs).to.eql([
           {
             id: policyInfo.packagePolicy.id,
-            revision: 2,
+            revision: 3,
             data_stream: { namespace: 'default' },
             name: 'Protect East Coast',
             meta: {
@@ -261,8 +261,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const advancedPolicyField = await pageObjects.policy.findAdvancedPolicyField();
         await advancedPolicyField.clearValue();
-
-        await pageObjects.policy.confirmAndSave();
+        await advancedPolicyField.click();
         await advancedPolicyField.type('true');
         await pageObjects.policy.confirmAndSave();
 
@@ -400,7 +399,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ]);
 
         // Clear the value
-        await advancedPolicyField.clearValue();
+        await advancedPolicyField.click();
+        await advancedPolicyField.clearValueWithKeyboard();
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
