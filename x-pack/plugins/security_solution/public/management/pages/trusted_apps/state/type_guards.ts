@@ -11,12 +11,12 @@ import {
   TrustedAppCreateSuccess,
 } from './trusted_apps_list_page_state';
 import {
+  ConditionEntry,
+  ConditionEntryField,
   Immutable,
   MacosLinuxConditionEntry,
-  NewTrustedApp,
   WindowsConditionEntry,
 } from '../../../../../common/endpoint/types';
-import { TRUSTED_APPS_SUPPORTED_OS_TYPES } from '../../../../../common/endpoint/constants';
 
 type CreateViewPossibleStates =
   | TrustedAppsListPageState['createView']
@@ -40,23 +40,14 @@ export const isTrustedAppCreateFailureState = (
   return data?.type === 'failure';
 };
 
-export const isWindowsTrustedApp = <T extends NewTrustedApp = NewTrustedApp>(
-  trustedApp: T
-): trustedApp is T & { os: 'windows' } => {
-  return trustedApp.os === 'windows';
+export const isWindowsTrustedAppCondition = (
+  condition: ConditionEntry<ConditionEntryField>
+): condition is WindowsConditionEntry => {
+  return condition.field === ConditionEntryField.SIGNER || true;
 };
 
-export const isWindowsTrustedAppCondition = (condition: {
-  field: string;
-}): condition is WindowsConditionEntry => {
-  return condition.field === 'process.code_signature' || true;
+export const isMacosLinuxTrustedAppCondition = (
+  condition: ConditionEntry<ConditionEntryField>
+): condition is MacosLinuxConditionEntry => {
+  return condition.field !== ConditionEntryField.SIGNER;
 };
-
-export const isMacosLinuxTrustedAppCondition = (condition: {
-  field: string;
-}): condition is MacosLinuxConditionEntry => {
-  return condition.field !== 'process.code_signature' || true;
-};
-
-export const isTrustedAppSupportedOs = (os: string): os is NewTrustedApp['os'] =>
-  TRUSTED_APPS_SUPPORTED_OS_TYPES.includes(os);

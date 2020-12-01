@@ -6,14 +6,18 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { EventsCheckbox } from './checkbox';
 import { OS } from '../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { selectedWindowsEvents, totalWindowsEvents } from '../../../store/policy_details/selectors';
 import { ConfigForm, ConfigFormHeading } from '../../components/config_form';
-import { setIn, getIn } from '../../../models/policy_details_config';
-import { UIPolicyConfig, Immutable } from '../../../../../../../common/endpoint/types';
+import { getIn, setIn } from '../../../models/policy_details_config';
+import {
+  Immutable,
+  OperatingSystem,
+  UIPolicyConfig,
+} from '../../../../../../../common/endpoint/types';
 import {
   COLLECTIONS_ENABLED_MESSAGE,
   EVENTS_FORM_TYPE_LABEL,
@@ -25,11 +29,13 @@ export const WindowsEvents = React.memo(() => {
   const total = usePolicyDetailsSelector(totalWindowsEvents);
 
   const checkboxes = useMemo(() => {
-    const items: Immutable<Array<{
-      name: string;
-      os: 'windows';
-      protectionField: keyof UIPolicyConfig['windows']['events'];
-    }>> = [
+    const items: Immutable<
+      Array<{
+        name: string;
+        os: 'windows';
+        protectionField: keyof UIPolicyConfig['windows']['events'];
+      }>
+    > = [
       {
         name: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.dllDriverLoad',
@@ -125,7 +131,7 @@ export const WindowsEvents = React.memo(() => {
   return (
     <ConfigForm
       type={EVENTS_FORM_TYPE_LABEL}
-      supportedOss={['windows']}
+      supportedOss={[OperatingSystem.WINDOWS]}
       dataTestSubj="windowsEventingForm"
       rightCorner={
         <EuiText size="s" color="subdued">

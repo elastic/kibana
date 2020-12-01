@@ -6,6 +6,7 @@
 
 import { CurveType, Fit, LineSeries, ScaleType } from '@elastic/charts';
 import React, { useEffect } from 'react';
+import numeral from '@elastic/numeral';
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
@@ -63,6 +64,7 @@ export function BreakdownSeries({
               sortIndex === 0 ? 0 : sortIndex + 1
             ]
           }
+          tickFormat={(d) => numeral(d).format('0.0') + ' %'}
         />
       ))}
     </>

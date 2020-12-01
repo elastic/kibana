@@ -5,8 +5,7 @@
  */
 
 import { getCerts } from '../get_certs';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+import { getUptimeESMockClient } from './helper';
 
 describe('getCerts', () => {
   let mockHits: any;
@@ -82,8 +81,9 @@ describe('getCerts', () => {
   });
 
   it('parses query result and returns expected values', async () => {
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockEsClient.search.mockResolvedValueOnce({
+    const { esClient, uptimeEsClient } = getUptimeESMockClient();
+
+    esClient.search.mockResolvedValueOnce({
       body: {
         hits: {
           hits: mockHits,
@@ -92,13 +92,7 @@ describe('getCerts', () => {
     } as any);
 
     const result = await getCerts({
-      callES: mockEsClient,
-      dynamicSettings: {
-        heartbeatIndices: 'heartbeat*',
-        certAgeThreshold: DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
-        certExpirationThreshold: DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
-        defaultConnectors: [],
-      },
+      uptimeEsClient,
       index: 1,
       from: 'now-2d',
       to: 'now+1h',
@@ -129,7 +123,7 @@ describe('getCerts', () => {
         "total": 0,
       }
     `);
-    expect(mockEsClient.search.mock.calls).toMatchInlineSnapshot(`
+    expect(esClient.search.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
@@ -217,7 +211,7 @@ describe('getCerts', () => {
                 },
               ],
             },
-            "index": "heartbeat*",
+            "index": "heartbeat-8*",
           },
         ],
       ]

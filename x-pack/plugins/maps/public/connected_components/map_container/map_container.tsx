@@ -23,7 +23,7 @@ import { LayerPanel } from '../layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
-import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { ES_GEO_FIELD_TYPE, RawValue } from '../../../common/constants';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettingsPanel } from '../map_settings_panel';
@@ -40,6 +40,7 @@ interface Props {
   backgroundColor: string;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   areLayersLoaded: boolean;
   cancelAllInFlightRequests: () => void;
   exitFullScreen: () => void;
@@ -191,6 +192,7 @@ export class MapContainer extends Component<Props, State> {
       addFilters,
       getFilterActions,
       getActionContext,
+      onSingleValueTrigger,
       flyoutDisplay,
       isFullScreen,
       exitFullScreen,
@@ -250,6 +252,7 @@ export class MapContainer extends Component<Props, State> {
             addFilters={addFilters}
             getFilterActions={getFilterActions}
             getActionContext={getActionContext}
+            onSingleValueTrigger={onSingleValueTrigger}
             geoFields={this.state.geoFields}
             renderTooltipContent={renderTooltipContent}
           />
