@@ -20,7 +20,6 @@
 import { cloneDeep, get, omit, has, flow } from 'lodash';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
-import { Fit } from '@elastic/charts';
 
 import { ChartType } from '../../../vis_type_xy/common';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
@@ -813,7 +812,7 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
               isVislibVis: true,
               detailedTooltip: true,
               ...(isLineOrArea && {
-                fittingFunction: Fit.Zero,
+                fittingFunction: 'zero',
               }),
             },
           }),
