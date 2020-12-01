@@ -90,7 +90,7 @@ Lens and visualizations::
 Machine Learning::
 * Fixes setting of anomaly chart time range depending on bucket spans {kibana-pull}81291[#81291]
 * Fixes formatting of fields in index data visualizer {kibana-pull}82593[#82593]
-* Updates analysis config schema {kibana-pull}82703[#82703]
+* Fixes anomaly detection validation when using advanced properties in the analysis config {kibana-pull}82703[#82703]
 * Fixes Anomaly Explorer population charts when multiple causes in anomaly {kibana-pull}84254[#84254]
 * Fixes swim lane for top influencers {kibana-pull}84258[#84258]
 Management::
