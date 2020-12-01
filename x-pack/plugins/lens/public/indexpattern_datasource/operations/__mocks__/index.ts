@@ -40,6 +40,7 @@ export const {
   isColumnTransferable,
   getErrorMessages,
   isReferenced,
+  resetIncomplete,
 } = actualHelpers;
 
 export const { adjustTimeScaleLabelSuffix, DEFAULT_TIME_SCALE } = actualTimeScaleUtils;

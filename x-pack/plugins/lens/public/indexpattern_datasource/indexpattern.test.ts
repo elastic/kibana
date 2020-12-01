@@ -988,4 +988,44 @@ describe('IndexPattern Data Source', () => {
       expect(getErrorMessages).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('#updateStateOnCloseDimension', () => {
+    it('should clear the incomplete column', () => {
+      const state = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+            incompleteColumns: {
+              col1: { operationType: 'avg' },
+              col2: { operationType: 'sum' },
+            },
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(
+        indexPatternDatasource.updateStateOnCloseDimension!({
+          state,
+          layerId: 'first',
+          columnId: 'col1',
+        })
+      ).toEqual({
+        ...state,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+            incompleteColumns: { col2: { operationType: 'sum' } },
+          },
+        },
+      });
+    });
+  });
 });
