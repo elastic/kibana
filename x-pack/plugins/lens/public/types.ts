@@ -540,7 +540,10 @@ export interface Visualization<T = unknown> {
    * Visualizations can provide a custom icon which will open a layer-specific popover
    * If no icon is provided, gear icon is default
    */
-  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
+  getLayerContextMenuIcon?: (opts: {
+    state: T;
+    layerId: string;
+  }) => { icon: IconType | 'gear'; label: string } | undefined;
 
   /**
    * The frame is telling the visualization to update or set a dimension based on user interaction
