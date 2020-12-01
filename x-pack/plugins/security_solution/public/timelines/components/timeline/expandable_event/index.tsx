@@ -10,7 +10,6 @@ import {
   EuiFlyoutHeader,
   EuiLoadingContent,
   EuiTitle,
-  EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -109,24 +108,24 @@ export const ExpandableEvent = React.memo<Props>(
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
     }
 
+    if (loading) {
+      return <EuiLoadingContent lines={10} />;
+    }
+
     return (
       <>
         <EuiFlyoutHeader hasBorder>
-          {loading && <EuiSpacer />}
-          {!loading && <ExpandableEventTitle isAlert={eventKind !== 'event'} />}
+          <ExpandableEventTitle isAlert={eventKind !== 'event'} />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {loading && <EuiLoadingContent lines={10} />}
-          {!loading && (
-            <ExpandableDetails>
-              <LazyAccordion
-                id={`timeline-${timelineId}-row-${event.eventId}`}
-                renderExpandedContent={handleRenderExpandedContent}
-                forceExpand={!!event.eventId && !loading}
-                paddingSize="none"
-              />
-            </ExpandableDetails>
-          )}
+          <ExpandableDetails>
+            <LazyAccordion
+              id={`timeline-${timelineId}-row-${event.eventId}`}
+              renderExpandedContent={handleRenderExpandedContent}
+              forceExpand={!!event.eventId && !loading}
+              paddingSize="none"
+            />
+          </ExpandableDetails>
         </EuiFlyoutBody>
       </>
     );

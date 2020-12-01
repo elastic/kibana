@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
+import React, { useMemo } from 'react';
 
 import {
   EuiBadge,
@@ -11,11 +11,10 @@ import {
   EuiSpacer,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiButtonEmpty,
 } from '@elastic/eui';
-import styled from 'styled-components';
 
 import { get, getOr } from 'lodash/fp';
+import styled from 'styled-components';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import * as i18n from './translations';
@@ -35,6 +34,7 @@ import {
   Ip,
   SOURCE_IP_FIELD_NAME,
 } from '../../../network/components/ip';
+import { LineClamp } from '../line_clamp';
 
 type Summary = Array<{ title: string; description: JSX.Element }>;
 
@@ -43,7 +43,7 @@ const fields = [
   { id: '@timestamp' },
   {
     id: SIGNAL_RULE_NAME_FIELD_NAME,
-    linkField: 'signal.rule.description',
+    linkField: 'signal.rule.name',
     label: ALERTS_HEADERS_RULE,
   },
   { id: 'signal.rule.severity', label: ALERTS_HEADERS_SEVERITY },
@@ -53,27 +53,6 @@ const fields = [
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
 ];
-const LINE_CLAMP = 3;
-const LINE_CLAMP_HEIGHT = 4.5;
-
-const LineClamp = styled.div`
-  display: -webkit-box;
-  -webkit-line-clamp: ${LINE_CLAMP};
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  max-height: ${`${LINE_CLAMP_HEIGHT}em`};
-  height: ${`${LINE_CLAMP_HEIGHT}em`};
-`;
-
-const StyledDescription = styled(EuiDescriptionListDescription)`
-  word-break: break-all;
-`;
-
-const ReadMore = styled(EuiButtonEmpty)`
-  span.euiButtonContent {
-    padding: 0;
-  }
-`;
 
 const getDescription = ({
   contextId,
@@ -168,33 +147,6 @@ export const SummaryViewComponent: React.FC<{
 
   const messageData = (data || []).find((item) => item.field === MESSAGE_FIELD_NAME);
   const message = get('values.0', messageData);
-  const [readMoreButtonText, setReadMoreButtonText] = useState(i18n.READ_MORE);
-  const [isOverflow, setIsOverflow] = useState<boolean | null>(null);
-  const [isExpanded, setIsReadMoreClicked] = useState<boolean | null>(null);
-  const descriptionRef = useRef<HTMLDivElement>(null);
-  const toggleReadMore = useCallback(() => {
-    setIsReadMoreClicked((prevState) => !prevState);
-    setReadMoreButtonText((prevState) =>
-      prevState === i18n.READ_MORE ? i18n.READ_LESS : i18n.READ_MORE
-    );
-  }, []);
-
-  useEffect(() => {
-    if (message != null && descriptionRef?.current?.clientHeight != null) {
-      if (
-        (descriptionRef?.current?.scrollHeight ?? 0) > (descriptionRef?.current?.clientHeight ?? 0)
-      ) {
-        setIsOverflow(true);
-      }
-
-      if (
-        ((message == null || descriptionRef?.current?.scrollHeight) ?? 0) <=
-        (descriptionRef?.current?.clientHeight ?? 0)
-      ) {
-        setIsOverflow(false);
-      }
-    }
-  }, [message, descriptionRef?.current?.clientHeight]);
 
   return (
     <>
@@ -210,19 +162,10 @@ export const SummaryViewComponent: React.FC<{
           <EuiSpacer />
           <EuiDescriptionList data-test-subj="summary-view-message" compressed>
             <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
-            <StyledDescription>
-              {isExpanded ? (
-                <p>{message}</p>
-              ) : (
-                <LineClamp ref={descriptionRef}>{message}</LineClamp>
-              )}
-            </StyledDescription>
+            <EuiDescriptionListDescription>
+              <LineClamp content={message} />
+            </EuiDescriptionListDescription>
           </EuiDescriptionList>
-          {isOverflow && (
-            <ReadMore onClick={toggleReadMore} size="s" data-test-subj="summary-view-readmore">
-              {readMoreButtonText}
-            </ReadMore>
-          )}
         </>
       )}
     </>

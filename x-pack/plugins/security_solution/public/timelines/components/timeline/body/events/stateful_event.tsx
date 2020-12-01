@@ -126,7 +126,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     if (timelineId === TimelineId.active) {
       activeTimeline.toggleExpandedEvent({ eventId, indexName, loading: false });
     }
-  }, [dispatch, timelineId, event]);
+  }, [dispatch, event._id, event._index, timelineId]);
 
   const associateNote = useCallback(
     (noteId: string) => {
