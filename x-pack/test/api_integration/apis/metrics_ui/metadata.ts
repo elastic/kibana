@@ -157,6 +157,13 @@ export default function ({ getService }: FtrProviderContext) {
                 region: 'us-east-2',
                 account: { id: '015351775590' },
               },
+              agent: {
+                hostname: 'ip-172-31-47-9.us-east-2.compute.internal',
+                id: 'd0943b36-d0d3-426d-892b-7d79c071b44b',
+                ephemeral_id: '64c94244-88b8-4a37-adc0-30428fefaf53',
+                type: 'metricbeat',
+                version: '8.0.0',
+              },
               host: {
                 hostname: 'ip-172-31-47-9.us-east-2.compute.internal',
                 os: {
