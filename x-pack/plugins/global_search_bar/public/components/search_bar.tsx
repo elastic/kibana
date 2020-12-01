@@ -252,6 +252,7 @@ export function SearchBar({
 
   return (
     <EuiSelectableTemplateSitewide
+      isPreFiltered
       onChange={onChange}
       options={options}
       popoverButtonBreakpoints={['xs', 's']}
@@ -267,7 +268,6 @@ export function SearchBar({
         </EuiHeaderSectionItemButton>
       }
       searchProps={{
-        onSearch: () => undefined,
         onKeyUpCapture: (e: React.KeyboardEvent<HTMLInputElement>) =>
           setSearchValue(e.currentTarget.value),
         'data-test-subj': 'nav-search-input',
