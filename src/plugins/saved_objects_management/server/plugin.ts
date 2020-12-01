@@ -34,9 +34,11 @@ export class SavedObjectsManagementPlugin
     this.logger = this.context.logger.get();
   }
 
-  public async setup({ http, capabilities }: CoreSetup) {
+  public async setup({ http, capabilities, getStartServices }: CoreSetup) {
     this.logger.debug('Setting up SavedObjectsManagement plugin');
+    const savedObjectsStartPromise = getStartServices().then(([core]) => core.savedObjects);
     registerRoutes({
+      savedObjectsStartPromise,
       http,
       managementServicePromise: this.managementService$.pipe(first()).toPromise(),
     });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpServiceSetup } from 'src/core/server';
+import { HttpServiceSetup, SavedObjectsServiceStart } from 'src/core/server';
 import { ISavedObjectsManagement } from '../services';
 import { registerFindRoute } from './find';
 import { registerGetRoute } from './get';
@@ -29,11 +29,16 @@ import { registerGetAllowedTypesRoute } from './get_allowed_types';
 interface RegisterRouteOptions {
   http: HttpServiceSetup;
   managementServicePromise: Promise<ISavedObjectsManagement>;
+  savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
 }
 
-export function registerRoutes({ http, managementServicePromise }: RegisterRouteOptions) {
+export function registerRoutes({
+  http,
+  managementServicePromise,
+  savedObjectsStartPromise,
+}: RegisterRouteOptions) {
   const router = http.createRouter();
-  registerFindRoute(router, managementServicePromise);
+  registerFindRoute(router, managementServicePromise, savedObjectsStartPromise);
   registerGetRoute(router, managementServicePromise);
   registerScrollForCountRoute(router);
   registerScrollForExportRoute(router);

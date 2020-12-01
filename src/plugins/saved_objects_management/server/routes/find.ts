@@ -18,13 +18,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import { IRouter, SavedObjectsServiceStart } from 'src/core/server';
 import { injectMetaAttributes } from '../lib';
 import { ISavedObjectsManagement } from '../services';
 
 export const registerFindRoute = (
   router: IRouter,
-  managementServicePromise: Promise<ISavedObjectsManagement>
+  managementServicePromise: Promise<ISavedObjectsManagement>,
+  savedObjectsStartPromise: Promise<SavedObjectsServiceStart>
 ) => {
   const referenceSchema = schema.object({
     type: schema.string(),
@@ -57,7 +58,7 @@ export const registerFindRoute = (
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const managementService = await managementServicePromise;
-      const { client } = context.core.savedObjects;
+      const savedObjects = await savedObjectsStartPromise;
       const searchTypes = Array.isArray(req.query.type) ? req.query.type : [req.query.type];
       const includedFields = Array.isArray(req.query.fields)
         ? req.query.fields
@@ -65,6 +66,13 @@ export const registerFindRoute = (
       const importAndExportableTypes = searchTypes.filter((type) =>
         managementService.isImportAndExportable(type)
       );
+      const includedHiddenTypes = importAndExportableTypes.filter((type) =>
+        managementService.isHidden(type)
+      );
+
+      const client = savedObjects.getScopedClient(req, {
+        includedHiddenTypes,
+      });
 
       const searchFields = new Set<string>();
       importAndExportableTypes.forEach((type) => {
