@@ -18,6 +18,7 @@ import {
   CasesResponse,
   CasesFindResponse,
   CommentType,
+  CaseStatuses,
 } from '../../../../case/common/api';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { ConnectorTypes } from '../../../../case/common/api/connectors';
@@ -69,7 +70,7 @@ export const basicCase: Case = {
   },
   description: 'Security banana Issue',
   externalService: null,
-  status: 'open',
+  status: CaseStatuses.open,
   tags,
   title: 'Another horrible breach!!',
   totalComment: 1,
@@ -203,7 +204,7 @@ export const basicCommentSnake: CommentResponse = {
 
 export const basicCaseSnake: CaseResponse = {
   ...basicCase,
-  status: 'open' as CaseStatus,
+  status: CaseStatuses.open as CaseStatus,
   closed_at: null,
   closed_by: null,
   comments: [basicCommentSnake],
@@ -325,5 +326,5 @@ export const basicCaseClosed: Case = {
   ...basicCase,
   closedAt: '2020-02-25T23:06:33.798Z',
   closedBy: elasticUser,
-  status: 'closed',
+  status: CaseStatuses.closed,
 };

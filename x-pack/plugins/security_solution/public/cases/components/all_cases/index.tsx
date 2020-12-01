@@ -385,7 +385,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 <Stats
                   dataTestSubj="openStatsHeader"
                   caseCount={countOpenCases}
-                  caseStatus={'open'}
+                  caseStatus={CaseStatuses.open}
                   isLoading={isCasesStatusLoading}
                 />
               </EuiFlexItem>
@@ -401,7 +401,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 <Stats
                   dataTestSubj="closedStatsHeader"
                   caseCount={countClosedCases}
-                  caseStatus={'closed'}
+                  caseStatus={CaseStatuses.closed}
                   isLoading={isCasesStatusLoading}
                 />
               </FlexItemDivider>

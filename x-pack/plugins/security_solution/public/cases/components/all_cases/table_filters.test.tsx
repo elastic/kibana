@@ -7,12 +7,13 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
+import { CaseStatuses } from '../../../../../case/common/api';
 import { CasesTableFilters } from './table_filters';
 import { TestProviders } from '../../../common/mock';
-
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
+
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
 
@@ -100,7 +101,7 @@ describe('CasesTableFilters ', () => {
     );
     wrapper.find(`[data-test-subj="closed-case-count"]`).last().simulate('click');
 
-    expect(onFilterChanged).toBeCalledWith({ status: 'closed' });
+    expect(onFilterChanged).toBeCalledWith({ status: CaseStatuses.closed });
   });
   it('should call on load setFilterRefetch', () => {
     mount(

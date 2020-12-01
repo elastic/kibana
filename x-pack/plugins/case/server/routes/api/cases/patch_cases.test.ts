@@ -16,7 +16,7 @@ import {
 } from '../__fixtures__';
 import { initPatchCasesApi } from './patch_cases';
 import { mockCaseConfigure, mockCaseNoConnectorId } from '../__fixtures__/mock_saved_objects';
-import { ConnectorTypes } from '../../../../common/api/connectors';
+import { ConnectorTypes, CaseStatuses } from '../../../../common/api';
 
 describe('PATCH cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -36,7 +36,7 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-1',
-            status: 'closed',
+            status: CaseStatuses.closed,
             version: 'WzAsMV0=',
           },
         ],
@@ -67,7 +67,7 @@ describe('PATCH cases', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         id: 'mock-id-1',
         external_service: null,
-        status: 'closed',
+        status: CaseStatuses.closed,
         tags: ['defacement'],
         title: 'Super Bad Security Issue',
         totalComment: 0,
@@ -86,7 +86,7 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-4',
-            status: 'open',
+            status: CaseStatuses.open,
             version: 'WzUsMV0=',
           },
         ],
@@ -118,7 +118,7 @@ describe('PATCH cases', () => {
         description: 'Oh no, a bad meanie going LOLBins all over the place!',
         id: 'mock-id-4',
         external_service: null,
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['LOLBins'],
         title: 'Another bad one',
         totalComment: 0,
@@ -137,7 +137,7 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-no-connector_id',
-            status: 'closed',
+            status: CaseStatuses.closed,
             version: 'WzAsMV0=',
           },
         ],
@@ -163,7 +163,7 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-3',
-            status: 'closed',
+            status: CaseStatuses.closed,
             version: 'WzUsMV0=',
           },
         ],
@@ -225,7 +225,7 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-1',
-            case: { status: 'closed' },
+            case: { status: CaseStatuses.closed },
             version: 'badv=',
           },
         ],
@@ -250,7 +250,7 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-1',
-            case: { status: 'open' },
+            case: { status: CaseStatuses.open },
             version: 'WzAsMV0=',
           },
         ],
@@ -276,7 +276,7 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-does-not-exist',
-            status: 'closed',
+            status: CaseStatuses.closed,
             version: 'WzAsMV0=',
           },
         ],

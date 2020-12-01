@@ -5,6 +5,8 @@
  */
 
 import React from 'react';
+
+import { CaseStatuses } from '../../../../../case/common/api';
 import { basicPush, getUserAction } from '../../containers/mock';
 import { getLabelTitle, getPushedServiceLabelTitle, getConnectorLabelTitle } from './helpers';
 import * as i18n from '../case_view/translations';
@@ -55,7 +57,7 @@ describe('User action tree helpers', () => {
   });
 
   it('label title generated for update status to open', () => {
-    const action = { ...getUserAction(['status'], 'update'), newValue: 'open' };
+    const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.open };
     const result: string | JSX.Element = getLabelTitle({
       action,
       field: 'status',
@@ -65,7 +67,7 @@ describe('User action tree helpers', () => {
   });
 
   it('label title generated for update status to closed', () => {
-    const action = { ...getUserAction(['status'], 'update'), newValue: 'closed' };
+    const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.closed };
     const result: string | JSX.Element = getLabelTitle({
       action,
       field: 'status',

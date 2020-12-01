@@ -16,7 +16,7 @@ import {
 import { initPostCaseApi } from './post_case';
 import { CASES_URL } from '../../../../common/constants';
 import { mockCaseConfigure } from '../__fixtures__/mock_saved_objects';
-import { ConnectorTypes } from '../../../../common/api/connectors';
+import { ConnectorTypes, CaseStatuses } from '../../../../common/api';
 
 describe('POST cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -104,7 +104,7 @@ describe('POST cases', () => {
       body: {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['defacement'],
         connector: null,
       },
@@ -191,7 +191,7 @@ describe('POST cases', () => {
       description: 'This is a brand new case of a bad meanie defacing data',
       external_service: null,
       id: 'mock-it',
-      status: 'open',
+      status: CaseStatuses.open,
       tags: ['defacement'],
       title: 'Super Bad Security Issue',
       totalComment: 0,
