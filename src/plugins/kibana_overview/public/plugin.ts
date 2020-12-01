@@ -109,7 +109,7 @@ export class KibanaOverviewPlugin
             defaultMessage: 'Search and find insights.',
           }),
           i18n.translate('kibanaOverview.kibana.appDescription3', {
-            defaultMessage: 'Design pixel-perfect reports.',
+            defaultMessage: 'Design pixel-perfect presentations.',
           }),
           i18n.translate('kibanaOverview.kibana.appDescription4', {
             defaultMessage: 'Plot geographic data.',

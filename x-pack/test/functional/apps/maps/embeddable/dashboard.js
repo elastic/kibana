@@ -15,6 +15,7 @@ export default function ({ getPageObjects, getService }) {
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('embed in dashboard', () => {
     before(async () => {
@@ -50,9 +51,11 @@ export default function ({ getPageObjects, getService }) {
 
     it('should populate inspector with requests for map embeddable', async () => {
       await dashboardPanelActions.openInspectorByTitle('join example');
-      const joinExampleRequestNames = await inspector.getRequestNames();
+      await retry.try(async () => {
+        const joinExampleRequestNames = await inspector.getRequestNames();
+        expect(joinExampleRequestNames).to.equal('geo_shapes*,meta_for_geo_shapes*.shape_name');
+      });
       await inspector.close();
-      expect(joinExampleRequestNames).to.equal('geo_shapes*,meta_for_geo_shapes*.shape_name');
 
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const gridExampleRequestNames = await inspector.getRequestNames();

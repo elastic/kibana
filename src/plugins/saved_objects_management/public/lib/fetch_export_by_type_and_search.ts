@@ -17,18 +17,26 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpStart, SavedObjectsFindOptionsReference } from 'src/core/public';
 
-export async function fetchExportByTypeAndSearch(
-  http: HttpStart,
-  types: string[],
-  search: string | undefined,
-  includeReferencesDeep: boolean = false
-): Promise<Blob> {
+export async function fetchExportByTypeAndSearch({
+  http,
+  search,
+  types,
+  references,
+  includeReferencesDeep = false,
+}: {
+  http: HttpStart;
+  types: string[];
+  search?: string;
+  references?: SavedObjectsFindOptionsReference[];
+  includeReferencesDeep?: boolean;
+}): Promise<Blob> {
   return http.post('/api/saved_objects/_export', {
     body: JSON.stringify({
       type: types,
       search,
+      hasReference: references,
       includeReferencesDeep,
     }),
   });

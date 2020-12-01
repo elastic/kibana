@@ -32,7 +32,7 @@
   min-height: 0;
   min-width: 0;
   overflow: hidden;
-  padding: ($euiSizeS + 2px) 0;
+  padding: $euiSizeS 0;
 }
 
 .visWrapper__column {
@@ -142,7 +142,6 @@
   min-height: 0;
 }
 
-
 //
 // STYLE
 //
@@ -152,7 +151,6 @@
 // search and replace. The SVG itself doesn't have a class, nor
 // could it be easily found to apply to all chart types.
 // At least wrapping selectors inside .visWrapper will narrow scope.
-
 
 // sass-lint:disable-block no-mergeable-selectors
 // Keep SVG and non-renamable selectors separately
@@ -221,7 +219,7 @@
   .axis-title text {
     @include fontSize($euiFontSizeXS);
     font-weight: $euiFontWeightBold;
-    fill: $visTextColor;
+    fill: $euiTextColor;
   }
 
   .y-axis-title {

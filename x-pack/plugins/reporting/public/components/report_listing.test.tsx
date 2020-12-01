@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Observable } from 'rxjs';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ILicense } from '../../../licensing/public';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 

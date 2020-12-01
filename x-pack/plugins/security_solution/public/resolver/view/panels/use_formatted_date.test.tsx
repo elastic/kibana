@@ -4,103 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mount } from 'enzyme';
+
 import React from 'react';
-import { render, RenderResult } from '@testing-library/react';
 import { useFormattedDate } from './use_formatted_date';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { getUiSettings } from '../../mocks/get_ui_settings';
+import { uiSetting } from '../../mocks/ui_setting';
 
-describe('useFormattedDate', () => {
-  let element: HTMLElement;
-  const testID = 'formattedDate';
-  let reactRenderResult: (
-    date: ConstructorParameters<typeof Date>[0] | Date | undefined
-  ) => RenderResult;
+describe(`useFormattedDate, when the "dateFormat" UI setting is "${uiSetting(
+  'dateFormat'
+)}" and the "dateFormat:tz" setting is "${uiSetting('dateFormat:tz')}"`, () => {
+  let formattedDate: (date: ConstructorParameters<typeof Date>[0] | Date | undefined) => string;
 
   beforeEach(async () => {
     const mockCoreStart = coreMock.createStart();
-    mockCoreStart.uiSettings.get.mockImplementation(getUiSettings);
+    mockCoreStart.uiSettings.get.mockImplementation(uiSetting);
 
     function Test({ date }: { date: ConstructorParameters<typeof Date>[0] | Date | undefined }) {
-      const formattedDate = useFormattedDate(date);
-      return <div data-test-subj={testID}>{formattedDate}</div>;
+      return <>{useFormattedDate(date)}</>;
     }
 
-    reactRenderResult = (
-      date: ConstructorParameters<typeof Date>[0] | Date | undefined
-    ): RenderResult =>
-      render(
+    formattedDate = (date: ConstructorParameters<typeof Date>[0] | Date | undefined): string =>
+      mount(
         <KibanaContextProvider services={mockCoreStart}>
           <Test date={date} />
         </KibanaContextProvider>
-      );
-  });
-  afterEach(() => {
-    jest.clearAllMocks();
+      ).text();
   });
 
-  describe('when the provided date is undefined', () => {
-    it('should return undefined', async () => {
-      const { findByTestId } = reactRenderResult(undefined);
-      element = await findByTestId(testID);
-
-      expect(element).toBeEmptyDOMElement();
-    });
-  });
-
-  describe('when the provided date is empty', () => {
-    it('should return undefined', async () => {
-      const { findByTestId } = reactRenderResult('');
-      element = await findByTestId(testID);
-
-      expect(element).toBeEmptyDOMElement();
-    });
-  });
-
-  describe('when the provided date is an invalid date', () => {
-    it('should return the string invalid date', async () => {
-      const { findByTestId } = reactRenderResult('randomString');
-      element = await findByTestId(testID);
-
-      expect(element).toHaveTextContent('Invalid Date');
-    });
-  });
-
-  describe('when the provided date is a stringified unix timestamp', () => {
-    it('should return the string invalid date', async () => {
-      const { findByTestId } = reactRenderResult('1600863932316');
-      element = await findByTestId(testID);
-
-      expect(element).toHaveTextContent('Invalid Date');
-    });
-  });
-
-  describe('when the provided date is a valid numerical timestamp', () => {
-    it('should return the string invalid date', async () => {
-      const { findByTestId } = reactRenderResult(1600863932316);
-      element = await findByTestId(testID);
-
-      expect(element).toHaveTextContent('Sep 23, 2020 @ 08:25:32.316');
-    });
-  });
-
-  describe('when the provided date is a date string', () => {
-    it('should return the string invalid date', async () => {
-      const { findByTestId } = reactRenderResult('2020-09-23T12:25:32Z');
-      element = await findByTestId(testID);
-
-      expect(element).toHaveTextContent('Sep 23, 2020 @ 08:25:32.000');
-    });
-  });
-
-  describe('when the provided date is a valid date', () => {
-    it('should return the string invalid date', async () => {
-      const validDate = new Date(1600863932316);
-      const { findByTestId } = reactRenderResult(validDate);
-      element = await findByTestId(testID);
-
-      expect(element).toHaveTextContent('Sep 23, 2020 @ 08:25:32.316');
-    });
+  it.each([
+    ['randomString', 'an invalid string', 'Invalid Date'],
+    [
+      '1600863932316',
+      "a string that does't match the configured time format settings",
+      'Invalid Date',
+    ],
+    [1600863932316, 'a valid unix timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
+    [undefined, 'undefined', ''],
+    ['', 'an empty string', ''],
+    [
+      '2020-09-23T12:25:32Z',
+      'a string that conforms to the specified format',
+      'Sep 23, 2020 @ 08:25:32.000',
+    ],
+    [new Date(1600863932316), 'a defined Date object', 'Sep 23, 2020 @ 08:25:32.316'],
+  ])('when the provided date is %p (%s) it should return %p', (value, _explanation, expected) => {
+    expect(formattedDate(value)).toBe(expected);
   });
 });

@@ -27,7 +27,7 @@ export interface LegacyAuditLogger {
 }
 
 export interface AuditLogger {
-  log: (event: AuditEvent) => void;
+  log: (event: AuditEvent | undefined) => void;
 }
 
 interface AuditLogMeta extends AuditEvent {
@@ -67,7 +67,11 @@ export class AuditService {
    */
   private allowAuditLogging = false;
 
-  constructor(private readonly logger: Logger) {}
+  private ecsLogger: Logger;
+
+  constructor(private readonly logger: Logger) {
+    this.ecsLogger = logger.get('ecs');
+  }
 
   setup({
     license,
@@ -83,16 +87,13 @@ export class AuditService {
       });
     }
 
-    // Do not change logging for legacy logger
-    if (config.appender) {
-      // Configure logging during setup and when license changes
-      logging.configure(
-        license.features$.pipe(
-          distinctUntilKeyChanged('allowAuditLogging'),
-          createLoggingConfig(config)
-        )
-      );
-    }
+    // Configure logging during setup and when license changes
+    logging.configure(
+      license.features$.pipe(
+        distinctUntilKeyChanged('allowAuditLogging'),
+        createLoggingConfig(config)
+      )
+    );
 
     /**
      * Creates an {@link AuditLogger} scoped to the current request.
@@ -126,7 +127,10 @@ export class AuditService {
        * });
        * ```
        */
-      const log = (event: AuditEvent) => {
+      const log: AuditLogger['log'] = (event) => {
+        if (!event) {
+          return;
+        }
         const user = getCurrentUser(request);
         const spaceId = getSpaceId(request);
         const meta: AuditLogMeta = {
@@ -146,7 +150,7 @@ export class AuditService {
           },
         };
         if (filterEvent(meta, config.ignore_filters)) {
-          this.logger.info(event.message!, meta);
+          this.ecsLogger.info(event.message!, meta);
         }
       };
       return { log };
@@ -203,7 +207,7 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
     },
     loggers: [
       {
-        context: 'audit',
+        context: 'audit.ecs',
         level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
         appenders: ['auditTrailAppender'],
       },

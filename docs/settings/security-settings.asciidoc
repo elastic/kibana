@@ -92,8 +92,8 @@ The valid settings in the `xpack.security.authc.providers` namespace vary depend
 `<provider-type>.<provider-name>.icon` {ess-icon}
 | Custom icon for the provider entry displayed on the Login Selector UI.
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.showInSelector` {ess-icon}
+| `xpack.security.authc.providers.<provider-type>.`
+`<provider-name>.showInSelector` {ess-icon}
 | Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn't remove the provider from the authentication chain.
 
 2+a|
@@ -103,9 +103,30 @@ The valid settings in the `xpack.security.authc.providers` namespace vary depend
 You are unable to set this setting to `false` for `basic` and `token` authentication providers.
 ============
 
-| `xpack.security.authc.providers.`
-`<provider-type>.<provider-name>.accessAgreement.message` {ess-icon}
+| `xpack.security.authc.providers.<provider-type>.`
+`<provider-name>.accessAgreement.message` {ess-icon}
 | Access agreement text in Markdown format. For more information, refer to <<xpack-security-access-agreement>>.
+
+| [[xpack-security-provider-session-idleTimeout]] `xpack.security.authc.providers.<provider-type>.`
+`<provider-name>.session.idleTimeout` {ess-icon}
+| Ensures that user sessions will expire after a period of inactivity. Setting this to `0` will prevent sessions from expiring because of inactivity. By default, this setting is equal to <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>>.
+
+2+a|
+[TIP]
+============
+Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
+============
+
+| [[xpack-security-provider-session-lifespan]] `xpack.security.authc.providers.<provider-type>.`
+`<provider-name>.session.lifespan` {ess-icon}
+| Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If
+this is set to `0`, user sessions could stay active indefinitely. By default, this setting is equal to <<xpack-session-lifespan, `xpack.security.session.lifespan`>>.
+
+2+a|
+[TIP]
+============
+Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
+============
 
 |===
 
@@ -210,32 +231,32 @@ You can configure the following settings in the `kibana.yml` file.
 
 |[[xpack-session-idleTimeout]] `xpack.security.session.idleTimeout` {ess-icon}
   | Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both
-highly recommended. By default, this setting is not set.
+highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. If this is _not_ set or set to `0`, then sessions will never expire due to inactivity. By default, this setting is not set.
 
 2+a|
 [TIP]
 ============
-The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
+Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 ============
 
 |[[xpack-session-lifespan]] `xpack.security.session.lifespan` {ess-icon}
-  | Ensures that user sessions will expire after the defined time period. This behavior also known as an "absolute timeout". If
-this is _not_ set, user sessions could stay active indefinitely. This and <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>> are both highly
-recommended. By default, this setting is not set.
+  | Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If
+this is _not_ set or set to `0`, user sessions could stay active indefinitely. This and <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>> are both highly
+recommended. You can also specify this setting for <<xpack-security-provider-session-lifespan, every provider separately>>. By default, this setting is not set.
 
 2+a|
 [TIP]
 ============
-The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
+Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 ============
 
-| `xpack.security.session.cleanupInterval`
+| `xpack.security.session.cleanupInterval` {ess-icon}
 | Sets the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default, this value is 1 hour. The minimum value is 10 seconds.
 
 2+a|
 [TIP]
 ============
-The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
+Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 ============
 
 |===

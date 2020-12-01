@@ -141,7 +141,7 @@ function DefaultEditorAggSelect({
       error={errors}
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
-      compressed
+      display="rowCompressed"
     >
       <EuiComboBox
         placeholder={i18n.translate('visDefaultEditor.aggSelect.selectAggPlaceholder', {

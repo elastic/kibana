@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
 import { LicenseCheck } from '../../../../../licensing/server';
 import { defineGetAllRolesRoutes } from './get_all';

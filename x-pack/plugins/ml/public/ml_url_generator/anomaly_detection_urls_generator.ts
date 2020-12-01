@@ -6,7 +6,6 @@
 
 import { isEmpty } from 'lodash';
 import type {
-  AnomalyDetectionQueryState,
   AnomalyDetectionUrlState,
   ExplorerAppState,
   ExplorerGlobalState,
@@ -20,6 +19,8 @@ import type {
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
 import { createGenericMlUrl } from './common';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
+import { getGroupQueryText, getJobQueryText } from '../../common/util/string_utils';
+import { AppPageState, ListingPageUrlState } from '../../common/types/common';
 /**
  * Creates URL to the Anomaly Detection Job management page
  */
@@ -33,13 +34,23 @@ export function createAnomalyDetectionJobManagementUrl(
   }
   const { jobId, groupIds, globalState } = params;
   if (jobId || groupIds) {
-    const queryState: AnomalyDetectionQueryState = {
-      jobId,
-      groupIds,
+    const queryTextArr = [];
+    if (jobId) {
+      queryTextArr.push(getJobQueryText(jobId));
+    }
+    if (groupIds) {
+      queryTextArr.push(getGroupQueryText(groupIds));
+    }
+    const jobsListState: Partial<ListingPageUrlState> = {
+      ...(queryTextArr.length > 0 ? { queryText: queryTextArr.join(' ') } : {}),
     };
 
-    url = setStateToKbnUrl<AnomalyDetectionQueryState>(
-      'mlManagement',
+    const queryState: AppPageState<ListingPageUrlState> = {
+      [ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE]: jobsListState,
+    };
+
+    url = setStateToKbnUrl<AppPageState<ListingPageUrlState>>(
+      '_a',
       queryState,
       { useHash: false, storeInHashQuery: false },
       url
@@ -121,9 +132,9 @@ export function createExplorerUrl(
     { useHash: false, storeInHashQuery: false },
     url
   );
-  url = setStateToKbnUrl<Partial<ExplorerAppState>>(
+  url = setStateToKbnUrl<AppPageState<Partial<ExplorerAppState>>>(
     '_a',
-    appState,
+    { [ML_PAGES.ANOMALY_EXPLORER]: appState },
     { useHash: false, storeInHashQuery: false },
     url
   );
@@ -146,12 +157,12 @@ export function createSingleMetricViewerUrl(
     timeRange,
     jobIds,
     refreshInterval,
-    zoom,
     query,
     detectorIndex,
     forecastId,
     entities,
     globalState,
+    functionDescription,
   } = params;
 
   let queryState: Partial<TimeSeriesExplorerGlobalState> = {};
@@ -178,9 +189,12 @@ export function createSingleMetricViewerUrl(
   if (entities !== undefined) {
     mlTimeSeriesExplorer.entities = entities;
   }
+  if (functionDescription !== undefined) {
+    mlTimeSeriesExplorer.functionDescription = functionDescription;
+  }
+
   appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
 
-  if (zoom) appState.zoom = zoom;
   if (query)
     appState.query = {
       query_string: query,
@@ -191,9 +205,9 @@ export function createSingleMetricViewerUrl(
     { useHash: false, storeInHashQuery: false },
     url
   );
-  url = setStateToKbnUrl<TimeSeriesExplorerAppState>(
+  url = setStateToKbnUrl<AppPageState<Partial<TimeSeriesExplorerAppState>>>(
     '_a',
-    appState,
+    { [ML_PAGES.SINGLE_METRIC_VIEWER]: appState },
     { useHash: false, storeInHashQuery: false },
     url
   );

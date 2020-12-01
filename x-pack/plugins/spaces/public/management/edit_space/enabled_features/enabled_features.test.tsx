@@ -5,18 +5,17 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
 import { EnabledFeatures } from './enabled_features';
 import { KibanaFeatureConfig } from '../../../../../features/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../../../src/core/public';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 import { EuiCheckboxProps } from '@elastic/eui';
 
 const features: KibanaFeatureConfig[] = [
   {
     id: 'feature-1',
     name: 'Feature 1',
-    icon: 'spacesApp',
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
     privileges: null,
@@ -24,7 +23,6 @@ const features: KibanaFeatureConfig[] = [
   {
     id: 'feature-2',
     name: 'Feature 2',
-    icon: 'spacesApp',
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
     privileges: null,
@@ -235,7 +233,6 @@ describe('EnabledFeatures', () => {
             {
               id: 'feature-3',
               name: 'Feature 3',
-              icon: 'spacesApp',
               app: [],
               category: DEFAULT_APP_CATEGORIES.management,
               privileges: null,

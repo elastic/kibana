@@ -6,7 +6,7 @@
 
 import { ActionExecutor, TaskRunnerFactory } from '../lib';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { taskManagerMock } from '../../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../task_manager/server/mocks';
 import { registerBuiltInActionTypes } from './index';
 import { Logger } from '../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
@@ -14,7 +14,15 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '../../../licensing/server/mocks';
 
-const ACTION_TYPE_IDS = ['.index', '.email', '.pagerduty', '.server-log', '.slack', '.webhook'];
+const ACTION_TYPE_IDS = [
+  '.index',
+  '.email',
+  '.pagerduty',
+  '.server-log',
+  '.slack',
+  '.teams',
+  '.webhook',
+];
 
 export function createActionTypeRegistry(): {
   logger: jest.Mocked<Logger>;
@@ -22,8 +30,8 @@ export function createActionTypeRegistry(): {
 } {
   const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
   const actionTypeRegistry = new ActionTypeRegistry({
+    taskManager: taskManagerMock.createSetup(),
     licensing: licensingMock.createSetup(),
-    taskManager: taskManagerMock.setup(),
     taskRunnerFactory: new TaskRunnerFactory(
       new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
     ),

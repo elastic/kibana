@@ -14,11 +14,15 @@ import {
   IEmbeddable,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  isContextMenuTriggerContext,
   RangeSelectContext,
   ValueClickContext,
 } from '../../../../../../src/plugins/embeddable/public';
 import type { ActionContext, ActionFactoryContext, UrlTrigger } from './url_drilldown';
-import { SELECT_RANGE_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../../src/plugins/ui_actions/public';
 
 type ContextScopeInput = ActionContext | ActionFactoryContext;
 
@@ -101,7 +105,10 @@ export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilld
  * URL drilldown event scope,
  * available as {{event.$}}
  */
-export type UrlDrilldownEventScope = ValueClickTriggerEventScope | RangeSelectTriggerEventScope;
+export type UrlDrilldownEventScope =
+  | ValueClickTriggerEventScope
+  | RangeSelectTriggerEventScope
+  | ContextMenuTriggerEventScope;
 export type EventScopeInput = ActionContext;
 export interface ValueClickTriggerEventScope {
   key?: string;
@@ -115,11 +122,15 @@ export interface RangeSelectTriggerEventScope {
   to?: string | number;
 }
 
+export type ContextMenuTriggerEventScope = object;
+
 export function getEventScope(eventScopeInput: EventScopeInput): UrlDrilldownEventScope {
   if (isRangeSelectTriggerContext(eventScopeInput)) {
     return getEventScopeFromRangeSelectTriggerContext(eventScopeInput);
   } else if (isValueClickTriggerContext(eventScopeInput)) {
     return getEventScopeFromValueClickTriggerContext(eventScopeInput);
+  } else if (isContextMenuTriggerContext(eventScopeInput)) {
+    return {};
   } else {
     throw new Error("UrlDrilldown [getEventScope] can't build scope from not supported trigger");
   }
@@ -169,7 +180,9 @@ export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventSco
       from: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 minutes ago
       to: new Date().toISOString(),
     };
-  } else {
+  }
+
+  if (trigger === VALUE_CLICK_TRIGGER) {
     // number of mock points to generate
     // should be larger or equal of any possible data points length emitted by VALUE_CLICK_TRIGGER
     const nPoints = 4;
@@ -184,6 +197,8 @@ export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventSco
       points,
     };
   }
+
+  return {};
 }
 
 type Primitive = string | number | boolean | null;

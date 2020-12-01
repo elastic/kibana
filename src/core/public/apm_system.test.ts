@@ -18,6 +18,7 @@
  */
 
 jest.mock('@elastic/apm-rum');
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { init, apm } from '@elastic/apm-rum';
 import { ApmSystem } from './apm_system';
 

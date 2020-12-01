@@ -8,7 +8,6 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { MarkdownHint } from '../../../../common/components/markdown/markdown_hint';
 import {
   AssociateNote,
   GetNewNoteId,
@@ -64,9 +63,6 @@ export const AddNote = React.memo<{
   return (
     <AddNotesContainer alignItems="flexEnd" direction="column" gutterSize="none">
       <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
-      <EuiFlexItem grow={true}>
-        <MarkdownHint show={newNote.trim().length > 0} />
-      </EuiFlexItem>
       <ButtonsContainer gutterSize="none">
         {onCancelAddNote != null ? (
           <EuiFlexItem grow={false}>

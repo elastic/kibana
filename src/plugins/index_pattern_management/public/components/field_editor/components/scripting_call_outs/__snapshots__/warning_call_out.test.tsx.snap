@@ -27,7 +27,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
           size="m"
           type="alert"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
             data-euiicon-type="alert"
@@ -111,7 +111,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                     <EuiIcon
                       type="link"
                     >
-                      <div
+                      <span
                         data-euiicon-type="link"
                       />
                     </EuiIcon>
@@ -138,7 +138,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                     <EuiIcon
                       type="link"
                     >
-                      <div
+                      <span
                         data-euiicon-type="link"
                       />
                     </EuiIcon>

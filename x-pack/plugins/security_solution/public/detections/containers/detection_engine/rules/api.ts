@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -42,8 +43,8 @@ import { RulesSchema } from '../../../../../common/detection_engine/schemas/resp
  *
  * @throws An error if response is not OK
  */
-export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RulesSchema> =>
-  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
+export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<FullResponseSchema> =>
+  KibanaServices.get().http.fetch<FullResponseSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'POST',
     body: JSON.stringify(rule),
     signal,
@@ -245,13 +246,25 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
  *
  * @throws An error if response is not OK
  */
-export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> => {
-  await KibanaServices.get().http.fetch<unknown>(DETECTION_ENGINE_PREPACKAGED_URL, {
+export const createPrepackagedRules = async ({
+  signal,
+}: BasicFetchProps): Promise<{
+  rules_installed: number;
+  rules_updated: number;
+  timelines_installed: number;
+  timelines_updated: number;
+}> => {
+  const result = await KibanaServices.get().http.fetch<{
+    rules_installed: number;
+    rules_updated: number;
+    timelines_installed: number;
+    timelines_updated: number;
+  }>(DETECTION_ENGINE_PREPACKAGED_URL, {
     method: 'PUT',
     signal,
   });
 
-  return true;
+  return result;
 };
 
 /**

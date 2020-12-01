@@ -215,7 +215,8 @@ export function mockTreeWithNoAncestorsAnd2Children({
   const secondChild: SafeResolverEvent = mockEndpointEvent({
     pid: 2,
     entityID: secondChildID,
-    processName: 'e',
+    processName:
+      'really_really_really_really_really_really_really_really_really_really_really_really_really_really_long_node_name',
     parentEntityID: originID,
     timestamp: 1600863932318,
   });
@@ -388,5 +389,31 @@ export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
       eventCategory: 'registry',
     }),
   ];
+  // Add one additional event for each category
+  const categories: string[] = [
+    'authentication',
+    'database',
+    'driver',
+    'file',
+    'host',
+    'iam',
+    'intrusion_detection',
+    'malware',
+    'network',
+    'package',
+    'process',
+    'web',
+  ];
+  for (const category of categories) {
+    relatedEvents.push(
+      mockEndpointEvent({
+        entityID: originID,
+        parentEntityID,
+        eventID: `${relatedEvents.length}`,
+        eventType: 'access',
+        eventCategory: category,
+      })
+    );
+  }
   return withRelatedEventsOnOrigin(baseTree, relatedEvents);
 }

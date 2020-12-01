@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 
 import execa from 'execa';
 
@@ -35,7 +35,7 @@ export async function runCheckTsProjectsCli() {
       });
 
       const isNotInTsProject: File[] = [];
-      const isInMultipleTsProjects: File[] = [];
+      const isInMultipleTsProjects: string[] = [];
 
       for (const lineRaw of files.split('\n')) {
         const line = lineRaw.trim();
@@ -56,7 +56,11 @@ export async function runCheckTsProjectsCli() {
           isNotInTsProject.push(file);
         }
         if (projects.length > 1 && !file.isTypescriptAmbient()) {
-          isInMultipleTsProjects.push(file);
+          isInMultipleTsProjects.push(
+            ` - ${file.getRelativePath()}:\n${projects
+              .map((p) => `   - ${relative(process.cwd(), p.tsConfigPath)}`)
+              .join('\n')}`
+          );
         }
       }
 
@@ -74,10 +78,9 @@ export async function runCheckTsProjectsCli() {
       }
 
       if (isInMultipleTsProjects.length) {
+        const details = isInMultipleTsProjects.join('\n');
         log.error(
-          `The following files belong to multiple tsconfig.json files listed in src/dev/typescript/projects.ts\n${isInMultipleTsProjects
-            .map((file) => ` - ${file.getRelativePath()}`)
-            .join('\n')}`
+          `The following files belong to multiple tsconfig.json files listed in src/dev/typescript/projects.ts\n${details}`
         );
       }
 

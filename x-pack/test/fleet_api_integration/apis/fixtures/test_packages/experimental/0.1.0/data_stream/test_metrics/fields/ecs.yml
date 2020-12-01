@@ -1,0 +1,3 @@
+- name: metrics_experimental_name
+  title: metrics_experimental_title
+  type: keyword

@@ -86,7 +86,7 @@ function MetricVisOptions({
   );
 
   const setColorMode: EuiButtonGroupProps['onChange'] = useCallback(
-    (id) => setMetricValue('metricColorMode', id as ColorModes),
+    (id: string) => setMetricValue('metricColorMode', id as ColorModes),
     [setMetricValue]
   );
 

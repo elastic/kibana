@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../../plugins/kibana_utils/tsconfig.json" }
+  ]
+}

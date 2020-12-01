@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export { PointSeriesOptions } from './point_series';
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { PointSeriesOptions as default } from './point_series';

@@ -3,23 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   KibanaRequest,
   LoggerFactory,
   ILegacyClusterClient,
   IBasePath,
 } from '../../../../../src/core/server';
-import { SecurityLicense } from '../../common/licensing';
-import { AuthenticatedUser } from '../../common/model';
-import { AuthenticationProvider } from '../../common/types';
+import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticatedUser } from '../../common/model';
+import type { AuthenticationProvider } from '../../common/types';
 import { SecurityAuditLogger, AuditServiceSetup, userLoginEvent } from '../audit';
-import { ConfigType } from '../config';
+import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
-import { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import { SessionValue, Session } from '../session_management';
+import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import type { SessionValue, Session } from '../session_management';
 
 import {
+  AnonymousAuthenticationProvider,
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
   BaseAuthenticationProvider,
@@ -86,6 +88,7 @@ const providerMap = new Map<
   [TokenAuthenticationProvider.type, TokenAuthenticationProvider],
   [OIDCAuthenticationProvider.type, OIDCAuthenticationProvider],
   [PKIAuthenticationProvider.type, PKIAuthenticationProvider],
+  [AnonymousAuthenticationProvider.type, AnonymousAuthenticationProvider],
 ]);
 
 /**
@@ -259,7 +262,7 @@ export class Authenticator {
       isLoginAttemptWithProviderName(attempt) && this.providers.has(attempt.provider.name)
         ? [[attempt.provider.name, this.providers.get(attempt.provider.name)!]]
         : isLoginAttemptWithProviderType(attempt)
-        ? [...this.providerIterator(existingSessionValue)].filter(
+        ? [...this.providerIterator(existingSessionValue?.provider.name)].filter(
             ([, { type }]) => type === attempt.provider.type
           )
         : [];
@@ -328,17 +331,26 @@ export class Authenticator {
     assertRequest(request);
 
     const existingSessionValue = await this.getSessionValue(request);
+    const suggestedProviderName =
+      existingSessionValue?.provider.name ??
+      request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
 
     if (this.shouldRedirectToLoginSelector(request, existingSessionValue)) {
       this.logger.debug('Redirecting request to Login Selector.');
       return AuthenticationResult.redirectTo(
         `${this.options.basePath.serverBasePath}/login?next=${encodeURIComponent(
-          `${this.options.basePath.get(request)}${request.url.path}`
-        )}`
+          `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
+        )}${
+          suggestedProviderName && !existingSessionValue
+            ? `&${AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+                suggestedProviderName
+              )}`
+            : ''
+        }`
       );
     }
 
-    for (const [providerName, provider] of this.providerIterator(existingSessionValue)) {
+    for (const [providerName, provider] of this.providerIterator(suggestedProviderName)) {
       // Check if current session has been set by this provider.
       const ownsSession =
         existingSessionValue?.provider.name === providerName &&
@@ -395,7 +407,7 @@ export class Authenticator {
       // active session already some providers can still properly respond to the 3rd-party logout
       // request. For example SAML provider can process logout request encoded in `SAMLRequest`
       // query string parameter.
-      for (const [, provider] of this.providerIterator(null)) {
+      for (const [, provider] of this.providerIterator()) {
         const deauthenticationResult = await provider.logout(request);
         if (!deauthenticationResult.notHandled()) {
           return deauthenticationResult;
@@ -473,22 +485,22 @@ export class Authenticator {
   }
 
   /**
-   * Returns provider iterator where providers are sorted in the order of priority (based on the session ownership).
-   * @param sessionValue Current session value.
+   * Returns provider iterator starting from the suggested provider if any.
+   * @param suggestedProviderName Optional name of the provider to return first.
    */
   private *providerIterator(
-    sessionValue: SessionValue | null
+    suggestedProviderName?: string | null
   ): IterableIterator<[string, BaseAuthenticationProvider]> {
-    // If there is no session to predict which provider to use first, let's use the order
-    // providers are configured in. Otherwise return provider that owns session first, and only then the rest
+    // If there is no provider suggested or suggested provider isn't configured, let's use the order
+    // providers are configured in. Otherwise return suggested provider first, and only then the rest
     // of providers.
-    if (!sessionValue) {
+    if (!suggestedProviderName || !this.providers.has(suggestedProviderName)) {
       yield* this.providers;
     } else {
-      yield [sessionValue.provider.name, this.providers.get(sessionValue.provider.name)!];
+      yield [suggestedProviderName, this.providers.get(suggestedProviderName)!];
 
       for (const [providerName, provider] of this.providers) {
-        if (providerName !== sessionValue.provider.name) {
+        if (providerName !== suggestedProviderName) {
           yield [providerName, provider];
         }
       }
@@ -728,7 +740,7 @@ export class Authenticator {
       preAccessRedirectURL = `${preAccessRedirectURL}?next=${encodeURIComponent(
         authenticationResult.redirectURL ||
           redirectURL ||
-          `${this.options.basePath.get(request)}${request.url.path}`
+          `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
       )}`;
     } else if (redirectURL && !authenticationResult.redirectURL) {
       preAccessRedirectURL = redirectURL;

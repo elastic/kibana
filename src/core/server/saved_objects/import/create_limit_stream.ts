@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { Transform } from 'stream';
 
 export function createLimitStream(limit: number) {

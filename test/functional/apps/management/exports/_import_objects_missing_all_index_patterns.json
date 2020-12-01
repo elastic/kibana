@@ -1,0 +1,121 @@
+[
+  {
+    "_id": "test-vis-1",
+    "_type": "visualization",
+    "_source": {
+      "title": "Test VIS 1",
+      "visState": "{\"title\":\"test vis 1\",\"type\":\"histogram\"}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"missing-index-pattern-1\",\"query\":{}}"
+      }
+    },
+    "_meta": {
+      "savedObjectVersion": 2
+    }
+  },
+  {
+    "_id": "test-vis-2",
+    "_type": "visualization",
+    "_source": {
+      "title": "Test VIS 2",
+      "visState": "{\"title\":\"test vis 2\",\"type\":\"histogram\"}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"missing-index-pattern-2\",\"query\":{}}"
+      }
+    },
+    "_meta": {
+      "savedObjectVersion": 2
+    }
+  },
+  {
+    "_id": "test-vis-3",
+    "_type": "visualization",
+    "_source": {
+      "title": "Test VIS 3",
+      "visState": "{\"title\":\"test vis 3\",\"type\":\"histogram\"}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"missing-index-pattern-3\",\"query\":{}}"
+      }
+    },
+    "_meta": {
+      "savedObjectVersion": 2
+    }
+  },
+  {
+    "_id": "test-vis-4",
+    "_type": "visualization",
+    "_source": {
+      "title": "Test VIS 4",
+      "visState": "{\"title\":\"test vis 4\",\"type\":\"histogram\"}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"missing-index-pattern-4\",\"query\":{}}"
+      }
+    },
+    "_meta": {
+      "savedObjectVersion": 2
+    }
+  },
+  {
+    "_id": "test-vis-5",
+    "_type": "visualization",
+    "_source": {
+      "title": "Test VIS 5",
+      "visState": "{\"title\":\"test vis 5\",\"type\":\"histogram\"}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"missing-index-pattern-5\",\"query\":{}}"
+      }
+    },
+    "_meta": {
+      "savedObjectVersion": 2
+    }
+  },
+  {
+    "_id": "test-vis-6",
+    "_type": "visualization",
+    "_source": {
+      "title": "Test VIS 6",
+      "visState": "{\"title\":\"test vis 6\",\"type\":\"histogram\"}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"missing-index-pattern-6\",\"query\":{}}"
+      }
+    },
+    "_meta": {
+      "savedObjectVersion": 2
+    }
+  },
+  {
+    "_id": "test-vis-7",
+    "_type": "visualization",
+    "_source": {
+      "title": "Test VIS 7",
+      "visState": "{\"title\":\"test vis 7\",\"type\":\"histogram\"}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"missing-index-pattern-7\",\"query\":{}}"
+      }
+    },
+    "_meta": {
+      "savedObjectVersion": 2
+    }
+  }
+]

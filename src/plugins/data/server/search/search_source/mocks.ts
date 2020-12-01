@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { KibanaRequest } from 'src/core/server';
 
 import { searchSourceCommonMock } from '../../../common/search/search_source/mocks';

@@ -477,7 +477,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="#bd271e"
                   data-euiicon-type="dot"
                 />
@@ -518,7 +518,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="#d3dae6"
                   data-euiicon-type="dot"
                 />
@@ -604,7 +604,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
         class="echContainer"
       />
     </div>
-    <div
+    <span
       class="c0 greenCheckIcon"
       data-euiicon-type="checkInCircleFilled"
     />
@@ -630,7 +630,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="#bd271e"
                   data-euiicon-type="dot"
                 />
@@ -671,7 +671,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <div
+                <span
                   color="#d3dae6"
                   data-euiicon-type="dot"
                 />

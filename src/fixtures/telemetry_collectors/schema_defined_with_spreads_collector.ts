@@ -49,7 +49,7 @@ const someSchema: MakeSchemaFrom<Pick<Usage, 'flat' | 'my_str'>> = {
 const someOtherSchema: MakeSchemaFrom<Pick<Usage, 'my_objects'>> = {
   my_objects: {
     total: {
-      type: 'number',
+      type: 'long',
     },
     type: { type: 'boolean' },
   },

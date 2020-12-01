@@ -69,7 +69,7 @@ export function createRegionMapLayerDescriptor({
   const joinId = uuid();
   const joinKey = getJoinAggKey({
     aggType: metricsDescriptor.type,
-    aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
+    aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
     rightSourceId: joinId,
   });
   const colorPallette = NUMERICAL_COLOR_PALETTES.find((pallette) => {
@@ -87,6 +87,8 @@ export function createRegionMapLayerDescriptor({
           indexPatternTitle: indexPatternTitle ? indexPatternTitle : indexPatternId,
           term: termsFieldName,
           metrics: [metricsDescriptor],
+          applyGlobalQuery: true,
+          applyGlobalTime: true,
         },
       },
     ],
@@ -98,7 +100,7 @@ export function createRegionMapLayerDescriptor({
       [VECTOR_STYLES.FILL_COLOR]: {
         type: STYLE_TYPE.DYNAMIC,
         options: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions),
+          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
           field: {
             name: joinKey,
             origin: FIELD_ORIGIN.JOIN,
@@ -106,7 +108,7 @@ export function createRegionMapLayerDescriptor({
           color: colorPallette ? colorPallette.value : 'Yellow to Red',
           type: COLOR_MAP_TYPE.ORDINAL,
           fieldMetaOptions: {
-            ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions)
+            ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions)
               .fieldMetaOptions,
             isEnabled: false,
           },

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

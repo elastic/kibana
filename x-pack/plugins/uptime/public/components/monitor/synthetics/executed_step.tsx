@@ -41,7 +41,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index }) => (
       <div>
         <StatusBadge status={step.synthetics?.payload?.status} />
       </div>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <div>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
@@ -87,6 +87,5 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index }) => (
         </EuiFlexGroup>
       </div>
     </div>
-    <EuiSpacer />
   </>
 );

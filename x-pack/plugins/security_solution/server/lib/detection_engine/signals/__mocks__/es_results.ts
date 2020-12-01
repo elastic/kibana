@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import {
   SignalSourceHit,
   SignalSearchResponse,
@@ -19,7 +20,7 @@ import {
 } from '../../../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { RuleTypeParams } from '../../types';
-import { IRuleStatusAttributes } from '../../rules/types';
+import { IRuleStatusSOAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
@@ -68,6 +69,8 @@ export const sampleRuleAlertParams = (
   threat: undefined,
   version: 1,
   exceptionsList: getListArrayMock(),
+  concurrentSearches: undefined,
+  itemsPerSearch: undefined,
 });
 
 export const sampleRuleSO = (): SavedObject<RuleAlertAttributes> => {
@@ -187,9 +190,25 @@ export const sampleDocNoSortId = (
   sort: [],
 });
 
-export const sampleDocSeverity = (
-  severity?: Array<string | number | null> | string | number | null
-): SignalSourceHit => ({
+export const sampleDocSeverity = (severity?: unknown, fieldName?: string): SignalSourceHit => {
+  const doc = {
+    _index: 'myFakeSignalIndex',
+    _type: 'doc',
+    _score: 100,
+    _version: 1,
+    _id: sampleIdGuid,
+    _source: {
+      someKey: 'someValue',
+      '@timestamp': '2020-04-20T21:27:45+0000',
+    },
+    sort: [],
+  };
+
+  set(doc._source, fieldName ?? 'event.severity', severity);
+  return doc;
+};
+
+export const sampleDocRiskScore = (riskScore?: unknown): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
@@ -199,7 +218,7 @@ export const sampleDocSeverity = (
     someKey: 'someValue',
     '@timestamp': '2020-04-20T21:27:45+0000',
     event: {
-      severity: severity ?? 100,
+      risk: riskScore,
     },
   },
   sort: [],
@@ -555,7 +574,7 @@ export const sampleDocSearchResultsWithSortId = (
 export const sampleRuleGuid = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 export const sampleIdGuid = 'e1e08ddc-5e37-49ff-a258-5393aa44435a';
 
-export const exampleRuleStatus: () => SavedObject<IRuleStatusAttributes> = () => ({
+export const exampleRuleStatus: () => SavedObject<IRuleStatusSOAttributes> = () => ({
   type: ruleStatusSavedObjectType,
   id: '042e6d90-7069-11ea-af8b-0f8ae4fa817e',
   attributes: {
@@ -577,8 +596,10 @@ export const exampleRuleStatus: () => SavedObject<IRuleStatusAttributes> = () =>
 });
 
 export const exampleFindRuleStatusResponse: (
-  mockStatuses: Array<SavedObject<IRuleStatusAttributes>>
-) => SavedObjectsFindResponse<IRuleStatusAttributes> = (mockStatuses = [exampleRuleStatus()]) => ({
+  mockStatuses: Array<SavedObject<IRuleStatusSOAttributes>>
+) => SavedObjectsFindResponse<IRuleStatusSOAttributes> = (
+  mockStatuses = [exampleRuleStatus()]
+) => ({
   total: 1,
   per_page: 6,
   page: 1,

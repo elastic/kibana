@@ -10,17 +10,19 @@ import { Expression, Props } from '../components/duration/expression';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DiskUsageAlert } from '../../../server/alerts';
+import { ALERT_DISK_USAGE, ALERT_DETAILS } from '../../../common/constants';
 
 export function createDiskUsageAlertType(): AlertTypeModel {
   return {
-    id: DiskUsageAlert.TYPE,
-    name: DiskUsageAlert.LABEL,
+    id: ALERT_DISK_USAGE,
+    name: ALERT_DETAILS[ALERT_DISK_USAGE].label,
+    description: ALERT_DETAILS[ALERT_DISK_USAGE].description,
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-disk-usage-threshold`;
+    },
     alertParamsExpression: (props: Props) => (
-      <Expression {...props} paramDetails={DiskUsageAlert.PARAM_DETAILS} />
+      <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_DISK_USAGE].paramDetails} />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',

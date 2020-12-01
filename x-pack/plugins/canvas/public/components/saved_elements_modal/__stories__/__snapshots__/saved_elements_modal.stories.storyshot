@@ -20,7 +20,7 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"
@@ -57,7 +57,7 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
-                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
+                className="euiFieldSearch euiFieldSearch--fullWidth"
                 onChange={[Function]}
                 onKeyUp={[Function]}
                 placeholder="Find element"
@@ -70,7 +70,7 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
                 <span
                   className="euiFormControlLayoutCustomIcon"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="search"
@@ -85,7 +85,7 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
           <div
             className="euiEmptyPrompt"
           >
-            <div
+            <span
               color="subdued"
               data-euiicon-type="vector"
               size="xxl"
@@ -122,6 +122,11 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
           className="euiButton euiButton--primary euiButton--small"
           data-test-subj="saved-elements-modal-close-button"
           onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
+          }
           type="button"
         >
           <span
@@ -160,7 +165,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"
@@ -197,7 +202,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
-                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
+                className="euiFieldSearch euiFieldSearch--fullWidth"
                 onChange={[Function]}
                 onKeyUp={[Function]}
                 placeholder="Find element"
@@ -210,7 +215,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                 <span
                   className="euiFormControlLayoutCustomIcon"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="search"
@@ -229,7 +234,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -293,7 +298,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       onFocus={[Function]}
                       type="button"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
                         data-euiicon-type="pencil"
@@ -320,7 +325,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       onFocus={[Function]}
                       type="button"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
                         data-euiicon-type="trash"
@@ -335,7 +340,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -399,7 +404,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       onFocus={[Function]}
                       type="button"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
                         data-euiicon-type="pencil"
@@ -426,7 +431,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       onFocus={[Function]}
                       type="button"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
                         data-euiicon-type="trash"
@@ -441,7 +446,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -505,7 +510,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       onFocus={[Function]}
                       type="button"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
                         data-euiicon-type="pencil"
@@ -532,7 +537,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       onFocus={[Function]}
                       type="button"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
                         data-euiicon-type="trash"
@@ -553,6 +558,11 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
           className="euiButton euiButton--primary euiButton--small"
           data-test-subj="saved-elements-modal-close-button"
           onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
+          }
           type="button"
         >
           <span
@@ -591,7 +601,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"
@@ -641,7 +651,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                 <span
                   className="euiFormControlLayoutCustomIcon"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="search"
@@ -657,7 +667,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                   onClick={[Function]}
                   type="button"
                 >
-                  <div
+                  <span
                     className="euiFormControlLayoutClearButton__icon"
                     data-euiicon-type="cross"
                   />
@@ -675,7 +685,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiCard euiCard--shadow euiCard--borderRadiusMedium euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
                 onClick={[Function]}
               >
                 <div
@@ -739,7 +749,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                       onFocus={[Function]}
                       type="button"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
                         data-euiicon-type="pencil"
@@ -766,7 +776,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                       onFocus={[Function]}
                       type="button"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiButtonIcon__icon"
                         data-euiicon-type="trash"
@@ -787,6 +797,11 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
           className="euiButton euiButton--primary euiButton--small"
           data-test-subj="saved-elements-modal-close-button"
           onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
+          }
           type="button"
         >
           <span

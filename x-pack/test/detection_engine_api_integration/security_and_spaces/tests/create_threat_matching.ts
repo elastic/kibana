@@ -6,32 +6,30 @@
 
 import expect from '@kbn/expect';
 
-import { SearchResponse } from 'elasticsearch';
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_STATUS_URL,
-  DETECTION_ENGINE_QUERY_SIGNALS_URL,
 } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
+  createRule,
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
-  getQueryAllSignals,
+  getSignalsByIds,
   removeServerGeneratedProperties,
-  waitFor,
+  waitForRuleSuccess,
+  waitForSignalsToBePresent,
 } from '../../utils';
 
-import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema.mock';
+import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
-import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
 
   /**
    * Specific api integration tests for threat matching rule type
@@ -60,66 +58,56 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
       });
 
       it('should create a single rule with a rule_id', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getCreateThreatMatchRulesSchemaMock())
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedProperties(body);
+        const ruleResponse = await createRule(supertest, getCreateThreatMatchRulesSchemaMock());
+        const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock());
       });
 
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getCreateThreatMatchRulesSchemaMock())
-          .expect(200);
-
-        // wait for Task Manager to execute the rule and update status
-        await waitFor(async () => {
-          const { body: statusBody } = await supertest
-            .post(DETECTION_ENGINE_RULES_STATUS_URL)
-            .set('kbn-xsrf', 'true')
-            .send({ ids: [body.id] })
-            .expect(200);
-
-          return statusBody[body.id]?.current_status?.status === 'succeeded';
-        });
+        const ruleResponse = await createRule(
+          supertest,
+          getCreateThreatMatchRulesSchemaMock('rule-1', true)
+        );
+        await waitForRuleSuccess(supertest, ruleResponse.id);
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
           .set('kbn-xsrf', 'true')
-          .send({ ids: [body.id] })
+          .send({ ids: [ruleResponse.id] })
           .expect(200);
 
-        const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock());
-        expect(statusBody[body.id].current_status.status).to.eql('succeeded');
+        const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
+        expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock(true));
+        expect(statusBody[ruleResponse.id].current_status.status).to.eql('succeeded');
       });
     });
 
     describe('tests with auditbeat data', () => {
       beforeEach(async () => {
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
         await createSignalsIndex(supertest);
         await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
         await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should be able to execute and get 10 signals when doing a specific query', async () => {
         const rule: CreateRulesSchema = {
-          ...getCreateThreatMatchRulesSchemaMock(),
+          description: 'Detecting root and admin users',
+          name: 'Query with a rule id',
+          severity: 'high',
+          type: 'threat_match',
+          risk_score: 55,
+          language: 'kuery',
+          rule_id: 'rule-1',
           from: '1900-01-01T00:00:00.000Z',
           query: '*:*',
           threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
@@ -139,40 +127,22 @@ export default ({ getService }: FtrProviderContext) => {
           threat_filters: [],
         };
 
-        // create a simple rule
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(rule)
-          .expect(200);
-
-        // wait until rules show up and are present
-        await waitFor(async () => {
-          const {
-            body: signalsOpen,
-          }: { body: SearchResponse<{ signal: Signal }> } = await supertest
-            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-            .set('kbn-xsrf', 'true')
-            .send(getQueryAllSignals())
-            .expect(200);
-          return signalsOpen.hits.hits.length > 0;
-        });
-
-        const {
-          body: signalsOpen,
-        }: { body: SearchResponse<{ signal: Signal }> } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQueryAllSignals())
-          .expect(200);
-
-        // expect there to be 10
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccess(supertest, id);
+        await waitForSignalsToBePresent(supertest, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
       });
 
-      it('should return zero matches if the mapping does not match against anything in the mapping', async () => {
+      it('should return 0 matches if the mapping does not match against anything in the mapping', async () => {
         const rule: CreateRulesSchema = {
-          ...getCreateThreatMatchRulesSchemaMock(),
+          description: 'Detecting root and admin users',
+          name: 'Query with a rule id',
+          severity: 'high',
+          type: 'threat_match',
+          risk_score: 55,
+          language: 'kuery',
+          rule_id: 'rule-1',
           from: '1900-01-01T00:00:00.000Z',
           query: '*:*',
           threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
@@ -192,32 +162,85 @@ export default ({ getService }: FtrProviderContext) => {
           threat_filters: [],
         };
 
-        // create the threat match rule
-        const { body: resBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(rule)
-          .expect(200);
+        const ruleResponse = await createRule(supertest, rule);
+        await waitForRuleSuccess(supertest, ruleResponse.id);
+        const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
+        expect(signalsOpen.hits.hits.length).equal(0);
+      });
 
-        // wait for Task Manager to finish executing the rule
-        await waitFor(async () => {
-          const { body } = await supertest
-            .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-            .set('kbn-xsrf', 'true')
-            .send({ ids: [resBody.id] })
-            .expect(200);
-          return body[resBody.id]?.current_status?.status === 'succeeded';
-        });
+      it('should return 0 signals when using an AND and one of the clauses does not have data', async () => {
+        const rule: CreateRulesSchema = {
+          description: 'Detecting root and admin users',
+          name: 'Query with a rule id',
+          severity: 'high',
+          type: 'threat_match',
+          risk_score: 55,
+          language: 'kuery',
+          rule_id: 'rule-1',
+          from: '1900-01-01T00:00:00.000Z',
+          query: '*:*',
+          threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
+          threat_index: ['auditbeat-*'], // We use auditbeat as both the matching index and the threat list for simplicity
+          threat_mapping: [
+            {
+              entries: [
+                {
+                  field: 'source.ip',
+                  value: 'source.ip',
+                  type: 'mapping',
+                },
+                {
+                  field: 'source.ip',
+                  value: 'destination.ip', // All records from the threat query do NOT have destination.ip, so those records that do not should drop this entire AND clause.
+                  type: 'mapping',
+                },
+              ],
+            },
+          ],
+          threat_filters: [],
+        };
 
-        // Get the signals now that we are done running and expect the result to always be zero
-        const {
-          body: signalsOpen,
-        }: { body: SearchResponse<{ signal: Signal }> } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQueryAllSignals())
-          .expect(200);
+        const ruleResponse = await createRule(supertest, rule);
+        await waitForRuleSuccess(supertest, ruleResponse.id);
+        const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
+        expect(signalsOpen.hits.hits.length).equal(0);
+      });
 
+      it('should return 0 signals when using an AND and one of the clauses has a made up value that does not exist', async () => {
+        const rule: CreateRulesSchema = {
+          description: 'Detecting root and admin users',
+          name: 'Query with a rule id',
+          severity: 'high',
+          type: 'threat_match',
+          risk_score: 55,
+          language: 'kuery',
+          rule_id: 'rule-1',
+          from: '1900-01-01T00:00:00.000Z',
+          query: '*:*',
+          threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
+          threat_index: ['auditbeat-*'], // We use auditbeat as both the matching index and the threat list for simplicity
+          threat_mapping: [
+            {
+              entries: [
+                {
+                  field: 'source.ip',
+                  value: 'source.ip',
+                  type: 'mapping',
+                },
+                {
+                  field: 'source.ip',
+                  value: 'made.up.non.existent.field', // made up field should not match
+                  type: 'mapping',
+                },
+              ],
+            },
+          ],
+          threat_filters: [],
+        };
+
+        const ruleResponse = await createRule(supertest, rule);
+        await waitForRuleSuccess(supertest, ruleResponse.id);
+        const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
     });

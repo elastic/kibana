@@ -22,6 +22,7 @@ import { Subscription } from 'rxjs';
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
 import { useParams } from 'react-router-dom';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
@@ -39,6 +40,7 @@ interface AdvancedSettingsProps {
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   componentRegistry: ComponentRegistry['start'];
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 interface AdvancedSettingsComponentProps extends AdvancedSettingsProps {
@@ -241,6 +243,7 @@ export class AdvancedSettingsComponent extends Component<
           enableSaving={this.props.enableSaving}
           dockLinks={this.props.dockLinks}
           toasts={this.props.toasts}
+          trackUiMetric={this.props.trackUiMetric}
         />
         <PageFooter
           toasts={this.props.toasts}
@@ -263,6 +266,7 @@ export const AdvancedSettings = (props: AdvancedSettingsProps) => {
       dockLinks={props.dockLinks}
       toasts={props.toasts}
       componentRegistry={props.componentRegistry}
+      trackUiMetric={props.trackUiMetric}
     />
   );
 };

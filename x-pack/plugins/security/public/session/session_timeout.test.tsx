@@ -8,7 +8,7 @@ import { coreMock } from 'src/core/public/mocks';
 import BroadcastChannel from 'broadcast-channel';
 import { SessionTimeout } from './session_timeout';
 import { createSessionExpiredMock } from './session_expired.mock';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 
 jest.useFakeTimers();
 

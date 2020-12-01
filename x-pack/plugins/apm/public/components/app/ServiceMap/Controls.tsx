@@ -14,7 +14,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { APMQueryParams } from '../../shared/Links/url_helpers';
 import { CytoscapeContext } from './Cytoscape';
-import { getAnimationOptions, getNodeHeight } from './cytoscapeOptions';
+import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 
 const ControlsContainer = styled('div')`
   left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};

@@ -47,7 +47,7 @@ export function EuiMonitoringTable({
   });
 
   let footerContent = null;
-  if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
+  if (setupMode && isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
     footerContent = (
       <Fragment>
         <EuiSpacer size="m" />

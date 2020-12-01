@@ -5,11 +5,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-import { Request } from 'hapi';
 import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
-import { mlLog } from '../client/log';
+import { mlLog } from '../lib/log';
 import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { RouteInitialization, SystemRouteDeps } from '../types';
@@ -18,8 +16,8 @@ import { RouteInitialization, SystemRouteDeps } from '../types';
  * System routes
  */
 export function systemRoutes(
-  { router, mlLicense }: RouteInitialization,
-  { spaces, cloud, resolveMlCapabilities }: SystemRouteDeps
+  { router, mlLicense, routeGuard }: RouteInitialization,
+  { getSpaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
   async function getNodeCount(client: IScopedClusterClient) {
     const { body } = await client.asInternalUser.nodes.info({
@@ -57,12 +55,12 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ mlClient, client, request, response }) => {
       try {
-        const { asCurrentUser, asInternalUser } = client;
+        const { asCurrentUser } = client;
         let upgradeInProgress = false;
         try {
-          const { body } = await asInternalUser.ml.info();
+          const { body } = await mlClient.info();
           // if ml indices are currently being migrated, upgrade_mode will be set to true
           // pass this back with the privileges to allow for the disabling of UI controls.
           upgradeInProgress = body.upgrade_mode === true;
@@ -115,13 +113,9 @@ export function systemRoutes(
       path: '/api/ml/ml_capabilities',
       validate: false,
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        // if spaces is disabled force isMlEnabledInSpace to be true
-        const { isMlEnabledInSpace } =
-          spaces !== undefined
-            ? spacesUtilsProvider(spaces, (request as unknown) as Request)
-            : { isMlEnabledInSpace: async () => true };
+        const { isMlEnabledInSpace } = spacesUtilsProvider(getSpaces, request);
 
         const mlCapabilities = await resolveMlCapabilities(request);
         if (mlCapabilities === null) {
@@ -129,7 +123,7 @@ export function systemRoutes(
         }
 
         const { getCapabilities } = capabilitiesProvider(
-          client,
+          mlClient,
           mlCapabilities,
           mlLicense,
           isMlEnabledInSpace
@@ -159,7 +153,7 @@ export function systemRoutes(
       },
     },
 
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, response }) => {
       try {
         return response.ok({
           body: await getNodeCount(client),
@@ -185,9 +179,9 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.info();
+        const { body } = await mlClient.info();
         const cloudId = cloud && cloud.cloudId;
         return response.ok({
           body: { ...body, cloudId },
@@ -216,7 +210,7 @@ export function systemRoutes(
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { body } = await client.asCurrentUser.search(request.body);
         return response.ok({
@@ -244,7 +238,7 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { index } = request.body;
 

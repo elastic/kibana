@@ -30,7 +30,21 @@ export const RULE_AND_TIMELINE_PREPACKAGED_FAILURE = i18n.translate(
 export const RULE_AND_TIMELINE_PREPACKAGED_SUCCESS = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.createPrePackagedRuleAndTimelineSuccesDescription',
   {
-    defaultMessage: 'Installed pre-packaged rules and timelines from elastic',
+    defaultMessage: 'Installed pre-packaged rules and timeline templates from elastic',
+  }
+);
+
+export const RULE_PREPACKAGED_SUCCESS = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.createPrePackagedRuleSuccesDescription',
+  {
+    defaultMessage: 'Installed pre-packaged rules from elastic',
+  }
+);
+
+export const TIMELINE_PREPACKAGED_SUCCESS = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.createPrePackagedTimelineSuccesDescription',
+  {
+    defaultMessage: 'Installed pre-packaged timeline templates from elastic',
   }
 );
 

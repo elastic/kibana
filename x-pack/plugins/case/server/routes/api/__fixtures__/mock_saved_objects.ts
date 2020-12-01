@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from 'kibana/server';
+import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import {
   ESCasesConfigureAttributes,
   CommentAttributes,
   ESCaseAttributes,
   ConnectorTypes,
+  CommentType,
 } from '../../../../common/api';
 
 export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
@@ -207,6 +208,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-1',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
+      type: CommentType.user,
       created_at: '2019-11-25T21:55:00.177Z',
       created_by: {
         full_name: 'elastic',
@@ -237,6 +239,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-2',
     attributes: {
       comment: 'Well I decided to update my comment. So what? Deal with it.',
+      type: CommentType.user,
       created_at: '2019-11-25T21:55:14.633Z',
       created_by: {
         full_name: 'elastic',
@@ -268,6 +271,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-3',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
+      type: CommentType.user,
       created_at: '2019-11-25T22:32:30.608Z',
       created_by: {
         full_name: 'elastic',
@@ -288,6 +292,38 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
         type: 'cases',
         name: 'associated-cases',
         id: 'mock-id-3',
+      },
+    ],
+    updated_at: '2019-11-25T22:32:30.608Z',
+    version: 'WzYsMV0=',
+  },
+  {
+    type: 'cases-comment',
+    id: 'mock-comment-4',
+    attributes: {
+      type: CommentType.alert,
+      index: 'test-index',
+      alertId: 'test-id',
+      created_at: '2019-11-25T22:32:30.608Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: '2019-11-25T22:32:30.608Z',
+      updated_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+    },
+    references: [
+      {
+        type: 'cases',
+        name: 'associated-cases',
+        id: 'mock-id-4',
       },
     ],
     updated_at: '2019-11-25T22:32:30.608Z',
@@ -323,5 +359,14 @@ export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> =
     references: [],
     updated_at: '2020-04-09T09:43:51.778Z',
     version: 'WzYsMV0=',
+  },
+];
+
+export const mockCaseConfigureFind: Array<SavedObjectsFindResponse<ESCasesConfigureAttributes>> = [
+  {
+    page: 1,
+    per_page: 5,
+    total: mockCaseConfigure.length,
+    saved_objects: [{ ...mockCaseConfigure[0], score: 0 }],
   },
 ];

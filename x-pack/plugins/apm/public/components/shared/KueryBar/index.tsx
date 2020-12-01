@@ -80,13 +80,6 @@ export function KueryBar() {
     },
   });
 
-  // The bar should be disabled when viewing the service map
-  const disabled = /\/(service-map)$/.test(location.pathname);
-  const disabledPlaceholder = i18n.translate(
-    'xpack.apm.kueryBar.disabledPlaceholder',
-    { defaultMessage: 'Search is not available here' }
-  );
-
   async function onChange(inputValue: string, selectionStart: number) {
     if (indexPattern == null) {
       return;
@@ -111,6 +104,7 @@ export function KueryBar() {
           query: inputValue,
           selectionStart,
           selectionEnd: selectionStart,
+          useTimeRange: true,
         })) || []
       )
         .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
@@ -152,13 +146,12 @@ export function KueryBar() {
   return (
     <Container>
       <Typeahead
-        disabled={disabled}
         isLoading={state.isLoadingSuggestions}
         initialValue={urlParams.kuery}
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions}
-        placeholder={disabled ? disabledPlaceholder : placeholder}
+        placeholder={placeholder}
       />
     </Container>
   );

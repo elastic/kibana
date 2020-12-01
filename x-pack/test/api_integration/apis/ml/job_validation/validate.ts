@@ -35,7 +35,13 @@ export default ({ getService }: FtrProviderContext) => {
           groups: [],
           analysis_config: {
             bucket_span: '15m',
-            detectors: [{ function: 'mean', field_name: 'products.discount_amount' }],
+            detectors: [
+              {
+                function: 'mean',
+                field_name: 'products.discount_amount',
+                exclude_frequent: 'none',
+              },
+            ],
             influencers: [],
             summary_count_field_name: 'doc_count',
           },
@@ -296,6 +302,12 @@ export default ({ getService }: FtrProviderContext) => {
             'The specified model memory limit is less than half of the estimated model memory limit and will likely hit the hard limit.',
           url: `https://www.elastic.co/guide/en/machine-learning/${pkg.branch}/create-jobs.html#model-memory-limits`,
           status: 'warning',
+        },
+        {
+          id: 'missing_summary_count_field_name',
+          status: 'error',
+          text:
+            'A job configured with a datafeed with aggregations must set summary_count_field_name; use doc_count or suitable alternative.',
         },
       ];
 

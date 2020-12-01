@@ -24,5 +24,5 @@ expressions.run('...', null, { elasticsearchClient });
 <b>Signature:</b>
 
 ```typescript
-run: <Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext, options?: ExpressionExecOptions) => Promise<Output>;
+run: <Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams) => Promise<Output>;
 ```

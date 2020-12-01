@@ -131,8 +131,8 @@ export const getUpdateAction = ({
 }): EuiCommentProps => ({
   username: (
     <UserActionUsernameWithAvatar
-      username={action.actionBy.username ?? ''}
-      fullName={action.actionBy.fullName ?? action.actionBy.username ?? ''}
+      username={action.actionBy.username}
+      fullName={action.actionBy.fullName}
     />
   ),
   type: 'update',

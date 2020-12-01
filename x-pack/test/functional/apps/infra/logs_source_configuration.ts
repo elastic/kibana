@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
 import { DATES } from './constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -118,10 +117,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           .set(COMMON_REQUEST_HEADERS)
           .set('Accept', 'application/json')
           .send({
-            timeRange: {
-              min: moment().subtract(1, 'hour').toISOString(),
-              max: moment().toISOString(),
-            },
             unencrypted: true,
           })
           .expect(200)

@@ -51,6 +51,7 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
         '--telemetry.optIn=false',
+        '--savedObjects.maxImportPayloadBytes=10485760',
       ],
     },
 
@@ -287,6 +288,18 @@ export default async function ({ readConfigFile }) {
             run_as: [],
           },
           kibana: [],
+        },
+
+        test_alias1_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['alias1'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
         },
       },
       defaultRoles: ['test_logstash_reader', 'kibana_admin'],

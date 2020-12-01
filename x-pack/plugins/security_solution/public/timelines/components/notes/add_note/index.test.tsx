@@ -74,7 +74,9 @@ describe('AddNote', () => {
   test('it renders the contents of the note', () => {
     const wrapper = mount(<AddNote {...props} />);
 
-    expect(wrapper.find('[data-test-subj="add-a-note"]').first().text()).toEqual(note);
+    expect(
+      wrapper.find('[data-test-subj="add-a-note"] .euiMarkdownEditorDropZone').first().text()
+    ).toEqual(note);
   });
 
   test('it invokes associateNote when the Add Note button is clicked', () => {
@@ -130,31 +132,5 @@ describe('AddNote', () => {
     wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
     expect(updateNote).toBeCalled();
-  });
-
-  test('it does NOT display the markdown formatting hint when a note has NOT been entered', () => {
-    const testProps = {
-      ...props,
-      newNote: '',
-    };
-    const wrapper = mount(<AddNote {...testProps} />);
-
-    expect(wrapper.find('[data-test-subj="markdown-hint"]').first()).toHaveStyleRule(
-      'visibility',
-      'hidden'
-    );
-  });
-
-  test('it displays the markdown formatting hint when a note has been entered', () => {
-    const testProps = {
-      ...props,
-      newNote: 'We should see a formatting hint now',
-    };
-    const wrapper = mount(<AddNote {...testProps} />);
-
-    expect(wrapper.find('[data-test-subj="markdown-hint"]').first()).toHaveStyleRule(
-      'visibility',
-      'inline'
-    );
   });
 });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ExecutedJourney } from '../executed_journey';
 import { Ping } from '../../../../../common/runtime_types';
@@ -252,6 +252,9 @@ describe('ExecutedJourney component', () => {
               "timestamp": "124",
             }
           }
+        />
+        <EuiSpacer
+          size="s"
         />
       </EuiFlexGroup>
     `);

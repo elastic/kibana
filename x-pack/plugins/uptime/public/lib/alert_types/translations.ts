@@ -35,6 +35,9 @@ Aging Certificates: {agingCommonNameAndDate}
   name: i18n.translate('xpack.uptime.alerts.tls.clientName', {
     defaultMessage: 'Uptime TLS',
   }),
+  description: i18n.translate('xpack.uptime.alerts.tls.description', {
+    defaultMessage: 'Alert when the TLS certificate of an Uptime monitor is about to expire.',
+  }),
 };
 
 export const DurationAnomalyTranslations = {
@@ -54,5 +57,8 @@ Response times as high as {slowestAnomalyResponse} have been detected from locat
   }),
   name: i18n.translate('xpack.uptime.alerts.durationAnomaly.clientName', {
     defaultMessage: 'Uptime Duration Anomaly',
+  }),
+  description: i18n.translate('xpack.uptime.alerts.durationAnomaly.description', {
+    defaultMessage: 'Alert when the Uptime monitor duration is anaomalous.',
   }),
 };

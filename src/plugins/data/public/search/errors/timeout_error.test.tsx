@@ -23,7 +23,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
-import { AbortError } from 'src/plugins/data/common';
+import { AbortError } from '../../../../kibana_utils/public';
 
 describe('SearchTimeoutError', () => {
   beforeEach(() => {

@@ -81,7 +81,6 @@ export const SettingsComponent: FC<Props> = ({ refs }) => {
           isOpen={isPopoverOpen}
           button={button}
           panelPaddingSize="none"
-          withTitle
           anchorPosition="upRight"
           insert={
             refs.stage.current ? { sibling: refs.stage.current, position: 'after' } : undefined

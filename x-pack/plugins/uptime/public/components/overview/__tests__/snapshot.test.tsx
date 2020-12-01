@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { Snapshot } from '../../../../common/runtime_types';
 import { SnapshotComponent } from '../snapshot/snapshot';
 

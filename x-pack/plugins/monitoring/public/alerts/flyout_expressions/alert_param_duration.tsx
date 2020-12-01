@@ -69,7 +69,7 @@ export const AlertParamDuration: React.FC<Props> = (props: Props) => {
   }, [unit, value]);
 
   return (
-    <EuiFormRow label={label} error={errors} isInvalid={errors.length > 0}>
+    <EuiFormRow label={label} error={errors} isInvalid={errors?.length > 0}>
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
           <EuiFieldNumber

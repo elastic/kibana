@@ -11,13 +11,6 @@ export const BROWSER_TYPE = 'chromium';
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
-export const API_BASE_URL = '/api/reporting'; // "Generation URL" from share menu
-export const API_BASE_URL_V1 = '/api/reporting/v1'; //
-export const API_BASE_GENERATE_V1 = `${API_BASE_URL_V1}/generate`;
-export const API_LIST_URL = '/api/reporting/jobs';
-export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object`;
-export const API_DIAGNOSE_URL = `${API_BASE_URL}/diagnose`;
-
 export const CONTENT_TYPE_CSV = 'text/csv';
 export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 export const CSV_BOM_CHARS = '\ufeff';
@@ -57,15 +50,49 @@ export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 export const UI_SETTINGS_CSV_SEPARATOR = 'csv:separator';
 export const UI_SETTINGS_CSV_QUOTE_VALUES = 'csv:quoteValues';
 
+export const LAYOUT_TYPES = {
+  PRESERVE_LAYOUT: 'preserve_layout',
+  PRINT: 'print',
+};
+
+// Export Type Definitions
+export const CSV_REPORT_TYPE = 'CSV';
+export const PDF_REPORT_TYPE = 'printablePdf';
+export const PNG_REPORT_TYPE = 'PNG';
+
 export const PDF_JOB_TYPE = 'printable_pdf';
 export const PNG_JOB_TYPE = 'PNG';
 export const CSV_JOB_TYPE = 'csv';
 export const CSV_FROM_SAVEDOBJECT_JOB_TYPE = 'csv_from_savedobject';
 export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE, PNG_JOB_TYPE];
 
+// Licenses
 export const LICENSE_TYPE_TRIAL = 'trial';
 export const LICENSE_TYPE_BASIC = 'basic';
 export const LICENSE_TYPE_STANDARD = 'standard';
 export const LICENSE_TYPE_GOLD = 'gold';
 export const LICENSE_TYPE_PLATINUM = 'platinum';
 export const LICENSE_TYPE_ENTERPRISE = 'enterprise';
+
+// Routes
+export const API_BASE_URL = '/api/reporting'; // "Generation URL" from share menu
+export const API_BASE_GENERATE = `${API_BASE_URL}/generate`;
+export const API_LIST_URL = `${API_BASE_URL}/jobs`;
+export const API_DIAGNOSE_URL = `${API_BASE_URL}/diagnose`;
+
+// hacky endpoint
+export const API_BASE_URL_V1 = '/api/reporting/v1'; //
+export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object`;
+
+// Management UI route
+export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
+
+// Statuses
+export enum JOB_STATUSES {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+  WARNINGS = 'completed_with_warnings',
+}

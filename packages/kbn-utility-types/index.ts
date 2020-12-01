@@ -110,3 +110,10 @@ export type MethodKeysOf<T> = {
  *  Returns an object with public methods only.
  */
 export type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
+
+/**
+ *  Makes an object with readonly properties mutable.
+ */
+export type Writable<T> = {
+  -readonly [K in keyof T]: T[K];
+};

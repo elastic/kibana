@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('inspector', function describeIndexTests() {
     before(async function () {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
 

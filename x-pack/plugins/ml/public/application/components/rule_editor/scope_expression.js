@@ -157,7 +157,6 @@ export class ScopeExpression extends Component {
               closePopover={this.closeFilterList}
               panelPaddingSize="none"
               ownFocus
-              withTitle
               anchorPosition="downLeft"
             >
               {this.renderFilterListPopover()}

@@ -16,7 +16,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"

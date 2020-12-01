@@ -43,8 +43,8 @@ const defaults = {
  * chart
  */
 export class AreaChart extends PointSeries {
-  constructor(handler, chartEl, chartData, seriesConfigArgs, deps) {
-    super(handler, chartEl, chartData, seriesConfigArgs, deps);
+  constructor(handler, chartEl, chartData, seriesConfigArgs, core) {
+    super(handler, chartEl, chartData, seriesConfigArgs, core);
 
     this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
     this.isOverlapping = this.seriesConfig.mode !== 'stacked';

@@ -18,7 +18,7 @@ import {
   DeletePackagePoliciesResponse,
   DeletePackagePoliciesRequest,
   GetAgentStatusResponse,
-} from '../../../../../../../ingest_manager/common';
+} from '../../../../../../../fleet/common';
 
 export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListState> = (
   coreStart

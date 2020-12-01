@@ -20,7 +20,7 @@ export const contentSources = [
     boost: 1,
   },
   {
-    id: '123',
+    id: '124',
     serviceType: 'jira',
     searchable: true,
     supportedByLicense: true,

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionsViewerUtility } from './exceptions_utility';

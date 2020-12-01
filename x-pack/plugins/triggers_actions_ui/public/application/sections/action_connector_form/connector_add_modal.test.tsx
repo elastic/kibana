@@ -4,36 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ConnectorAddModal } from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, ActionType } from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+
+jest.mock('../../../common/lib/kibana');
+const mocks = coreMock.createSetup();
 const actionTypeRegistry = actionTypeRegistryMock.create();
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('connector_add_modal', () => {
-  let deps: any;
-
   beforeAll(async () => {
-    const mocks = coreMock.createSetup();
     const [
       {
         application: { capabilities },
       },
     ] = await mocks.getStartServices();
-    deps = {
-      toastNotifications: mocks.notifications.toasts,
-      http: mocks.http,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          show: true,
-          save: true,
-          delete: true,
-        },
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      actions: {
+        show: true,
+        save: true,
+        delete: true,
       },
-      actionTypeRegistry: actionTypeRegistry as any,
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
   it('renders connector modal form if addModalVisible is true', () => {
@@ -65,14 +61,9 @@ describe('connector_add_modal', () => {
 
     const wrapper = mountWithIntl(
       <ConnectorAddModal
-        addModalVisible={true}
-        setAddModalVisibility={() => {}}
+        onClose={() => {}}
         actionType={actionType}
-        http={deps!.http}
-        actionTypeRegistry={deps!.actionTypeRegistry}
-        toastNotifications={deps!.toastNotifications}
-        docLinks={deps!.docLinks}
-        capabilities={deps!.capabilities}
+        actionTypeRegistry={actionTypeRegistry}
       />
     );
     expect(wrapper.exists('.euiModalHeader')).toBeTruthy();

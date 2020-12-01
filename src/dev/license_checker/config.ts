@@ -46,6 +46,7 @@ export const LICENSE_WHITELIST = [
   'BSD*',
   'BSD-2-Clause',
   'BSD-3-Clause AND MIT',
+  '(MIT AND BSD-3-Clause)',
   'BSD-3-Clause OR MIT',
   'BSD-3-Clause',
   '(BSD-3-Clause OR GPL-2.0)',

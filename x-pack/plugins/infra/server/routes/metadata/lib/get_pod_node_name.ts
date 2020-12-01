@@ -15,9 +15,11 @@ export const getPodNodeName = async (
   requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: 'host' | 'pod' | 'container'
+  nodeType: 'host' | 'pod' | 'container',
+  timeRange: { from: number; to: number }
 ): Promise<string | undefined> => {
   const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
+  const timestampField = sourceConfiguration.fields.timestamp;
   const params = {
     allowNoIndices: true,
     ignoreUnavailable: true,
@@ -26,11 +28,21 @@ export const getPodNodeName = async (
     body: {
       size: 1,
       _source: ['kubernetes.node.name'],
+      sort: [{ [timestampField]: 'desc' }],
       query: {
         bool: {
           filter: [
             { match: { [fields.id]: nodeId } },
             { exists: { field: `kubernetes.node.name` } },
+            {
+              range: {
+                [timestampField]: {
+                  gte: timeRange.from,
+                  lte: timeRange.to,
+                  format: 'epoch_millis',
+                },
+              },
+            },
           ],
         },
       },

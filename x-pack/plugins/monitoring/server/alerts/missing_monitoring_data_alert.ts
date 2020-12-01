@@ -16,24 +16,22 @@ import {
   AlertMissingData,
   AlertMessageTimeToken,
   AlertInstanceState,
-} from './types';
+  CommonAlertFilter,
+  CommonAlertParams,
+  CommonAlertStackProductFilter,
+  CommonAlertNodeUuidFilter,
+} from '../../common/types/alerts';
 import { AlertInstance, AlertServices } from '../../../alerts/server';
 import {
   INDEX_PATTERN,
   ALERT_MISSING_MONITORING_DATA,
   INDEX_PATTERN_ELASTICSEARCH,
+  ALERT_DETAILS,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { AlertMessageTokenType, AlertSeverity, AlertParamType } from '../../common/enums';
+import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { RawAlertInstance } from '../../../alerts/common';
 import { parseDuration } from '../../../alerts/common/parse_duration';
-import {
-  CommonAlertFilter,
-  CommonAlertParams,
-  CommonAlertParamDetail,
-  CommonAlertStackProductFilter,
-  CommonAlertNodeUuidFilter,
-} from '../../common/types';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { getTypeLabelForStackProduct } from '../lib/alerts/get_type_label_for_stack_product';
@@ -41,7 +39,7 @@ import { getListingLinkForStackProduct } from '../lib/alerts/get_listing_link_fo
 import { getStackProductLabel } from '../lib/alerts/get_stack_product_label';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
-import { AlertingDefaults, createLink } from './alerts_common';
+import { AlertingDefaults, createLink } from './alert_helpers';
 
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.missingData.resolved', {
   defaultMessage: 'resolved',
@@ -50,7 +48,7 @@ const FIRING = i18n.translate('xpack.monitoring.alerts.missingData.firing', {
   defaultMessage: 'firing',
 });
 
-const DEFAULT_DURATION = '5m';
+const DEFAULT_DURATION = '15m';
 const DEFAULT_LIMIT = '1d';
 
 // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
@@ -62,25 +60,11 @@ interface MissingDataParams {
 }
 
 export class MissingMonitoringDataAlert extends BaseAlert {
-  public static paramDetails = {
-    duration: {
-      label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.duration.label', {
-        defaultMessage: `Notify if monitoring data is missing for`,
-      }),
-      type: AlertParamType.Duration,
-    } as CommonAlertParamDetail,
-    limit: {
-      label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.limit.label', {
-        defaultMessage: `Look this far back in time for monitoring data`,
-      }),
-      type: AlertParamType.Duration,
-    } as CommonAlertParamDetail,
-  };
+  public defaultThrottle: string = '6h';
 
   public type = ALERT_MISSING_MONITORING_DATA;
-  public label = i18n.translate('xpack.monitoring.alerts.missingData.label', {
-    defaultMessage: 'Missing monitoring data',
-  });
+  public label = ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].label;
+  public description = ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].description;
 
   protected defaultParams: MissingDataParams = {
     duration: DEFAULT_DURATION,

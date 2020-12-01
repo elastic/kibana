@@ -149,7 +149,7 @@ def getTestFailuresMessage() {
 def getBuildStatusIncludingMetrics() {
   def status = buildUtils.getBuildStatus()
 
-  if (status == 'SUCCESS' && !ciStats.getMetricsSuccess()) {
+  if (status == 'SUCCESS' && shouldCheckCiMetricSuccess() && !ciStats.getMetricsSuccess()) {
     return 'FAILURE'
   }
 
@@ -296,4 +296,13 @@ def getFailedSteps() {
   return jenkinsApi.getFailedSteps()?.findAll { step ->
     step.displayName != 'Check out from version control'
   }
+}
+
+def shouldCheckCiMetricSuccess() {
+  // disable ciMetrics success check when a PR is targetting a non-tracked branch
+  if (buildState.has('checkoutInfo') && !buildState.get('checkoutInfo').targetsTrackedBranch) {
+    return false
+  }
+
+  return true
 }

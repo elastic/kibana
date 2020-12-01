@@ -18,7 +18,9 @@
  */
 
 import { NameList } from 'elasticsearch';
-import { Filter, IndexPattern, Query } from '../..';
+import { Query } from '../..';
+import { Filter } from '../../es_query';
+import { IndexPattern } from '../../index_patterns';
 import { SearchSource } from './search_source';
 
 /**

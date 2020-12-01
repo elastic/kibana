@@ -136,7 +136,7 @@ export class ForecastsTableUI extends Component {
         },
         refreshInterval: {
           display: 'Off',
-          pause: false,
+          pause: true,
           value: 0,
         },
         jobIds: [this.props.job.job_id],

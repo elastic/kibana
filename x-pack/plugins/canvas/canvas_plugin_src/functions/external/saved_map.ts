@@ -83,6 +83,7 @@ export function savedMap(): ExpressionFunctionDefinition<
       return {
         type: EmbeddableExpressionType,
         input: {
+          attributes: { title: '' },
           id: args.id,
           filters: getQueryFilters(filters),
           timeRange: args.timerange || defaultTimeRange,

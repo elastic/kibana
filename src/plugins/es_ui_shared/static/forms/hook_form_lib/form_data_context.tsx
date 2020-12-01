@@ -22,9 +22,9 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { FormData, FormHook } from './types';
 import { Subject } from './lib';
 
-export interface Context<T extends FormData = FormData, I = T> {
-  getFormData$: () => Subject<I>;
-  getFormData: FormHook<T>['getFormData'];
+export interface Context<T extends FormData = FormData, I extends FormData = T> {
+  getFormData$: () => Subject<FormData>;
+  getFormData: FormHook<T, I>['getFormData'];
 }
 
 const FormDataContext = createContext<Context<any> | undefined>(undefined);
@@ -45,6 +45,6 @@ export const FormDataContextProvider = ({ children, getFormData$, getFormData }:
   return <FormDataContext.Provider value={value}>{children}</FormDataContext.Provider>;
 };
 
-export function useFormDataContext<T extends FormData = FormData>() {
-  return useContext<Context<T> | undefined>(FormDataContext);
+export function useFormDataContext<T extends FormData = FormData, I extends FormData = T>() {
+  return useContext<Context<T, I> | undefined>(FormDataContext);
 }

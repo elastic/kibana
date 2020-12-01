@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { notFound, notImplemented } from 'boom';
+import { notFound, notImplemented } from '@hapi/boom';
 import { get } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';

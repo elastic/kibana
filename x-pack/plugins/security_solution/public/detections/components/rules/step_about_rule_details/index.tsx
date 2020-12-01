@@ -8,7 +8,7 @@ import {
   EuiPanel,
   EuiProgress,
   EuiButtonGroup,
-  EuiButtonGroupOption,
+  EuiButtonGroupOptionProps,
   EuiSpacer,
   EuiFlexItem,
   EuiText,
@@ -20,7 +20,7 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 
 import { HeaderSection } from '../../../../common/components/header_section';
-import { Markdown } from '../../../../common/components/markdown';
+import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import { AboutStepRule, AboutStepRuleDetails } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { StepAboutRule } from '../step_about_rule';
@@ -46,14 +46,16 @@ const AboutContent = styled.div`
   height: 100%;
 `;
 
-const toggleOptions: EuiButtonGroupOption[] = [
+const toggleOptions: EuiButtonGroupOptionProps[] = [
   {
     id: 'details',
     label: i18n.ABOUT_PANEL_DETAILS_TAB,
+    'data-test-subj': 'stepAboutDetailsToggle-details',
   },
   {
     id: 'notes',
     label: i18n.ABOUT_PANEL_NOTES_TAB,
+    'data-test-subj': 'stepAboutDetailsToggle-notes',
   },
 ];
 
@@ -98,6 +100,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                     setToggleOption(val);
                   }}
                   data-test-subj="stepAboutDetailsToggle"
+                  legend={i18n.ABOUT_CONTROL_LEGEND}
                 />
               )}
             </HeaderSection>
@@ -136,7 +139,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                   maxHeight={aboutPanelHeight}
                   className="eui-yScrollWithShadows"
                 >
-                  <Markdown raw={stepDataDetails.note} />
+                  <MarkdownRenderer>{stepDataDetails.note}</MarkdownRenderer>
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
             )}

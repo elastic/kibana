@@ -3,16 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Logger, KibanaRequest, ISavedObjectsRepository } from '../../../../../src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import {
+  Logger,
+  KibanaRequest,
+  ISavedObjectsRepository,
+  IBasePath,
+} from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
-import {
-  AlertType,
-  GetBasePathFunction,
-  GetServicesFunction,
-  SpaceIdToNamespaceFunction,
-} from '../types';
+import { AlertType, GetServicesFunction, SpaceIdToNamespaceFunction } from '../types';
 import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
 import { AlertsClient } from '../alerts_client';
@@ -25,7 +26,7 @@ export interface TaskRunnerContext {
   eventLogger: IEventLogger;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  getBasePath: GetBasePathFunction;
+  basePathService: IBasePath;
   internalSavedObjectsRepository: ISavedObjectsRepository;
 }
 

@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { ISavedObjectsRepository, SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObject } from 'kibana/server';
 import { IFieldType, IndexPatternAttributes } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
@@ -40,12 +40,14 @@ interface ILayerTypeCount {
   [key: string]: number;
 }
 
-export interface MapsUsage {
-  settings: Settings;
-  indexPatternsWithGeoFieldCount: number;
-  indexPatternsWithGeoPointFieldCount: number;
-  indexPatternsWithGeoShapeFieldCount: number;
-  geoShapeAggLayersCount: number;
+export interface GeoIndexPatternsUsage {
+  indexPatternsWithGeoFieldCount?: number;
+  indexPatternsWithGeoPointFieldCount?: number;
+  indexPatternsWithGeoShapeFieldCount?: number;
+  geoShapeAggLayersCount?: number;
+}
+
+export interface LayersStatsUsage {
   mapsTotalCount: number;
   timeCaptured: string;
   attributesPerMap: {
@@ -62,6 +64,10 @@ export interface MapsUsage {
     layerTypesCount: IStats;
     emsVectorLayersCount: IStats;
   };
+}
+
+export interface MapsUsage extends LayersStatsUsage, GeoIndexPatternsUsage {
+  settings: Settings;
 }
 
 function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
@@ -228,16 +234,28 @@ export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescripto
   });
 }
 
-export function buildMapsTelemetry({
-  mapSavedObjects,
-  indexPatternSavedObjects,
-  settings,
-}: {
-  mapSavedObjects: MapSavedObject[];
-  indexPatternSavedObjects: Array<SavedObject<IndexPatternAttributes>>;
-  settings: Settings;
-}): MapsUsage {
-  const layerLists: LayerDescriptor[][] = getLayerLists(mapSavedObjects);
+export function buildMapsIndexPatternsTelemetry(
+  indexPatternSavedObjects: Array<SavedObject<IndexPatternAttributes>>,
+  layerLists: LayerDescriptor[][]
+): GeoIndexPatternsUsage {
+  const {
+    indexPatternsWithGeoFieldCount,
+    indexPatternsWithGeoPointFieldCount,
+    indexPatternsWithGeoShapeFieldCount,
+  } = getIndexPatternsWithGeoFieldCount(indexPatternSavedObjects);
+
+  // Tracks whether user uses Gold+ only functionality
+  const geoShapeAggLayersCount = getGeoShapeAggCount(layerLists, indexPatternSavedObjects);
+
+  return {
+    indexPatternsWithGeoFieldCount,
+    indexPatternsWithGeoPointFieldCount,
+    indexPatternsWithGeoShapeFieldCount,
+    geoShapeAggLayersCount,
+  };
+}
+
+export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]): LayersStatsUsage {
   const mapsCount = layerLists.length;
 
   const dataSourcesCount = layerLists.map((layerList: LayerDescriptor[]) => {
@@ -256,21 +274,7 @@ export function buildMapsTelemetry({
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
 
-  const {
-    indexPatternsWithGeoFieldCount,
-    indexPatternsWithGeoPointFieldCount,
-    indexPatternsWithGeoShapeFieldCount,
-  } = getIndexPatternsWithGeoFieldCount(indexPatternSavedObjects);
-
-  // Tracks whether user users Gold+ only functionality
-  const geoShapeAggLayersCount = getGeoShapeAggCount(layerLists, indexPatternSavedObjects);
-
   return {
-    settings,
-    indexPatternsWithGeoFieldCount,
-    indexPatternsWithGeoPointFieldCount,
-    indexPatternsWithGeoShapeFieldCount,
-    geoShapeAggLayersCount,
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture
@@ -299,30 +303,58 @@ export function buildMapsTelemetry({
     },
   };
 }
-async function getMapSavedObjects(
-  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository
-) {
-  const mapsSavedObjects = await savedObjectsClient.find<MapSavedObjectAttributes>({
-    type: MAP_SAVED_OBJECT_TYPE,
-  });
-  return mapsSavedObjects.saved_objects;
-}
 
-async function getIndexPatternSavedObjects(
-  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository
+export async function execTransformOverMultipleSavedObjectPages<T>(
+  savedObjectType: string,
+  transform: (savedObjects: Array<SavedObject<T>>) => void
 ) {
-  const indexPatternSavedObjects = await savedObjectsClient.find<IndexPatternAttributes>({
-    type: 'index-pattern',
-  });
-  return indexPatternSavedObjects.saved_objects;
-}
-
-export async function getMapsTelemetry(config: MapsConfigType) {
   const savedObjectsClient = getInternalRepository();
-  const mapSavedObjects = await getMapSavedObjects(savedObjectsClient);
-  const indexPatternSavedObjects = await getIndexPatternSavedObjects(savedObjectsClient);
-  const settings = {
-    showMapVisualizationTypes: config.showMapVisualizationTypes,
+
+  let currentPage = 1;
+  // Seed values
+  let page = 0;
+  let perPage = 0;
+  let total = 0;
+  let savedObjects = [];
+
+  do {
+    const savedObjectsFindResult = await savedObjectsClient.find<T>({
+      type: savedObjectType,
+      page: currentPage++,
+    });
+    ({ page, per_page: perPage, saved_objects: savedObjects, total } = savedObjectsFindResult);
+    transform(savedObjects);
+  } while (page * perPage < total);
+}
+
+export async function getMapsTelemetry(config: MapsConfigType): Promise<MapsUsage> {
+  // Get layer descriptors for Maps saved objects. This is not set up
+  // to be done incrementally (i.e. - per page) but minimally we at least
+  // build a list of small footprint objects
+  const layerLists: LayerDescriptor[][] = [];
+  await execTransformOverMultipleSavedObjectPages<MapSavedObjectAttributes>(
+    MAP_SAVED_OBJECT_TYPE,
+    (savedObjects) => layerLists.push(...getLayerLists(savedObjects))
+  );
+  const savedObjectsTelemetry = buildMapsSavedObjectsTelemetry(layerLists);
+
+  // Incrementally harvest index pattern saved objects telemetry
+  const indexPatternsTelemetry = {};
+  await execTransformOverMultipleSavedObjectPages<IndexPatternAttributes>(
+    'index-pattern',
+    (savedObjects) =>
+      _.mergeWith(
+        indexPatternsTelemetry,
+        buildMapsIndexPatternsTelemetry(savedObjects, layerLists),
+        (prevVal, currVal) => prevVal || 0 + currVal || 0 // Additive merge
+      )
+  );
+
+  return {
+    settings: {
+      showMapVisualizationTypes: config.showMapVisualizationTypes,
+    },
+    ...indexPatternsTelemetry,
+    ...savedObjectsTelemetry,
   };
-  return buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
 }

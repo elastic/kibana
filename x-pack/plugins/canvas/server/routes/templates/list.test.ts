@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { initializeListTemplates } from './list';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';

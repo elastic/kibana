@@ -100,3 +100,9 @@ export const mockLoggingService = loggingServiceMock.create();
 jest.doMock('./logging/logging_service', () => ({
   LoggingService: jest.fn(() => mockLoggingService),
 }));
+
+import { i18nServiceMock } from './i18n/i18n_service.mock';
+export const mockI18nService = i18nServiceMock.create();
+jest.doMock('./i18n/i18n_service', () => ({
+  I18nService: jest.fn(() => mockI18nService),
+}));

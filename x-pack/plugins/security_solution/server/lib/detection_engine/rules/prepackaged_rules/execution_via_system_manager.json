@@ -24,11 +24,12 @@
   "rule_id": "37b211e8-4e2f-440f-86d8-06cc8f158cfa",
   "severity": "low",
   "tags": [
-    "AWS",
     "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
     "SecOps",
-    "Logging",
-    "Continuous Monitoring"
+    "Log Auditing"
   ],
   "threat": [
     {

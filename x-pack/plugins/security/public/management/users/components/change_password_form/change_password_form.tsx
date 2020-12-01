@@ -15,6 +15,7 @@ import {
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import React, { ChangeEvent, Component } from 'react';
 import { NotificationsStart } from 'src/core/public';
 import { User } from '../../../../../common/model';

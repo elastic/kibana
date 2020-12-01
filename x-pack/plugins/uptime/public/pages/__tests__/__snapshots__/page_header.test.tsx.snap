@@ -16,7 +16,7 @@ Array [
     <div
       class="euiCallOutHeader"
     >
-      <div
+      <span
         aria-hidden="true"
         class="euiCallOutHeader__icon"
         data-euiicon-type="beaker"
@@ -142,7 +142,7 @@ Array [
                 <span
                   class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
-                  <div
+                  <span
                     class="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                   />
@@ -168,7 +168,7 @@ Array [
             <span
               class="euiButtonContent euiButtonEmpty__content"
             >
-              <div
+              <span
                 class="euiButtonContent__icon"
                 data-euiicon-type="gear"
               />
@@ -190,7 +190,7 @@ Array [
             <span
               class="euiButtonContent euiButtonEmpty__content"
             >
-              <div
+              <span
                 class="euiButtonContent__icon"
                 data-euiicon-type="plusInCircle"
               />
@@ -233,14 +233,14 @@ Array [
                   <span
                     class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <div
+                    <span
                       class="euiButtonContent__icon"
                       data-euiicon-type="arrowDown"
                     />
                     <span
                       class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                     >
-                      <div
+                      <span
                         data-euiicon-type="clock"
                       />
                     </span>
@@ -276,14 +276,14 @@ Array [
             class="euiToolTipAnchor"
           >
             <button
-              class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
+              class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
               data-test-subj="superDatePickerApplyTimeButton"
               type="button"
             >
               <span
                 class="euiButtonContent euiButton__content"
               >
-                <div
+                <span
                   class="euiButtonContent__icon"
                   data-euiicon-type="refresh"
                 />
@@ -329,7 +329,7 @@ Array [
     <div
       class="euiCallOutHeader"
     >
-      <div
+      <span
         aria-hidden="true"
         class="euiCallOutHeader__icon"
         data-euiicon-type="beaker"
@@ -460,14 +460,14 @@ Array [
                   <span
                     class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <div
+                    <span
                       class="euiButtonContent__icon"
                       data-euiicon-type="arrowDown"
                     />
                     <span
                       class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                     >
-                      <div
+                      <span
                         data-euiicon-type="clock"
                       />
                     </span>
@@ -503,14 +503,14 @@ Array [
             class="euiToolTipAnchor"
           >
             <button
-              class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
+              class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
               data-test-subj="superDatePickerApplyTimeButton"
               type="button"
             >
               <span
                 class="euiButtonContent euiButton__content"
               >
-                <div
+                <span
                   class="euiButtonContent__icon"
                   data-euiicon-type="refresh"
                 />
@@ -548,7 +548,7 @@ Array [
     <div
       class="euiCallOutHeader"
     >
-      <div
+      <span
         aria-hidden="true"
         class="euiCallOutHeader__icon"
         data-euiicon-type="beaker"

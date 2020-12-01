@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { Observable } from 'rxjs';
 
 import {
@@ -76,7 +76,6 @@ describe('msearch route', () => {
     );
     expect(mockClient.msearch.mock.calls[0][1].querystring).toMatchInlineSnapshot(`
       Object {
-        "ignore_throttled": true,
         "ignore_unavailable": true,
         "max_concurrent_shard_requests": undefined,
       }

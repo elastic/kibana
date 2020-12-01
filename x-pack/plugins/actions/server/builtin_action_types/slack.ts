@@ -126,6 +126,7 @@ async function slackExecutor(
     // https://slack.dev/node-slack-sdk/webhook
     // node-slack-sdk use Axios inside :)
     const webhook = new IncomingWebhook(webhookUrl, {
+      // @ts-expect-error The types exposed by 'HttpsProxyAgent' isn't up to date with 'Agent'
       agent: proxyAgent,
     });
     result = await webhook.send(message);

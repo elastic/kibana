@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`buildOSSFeatures returns the advancedSettings feature augmented with appropriate sub feature privileges 1`] = `
+exports[`buildOSSFeatures with a basic license returns the advancedSettings feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
     "privilege": Object {
@@ -51,7 +51,7 @@ Array [
 ]
 `;
 
-exports[`buildOSSFeatures returns the dashboard feature augmented with appropriate sub feature privileges 1`] = `
+exports[`buildOSSFeatures with a basic license returns the dashboard feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
     "privilege": Object {
@@ -82,6 +82,7 @@ Array [
           "canvas-workpad",
           "lens",
           "map",
+          "tag",
         ],
       },
       "ui": Array [
@@ -115,6 +116,7 @@ Array [
           "map",
           "dashboard",
           "query",
+          "tag",
         ],
       },
       "ui": Array [
@@ -126,7 +128,7 @@ Array [
 ]
 `;
 
-exports[`buildOSSFeatures returns the dev_tools feature augmented with appropriate sub feature privileges 1`] = `
+exports[`buildOSSFeatures with a basic license returns the dev_tools feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
     "privilege": Object {
@@ -180,7 +182,7 @@ Array [
 ]
 `;
 
-exports[`buildOSSFeatures returns the discover feature augmented with appropriate sub feature privileges 1`] = `
+exports[`buildOSSFeatures with a basic license returns the discover feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
     "privilege": Object {
@@ -241,7 +243,7 @@ Array [
 ]
 `;
 
-exports[`buildOSSFeatures returns the indexPatterns feature augmented with appropriate sub feature privileges 1`] = `
+exports[`buildOSSFeatures with a basic license returns the indexPatterns feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
     "privilege": Object {
@@ -294,7 +296,7 @@ Array [
 ]
 `;
 
-exports[`buildOSSFeatures returns the savedObjectsManagement feature augmented with appropriate sub feature privileges 1`] = `
+exports[`buildOSSFeatures with a basic license returns the savedObjectsManagement feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
     "privilege": Object {
@@ -361,7 +363,7 @@ Array [
 ]
 `;
 
-exports[`buildOSSFeatures returns the timelion feature augmented with appropriate sub feature privileges 1`] = `
+exports[`buildOSSFeatures with a basic license returns the timelion feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
     "privilege": Object {
@@ -409,7 +411,7 @@ Array [
 ]
 `;
 
-exports[`buildOSSFeatures returns the visualize feature augmented with appropriate sub feature privileges 1`] = `
+exports[`buildOSSFeatures with a basic license returns the visualize feature augmented with appropriate sub feature privileges 1`] = `
 Array [
   Object {
     "privilege": Object {
@@ -437,6 +439,7 @@ Array [
         "read": Array [
           "index-pattern",
           "search",
+          "tag",
         ],
       },
       "ui": Array [
@@ -467,6 +470,489 @@ Array [
           "visualization",
           "query",
           "lens",
+          "tag",
+        ],
+      },
+      "ui": Array [
+        "show",
+      ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the advancedSettings feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "kibana",
+      ],
+      "catalogue": Array [
+        "advanced_settings",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "settings",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [
+          "config",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [
+        "save",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "kibana",
+      ],
+      "catalogue": Array [
+        "advanced_settings",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "settings",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the dashboard feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "alerting": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "api": Array [],
+      "app": Array [
+        "dashboards",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "dashboard",
+      ],
+      "management": Object {},
+      "savedObject": Object {
+        "all": Array [
+          "dashboard",
+          "query",
+          "url",
+        ],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "visualization",
+          "timelion-sheet",
+          "canvas-workpad",
+          "lens",
+          "map",
+          "tag",
+        ],
+      },
+      "ui": Array [
+        "createNew",
+        "show",
+        "showWriteControls",
+        "saveQuery",
+        "createShortUrl",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "dashboards",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "dashboard",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "visualization",
+          "timelion-sheet",
+          "canvas-workpad",
+          "lens",
+          "map",
+          "dashboard",
+          "query",
+          "tag",
+        ],
+      },
+      "ui": Array [
+        "show",
+      ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the dev_tools feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "console",
+      ],
+      "app": Array [
+        "dev_tools",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "console",
+        "searchprofiler",
+        "grokdebugger",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "ui": Array [
+        "show",
+        "save",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "console",
+      ],
+      "app": Array [
+        "dev_tools",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "console",
+        "searchprofiler",
+        "grokdebugger",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "ui": Array [
+        "show",
+      ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the discover feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "alerting": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "api": Array [],
+      "app": Array [
+        "discover",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "discover",
+      ],
+      "management": Object {},
+      "savedObject": Object {
+        "all": Array [
+          "search",
+          "query",
+          "index-pattern",
+          "url",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [
+        "show",
+        "save",
+        "saveQuery",
+        "createShortUrl",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "discover",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "discover",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "query",
+        ],
+      },
+      "ui": Array [
+        "show",
+      ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the indexPatterns feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "kibana",
+      ],
+      "catalogue": Array [
+        "indexPatterns",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "indexPatterns",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [
+          "index-pattern",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [
+        "save",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "kibana",
+      ],
+      "catalogue": Array [
+        "indexPatterns",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "indexPatterns",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "index-pattern",
+        ],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the savedObjectsManagement feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "copySavedObjectsToSpaces",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "catalogue": Array [
+        "saved_objects",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "objects",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [
+          "foo",
+          "bar",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [
+        "read",
+        "edit",
+        "delete",
+        "copyIntoSpace",
+        "shareIntoSpace",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "copySavedObjectsToSpaces",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "catalogue": Array [
+        "saved_objects",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "objects",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "foo",
+          "bar",
+        ],
+      },
+      "ui": Array [
+        "read",
+      ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the timelion feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "timelion",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "timelion",
+      ],
+      "savedObject": Object {
+        "all": Array [
+          "timelion-sheet",
+        ],
+        "read": Array [
+          "index-pattern",
+        ],
+      },
+      "ui": Array [
+        "save",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "timelion",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "timelion",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "index-pattern",
+          "timelion-sheet",
+        ],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the visualize feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "alerting": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "api": Array [],
+      "app": Array [
+        "visualize",
+        "lens",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "visualize",
+      ],
+      "management": Object {},
+      "savedObject": Object {
+        "all": Array [
+          "visualization",
+          "query",
+          "lens",
+          "url",
+        ],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "tag",
+        ],
+      },
+      "ui": Array [
+        "show",
+        "delete",
+        "save",
+        "saveQuery",
+        "createShortUrl",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "app": Array [
+        "visualize",
+        "lens",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "visualize",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "visualization",
+          "query",
+          "lens",
+          "tag",
         ],
       },
       "ui": Array [

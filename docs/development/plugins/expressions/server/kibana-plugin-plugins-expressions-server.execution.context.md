@@ -9,5 +9,5 @@ Execution context - object that allows to do side-effects. Context is passed to 
 <b>Signature:</b>
 
 ```typescript
-readonly context: ExecutionContext<Input, InspectorAdapters> & ExtraContext;
+readonly context: ExecutionContext<InspectorAdapters>;
 ```

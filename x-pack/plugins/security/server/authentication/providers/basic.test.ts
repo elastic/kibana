@@ -101,13 +101,13 @@ describe('BasicAuthenticationProvider', () => {
       await expect(
         provider.authenticate(
           httpServerMock.createKibanaRequest({
-            path: '/s/foo/some-path # that needs to be encoded',
+            path: '/s/foo/some path that needs to be encoded',
           }),
           null
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
+          '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome%2520path%2520that%2520needs%2520to%2520be%2520encoded'
         )
       );
     });

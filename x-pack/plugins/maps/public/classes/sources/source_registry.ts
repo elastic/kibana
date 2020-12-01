@@ -6,11 +6,12 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ISource } from './source';
+import { Adapters } from '../../../../../../src/plugins/inspector/common/adapters';
 
 export type SourceRegistryEntry = {
   ConstructorFunction: new (
     sourceDescriptor: any, // this is the source-descriptor that corresponds specifically to the particular ISource instance
-    inspectorAdapters?: object
+    inspectorAdapters?: Adapters
   ) => ISource;
   type: string;
 };

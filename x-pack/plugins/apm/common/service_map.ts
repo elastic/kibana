@@ -91,3 +91,5 @@ export function isSpanGroupingSupported(type?: string, subtype?: string) {
       nongroupedSubType === 'all' || nongroupedSubType === subtype
   );
 }
+
+export const SERVICE_MAP_TIMEOUT_ERROR = 'ServiceMapTimeoutError';

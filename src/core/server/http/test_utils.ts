@@ -50,6 +50,8 @@ configService.atPath.mockReturnValue(
       allowFromAnyIp: true,
       ipAllowlist: [],
     },
+    keepaliveTimeout: 120_000,
+    socketTimeout: 120_000,
   } as any)
 );
 

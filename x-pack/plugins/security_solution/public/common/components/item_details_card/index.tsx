@@ -80,18 +80,12 @@ export const ItemDetailsPropertySummary = memo<ItemDetailsPropertySummaryProps>(
 ItemDetailsPropertySummary.displayName = 'ItemPropertySummary';
 
 export const ItemDetailsAction: FC<PropsForButton<EuiButtonProps>> = memo(
-  ({ children, ...rest }) => (
-    <>
-      <EuiButton
-        contentProps={{
-          // TODO: remove when https://github.com/elastic/eui/issues/4139 is fixed
-          style: { height: 'auto' },
-        }}
-        {...rest}
-      >
+  ({ children, className = '', ...rest }) => (
+    <div>
+      <EuiButton className={`eui-fullWidth ${className}`} {...rest}>
         {children}
       </EuiButton>
-    </>
+    </div>
   )
 );
 

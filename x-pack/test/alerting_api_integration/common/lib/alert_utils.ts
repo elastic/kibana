@@ -328,6 +328,7 @@ alertName: {{alertName}},
 spaceId: {{spaceId}},
 tags: {{tags}},
 alertInstanceId: {{alertInstanceId}},
+alertActionGroup: {{alertActionGroup}},
 instanceContextValue: {{context.instanceContextValue}},
 instanceStateValue: {{state.instanceStateValue}}
 `.trim();

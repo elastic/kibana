@@ -5,13 +5,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import isEmpty from 'lodash/isEmpty';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { flattenCaseSavedObject, wrapError, escapeHatch } from '../utils';
+import {
+  flattenCaseSavedObject,
+  wrapError,
+  escapeHatch,
+  getCommentContextFromAttributes,
+} from '../utils';
 
 import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
@@ -164,6 +169,7 @@ export function initPushCaseUserActionApi({
             ],
           }),
         ]);
+
         return response.ok({
           body: CaseResponseRt.encode(
             flattenCaseSavedObject({
@@ -183,6 +189,7 @@ export function initPushCaseUserActionApi({
                   attributes: {
                     ...origComment.attributes,
                     ...updatedComment?.attributes,
+                    ...getCommentContextFromAttributes(origComment.attributes),
                   },
                   version: updatedComment?.version ?? origComment.version,
                   references: origComment?.references ?? [],

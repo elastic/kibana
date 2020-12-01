@@ -12,7 +12,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
     className="euiFlexItem"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall canvasAsset"
+      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow canvasAsset"
     >
       <div
         className="canvasAsset__thumb canvasCheckered"
@@ -75,7 +75,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="vector"
@@ -105,7 +105,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                 className="euiButtonIcon euiButtonIcon--primary"
                 type="button"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
                   data-euiicon-type="sortDown"
@@ -136,7 +136,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                 className="euiButtonIcon euiButtonIcon--primary"
                 type="button"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
                   data-euiicon-type="copyClipboard"
@@ -163,7 +163,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="trash"
@@ -190,7 +190,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
     className="euiFlexItem"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall canvasAsset"
+      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow canvasAsset"
     >
       <div
         className="canvasAsset__thumb canvasCheckered"
@@ -253,7 +253,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="vector"
@@ -283,7 +283,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                 className="euiButtonIcon euiButtonIcon--primary"
                 type="button"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
                   data-euiicon-type="sortDown"
@@ -314,7 +314,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                 className="euiButtonIcon euiButtonIcon--primary"
                 type="button"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
                   data-euiicon-type="copyClipboard"
@@ -341,7 +341,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="trash"

@@ -49,7 +49,7 @@ export {
   updateExceptionListItem,
   fetchExceptionListById,
   addExceptionList,
-  ExceptionIdentifiers,
+  ExceptionListIdentifiers,
   ExceptionList,
   Pagination,
   UseExceptionListSuccess,

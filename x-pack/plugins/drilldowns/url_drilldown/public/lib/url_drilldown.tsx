@@ -6,7 +6,11 @@
 
 import React from 'react';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
-import { ChartActionContext, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
+import {
+  ChartActionContext,
+  CONTEXT_MENU_TRIGGER,
+  IEmbeddable,
+} from '../../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import {
   SELECT_RANGE_TRIGGER,
@@ -34,7 +38,10 @@ interface UrlDrilldownDeps {
 
 export type ActionContext = ChartActionContext;
 export type Config = UrlDrilldownConfig;
-export type UrlTrigger = typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER;
+export type UrlTrigger =
+  | typeof CONTEXT_MENU_TRIGGER
+  | typeof VALUE_CLICK_TRIGGER
+  | typeof SELECT_RANGE_TRIGGER;
 export interface ActionFactoryContext extends BaseActionFactoryContext<UrlTrigger> {
   embeddable?: IEmbeddable;
 }
@@ -58,7 +65,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   public readonly euiIcon = 'link';
 
   supportedTriggers(): UrlTrigger[] {
-    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
+    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, CONTEXT_MENU_TRIGGER];
   }
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({

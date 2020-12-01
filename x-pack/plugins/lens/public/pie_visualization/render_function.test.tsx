@@ -5,7 +5,12 @@
  */
 
 import React from 'react';
-import { SeriesIdentifier, Settings } from '@elastic/charts';
+import { Partition, SeriesIdentifier, Settings } from '@elastic/charts';
+import {
+  NodeColorAccessor,
+  ShapeTreeNode,
+} from '@elastic/charts/dist/chart_types/partition_chart/layout/types/viewmodel_types';
+import { HierarchyOfArrays } from '@elastic/charts/dist/chart_types/partition_chart/layout/utils/group_by_rollup';
 import { shallow } from 'enzyme';
 import { LensMultiTable } from '../types';
 import { PieComponent } from './render_function';
@@ -55,6 +60,7 @@ describe('PieVisualization component', () => {
       nestedLegend: false,
       percentDecimals: 3,
       hideLabels: false,
+      palette: { name: 'mock', type: 'palette' },
     };
 
     function getDefaultArgs() {
@@ -63,6 +69,8 @@ describe('PieVisualization component', () => {
         formatFactory: getFormatSpy,
         onClickValue: jest.fn(),
         chartsThemeService,
+        paletteService: chartPluginMock.createPaletteRegistry(),
+        renderMode: 'display' as const,
       };
     }
 
@@ -90,6 +98,84 @@ describe('PieVisualization component', () => {
         <PieComponent args={{ ...args, hideLabels: true }} {...getDefaultArgs()} />
       );
       expect(component.find(Settings).prop('showLegend')).toEqual(false);
+    });
+
+    test('it calls the color function with the right series layers', () => {
+      const defaultArgs = getDefaultArgs();
+      const component = shallow(
+        <PieComponent
+          args={args}
+          {...defaultArgs}
+          data={{
+            ...data,
+            tables: {
+              first: {
+                ...data.tables.first,
+                rows: [
+                  { a: 'empty', b: 'first', c: 1, d: 'Row 1' },
+                  { a: 'css', b: 'first', c: 1, d: 'Row 1' },
+                  { a: 'css', b: 'second', c: 1, d: 'Row 1' },
+                  { a: 'css', b: 'third', c: 1, d: 'Row 1' },
+                  { a: 'gz', b: 'first', c: 1, d: 'Row 1' },
+                ],
+              },
+            },
+          }}
+        />
+      );
+
+      (component.find(Partition).prop('layers')![1].shape!.fillColor as NodeColorAccessor)(
+        ({
+          dataName: 'third',
+          depth: 2,
+          parent: {
+            children: [
+              ['first', {}],
+              ['second', {}],
+              ['third', {}],
+            ],
+            depth: 1,
+            value: 200,
+            dataName: 'css',
+            parent: {
+              children: [
+                ['empty', {}],
+                ['css', {}],
+                ['gz', {}],
+              ],
+              depth: 0,
+              sortIndex: 0,
+              value: 500,
+            },
+            sortIndex: 1,
+          },
+          value: 41,
+          sortIndex: 2,
+        } as unknown) as ShapeTreeNode,
+        0,
+        [] as HierarchyOfArrays
+      );
+
+      expect(defaultArgs.paletteService.get('mock').getColor).toHaveBeenCalledWith(
+        [
+          {
+            name: 'css',
+            rankAtDepth: 1,
+            totalSeriesAtDepth: 3,
+          },
+          {
+            name: 'third',
+            rankAtDepth: 2,
+            totalSeriesAtDepth: 3,
+          },
+        ],
+        {
+          maxDepth: 2,
+          totalSeries: 5,
+          behindText: true,
+        },
+        undefined
+      );
     });
 
     test('it hides legend with 2 groups for treemap', () => {
@@ -179,6 +265,14 @@ describe('PieVisualization component', () => {
           ],
         }
       `);
+    });
+
+    test('does not set click listener on noInteractivity render mode', () => {
+      const defaultArgs = getDefaultArgs();
+      const component = shallow(
+        <PieComponent args={{ ...args }} {...defaultArgs} renderMode="noInteractivity" />
+      );
+      expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
     });
 
     test('it shows emptyPlaceholder for undefined grouped data', () => {

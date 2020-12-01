@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CommonAlertState, CommonAlertStatus } from '../../common/types';
+import { CommonAlertState, CommonAlertStatus } from '../../common/types/alerts';
 
 export function filterAlertStates(
   alerts: { [type: string]: CommonAlertStatus },

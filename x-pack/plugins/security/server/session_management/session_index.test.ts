@@ -155,6 +155,17 @@ describe('Session index', () => {
 
       await sessionIndex.initialize();
     });
+
+    it('works properly after failure', async () => {
+      const unexpectedError = new Error('Uh! Oh!');
+      mockClusterClient.callAsInternalUser.mockImplementationOnce(() =>
+        Promise.reject(unexpectedError)
+      );
+      mockClusterClient.callAsInternalUser.mockImplementationOnce(() => Promise.resolve(true));
+
+      await expect(sessionIndex.initialize()).rejects.toBe(unexpectedError);
+      await expect(sessionIndex.initialize()).resolves.toBe(undefined);
+    });
   });
 
   describe('cleanUp', () => {
@@ -183,8 +194,39 @@ describe('Session index', () => {
           query: {
             bool: {
               should: [
+                // All expired sessions based on the lifespan, no matter which provider they belong to.
                 { range: { lifespanExpiration: { lte: now } } },
-                { range: { idleTimeoutExpiration: { lte: now } } },
+                // All sessions that belong to the providers that aren't configured.
+                {
+                  bool: {
+                    must_not: {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              must: [
+                                { term: { 'provider.type': 'basic' } },
+                                { term: { 'provider.name': 'basic' } },
+                              ],
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+                // The sessions that belong to a particular provider that are expired based on the idle timeout.
+                {
+                  bool: {
+                    must: [
+                      { term: { 'provider.type': 'basic' } },
+                      { term: { 'provider.name': 'basic' } },
+                    ],
+                    should: [{ range: { idleTimeoutExpiration: { lte: now } } }],
+                    minimum_should_match: 1,
+                  },
+                },
               ],
             },
           },
@@ -215,9 +257,49 @@ describe('Session index', () => {
           query: {
             bool: {
               should: [
+                // All expired sessions based on the lifespan, no matter which provider they belong to.
                 { range: { lifespanExpiration: { lte: now } } },
-                { bool: { must_not: { exists: { field: 'lifespanExpiration' } } } },
-                { range: { idleTimeoutExpiration: { lte: now } } },
+                // All sessions that belong to the providers that aren't configured.
+                {
+                  bool: {
+                    must_not: {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              must: [
+                                { term: { 'provider.type': 'basic' } },
+                                { term: { 'provider.name': 'basic' } },
+                              ],
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+                // The sessions that belong to a particular provider but don't have a configured lifespan.
+                {
+                  bool: {
+                    must: [
+                      { term: { 'provider.type': 'basic' } },
+                      { term: { 'provider.name': 'basic' } },
+                    ],
+                    must_not: { exists: { field: 'lifespanExpiration' } },
+                  },
+                },
+                // The sessions that belong to a particular provider that are expired based on the idle timeout.
+                {
+                  bool: {
+                    must: [
+                      { term: { 'provider.type': 'basic' } },
+                      { term: { 'provider.name': 'basic' } },
+                    ],
+                    should: [{ range: { idleTimeoutExpiration: { lte: now } } }],
+                    minimum_should_match: 1,
+                  },
+                },
               ],
             },
           },
@@ -249,9 +331,43 @@ describe('Session index', () => {
           query: {
             bool: {
               should: [
+                // All expired sessions based on the lifespan, no matter which provider they belong to.
                 { range: { lifespanExpiration: { lte: now } } },
-                { range: { idleTimeoutExpiration: { lte: now - 3 * idleTimeout } } },
-                { bool: { must_not: { exists: { field: 'idleTimeoutExpiration' } } } },
+                // All sessions that belong to the providers that aren't configured.
+                {
+                  bool: {
+                    must_not: {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              must: [
+                                { term: { 'provider.type': 'basic' } },
+                                { term: { 'provider.name': 'basic' } },
+                              ],
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+                // The sessions that belong to a particular provider that are either expired based on the idle timeout
+                // or don't have it configured at all.
+                {
+                  bool: {
+                    must: [
+                      { term: { 'provider.type': 'basic' } },
+                      { term: { 'provider.name': 'basic' } },
+                    ],
+                    should: [
+                      { range: { idleTimeoutExpiration: { lte: now - 3 * idleTimeout } } },
+                      { bool: { must_not: { exists: { field: 'idleTimeoutExpiration' } } } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
               ],
             },
           },
@@ -283,10 +399,179 @@ describe('Session index', () => {
           query: {
             bool: {
               should: [
+                // All expired sessions based on the lifespan, no matter which provider they belong to.
                 { range: { lifespanExpiration: { lte: now } } },
-                { bool: { must_not: { exists: { field: 'lifespanExpiration' } } } },
-                { range: { idleTimeoutExpiration: { lte: now - 3 * idleTimeout } } },
-                { bool: { must_not: { exists: { field: 'idleTimeoutExpiration' } } } },
+                // All sessions that belong to the providers that aren't configured.
+                {
+                  bool: {
+                    must_not: {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              must: [
+                                { term: { 'provider.type': 'basic' } },
+                                { term: { 'provider.name': 'basic' } },
+                              ],
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+                // The sessions that belong to a particular provider but don't have a configured lifespan.
+                {
+                  bool: {
+                    must: [
+                      { term: { 'provider.type': 'basic' } },
+                      { term: { 'provider.name': 'basic' } },
+                    ],
+                    must_not: { exists: { field: 'lifespanExpiration' } },
+                  },
+                },
+                // The sessions that belong to a particular provider that are either expired based on the idle timeout
+                // or don't have it configured at all.
+                {
+                  bool: {
+                    must: [
+                      { term: { 'provider.type': 'basic' } },
+                      { term: { 'provider.name': 'basic' } },
+                    ],
+                    should: [
+                      { range: { idleTimeoutExpiration: { lte: now - 3 * idleTimeout } } },
+                      { bool: { must_not: { exists: { field: 'idleTimeoutExpiration' } } } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+    });
+
+    it('when both `lifespan` and `idleTimeout` are configured and multiple providers are enabled', async () => {
+      const globalIdleTimeout = 123;
+      const samlIdleTimeout = 33221;
+      sessionIndex = new SessionIndex({
+        logger: loggingSystemMock.createLogger(),
+        kibanaIndexName: '.kibana_some_tenant',
+        config: createConfig(
+          ConfigSchema.validate({
+            session: { idleTimeout: globalIdleTimeout, lifespan: 456 },
+            authc: {
+              providers: {
+                basic: { basic1: { order: 0 } },
+                saml: {
+                  saml1: {
+                    order: 1,
+                    realm: 'saml-realm',
+                    session: { idleTimeout: samlIdleTimeout },
+                  },
+                },
+              },
+            },
+          }),
+          loggingSystemMock.createLogger(),
+          { isTLSEnabled: false }
+        ),
+        clusterClient: mockClusterClient,
+      });
+
+      await sessionIndex.cleanUp();
+
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('deleteByQuery', {
+        index: indexName,
+        refresh: 'wait_for',
+        ignore: [409, 404],
+        body: {
+          query: {
+            bool: {
+              should: [
+                // All expired sessions based on the lifespan, no matter which provider they belong to.
+                { range: { lifespanExpiration: { lte: now } } },
+                // All sessions that belong to the providers that aren't configured.
+                {
+                  bool: {
+                    must_not: {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              must: [
+                                { term: { 'provider.type': 'basic' } },
+                                { term: { 'provider.name': 'basic1' } },
+                              ],
+                            },
+                          },
+                          {
+                            bool: {
+                              must: [
+                                { term: { 'provider.type': 'saml' } },
+                                { term: { 'provider.name': 'saml1' } },
+                              ],
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+                // The sessions that belong to a Basic provider but don't have a configured lifespan.
+                {
+                  bool: {
+                    must: [
+                      { term: { 'provider.type': 'basic' } },
+                      { term: { 'provider.name': 'basic1' } },
+                    ],
+                    must_not: { exists: { field: 'lifespanExpiration' } },
+                  },
+                },
+                // The sessions that belong to a Basic provider that are either expired based on the idle timeout
+                // or don't have it configured at all.
+                {
+                  bool: {
+                    must: [
+                      { term: { 'provider.type': 'basic' } },
+                      { term: { 'provider.name': 'basic1' } },
+                    ],
+                    should: [
+                      { range: { idleTimeoutExpiration: { lte: now - 3 * globalIdleTimeout } } },
+                      { bool: { must_not: { exists: { field: 'idleTimeoutExpiration' } } } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                // The sessions that belong to a SAML provider but don't have a configured lifespan.
+                {
+                  bool: {
+                    must: [
+                      { term: { 'provider.type': 'saml' } },
+                      { term: { 'provider.name': 'saml1' } },
+                    ],
+                    must_not: { exists: { field: 'lifespanExpiration' } },
+                  },
+                },
+                // The sessions that belong to a SAML provider that are either expired based on the idle timeout
+                // or don't have it configured at all.
+                {
+                  bool: {
+                    must: [
+                      { term: { 'provider.type': 'saml' } },
+                      { term: { 'provider.name': 'saml1' } },
+                    ],
+                    should: [
+                      { range: { idleTimeoutExpiration: { lte: now - 3 * samlIdleTimeout } } },
+                      { bool: { must_not: { exists: { field: 'idleTimeoutExpiration' } } } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
               ],
             },
           },

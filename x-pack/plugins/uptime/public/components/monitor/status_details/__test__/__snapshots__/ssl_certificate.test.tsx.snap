@@ -38,7 +38,7 @@ Array [
         <div
           class="euiText euiText--small"
         >
-          <div
+          <span
             color="success"
             data-euiicon-type="lock"
           />

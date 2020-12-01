@@ -5,19 +5,18 @@
  */
 
 import React from 'react';
-import { useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 import { snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiTextColor } from '@elastic/eui';
 
-import { EuiButton } from '../../../shared/react_router_helpers';
-import { sendTelemetry } from '../../../shared/telemetry';
-import { HttpLogic } from '../../../shared/http';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { TelemetryLogic } from '../../../shared/telemetry';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import './product_card.scss';
 
-interface IProductCard {
+interface ProductCardProps {
   // Expects product plugin constants (@see common/constants.ts)
   product: {
     ID: string;
@@ -28,8 +27,8 @@ interface IProductCard {
   image: string;
 }
 
-export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
-  const { http } = useValues(HttpLogic);
+export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
+  const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { config } = useValues(KibanaLogic);
 
   const LAUNCH_BUTTON_TEXT = i18n.translate(
@@ -64,21 +63,19 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
       paddingSize="l"
       description={<EuiTextColor color="subdued">{product.CARD_DESCRIPTION}</EuiTextColor>}
       footer={
-        <EuiButton
+        <EuiButtonTo
           fill
           to={product.URL}
           shouldNotCreateHref={true}
           onClick={() =>
-            sendTelemetry({
-              http,
-              product: 'enterprise_search',
+            sendEnterpriseSearchTelemetry({
               action: 'clicked',
               metric: snakeCase(product.ID),
             })
           }
         >
           {config.host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
-        </EuiButton>
+        </EuiButtonTo>
       }
     />
   );

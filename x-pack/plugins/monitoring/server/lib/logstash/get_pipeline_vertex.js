@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import boom from 'boom';
+import boom from '@hapi/boom';
 import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { getPipelineStateDocument } from './get_pipeline_state_document';

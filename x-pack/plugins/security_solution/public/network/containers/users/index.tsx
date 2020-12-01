@@ -23,11 +23,8 @@ import {
   NetworkUsersRequestOptions,
   NetworkUsersStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/network';
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
@@ -80,7 +77,6 @@ export const useNetworkUsers = ({
           factoryQueryType: NetworkQueries.users,
           filterQuery: createFilter(filterQuery),
           flowTarget,
-          id,
           ip,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort,
@@ -192,7 +188,6 @@ export const useNetworkUsers = ({
     setNetworkUsersRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        id,
         ip,
         defaultIndex,
         factoryQueryType: NetworkQueries.users,
@@ -222,7 +217,6 @@ export const useNetworkUsers = ({
     skip,
     ip,
     flowTarget,
-    id,
   ]);
 
   useEffect(() => {

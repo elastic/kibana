@@ -8,7 +8,13 @@ To integrate with the telemetry services for usage collection of your feature, t
 
 ## Creating and Registering Usage Collector
 
-All you need to provide is a `type` for organizing your fields, `schema` field to define the expected types of usage fields reported, and a `fetch` method for returning your usage data. Then you need to make the Telemetry service aware of the collector by registering it.
+Your usage collector needs to provide 
+- a `type` for organizing your fields, 
+- `schema` field to define the expected types of usage fields reported, 
+- a `fetch` method for returning your usage data, and
+- an `isReady` method (that returns true or false) for letting the telemetry service know if it needs to wait for any asynchronous action (initialization of clients or other services) before calling the `fetch` method. 
+
+Then you need to make the Telemetry service aware of the collector by registering it.
 
 1. Make sure `usageCollection` is in your optional Plugins:
 
@@ -25,7 +31,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
     ```ts
     // server/plugin.ts
     import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-    import { CoreSetup, CoreStart } from 'kibana/server';
+    import { CoreSetup, CoreStart } from 'src/core/server';
 
     class Plugin {
       public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
@@ -40,7 +46,7 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
     ```ts
     // server/collectors/register.ts
     import { UsageCollectionSetup, CollectorFetchContext } from 'src/plugins/usage_collection/server';
-    import { APICluster } from 'kibana/server';
+    import { APICluster } from 'src/core/server';
 
     interface Usage {
       my_objects: {
@@ -62,6 +68,8 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
             total: 'long',
           },
         },
+        isReady: () => isCollectorFetchReady, // Method to return `true`/`false` or Promise(`true`/`false`) to confirm if the collector is ready for the `fetch` method to be called.
+        
         fetch: async (collectorFetchContext: CollectorFetchContext) => {
 
         // query ES or saved objects and get some data
@@ -84,8 +92,11 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
 Some background: 
 
 - `MY_USAGE_TYPE` can be any string. It usually matches the plugin name. As a safety mechanism, we double check there are no duplicates at the moment of registering the collector.
-- The `fetch` method needs to support multiple contexts in which it is called. For example, when stats are pulled from a Kibana Metricbeat module, the Beat calls Kibana's stats API to invoke usage collection.
-In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest` or `esClient` wraps `asCurrentUser`, where the request headers are expected to have read privilege on the entire `.kibana' index. The `fetch` method also exposes the saved objects client that will have the correct scope when the collectors' `fetch` method is called.
+
+- `isReady` (added in v7.2.0 and v6.8.4) is a way for a usage collector to announce that some async process must finish first before it can return data in the `fetch` method (e.g. a client needs to ne initialized, or the task manager needs to run a task first). If any collector reports that it is not ready when we call its `fetch` method, we reset a flag to try again and, after a set amount of time, collect data from those collectors that are ready and skip any that are not. This means that if a collector returns `true` for `isReady` and it actually isn't ready to return data, there won't be telemetry data from that collector in that telemetry report (usually once per day). You should consider what it means if your collector doesn't return data in the first few documents when Kibana starts or, if we should wait for any other reason (e.g. the task manager needs to run your task first). If you need to tell telemetry collection to wait, you should implement this function with custom logic. If your `fetch` method can run without the need of any previous dependencies, then you can return true for `isReady` as shown in the example below.
+
+- The `fetch` method needs to support multiple contexts in which it is called. For example, when a user requests the example of what we collect in the **Kibana>Advanced Settings>Usage data** section, the clients provided in the context of the function (`CollectorFetchContext`) are scoped to that user's privileges. The reason is to avoid exposing via telemetry any data that user should not have access to (i.e.: if the user does not have access to certain indices, they shouldn't be allowed to see the number of documents that exists in it). In this case, the `fetch` method receives the clients `callCluster`, `esClient` and `soClient` scoped to the user who performed the HTTP API request. Alternatively, when requesting the usage data to be reported to the Remote Telemetry Service, the clients are scoped to the internal Kibana user (`kibana_system`). Please, mind it might have lower-level access than the default super-admin `elastic` test user.   
+In some scenarios, your collector might need to maintain its own client. An example of that is the `monitoring` plugin, that maintains a connection to the Remote Monitoring Cluster to push its monitoring data. If that's the case, your plugin can opt-in to receive the additional `kibanaRequest` parameter by adding `extendFetchContext.kibanaRequest: true` to the collector's config: it will be appended to the context of the `fetch` method only if the request needs to be scoped to a user other than Kibana Internal, so beware that your collector will need to work for both scenarios (especially for the scenario when `kibanaRequest` is missing).
 
 Note: there will be many cases where you won't need to use the `callCluster`, `esClient` or `soClient` function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS.
 
@@ -94,7 +105,7 @@ In the case of using a custom SavedObjects client, it is up to the plugin to ini
 ```ts
 // server/plugin.ts
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CoreSetup, CoreStart } from 'kibana/server';
+import { CoreSetup, CoreStart } from 'src/core/server';
 
 class Plugin {
   private savedObjectsRepository?: ISavedObjectsRepository;
@@ -129,6 +140,98 @@ export function registerMyPluginUsageCollector(
 }
 ```
 
+## Tracking interactions with incrementCounter
+There are several ways to collect data that can provide insight into how users
+use your plugin or specific features. For tracking user interactions the
+`SavedObjectsRepository` provided by Core provides a useful `incrementCounter`
+method which can be used to increment one or more counter fields in a
+document. Examples of interactions include tracking:
+ - the number of API calls
+ - the number of times users installed and uninstalled the sample datasets 
+
+When using `incrementCounter` for collecting usage data, you need to ensure
+that usage collection happens on a best-effort basis and doesn't
+negatively affect your plugin or users (see the example):
+ - Swallow any exceptions thrown from the incrementCounter method and log
+   a message in development.
+ - Don't block your application on the incrementCounter method (e.g.
+   don't use `await`)
+ - Set the `refresh` option to false to prevent unecessary index refreshes
+   which slows down Elasticsearch performance
+
+
+Note: for brevity the following example does not follow Kibana's conventions
+for structuring your plugin code.
+```ts
+// src/plugins/dashboard/server/plugin.ts
+
+import { PluginInitializerContext, Plugin, CoreStart, CoreSetup } from '../../src/core/server';
+
+export class DashboardPlugin implements Plugin {
+  private readonly logger: Logger;
+  private readonly isDevEnvironment: boolean;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+    this.isDevEnvironment = initializerContext.env.cliArgs.dev;
+  }
+  public setup(core) {
+    // Register a saved object type to store our usage counters
+    core.savedObjects.registerType({
+      // Don't expose this saved object type via the saved objects HTTP API
+      hidden: true,
+      mappings: {
+        // Since we're not querying or aggregating over our counter documents
+        // we don't define any fields.
+        dynamic: false,
+        properties: {},
+      },
+      name: 'dashboard_usage_counters',
+      namespaceType: 'single',
+    });
+  }
+  public start(core) {
+    const repository = core.savedObjects.createInternalRepository(['dashboard_usage_counters']);
+    // Initialize all the counter fields to 0 when our plugin starts
+    // NOTE: Usage collection happens on a best-effort basis, so we don't
+    // `await` the promise returned by `incrementCounter` and we swallow any
+    // exceptions in production.
+    repository
+      .incrementCounter('dashboard_usage_counters', 'dashboard_usage_counters', [
+        'apiCalls',
+        'settingToggled',
+      ], {refresh: false, initialize: true})
+      .catch((e) => (this.isDevEnvironment ? this.logger.error(e) : e));
+
+    const router = core.http.createRouter();
+
+    router.post(
+      {
+        path: `api/v1/dashboard/counters/{counter}`,
+        validate: {
+          params: schema.object({
+            counter: schema.oneOf([schema.literal('apiCalls'), schema.literal('settingToggled')]),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        request.params.id
+
+        // NOTE: Usage collection happens on a best-effort basis, so we don't
+        // `await` the promise returned by `incrementCounter` and we swallow any
+        // exceptions in production.
+        repository
+          .incrementCounter('dashboard_usage_counters', 'dashboard_usage_counters', [
+            counter
+          ], {refresh: false})
+          .catch((e) => (this.isDevEnvironement ? this.logger.error(e) : e));
+    
+        return response.ok();
+      }
+    );
+  }
+}
+
 ## Schema Field
 
 The `schema` field is a proscribed data model assists with detecting changes in usage collector payloads. To define the collector schema add a schema field that specifies every possible field reported when registering the collector. Whenever the `schema` field is set or changed please run `node scripts/telemetry_check.js --fix` to update the stored schema json files.
@@ -138,7 +241,7 @@ The `schema` field is a proscribed data model assists with detecting changes in 
 The `AllowedSchemaTypes` is the list of allowed schema types for the usage fields getting reported:
 
 ```
-'keyword', 'text', 'number', 'boolean', 'long', 'date', 'float'
+'long', 'integer', 'short', 'byte', 'double', 'float', 'keyword', 'text', 'boolean', 'date'
 ```
 
 ### Arrays
@@ -154,7 +257,7 @@ If any of your properties is an array, the schema definition must follow the con
 ```ts
 export const myCollector = makeUsageCollector<Usage>({
   type: 'my_working_collector',
-  isReady: () => true,
+  isReady: () => true, // `fetch` doesn't require any validation for dependencies to be met
   fetch() {
     return {
       my_greeting: 'hello',
@@ -171,7 +274,7 @@ export const myCollector = makeUsageCollector<Usage>({
     },
     some_obj: {
       total: {
-        type: 'number',
+        type: 'long',
       },
     },
     some_array: {
@@ -182,14 +285,13 @@ export const myCollector = makeUsageCollector<Usage>({
       type: 'array',
       items: { 
         total: {
-          type: 'number',
+          type: 'long',
         },
       },   
     },
   },
 });
 ```
-
 ## Update the telemetry payload and telemetry cluster field mappings
 
 There is a module in the telemetry service that creates the payload of data that gets sent up to the telemetry cluster.

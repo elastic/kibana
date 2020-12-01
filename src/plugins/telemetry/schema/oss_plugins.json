@@ -16,13 +16,13 @@
     "search": {
       "properties": {
         "successCount": {
-          "type": "number"
+          "type": "long"
         },
         "errorCount": {
-          "type": "number"
+          "type": "long"
         },
         "averageDuration": {
-          "type": "long"
+          "type": "float"
         }
       }
     },
@@ -616,7 +616,7 @@
             }
           }
         },
-        "ingestManager": {
+        "fleet": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -1578,6 +1578,23 @@
               "type": "long"
             }
           }
+        }
+      }
+    },
+    "localization": {
+      "properties": {
+        "locale": {
+          "type": "keyword"
+        },
+        "integrities": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "text"
+            }
+          }
+        },
+        "labelsCount": {
+          "type": "long"
         }
       }
     },

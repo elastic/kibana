@@ -80,7 +80,6 @@ export const ManageButton: React.FunctionComponent<Props> = ({
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopOverOpen(false)}
       panelPaddingSize="none"
-      withTitle
       anchorPosition="rightUp"
       repositionOnScroll
     >

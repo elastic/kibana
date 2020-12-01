@@ -30,6 +30,7 @@ import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
 
 import './index.scss';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
   defaultMessage: 'Advanced Settings',
@@ -49,12 +50,14 @@ const readOnlyBadge = {
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor,
   params: ManagementAppMountParams,
-  componentRegistry: ComponentRegistry['start']
+  componentRegistry: ComponentRegistry['start'],
+  usageCollection?: UsageCollectionSetup
 ) {
   params.setBreadcrumbs(crumb);
   const [{ uiSettings, notifications, docLinks, application, chrome }] = await getStartServices();
 
   const canSave = application.capabilities.advancedSettings.save as boolean;
+  const trackUiMetric = usageCollection?.reportUiStats.bind(usageCollection, 'advanced_settings');
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
@@ -71,6 +74,7 @@ export async function mountManagementSection(
               dockLinks={docLinks.links}
               uiSettings={uiSettings}
               componentRegistry={componentRegistry}
+              trackUiMetric={trackUiMetric}
             />
           </Route>
         </Switch>

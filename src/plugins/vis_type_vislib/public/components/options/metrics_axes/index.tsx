@@ -325,4 +325,6 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   ) : null;
 }
 
-export { MetricsAxisOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { MetricsAxisOptions as default };

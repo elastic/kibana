@@ -10,7 +10,7 @@ import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_regist
 import { ActionsClient } from './actions_client';
 import { ExecutorType, ActionType } from './types';
 import { ActionExecutor, TaskRunnerFactory, ILicenseState } from './lib';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/mocks';
 import { actionsConfigMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
 import { licenseStateMock } from './lib/license_state.mock';
@@ -34,7 +34,7 @@ const authorization = actionsAuthorizationMock.create();
 const executionEnqueuer = jest.fn();
 const request = {} as KibanaRequest;
 
-const mockTaskManager = taskManagerMock.setup();
+const mockTaskManager = taskManagerMock.createSetup();
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;

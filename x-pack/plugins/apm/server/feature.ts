@@ -20,8 +20,6 @@ export const APM_FEATURE = {
   }),
   order: 900,
   category: DEFAULT_APP_CATEGORIES.observability,
-  icon: 'apmApp',
-  navLinkId: 'apm',
   app: ['apm', 'ux', 'kibana'],
   catalogue: ['apm'],
   management: {

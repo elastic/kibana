@@ -374,6 +374,7 @@ export class VisualizeEmbeddable
         query: this.input.query,
         filters: this.input.filters,
       },
+      searchSessionId: this.input.searchSessionId,
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
     };

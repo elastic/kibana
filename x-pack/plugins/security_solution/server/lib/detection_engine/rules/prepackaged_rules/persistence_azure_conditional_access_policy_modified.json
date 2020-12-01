@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when an Azure Conditional Access policy is modified. Azure Conditional Access policies control access to resources via if-then statements. For example, if a user wants to access a resource, then they must complete an action such as using multi-factor authentication to access it. An adversary may modify a Conditional Access policy in order to weaken their target's security controls.",
+  "from": "now-25m",
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Azure Conditional Access Policy Modified",
+  "note": "The Azure Filebeat module must be enabled to use this rule.",
+  "query": "event.dataset:(azure.activitylogs or azure.auditlogs) and ( azure.activitylogs.operation_name:\"Update policy\" or azure.auditlogs.operation_name:\"Update policy\" ) and event.outcome:success",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/active-directory/conditional-access/overview"
+  ],
+  "risk_score": 47,
+  "rule_id": "bc48bba7-4a23-4232-b551-eca3ca1e3f20",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

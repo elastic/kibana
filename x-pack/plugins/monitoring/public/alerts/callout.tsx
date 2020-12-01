@@ -7,10 +7,10 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { CommonAlertStatus } from '../../common/types';
+import { CommonAlertStatus } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 import { replaceTokens } from './lib/replace_tokens';
-import { AlertMessage, AlertState } from '../../server/alerts/types';
+import { AlertMessage, AlertState } from '../../common/types/alerts';
 
 const TYPES = [
   {

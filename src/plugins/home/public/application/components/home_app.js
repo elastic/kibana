@@ -28,7 +28,7 @@ import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 
 const RedirectToDefaultApp = () => {
   useMount(() => {

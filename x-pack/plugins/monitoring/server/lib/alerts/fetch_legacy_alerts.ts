@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { LegacyAlert, AlertCluster, LegacyAlertMetadata } from '../../alerts/types';
+import { LegacyAlert, AlertCluster, LegacyAlertMetadata } from '../../../common/types/alerts';
 
 export async function fetchLegacyAlerts(
   callCluster: any,

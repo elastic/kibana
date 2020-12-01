@@ -10,6 +10,7 @@ import { HealthCheck } from './health_check';
 
 import { act } from 'react-dom/test-utils';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { HealthContextProvider } from '../context/health_context';
 
 const docLinks = { ELASTIC_WEBSITE_URL: 'elastic.co/', DOC_LINK_VERSION: 'current' };
 
@@ -20,9 +21,11 @@ describe('health check', () => {
     http.get.mockImplementationOnce(() => new Promise(() => {}));
 
     const { queryByText, container } = render(
-      <HealthCheck http={http} docLinks={docLinks}>
-        <p>{'shouldnt render'}</p>
-      </HealthCheck>
+      <HealthContextProvider>
+        <HealthCheck http={http} docLinks={docLinks} waitForCheck={true}>
+          <p>{'shouldnt render'}</p>
+        </HealthCheck>
+      </HealthContextProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -32,13 +35,33 @@ describe('health check', () => {
     expect(queryByText('shouldnt render')).not.toBeInTheDocument();
   });
 
+  it('renders children immediately if waitForCheck is false', async () => {
+    http.get.mockImplementationOnce(() => new Promise(() => {}));
+
+    const { queryByText, container } = render(
+      <HealthContextProvider>
+        <HealthCheck http={http} docLinks={docLinks} waitForCheck={false}>
+          <p>{'should render'}</p>
+        </HealthCheck>
+      </HealthContextProvider>
+    );
+    await act(async () => {
+      // wait for useEffect to run
+    });
+
+    expect(container.getElementsByClassName('euiLoadingSpinner').length).toBe(0);
+    expect(queryByText('should render')).toBeInTheDocument();
+  });
+
   it('renders children if keys are enabled', async () => {
     http.get.mockResolvedValue({ isSufficientlySecure: true, hasPermanentEncryptionKey: true });
 
     const { queryByText } = render(
-      <HealthCheck http={http} docLinks={docLinks}>
-        <p>{'should render'}</p>
-      </HealthCheck>
+      <HealthContextProvider>
+        <HealthCheck http={http} docLinks={docLinks} waitForCheck={true}>
+          <p>{'should render'}</p>
+        </HealthCheck>
+      </HealthContextProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -53,9 +76,11 @@ describe('health check', () => {
     }));
 
     const { queryAllByText } = render(
-      <HealthCheck http={http} docLinks={docLinks}>
-        <p>{'should render'}</p>
-      </HealthCheck>
+      <HealthContextProvider>
+        <HealthCheck http={http} docLinks={docLinks} waitForCheck={true}>
+          <p>{'should render'}</p>
+        </HealthCheck>
+      </HealthContextProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -64,10 +89,12 @@ describe('health check', () => {
     const [description, action] = queryAllByText(/TLS/i);
 
     expect(description.textContent).toMatchInlineSnapshot(
-      `"Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. Learn how to enable TLS."`
+      `"Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. Learn how to enable TLS.(opens in a new tab or window)"`
     );
 
-    expect(action.textContent).toMatchInlineSnapshot(`"Learn how to enable TLS."`);
+    expect(action.textContent).toMatchInlineSnapshot(
+      `"Learn how to enable TLS.(opens in a new tab or window)"`
+    );
 
     expect(action.getAttribute('href')).toMatchInlineSnapshot(
       `"elastic.co/guide/en/kibana/current/configuring-tls.html"`
@@ -81,9 +108,11 @@ describe('health check', () => {
     }));
 
     const { queryByText, queryByRole } = render(
-      <HealthCheck http={http} docLinks={docLinks}>
-        <p>{'should render'}</p>
-      </HealthCheck>
+      <HealthContextProvider>
+        <HealthCheck http={http} docLinks={docLinks} waitForCheck={true}>
+          <p>{'should render'}</p>
+        </HealthCheck>
+      </HealthContextProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -91,11 +120,11 @@ describe('health check', () => {
 
     const description = queryByRole(/banner/i);
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"To create an alert, set a value for xpack.encryptedSavedObjects.encryptionKey in your kibana.yml file. Learn how."`
+      `"To create an alert, set a value for xpack.encryptedSavedObjects.encryptionKey in your kibana.yml file. Learn how.(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
-    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how."`);
+    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how.(opens in a new tab or window)"`);
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#general-alert-action-settings"`
     );
@@ -108,9 +137,11 @@ describe('health check', () => {
     }));
 
     const { queryByText } = render(
-      <HealthCheck http={http} docLinks={docLinks}>
-        <p>{'should render'}</p>
-      </HealthCheck>
+      <HealthContextProvider>
+        <HealthCheck http={http} docLinks={docLinks} waitForCheck={true}>
+          <p>{'should render'}</p>
+        </HealthCheck>
+      </HealthContextProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -119,11 +150,11 @@ describe('health check', () => {
     const description = queryByText(/Transport Layer Security/i);
 
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. Learn how"`
+      `"You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. Learn how(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
-    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how"`);
+    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how(opens in a new tab or window)"`);
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"elastic.co/guide/en/kibana/current/alerting-getting-started.html#alerting-setup-prerequisites"`
     );

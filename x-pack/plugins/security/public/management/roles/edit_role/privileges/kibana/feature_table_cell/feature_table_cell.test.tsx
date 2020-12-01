@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { createFeature } from '../../../../__fixtures__/kibana_features';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { FeatureTableCell } from '.';
 import { SecuredFeature } from '../../../../model';
 import { EuiIconTip } from '@elastic/eui';

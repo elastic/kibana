@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
@@ -60,7 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
-      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(3);
+      // 4th item is the other bucket
+      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(4);
     });
 
     it('should create an xy visualization with filters aggregation', async () => {
@@ -169,6 +170,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Test of label'
       );
+      await PageObjects.lens.closeDimensionEditor();
+    });
+
+    it('should be able to add very long labels and still be able to remove a dimension', async () => {
+      await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
+      const longLabel =
+        'Veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryvery long label wrapping multiple lines';
+      await PageObjects.lens.editDimensionLabel(longLabel);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.closeDimensionEditor();
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        longLabel
+      );
+      expect(
+        await testSubjects.isDisplayed('lnsXY_yDimensionPanel >  indexPattern-dimension-remove')
+      ).to.equal(true);
+      await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
+      await testSubjects.missingOrFail('lnsXY_yDimensionPanel > lns-dimensionTrigger');
     });
 
     it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
@@ -273,11 +293,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('treemap')).to.eql(false);
       await PageObjects.lens.switchToVisualization('treemap');
       expect(
-        await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel', 0)
-      ).to.eql('Top values of geo.dest');
-      expect(
-        await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel', 1)
-      ).to.eql('Top values of geo.src');
+        await PageObjects.lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')
+      ).to.eql(['Top values of geo.dest', 'Top values of geo.src']);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
       );
@@ -307,6 +324,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.eql('Average of bytes');
       expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
+    });
+
+    it('should allow to change index pattern', async () => {
+      await PageObjects.lens.switchFirstLayerIndexPattern('log*');
+      expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal('log*');
+    });
+
+    it('should show a download button only when the configuration is valid', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('pie');
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      // incomplete configuration should not be downloadable
+      expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(false);
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+      expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(true);
     });
   });
 }

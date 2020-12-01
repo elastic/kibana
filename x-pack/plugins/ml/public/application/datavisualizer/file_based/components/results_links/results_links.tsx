@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
@@ -12,7 +12,7 @@ import { ml } from '../../../../services/ml_api_service';
 import { isFullLicense } from '../../../../license';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
-import { useMlKibana, useMlUrlGenerator, useNavigateToPath } from '../../../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator } from '../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 import { MlCommonGlobalState } from '../../../../../../common/types/ml_url_generator';
 import {
@@ -45,12 +45,16 @@ export const ResultsLinks: FC<Props> = ({
   const [globalState, setGlobalState] = useState<MlCommonGlobalState | undefined>();
 
   const [discoverLink, setDiscoverLink] = useState('');
+  const [indexManagementLink, setIndexManagementLink] = useState('');
+  const [indexPatternManagementLink, setIndexPatternManagementLink] = useState('');
+  const [dataVisualizerLink, setDataVisualizerLink] = useState('');
+  const [createJobsSelectTypePage, setCreateJobsSelectTypePage] = useState('');
+
   const mlUrlGenerator = useMlUrlGenerator();
-  const navigateToPath = useNavigateToPath();
 
   const {
     services: {
-      application: { navigateToApp, navigateToUrl },
+      application: { getUrlForApp },
       share: {
         urlGenerators: { getUrlGenerator },
       },
@@ -84,34 +88,51 @@ export const ResultsLinks: FC<Props> = ({
         setDiscoverLink(discoverUrl);
       }
     };
+
+    const getDataVisualizerLink = async (): Promise<void> => {
+      const _dataVisualizerLink = await mlUrlGenerator.createUrl({
+        page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
+        pageState: {
+          index: indexPatternId,
+          globalState,
+        },
+      });
+      if (!unmounted) {
+        setDataVisualizerLink(_dataVisualizerLink);
+      }
+    };
+    const getADCreateJobsSelectTypePage = async (): Promise<void> => {
+      const _createJobsSelectTypePage = await mlUrlGenerator.createUrl({
+        page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
+        pageState: {
+          index: indexPatternId,
+          globalState,
+        },
+      });
+      if (!unmounted) {
+        setCreateJobsSelectTypePage(_createJobsSelectTypePage);
+      }
+    };
+
     getDiscoverUrl();
+    getDataVisualizerLink();
+    getADCreateJobsSelectTypePage();
+
+    if (!unmounted) {
+      setIndexManagementLink(
+        getUrlForApp('management', { path: '/data/index_management/indices' })
+      );
+      setIndexPatternManagementLink(
+        getUrlForApp('management', {
+          path: `/kibana/indexPatterns${createIndexPattern ? `/patterns/${indexPatternId}` : ''}`,
+        })
+      );
+    }
 
     return () => {
       unmounted = true;
     };
   }, [indexPatternId, getUrlGenerator]);
-
-  const openInDataVisualizer = useCallback(async () => {
-    const path = await mlUrlGenerator.createUrl({
-      page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
-      pageState: {
-        index: indexPatternId,
-        globalState,
-      },
-    });
-    await navigateToPath(path);
-  }, [indexPatternId, globalState]);
-
-  const redirectToADCreateJobsSelectTypePage = useCallback(async () => {
-    const path = await mlUrlGenerator.createUrl({
-      page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
-      pageState: {
-        index: indexPatternId,
-        globalState,
-      },
-    });
-    await navigateToPath(path);
-  }, [indexPatternId, globalState]);
 
   useEffect(() => {
     setShowCreateJobLink(checkPermission('canCreateJob') && mlNodesAvailable());
@@ -148,23 +169,6 @@ export const ResultsLinks: FC<Props> = ({
     }
   }
 
-  function openInDiscover(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    navigateToUrl(discoverLink);
-  }
-
-  function openIndexManagement(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    navigateToApp('management', { path: '/data/index_management/indices' });
-  }
-
-  function openIndexPatternManagement(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    navigateToApp('management', {
-      path: `/kibana/indexPatterns${createIndexPattern ? `/patterns/${indexPatternId}` : ''}`,
-    });
-  }
-
   return (
     <EuiFlexGroup gutterSize="l">
       {createIndexPattern && discoverLink && (
@@ -178,7 +182,7 @@ export const ResultsLinks: FC<Props> = ({
               />
             }
             description=""
-            onClick={openInDiscover}
+            href={discoverLink}
           />
         </EuiFlexItem>
       )}
@@ -186,7 +190,8 @@ export const ResultsLinks: FC<Props> = ({
       {isFullLicense() === true &&
         timeFieldName !== undefined &&
         showCreateJobLink &&
-        createIndexPattern && (
+        createIndexPattern &&
+        createJobsSelectTypePage && (
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
@@ -197,12 +202,12 @@ export const ResultsLinks: FC<Props> = ({
                 />
               }
               description=""
-              onClick={redirectToADCreateJobsSelectTypePage}
+              href={createJobsSelectTypePage}
             />
           </EuiFlexItem>
         )}
 
-      {createIndexPattern && (
+      {createIndexPattern && dataVisualizerLink && (
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type={`dataVisualizer`} />}
@@ -213,38 +218,42 @@ export const ResultsLinks: FC<Props> = ({
               />
             }
             description=""
-            onClick={openInDataVisualizer}
+            href={dataVisualizerLink}
           />
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem>
-        <EuiCard
-          icon={<EuiIcon size="xxl" type={`managementApp`} />}
-          title={
-            <FormattedMessage
-              id="xpack.ml.fileDatavisualizer.resultsLinks.indexManagementTitle"
-              defaultMessage="Index Management"
-            />
-          }
-          description=""
-          onClick={openIndexManagement}
-        />
-      </EuiFlexItem>
+      {indexManagementLink && (
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type={`managementApp`} />}
+            title={
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.resultsLinks.indexManagementTitle"
+                defaultMessage="Index Management"
+              />
+            }
+            description=""
+            href={indexManagementLink}
+          />
+        </EuiFlexItem>
+      )}
 
-      <EuiFlexItem>
-        <EuiCard
-          icon={<EuiIcon size="xxl" type={`managementApp`} />}
-          title={
-            <FormattedMessage
-              id="xpack.ml.fileDatavisualizer.resultsLinks.indexPatternManagementTitle"
-              defaultMessage="Index Pattern Management"
-            />
-          }
-          description=""
-          onClick={openIndexPatternManagement}
-        />
-      </EuiFlexItem>
+      {indexPatternManagementLink && (
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type={`managementApp`} />}
+            title={
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.resultsLinks.indexPatternManagementTitle"
+                defaultMessage="Index Pattern Management"
+              />
+            }
+            description=""
+            href={indexPatternManagementLink}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiCard
           icon={<EuiIcon size="xxl" type={`filebeatApp`} />}

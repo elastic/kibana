@@ -12,15 +12,16 @@
     "uiActions",
     "navigation",
     "visualizations",
+    "dashboard",
     "embeddable",
     "mapsLegacy",
     "usageCollection",
     "savedObjects",
     "share"
   ],
-  "optionalPlugins": ["home"],
+  "optionalPlugins": ["home", "savedObjectsTagging"],
   "ui": true,
   "server": true,
   "extraPublicDirs": ["common/constants"],
-  "requiredBundles": ["kibanaReact", "kibanaUtils", "home"]
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "home", "mapsOss"]
 }

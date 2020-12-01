@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { ActionType as CommonActionType } from '../common';
@@ -125,7 +125,6 @@ export class ActionTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
-        type: `actions:${actionType.id}`,
         maxAttempts: actionType.maxAttempts || 1,
         getRetry(attempts: number, error: unknown) {
           if (error instanceof ExecutorError) {

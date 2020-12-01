@@ -90,7 +90,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
-    this.discoveryDisabled = coreContext.env.isDevClusterMaster;
+    this.discoveryDisabled = coreContext.env.isDevCliParent;
     this.pluginsSystem = new PluginsSystem(coreContext);
     this.configService = coreContext.configService;
     this.config$ = coreContext.configService
@@ -118,6 +118,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     return {
       // Return dependency tree
       pluginTree: this.pluginsSystem.getPluginDependencies(),
+      pluginPaths: this.pluginsSystem.getPlugins().map((plugin) => plugin.path),
       uiPlugins: {
         internal: this.uiPluginInternalInfo,
         public: uiPlugins,
@@ -132,7 +133,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     const config = await this.config$.pipe(first()).toPromise();
 
     let contracts = new Map<PluginName, unknown>();
-    const initialize = config.initialize && !this.coreContext.env.isDevClusterMaster;
+    const initialize = config.initialize && !this.coreContext.env.isDevCliParent;
     if (initialize) {
       contracts = await this.pluginsSystem.setupPlugins(deps);
       this.registerPluginStaticDirs(deps);

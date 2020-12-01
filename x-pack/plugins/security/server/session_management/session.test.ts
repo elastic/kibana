@@ -6,6 +6,7 @@
 
 import crypto from 'crypto';
 import nodeCrypto from '@elastic/node-crypto';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ConfigSchema, createConfig } from '../config';
 import { Session, SessionValueContentToEncrypt } from './session';
 import { SessionIndex } from './session_index';

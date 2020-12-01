@@ -8,7 +8,9 @@
 
 import * as t from 'io-ts';
 import { language } from '../common/schemas';
+import { NonEmptyArray } from './non_empty_array';
 import { NonEmptyString } from './non_empty_string';
+import { PositiveIntegerGreaterThanZero } from './positive_integer_greater_than_zero';
 
 export const threat_query = t.string;
 export type ThreatQuery = t.TypeOf<typeof threat_query>;
@@ -40,7 +42,7 @@ export const threatMap = t.exact(
 );
 export type ThreatMap = t.TypeOf<typeof threatMap>;
 
-export const threat_mapping = t.array(threatMap);
+export const threat_mapping = NonEmptyArray(threatMap, 'NonEmptyArray<ThreatMap>');
 export type ThreatMapping = t.TypeOf<typeof threat_mapping>;
 
 export const threatMappingOrUndefined = t.union([threat_mapping, t.undefined]);
@@ -55,3 +57,13 @@ export const threat_language = t.union([language, t.undefined]);
 export type ThreatLanguage = t.TypeOf<typeof threat_language>;
 export const threatLanguageOrUndefined = t.union([threat_language, t.undefined]);
 export type ThreatLanguageOrUndefined = t.TypeOf<typeof threatLanguageOrUndefined>;
+
+export const concurrent_searches = PositiveIntegerGreaterThanZero;
+export type ConcurrentSearches = t.TypeOf<typeof concurrent_searches>;
+export const concurrentSearchesOrUndefined = t.union([concurrent_searches, t.undefined]);
+export type ConcurrentSearchesOrUndefined = t.TypeOf<typeof concurrentSearchesOrUndefined>;
+
+export const items_per_search = PositiveIntegerGreaterThanZero;
+export type ItemsPerSearch = t.TypeOf<typeof concurrent_searches>;
+export const itemsPerSearchOrUndefined = t.union([items_per_search, t.undefined]);
+export type ItemsPerSearchOrUndefined = t.TypeOf<typeof itemsPerSearchOrUndefined>;

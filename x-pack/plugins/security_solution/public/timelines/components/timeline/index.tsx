@@ -18,6 +18,7 @@ import { OnChangeItemsPerPage } from './events';
 import { Timeline } from './timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { activeTimeline } from '../../containers/active_timeline_context';
 
 export interface OwnProps {
   id: string;
@@ -26,6 +27,11 @@ export interface OwnProps {
 }
 
 export type Props = OwnProps & PropsFromRedux;
+
+const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
+  prevProps.end === nextProps.end &&
+  prevProps.start === nextProps.start &&
+  prevProps.timerangeKind === nextProps.timerangeKind;
 
 const StatefulTimelineComponent = React.memo<Props>(
   ({
@@ -51,6 +57,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     start,
     status,
     timelineType,
+    timerangeKind,
     updateItemsPerPage,
     upsertColumn,
     usersViewing,
@@ -92,7 +99,13 @@ const StatefulTimelineComponent = React.memo<Props>(
 
     useEffect(() => {
       if (createTimeline != null && !isTimelineExists) {
-        createTimeline({ id, columns: defaultHeaders, indexNames: selectedPatterns, show: false });
+        createTimeline({
+          id,
+          columns: defaultHeaders,
+          indexNames: selectedPatterns,
+          show: false,
+          expandedEvent: activeTimeline.getExpandedEvent(),
+        });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -125,13 +138,14 @@ const StatefulTimelineComponent = React.memo<Props>(
         status={status}
         toggleColumn={toggleColumn}
         timelineType={timelineType}
+        timerangeKind={timerangeKind}
         usersViewing={usersViewing}
       />
     );
   },
   (prevProps, nextProps) => {
     return (
-      prevProps.end === nextProps.end &&
+      isTimerangeSame(prevProps, nextProps) &&
       prevProps.graphEventId === nextProps.graphEventId &&
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
@@ -142,7 +156,6 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
-      prevProps.start === nextProps.start &&
       prevProps.timelineType === nextProps.timelineType &&
       prevProps.status === nextProps.status &&
       deepEqual(prevProps.columns, nextProps.columns) &&
@@ -209,6 +222,7 @@ const makeMapStateToProps = () => {
       start: input.timerange.from,
       status,
       timelineType,
+      timerangeKind: input.timerange.kind,
     };
   };
   return mapStateToProps;
@@ -219,7 +233,6 @@ const mapDispatchToProps = {
   createTimeline: timelineActions.createTimeline,
   removeColumn: timelineActions.removeColumn,
   updateColumns: timelineActions.updateColumns,
-  updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
   updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
   updateSort: timelineActions.updateSort,

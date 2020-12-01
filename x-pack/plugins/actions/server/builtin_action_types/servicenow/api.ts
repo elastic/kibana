@@ -12,6 +12,8 @@ import {
   PushToServiceApiParams,
   PushToServiceResponse,
   Incident,
+  GetCommonFieldsHandlerArgs,
+  GetCommonFieldsResponse,
 } from './types';
 
 // TODO: to remove, need to support Case
@@ -127,8 +129,16 @@ const pushToServiceHandler = async ({
   return res;
 };
 
+const getFieldsHandler = async ({
+  externalService,
+}: GetCommonFieldsHandlerArgs): Promise<GetCommonFieldsResponse> => {
+  const res = await externalService.getFields();
+  return res;
+};
+
 export const api: ExternalServiceApi = {
+  getFields: getFieldsHandler,
+  getIncident: getIncidentHandler,
   handshake: handshakeHandler,
   pushToService: pushToServiceHandler,
-  getIncident: getIncidentHandler,
 };

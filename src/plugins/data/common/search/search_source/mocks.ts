@@ -18,6 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 import { SearchSource } from './search_source';
@@ -27,6 +28,7 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   setPreferredSearchStrategyId: jest.fn(),
   setFields: jest.fn().mockReturnThis(),
   setField: jest.fn().mockReturnThis(),
+  removeField: jest.fn().mockReturnThis(),
   getId: jest.fn(),
   getFields: jest.fn(),
   getField: jest.fn(),

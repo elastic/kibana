@@ -13,11 +13,11 @@ import { ScopedHistory } from 'kibana/public';
 import { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
-import { encodePathForReactRouter } from '../../../../services/routing';
 import { useServices } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
 import { TemplateTypeIndicator } from '../components';
+import { getTemplateDetailsLink } from '../../../../services/routing';
 
 interface Props {
   templates: TemplateListItem[];
@@ -52,12 +52,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         return (
           <>
             <EuiLink
-              {...reactRouterNavigate(
-                history,
-                {
-                  pathname: `/templates/${encodePathForReactRouter(name)}`,
-                },
-                () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
+              {...reactRouterNavigate(history, getTemplateDetailsLink(name), () =>
+                uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
               )}
               data-test-subj="templateDetailsLink"
             >

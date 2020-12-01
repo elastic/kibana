@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   ENVIRONMENT_NOT_DEFINED,
   ENVIRONMENT_ALL,

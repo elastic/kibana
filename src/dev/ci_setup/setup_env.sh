@@ -24,6 +24,10 @@ export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
 ###
 export FORCE_COLOR=1
 
+### APM tracking
+###
+export ELASTIC_APM_ENVIRONMENT=ci
+
 ###
 ### check that we seem to be in a kibana project
 ###

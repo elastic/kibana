@@ -36,7 +36,7 @@ import dateMath from '@elastic/datemath';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 import { DocLinksStart } from 'src/core/public';
 
 import { useKibana } from '../../../../kibana_react/public';
@@ -125,7 +125,7 @@ function DateRangesParamEditor({
     );
 
   return (
-    <EuiFormRow compressed fullWidth>
+    <EuiFormRow display="rowCompressed" fullWidth>
       <>
         <EuiText size="xs">
           <EuiLink href={services.docLinks.links.date.dateMath} target="_blank">

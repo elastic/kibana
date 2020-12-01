@@ -16,11 +16,12 @@ import {
   ValidationFuncArg,
   fieldFormatters,
   FieldConfig,
+  RUNTIME_FIELD_OPTIONS,
+  RuntimeType,
 } from '../shared_imports';
 import {
   AliasOption,
   DataType,
-  RuntimeType,
   ComboBoxOption,
   ParameterName,
   ParameterDefinition,
@@ -28,7 +29,6 @@ import {
 import { documentationService } from '../../../services/documentation';
 import { INDEX_DEFAULT } from './default_values';
 import { TYPE_DEFINITION } from './data_types_definition';
-import { RUNTIME_FIELD_OPTIONS } from './field_options';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField, numberGreaterThanField, isJsonField } = fieldValidators;

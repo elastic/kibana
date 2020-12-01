@@ -15,8 +15,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useContext, useEffect, useRef, useState, FC } from 'react';
-import { useIntersection } from 'react-use';
-import { UptimeThemeContext } from '../../../contexts';
+import useIntersection from 'react-use/lib/useIntersection';
+import { UptimeSettingsContext, UptimeThemeContext } from '../../../contexts';
 
 interface StepScreenshotDisplayProps {
   screenshotExists?: boolean;
@@ -41,6 +41,8 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
     colors: { lightestShade: pageBackground },
   } = useContext(UptimeThemeContext);
 
+  const { basePath } = useContext(UptimeSettingsContext);
+
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState<boolean>(false);
   const [isOverlayOpen, setIsOverlayOpen] = useState<boolean>(false);
 
@@ -59,7 +61,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   }, [hasIntersected, isIntersecting, setHasIntersected]);
 
   let content: JSX.Element | null = null;
-  const imgSrc = `/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`;
+  const imgSrc = basePath + `/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`;
   if (hasIntersected && screenshotExists) {
     content = (
       <>

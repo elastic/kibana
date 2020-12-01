@@ -93,7 +93,6 @@ export class ContextMenu extends PureComponent {
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         panelPaddingSize="none"
-        withTitle
         anchorPosition={anchorPosition}
         repositionOnScroll
       >

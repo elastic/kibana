@@ -50,7 +50,7 @@ export interface UseExceptionListSuccess {
 
 export interface UseExceptionListProps {
   http: HttpStart;
-  lists: ExceptionIdentifiers[];
+  lists: ExceptionListIdentifiers[];
   onError?: (arg: string[]) => void;
   filterOptions: FilterExceptionsOptions[];
   pagination?: Pagination;
@@ -60,7 +60,7 @@ export interface UseExceptionListProps {
   onSuccess?: (arg: UseExceptionListSuccess) => void;
 }
 
-export interface ExceptionIdentifiers {
+export interface ExceptionListIdentifiers {
   id: string;
   listId: string;
   namespaceType: NamespaceType;
@@ -91,7 +91,7 @@ export interface ApiCallMemoProps {
 }
 
 export interface ApiCallFindListsItemsMemoProps {
-  lists: ExceptionIdentifiers[];
+  lists: ExceptionListIdentifiers[];
   filterOptions: FilterExceptionsOptions[];
   pagination: Partial<Pagination>;
   showDetectionsListsOnly: boolean;

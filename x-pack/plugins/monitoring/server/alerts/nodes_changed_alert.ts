@@ -14,22 +14,21 @@ import {
   AlertInstanceState,
   LegacyAlert,
   LegacyAlertNodesChangedList,
-} from './types';
+  CommonAlertParams,
+} from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import { INDEX_ALERTS, ALERT_NODES_CHANGED } from '../../common/constants';
+import { INDEX_ALERTS, ALERT_NODES_CHANGED, LEGACY_ALERT_DETAILS } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { CommonAlertParams } from '../../common/types';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
-import { AlertingDefaults } from './alerts_common';
+import { AlertingDefaults } from './alert_helpers';
 
 const WATCH_NAME = 'elasticsearch_nodes';
 
 export class NodesChangedAlert extends BaseAlert {
   public type = ALERT_NODES_CHANGED;
-  public label = i18n.translate('xpack.monitoring.alerts.nodesChanged.label', {
-    defaultMessage: 'Nodes changed',
-  });
+  public label = LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].label;
+  public description = LEGACY_ALERT_DETAILS[ALERT_NODES_CHANGED].description;
   public isLegacy = true;
 
   protected actionVariables = [

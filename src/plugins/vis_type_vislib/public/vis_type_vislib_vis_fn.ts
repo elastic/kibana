@@ -18,29 +18,35 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './vislib/response_handler';
+import { BasicVislibParams } from './types';
+
+export const vislibVisName = 'vislib_vis';
 
 interface Arguments {
   type: string;
   visConfig: string;
 }
 
-type VisParams = Required<Arguments>;
-
-interface RenderValue {
+export interface VislibRenderValue {
+  visData: any;
   visType: string;
-  visConfig: VisParams;
+  visConfig: BasicVislibParams;
 }
 
-export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
-  'vislib',
+export type VisTypeVislibExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof vislibVisName,
   Datatable,
   Arguments,
-  Render<RenderValue>
-> => ({
-  name: 'vislib',
+  Render<VislibRenderValue>
+>;
+
+export const createVisTypeVislibVisFn = (): VisTypeVislibExpressionFunctionDefinition => ({
+  name: vislibVisName,
   type: 'render',
   inputTypes: ['datatable'],
   help: i18n.translate('visTypeVislib.functions.vislib.help', {
@@ -55,23 +61,21 @@ export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      help: '',
+      help: 'vislib vis config',
     },
   },
   fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
-    const convertedData = vislibSeriesResponseHandler(context, visConfigParams.dimensions);
+    const visType = args.type;
+    const visConfig = JSON.parse(args.visConfig) as BasicVislibParams;
+    const visData = vislibSeriesResponseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: vislibVisName,
       value: {
-        visData: convertedData,
-        visType: args.type,
-        visConfig: visConfigParams,
-        params: {
-          listenOnChange: true,
-        },
+        visData,
+        visConfig,
+        visType,
       },
     };
   },

@@ -3,11 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 
 import React from 'react';
 import { useValues } from 'kea';
@@ -30,18 +25,19 @@ import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kiba
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 import { ProductCard } from '../product_card';
+import { SetupGuideCta } from '../setup_guide';
 
 import AppSearchImage from '../../assets/app_search.png';
 import WorkplaceSearchImage from '../../assets/workplace_search.png';
 
-interface IProductSelectorProps {
+interface ProductSelectorProps {
   access: {
     hasAppSearchAccess?: boolean;
     hasWorkplaceSearchAccess?: boolean;
   };
 }
 
-export const ProductSelector: React.FC<IProductSelectorProps> = ({ access }) => {
+export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
   const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
   const { config } = useValues(KibanaLogic);
 
@@ -66,9 +62,13 @@ export const ProductSelector: React.FC<IProductSelectorProps> = ({ access }) => 
             </EuiTitle>
             <EuiTitle size="s">
               <p className="enterpriseSearchOverview__subheading">
-                {i18n.translate('xpack.enterpriseSearch.overview.subheading', {
-                  defaultMessage: 'Select a product to get started',
-                })}
+                {config.host
+                  ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
+                      defaultMessage: 'Select a product to get started.',
+                    })
+                  : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
+                      defaultMessage: 'Choose a product to set up and get started.',
+                    })}
               </p>
             </EuiTitle>
           </EuiPageHeaderSection>
@@ -87,6 +87,7 @@ export const ProductSelector: React.FC<IProductSelectorProps> = ({ access }) => 
             )}
           </EuiFlexGroup>
           <EuiSpacer />
+          {!config.host && <SetupGuideCta />}
         </EuiPageContentBody>
       </EuiPageBody>
     </EuiPage>

@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickDataTable');
       await PageObjects.visualize.clickDataTable();
       log.debug('clickNewSearch');
@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }) {
       }
 
       // load a plain table
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show correct data when using average pipeline aggregation', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -167,7 +167,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show correct data for a data table with date histogram', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -189,7 +189,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show correct data for a data table with date histogram', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -207,6 +207,29 @@ export default function ({ getService, getPageObjects }) {
         '2015-09-22',
         '4,633',
       ]);
+    });
+
+    it('should show correct data when selecting a field by its custom name', async () => {
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.visEditor.clickBucket('Split rows');
+      await PageObjects.visEditor.selectAggregation('Date Histogram');
+      await PageObjects.visEditor.selectField('UTC time');
+      await PageObjects.visEditor.setInterval('Day');
+      await PageObjects.visEditor.clickGo();
+      const data = await PageObjects.visChart.getTableVisData();
+      expect(data.trim().split('\n')).to.be.eql([
+        '2015-09-20',
+        '4,757',
+        '2015-09-21',
+        '4,614',
+        '2015-09-22',
+        '4,633',
+      ]);
+      const header = await PageObjects.visChart.getTableVisHeader();
+      expect(header).to.contain('UTC time');
     });
 
     it('should correctly filter for applied time filter on the main timefield', async () => {
@@ -224,7 +247,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show correct data for a data table with top hits', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -238,7 +261,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show correct data for a data table with range agg', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -257,7 +280,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('otherBucket', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -295,7 +318,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('metricsOnAllLevels', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -389,7 +412,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('split tables', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setDefaultAbsoluteRange();

@@ -23,3 +23,4 @@ export * from './get_format_with_aggs';
 export * from './ipv4_address';
 export * from './prop_filter';
 export * from './to_angular_json';
+export * from './infer_time_zone';

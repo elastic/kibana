@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useLayoutEffect, useCallback } from 'react';
-import { usePromise } from 'react-use';
+import usePromise from 'react-use/lib/usePromise';
 import { History } from 'history';
 
 import { i18n } from '@kbn/i18n';

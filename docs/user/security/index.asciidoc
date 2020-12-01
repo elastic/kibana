@@ -10,10 +10,18 @@ auditing. For more information, see
 {ref}/secure-cluster.html[Secure a cluster] and
 <<using-kibana-with-security,Configuring Security in {kib}>>.
 
+NOTE: There are security limitations that affect {kib}. For more information, refer to {ref}/security-limitations.html[Security].
+
+[float]
+=== Required permissions
+
+The `manage_security` cluster privilege is required to access all Security features.
+
+
 [float]
 === Users
 
-To create and manage users, open the menu, then go to *Stack Management > Security > Users*.
+To create and manage users, open the main menu, then click *Stack Management > Users*.
 You can also change their passwords and roles. For more information about
 authentication and built-in users, see
 {ref}/setting-up-authentication.html[Setting up user authentication].
@@ -21,7 +29,7 @@ authentication and built-in users, see
 [float]
 === Roles
 
-To manage roles, open the menu, then go to *Stack Management > Security > Roles*, or use
+To manage roles, open the main menu, then click *Stack Management > Roles*, or use
 the <<role-management-api>>. For more information on configuring roles for {kib}, see <<xpack-security-authorization, Granting access to {kib}>>.
 
 For a more holistic overview of configuring roles for the entire stack,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
@@ -29,7 +29,7 @@ describe('OIDCAuthenticationProvider', () => {
     mockOptions = mockAuthenticationProviderOptions({ name: 'oidc' });
 
     mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    mockUser = mockAuthenticatedUser({ authentication_provider: 'oidc' });
+    mockUser = mockAuthenticatedUser({ authentication_provider: { type: 'oidc', name: 'oidc' } });
     mockScopedClusterClient.callAsCurrentUser.mockImplementation(async (method) => {
       if (method === 'shield.authenticate') {
         return mockUser;
@@ -175,6 +175,7 @@ describe('OIDCAuthenticationProvider', () => {
         const { request, attempt, expectedRedirectURI } = getMocks();
 
         mockOptions.client.callAsInternalUser.mockResolvedValue({
+          authentication: mockUser,
           access_token: 'some-token',
           refresh_token: 'some-refresh-token',
         });
@@ -440,25 +441,14 @@ describe('OIDCAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'valid-refresh-token' };
 
-      mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
-        if (scopeableRequest?.headers.authorization === `Bearer ${tokenPair.accessToken}`) {
-          const mockScopedClusterClientToFail = elasticsearchServiceMock.createLegacyScopedClusterClient();
-          mockScopedClusterClientToFail.callAsCurrentUser.mockRejectedValue(
-            LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
-          );
-          return mockScopedClusterClientToFail;
-        }
-
-        if (scopeableRequest?.headers.authorization === 'Bearer new-access-token') {
-          return mockScopedClusterClient;
-        }
-
-        throw new Error('Unexpected call');
-      });
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
 
       mockOptions.tokens.refresh.mockResolvedValue({
         accessToken: 'new-access-token',
         refreshToken: 'new-refresh-token',
+        authenticationInfo: mockUser,
       });
 
       await expect(

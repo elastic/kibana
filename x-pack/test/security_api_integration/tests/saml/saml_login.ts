@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     expect(apiResponse.body.username).to.be(username);
     expect(apiResponse.body.authentication_realm).to.eql({ name: 'saml1', type: 'saml' });
-    expect(apiResponse.body.authentication_provider).to.eql('saml');
+    expect(apiResponse.body.authentication_provider).to.eql({ type: 'saml', name: 'saml' });
     expect(apiResponse.body.authentication_type).to.be('token');
   }
 
@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(user.username).to.eql(username);
-      expect(user.authentication_provider).to.eql('basic');
+      expect(user.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
       expect(user.authentication_type).to.be('realm');
       // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
     });

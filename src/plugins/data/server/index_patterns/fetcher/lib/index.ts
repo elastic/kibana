@@ -20,3 +20,5 @@
 export { getFieldCapabilities, shouldReadFieldFromDocValues } from './field_capabilities';
 export { resolveTimePattern } from './resolve_time_pattern';
 export { createNoMatchingIndicesError } from './errors';
+export * from './merge_capabilities_with_fields';
+export * from './map_capabilities';

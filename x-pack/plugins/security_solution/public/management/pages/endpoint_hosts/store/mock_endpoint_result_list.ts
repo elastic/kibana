@@ -25,7 +25,7 @@ import {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
   GetAgentsResponse,
-} from '../../../../../../ingest_manager/common/types/rest_spec';
+} from '../../../../../../fleet/common/types/rest_spec';
 import { GetPolicyListResponse } from '../../policy/types';
 
 const generator = new EndpointDocGenerator('seed');

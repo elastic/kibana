@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { forEach, keys, sortBy } from 'lodash';
 import { normalizedFieldTypes } from '../../lib/normalized_field_types';
 import { i18n } from '@kbn/i18n';

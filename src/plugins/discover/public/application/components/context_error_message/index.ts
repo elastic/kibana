@@ -18,4 +18,3 @@
  */
 
 export { ContextErrorMessage } from './context_error_message';
-export { createContextErrorMessageDirective } from './context_error_message_directive';

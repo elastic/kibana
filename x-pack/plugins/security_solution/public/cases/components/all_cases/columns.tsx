@@ -82,11 +82,11 @@ export const getCasesColumns = (
             <>
               <EuiAvatar
                 className="userAction__circle"
-                name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
+                name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
                 size="s"
               />
               <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
+                {createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
               </Spacer>
             </>
           );
