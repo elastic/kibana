@@ -24,22 +24,25 @@ import { ID } from './constants';
 import { PainlessContext, Field } from './types';
 import { PainlessWorker } from './worker';
 import { PainlessCompletionAdapter } from './completion_adapter';
+import { DiagnosticsAdapter } from './diagnostics_adapter';
 
 const workerProxyService = new WorkerProxyService();
 const editorStateService = new EditorStateService();
 
-type WorkerAccessor = (...uris: monaco.Uri[]) => Promise<PainlessWorker>;
+export type WorkerAccessor = (...uris: monaco.Uri[]) => Promise<PainlessWorker>;
 
 const worker: WorkerAccessor = (...uris: monaco.Uri[]): Promise<PainlessWorker> => {
   return workerProxyService.getWorker(uris);
 };
-
-monaco.languages.onLanguage(ID, async () => {
-  workerProxyService.setup();
-});
 
 export const getSuggestionProvider = (context: PainlessContext, fields?: Field[]) => {
   editorStateService.setup(context, fields);
 
   return new PainlessCompletionAdapter(worker, editorStateService);
 };
+
+monaco.languages.onLanguage(ID, async () => {
+  workerProxyService.setup();
+
+  new DiagnosticsAdapter(worker);
+});

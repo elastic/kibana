@@ -18,3 +18,5 @@
  */
 
 export { getAutocompleteSuggestions } from './autocomplete';
+
+export { PainlessError, PainlessErrorService } from './error';

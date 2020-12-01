@@ -17,11 +17,29 @@
  * under the License.
  */
 
+import { monaco } from '../../monaco_imports';
 import { PainlessCompletionResult, PainlessContext, Field } from '../types';
 
 import { getAutocompleteSuggestions } from './lib';
-
+import { parseAndGetSyntaxErrors } from './parser';
 export class PainlessWorker {
+  private _ctx: monaco.worker.IWorkerContext;
+
+  constructor(ctx: monaco.worker.IWorkerContext) {
+    this._ctx = ctx;
+  }
+
+  private getTextDocument(): string {
+    const model = this._ctx.getMirrorModels()[0];
+    return model.getValue();
+  }
+
+  public async getSyntaxErrors() {
+    const code = this.getTextDocument();
+    const syntaxErrors = parseAndGetSyntaxErrors(code);
+    return syntaxErrors;
+  }
+
   public provideAutocompleteSuggestions(
     currentLineChars: string,
     context: PainlessContext,
