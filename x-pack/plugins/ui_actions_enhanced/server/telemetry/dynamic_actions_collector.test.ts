@@ -111,4 +111,29 @@ describe('dynamicActionsCollector', () => {
       });
     });
   });
+
+  describe('action trigger frequencies', () => {
+    test('for single action sets count to one', () => {
+      const stats = dynamicActionsCollector({
+        events: [state.events[0]],
+      });
+
+      expect(stats).toMatchObject({
+        'dynamicActions.triggers.TRIGGER_1.count': 1,
+      });
+    });
+
+    test('aggregates trigger counts from all dynamic actions', () => {
+      const stats = dynamicActionsCollector({
+        events: [state.events[0], state.events[2], state.events[1]],
+      });
+
+      expect(stats).toMatchObject({
+        'dynamicActions.triggers.TRIGGER_1.count': 2,
+        'dynamicActions.triggers.TRIGGER_2.count': 1,
+        'dynamicActions.triggers.TRIGGER_3.count': 1,
+        'dynamicActions.triggers.TRIGGER_4.count': 1,
+      });
+    });
+  });
 });
