@@ -83,6 +83,7 @@ const AppRoot = React.memo(
                   databaseDocumentID=""
                   resolverComponentInstanceID="test"
                   indices={[]}
+                  shouldUpdate={false}
                 />
               </Wrapper>
             </Provider>

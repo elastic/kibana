@@ -39,7 +39,6 @@ export const ResolverWithoutProviders = React.memo(
       resolverComponentInstanceID,
       indices,
       shouldUpdate,
-      filters,
     }: ResolverProps,
     refToForward
   ) {
@@ -53,7 +52,6 @@ export const ResolverWithoutProviders = React.memo(
       resolverComponentInstanceID,
       indices,
       shouldUpdate,
-      filters,
     });
 
     const { timestamp } = useContext(SideEffectContext);
