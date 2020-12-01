@@ -15,6 +15,7 @@ export interface IEmbeddable<I extends EmbeddableInput = EmbeddableInput, O exte
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [enhancements](./kibana-plugin-plugins-embeddable-public.iembeddable.enhancements.md) | <code>object</code> | Extra abilities added to Embeddable by <code>*_enhanced</code> plugins. |
+|  [fatalError](./kibana-plugin-plugins-embeddable-public.iembeddable.fatalerror.md) | <code>Error</code> | If this embeddable has encountered a fatal error, that error will be stored here |
 |  [id](./kibana-plugin-plugins-embeddable-public.iembeddable.id.md) | <code>string</code> | A unique identifier for this embeddable. Mainly only used by containers to map their Panel States to a child embeddable instance. |
 |  [isContainer](./kibana-plugin-plugins-embeddable-public.iembeddable.iscontainer.md) | <code>boolean</code> | Is this embeddable an instance of a Container class, can it contain nested embeddables? |
 |  [parent](./kibana-plugin-plugins-embeddable-public.iembeddable.parent.md) | <code>IContainer</code> | If this embeddable is nested inside a container, this will contain a reference to its parent. |

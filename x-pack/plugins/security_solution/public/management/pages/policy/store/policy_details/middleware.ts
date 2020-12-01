@@ -5,6 +5,7 @@
  */
 
 import { IHttpFetchError } from 'kibana/public';
+import { DefaultMalwareMessage } from '../../../../../../common/endpoint/models/policy_config';
 import { PolicyDetailsState, UpdatePolicyResponse } from '../../types';
 import {
   policyIdFromParams,
@@ -36,6 +37,11 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 
       try {
         policyItem = (await sendGetPackagePolicy(http, id)).item;
+        // sets default user notification message if policy config message is empty
+        if (policyItem.inputs[0].config.policy.value.windows.popup.malware.message === '') {
+          policyItem.inputs[0].config.policy.value.windows.popup.malware.message = DefaultMalwareMessage;
+          policyItem.inputs[0].config.policy.value.mac.popup.malware.message = DefaultMalwareMessage;
+        }
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnPolicyDetailsData',

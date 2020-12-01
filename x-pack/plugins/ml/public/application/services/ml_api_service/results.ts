@@ -24,8 +24,9 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     latestMs: number,
     dateFormatTz: string,
     maxRecords: number,
-    maxExamples: number,
-    influencersFilterQuery: any
+    maxExamples?: number,
+    influencersFilterQuery?: any,
+    functionDescription?: string
   ) {
     const body = JSON.stringify({
       jobIds,
@@ -39,6 +40,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       maxRecords,
       maxExamples,
       influencersFilterQuery,
+      functionDescription,
     });
 
     return httpService.http$<any>({
@@ -106,8 +108,8 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  anomalySearch(obj: any) {
-    const body = JSON.stringify(obj);
+  anomalySearch(query: any, jobIds: string[]) {
+    const body = JSON.stringify({ query, jobIds });
     return httpService.http<any>({
       path: `${basePath()}/results/anomaly_search`,
       method: 'POST',
@@ -115,8 +117,8 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  anomalySearch$(obj: any) {
-    const body = JSON.stringify(obj);
+  anomalySearch$(query: any, jobIds: string[]) {
+    const body = JSON.stringify({ query, jobIds });
     return httpService.http$<any>({
       path: `${basePath()}/results/anomaly_search`,
       method: 'POST',

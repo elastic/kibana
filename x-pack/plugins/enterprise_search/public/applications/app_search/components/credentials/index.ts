@@ -5,3 +5,4 @@
  */
 
 export { Credentials } from './credentials';
+export { CREDENTIALS_TITLE } from './constants';

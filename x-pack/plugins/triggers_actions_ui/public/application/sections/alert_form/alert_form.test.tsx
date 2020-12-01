@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -31,6 +31,8 @@ describe('alert_form', () => {
     id: 'my-alert-type',
     iconClass: 'test',
     name: 'test-alert',
+    description: 'Alert when testing',
+    documentationUrl: 'https://localhost.local/docs',
     validate: (): ValidationResult => {
       return { errors: {} };
     },
@@ -57,6 +59,8 @@ describe('alert_form', () => {
     id: 'non-edit-alert-type',
     iconClass: 'test',
     name: 'non edit alert',
+    description: 'test',
+    documentationUrl: null,
     validate: (): ValidationResult => {
       return { errors: {} };
     },
@@ -180,6 +184,22 @@ describe('alert_form', () => {
       );
       expect(alertTypeSelectOptions.exists()).toBeFalsy();
     });
+
+    it('renders alert type description', async () => {
+      await setup();
+      wrapper.find('button[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
+      const alertDescription = wrapper.find('[data-test-subj="alertDescription"]');
+      expect(alertDescription.exists()).toBeTruthy();
+      expect(alertDescription.first().text()).toContain('Alert when testing');
+    });
+
+    it('renders alert type documentation link', async () => {
+      await setup();
+      wrapper.find('button[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
+      const alertDocumentationLink = wrapper.find('[data-test-subj="alertDocumentationLink"]');
+      expect(alertDocumentationLink.exists()).toBeTruthy();
+      expect(alertDocumentationLink.first().prop('href')).toBe('https://localhost.local/docs');
+    });
   });
 
   describe('alert_form create alert non alerting consumer and producer', () => {
@@ -241,6 +261,8 @@ describe('alert_form', () => {
           id: 'same-consumer-producer-alert-type',
           iconClass: 'test',
           name: 'test-alert',
+          description: 'test',
+          documentationUrl: null,
           validate: (): ValidationResult => {
             return { errors: {} };
           },
@@ -251,6 +273,8 @@ describe('alert_form', () => {
           id: 'other-consumer-producer-alert-type',
           iconClass: 'test',
           name: 'test-alert',
+          description: 'test',
+          documentationUrl: null,
           validate: (): ValidationResult => {
             return { errors: {} };
           },
@@ -418,6 +442,20 @@ describe('alert_form', () => {
       throttleField.at(1).simulate('change', { target: { value: newThrottle } });
       const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
       expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
+    });
+
+    it('renders alert type description', async () => {
+      await setup();
+      const alertDescription = wrapper.find('[data-test-subj="alertDescription"]');
+      expect(alertDescription.exists()).toBeTruthy();
+      expect(alertDescription.first().text()).toContain('Alert when testing');
+    });
+
+    it('renders alert type documentation link', async () => {
+      await setup();
+      const alertDocumentationLink = wrapper.find('[data-test-subj="alertDocumentationLink"]');
+      expect(alertDocumentationLink.exists()).toBeTruthy();
+      expect(alertDocumentationLink.first().prop('href')).toBe('https://localhost.local/docs');
     });
   });
 });

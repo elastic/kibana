@@ -1,0 +1,84 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import globby from 'globby';
+// @ts-ignore
+import { parseEntries, dependenciesParseStrategy } from '@kbn/babel-code-parser';
+
+async function getDependencies(cwd: string, entries: string[]) {
+  // Return the dependencies retrieve from the
+  // provided code entries (sanitized) and
+  // parseStrategy (dependencies one)
+  return Object.keys(await parseEntries(cwd, entries, dependenciesParseStrategy, {}));
+}
+
+export async function findUsedDependencies(listedPkgDependencies: any, baseDir: any) {
+  // Define the entry points for the server code in order to
+  // start here later looking for the server side dependencies
+  const mainCodeEntries = [
+    `${baseDir}/src/cli/dist.js`,
+    `${baseDir}/src/cli_keystore/dist.js`,
+    `${baseDir}/src/cli_plugin/dist.js`,
+  ];
+
+  const discoveredPluginEntries = await globby([
+    `${baseDir}/src/plugins/*/server/index.js`,
+    `!${baseDir}/src/plugins/**/public`,
+    `${baseDir}/x-pack/plugins/*/server/index.js`,
+    `!${baseDir}/x-pack/plugins/**/public`,
+  ]);
+
+  // It will include entries that cannot be discovered
+  // statically as they are required with dynamic imports.
+  // In vis_type_timelion the problem is the loadFunctions()
+  // which dynamically requires all the files inside of function folders
+  // Another way would be to include an index file and import all the functions
+  // using named imports
+  const dynamicRequiredEntries = await globby([
+    `${baseDir}/src/plugins/vis_type_timelion/server/**/*.js`,
+  ]);
+
+  // Compose all the needed entries
+  const serverEntries = [...mainCodeEntries, ...discoveredPluginEntries, ...dynamicRequiredEntries];
+
+  // Get the dependencies found searching through the server
+  // side code entries that were provided
+  const serverDependencies = await getDependencies(baseDir, serverEntries);
+
+  // List of hardcoded dependencies that we need and that are not discovered
+  // searching through code imports
+  // TODO: remove this once we get rid off @kbn/ui-framework
+  const hardCodedDependencies = ['@kbn/ui-framework'];
+
+  // Consider this as our whiteList for the modules we can't delete
+  const whiteListedModules = [...serverDependencies, ...hardCodedDependencies];
+
+  const listedDependencies = Object.keys(listedPkgDependencies);
+  const filteredListedDependencies = listedDependencies.filter((entry) => {
+    return whiteListedModules.some((nonEntry) => entry.includes(nonEntry));
+  });
+
+  return filteredListedDependencies.reduce((foundUsedDeps: any, usedDep) => {
+    if (listedPkgDependencies[usedDep]) {
+      foundUsedDeps[usedDep] = listedPkgDependencies[usedDep];
+    }
+
+    return foundUsedDeps;
+  }, {});
+}

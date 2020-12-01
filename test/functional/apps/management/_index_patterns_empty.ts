@@ -22,6 +22,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const log = getService('log');
   const PageObjects = getPageObjects(['common', 'settings']);
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
@@ -30,6 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('index pattern empty view', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
+      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload('makelogs');
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
     });
@@ -37,16 +40,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('empty_kibana');
       await esArchiver.loadIfNeeded('makelogs');
+      // @ts-expect-error
+      await es.transport.request({
+        path: '/logstash-a',
+        method: 'DELETE',
+      });
     });
 
     // create index pattern and return to verify list
     it(`shows empty views`, async () => {
-      // @ts-expect-error
-      await es.transport.request({
-        path: '/_all',
-        method: 'DELETE',
-      });
       await PageObjects.settings.clickKibanaIndexPatterns();
+      log.debug(
+        `\n\nNOTE: If this test fails make sure there aren't any non-system indices in the _cat/indices output (use esArchiver.unload on them)`
+      );
+      log.debug(
+        // @ts-expect-error
+        await es.transport.request({
+          path: '/_cat/indices',
+          method: 'GET',
+        })
+      );
       await testSubjects.existOrFail('createAnyway');
       // @ts-expect-error
       await es.transport.request({

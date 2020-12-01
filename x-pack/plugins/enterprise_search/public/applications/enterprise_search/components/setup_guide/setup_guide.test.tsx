@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { SetupGuide as SetupGuideLayout } from '../../../shared/setup_guide';
+import { SetupGuideLayout } from '../../../shared/setup_guide';
 import { SetupGuide } from './';
 
 describe('SetupGuide', () => {

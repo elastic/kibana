@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESSearchHit } from '../../../../typings/elasticsearch';
+import { ESSearchHit } from '../../../../../../typings/elasticsearch';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 
 // needed for backwards compatability

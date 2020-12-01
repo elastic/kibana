@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SemVer } from 'semver';
+import SemVer from 'semver/classes/semver';
 import pkg from '../../../../package.json';
 
 export const CURRENT_VERSION = new SemVer(pkg.version as string);

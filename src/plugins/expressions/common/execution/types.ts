@@ -17,16 +17,18 @@
  * under the License.
  */
 
-import { ExpressionType } from '../expression_types';
+import { ExpressionType, SerializableState } from '../expression_types';
 import { Adapters, DataAdapter, RequestAdapter } from '../../../inspector/common';
-import { TimeRange, Query, Filter } from '../../../data/common';
 import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
  * it provides various methods to perform side-effects.
  */
-export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters> {
+export interface ExecutionContext<
+  InspectorAdapters extends Adapters = Adapters,
+  ExecutionContextSearch extends SerializableState = SerializableState
+> {
   /**
    * Get search context of the expression.
    */
@@ -78,10 +80,4 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
 export interface DefaultInspectorAdapters extends Adapters {
   requests: RequestAdapter;
   data: DataAdapter;
-}
-
-export interface ExecutionContextSearch {
-  filters?: Filter[];
-  query?: Query | Query[];
-  timeRange?: TimeRange;
 }

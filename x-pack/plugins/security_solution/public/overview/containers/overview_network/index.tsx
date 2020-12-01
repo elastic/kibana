@@ -17,11 +17,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { inputsModel } from '../../../common/store/inputs';
 import { createFilter } from '../../../common/containers/helpers';
 import { ESQuery } from '../../../../common/typed_json';
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -64,7 +61,6 @@ export const useNetworkOverview = ({
           defaultIndex: indexNames,
           factoryQueryType: NetworkQueries.overview,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -151,7 +147,6 @@ export const useNetworkOverview = ({
         defaultIndex: indexNames,
         factoryQueryType: NetworkQueries.overview,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

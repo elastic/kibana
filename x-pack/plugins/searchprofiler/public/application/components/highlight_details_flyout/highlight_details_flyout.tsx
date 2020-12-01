@@ -15,7 +15,7 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 
-import { msToPretty } from '../../utils';
+import { msToPretty } from '../../lib';
 import { HighlightDetailsTable } from './highlight_details_table';
 import { Operation } from '../../types';
 

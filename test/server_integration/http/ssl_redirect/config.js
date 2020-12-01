@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Url from 'url';
 import { readFileSync } from 'fs';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
@@ -24,22 +25,22 @@ import { createKibanaSupertestProvider } from '../../services';
 
 export default async function ({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
+  const certificateAuthorities = [readFileSync(CA_CERT_PATH)];
 
-  const redirectPort = httpConfig.get('servers.kibana.port') + 1;
-  const supertestOptions = {
-    ...httpConfig.get('servers.kibana'),
-    port: redirectPort,
-    // test with non ssl protocol
-    protocol: 'http',
-  };
+  const redirectPort = httpConfig.get('servers.kibana.port') + 1234;
 
   return {
     testFiles: [require.resolve('./')],
     services: {
       ...httpConfig.get('services'),
       supertest: createKibanaSupertestProvider({
-        certificateAuthorities: [readFileSync(CA_CERT_PATH)],
-        options: supertestOptions,
+        certificateAuthorities,
+        kibanaUrl: Url.format({
+          ...httpConfig.get('servers.kibana'),
+          port: redirectPort,
+          // test with non ssl protocol
+          protocol: 'http',
+        }),
       }),
     },
     servers: {
@@ -48,6 +49,7 @@ export default async function ({ readConfigFile }) {
         ...httpConfig.get('servers.kibana'),
         // start the server with https
         protocol: 'https',
+        certificateAuthorities,
       },
     },
     junit: {

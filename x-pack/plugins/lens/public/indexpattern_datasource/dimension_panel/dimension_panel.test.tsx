@@ -5,26 +5,30 @@
  */
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import React from 'react';
+import React, { ChangeEvent, MouseEvent } from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiRange } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { changeColumn } from '../state_helpers';
 import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
 } from './dimension_panel';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
-import { IndexPatternColumn } from '../operations';
+import { IndexPatternColumn, replaceColumn } from '../operations';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
+import { getFieldByNameFactory } from '../pure_helpers';
+import { TimeScaling } from './time_scaling';
+import { EuiSelect } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
+import { DimensionEditor } from './dimension_editor';
 
 jest.mock('../loader');
-jest.mock('../state_helpers');
+jest.mock('../operations');
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
 
@@ -34,6 +38,42 @@ jest.mock('lodash', () => {
   };
 });
 
+const fields = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  documentField,
+];
+
 const expectedIndexPatterns = {
   1: {
     id: '1',
@@ -41,41 +81,8 @@ const expectedIndexPatterns = {
     timeFieldName: 'timestamp',
     hasExistence: true,
     hasRestrictions: false,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestampLabel',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      {
-        name: 'memory',
-        displayName: 'memory',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      documentField,
-    ],
+    fields,
+    getFieldByName: getFieldByNameFactory(fields),
   },
 };
 
@@ -108,7 +115,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
   let defaultProps: IndexPatternDimensionEditorProps;
 
   function getStateWithColumns(columns: Record<string, IndexPatternColumn>) {
-    return { ...state, layers: { first: { ...state.layers.first, columns } } };
+    return {
+      ...state,
+      layers: { first: { ...state.layers.first, columns, columnOrder: Object.keys(columns) } },
+    };
   }
 
   beforeEach(() => {
@@ -174,6 +184,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         } as unknown) as DataPublicPluginStart['fieldFormats'],
       } as unknown) as DataPublicPluginStart,
       core: {} as CoreSetup,
+      dimensionGroups: [],
     };
 
     jest.clearAllMocks();
@@ -677,7 +688,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 // Other parts of this don't matter for this test
               }),
             },
-            columnOrder: ['col1', 'col2'],
+            columnOrder: ['col2', 'col1'],
           },
         },
       });
@@ -773,6 +784,226 @@ describe('IndexPatternDimensionEditorPanel', () => {
               col1: expect.objectContaining({
                 sourceField: 'source',
                 operationType: 'terms',
+              }),
+            },
+          },
+        },
+      });
+    });
+  });
+
+  describe('time scaling', () => {
+    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+      return {
+        ...defaultProps,
+        state: getStateWithColumns({
+          datecolumn: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '',
+            operationType: 'date_histogram',
+            sourceField: 'ts',
+            params: {
+              interval: '1d',
+            },
+          },
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: 'Count of records',
+            operationType: 'count',
+            sourceField: 'Records',
+            ...colOverrides,
+          } as IndexPatternColumn,
+        }),
+        columnId: 'col2',
+      };
+    }
+    it('should not show custom options if time scaling is not available', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...getProps({
+            operationType: 'avg',
+            sourceField: 'bytes',
+          })}
+        />
+      );
+      expect(wrapper.find('[data-test-subj="indexPattern-time-scaling"]')).toHaveLength(0);
+    });
+
+    it('should show custom options if time scaling is available', () => {
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({})} />);
+      expect(
+        wrapper
+          .find(TimeScaling)
+          .find('[data-test-subj="indexPattern-time-scaling-popover"]')
+          .exists()
+      ).toBe(true);
+    });
+
+    it('should show current time scaling if set', () => {
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({ timeScale: 'd' })} />);
+      expect(
+        wrapper
+          .find('[data-test-subj="indexPattern-time-scaling-unit"]')
+          .find(EuiSelect)
+          .prop('value')
+      ).toEqual('d');
+    });
+
+    it('should allow to set time scaling initially', () => {
+      const props = getProps({});
+      wrapper = shallow(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find(DimensionEditor)
+        .dive()
+        .find(TimeScaling)
+        .dive()
+        .find('[data-test-subj="indexPattern-time-scaling-enable"]')
+        .prop('onClick')!({} as MouseEvent);
+      expect(props.setState).toHaveBeenCalledWith({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: 's',
+                label: 'Count of records per second',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should carry over time scaling to other operation if possible', () => {
+      const props = getProps({
+        timeScale: 'h',
+        sourceField: 'bytes',
+        operationType: 'sum',
+        label: 'Sum of bytes per hour',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
+        .simulate('click');
+      expect(props.setState).toHaveBeenCalledWith({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: 'h',
+                label: 'Count of records per hour',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should not carry over time scaling if the other operation does not support it', () => {
+      const props = getProps({
+        timeScale: 'h',
+        sourceField: 'bytes',
+        operationType: 'sum',
+        label: 'Sum of bytes per hour',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+      expect(props.setState).toHaveBeenCalledWith({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: undefined,
+                label: 'Average of bytes',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should allow to change time scaling', () => {
+      const props = getProps({ timeScale: 's', label: 'Count of records per second' });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-time-scaling-unit"]')
+        .find(EuiSelect)
+        .prop('onChange')!(({
+        target: { value: 'h' },
+      } as unknown) as ChangeEvent<HTMLSelectElement>);
+      expect(props.setState).toHaveBeenCalledWith({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: 'h',
+                label: 'Count of records per hour',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should not adjust label if it is custom', () => {
+      const props = getProps({ timeScale: 's', customLabel: true, label: 'My label' });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-time-scaling-unit"]')
+        .find(EuiSelect)
+        .prop('onChange')!(({
+        target: { value: 'h' },
+      } as unknown) as ChangeEvent<HTMLSelectElement>);
+      expect(props.setState).toHaveBeenCalledWith({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: 'h',
+                label: 'My label',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should allow to remove time scaling', () => {
+      const props = getProps({ timeScale: 's', label: 'Count of records per second' });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-time-scaling-remove"]')
+        .find(EuiButtonIcon)
+        .prop('onClick')!(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        {} as any
+      );
+      expect(props.setState).toHaveBeenCalledWith({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: undefined,
+                label: 'Count of records',
               }),
             },
           },
@@ -1020,19 +1251,17 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     act(() => {
       wrapper.find('[data-test-subj="lns-indexPatternDimension-min"]').first().prop('onClick')!(
-        {} as React.MouseEvent<{}, MouseEvent>
+        {} as MouseEvent
       );
     });
 
-    expect(changeColumn).toHaveBeenCalledWith({
-      state: initialState,
-      columnId: 'col1',
-      layerId: 'first',
-      newColumn: expect.objectContaining({
-        sourceField: 'bytes',
-        operationType: 'min',
-      }),
-    });
+    expect(replaceColumn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        columnId: 'col1',
+        op: 'min',
+        field: expect.objectContaining({ name: 'bytes' }),
+      })
+    );
   });
 
   it('should clear the dimension when removing the selection in field combobox', () => {
@@ -1052,6 +1281,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           indexPatternId: '1',
           columns: {},
           columnOrder: [],
+          incompleteColumns: {},
         },
       },
     });

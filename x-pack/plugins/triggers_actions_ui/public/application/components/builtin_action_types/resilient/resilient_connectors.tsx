@@ -31,7 +31,6 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
   errors,
   consumer,
   readOnly,
-  docLinks,
 }) => {
   // TODO: remove incidentConfiguration later, when Case Resilient will move their fields to the level of action execution
   const { apiUrl, orgId, incidentConfiguration, isCaseOwned } = action.config;
@@ -98,7 +97,6 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
               readOnly={readOnly}
               value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="apiUrlFromInput"
-              placeholder="https://<site-url>"
               onChange={(evt) => handleOnChangeActionConfig('apiUrl', evt.target.value)}
               onBlur={() => {
                 if (!apiUrl) {

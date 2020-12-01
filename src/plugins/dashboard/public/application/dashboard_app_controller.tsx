@@ -26,7 +26,7 @@ import ReactDOM from 'react-dom';
 import angular from 'angular';
 import deepEqual from 'fast-deep-equal';
 
-import { Observable, pipe, Subscription, merge } from 'rxjs';
+import { Observable, pipe, Subscription, merge, EMPTY } from 'rxjs';
 import {
   filter,
   map,
@@ -35,9 +35,11 @@ import {
   startWith,
   switchMap,
   distinctUntilChanged,
+  catchError,
 } from 'rxjs/operators';
 import { History } from 'history';
-import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
+import { SavedObjectSaveOpts, SavedObject } from 'src/plugins/saved_objects/public';
+import type { TagDecoratedSavedObject } from 'src/plugins/saved_objects_tagging_oss/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
@@ -70,18 +72,23 @@ import {
 import { NavAction, SavedDashboardPanel } from '../types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
-import { DashboardSaveModal } from './top_nav/save_modal';
+import { DashboardSaveModal, SaveOptions } from './top_nav/save_modal';
 import { showCloneModal } from './top_nav/show_clone_modal';
-import { saveDashboard } from './lib';
+import { createSessionRestorationDataProvider, saveDashboard } from './lib';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
-import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
-import { IKbnUrlStateStorage, setStateToKbnUrl, unhashUrl } from '../../../kibana_utils/public';
+import {
+  IKbnUrlStateStorage,
+  removeQueryParam,
+  setStateToKbnUrl,
+  unhashUrl,
+  getQueryParams,
+} from '../../../kibana_utils/public';
 import {
   addFatalError,
   AngularHttpError,
@@ -89,6 +96,7 @@ import {
   subscribeWithScope,
 } from '../../../kibana_legacy/public';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
+import { convertSavedDashboardPanelToPanelState } from '../../common/embeddable/embeddable_saved_object_converters';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -120,6 +128,9 @@ interface UrlParamValues extends Omit<UrlParamsSelectedMap, UrlParams.SHOW_FILTE
   [UrlParams.HIDE_FILTER_BAR]: boolean;
 }
 
+const getSearchSessionIdFromURL = (history: History): string | undefined =>
+  getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;
+
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
   appStatus: {
@@ -139,7 +150,7 @@ export class DashboardAppController {
     dashboardCapabilities,
     scopedHistory,
     embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
-    data: { query: queryService, search: searchService },
+    data,
     core: {
       notifications,
       overlays,
@@ -155,7 +166,10 @@ export class DashboardAppController {
     kbnUrlStateStorage,
     usageCollection,
     navigation,
+    savedObjectsTagging,
   }: DashboardAppControllerDependencies) {
+    const queryService = data.query;
+    const searchService = data.search;
     const filterManager = queryService.filterManager;
     const timefilter = queryService.timefilter.timefilter;
     const queryStringManager = queryService.queryString;
@@ -180,6 +194,11 @@ export class DashboardAppController {
       .getStateTransfer(scopedHistory())
       .getIncomingEmbeddablePackage();
 
+    // TS is picky with type guards, we can't just inline `() => false`
+    function defaultTaggingGuard(obj: SavedObject): obj is TagDecoratedSavedObject {
+      return false;
+    }
+
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
@@ -187,6 +206,7 @@ export class DashboardAppController {
       kbnUrlStateStorage,
       history,
       usageCollection,
+      hasTaggingCapabilities: savedObjectsTagging?.ui.hasTagDecoration ?? defaultTaggingGuard,
     });
 
     // sync initial app filters from state to filterManager
@@ -243,6 +263,16 @@ export class DashboardAppController {
     dashboardStateManager.startStateSyncing();
 
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
+
+    const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
+
+    const getDashTitle = () =>
+      getDashboardTitle(
+        dashboardStateManager.getTitle(),
+        dashboardStateManager.getViewMode(),
+        dashboardStateManager.getIsDirty(timefilter),
+        dashboardStateManager.isNew()
+      );
 
     const getShouldShowEditHelp = () =>
       !dashboardStateManager.getPanels().length &&
@@ -411,8 +441,21 @@ export class DashboardAppController {
       DashboardContainer
     >(DASHBOARD_CONTAINER_TYPE);
 
+    searchService.session.setSearchSessionInfoProvider(
+      createSessionRestorationDataProvider({
+        data,
+        getDashboardTitle: () => getDashTitle(),
+        getDashboardId: () => dash.id,
+        getAppState: () => dashboardStateManager.getAppState(),
+      })
+    );
+
     if (dashboardFactory) {
-      const searchSessionId = searchService.session.start();
+      const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+      if (searchSessionIdFromURL) {
+        searchService.session.restore(searchSessionIdFromURL);
+      }
+      const searchSessionId = searchSessionIdFromURL ?? searchService.session.start();
       dashboardFactory
         .create({ ...getDashboardInput(), searchSessionId })
         .then((container: DashboardContainer | ErrorEmbeddable | undefined) => {
@@ -443,7 +486,10 @@ export class DashboardAppController {
                 switchMap((newChildIds: string[]) =>
                   merge(
                     ...newChildIds.map((childId) =>
-                      dashboardContainer!.getChild(childId).getOutput$()
+                      dashboardContainer!
+                        .getChild(childId)
+                        .getOutput$()
+                        .pipe(catchError(() => EMPTY))
                     )
                   )
                 )
@@ -527,16 +573,6 @@ export class DashboardAppController {
       filterManager.getFilters()
     );
 
-    const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
-
-    const getDashTitle = () =>
-      getDashboardTitle(
-        dashboardStateManager.getTitle(),
-        dashboardStateManager.getViewMode(),
-        dashboardStateManager.getIsDirty(timefilter),
-        dashboardStateManager.isNew()
-      );
-
     // Push breadcrumbs to new header navigation
     const updateBreadcrumbs = () => {
       chrome.setBreadcrumbs([
@@ -591,8 +627,15 @@ export class DashboardAppController {
     const refreshDashboardContainer = () => {
       const changes = getChangesFromAppStateForContainerState();
       if (changes && dashboardContainer) {
-        const searchSessionId = searchService.session.start();
-        dashboardContainer.updateInput({ ...changes, searchSessionId });
+        if (getSearchSessionIdFromURL(history)) {
+          // going away from a background search results
+          removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
+        }
+
+        dashboardContainer.updateInput({
+          ...changes,
+          searchSessionId: searchService.session.start(),
+        });
       }
     };
 
@@ -605,6 +648,13 @@ export class DashboardAppController {
         refreshDashboardContainer();
       }
     };
+
+    const searchServiceSessionRefreshSubscribtion = searchService.session.onRefresh$.subscribe(
+      () => {
+        lastReloadRequestTime = new Date().getTime();
+        refreshDashboardContainer();
+      }
+    );
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
       const allFilters = filterManager.getFilters();
@@ -882,6 +932,15 @@ export class DashboardAppController {
       const currentTitle = dashboardStateManager.getTitle();
       const currentDescription = dashboardStateManager.getDescription();
       const currentTimeRestore = dashboardStateManager.getTimeRestore();
+
+      let currentTags: string[] = [];
+      if (savedObjectsTagging) {
+        const dashboard = dashboardStateManager.savedDashboard;
+        if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
+          currentTags = dashboard.getTags();
+        }
+      }
+
       const onSave = ({
         newTitle,
         newDescription,
@@ -889,18 +948,16 @@ export class DashboardAppController {
         newTimeRestore,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
-      }: {
-        newTitle: string;
-        newDescription: string;
-        newCopyOnSave: boolean;
-        newTimeRestore: boolean;
-        isTitleDuplicateConfirmed: boolean;
-        onTitleDuplicate: () => void;
-      }) => {
+        newTags,
+      }: SaveOptions) => {
         dashboardStateManager.setTitle(newTitle);
         dashboardStateManager.setDescription(newDescription);
         dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
         dashboardStateManager.setTimeRestore(newTimeRestore);
+        if (savedObjectsTagging && newTags) {
+          dashboardStateManager.setTags(newTags);
+        }
+
         const saveOptions = {
           confirmOverwrite: false,
           isTitleDuplicateConfirmed,
@@ -912,6 +969,9 @@ export class DashboardAppController {
             dashboardStateManager.setTitle(currentTitle);
             dashboardStateManager.setDescription(currentDescription);
             dashboardStateManager.setTimeRestore(currentTimeRestore);
+            if (savedObjectsTagging) {
+              dashboardStateManager.setTags(currentTags);
+            }
           }
           return response;
         });
@@ -923,6 +983,8 @@ export class DashboardAppController {
           onClose={() => {}}
           title={currentTitle}
           description={currentDescription}
+          tags={currentTags}
+          savedObjectsTagging={savedObjectsTagging}
           timeRestore={currentTimeRestore}
           showCopyOnSave={dash.id ? true : false}
         />
@@ -1155,6 +1217,7 @@ export class DashboardAppController {
       if (dashboardContainer) {
         dashboardContainer.destroy();
       }
+      searchServiceSessionRefreshSubscribtion.unsubscribe();
       searchService.session.clear();
     });
   }

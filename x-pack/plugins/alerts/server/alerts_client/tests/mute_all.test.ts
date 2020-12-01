@@ -12,7 +12,7 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
-import { getBeforeSetup } from './lib';
+import { getBeforeSetup, setGlobalDate } from './lib';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -32,7 +32,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -43,6 +42,8 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 beforeEach(() => {
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
 });
+
+setGlobalDate();
 
 describe('muteAll()', () => {
   test('mutes an alert', async () => {
@@ -75,6 +76,7 @@ describe('muteAll()', () => {
       {
         muteAll: true,
         mutedInstanceIds: [],
+        updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
       },
       {

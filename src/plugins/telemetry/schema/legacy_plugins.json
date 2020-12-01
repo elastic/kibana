@@ -1,21 +1,3 @@
 {
-  "properties": {
-    "localization": {
-      "properties": {
-        "locale": {
-          "type": "keyword"
-        },
-        "integrities": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "text"
-            }
-          }
-        },
-        "labelsCount": {
-          "type": "long"
-        }
-      }
-    }
-  }
+  "properties": {}
 }

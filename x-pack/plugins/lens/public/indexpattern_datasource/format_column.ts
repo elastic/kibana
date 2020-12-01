@@ -10,7 +10,7 @@ import {
   DatatableColumn,
 } from 'src/plugins/expressions/public';
 
-interface FormatColumn {
+export interface FormatColumnArgs {
   format: string;
   columnId: string;
   decimals?: number;
@@ -50,7 +50,7 @@ export const supportedFormats: Record<
 export const formatColumn: ExpressionFunctionDefinition<
   'lens_format_column',
   Datatable,
-  FormatColumn,
+  FormatColumnArgs,
   Datatable
 > = {
   name: 'lens_format_column',
@@ -77,7 +77,7 @@ export const formatColumn: ExpressionFunctionDefinition<
     },
   },
   inputTypes: ['datatable'],
-  fn(input, { format, columnId, decimals, parentFormat }: FormatColumn) {
+  fn(input, { format, columnId, decimals, parentFormat }: FormatColumnArgs) {
     return {
       ...input,
       columns: input.columns.map((col) => {
@@ -116,9 +116,18 @@ export const formatColumn: ExpressionFunctionDefinition<
             });
           }
           if (parentFormatParams) {
-            const innerParams = (col.meta.params?.params as Record<string, unknown>) ?? {};
+            // if original format is already a nested one, we are just replacing the wrapper params
+            // otherwise wrapping it inside parentFormatId/parentFormatParams
+            const isNested = isNestedFormat(col.meta.params);
+            const innerParams = isNested
+              ? col.meta.params?.params
+              : { id: col.meta.params?.id, params: col.meta.params?.params };
+
+            const formatId = isNested ? col.meta.params?.id : parentFormatId;
+
             return withParams(col, {
               ...col.meta.params,
+              id: formatId,
               params: {
                 ...innerParams,
                 ...parentFormatParams,
@@ -131,6 +140,11 @@ export const formatColumn: ExpressionFunctionDefinition<
     };
   },
 };
+
+function isNestedFormat(params: DatatableColumn['meta']['params']) {
+  // if there is a nested params object with an id, it's a nested format
+  return !!params?.params?.id;
+}
 
 function withParams(col: DatatableColumn, params: Record<string, unknown>) {
   return { ...col, meta: { ...col.meta, params } };

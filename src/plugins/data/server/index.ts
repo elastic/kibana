@@ -49,6 +49,16 @@ export const esFilters = {
   isFilterDisabled,
 };
 
+/**
+ * Exporters (CSV)
+ */
+
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export const exporters = {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+};
+
 /*
  * esQuery and esKuery:
  */
@@ -134,6 +144,8 @@ export {
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
+  mergeCapabilitiesWithFields,
+  getCapabilitiesForRollupIndices,
 } from './index_patterns';
 
 export {
@@ -176,6 +188,7 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
+  calcAutoIntervalLessThan,
 } from '../common';
 
 export {
@@ -198,6 +211,12 @@ export {
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
   // search
   ISearchOptions,
   IEsSearchRequest,
@@ -213,13 +232,14 @@ export {
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
-  toSnakeCase,
-  getAsyncOptions,
+  SearchStrategyDependencies,
   getDefaultSearchParams,
   getShardTimeout,
   getTotalLoaded,
+  toKibanaSearchResponse,
   shimHitsTotal,
   usageProvider,
+  searchUsageObserver,
   shimAbortSignal,
   SearchUsage,
 } from './search';
@@ -245,6 +265,7 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    calcAutoIntervalLessThan,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,

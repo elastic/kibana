@@ -12,13 +12,17 @@ import { init as initHttp } from './application/services/http';
 import { init as initDocumentation } from './application/services/documentation';
 import { init as initUiMetric } from './application/services/ui_metric';
 import { init as initNotification } from './application/services/notification';
+import { BreadcrumbService } from './application/services/breadcrumbs';
 import { addAllExtensions } from './extend_index_management';
-import { PluginsDependencies, ClientConfigType } from './types';
+import { ClientConfigType, SetupDependencies } from './types';
+import { registerUrlGenerator } from './url_generator';
 
 export class IndexLifecycleManagementPlugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies) {
+  private breadcrumbService = new BreadcrumbService();
+
+  public setup(coreSetup: CoreSetup, plugins: SetupDependencies) {
     const {
       ui: { enabled: isIndexLifecycleManagementUiEnabled },
     } = this.initializerContext.config.get<ClientConfigType>();
@@ -31,7 +35,7 @@ export class IndexLifecycleManagementPlugin {
         getStartServices,
       } = coreSetup;
 
-      const { usageCollection, management, indexManagement, home, cloud } = plugins;
+      const { usageCollection, management, indexManagement, home, cloud, share } = plugins;
 
       // Initialize services even if the app isn't mounted, because they're used by index management extensions.
       initHttp(http);
@@ -42,7 +46,7 @@ export class IndexLifecycleManagementPlugin {
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
         order: 2,
-        mount: async ({ element, history }) => {
+        mount: async ({ element, history, setBreadcrumbs }) => {
           const [coreStart] = await getStartServices();
           const {
             chrome: { docTitle },
@@ -52,6 +56,7 @@ export class IndexLifecycleManagementPlugin {
           } = coreStart;
 
           docTitle.change(PLUGIN.TITLE);
+          this.breadcrumbService.setup(setBreadcrumbs);
 
           // Initialize additional services.
           initDocumentation(
@@ -66,6 +71,7 @@ export class IndexLifecycleManagementPlugin {
             history,
             navigateToApp,
             getUrlForApp,
+            this.breadcrumbService,
             cloud
           );
 
@@ -97,6 +103,8 @@ export class IndexLifecycleManagementPlugin {
       if (indexManagement) {
         addAllExtensions(indexManagement.extensionsService);
       }
+
+      registerUrlGenerator(coreSetup, management, share);
     }
   }
 

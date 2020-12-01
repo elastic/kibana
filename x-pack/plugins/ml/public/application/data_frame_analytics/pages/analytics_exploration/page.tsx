@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { FC } from 'react';
 
 import {
   EuiPage,
@@ -27,9 +27,8 @@ import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_fr
 export const Page: FC<{
   jobId: string;
   analysisType: DataFrameAnalysisConfigType;
-  defaultIsTraining?: boolean;
-}> = ({ jobId, analysisType, defaultIsTraining }) => (
-  <Fragment>
+}> = ({ jobId, analysisType }) => (
+  <>
     <NavigationMenu tabId="data_frame_analytics" />
     <EuiPage data-test-subj="mlPageDataFrameAnalyticsExploration">
       <EuiPageBody style={{ maxWidth: 'calc(100% - 0px)' }}>
@@ -45,13 +44,13 @@ export const Page: FC<{
             <OutlierExploration jobId={jobId} />
           )}
           {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-            <RegressionExploration jobId={jobId} defaultIsTraining={defaultIsTraining} />
+            <RegressionExploration jobId={jobId} />
           )}
           {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
-            <ClassificationExploration jobId={jobId} defaultIsTraining={defaultIsTraining} />
+            <ClassificationExploration jobId={jobId} />
           )}
         </EuiPageContentBody>
       </EuiPageBody>
     </EuiPage>
-  </Fragment>
+  </>
 );

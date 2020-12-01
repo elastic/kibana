@@ -25,6 +25,7 @@ const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     listTypes: jest.fn(),
     getAlertsClientWithRequest: jest.fn().mockResolvedValue(alertsClientMock.create()),
+    getFrameworkHealth: jest.fn(),
   };
   return mock;
 };

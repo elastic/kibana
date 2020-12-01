@@ -11,7 +11,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
+import { kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
   loggingSystemMock,
   httpServiceMock,
@@ -19,12 +19,10 @@ import {
   coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { SpacesAuditLogger } from '../../../lib/audit_logger';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { initPutSpacesApi } from './put';
 import { spacesConfig } from '../../../lib/__fixtures__';
-import { securityMock } from '../../../../../security/server/mocks';
 import { ObjectType } from '@kbn/config-schema';
+import { SpacesClientService } from '../../../spaces_client';
 
 describe('PUT /api/spaces/space', () => {
   const spacesSavedObjects = createSpaces();
@@ -39,27 +37,21 @@ describe('PUT /api/spaces/space', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const service = new SpacesService(log);
-    const spacesService = await service.setup({
-      http: (httpService as unknown) as CoreSetup['http'],
-      getStartServices: async () => [coreStart, {}, {}],
-      authorization: securityMock.createSetup().authz,
-      auditLogger: {} as SpacesAuditLogger,
-      config$: Rx.of(spacesConfig),
+    const clientService = new SpacesClientService(jest.fn());
+    clientService
+      .setup({ config$: Rx.of(spacesConfig) })
+      .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+
+    const service = new SpacesService();
+    service.setup({
+      basePath: httpService.basePath,
     });
 
-    spacesService.scopedClient = jest.fn((req: any) => {
-      return Promise.resolve(
-        new SpacesClient(
-          null as any,
-          () => null,
-          null,
-          savedObjectsRepositoryMock,
-          spacesConfig,
-          savedObjectsRepositoryMock,
-          req
-        )
-      );
+    const clientServiceStart = clientService.start(coreStart);
+
+    const spacesServiceStart = service.start({
+      basePath: coreStart.http.basePath,
+      spacesClientService: clientServiceStart,
     });
 
     initPutSpacesApi({
@@ -67,8 +59,7 @@ describe('PUT /api/spaces/space', () => {
       getStartServices: async () => [coreStart, {}, {}],
       getImportExportObjectLimit: () => 1000,
       log,
-      spacesService,
-      authorization: null, // not needed for this route
+      getSpacesService: () => spacesServiceStart,
     });
 
     const [routeDefinition, routeHandler] = router.put.mock.calls[0];

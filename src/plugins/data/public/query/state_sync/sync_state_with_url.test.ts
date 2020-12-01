@@ -29,7 +29,7 @@ import {
   Storage,
 } from '../../../../kibana_utils/public';
 import { QueryService, QueryStart } from '../query_service';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { TimefilterContract } from '../timefilter';
 import { syncQueryStateWithUrl } from './sync_state_with_url';
 import { QueryState } from './types';

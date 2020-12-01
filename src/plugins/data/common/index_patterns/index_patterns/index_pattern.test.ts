@@ -196,6 +196,24 @@ describe('IndexPattern', () => {
     });
   });
 
+  describe('getFormatterForField', () => {
+    test('should return the default one for empty objects', () => {
+      indexPattern.setFieldFormat('scriptedFieldWithEmptyFormatter', {});
+      expect(
+        indexPattern.getFormatterForField({
+          name: 'scriptedFieldWithEmptyFormatter',
+          type: 'number',
+          esTypes: ['long'],
+        })
+      ).toEqual(
+        expect.objectContaining({
+          convert: expect.any(Function),
+          getConverterFor: expect.any(Function),
+        })
+      );
+    });
+  });
+
   describe('toSpec', () => {
     test('should match snapshot', () => {
       const formatter = {

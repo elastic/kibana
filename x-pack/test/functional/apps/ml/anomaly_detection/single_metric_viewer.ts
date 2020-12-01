@@ -105,7 +105,6 @@ export default function ({ getService }: FtrProviderContext) {
               field_name: 'taxless_total_price',
               over_field_name: 'geoip.city_name',
               partition_field_name: 'day_of_week',
-              detector_index: 0,
             },
           ],
           influencers: ['day_of_week'],

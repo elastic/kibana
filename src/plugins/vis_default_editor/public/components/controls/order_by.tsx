@@ -20,7 +20,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 
 import {
   isCompatibleAggregation,

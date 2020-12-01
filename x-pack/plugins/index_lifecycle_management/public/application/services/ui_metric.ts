@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * TODO:
+ * IMPORTANT: Please see how {@link BreadcrumbService} is set up for an example of how these services should be set up
+ * in future. The pattern in this file is legacy and should be updated to conform to the plugin lifecycle.
+ */
+
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { UiStatsMetricType } from '@kbn/analytics';
 

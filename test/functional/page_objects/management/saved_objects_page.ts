@@ -39,6 +39,11 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await this.waitTableIsLoaded();
     }
 
+    async getCurrentSearchValue() {
+      const searchBox = await testSubjects.find('savedObjectSearchBar');
+      return await searchBox.getAttribute('value');
+    }
+
     async importFile(path: string, overwriteAll = true) {
       log.debug(`importFile(${path})`);
 
@@ -83,6 +88,14 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
 
     async checkImportFailedWarning() {
       await testSubjects.existOrFail('importSavedObjectsFailedWarning', { timeout: 20000 });
+    }
+
+    async checkImportError() {
+      await testSubjects.existOrFail('importSavedObjectsErrorText', { timeout: 20000 });
+    }
+
+    async getImportErrorText() {
+      return await testSubjects.getVisibleText('importSavedObjectsErrorText');
     }
 
     async clickImportDone() {

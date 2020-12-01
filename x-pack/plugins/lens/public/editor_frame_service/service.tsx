@@ -25,6 +25,7 @@ import { Document } from '../persistence/saved_object_store';
 import { mergeTables } from './merge_tables';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import { LensAttributeService } from '../lens_attribute_service';
 
@@ -32,6 +33,7 @@ export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
   embeddable?: EmbeddableSetup;
   expressions: ExpressionsSetup;
+  charts: ChartsPluginSetup;
 }
 
 export interface EditorFrameStartPlugins {
@@ -40,6 +42,7 @@ export interface EditorFrameStartPlugins {
   dashboard?: DashboardStart;
   expressions: ExpressionsStart;
   uiActions?: UiActionsStart;
+  charts: ChartsPluginSetup;
 }
 
 async function collectAsyncDefinitions<T extends { id: string }>(
@@ -143,6 +146,8 @@ export class EditorFrameService {
 
           const { EditorFrame, getActiveDatasourceIdFromDoc } = await import('../async_services');
 
+          const palettes = await plugins.charts.palettes.getPalettes();
+
           render(
             <I18nProvider>
               <EditorFrame
@@ -154,9 +159,11 @@ export class EditorFrameService {
                 initialVisualizationId={
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }
+                key={doc?.savedObjectId} // ensures rerendering when switching to another visualization inside of lens (eg global search)
                 core={core}
                 plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
+                palettes={palettes}
                 doc={doc}
                 dateRange={dateRange}
                 query={query}

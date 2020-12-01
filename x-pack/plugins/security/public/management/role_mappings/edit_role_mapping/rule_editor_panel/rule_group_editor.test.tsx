@@ -6,12 +6,12 @@
 
 import React from 'react';
 import { RuleGroupEditor } from './rule_group_editor';
-import { shallowWithIntl, mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl, nextTick } from '@kbn/test/jest';
 import { AllRule, FieldRule, AnyRule, ExceptAnyRule } from '../../model';
 import { FieldRuleEditor } from './field_rule_editor';
 import { AddRuleButton } from './add_rule_button';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 
 describe('RuleGroupEditor', () => {
   it('renders an empty group', () => {

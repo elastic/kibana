@@ -7,12 +7,12 @@
 import Boom from '@hapi/boom';
 import type from 'type-detect';
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../common/model';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import { Tokens, TokenPair } from '../tokens';
+import { Tokens, TokenPair, RefreshTokenResult } from '../tokens';
 import {
   AuthenticationProviderOptions,
   BaseAuthenticationProvider,
@@ -243,46 +243,31 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     // We have all the necessary parameters, so attempt to complete the OpenID Connect Authentication
-    let accessToken;
-    let refreshToken;
+    let result: { access_token: string; refresh_token: string; authentication: AuthenticationInfo };
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/oidc/authenticate`.
-      const authenticateResponse = await this.options.client.callAsInternalUser(
-        'shield.oidcAuthenticate',
-        {
-          body: {
-            state: stateOIDCState,
-            nonce: stateNonce,
-            redirect_uri: authenticationResponseURI,
-            realm: this.realm,
-          },
-        }
-      );
-
-      accessToken = authenticateResponse.access_token;
-      refreshToken = authenticateResponse.refresh_token;
+      result = await this.options.client.callAsInternalUser('shield.oidcAuthenticate', {
+        body: {
+          state: stateOIDCState,
+          nonce: stateNonce,
+          redirect_uri: authenticationResponseURI,
+          realm: this.realm,
+        },
+      });
     } catch (err) {
       this.logger.debug(`Failed to authenticate request via OpenID Connect: ${err.message}`);
       return AuthenticationResult.failed(err);
     }
 
-    // Now we need to retrieve full user information.
-    let user: Readonly<AuthenticatedUser>;
-    try {
-      user = await this.getUser(request, {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      });
-    } catch (err) {
-      this.logger.debug(`Failed to retrieve user using access token: ${err.message}`);
-      return AuthenticationResult.failed(err);
-    }
-
     this.logger.debug('Login has been performed with OpenID Connect response.');
-
     return AuthenticationResult.redirectTo(stateRedirectURL, {
-      state: { accessToken, refreshToken, realm: this.realm },
-      user,
+      state: {
+        accessToken: result.access_token,
+        refreshToken: result.refresh_token,
+        realm: this.realm,
+      },
+      user: this.authenticationInfoToAuthenticatedUser(result.authentication),
     });
   }
 
@@ -356,20 +341,17 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaRefreshToken(
-    request: KibanaRequest,
-    { refreshToken }: ProviderState
-  ) {
+  private async authenticateViaRefreshToken(request: KibanaRequest, state: ProviderState) {
     this.logger.debug('Trying to refresh elasticsearch access token.');
 
-    if (!refreshToken) {
+    if (!state.refreshToken) {
       this.logger.debug('Refresh token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
-    let refreshedTokenPair: TokenPair | null;
+    let refreshTokenResult: RefreshTokenResult | null;
     try {
-      refreshedTokenPair = await this.options.tokens.refresh(refreshToken);
+      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
       return AuthenticationResult.failed(err);
     }
@@ -380,7 +362,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     // message. There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it
     // seems logical to do the same on Kibana side and `401` would force user to logout and do full SLO if it's
     // supported.
-    if (refreshedTokenPair === null) {
+    if (refreshTokenResult === null) {
       if (canStartNewSession(request)) {
         this.logger.debug(
           'Both elasticsearch access and refresh tokens are expired. Re-initiating OpenID Connect authentication.'
@@ -393,24 +375,17 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       );
     }
 
-    try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader(
-          'Bearer',
-          refreshedTokenPair.accessToken
-        ).toString(),
-      };
-      const user = await this.getUser(request, authHeaders);
-
-      this.logger.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, {
-        authHeaders,
-        state: { ...refreshedTokenPair, realm: this.realm },
-      });
-    } catch (err) {
-      this.logger.debug(`Failed to refresh elasticsearch access token: ${err.message}`);
-      return AuthenticationResult.failed(err);
-    }
+    this.logger.debug('Request has been authenticated via refreshed token.');
+    const { accessToken, refreshToken, authenticationInfo } = refreshTokenResult;
+    return AuthenticationResult.succeeded(
+      this.authenticationInfoToAuthenticatedUser(authenticationInfo),
+      {
+        authHeaders: {
+          authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+        },
+        state: { accessToken, refreshToken, realm: this.realm },
+      }
+    );
   }
 
   /**

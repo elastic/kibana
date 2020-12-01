@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash/fp';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
@@ -16,6 +17,7 @@ import {
 } from '../../__fixtures__';
 import { initPostCommentApi } from './post_comment';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { CommentType } from '../../../../../common/api';
 
 describe('POST comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -36,6 +38,7 @@ describe('POST comment', () => {
       },
       body: {
         comment: 'Wow, good luck catching that bad meanie!',
+        type: CommentType.user,
       },
     });
 
@@ -53,6 +56,174 @@ describe('POST comment', () => {
     );
   });
 
+  it(`Posts a new comment of type alert`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASE_COMMENTS_URL,
+      method: 'post',
+      params: {
+        case_id: 'mock-id-1',
+      },
+      body: {
+        type: CommentType.alert,
+        alertId: 'test-id',
+        index: 'test-index',
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload.comments[response.payload.comments.length - 1].id).toEqual(
+      'mock-comment'
+    );
+  });
+
+  it(`it throws when missing type`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASE_COMMENTS_URL,
+      method: 'post',
+      params: {
+        case_id: 'mock-id-1',
+      },
+      body: {},
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(400);
+    expect(response.payload.isBoom).toEqual(true);
+  });
+
+  it(`it throws when missing attributes: type user`, async () => {
+    const allRequestAttributes = {
+      type: CommentType.user,
+      comment: 'a comment',
+    };
+
+    for (const attribute of ['comment']) {
+      const requestAttributes = omit(attribute, allRequestAttributes);
+      const request = httpServerMock.createKibanaRequest({
+        path: CASE_COMMENTS_URL,
+        method: 'post',
+        params: {
+          case_id: 'mock-id-1',
+        },
+        body: requestAttributes,
+      });
+
+      const theContext = await createRouteContext(
+        createMockSavedObjectsRepository({
+          caseSavedObject: mockCases,
+          caseCommentSavedObject: mockCaseComments,
+        })
+      );
+
+      const response = await routeHandler(theContext, request, kibanaResponseFactory);
+      expect(response.status).toEqual(400);
+      expect(response.payload.isBoom).toEqual(true);
+    }
+  });
+
+  it(`it throws when excess attributes are provided: type user`, async () => {
+    for (const attribute of ['alertId', 'index']) {
+      const request = httpServerMock.createKibanaRequest({
+        path: CASE_COMMENTS_URL,
+        method: 'post',
+        params: {
+          case_id: 'mock-id-1',
+        },
+        body: {
+          [attribute]: attribute,
+          comment: 'a comment',
+          type: CommentType.user,
+        },
+      });
+
+      const theContext = await createRouteContext(
+        createMockSavedObjectsRepository({
+          caseSavedObject: mockCases,
+          caseCommentSavedObject: mockCaseComments,
+        })
+      );
+
+      const response = await routeHandler(theContext, request, kibanaResponseFactory);
+      expect(response.status).toEqual(400);
+      expect(response.payload.isBoom).toEqual(true);
+    }
+  });
+
+  it(`it throws when missing attributes: type alert`, async () => {
+    const allRequestAttributes = {
+      type: CommentType.alert,
+      index: 'test-index',
+      alertId: 'test-id',
+    };
+
+    for (const attribute of ['alertId', 'index']) {
+      const requestAttributes = omit(attribute, allRequestAttributes);
+      const request = httpServerMock.createKibanaRequest({
+        path: CASE_COMMENTS_URL,
+        method: 'post',
+        params: {
+          case_id: 'mock-id-1',
+        },
+        body: requestAttributes,
+      });
+
+      const theContext = await createRouteContext(
+        createMockSavedObjectsRepository({
+          caseSavedObject: mockCases,
+          caseCommentSavedObject: mockCaseComments,
+        })
+      );
+
+      const response = await routeHandler(theContext, request, kibanaResponseFactory);
+      expect(response.status).toEqual(400);
+      expect(response.payload.isBoom).toEqual(true);
+    }
+  });
+
+  it(`it throws when excess attributes are provided: type alert`, async () => {
+    for (const attribute of ['comment']) {
+      const request = httpServerMock.createKibanaRequest({
+        path: CASE_COMMENTS_URL,
+        method: 'post',
+        params: {
+          case_id: 'mock-id-1',
+        },
+        body: {
+          [attribute]: attribute,
+          type: CommentType.alert,
+          index: 'test-index',
+          alertId: 'test-id',
+        },
+      });
+
+      const theContext = await createRouteContext(
+        createMockSavedObjectsRepository({
+          caseSavedObject: mockCases,
+          caseCommentSavedObject: mockCaseComments,
+        })
+      );
+
+      const response = await routeHandler(theContext, request, kibanaResponseFactory);
+      expect(response.status).toEqual(400);
+      expect(response.payload.isBoom).toEqual(true);
+    }
+  });
+
   it(`Returns an error if the case does not exist`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: CASE_COMMENTS_URL,
@@ -62,6 +233,7 @@ describe('POST comment', () => {
       },
       body: {
         comment: 'Wow, good luck catching that bad meanie!',
+        type: CommentType.user,
       },
     });
 
@@ -112,6 +284,7 @@ describe('POST comment', () => {
       },
       body: {
         comment: 'Wow, good luck catching that bad meanie!',
+        type: CommentType.user,
       },
     });
 
@@ -127,6 +300,7 @@ describe('POST comment', () => {
     expect(response.status).toEqual(200);
     expect(response.payload.comments[response.payload.comments.length - 1]).toEqual({
       comment: 'Wow, good luck catching that bad meanie!',
+      type: CommentType.user,
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
         email: null,

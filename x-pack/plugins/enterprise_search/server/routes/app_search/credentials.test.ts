@@ -14,7 +14,11 @@ describe('credentials routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'get', payload: 'query' });
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/credentials',
+        payload: 'query',
+      });
 
       registerCredentialsRoutes({
         ...mockDependencies,
@@ -46,7 +50,11 @@ describe('credentials routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'post', payload: 'body' });
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/app_search/credentials',
+        payload: 'body',
+      });
 
       registerCredentialsRoutes({
         ...mockDependencies,
@@ -155,7 +163,11 @@ describe('credentials routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'get', payload: 'query' });
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/credentials/details',
+        payload: 'query',
+      });
 
       registerCredentialsRoutes({
         ...mockDependencies,
@@ -175,7 +187,11 @@ describe('credentials routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'put', payload: 'body' });
+      mockRouter = new MockRouter({
+        method: 'put',
+        path: '/api/app_search/credentials/{name}',
+        payload: 'body',
+      });
 
       registerCredentialsRoutes({
         ...mockDependencies,
@@ -292,7 +308,11 @@ describe('credentials routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'delete', payload: 'params' });
+      mockRouter = new MockRouter({
+        method: 'delete',
+        path: '/api/app_search/credentials/{name}',
+        payload: 'params',
+      });
 
       registerCredentialsRoutes({
         ...mockDependencies,

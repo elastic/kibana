@@ -9,7 +9,7 @@ import React, { ReactElement } from 'react';
 import { Router } from 'react-router-dom';
 import { MemoryHistory } from 'history/createMemoryHistory';
 import { createMemoryHistory } from 'history';
-import { mountWithIntl, renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { AppState } from '../../state';
 import { MountWithReduxProvider } from './helper_with_redux';
 

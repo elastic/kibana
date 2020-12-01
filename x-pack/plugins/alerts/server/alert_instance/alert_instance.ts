@@ -51,6 +51,10 @@ export class AlertInstance<
     return false;
   }
 
+  getLastScheduledActions() {
+    return this.meta.lastScheduledActions;
+  }
+
   getScheduledActionOptions() {
     return this.scheduledExecutionOptions;
   }

@@ -38,7 +38,7 @@ export default {
 export function Example() {
   return (
     <ApmHeader>
-      <EuiTitle size="l">
+      <EuiTitle>
         <h1>
           GET
           /api/v1/regions/azure-eastus2/clusters/elasticsearch/xc18de071deb4262be54baebf5f6a1ce/proxy/_snapshot/found-snapshots/_all

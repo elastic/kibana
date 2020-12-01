@@ -29,11 +29,11 @@ import { TableVisParams } from './types';
 export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
   name: 'table',
   title: i18n.translate('visTypeTable.tableVisTitle', {
-    defaultMessage: 'Data Table',
+    defaultMessage: 'Data table',
   }),
   icon: 'visTable',
   description: i18n.translate('visTypeTable.tableVisDescription', {
-    defaultMessage: 'Display values in a table',
+    defaultMessage: 'Display data in rows and columns.',
   }),
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter];

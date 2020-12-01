@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { AuthenticationProvider } from '../types';
 import { User } from './user';
 
 const REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE = ['reserved', 'native'];
@@ -28,9 +29,9 @@ export interface AuthenticatedUser extends User {
   lookup_realm: UserRealm;
 
   /**
-   * Name of the Kibana authentication provider that used to authenticate user.
+   * The authentication provider that used to authenticate user.
    */
-  authentication_provider: string;
+  authentication_provider: AuthenticationProvider;
 
   /**
    * The AuthenticationType used by ES to authenticate the user.
@@ -41,5 +42,8 @@ export interface AuthenticatedUser extends User {
 }
 
 export function canUserChangePassword(user: AuthenticatedUser) {
-  return REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(user.authentication_realm.type);
+  return (
+    REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(user.authentication_realm.type) &&
+    user.authentication_provider.type !== 'anonymous'
+  );
 }

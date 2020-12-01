@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsStart } from './plugin';
+import { SavedObjectsStart, SavedObjectSetup } from './plugin';
 
 const createStartContract = (): SavedObjectsStart => {
   return {
@@ -29,6 +29,13 @@ const createStartContract = (): SavedObjectsStart => {
   };
 };
 
+const createSetupContract = (): jest.Mocked<SavedObjectSetup> => {
+  return {
+    registerDecorator: jest.fn(),
+  };
+};
+
 export const savedObjectsPluginMock = {
   createStartContract,
+  createSetupContract,
 };

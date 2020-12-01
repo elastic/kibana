@@ -88,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('with no data loaded', function () {
+    describe('with data loaded', function () {
       const adJobId = 'fq_single_permission';
       const dfaJobId = 'iph_outlier_permission';
       const calendarId = 'calendar_permission';
@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
       const filterItems = ['filter_item_permission'];
 
       const ecIndexPattern = 'ft_module_sample_ecommerce';
-      const ecExpectedTotalCount = 287;
+      const ecExpectedTotalCount = '287';
       const ecExpectedFieldPanelCount = 2;
 
       const uploadFilePath = path.join(

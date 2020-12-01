@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IBasePath } from 'src/core/public';
+import { ApplicationStart, IBasePath } from 'src/core/public';
 import React, { PureComponent, Fragment } from 'react';
 import {
   EuiSearchBar,
@@ -34,9 +34,11 @@ import {
   EuiText,
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
+  QueryType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
@@ -46,6 +48,7 @@ import {
 } from '../../../services';
 
 export interface TableProps {
+  taggingApi?: SavedObjectsTaggingApi;
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
@@ -54,7 +57,7 @@ export interface TableProps {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
   };
   filterOptions: any[];
-  canDelete: boolean;
+  capabilities: ApplicationStart['capabilities'];
   onDelete: () => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
   onExport: (includeReferencesDeep: boolean) => void;
@@ -69,6 +72,7 @@ export interface TableProps {
   isSearching: boolean;
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+  initialQuery?: QueryType;
 }
 
 interface TableState {
@@ -152,6 +156,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       isSearching,
       filterOptions,
       selectionConfig: selection,
+      capabilities,
       onDelete,
       onActionRefresh,
       selectedSavedObjects,
@@ -161,6 +166,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       basePath,
       actionRegistry,
       columnRegistry,
+      taggingApi,
     } = this.props;
 
     const pagination = {
@@ -180,14 +186,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         multiSelect: 'or',
         options: filterOptions,
       },
-      // Add this back in once we have tag support
-      // {
-      //   type: 'field_value_selection',
-      //   field: 'tag',
-      //   name: 'Tags',
-      //   multiSelect: 'or',
-      //   options: [],
-      // },
+      ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []),
     ];
 
     const columns = [
@@ -240,6 +239,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
+      ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
       ...columnRegistry.getAll().map((column) => {
         return {
           ...column.euiColumn,
@@ -286,6 +286,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
           ...actionRegistry.getAll().map((action) => {
+            action.setActionContext({ capabilities });
             return {
               ...action.euiAction,
               'data-test-subj': `savedObjectsTableAction-${action.id}`,
@@ -348,15 +349,18 @@ export class Table extends PureComponent<TableProps, TableState> {
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
           filters={filters as any}
           onChange={this.onChange}
+          defaultQuery={this.props.initialQuery}
           toolsRight={[
             <EuiButton
               key="deleteSO"
               iconType="trash"
               color="danger"
               onClick={onDelete}
-              isDisabled={selectedSavedObjects.length === 0 || !this.props.canDelete}
+              isDisabled={
+                selectedSavedObjects.length === 0 || !capabilities.savedObjectsManagement.delete
+              }
               title={
-                this.props.canDelete
+                capabilities.savedObjectsManagement.delete
                   ? undefined
                   : i18n.translate('savedObjectsManagement.objectsTable.table.deleteButtonTitle', {
                       defaultMessage: 'Unable to delete saved objects',

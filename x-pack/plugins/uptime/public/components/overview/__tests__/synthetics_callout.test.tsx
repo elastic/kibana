@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { SyntheticsCallout } from '../synthetics_callout';
 
@@ -19,7 +19,6 @@ describe('SyntheticsCallout', () => {
       setItem: setItemMock,
     };
 
-    //  @ts-expect-error replacing a call to localStorage we use for monitor list size
     global.localStorage = localStorageMock;
   });
 

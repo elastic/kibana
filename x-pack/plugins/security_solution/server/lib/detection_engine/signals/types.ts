@@ -14,7 +14,7 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerts/server';
-import { SearchResponse } from '../../types';
+import { BaseSearchResponse, SearchResponse, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
@@ -46,6 +46,11 @@ export interface SignalsStatusParams {
   status: Status;
 }
 
+export interface ThresholdResult {
+  count: number;
+  value: string;
+}
+
 export interface SignalSource {
   [key: string]: SearchTypes;
   // TODO: SignalSource is being used as the type for documents matching detection engine queries, but they may not
@@ -67,6 +72,7 @@ export interface SignalSource {
     // signal.depth doesn't exist on pre-7.10 signals
     depth?: number;
   };
+  threshold_result?: ThresholdResult;
 }
 
 export interface BulkItem {
@@ -156,7 +162,8 @@ export interface Signal {
   original_time?: string;
   original_event?: SearchTypes;
   status: Status;
-  threshold_count?: SearchTypes;
+  threshold_result?: ThresholdResult;
+  original_signal?: SearchTypes;
   depth: number;
 }
 
@@ -233,4 +240,14 @@ export interface SearchAfterAndBulkCreateReturnType {
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
   errors: string[];
+}
+
+export interface ThresholdAggregationBucket extends TermAggregationBucket {
+  top_threshold_hits: BaseSearchResponse<SignalSource>;
+}
+
+export interface ThresholdQueryBucket extends TermAggregationBucket {
+  lastSignalTimestamp: {
+    value_as_string: string;
+  };
 }

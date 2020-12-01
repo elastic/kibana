@@ -18,15 +18,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaContext,
-  ExpressionFunctionDefinition,
-} from '../../../../../plugins/expressions/public';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 
 import { getSearchService, getUiSettings } from '../../services';
 import { EsRawResponse } from './es_raw_response';
 import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
-import { IEsSearchResponse } from '../../../common/search/es_search';
+import { IEsSearchResponse, KibanaContext } from '../../../common/search';
 import { buildEsQuery, getEsQueryConfig } from '../../../common/es_query/es_query';
 import { DataPublicPluginStart } from '../../types';
 

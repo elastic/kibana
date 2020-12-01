@@ -19,7 +19,8 @@
 
 import { schema } from '@kbn/config-schema';
 import stringify from 'json-stable-stringify';
-import { createPromiseFromStreams, createMapStream, createConcatStream } from '../../utils/streams';
+import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
+
 import { IRouter } from '../../http';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { exportSavedObjectsToStream } from '../export';
@@ -28,12 +29,20 @@ import { validateTypes, validateObjects } from './utils';
 export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) => {
   const { maxImportExportSize } = config;
 
+  const referenceSchema = schema.object({
+    type: schema.string(),
+    id: schema.string(),
+  });
+
   router.post(
     {
       path: '/_export',
       validate: {
         body: schema.object({
           type: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+          hasReference: schema.maybe(
+            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
+          ),
           objects: schema.maybe(
             schema.arrayOf(
               schema.object({
@@ -51,7 +60,14 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const savedObjectsClient = context.core.savedObjects.client;
-      const { type, objects, search, excludeExportDetails, includeReferencesDeep } = req.body;
+      const {
+        type,
+        hasReference,
+        objects,
+        search,
+        excludeExportDetails,
+        includeReferencesDeep,
+      } = req.body;
       const types = typeof type === 'string' ? [type] : type;
 
       // need to access the registry for type validation, can't use the schema for this
@@ -82,6 +98,7 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
       const exportStream = await exportSavedObjectsToStream({
         savedObjectsClient,
         types,
+        hasReference: hasReference && !Array.isArray(hasReference) ? [hasReference] : hasReference,
         search,
         objects,
         exportSizeLimit: maxImportExportSize,

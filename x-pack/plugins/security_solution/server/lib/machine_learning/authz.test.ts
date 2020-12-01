@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from '../../../../../../src/core/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
+import { httpServerMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_admin_permissions';
 import { mlServicesMock } from './mocks';
 import { hasMlLicense, isMlAdmin, buildMlAuthz } from './authz';
@@ -17,17 +17,19 @@ describe('isMlAdmin', () => {
   it('returns true if hasMlAdminPermissions is true', async () => {
     const mockMl = mlServicesMock.create();
     const request = httpServerMock.createKibanaRequest();
+    const savedObjectsClient = savedObjectsClientMock.create();
     (hasMlAdminPermissions as jest.Mock).mockReturnValue(true);
 
-    expect(await isMlAdmin({ ml: mockMl, request })).toEqual(true);
+    expect(await isMlAdmin({ ml: mockMl, request, savedObjectsClient })).toEqual(true);
   });
 
   it('returns false if hasMlAdminPermissions is false', async () => {
     const mockMl = mlServicesMock.create();
     const request = httpServerMock.createKibanaRequest();
+    const savedObjectsClient = savedObjectsClientMock.create();
     (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
 
-    expect(await isMlAdmin({ ml: mockMl, request })).toEqual(false);
+    expect(await isMlAdmin({ ml: mockMl, request, savedObjectsClient })).toEqual(false);
   });
 });
 
@@ -55,11 +57,13 @@ describe('mlAuthz', () => {
   let licenseMock: ReturnType<typeof licensingMock.createLicenseMock>;
   let mlMock: ReturnType<typeof mlServicesMock.create>;
   let request: KibanaRequest;
+  let savedObjectsClient: SavedObjectsClientContract;
 
   beforeEach(() => {
     licenseMock = licensingMock.createLicenseMock();
     mlMock = mlServicesMock.create();
     request = httpServerMock.createKibanaRequest();
+    savedObjectsClient = savedObjectsClientMock.create();
   });
 
   describe('#validateRuleType', () => {
@@ -68,6 +72,7 @@ describe('mlAuthz', () => {
         license: licenseMock,
         ml: undefined,
         request,
+        savedObjectsClient,
       });
 
       const validation = await mlAuthz.validateRuleType('query');
@@ -80,6 +85,7 @@ describe('mlAuthz', () => {
         license: licenseMock,
         ml: undefined,
         request,
+        savedObjectsClient,
       });
 
       const validation = await mlAuthz.validateRuleType('machine_learning');
@@ -97,6 +103,7 @@ describe('mlAuthz', () => {
         license: licenseMock,
         ml: mlMock,
         request,
+        savedObjectsClient,
       });
 
       const validation = await mlAuthz.validateRuleType('query');
@@ -111,6 +118,7 @@ describe('mlAuthz', () => {
         license: licenseMock,
         ml: mlMock,
         request,
+        savedObjectsClient,
       });
 
       const validation = await mlAuthz.validateRuleType('machine_learning');
@@ -128,6 +136,7 @@ describe('mlAuthz', () => {
         license: licenseMock,
         ml: mlMock,
         request,
+        savedObjectsClient,
       });
 
       const validation = await mlAuthz.validateRuleType('query');
@@ -143,6 +152,7 @@ describe('mlAuthz', () => {
         license: licenseMock,
         ml: mlMock,
         request,
+        savedObjectsClient,
       });
 
       const validation = await mlAuthz.validateRuleType('machine_learning');
@@ -161,6 +171,7 @@ describe('mlAuthz', () => {
         license: licenseMock,
         ml: mlMock,
         request,
+        savedObjectsClient,
       });
 
       const validation = await mlAuthz.validateRuleType('machine_learning');
@@ -181,6 +192,7 @@ describe('mlAuthz', () => {
         license: licenseMock,
         ml: mlMock,
         request,
+        savedObjectsClient,
       });
 
       await mlAuthz.validateRuleType('machine_learning');
@@ -202,6 +214,7 @@ describe('mlAuthz', () => {
         license: licenseMock,
         ml: mlMock,
         request,
+        savedObjectsClient,
       });
 
       await mlAuthz.validateRuleType('query');
@@ -219,6 +232,7 @@ describe('mlAuthz', () => {
         license: licenseMock,
         ml: mlMock,
         request,
+        savedObjectsClient,
       });
 
       const validationFirst = await mlAuthz.validateRuleType('machine_learning');
@@ -243,12 +257,14 @@ describe('mlAuthz', () => {
         license: licenseMock,
         ml: mlMock,
         request,
+        savedObjectsClient,
       });
 
       const mlAuthzSecond = buildMlAuthz({
         license: licenseMock,
         ml: mlMock,
         request,
+        savedObjectsClient,
       });
 
       const validationFirst = await mlAuthzFirst.validateRuleType('machine_learning');

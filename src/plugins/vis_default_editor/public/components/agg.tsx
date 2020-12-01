@@ -78,6 +78,7 @@ function DefaultEditorAgg({
   const showDescription = !isEditorOpen && validState;
   const showError = !isEditorOpen && !validState;
   const aggName = agg.type?.name;
+  const schemaTitle = getSchemaByName(schemas, agg.schema).title;
   let disabledParams;
   let aggError;
   // When a Parent Pipeline agg is selected and this agg is the last bucket.
@@ -163,6 +164,7 @@ function DefaultEditorAgg({
 
   const renderAggButtons = () => {
     const actionIcons = [];
+    const aggTitle = agg.type?.title?.toLowerCase();
 
     if (showError) {
       actionIcons.push({
@@ -170,7 +172,8 @@ function DefaultEditorAgg({
         color: 'danger',
         type: 'alert',
         tooltip: i18n.translate('visDefaultEditor.agg.errorsAriaLabel', {
-          defaultMessage: 'Aggregation has errors',
+          defaultMessage: '{schemaTitle} {aggTitle} aggregation has errors',
+          values: { aggTitle, schemaTitle },
         }),
         dataTestSubj: 'hasErrorsAggregationIcon',
       });
@@ -184,7 +187,8 @@ function DefaultEditorAgg({
         type: 'eye',
         onClick: () => onToggleEnableAgg(agg.id, false),
         tooltip: i18n.translate('visDefaultEditor.agg.disableAggButtonTooltip', {
-          defaultMessage: 'Disable aggregation',
+          defaultMessage: 'Disable {schemaTitle} {aggTitle} aggregation',
+          values: { aggTitle, schemaTitle },
         }),
         dataTestSubj: 'toggleDisableAggregationBtn disable',
       });
@@ -196,7 +200,8 @@ function DefaultEditorAgg({
         type: 'eyeClosed',
         onClick: () => onToggleEnableAgg(agg.id, true),
         tooltip: i18n.translate('visDefaultEditor.agg.enableAggButtonTooltip', {
-          defaultMessage: 'Enable aggregation',
+          defaultMessage: 'Enable {schemaTitle} {aggTitle} aggregation',
+          values: { aggTitle, schemaTitle },
         }),
         dataTestSubj: 'toggleDisableAggregationBtn enable',
       });
@@ -206,7 +211,8 @@ function DefaultEditorAgg({
         id: 'dragHandle',
         type: 'grab',
         tooltip: i18n.translate('visDefaultEditor.agg.modifyPriorityButtonTooltip', {
-          defaultMessage: 'Modify priority by dragging',
+          defaultMessage: 'Modify priority of {schemaTitle} {aggTitle} by dragging',
+          values: { aggTitle, schemaTitle },
         }),
         dataTestSubj: 'dragHandleBtn',
       });
@@ -218,7 +224,8 @@ function DefaultEditorAgg({
         type: 'cross',
         onClick: () => removeAgg(agg.id),
         tooltip: i18n.translate('visDefaultEditor.agg.removeDimensionButtonTooltip', {
-          defaultMessage: 'Remove dimension',
+          defaultMessage: 'Remove {schemaTitle} {aggTitle} aggregation',
+          values: { aggTitle, schemaTitle },
         }),
         dataTestSubj: 'removeDimensionBtn',
       });
@@ -257,7 +264,7 @@ function DefaultEditorAgg({
       </div>
     );
   };
-  const schemaTitle = getSchemaByName(schemas, agg.schema).title;
+
   const buttonContent = (
     <>
       {schemaTitle || agg.schema} {showDescription && <span>{aggDescription}</span>}

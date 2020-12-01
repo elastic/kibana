@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
-
 import {
   PluginSetup,
   PluginStart,
@@ -44,8 +43,6 @@ import {
   DEFAULT_INDEX_KEY,
 } from '../common/constants';
 
-import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/ingest_manager_integration/configure_package_policy';
-
 import { SecurityPageName } from './app/types';
 import { manageOldSiemRoutes } from './helpers';
 import {
@@ -62,6 +59,10 @@ import {
   IndexFieldsStrategyResponse,
 } from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
+import { getCaseConnectorUI } from './common/lib/connectors';
+import { licenseService } from './common/hooks/use_license';
+import { LazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
+import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -312,6 +313,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
+    plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUI());
+
     return {
       resolver: async () => {
         /**
@@ -328,12 +331,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
-    if (plugins.ingestManager) {
-      plugins.ingestManager.registerPackagePolicyComponent(
-        'endpoint',
-        ConfigureEndpointPackagePolicy
-      );
+    if (plugins.fleet) {
+      const { registerExtension } = plugins.fleet;
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-policy-edit',
+        component: LazyEndpointPolicyEditExtension,
+      });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-policy-create',
+        component: LazyEndpointPolicyCreateExtension,
+      });
     }
+    licenseService.start(plugins.licensing.license$);
 
     return {};
   }

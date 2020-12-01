@@ -21,16 +21,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ToastsStart, StartServicesAccessor, CoreStart } from 'src/core/public';
+import { ToastsStart } from 'src/core/public';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
-import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
-import { Space } from '../../../common/model/space';
+import { GetSpaceResult } from '../../../common/model/types';
 import { SpacesManager } from '../../spaces_manager';
 import { ShareToSpaceForm } from './share_to_space_form';
 import { ShareOptions, SpaceTarget } from '../types';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
-import { PluginsStart } from '../../plugin';
 
 interface Props {
   onClose: () => void;
@@ -38,23 +36,14 @@ interface Props {
   savedObject: SavedObjectsManagementRecord;
   spacesManager: SpacesManager;
   toastNotifications: ToastsStart;
-  getStartServices: StartServicesAccessor<PluginsStart>;
 }
 
 const arraysAreEqual = (a: unknown[], b: unknown[]) =>
   a.every((x) => b.includes(x)) && b.every((x) => a.includes(x));
 
 export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
-  const {
-    getStartServices,
-    onClose,
-    onObjectUpdated,
-    savedObject,
-    spacesManager,
-    toastNotifications,
-  } = props;
+  const { onClose, onObjectUpdated, savedObject, spacesManager, toastNotifications } = props;
   const { namespaces: currentNamespaces = [] } = savedObject;
-  const [coreStart, setCoreStart] = useState<CoreStart>();
   const [shareOptions, setShareOptions] = useState<ShareOptions>({ selectedSpaceIds: [] });
   const [canShareToAllSpaces, setCanShareToAllSpaces] = useState<boolean>(false);
   const [showMakeCopy, setShowMakeCopy] = useState<boolean>(false);
@@ -64,20 +53,19 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
     spaces: SpaceTarget[];
   }>({ isLoading: true, spaces: [] });
   useEffect(() => {
-    const getSpaces = spacesManager.getSpaces('shareSavedObjectsIntoSpace');
+    const getSpaces = spacesManager.getSpaces({ includeAuthorizedPurposes: true });
     const getActiveSpace = spacesManager.getActiveSpace();
     const getPermissions = spacesManager.getShareSavedObjectPermissions(savedObject.type);
-    Promise.all([getSpaces, getActiveSpace, getPermissions, getStartServices()])
-      .then(([allSpaces, activeSpace, permissions, startServices]) => {
-        const [coreStartValue] = startServices;
-        setCoreStart(coreStartValue);
+    Promise.all([getSpaces, getActiveSpace, getPermissions])
+      .then(([allSpaces, activeSpace, permissions]) => {
         setShareOptions({
           selectedSpaceIds: currentNamespaces.filter((spaceId) => spaceId !== activeSpace.id),
         });
         setCanShareToAllSpaces(permissions.shareToAllSpaces);
-        const createSpaceTarget = (space: Space): SpaceTarget => ({
+        const createSpaceTarget = (space: GetSpaceResult): SpaceTarget => ({
           ...space,
           isActiveSpace: space.id === activeSpace.id,
+          isPartiallyAuthorized: space.authorizedPurposes?.shareSavedObjectsIntoSpace === false,
         });
         setSpacesState({
           isLoading: false,
@@ -91,7 +79,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
           }),
         });
       });
-  }, [currentNamespaces, spacesManager, savedObject, toastNotifications, getStartServices]);
+  }, [currentNamespaces, spacesManager, savedObject, toastNotifications]);
 
   const getSelectionChanges = () => {
     const activeSpace = spaces.find((space) => space.isActiveSpace);
@@ -208,23 +196,16 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
     const activeSpace = spaces.find((x) => x.isActiveSpace)!;
     const showShareWarning =
       spaces.length > 1 && arraysAreEqual(currentNamespaces, [activeSpace.id]);
-    const { application, docLinks } = coreStart!;
-    const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
-      application,
-      docLinks,
-    });
     // Step 2: Share has not been initiated yet; User must fill out form to continue.
     return (
-      <KibanaReactContextProvider>
-        <ShareToSpaceForm
-          spaces={spaces}
-          shareOptions={shareOptions}
-          onUpdate={setShareOptions}
-          showShareWarning={showShareWarning}
-          canShareToAllSpaces={canShareToAllSpaces}
-          makeCopy={() => setShowMakeCopy(true)}
-        />
-      </KibanaReactContextProvider>
+      <ShareToSpaceForm
+        spaces={spaces}
+        shareOptions={shareOptions}
+        onUpdate={setShareOptions}
+        showShareWarning={showShareWarning}
+        canShareToAllSpaces={canShareToAllSpaces}
+        makeCopy={() => setShowMakeCopy(true)}
+      />
     );
   };
 

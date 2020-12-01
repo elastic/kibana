@@ -21,7 +21,11 @@ import { i18n } from '@kbn/i18n';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
-import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../../common/constants/search';
+import {
+  SEARCH_QUERY_LANGUAGE,
+  ErrorMessage,
+  SearchQueryLanguage,
+} from '../../../../../../common/constants/search';
 
 import {
   esKuery,
@@ -36,7 +40,7 @@ interface Props {
   setSearchString(s: Query['query']): void;
   searchQuery: Query['query'];
   setSearchQuery(q: Query['query']): void;
-  searchQueryLanguage: SEARCH_QUERY_LANGUAGE;
+  searchQueryLanguage: SearchQueryLanguage;
   setSearchQueryLanguage(q: any): void;
   samplerShardSize: number;
   setSamplerShardSize(s: number): void;
@@ -48,16 +52,20 @@ const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map((v) => {
     value: String(v),
     inputDisplay:
       v > 0 ? (
-        <FormattedMessage
-          id="xpack.ml.datavisualizer.searchPanel.sampleSizeOptionLabel"
-          defaultMessage="Sample size (per shard): {wrappedValue}"
-          values={{ wrappedValue: <b>{v}</b> }}
-        />
+        <span data-test-subj={`mlDataVisualizerShardSizeOption ${v}`}>
+          <FormattedMessage
+            id="xpack.ml.datavisualizer.searchPanel.sampleSizeOptionLabel"
+            defaultMessage="Sample size (per shard): {wrappedValue}"
+            values={{ wrappedValue: <b>{v}</b> }}
+          />
+        </span>
       ) : (
-        <FormattedMessage
-          id="xpack.ml.datavisualizer.searchPanel.allOptionLabel"
-          defaultMessage="Search all"
-        />
+        <span data-test-subj={`mlDataVisualizerShardSizeOption all`}>
+          <FormattedMessage
+            id="xpack.ml.datavisualizer.searchPanel.allOptionLabel"
+            defaultMessage="Search all"
+          />
+        </span>
       ),
   };
 });
@@ -174,10 +182,18 @@ export const SearchPanel: FC<Props> = ({
       <EuiFlexItem grow={false}>
         <EuiText size="s">
           <FormattedMessage
-            id="xpack.ml.datavisualizer.searchPanel.documentsPerShardLabel"
-            defaultMessage="Total documents: {wrappedTotalCount}"
+            id="xpack.ml.datavisualizer.searchPanel.totalDocCountLabel"
+            defaultMessage="Total documents: {strongTotalCount}"
             values={{
-              wrappedTotalCount: <b data-test-subj="mlDataVisualizerTotalDocCount">{totalCount}</b>,
+              strongTotalCount: (
+                <strong data-test-subj="mlDataVisualizerTotalDocCount">
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.searchPanel.totalDocCountNumber"
+                    defaultMessage="{totalCount, plural, one {#} other {#}}"
+                    values={{ totalCount }}
+                  />
+                </strong>
+              ),
             }}
           />
         </EuiText>

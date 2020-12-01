@@ -116,6 +116,7 @@ describe('Timeline', () => {
       start: startDate,
       status: TimelineStatus.active,
       timelineType: TimelineType.default,
+      timerangeKind: 'absolute',
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };
@@ -212,20 +213,6 @@ describe('Timeline', () => {
       );
 
       expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(true);
-    });
-    describe('when there is a graphEventId', () => {
-      beforeEach(() => {
-        props.graphEventId = 'graphEventId'; // any string w/ length > 0 works
-      });
-      it('should not show the timeline footer', () => {
-        const wrapper = mount(
-          <TestProviders>
-            <TimelineComponent {...props} />
-          </TestProviders>
-        );
-
-        expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(false);
-      });
     });
   });
 });

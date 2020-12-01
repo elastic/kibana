@@ -28,11 +28,11 @@ import {
 import { useAppContext } from '../../../app_context';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
-import { getIndexListUri } from '../../../services/routing';
 import { documentationService } from '../../../services/documentation';
 import { Section } from '../home';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
+import { filterDataStreams } from '../../../lib/data_streams';
 
 interface MatchParams {
   dataStreamName?: string;
@@ -46,13 +46,15 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   history,
 }) => {
   const { isDeepLink } = extractQueryParams(search);
+  const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
   const {
     core: { getUrlForApp },
-    plugins: { ingestManager },
+    plugins: { fleet },
   } = useAppContext();
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
+  const [isIncludeManagedChecked, setIsIncludeManagedChecked] = useState(true);
   const { error, isLoading, data: dataStreams, resendRequest: reload } = useLoadDataStreams({
     includeStats: isIncludeStatsChecked,
   });
@@ -99,7 +101,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               defaultMessage="Data streams store time-series data across multiple indices."
             />
             {' ' /* We need this space to separate these two sentences. */}
-            {ingestManager ? (
+            {fleet ? (
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
                 defaultMessage="Get started with data streams in {link}."
@@ -107,12 +109,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
                   link: (
                     <EuiLink
                       data-test-subj="dataStreamsEmptyPromptTemplateLink"
-                      href={getUrlForApp('ingestManager')}
+                      href={getUrlForApp('fleet')}
                     >
                       {i18n.translate(
                         'xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerLink',
                         {
-                          defaultMessage: 'Ingest Manager',
+                          defaultMessage: 'Fleet',
                         }
                       )}
                     </EuiLink>
@@ -148,11 +150,13 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       />
     );
   } else if (Array.isArray(dataStreams) && dataStreams.length > 0) {
+    const filteredDataStreams = isIncludeManagedChecked
+      ? dataStreams
+      : filterDataStreams(dataStreams);
     content = (
       <>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem>
-            {/* TODO: Add a switch for toggling on data streams created by Ingest Manager */}
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
@@ -203,17 +207,46 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.idxMgmt.dataStreamListControls.includeManagedSwitchLabel',
+                    {
+                      defaultMessage: 'Include Fleet-managed streams',
+                    }
+                  )}
+                  checked={isIncludeManagedChecked}
+                  onChange={(e) => setIsIncludeManagedChecked(e.target.checked)}
+                  data-test-subj="includeManagedSwitch"
+                />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.idxMgmt.dataStreamListControls.includeManagedSwitchToolTip',
+                    {
+                      defaultMessage: 'Display data streams managed by Fleet',
+                    }
+                  )}
+                  position="top"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="l" />
 
         <DataStreamTable
           filters={
-            isDeepLink && dataStreamName !== undefined
-              ? `name="${attemptToURIDecode(dataStreamName)}"`
+            isDeepLink && decodedDataStreamName !== undefined
+              ? `name="${decodedDataStreamName}"`
               : ''
           }
-          dataStreams={dataStreams}
+          dataStreams={filteredDataStreams}
           reload={reload}
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
@@ -230,13 +263,9 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         If the user has been deep-linked, they'll expect to see the detail panel because it reflects
         the URL state, even if there are no data streams or if there was an error loading them.
       */}
-      {dataStreamName && (
+      {decodedDataStreamName && (
         <DataStreamDetailPanel
-          dataStreamName={attemptToURIDecode(dataStreamName)}
-          backingIndicesLink={reactRouterNavigate(
-            history,
-            getIndexListUri(`data_stream="${attemptToURIDecode(dataStreamName)}"`, true)
-          )}
+          dataStreamName={decodedDataStreamName}
           onClose={(shouldReload?: boolean) => {
             history.push(`/${Section.DataStreams}`);
 

@@ -18,12 +18,11 @@
  */
 
 import { constant, once, compact, flatten } from 'lodash';
+import { reconfigureLogging } from '@kbn/legacy-logging';
 
-import { isWorker } from 'cluster';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot, pkg } from '../../core/server/utils';
 import { Config } from './config';
-import loggingConfiguration from './logging/configuration';
 import httpMixin from './http';
 import { coreMixin } from './core';
 import { loggingMixin } from './logging';
@@ -31,7 +30,6 @@ import warningsMixin from './warnings';
 import configCompleteMixin from './config/complete';
 import { optimizeMixin } from '../../optimize';
 import { uiMixin } from '../ui';
-import { i18nMixin } from './i18n';
 
 /**
  * @typedef {import('./kbn_server').KibanaConfig} KibanaConfig
@@ -82,9 +80,6 @@ export default class KbnServer {
         loggingMixin,
         warningsMixin,
 
-        // scan translations dirs, register locale files and initialize i18n engine.
-        i18nMixin,
-
         // tell the config we are done loading plugins
         configCompleteMixin,
 
@@ -125,7 +120,7 @@ export default class KbnServer {
 
     const { server, config } = this;
 
-    if (isWorker) {
+    if (process.env.isDevCliChild) {
       // help parent process know when we are ready
       process.send(['WORKER_LISTENING']);
     }
@@ -158,13 +153,17 @@ export default class KbnServer {
 
   applyLoggingConfiguration(settings) {
     const config = Config.withDefaultSchema(settings);
-    const loggingOptions = loggingConfiguration(config);
+
+    const loggingConfig = config.get('logging');
+    const opsConfig = config.get('ops');
+
     const subset = {
-      ops: config.get('ops'),
-      logging: config.get('logging'),
+      ops: opsConfig,
+      logging: loggingConfig,
     };
     const plain = JSON.stringify(subset, null, 2);
     this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
-    this.server.plugins['@elastic/good'].reconfigure(loggingOptions);
+
+    reconfigureLogging(this.server, loggingConfig, opsConfig.interval);
   }
 }

@@ -36,8 +36,8 @@ import {
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
-import { VisualizationsStart } from 'src/plugins/visualizations/public';
 
+import { UiStatsMetricType } from '@kbn/analytics';
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './kibana_services';
@@ -68,7 +68,7 @@ export interface DiscoverServices {
   getSavedSearchUrlById: (id: string) => Promise<string>;
   getEmbeddableInjector: any;
   uiSettings: IUiSettingsClient;
-  visualizations: VisualizationsStart;
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export async function buildServices(
@@ -82,6 +82,7 @@ export async function buildServices(
     savedObjects: plugins.savedObjects,
   };
   const savedObjectService = createSavedSearchesLoader(services);
+  const { usageCollection } = plugins;
 
   return {
     addBasePath: core.http.basePath.prepend,
@@ -108,6 +109,6 @@ export async function buildServices(
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
-    visualizations: plugins.visualizations,
+    trackUiMetric: usageCollection?.reportUiStats.bind(usageCollection, 'discover'),
   };
 }

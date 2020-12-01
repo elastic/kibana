@@ -212,6 +212,16 @@ export {
   FieldFormat,
 } from '../common';
 
+/**
+ * Exporters (CSV)
+ */
+
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export const exporters = {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+};
+
 /*
  * Index patterns:
  */
@@ -338,6 +348,12 @@ export {
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,
@@ -358,7 +374,6 @@ export {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   injectSearchSourceReferences,
-  ISearch,
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,
@@ -370,6 +385,7 @@ export {
   SearchRequest,
   SearchSourceFields,
   SortDirection,
+  SessionState,
   // expression functions and types
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
@@ -380,7 +396,12 @@ export {
   PainlessError,
 } from './search';
 
-export type { SearchSource, ISessionService } from './search';
+export type {
+  SearchSource,
+  ISessionService,
+  SearchSessionInfoProvider,
+  ISessionsClient,
+} from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 

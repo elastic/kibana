@@ -27,10 +27,10 @@ import {
   SanitizedAlert,
   AlertTaskState,
   AlertInstanceSummary,
+  AlertExecutionStatusValues,
 } from '../types';
 import { validateAlertTypeParams, alertExecutionStatusFromRaw } from '../lib';
 import {
-  InvalidateAPIKeyParams,
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../security/server';
@@ -47,6 +47,7 @@ import { IEvent } from '../../../event_log/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
+import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -71,7 +72,6 @@ export interface ConstructorOptions {
   namespace?: string;
   getUserName: () => Promise<string | null>;
   createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
-  invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
   getActionsClient: () => Promise<ActionsClient>;
   getEventLogClient: () => Promise<IEventLogClient>;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -98,8 +98,23 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
+export interface AggregateOptions extends IndexType {
+  search?: string;
+  defaultSearchOperator?: 'AND' | 'OR';
+  searchFields?: string[];
+  hasReference?: {
+    type: string;
+    id: string;
+  };
+  filter?: string;
+}
+
 interface IndexType {
   [key: string]: unknown;
+}
+
+interface AggregateResult {
+  alertExecutionStatus: { [status: string]: number };
 }
 
 export interface FindResult {
@@ -156,9 +171,6 @@ export class AlertsClient {
   private readonly authorization: AlertsAuthorization;
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
-  private readonly invalidateAPIKey: (
-    params: InvalidateAPIKeyParams
-  ) => Promise<InvalidateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
   private readonly actionsAuthorization: ActionsAuthorization;
   private readonly getEventLogClient: () => Promise<IEventLogClient>;
@@ -175,7 +187,6 @@ export class AlertsClient {
     namespace,
     getUserName,
     createAPIKey,
-    invalidateAPIKey,
     encryptedSavedObjectsClient,
     getActionsClient,
     actionsAuthorization,
@@ -191,7 +202,6 @@ export class AlertsClient {
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.authorization = authorization;
     this.createAPIKey = createAPIKey;
-    this.invalidateAPIKey = invalidateAPIKey;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.getActionsClient = getActionsClient;
     this.actionsAuthorization = actionsAuthorization;
@@ -218,14 +228,17 @@ export class AlertsClient {
 
     this.validateActions(alertType, data.actions);
 
+    const createTime = Date.now();
     const { references, actions } = await this.denormalizeActions(data.actions);
+
     const rawAlert: RawAlert = {
       ...data,
       ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       actions,
       createdBy: username,
       updatedBy: username,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(createTime).toISOString(),
+      updatedAt: new Date(createTime).toISOString(),
       params: validatedAlertTypeParams as RawAlert['params'],
       muteAll: false,
       mutedInstanceIds: [],
@@ -247,7 +260,11 @@ export class AlertsClient {
       );
     } catch (e) {
       // Avoid unused API key
-      this.invalidateApiKey({ apiKey: rawAlert.apiKey });
+      markApiKeyForInvalidation(
+        { apiKey: rawAlert.apiKey },
+        this.logger,
+        this.unsecuredSavedObjectsClient
+      );
       throw e;
     }
     if (data.enabled) {
@@ -275,12 +292,7 @@ export class AlertsClient {
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    return this.getAlertFromRaw(
-      createdAlert.id,
-      createdAlert.attributes,
-      createdAlert.updated_at,
-      references
-    );
+    return this.getAlertFromRaw(createdAlert.id, createdAlert.attributes, references);
   }
 
   public async get({ id }: { id: string }): Promise<SanitizedAlert> {
@@ -290,7 +302,7 @@ export class AlertsClient {
       result.attributes.consumer,
       ReadOperations.Get
     );
-    return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
+    return this.getAlertFromRaw(result.id, result.attributes, result.references);
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -379,13 +391,11 @@ export class AlertsClient {
       type: 'alert',
     });
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const authorizedData = data.map(({ id, attributes, updated_at, references }) => {
+    const authorizedData = data.map(({ id, attributes, references }) => {
       ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
       return this.getAlertFromRaw(
         id,
         fields ? (pick(attributes, fields) as RawAlert) : attributes,
-        updated_at,
         references
       );
     });
@@ -400,15 +410,55 @@ export class AlertsClient {
     };
   }
 
+  public async aggregate({
+    options: { fields, ...options } = {},
+  }: { options?: AggregateOptions } = {}): Promise<AggregateResult> {
+    // Replace this when saved objects supports aggregations https://github.com/elastic/kibana/pull/64002
+    const alertExecutionStatus = await Promise.all(
+      AlertExecutionStatusValues.map(async (status: string) => {
+        const {
+          filter: authorizationFilter,
+          logSuccessfulAuthorization,
+        } = await this.authorization.getFindAuthorizationFilter();
+        const filter = options.filter
+          ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
+          : `alert.attributes.executionStatus.status:(${status})`;
+        const { total } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
+          ...options,
+          filter:
+            (authorizationFilter && filter
+              ? and([esKuery.fromKueryExpression(filter), authorizationFilter])
+              : authorizationFilter) ?? filter,
+          page: 1,
+          perPage: 0,
+          type: 'alert',
+        });
+
+        logSuccessfulAuthorization();
+
+        return { [status]: total };
+      })
+    );
+
+    return {
+      alertExecutionStatus: alertExecutionStatus.reduce(
+        (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
+        {}
+      ),
+    };
+  }
+
   public async delete({ id }: { id: string }) {
     let taskIdToRemove: string | undefined | null;
     let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-        RawAlert
-      >('alert', id, { namespace: this.namespace });
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+        'alert',
+        id,
+        { namespace: this.namespace }
+      );
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
       attributes = decryptedAlert.attributes;
@@ -433,7 +483,13 @@ export class AlertsClient {
 
     await Promise.all([
       taskIdToRemove ? deleteTaskIfItExists(this.taskManager, taskIdToRemove) : null,
-      apiKeyToInvalidate ? this.invalidateApiKey({ apiKey: apiKeyToInvalidate }) : null,
+      apiKeyToInvalidate
+        ? markApiKeyForInvalidation(
+            { apiKey: apiKeyToInvalidate },
+            this.logger,
+            this.unsecuredSavedObjectsClient
+          )
+        : null,
     ]);
 
     return removeResult;
@@ -451,9 +507,11 @@ export class AlertsClient {
     let alertSavedObject: SavedObject<RawAlert>;
 
     try {
-      alertSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-        RawAlert
-      >('alert', id, { namespace: this.namespace });
+      alertSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+        'alert',
+        id,
+        { namespace: this.namespace }
+      );
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
@@ -472,7 +530,11 @@ export class AlertsClient {
 
     await Promise.all([
       alertSavedObject.attributes.apiKey
-        ? this.invalidateApiKey({ apiKey: alertSavedObject.attributes.apiKey })
+        ? markApiKeyForInvalidation(
+            { apiKey: alertSavedObject.attributes.apiKey },
+            this.logger,
+            this.unsecuredSavedObjectsClient
+          )
         : null,
       (async () => {
         if (
@@ -523,6 +585,7 @@ export class AlertsClient {
       params: validatedAlertTypeParams as RawAlert['params'],
       actions,
       updatedBy: username,
+      updatedAt: new Date().toISOString(),
     });
     try {
       updatedObject = await this.unsecuredSavedObjectsClient.create<RawAlert>(
@@ -537,16 +600,15 @@ export class AlertsClient {
       );
     } catch (e) {
       // Avoid unused API key
-      this.invalidateApiKey({ apiKey: createAttributes.apiKey });
+      markApiKeyForInvalidation(
+        { apiKey: createAttributes.apiKey },
+        this.logger,
+        this.unsecuredSavedObjectsClient
+      );
       throw e;
     }
 
-    return this.getPartialAlertFromRaw(
-      id,
-      updatedObject.attributes,
-      updatedObject.updated_at,
-      updatedObject.references
-    );
+    return this.getPartialAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
   private apiKeyAsAlertAttributes(
@@ -578,9 +640,11 @@ export class AlertsClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-        RawAlert
-      >('alert', id, { namespace: this.namespace });
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+        'alert',
+        id,
+        { namespace: this.namespace }
+      );
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
@@ -611,34 +675,27 @@ export class AlertsClient {
         await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
         username
       ),
+      updatedAt: new Date().toISOString(),
       updatedBy: username,
     });
     try {
       await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
     } catch (e) {
       // Avoid unused API key
-      this.invalidateApiKey({ apiKey: updateAttributes.apiKey });
+      markApiKeyForInvalidation(
+        { apiKey: updateAttributes.apiKey },
+        this.logger,
+        this.unsecuredSavedObjectsClient
+      );
       throw e;
     }
 
     if (apiKeyToInvalidate) {
-      await this.invalidateApiKey({ apiKey: apiKeyToInvalidate });
-    }
-  }
-
-  private async invalidateApiKey({ apiKey }: { apiKey: string | null }): Promise<void> {
-    if (!apiKey) {
-      return;
-    }
-
-    try {
-      const apiKeyId = Buffer.from(apiKey, 'base64').toString().split(':')[0];
-      const response = await this.invalidateAPIKey({ id: apiKeyId });
-      if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-        this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
-      }
-    } catch (e) {
-      this.logger.error(`Failed to invalidate API Key: ${e.message}`);
+      await markApiKeyForInvalidation(
+        { apiKey: apiKeyToInvalidate },
+        this.logger,
+        this.unsecuredSavedObjectsClient
+      );
     }
   }
 
@@ -656,9 +713,11 @@ export class AlertsClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-        RawAlert
-      >('alert', id, { namespace: this.namespace });
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+        'alert',
+        id,
+        { namespace: this.namespace }
+      );
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
@@ -693,12 +752,17 @@ export class AlertsClient {
           username
         ),
         updatedBy: username,
+        updatedAt: new Date().toISOString(),
       });
       try {
         await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
       } catch (e) {
         // Avoid unused API key
-        this.invalidateApiKey({ apiKey: updateAttributes.apiKey });
+        markApiKeyForInvalidation(
+          { apiKey: updateAttributes.apiKey },
+          this.logger,
+          this.unsecuredSavedObjectsClient
+        );
         throw e;
       }
       const scheduledTask = await this.scheduleAlert(
@@ -710,7 +774,11 @@ export class AlertsClient {
         scheduledTaskId: scheduledTask.id,
       });
       if (apiKeyToInvalidate) {
-        await this.invalidateApiKey({ apiKey: apiKeyToInvalidate });
+        await markApiKeyForInvalidation(
+          { apiKey: apiKeyToInvalidate },
+          this.logger,
+          this.unsecuredSavedObjectsClient
+        );
       }
     }
   }
@@ -729,9 +797,11 @@ export class AlertsClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-        RawAlert
-      >('alert', id, { namespace: this.namespace });
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+        'alert',
+        id,
+        { namespace: this.namespace }
+      );
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
@@ -763,6 +833,7 @@ export class AlertsClient {
           apiKey: null,
           apiKeyOwner: null,
           updatedBy: await this.getUserName(),
+          updatedAt: new Date().toISOString(),
         }),
         { version }
       );
@@ -771,7 +842,13 @@ export class AlertsClient {
         attributes.scheduledTaskId
           ? deleteTaskIfItExists(this.taskManager, attributes.scheduledTaskId)
           : null,
-        apiKeyToInvalidate ? this.invalidateApiKey({ apiKey: apiKeyToInvalidate }) : null,
+        apiKeyToInvalidate
+          ? await markApiKeyForInvalidation(
+              { apiKey: apiKeyToInvalidate },
+              this.logger,
+              this.unsecuredSavedObjectsClient
+            )
+          : null,
       ]);
     }
   }
@@ -803,6 +880,7 @@ export class AlertsClient {
       muteAll: true,
       mutedInstanceIds: [],
       updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
     });
     const updateOptions = { version };
 
@@ -841,6 +919,7 @@ export class AlertsClient {
       muteAll: false,
       mutedInstanceIds: [],
       updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
     });
     const updateOptions = { version };
 
@@ -885,6 +964,7 @@ export class AlertsClient {
         this.updateMeta({
           mutedInstanceIds,
           updatedBy: await this.getUserName(),
+          updatedAt: new Date().toISOString(),
         }),
         { version }
       );
@@ -927,6 +1007,7 @@ export class AlertsClient {
         alertId,
         this.updateMeta({
           updatedBy: await this.getUserName(),
+          updatedAt: new Date().toISOString(),
           mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
         }),
         { version }
@@ -978,19 +1059,17 @@ export class AlertsClient {
   private getAlertFromRaw(
     id: string,
     rawAlert: RawAlert,
-    updatedAt: SavedObject['updated_at'],
     references: SavedObjectReference[] | undefined
   ): Alert {
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    return this.getPartialAlertFromRaw(id, rawAlert, updatedAt, references) as Alert;
+    return this.getPartialAlertFromRaw(id, rawAlert, references) as Alert;
   }
 
   private getPartialAlertFromRaw(
     id: string,
-    { createdAt, meta, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
-    updatedAt: SavedObject['updated_at'] = createdAt,
+    { createdAt, updatedAt, meta, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
   ): PartialAlert {
     // Not the prettiest code here, but if we want to use most of the

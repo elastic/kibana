@@ -7,14 +7,14 @@ import { LocationDescriptorObject } from 'history';
 import { CoreStart, ScopedHistory } from 'kibana/public';
 
 import { User } from '../../../../common/model';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { UsersGridPage } from './users_grid_page';
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { userAPIClientMock } from '../index.mock';
 import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { rolesAPIClientMock } from '../../roles/index.mock';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 import { EuiBasicTable } from '@elastic/eui';
 
 describe('UsersGridPage', () => {

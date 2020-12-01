@@ -29,6 +29,14 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         body: schema.object({
           typesToInclude: schema.arrayOf(schema.string()),
           searchString: schema.maybe(schema.string()),
+          references: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                type: schema.string(),
+                id: schema.string(),
+              })
+            )
+          ),
         }),
       },
     },
@@ -42,6 +50,10 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       if (req.body.searchString) {
         findOptions.search = `${req.body.searchString}*`;
         findOptions.searchFields = ['title'];
+      }
+      if (req.body.references) {
+        findOptions.hasReference = req.body.references;
+        findOptions.hasReferenceOperator = 'OR';
       }
 
       const objects = await findAll(client, findOptions);

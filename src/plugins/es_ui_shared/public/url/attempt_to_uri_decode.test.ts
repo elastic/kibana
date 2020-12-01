@@ -19,14 +19,51 @@
 
 import { attemptToURIDecode } from './attempt_to_uri_decode';
 
+// this function doesn't work for % with other special chars or sequence %25
+// known issue https://github.com/elastic/kibana/issues/82440
 test('decodes an encoded string', () => {
-  const encodedString = 'test%3F';
-  expect(attemptToURIDecode(encodedString)).toBe('test?');
+  const originalName = 'test;,/?:@&=+$#';
+  const encodedName = encodeURIComponent(originalName);
+  // react router v5 automatically decodes route match params
+  const reactRouterDecoded = decodeURI(encodedName);
+
+  expect(attemptToURIDecode(encodedName)).toBe(originalName);
+  expect(attemptToURIDecode(reactRouterDecoded)).toBe(originalName);
 });
 
-// react router partially decodes %25 sequence to % in match params
-// https://github.com/elastic/kibana/pull/81664
 test('ignores the error if a string is already decoded', () => {
-  const decodedString = 'test%';
-  expect(attemptToURIDecode(decodedString)).toBe(decodedString);
+  const originalName = 'test%';
+
+  const encodedName = encodeURIComponent(originalName);
+  // react router v5 automatically decodes route match params
+  const reactRouterDecoded = decodeURI(encodedName);
+
+  expect(attemptToURIDecode(encodedName)).toBe(originalName);
+  expect(attemptToURIDecode(reactRouterDecoded)).toBe(originalName);
+});
+
+test('returns wrong decoded value for %25 sequence', () => {
+  const originalName = 'test%25';
+
+  const encodedName = encodeURIComponent(originalName);
+  // react router v5 automatically decodes route match params
+  const reactRouterDecoded = decodeURI(encodedName);
+
+  expect(attemptToURIDecode(encodedName)).toBe(originalName);
+  expect(attemptToURIDecode(reactRouterDecoded)).not.toBe(originalName);
+});
+
+test('returns wrong decoded value for % with other escaped characters', () => {
+  const originalName = 'test%?#';
+
+  const encodedName = encodeURIComponent(originalName);
+  // react router v5 automatically decodes route match params
+  const reactRouterDecoded = decodeURI(encodedName);
+
+  expect(attemptToURIDecode(encodedName)).toBe(originalName);
+  expect(attemptToURIDecode(reactRouterDecoded)).not.toBe(originalName);
+});
+
+test("doesn't convert undefined to a string", () => {
+  expect(attemptToURIDecode(undefined)).toBeUndefined();
 });

@@ -12,6 +12,7 @@ describe('#canUserChangePassword', () => {
       expect(
         canUserChangePassword({
           username: 'foo',
+          authentication_provider: { type: 'basic', name: 'basic1' },
           authentication_realm: {
             name: 'the realm name',
             type: realm,
@@ -19,12 +20,26 @@ describe('#canUserChangePassword', () => {
         } as AuthenticatedUser)
       ).toEqual(true);
     });
+
+    it(`returns false for users in the ${realm} realm if used for anonymous access`, () => {
+      expect(
+        canUserChangePassword({
+          username: 'foo',
+          authentication_provider: { type: 'anonymous', name: 'does not matter' },
+          authentication_realm: {
+            name: 'the realm name',
+            type: realm,
+          },
+        } as AuthenticatedUser)
+      ).toEqual(false);
+    });
   });
 
   it(`returns false for all other realms`, () => {
     expect(
       canUserChangePassword({
         username: 'foo',
+        authentication_provider: { type: 'the provider type', name: 'does not matter' },
         authentication_realm: {
           name: 'the realm name',
           type: 'does not matter',

@@ -18,6 +18,7 @@
  */
 
 import cmdShimCb from 'cmd-shim';
+import del from 'del';
 import fs from 'fs';
 import { ncp } from 'ncp';
 import { dirname, relative } from 'path';
@@ -31,6 +32,7 @@ export const chmod = promisify(fs.chmod);
 const cmdShim = promisify<string, string>(cmdShimCb);
 const mkdir = promisify(fs.mkdir);
 export const mkdirp = async (path: string) => await mkdir(path, { recursive: true });
+export const rmdirp = async (path: string) => await del(path, { force: true });
 export const unlink = promisify(fs.unlink);
 export const copyDirectory = promisify(ncp);
 

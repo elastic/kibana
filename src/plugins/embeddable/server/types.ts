@@ -22,7 +22,7 @@ import {
   PersistableStateDefinition,
   SerializableState,
 } from '../../kibana_utils/common';
-import { EmbeddableInput } from '../common/types';
+import { EmbeddableStateWithType } from '../common/types';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;
@@ -37,12 +37,13 @@ export interface EnhancementRegistryItem<P extends SerializableState = Serializa
   id: string;
 }
 
-export interface EmbeddableRegistryDefinition<P extends EmbeddableInput = EmbeddableInput>
-  extends PersistableStateDefinition<P> {
+export interface EmbeddableRegistryDefinition<
+  P extends EmbeddableStateWithType = EmbeddableStateWithType
+> extends PersistableStateDefinition<P> {
   id: string;
 }
 
-export interface EmbeddableRegistryItem<P extends EmbeddableInput = EmbeddableInput>
+export interface EmbeddableRegistryItem<P extends EmbeddableStateWithType = EmbeddableStateWithType>
   extends PersistableState<P> {
   id: string;
 }

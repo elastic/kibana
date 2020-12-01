@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { Role } from '../../../../../../common/model';
 import { ClusterPrivileges } from './cluster_privileges';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 
 test('it renders without crashing', () => {
   const role: Role = {

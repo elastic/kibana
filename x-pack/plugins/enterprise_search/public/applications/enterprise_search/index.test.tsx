@@ -8,6 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { setMockValues } from '../__mocks__/kea.mock';
+import { rerender } from '../__mocks__';
 
 import { EnterpriseSearch } from './';
 import { SetupGuide } from './components/setup_guide';
@@ -40,7 +41,7 @@ describe('EnterpriseSearch', () => {
       errorConnecting: true,
       config: { host: '' },
     });
-    wrapper.setProps({}); // Re-render
+    rerender(wrapper);
 
     expect(wrapper.find(ErrorConnecting)).toHaveLength(0);
     expect(wrapper.find(ProductSelector)).toHaveLength(1);

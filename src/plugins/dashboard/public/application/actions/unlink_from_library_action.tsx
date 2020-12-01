@@ -19,13 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import uuid from 'uuid';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
 import {
   PanelNotFoundError,
   EmbeddableInput,
   isReferenceOrValueEmbeddable,
+  isErrorEmbeddable,
 } from '../../../../embeddable/public';
 import { NotificationsStart } from '../../../../../core/public';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
@@ -61,7 +61,8 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
 
   public async isCompatible({ embeddable }: UnlinkFromLibraryActionContext) {
     return Boolean(
-      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
+      !isErrorEmbeddable(embeddable) &&
+        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&
         embeddable.getRoot().isContainer &&
         embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
@@ -86,9 +87,9 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
 
     const newPanel: PanelState<EmbeddableInput> = {
       type: embeddable.type,
-      explicitInput: { ...newInput, id: uuid.v4() },
+      explicitInput: { ...newInput },
     };
-    dashboard.replacePanel(panelToReplace, newPanel);
+    dashboard.replacePanel(panelToReplace, newPanel, true);
 
     const title = embeddable.getTitle()
       ? i18n.translate('dashboard.panel.unlinkFromLibrary.successMessageWithTitle', {

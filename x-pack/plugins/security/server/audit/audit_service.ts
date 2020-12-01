@@ -27,7 +27,7 @@ export interface LegacyAuditLogger {
 }
 
 export interface AuditLogger {
-  log: (event: AuditEvent) => void;
+  log: (event: AuditEvent | undefined) => void;
 }
 
 interface AuditLogMeta extends AuditEvent {
@@ -127,7 +127,10 @@ export class AuditService {
        * });
        * ```
        */
-      const log = (event: AuditEvent) => {
+      const log: AuditLogger['log'] = (event) => {
+        if (!event) {
+          return;
+        }
         const user = getCurrentUser(request);
         const spaceId = getSpaceId(request);
         const meta: AuditLogMeta = {
