@@ -193,6 +193,30 @@ describe('EventFieldsBrowser', () => {
       );
       expect(wrapper.find('[data-test-subj="field-name"]').at(0).text()).toEqual('@timestamp');
     });
+
+    test('it renders the expected icon for description', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            columnHeaders={defaultHeaders}
+            data={mockDetailItemData}
+            eventId={mockDetailItemDataId}
+            onUpdateColumns={jest.fn()}
+            timelineId="test"
+          />
+        </TestProviders>
+      );
+      expect(
+        wrapper
+          .find('.euiTableRow')
+          .find('.euiTableRowCell')
+          .at(1)
+          .find('[data-euiicon-type]')
+          .last()
+          .prop('data-euiicon-type')
+      ).toEqual('iInCircle');
+    });
   });
 
   describe('value', () => {

@@ -26,6 +26,10 @@ import { AlertsTableFilterGroup } from '../../../detections/components/alerts_ta
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useTimelineEvents } from '../../../timelines/containers';
 
+jest.mock('../../../timelines/components/graph_overlay', () => ({
+  GraphOverlay: jest.fn(() => <div />),
+}));
+
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
