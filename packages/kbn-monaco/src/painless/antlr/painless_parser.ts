@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Generated from ./PainlessParser.g4 by ANTLR 4.7.3-SNAPSHOT
+// Generated from ./src/painless/antlr/painless_parser.g4 by ANTLR 4.7.3-SNAPSHOT
 
 
 import { ATN } from "antlr4ts/atn/ATN";
@@ -24,9 +24,9 @@ import { VocabularyImpl } from "antlr4ts/VocabularyImpl";
 
 import * as Utils from "antlr4ts/misc/Utils";
 
-import { PainlessParserListener } from "./PainlessParserListener";
+import { painless_parserListener } from "./painless_parserListener";
 
-export class PainlessParser extends Parser {
+export class painless_parser extends Parser {
 	public static readonly WS = 1;
 	public static readonly COMMENT = 2;
 	public static readonly LBRACK = 3;
@@ -186,32 +186,32 @@ export class PainlessParser extends Parser {
 		"OCTAL", "HEX", "INTEGER", "DECIMAL", "STRING", "REGEX", "TRUE", "FALSE", 
 		"NULL", "PRIMITIVE", "DEF", "ID", "DOTINTEGER", "DOTID",
 	];
-	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(PainlessParser._LITERAL_NAMES, PainlessParser._SYMBOLIC_NAMES, []);
+	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(painless_parser._LITERAL_NAMES, painless_parser._SYMBOLIC_NAMES, []);
 
 	// @Override
 	// @NotNull
 	public get vocabulary(): Vocabulary {
-		return PainlessParser.VOCABULARY;
+		return painless_parser.VOCABULARY;
 	}
 	// tslint:enable:no-trailing-whitespace
 
 	// @Override
-	public get grammarFileName(): string { return "PainlessParser.g4"; }
+	public get grammarFileName(): string { return "painless_parser.g4"; }
 
 	// @Override
-	public get ruleNames(): string[] { return PainlessParser.ruleNames; }
+	public get ruleNames(): string[] { return painless_parser.ruleNames; }
 
 	// @Override
-	public get serializedATN(): string { return PainlessParser._serializedATN; }
+	public get serializedATN(): string { return painless_parser._serializedATN; }
 
 	constructor(input: TokenStream) {
 		super(input);
-		this._interp = new ParserATNSimulator(PainlessParser._ATN, this);
+		this._interp = new ParserATNSimulator(painless_parser._ATN, this);
 	}
 	// @RuleVersion(0)
 	public source(): SourceContext {
 		let _localctx: SourceContext = new SourceContext(this._ctx, this.state);
-		this.enterRule(_localctx, 0, PainlessParser.RULE_source);
+		this.enterRule(_localctx, 0, painless_parser.RULE_source);
 		let _la: number;
 		try {
 			let _alt: number;
@@ -236,7 +236,7 @@ export class PainlessParser extends Parser {
 			this.state = 87;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (PainlessParser.LBRACE - 5)) | (1 << (PainlessParser.LP - 5)) | (1 << (PainlessParser.IF - 5)) | (1 << (PainlessParser.WHILE - 5)) | (1 << (PainlessParser.DO - 5)) | (1 << (PainlessParser.FOR - 5)) | (1 << (PainlessParser.CONTINUE - 5)) | (1 << (PainlessParser.BREAK - 5)) | (1 << (PainlessParser.RETURN - 5)) | (1 << (PainlessParser.NEW - 5)) | (1 << (PainlessParser.TRY - 5)) | (1 << (PainlessParser.THROW - 5)) | (1 << (PainlessParser.BOOLNOT - 5)) | (1 << (PainlessParser.BWNOT - 5)) | (1 << (PainlessParser.ADD - 5)) | (1 << (PainlessParser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (PainlessParser.INCR - 58)) | (1 << (PainlessParser.DECR - 58)) | (1 << (PainlessParser.OCTAL - 58)) | (1 << (PainlessParser.HEX - 58)) | (1 << (PainlessParser.INTEGER - 58)) | (1 << (PainlessParser.DECIMAL - 58)) | (1 << (PainlessParser.STRING - 58)) | (1 << (PainlessParser.REGEX - 58)) | (1 << (PainlessParser.TRUE - 58)) | (1 << (PainlessParser.FALSE - 58)) | (1 << (PainlessParser.NULL - 58)) | (1 << (PainlessParser.PRIMITIVE - 58)) | (1 << (PainlessParser.DEF - 58)) | (1 << (PainlessParser.ID - 58)))) !== 0)) {
+			while (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.IF - 5)) | (1 << (painless_parser.WHILE - 5)) | (1 << (painless_parser.DO - 5)) | (1 << (painless_parser.FOR - 5)) | (1 << (painless_parser.CONTINUE - 5)) | (1 << (painless_parser.BREAK - 5)) | (1 << (painless_parser.RETURN - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.TRY - 5)) | (1 << (painless_parser.THROW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.PRIMITIVE - 58)) | (1 << (painless_parser.DEF - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
 				{
 				{
 				this.state = 84;
@@ -248,7 +248,7 @@ export class PainlessParser extends Parser {
 				_la = this._input.LA(1);
 			}
 			this.state = 90;
-			this.match(PainlessParser.EOF);
+			this.match(painless_parser.EOF);
 			}
 		}
 		catch (re) {
@@ -268,14 +268,14 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public function(): FunctionContext {
 		let _localctx: FunctionContext = new FunctionContext(this._ctx, this.state);
-		this.enterRule(_localctx, 2, PainlessParser.RULE_function);
+		this.enterRule(_localctx, 2, painless_parser.RULE_function);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 92;
 			this.decltype();
 			this.state = 93;
-			this.match(PainlessParser.ID);
+			this.match(painless_parser.ID);
 			this.state = 94;
 			this.parameters();
 			this.state = 95;
@@ -299,34 +299,34 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public parameters(): ParametersContext {
 		let _localctx: ParametersContext = new ParametersContext(this._ctx, this.state);
-		this.enterRule(_localctx, 4, PainlessParser.RULE_parameters);
+		this.enterRule(_localctx, 4, painless_parser.RULE_parameters);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 97;
-			this.match(PainlessParser.LP);
+			this.match(painless_parser.LP);
 			this.state = 109;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (((((_la - 81)) & ~0x1F) === 0 && ((1 << (_la - 81)) & ((1 << (PainlessParser.PRIMITIVE - 81)) | (1 << (PainlessParser.DEF - 81)) | (1 << (PainlessParser.ID - 81)))) !== 0)) {
+			if (((((_la - 81)) & ~0x1F) === 0 && ((1 << (_la - 81)) & ((1 << (painless_parser.PRIMITIVE - 81)) | (1 << (painless_parser.DEF - 81)) | (1 << (painless_parser.ID - 81)))) !== 0)) {
 				{
 				this.state = 98;
 				this.decltype();
 				this.state = 99;
-				this.match(PainlessParser.ID);
+				this.match(painless_parser.ID);
 				this.state = 106;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la === PainlessParser.COMMA) {
+				while (_la === painless_parser.COMMA) {
 					{
 					{
 					this.state = 100;
-					this.match(PainlessParser.COMMA);
+					this.match(painless_parser.COMMA);
 					this.state = 101;
 					this.decltype();
 					this.state = 102;
-					this.match(PainlessParser.ID);
+					this.match(painless_parser.ID);
 					}
 					}
 					this.state = 108;
@@ -337,7 +337,7 @@ export class PainlessParser extends Parser {
 			}
 
 			this.state = 111;
-			this.match(PainlessParser.RP);
+			this.match(painless_parser.RP);
 			}
 		}
 		catch (re) {
@@ -357,55 +357,55 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public statement(): StatementContext {
 		let _localctx: StatementContext = new StatementContext(this._ctx, this.state);
-		this.enterRule(_localctx, 6, PainlessParser.RULE_statement);
+		this.enterRule(_localctx, 6, painless_parser.RULE_statement);
 		let _la: number;
 		try {
 			this.state = 117;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case PainlessParser.IF:
-			case PainlessParser.WHILE:
-			case PainlessParser.FOR:
-			case PainlessParser.TRY:
+			case painless_parser.IF:
+			case painless_parser.WHILE:
+			case painless_parser.FOR:
+			case painless_parser.TRY:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 113;
 				this.rstatement();
 				}
 				break;
-			case PainlessParser.LBRACE:
-			case PainlessParser.LP:
-			case PainlessParser.DO:
-			case PainlessParser.CONTINUE:
-			case PainlessParser.BREAK:
-			case PainlessParser.RETURN:
-			case PainlessParser.NEW:
-			case PainlessParser.THROW:
-			case PainlessParser.BOOLNOT:
-			case PainlessParser.BWNOT:
-			case PainlessParser.ADD:
-			case PainlessParser.SUB:
-			case PainlessParser.INCR:
-			case PainlessParser.DECR:
-			case PainlessParser.OCTAL:
-			case PainlessParser.HEX:
-			case PainlessParser.INTEGER:
-			case PainlessParser.DECIMAL:
-			case PainlessParser.STRING:
-			case PainlessParser.REGEX:
-			case PainlessParser.TRUE:
-			case PainlessParser.FALSE:
-			case PainlessParser.NULL:
-			case PainlessParser.PRIMITIVE:
-			case PainlessParser.DEF:
-			case PainlessParser.ID:
+			case painless_parser.LBRACE:
+			case painless_parser.LP:
+			case painless_parser.DO:
+			case painless_parser.CONTINUE:
+			case painless_parser.BREAK:
+			case painless_parser.RETURN:
+			case painless_parser.NEW:
+			case painless_parser.THROW:
+			case painless_parser.BOOLNOT:
+			case painless_parser.BWNOT:
+			case painless_parser.ADD:
+			case painless_parser.SUB:
+			case painless_parser.INCR:
+			case painless_parser.DECR:
+			case painless_parser.OCTAL:
+			case painless_parser.HEX:
+			case painless_parser.INTEGER:
+			case painless_parser.DECIMAL:
+			case painless_parser.STRING:
+			case painless_parser.REGEX:
+			case painless_parser.TRUE:
+			case painless_parser.FALSE:
+			case painless_parser.NULL:
+			case painless_parser.PRIMITIVE:
+			case painless_parser.DEF:
+			case painless_parser.ID:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 114;
 				this.dstatement();
 				this.state = 115;
 				_la = this._input.LA(1);
-				if (!(_la === PainlessParser.EOF || _la === PainlessParser.SEMICOLON)) {
+				if (!(_la === painless_parser.EOF || _la === painless_parser.SEMICOLON)) {
 				this._errHandler.recoverInline(this);
 				} else {
 					if (this._input.LA(1) === Token.EOF) {
@@ -438,7 +438,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public rstatement(): RstatementContext {
 		let _localctx: RstatementContext = new RstatementContext(this._ctx, this.state);
-		this.enterRule(_localctx, 8, PainlessParser.RULE_rstatement);
+		this.enterRule(_localctx, 8, painless_parser.RULE_rstatement);
 		let _la: number;
 		try {
 			let _alt: number;
@@ -450,13 +450,13 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 119;
-				this.match(PainlessParser.IF);
+				this.match(painless_parser.IF);
 				this.state = 120;
-				this.match(PainlessParser.LP);
+				this.match(painless_parser.LP);
 				this.state = 121;
 				this.expression();
 				this.state = 122;
-				this.match(PainlessParser.RP);
+				this.match(painless_parser.RP);
 				this.state = 123;
 				this.trailer();
 				this.state = 127;
@@ -465,7 +465,7 @@ export class PainlessParser extends Parser {
 				case 1:
 					{
 					this.state = 124;
-					this.match(PainlessParser.ELSE);
+					this.match(painless_parser.ELSE);
 					this.state = 125;
 					this.trailer();
 					}
@@ -488,53 +488,53 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 129;
-				this.match(PainlessParser.WHILE);
+				this.match(painless_parser.WHILE);
 				this.state = 130;
-				this.match(PainlessParser.LP);
+				this.match(painless_parser.LP);
 				this.state = 131;
 				this.expression();
 				this.state = 132;
-				this.match(PainlessParser.RP);
+				this.match(painless_parser.RP);
 				this.state = 135;
 				this._errHandler.sync(this);
 				switch (this._input.LA(1)) {
-				case PainlessParser.LBRACK:
-				case PainlessParser.LBRACE:
-				case PainlessParser.LP:
-				case PainlessParser.IF:
-				case PainlessParser.WHILE:
-				case PainlessParser.DO:
-				case PainlessParser.FOR:
-				case PainlessParser.CONTINUE:
-				case PainlessParser.BREAK:
-				case PainlessParser.RETURN:
-				case PainlessParser.NEW:
-				case PainlessParser.TRY:
-				case PainlessParser.THROW:
-				case PainlessParser.BOOLNOT:
-				case PainlessParser.BWNOT:
-				case PainlessParser.ADD:
-				case PainlessParser.SUB:
-				case PainlessParser.INCR:
-				case PainlessParser.DECR:
-				case PainlessParser.OCTAL:
-				case PainlessParser.HEX:
-				case PainlessParser.INTEGER:
-				case PainlessParser.DECIMAL:
-				case PainlessParser.STRING:
-				case PainlessParser.REGEX:
-				case PainlessParser.TRUE:
-				case PainlessParser.FALSE:
-				case PainlessParser.NULL:
-				case PainlessParser.PRIMITIVE:
-				case PainlessParser.DEF:
-				case PainlessParser.ID:
+				case painless_parser.LBRACK:
+				case painless_parser.LBRACE:
+				case painless_parser.LP:
+				case painless_parser.IF:
+				case painless_parser.WHILE:
+				case painless_parser.DO:
+				case painless_parser.FOR:
+				case painless_parser.CONTINUE:
+				case painless_parser.BREAK:
+				case painless_parser.RETURN:
+				case painless_parser.NEW:
+				case painless_parser.TRY:
+				case painless_parser.THROW:
+				case painless_parser.BOOLNOT:
+				case painless_parser.BWNOT:
+				case painless_parser.ADD:
+				case painless_parser.SUB:
+				case painless_parser.INCR:
+				case painless_parser.DECR:
+				case painless_parser.OCTAL:
+				case painless_parser.HEX:
+				case painless_parser.INTEGER:
+				case painless_parser.DECIMAL:
+				case painless_parser.STRING:
+				case painless_parser.REGEX:
+				case painless_parser.TRUE:
+				case painless_parser.FALSE:
+				case painless_parser.NULL:
+				case painless_parser.PRIMITIVE:
+				case painless_parser.DEF:
+				case painless_parser.ID:
 					{
 					this.state = 133;
 					this.trailer();
 					}
 					break;
-				case PainlessParser.SEMICOLON:
+				case painless_parser.SEMICOLON:
 					{
 					this.state = 134;
 					this.empty();
@@ -551,13 +551,13 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 137;
-				this.match(PainlessParser.FOR);
+				this.match(painless_parser.FOR);
 				this.state = 138;
-				this.match(PainlessParser.LP);
+				this.match(painless_parser.LP);
 				this.state = 140;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (PainlessParser.LBRACE - 5)) | (1 << (PainlessParser.LP - 5)) | (1 << (PainlessParser.NEW - 5)) | (1 << (PainlessParser.BOOLNOT - 5)) | (1 << (PainlessParser.BWNOT - 5)) | (1 << (PainlessParser.ADD - 5)) | (1 << (PainlessParser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (PainlessParser.INCR - 58)) | (1 << (PainlessParser.DECR - 58)) | (1 << (PainlessParser.OCTAL - 58)) | (1 << (PainlessParser.HEX - 58)) | (1 << (PainlessParser.INTEGER - 58)) | (1 << (PainlessParser.DECIMAL - 58)) | (1 << (PainlessParser.STRING - 58)) | (1 << (PainlessParser.REGEX - 58)) | (1 << (PainlessParser.TRUE - 58)) | (1 << (PainlessParser.FALSE - 58)) | (1 << (PainlessParser.NULL - 58)) | (1 << (PainlessParser.PRIMITIVE - 58)) | (1 << (PainlessParser.DEF - 58)) | (1 << (PainlessParser.ID - 58)))) !== 0)) {
+				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.PRIMITIVE - 58)) | (1 << (painless_parser.DEF - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
 					{
 					this.state = 139;
 					this.initializer();
@@ -565,11 +565,11 @@ export class PainlessParser extends Parser {
 				}
 
 				this.state = 142;
-				this.match(PainlessParser.SEMICOLON);
+				this.match(painless_parser.SEMICOLON);
 				this.state = 144;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (PainlessParser.LBRACE - 5)) | (1 << (PainlessParser.LP - 5)) | (1 << (PainlessParser.NEW - 5)) | (1 << (PainlessParser.BOOLNOT - 5)) | (1 << (PainlessParser.BWNOT - 5)) | (1 << (PainlessParser.ADD - 5)) | (1 << (PainlessParser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (PainlessParser.INCR - 58)) | (1 << (PainlessParser.DECR - 58)) | (1 << (PainlessParser.OCTAL - 58)) | (1 << (PainlessParser.HEX - 58)) | (1 << (PainlessParser.INTEGER - 58)) | (1 << (PainlessParser.DECIMAL - 58)) | (1 << (PainlessParser.STRING - 58)) | (1 << (PainlessParser.REGEX - 58)) | (1 << (PainlessParser.TRUE - 58)) | (1 << (PainlessParser.FALSE - 58)) | (1 << (PainlessParser.NULL - 58)) | (1 << (PainlessParser.ID - 58)))) !== 0)) {
+				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
 					{
 					this.state = 143;
 					this.expression();
@@ -577,11 +577,11 @@ export class PainlessParser extends Parser {
 				}
 
 				this.state = 146;
-				this.match(PainlessParser.SEMICOLON);
+				this.match(painless_parser.SEMICOLON);
 				this.state = 148;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (PainlessParser.LBRACE - 5)) | (1 << (PainlessParser.LP - 5)) | (1 << (PainlessParser.NEW - 5)) | (1 << (PainlessParser.BOOLNOT - 5)) | (1 << (PainlessParser.BWNOT - 5)) | (1 << (PainlessParser.ADD - 5)) | (1 << (PainlessParser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (PainlessParser.INCR - 58)) | (1 << (PainlessParser.DECR - 58)) | (1 << (PainlessParser.OCTAL - 58)) | (1 << (PainlessParser.HEX - 58)) | (1 << (PainlessParser.INTEGER - 58)) | (1 << (PainlessParser.DECIMAL - 58)) | (1 << (PainlessParser.STRING - 58)) | (1 << (PainlessParser.REGEX - 58)) | (1 << (PainlessParser.TRUE - 58)) | (1 << (PainlessParser.FALSE - 58)) | (1 << (PainlessParser.NULL - 58)) | (1 << (PainlessParser.ID - 58)))) !== 0)) {
+				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
 					{
 					this.state = 147;
 					this.afterthought();
@@ -589,47 +589,47 @@ export class PainlessParser extends Parser {
 				}
 
 				this.state = 150;
-				this.match(PainlessParser.RP);
+				this.match(painless_parser.RP);
 				this.state = 153;
 				this._errHandler.sync(this);
 				switch (this._input.LA(1)) {
-				case PainlessParser.LBRACK:
-				case PainlessParser.LBRACE:
-				case PainlessParser.LP:
-				case PainlessParser.IF:
-				case PainlessParser.WHILE:
-				case PainlessParser.DO:
-				case PainlessParser.FOR:
-				case PainlessParser.CONTINUE:
-				case PainlessParser.BREAK:
-				case PainlessParser.RETURN:
-				case PainlessParser.NEW:
-				case PainlessParser.TRY:
-				case PainlessParser.THROW:
-				case PainlessParser.BOOLNOT:
-				case PainlessParser.BWNOT:
-				case PainlessParser.ADD:
-				case PainlessParser.SUB:
-				case PainlessParser.INCR:
-				case PainlessParser.DECR:
-				case PainlessParser.OCTAL:
-				case PainlessParser.HEX:
-				case PainlessParser.INTEGER:
-				case PainlessParser.DECIMAL:
-				case PainlessParser.STRING:
-				case PainlessParser.REGEX:
-				case PainlessParser.TRUE:
-				case PainlessParser.FALSE:
-				case PainlessParser.NULL:
-				case PainlessParser.PRIMITIVE:
-				case PainlessParser.DEF:
-				case PainlessParser.ID:
+				case painless_parser.LBRACK:
+				case painless_parser.LBRACE:
+				case painless_parser.LP:
+				case painless_parser.IF:
+				case painless_parser.WHILE:
+				case painless_parser.DO:
+				case painless_parser.FOR:
+				case painless_parser.CONTINUE:
+				case painless_parser.BREAK:
+				case painless_parser.RETURN:
+				case painless_parser.NEW:
+				case painless_parser.TRY:
+				case painless_parser.THROW:
+				case painless_parser.BOOLNOT:
+				case painless_parser.BWNOT:
+				case painless_parser.ADD:
+				case painless_parser.SUB:
+				case painless_parser.INCR:
+				case painless_parser.DECR:
+				case painless_parser.OCTAL:
+				case painless_parser.HEX:
+				case painless_parser.INTEGER:
+				case painless_parser.DECIMAL:
+				case painless_parser.STRING:
+				case painless_parser.REGEX:
+				case painless_parser.TRUE:
+				case painless_parser.FALSE:
+				case painless_parser.NULL:
+				case painless_parser.PRIMITIVE:
+				case painless_parser.DEF:
+				case painless_parser.ID:
 					{
 					this.state = 151;
 					this.trailer();
 					}
 					break;
-				case PainlessParser.SEMICOLON:
+				case painless_parser.SEMICOLON:
 					{
 					this.state = 152;
 					this.empty();
@@ -646,19 +646,19 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 4);
 				{
 				this.state = 155;
-				this.match(PainlessParser.FOR);
+				this.match(painless_parser.FOR);
 				this.state = 156;
-				this.match(PainlessParser.LP);
+				this.match(painless_parser.LP);
 				this.state = 157;
 				this.decltype();
 				this.state = 158;
-				this.match(PainlessParser.ID);
+				this.match(painless_parser.ID);
 				this.state = 159;
-				this.match(PainlessParser.COLON);
+				this.match(painless_parser.COLON);
 				this.state = 160;
 				this.expression();
 				this.state = 161;
-				this.match(PainlessParser.RP);
+				this.match(painless_parser.RP);
 				this.state = 162;
 				this.trailer();
 				}
@@ -669,17 +669,17 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 5);
 				{
 				this.state = 164;
-				this.match(PainlessParser.FOR);
+				this.match(painless_parser.FOR);
 				this.state = 165;
-				this.match(PainlessParser.LP);
+				this.match(painless_parser.LP);
 				this.state = 166;
-				this.match(PainlessParser.ID);
+				this.match(painless_parser.ID);
 				this.state = 167;
-				this.match(PainlessParser.IN);
+				this.match(painless_parser.IN);
 				this.state = 168;
 				this.expression();
 				this.state = 169;
-				this.match(PainlessParser.RP);
+				this.match(painless_parser.RP);
 				this.state = 170;
 				this.trailer();
 				}
@@ -690,7 +690,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 6);
 				{
 				this.state = 172;
-				this.match(PainlessParser.TRY);
+				this.match(painless_parser.TRY);
 				this.state = 173;
 				this.block();
 				this.state = 175;
@@ -734,7 +734,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public dstatement(): DstatementContext {
 		let _localctx: DstatementContext = new DstatementContext(this._ctx, this.state);
-		this.enterRule(_localctx, 10, PainlessParser.RULE_dstatement);
+		this.enterRule(_localctx, 10, painless_parser.RULE_dstatement);
 		let _la: number;
 		try {
 			this.state = 198;
@@ -745,17 +745,17 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 181;
-				this.match(PainlessParser.DO);
+				this.match(painless_parser.DO);
 				this.state = 182;
 				this.block();
 				this.state = 183;
-				this.match(PainlessParser.WHILE);
+				this.match(painless_parser.WHILE);
 				this.state = 184;
-				this.match(PainlessParser.LP);
+				this.match(painless_parser.LP);
 				this.state = 185;
 				this.expression();
 				this.state = 186;
-				this.match(PainlessParser.RP);
+				this.match(painless_parser.RP);
 				}
 				break;
 
@@ -773,7 +773,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 189;
-				this.match(PainlessParser.CONTINUE);
+				this.match(painless_parser.CONTINUE);
 				}
 				break;
 
@@ -782,7 +782,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 4);
 				{
 				this.state = 190;
-				this.match(PainlessParser.BREAK);
+				this.match(painless_parser.BREAK);
 				}
 				break;
 
@@ -791,11 +791,11 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 5);
 				{
 				this.state = 191;
-				this.match(PainlessParser.RETURN);
+				this.match(painless_parser.RETURN);
 				this.state = 193;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (PainlessParser.LBRACE - 5)) | (1 << (PainlessParser.LP - 5)) | (1 << (PainlessParser.NEW - 5)) | (1 << (PainlessParser.BOOLNOT - 5)) | (1 << (PainlessParser.BWNOT - 5)) | (1 << (PainlessParser.ADD - 5)) | (1 << (PainlessParser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (PainlessParser.INCR - 58)) | (1 << (PainlessParser.DECR - 58)) | (1 << (PainlessParser.OCTAL - 58)) | (1 << (PainlessParser.HEX - 58)) | (1 << (PainlessParser.INTEGER - 58)) | (1 << (PainlessParser.DECIMAL - 58)) | (1 << (PainlessParser.STRING - 58)) | (1 << (PainlessParser.REGEX - 58)) | (1 << (PainlessParser.TRUE - 58)) | (1 << (PainlessParser.FALSE - 58)) | (1 << (PainlessParser.NULL - 58)) | (1 << (PainlessParser.ID - 58)))) !== 0)) {
+				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
 					{
 					this.state = 192;
 					this.expression();
@@ -810,7 +810,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 6);
 				{
 				this.state = 195;
-				this.match(PainlessParser.THROW);
+				this.match(painless_parser.THROW);
 				this.state = 196;
 				this.expression();
 				}
@@ -843,48 +843,48 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public trailer(): TrailerContext {
 		let _localctx: TrailerContext = new TrailerContext(this._ctx, this.state);
-		this.enterRule(_localctx, 12, PainlessParser.RULE_trailer);
+		this.enterRule(_localctx, 12, painless_parser.RULE_trailer);
 		try {
 			this.state = 202;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case PainlessParser.LBRACK:
+			case painless_parser.LBRACK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 200;
 				this.block();
 				}
 				break;
-			case PainlessParser.LBRACE:
-			case PainlessParser.LP:
-			case PainlessParser.IF:
-			case PainlessParser.WHILE:
-			case PainlessParser.DO:
-			case PainlessParser.FOR:
-			case PainlessParser.CONTINUE:
-			case PainlessParser.BREAK:
-			case PainlessParser.RETURN:
-			case PainlessParser.NEW:
-			case PainlessParser.TRY:
-			case PainlessParser.THROW:
-			case PainlessParser.BOOLNOT:
-			case PainlessParser.BWNOT:
-			case PainlessParser.ADD:
-			case PainlessParser.SUB:
-			case PainlessParser.INCR:
-			case PainlessParser.DECR:
-			case PainlessParser.OCTAL:
-			case PainlessParser.HEX:
-			case PainlessParser.INTEGER:
-			case PainlessParser.DECIMAL:
-			case PainlessParser.STRING:
-			case PainlessParser.REGEX:
-			case PainlessParser.TRUE:
-			case PainlessParser.FALSE:
-			case PainlessParser.NULL:
-			case PainlessParser.PRIMITIVE:
-			case PainlessParser.DEF:
-			case PainlessParser.ID:
+			case painless_parser.LBRACE:
+			case painless_parser.LP:
+			case painless_parser.IF:
+			case painless_parser.WHILE:
+			case painless_parser.DO:
+			case painless_parser.FOR:
+			case painless_parser.CONTINUE:
+			case painless_parser.BREAK:
+			case painless_parser.RETURN:
+			case painless_parser.NEW:
+			case painless_parser.TRY:
+			case painless_parser.THROW:
+			case painless_parser.BOOLNOT:
+			case painless_parser.BWNOT:
+			case painless_parser.ADD:
+			case painless_parser.SUB:
+			case painless_parser.INCR:
+			case painless_parser.DECR:
+			case painless_parser.OCTAL:
+			case painless_parser.HEX:
+			case painless_parser.INTEGER:
+			case painless_parser.DECIMAL:
+			case painless_parser.STRING:
+			case painless_parser.REGEX:
+			case painless_parser.TRUE:
+			case painless_parser.FALSE:
+			case painless_parser.NULL:
+			case painless_parser.PRIMITIVE:
+			case painless_parser.DEF:
+			case painless_parser.ID:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 201;
@@ -912,14 +912,14 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public block(): BlockContext {
 		let _localctx: BlockContext = new BlockContext(this._ctx, this.state);
-		this.enterRule(_localctx, 14, PainlessParser.RULE_block);
+		this.enterRule(_localctx, 14, painless_parser.RULE_block);
 		let _la: number;
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 204;
-			this.match(PainlessParser.LBRACK);
+			this.match(painless_parser.LBRACK);
 			this.state = 208;
 			this._errHandler.sync(this);
 			_alt = this.interpreter.adaptivePredict(this._input, 16, this._ctx);
@@ -939,7 +939,7 @@ export class PainlessParser extends Parser {
 			this.state = 212;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (PainlessParser.LBRACE - 5)) | (1 << (PainlessParser.LP - 5)) | (1 << (PainlessParser.DO - 5)) | (1 << (PainlessParser.CONTINUE - 5)) | (1 << (PainlessParser.BREAK - 5)) | (1 << (PainlessParser.RETURN - 5)) | (1 << (PainlessParser.NEW - 5)) | (1 << (PainlessParser.THROW - 5)) | (1 << (PainlessParser.BOOLNOT - 5)) | (1 << (PainlessParser.BWNOT - 5)) | (1 << (PainlessParser.ADD - 5)) | (1 << (PainlessParser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (PainlessParser.INCR - 58)) | (1 << (PainlessParser.DECR - 58)) | (1 << (PainlessParser.OCTAL - 58)) | (1 << (PainlessParser.HEX - 58)) | (1 << (PainlessParser.INTEGER - 58)) | (1 << (PainlessParser.DECIMAL - 58)) | (1 << (PainlessParser.STRING - 58)) | (1 << (PainlessParser.REGEX - 58)) | (1 << (PainlessParser.TRUE - 58)) | (1 << (PainlessParser.FALSE - 58)) | (1 << (PainlessParser.NULL - 58)) | (1 << (PainlessParser.PRIMITIVE - 58)) | (1 << (PainlessParser.DEF - 58)) | (1 << (PainlessParser.ID - 58)))) !== 0)) {
+			if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.DO - 5)) | (1 << (painless_parser.CONTINUE - 5)) | (1 << (painless_parser.BREAK - 5)) | (1 << (painless_parser.RETURN - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.THROW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.PRIMITIVE - 58)) | (1 << (painless_parser.DEF - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
 				{
 				this.state = 211;
 				this.dstatement();
@@ -947,7 +947,7 @@ export class PainlessParser extends Parser {
 			}
 
 			this.state = 214;
-			this.match(PainlessParser.RBRACK);
+			this.match(painless_parser.RBRACK);
 			}
 		}
 		catch (re) {
@@ -967,12 +967,12 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public empty(): EmptyContext {
 		let _localctx: EmptyContext = new EmptyContext(this._ctx, this.state);
-		this.enterRule(_localctx, 16, PainlessParser.RULE_empty);
+		this.enterRule(_localctx, 16, painless_parser.RULE_empty);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 216;
-			this.match(PainlessParser.SEMICOLON);
+			this.match(painless_parser.SEMICOLON);
 			}
 		}
 		catch (re) {
@@ -992,7 +992,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public initializer(): InitializerContext {
 		let _localctx: InitializerContext = new InitializerContext(this._ctx, this.state);
-		this.enterRule(_localctx, 18, PainlessParser.RULE_initializer);
+		this.enterRule(_localctx, 18, painless_parser.RULE_initializer);
 		try {
 			this.state = 220;
 			this._errHandler.sync(this);
@@ -1031,7 +1031,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public afterthought(): AfterthoughtContext {
 		let _localctx: AfterthoughtContext = new AfterthoughtContext(this._ctx, this.state);
-		this.enterRule(_localctx, 20, PainlessParser.RULE_afterthought);
+		this.enterRule(_localctx, 20, painless_parser.RULE_afterthought);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
@@ -1056,7 +1056,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public declaration(): DeclarationContext {
 		let _localctx: DeclarationContext = new DeclarationContext(this._ctx, this.state);
-		this.enterRule(_localctx, 22, PainlessParser.RULE_declaration);
+		this.enterRule(_localctx, 22, painless_parser.RULE_declaration);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
@@ -1068,11 +1068,11 @@ export class PainlessParser extends Parser {
 			this.state = 230;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (_la === PainlessParser.COMMA) {
+			while (_la === painless_parser.COMMA) {
 				{
 				{
 				this.state = 226;
-				this.match(PainlessParser.COMMA);
+				this.match(painless_parser.COMMA);
 				this.state = 227;
 				this.declvar();
 				}
@@ -1100,7 +1100,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public decltype(): DecltypeContext {
 		let _localctx: DecltypeContext = new DecltypeContext(this._ctx, this.state);
-		this.enterRule(_localctx, 24, PainlessParser.RULE_decltype);
+		this.enterRule(_localctx, 24, painless_parser.RULE_decltype);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
@@ -1115,9 +1115,9 @@ export class PainlessParser extends Parser {
 					{
 					{
 					this.state = 234;
-					this.match(PainlessParser.LBRACE);
+					this.match(painless_parser.LBRACE);
 					this.state = 235;
-					this.match(PainlessParser.RBRACE);
+					this.match(painless_parser.RBRACE);
 					}
 					}
 				}
@@ -1144,31 +1144,31 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public type(): TypeContext {
 		let _localctx: TypeContext = new TypeContext(this._ctx, this.state);
-		this.enterRule(_localctx, 26, PainlessParser.RULE_type);
+		this.enterRule(_localctx, 26, painless_parser.RULE_type);
 		try {
 			let _alt: number;
 			this.state = 251;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case PainlessParser.DEF:
+			case painless_parser.DEF:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 241;
-				this.match(PainlessParser.DEF);
+				this.match(painless_parser.DEF);
 				}
 				break;
-			case PainlessParser.PRIMITIVE:
+			case painless_parser.PRIMITIVE:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 242;
-				this.match(PainlessParser.PRIMITIVE);
+				this.match(painless_parser.PRIMITIVE);
 				}
 				break;
-			case PainlessParser.ID:
+			case painless_parser.ID:
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 243;
-				this.match(PainlessParser.ID);
+				this.match(painless_parser.ID);
 				this.state = 248;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input, 21, this._ctx);
@@ -1177,9 +1177,9 @@ export class PainlessParser extends Parser {
 						{
 						{
 						this.state = 244;
-						this.match(PainlessParser.DOT);
+						this.match(painless_parser.DOT);
 						this.state = 245;
-						this.match(PainlessParser.DOTID);
+						this.match(painless_parser.DOTID);
 						}
 						}
 					}
@@ -1210,20 +1210,20 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public declvar(): DeclvarContext {
 		let _localctx: DeclvarContext = new DeclvarContext(this._ctx, this.state);
-		this.enterRule(_localctx, 28, PainlessParser.RULE_declvar);
+		this.enterRule(_localctx, 28, painless_parser.RULE_declvar);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 253;
-			this.match(PainlessParser.ID);
+			this.match(painless_parser.ID);
 			this.state = 256;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === PainlessParser.ASSIGN) {
+			if (_la === painless_parser.ASSIGN) {
 				{
 				this.state = 254;
-				this.match(PainlessParser.ASSIGN);
+				this.match(painless_parser.ASSIGN);
 				this.state = 255;
 				this.expression();
 				}
@@ -1248,20 +1248,20 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public trap(): TrapContext {
 		let _localctx: TrapContext = new TrapContext(this._ctx, this.state);
-		this.enterRule(_localctx, 30, PainlessParser.RULE_trap);
+		this.enterRule(_localctx, 30, painless_parser.RULE_trap);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 258;
-			this.match(PainlessParser.CATCH);
+			this.match(painless_parser.CATCH);
 			this.state = 259;
-			this.match(PainlessParser.LP);
+			this.match(painless_parser.LP);
 			this.state = 260;
 			this.type();
 			this.state = 261;
-			this.match(PainlessParser.ID);
+			this.match(painless_parser.ID);
 			this.state = 262;
-			this.match(PainlessParser.RP);
+			this.match(painless_parser.RP);
 			this.state = 263;
 			this.block();
 			}
@@ -1294,7 +1294,7 @@ export class PainlessParser extends Parser {
 		let _localctx: NoncondexpressionContext = new NoncondexpressionContext(this._ctx, _parentState);
 		let _prevctx: NoncondexpressionContext = _localctx;
 		let _startState: number = 32;
-		this.enterRecursionRule(_localctx, 32, PainlessParser.RULE_noncondexpression, _p);
+		this.enterRecursionRule(_localctx, 32, painless_parser.RULE_noncondexpression, _p);
 		let _la: number;
 		try {
 			let _alt: number;
@@ -1325,14 +1325,14 @@ export class PainlessParser extends Parser {
 					case 1:
 						{
 						_localctx = new BinaryContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 268;
 						if (!(this.precpred(this._ctx, 13))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 13)");
 						}
 						this.state = 269;
 						_la = this._input.LA(1);
-						if (!(((((_la - 30)) & ~0x1F) === 0 && ((1 << (_la - 30)) & ((1 << (PainlessParser.MUL - 30)) | (1 << (PainlessParser.DIV - 30)) | (1 << (PainlessParser.REM - 30)))) !== 0))) {
+						if (!(((((_la - 30)) & ~0x1F) === 0 && ((1 << (_la - 30)) & ((1 << (painless_parser.MUL - 30)) | (1 << (painless_parser.DIV - 30)) | (1 << (painless_parser.REM - 30)))) !== 0))) {
 						this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -1350,14 +1350,14 @@ export class PainlessParser extends Parser {
 					case 2:
 						{
 						_localctx = new BinaryContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 271;
 						if (!(this.precpred(this._ctx, 12))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 12)");
 						}
 						this.state = 272;
 						_la = this._input.LA(1);
-						if (!(_la === PainlessParser.ADD || _la === PainlessParser.SUB)) {
+						if (!(_la === painless_parser.ADD || _la === painless_parser.SUB)) {
 						this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -1375,14 +1375,14 @@ export class PainlessParser extends Parser {
 					case 3:
 						{
 						_localctx = new BinaryContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 274;
 						if (!(this.precpred(this._ctx, 11))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 11)");
 						}
 						this.state = 275;
 						_la = this._input.LA(1);
-						if (!(_la === PainlessParser.FIND || _la === PainlessParser.MATCH)) {
+						if (!(_la === painless_parser.FIND || _la === painless_parser.MATCH)) {
 						this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -1400,14 +1400,14 @@ export class PainlessParser extends Parser {
 					case 4:
 						{
 						_localctx = new BinaryContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 277;
 						if (!(this.precpred(this._ctx, 10))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 10)");
 						}
 						this.state = 278;
 						_la = this._input.LA(1);
-						if (!(((((_la - 35)) & ~0x1F) === 0 && ((1 << (_la - 35)) & ((1 << (PainlessParser.LSH - 35)) | (1 << (PainlessParser.RSH - 35)) | (1 << (PainlessParser.USH - 35)))) !== 0))) {
+						if (!(((((_la - 35)) & ~0x1F) === 0 && ((1 << (_la - 35)) & ((1 << (painless_parser.LSH - 35)) | (1 << (painless_parser.RSH - 35)) | (1 << (painless_parser.USH - 35)))) !== 0))) {
 						this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -1425,14 +1425,14 @@ export class PainlessParser extends Parser {
 					case 5:
 						{
 						_localctx = new CompContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 280;
 						if (!(this.precpred(this._ctx, 9))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 9)");
 						}
 						this.state = 281;
 						_la = this._input.LA(1);
-						if (!(((((_la - 38)) & ~0x1F) === 0 && ((1 << (_la - 38)) & ((1 << (PainlessParser.LT - 38)) | (1 << (PainlessParser.LTE - 38)) | (1 << (PainlessParser.GT - 38)) | (1 << (PainlessParser.GTE - 38)))) !== 0))) {
+						if (!(((((_la - 38)) & ~0x1F) === 0 && ((1 << (_la - 38)) & ((1 << (painless_parser.LT - 38)) | (1 << (painless_parser.LTE - 38)) | (1 << (painless_parser.GT - 38)) | (1 << (painless_parser.GTE - 38)))) !== 0))) {
 						this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -1450,14 +1450,14 @@ export class PainlessParser extends Parser {
 					case 6:
 						{
 						_localctx = new CompContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 283;
 						if (!(this.precpred(this._ctx, 7))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 7)");
 						}
 						this.state = 284;
 						_la = this._input.LA(1);
-						if (!(((((_la - 42)) & ~0x1F) === 0 && ((1 << (_la - 42)) & ((1 << (PainlessParser.EQ - 42)) | (1 << (PainlessParser.EQR - 42)) | (1 << (PainlessParser.NE - 42)) | (1 << (PainlessParser.NER - 42)))) !== 0))) {
+						if (!(((((_la - 42)) & ~0x1F) === 0 && ((1 << (_la - 42)) & ((1 << (painless_parser.EQ - 42)) | (1 << (painless_parser.EQR - 42)) | (1 << (painless_parser.NE - 42)) | (1 << (painless_parser.NER - 42)))) !== 0))) {
 						this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -1475,13 +1475,13 @@ export class PainlessParser extends Parser {
 					case 7:
 						{
 						_localctx = new BinaryContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 286;
 						if (!(this.precpred(this._ctx, 6))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 6)");
 						}
 						this.state = 287;
-						this.match(PainlessParser.BWAND);
+						this.match(painless_parser.BWAND);
 						this.state = 288;
 						this.noncondexpression(7);
 						}
@@ -1490,13 +1490,13 @@ export class PainlessParser extends Parser {
 					case 8:
 						{
 						_localctx = new BinaryContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 289;
 						if (!(this.precpred(this._ctx, 5))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 5)");
 						}
 						this.state = 290;
-						this.match(PainlessParser.XOR);
+						this.match(painless_parser.XOR);
 						this.state = 291;
 						this.noncondexpression(6);
 						}
@@ -1505,13 +1505,13 @@ export class PainlessParser extends Parser {
 					case 9:
 						{
 						_localctx = new BinaryContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 292;
 						if (!(this.precpred(this._ctx, 4))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 4)");
 						}
 						this.state = 293;
-						this.match(PainlessParser.BWOR);
+						this.match(painless_parser.BWOR);
 						this.state = 294;
 						this.noncondexpression(5);
 						}
@@ -1520,13 +1520,13 @@ export class PainlessParser extends Parser {
 					case 10:
 						{
 						_localctx = new BoolContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 295;
 						if (!(this.precpred(this._ctx, 3))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 3)");
 						}
 						this.state = 296;
-						this.match(PainlessParser.BOOLAND);
+						this.match(painless_parser.BOOLAND);
 						this.state = 297;
 						this.noncondexpression(4);
 						}
@@ -1535,13 +1535,13 @@ export class PainlessParser extends Parser {
 					case 11:
 						{
 						_localctx = new BoolContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 298;
 						if (!(this.precpred(this._ctx, 2))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 2)");
 						}
 						this.state = 299;
-						this.match(PainlessParser.BOOLOR);
+						this.match(painless_parser.BOOLOR);
 						this.state = 300;
 						this.noncondexpression(3);
 						}
@@ -1550,13 +1550,13 @@ export class PainlessParser extends Parser {
 					case 12:
 						{
 						_localctx = new ElvisContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 301;
 						if (!(this.precpred(this._ctx, 1))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 1)");
 						}
 						this.state = 302;
-						this.match(PainlessParser.ELVIS);
+						this.match(painless_parser.ELVIS);
 						this.state = 303;
 						this.noncondexpression(1);
 						}
@@ -1565,13 +1565,13 @@ export class PainlessParser extends Parser {
 					case 13:
 						{
 						_localctx = new InstanceofContext(new NoncondexpressionContext(_parentctx, _parentState));
-						this.pushNewRecursionContext(_localctx, _startState, PainlessParser.RULE_noncondexpression);
+						this.pushNewRecursionContext(_localctx, _startState, painless_parser.RULE_noncondexpression);
 						this.state = 304;
 						if (!(this.precpred(this._ctx, 8))) {
 							throw new FailedPredicateException(this, "this.precpred(this._ctx, 8)");
 						}
 						this.state = 305;
-						this.match(PainlessParser.INSTANCEOF);
+						this.match(painless_parser.INSTANCEOF);
 						this.state = 306;
 						this.decltype();
 						}
@@ -1602,7 +1602,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public expression(): ExpressionContext {
 		let _localctx: ExpressionContext = new ExpressionContext(this._ctx, this.state);
-		this.enterRule(_localctx, 34, PainlessParser.RULE_expression);
+		this.enterRule(_localctx, 34, painless_parser.RULE_expression);
 		let _la: number;
 		try {
 			this.state = 323;
@@ -1624,11 +1624,11 @@ export class PainlessParser extends Parser {
 				this.state = 313;
 				this.noncondexpression(0);
 				this.state = 314;
-				this.match(PainlessParser.COND);
+				this.match(painless_parser.COND);
 				this.state = 315;
 				this.expression();
 				this.state = 316;
-				this.match(PainlessParser.COLON);
+				this.match(painless_parser.COLON);
 				this.state = 317;
 				this.expression();
 				}
@@ -1642,7 +1642,7 @@ export class PainlessParser extends Parser {
 				this.noncondexpression(0);
 				this.state = 320;
 				_la = this._input.LA(1);
-				if (!(((((_la - 60)) & ~0x1F) === 0 && ((1 << (_la - 60)) & ((1 << (PainlessParser.ASSIGN - 60)) | (1 << (PainlessParser.AADD - 60)) | (1 << (PainlessParser.ASUB - 60)) | (1 << (PainlessParser.AMUL - 60)) | (1 << (PainlessParser.ADIV - 60)) | (1 << (PainlessParser.AREM - 60)) | (1 << (PainlessParser.AAND - 60)) | (1 << (PainlessParser.AXOR - 60)) | (1 << (PainlessParser.AOR - 60)) | (1 << (PainlessParser.ALSH - 60)) | (1 << (PainlessParser.ARSH - 60)) | (1 << (PainlessParser.AUSH - 60)))) !== 0))) {
+				if (!(((((_la - 60)) & ~0x1F) === 0 && ((1 << (_la - 60)) & ((1 << (painless_parser.ASSIGN - 60)) | (1 << (painless_parser.AADD - 60)) | (1 << (painless_parser.ASUB - 60)) | (1 << (painless_parser.AMUL - 60)) | (1 << (painless_parser.ADIV - 60)) | (1 << (painless_parser.AREM - 60)) | (1 << (painless_parser.AAND - 60)) | (1 << (painless_parser.AXOR - 60)) | (1 << (painless_parser.AOR - 60)) | (1 << (painless_parser.ALSH - 60)) | (1 << (painless_parser.ARSH - 60)) | (1 << (painless_parser.AUSH - 60)))) !== 0))) {
 				this._errHandler.recoverInline(this);
 				} else {
 					if (this._input.LA(1) === Token.EOF) {
@@ -1675,20 +1675,20 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public unary(): UnaryContext {
 		let _localctx: UnaryContext = new UnaryContext(this._ctx, this.state);
-		this.enterRule(_localctx, 36, PainlessParser.RULE_unary);
+		this.enterRule(_localctx, 36, painless_parser.RULE_unary);
 		let _la: number;
 		try {
 			this.state = 330;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case PainlessParser.INCR:
-			case PainlessParser.DECR:
+			case painless_parser.INCR:
+			case painless_parser.DECR:
 				_localctx = new PreContext(_localctx);
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 325;
 				_la = this._input.LA(1);
-				if (!(_la === PainlessParser.INCR || _la === PainlessParser.DECR)) {
+				if (!(_la === painless_parser.INCR || _la === painless_parser.DECR)) {
 				this._errHandler.recoverInline(this);
 				} else {
 					if (this._input.LA(1) === Token.EOF) {
@@ -1702,14 +1702,14 @@ export class PainlessParser extends Parser {
 				this.chain();
 				}
 				break;
-			case PainlessParser.ADD:
-			case PainlessParser.SUB:
+			case painless_parser.ADD:
+			case painless_parser.SUB:
 				_localctx = new AddsubContext(_localctx);
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 327;
 				_la = this._input.LA(1);
-				if (!(_la === PainlessParser.ADD || _la === PainlessParser.SUB)) {
+				if (!(_la === painless_parser.ADD || _la === painless_parser.SUB)) {
 				this._errHandler.recoverInline(this);
 				} else {
 					if (this._input.LA(1) === Token.EOF) {
@@ -1723,21 +1723,21 @@ export class PainlessParser extends Parser {
 				this.unary();
 				}
 				break;
-			case PainlessParser.LBRACE:
-			case PainlessParser.LP:
-			case PainlessParser.NEW:
-			case PainlessParser.BOOLNOT:
-			case PainlessParser.BWNOT:
-			case PainlessParser.OCTAL:
-			case PainlessParser.HEX:
-			case PainlessParser.INTEGER:
-			case PainlessParser.DECIMAL:
-			case PainlessParser.STRING:
-			case PainlessParser.REGEX:
-			case PainlessParser.TRUE:
-			case PainlessParser.FALSE:
-			case PainlessParser.NULL:
-			case PainlessParser.ID:
+			case painless_parser.LBRACE:
+			case painless_parser.LP:
+			case painless_parser.NEW:
+			case painless_parser.BOOLNOT:
+			case painless_parser.BWNOT:
+			case painless_parser.OCTAL:
+			case painless_parser.HEX:
+			case painless_parser.INTEGER:
+			case painless_parser.DECIMAL:
+			case painless_parser.STRING:
+			case painless_parser.REGEX:
+			case painless_parser.TRUE:
+			case painless_parser.FALSE:
+			case painless_parser.NULL:
+			case painless_parser.ID:
 				_localctx = new NotaddsubContext(_localctx);
 				this.enterOuterAlt(_localctx, 3);
 				{
@@ -1766,7 +1766,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public unarynotaddsub(): UnarynotaddsubContext {
 		let _localctx: UnarynotaddsubContext = new UnarynotaddsubContext(this._ctx, this.state);
-		this.enterRule(_localctx, 38, PainlessParser.RULE_unarynotaddsub);
+		this.enterRule(_localctx, 38, painless_parser.RULE_unarynotaddsub);
 		let _la: number;
 		try {
 			this.state = 339;
@@ -1789,7 +1789,7 @@ export class PainlessParser extends Parser {
 				this.chain();
 				this.state = 334;
 				_la = this._input.LA(1);
-				if (!(_la === PainlessParser.INCR || _la === PainlessParser.DECR)) {
+				if (!(_la === painless_parser.INCR || _la === painless_parser.DECR)) {
 				this._errHandler.recoverInline(this);
 				} else {
 					if (this._input.LA(1) === Token.EOF) {
@@ -1808,7 +1808,7 @@ export class PainlessParser extends Parser {
 				{
 				this.state = 336;
 				_la = this._input.LA(1);
-				if (!(_la === PainlessParser.BOOLNOT || _la === PainlessParser.BWNOT)) {
+				if (!(_la === painless_parser.BOOLNOT || _la === painless_parser.BWNOT)) {
 				this._errHandler.recoverInline(this);
 				} else {
 					if (this._input.LA(1) === Token.EOF) {
@@ -1850,7 +1850,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public castexpression(): CastexpressionContext {
 		let _localctx: CastexpressionContext = new CastexpressionContext(this._ctx, this.state);
-		this.enterRule(_localctx, 40, PainlessParser.RULE_castexpression);
+		this.enterRule(_localctx, 40, painless_parser.RULE_castexpression);
 		try {
 			this.state = 351;
 			this._errHandler.sync(this);
@@ -1860,11 +1860,11 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 341;
-				this.match(PainlessParser.LP);
+				this.match(painless_parser.LP);
 				this.state = 342;
 				this.primordefcasttype();
 				this.state = 343;
-				this.match(PainlessParser.RP);
+				this.match(painless_parser.RP);
 				this.state = 344;
 				this.unary();
 				}
@@ -1875,11 +1875,11 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 346;
-				this.match(PainlessParser.LP);
+				this.match(painless_parser.LP);
 				this.state = 347;
 				this.refcasttype();
 				this.state = 348;
-				this.match(PainlessParser.RP);
+				this.match(painless_parser.RP);
 				this.state = 349;
 				this.unarynotaddsub();
 				}
@@ -1903,14 +1903,14 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public primordefcasttype(): PrimordefcasttypeContext {
 		let _localctx: PrimordefcasttypeContext = new PrimordefcasttypeContext(this._ctx, this.state);
-		this.enterRule(_localctx, 42, PainlessParser.RULE_primordefcasttype);
+		this.enterRule(_localctx, 42, painless_parser.RULE_primordefcasttype);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 353;
 			_la = this._input.LA(1);
-			if (!(_la === PainlessParser.PRIMITIVE || _la === PainlessParser.DEF)) {
+			if (!(_la === painless_parser.PRIMITIVE || _la === painless_parser.DEF)) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -1939,17 +1939,17 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public refcasttype(): RefcasttypeContext {
 		let _localctx: RefcasttypeContext = new RefcasttypeContext(this._ctx, this.state);
-		this.enterRule(_localctx, 44, PainlessParser.RULE_refcasttype);
+		this.enterRule(_localctx, 44, painless_parser.RULE_refcasttype);
 		let _la: number;
 		try {
 			this.state = 384;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case PainlessParser.DEF:
+			case painless_parser.DEF:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 355;
-				this.match(PainlessParser.DEF);
+				this.match(painless_parser.DEF);
 				this.state = 358;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
@@ -1957,22 +1957,22 @@ export class PainlessParser extends Parser {
 					{
 					{
 					this.state = 356;
-					this.match(PainlessParser.LBRACE);
+					this.match(painless_parser.LBRACE);
 					this.state = 357;
-					this.match(PainlessParser.RBRACE);
+					this.match(painless_parser.RBRACE);
 					}
 					}
 					this.state = 360;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
-				} while (_la === PainlessParser.LBRACE);
+				} while (_la === painless_parser.LBRACE);
 				}
 				break;
-			case PainlessParser.PRIMITIVE:
+			case painless_parser.PRIMITIVE:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 362;
-				this.match(PainlessParser.PRIMITIVE);
+				this.match(painless_parser.PRIMITIVE);
 				this.state = 365;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
@@ -1980,32 +1980,32 @@ export class PainlessParser extends Parser {
 					{
 					{
 					this.state = 363;
-					this.match(PainlessParser.LBRACE);
+					this.match(painless_parser.LBRACE);
 					this.state = 364;
-					this.match(PainlessParser.RBRACE);
+					this.match(painless_parser.RBRACE);
 					}
 					}
 					this.state = 367;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
-				} while (_la === PainlessParser.LBRACE);
+				} while (_la === painless_parser.LBRACE);
 				}
 				break;
-			case PainlessParser.ID:
+			case painless_parser.ID:
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 369;
-				this.match(PainlessParser.ID);
+				this.match(painless_parser.ID);
 				this.state = 374;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la === PainlessParser.DOT) {
+				while (_la === painless_parser.DOT) {
 					{
 					{
 					this.state = 370;
-					this.match(PainlessParser.DOT);
+					this.match(painless_parser.DOT);
 					this.state = 371;
-					this.match(PainlessParser.DOTID);
+					this.match(painless_parser.DOTID);
 					}
 					}
 					this.state = 376;
@@ -2015,13 +2015,13 @@ export class PainlessParser extends Parser {
 				this.state = 381;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la === PainlessParser.LBRACE) {
+				while (_la === painless_parser.LBRACE) {
 					{
 					{
 					this.state = 377;
-					this.match(PainlessParser.LBRACE);
+					this.match(painless_parser.LBRACE);
 					this.state = 378;
-					this.match(PainlessParser.RBRACE);
+					this.match(painless_parser.RBRACE);
 					}
 					}
 					this.state = 383;
@@ -2051,7 +2051,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public chain(): ChainContext {
 		let _localctx: ChainContext = new ChainContext(this._ctx, this.state);
-		this.enterRule(_localctx, 46, PainlessParser.RULE_chain);
+		this.enterRule(_localctx, 46, painless_parser.RULE_chain);
 		try {
 			let _alt: number;
 			this.state = 394;
@@ -2109,7 +2109,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public primary(): PrimaryContext {
 		let _localctx: PrimaryContext = new PrimaryContext(this._ctx, this.state);
-		this.enterRule(_localctx, 48, PainlessParser.RULE_primary);
+		this.enterRule(_localctx, 48, painless_parser.RULE_primary);
 		let _la: number;
 		try {
 			this.state = 415;
@@ -2120,11 +2120,11 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 396;
-				this.match(PainlessParser.LP);
+				this.match(painless_parser.LP);
 				this.state = 397;
 				this.expression();
 				this.state = 398;
-				this.match(PainlessParser.RP);
+				this.match(painless_parser.RP);
 				}
 				break;
 
@@ -2134,7 +2134,7 @@ export class PainlessParser extends Parser {
 				{
 				this.state = 400;
 				_la = this._input.LA(1);
-				if (!(((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (PainlessParser.OCTAL - 72)) | (1 << (PainlessParser.HEX - 72)) | (1 << (PainlessParser.INTEGER - 72)) | (1 << (PainlessParser.DECIMAL - 72)))) !== 0))) {
+				if (!(((((_la - 72)) & ~0x1F) === 0 && ((1 << (_la - 72)) & ((1 << (painless_parser.OCTAL - 72)) | (1 << (painless_parser.HEX - 72)) | (1 << (painless_parser.INTEGER - 72)) | (1 << (painless_parser.DECIMAL - 72)))) !== 0))) {
 				this._errHandler.recoverInline(this);
 				} else {
 					if (this._input.LA(1) === Token.EOF) {
@@ -2152,7 +2152,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 401;
-				this.match(PainlessParser.TRUE);
+				this.match(painless_parser.TRUE);
 				}
 				break;
 
@@ -2161,7 +2161,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 4);
 				{
 				this.state = 402;
-				this.match(PainlessParser.FALSE);
+				this.match(painless_parser.FALSE);
 				}
 				break;
 
@@ -2170,7 +2170,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 5);
 				{
 				this.state = 403;
-				this.match(PainlessParser.NULL);
+				this.match(painless_parser.NULL);
 				}
 				break;
 
@@ -2179,7 +2179,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 6);
 				{
 				this.state = 404;
-				this.match(PainlessParser.STRING);
+				this.match(painless_parser.STRING);
 				}
 				break;
 
@@ -2188,7 +2188,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 7);
 				{
 				this.state = 405;
-				this.match(PainlessParser.REGEX);
+				this.match(painless_parser.REGEX);
 				}
 				break;
 
@@ -2215,7 +2215,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 10);
 				{
 				this.state = 408;
-				this.match(PainlessParser.ID);
+				this.match(painless_parser.ID);
 				}
 				break;
 
@@ -2224,7 +2224,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 11);
 				{
 				this.state = 409;
-				this.match(PainlessParser.ID);
+				this.match(painless_parser.ID);
 				this.state = 410;
 				this.arguments();
 				}
@@ -2235,7 +2235,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 12);
 				{
 				this.state = 411;
-				this.match(PainlessParser.NEW);
+				this.match(painless_parser.NEW);
 				this.state = 412;
 				this.type();
 				this.state = 413;
@@ -2261,7 +2261,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public postfix(): PostfixContext {
 		let _localctx: PostfixContext = new PostfixContext(this._ctx, this.state);
-		this.enterRule(_localctx, 50, PainlessParser.RULE_postfix);
+		this.enterRule(_localctx, 50, painless_parser.RULE_postfix);
 		try {
 			this.state = 420;
 			this._errHandler.sync(this);
@@ -2308,7 +2308,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public postdot(): PostdotContext {
 		let _localctx: PostdotContext = new PostdotContext(this._ctx, this.state);
-		this.enterRule(_localctx, 52, PainlessParser.RULE_postdot);
+		this.enterRule(_localctx, 52, painless_parser.RULE_postdot);
 		try {
 			this.state = 424;
 			this._errHandler.sync(this);
@@ -2347,14 +2347,14 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public callinvoke(): CallinvokeContext {
 		let _localctx: CallinvokeContext = new CallinvokeContext(this._ctx, this.state);
-		this.enterRule(_localctx, 54, PainlessParser.RULE_callinvoke);
+		this.enterRule(_localctx, 54, painless_parser.RULE_callinvoke);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 426;
 			_la = this._input.LA(1);
-			if (!(_la === PainlessParser.DOT || _la === PainlessParser.NSDOT)) {
+			if (!(_la === painless_parser.DOT || _la === painless_parser.NSDOT)) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -2365,7 +2365,7 @@ export class PainlessParser extends Parser {
 				this.consume();
 			}
 			this.state = 427;
-			this.match(PainlessParser.DOTID);
+			this.match(painless_parser.DOTID);
 			this.state = 428;
 			this.arguments();
 			}
@@ -2387,14 +2387,14 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public fieldaccess(): FieldaccessContext {
 		let _localctx: FieldaccessContext = new FieldaccessContext(this._ctx, this.state);
-		this.enterRule(_localctx, 56, PainlessParser.RULE_fieldaccess);
+		this.enterRule(_localctx, 56, painless_parser.RULE_fieldaccess);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 430;
 			_la = this._input.LA(1);
-			if (!(_la === PainlessParser.DOT || _la === PainlessParser.NSDOT)) {
+			if (!(_la === painless_parser.DOT || _la === painless_parser.NSDOT)) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -2406,7 +2406,7 @@ export class PainlessParser extends Parser {
 			}
 			this.state = 431;
 			_la = this._input.LA(1);
-			if (!(_la === PainlessParser.DOTINTEGER || _la === PainlessParser.DOTID)) {
+			if (!(_la === painless_parser.DOTINTEGER || _la === painless_parser.DOTID)) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -2435,16 +2435,16 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public braceaccess(): BraceaccessContext {
 		let _localctx: BraceaccessContext = new BraceaccessContext(this._ctx, this.state);
-		this.enterRule(_localctx, 58, PainlessParser.RULE_braceaccess);
+		this.enterRule(_localctx, 58, painless_parser.RULE_braceaccess);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 433;
-			this.match(PainlessParser.LBRACE);
+			this.match(painless_parser.LBRACE);
 			this.state = 434;
 			this.expression();
 			this.state = 435;
-			this.match(PainlessParser.RBRACE);
+			this.match(painless_parser.RBRACE);
 			}
 		}
 		catch (re) {
@@ -2464,7 +2464,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public arrayinitializer(): ArrayinitializerContext {
 		let _localctx: ArrayinitializerContext = new ArrayinitializerContext(this._ctx, this.state);
-		this.enterRule(_localctx, 60, PainlessParser.RULE_arrayinitializer);
+		this.enterRule(_localctx, 60, painless_parser.RULE_arrayinitializer);
 		let _la: number;
 		try {
 			let _alt: number;
@@ -2476,7 +2476,7 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 437;
-				this.match(PainlessParser.NEW);
+				this.match(painless_parser.NEW);
 				this.state = 438;
 				this.type();
 				this.state = 443;
@@ -2488,11 +2488,11 @@ export class PainlessParser extends Parser {
 						{
 						{
 						this.state = 439;
-						this.match(PainlessParser.LBRACE);
+						this.match(painless_parser.LBRACE);
 						this.state = 440;
 						this.expression();
 						this.state = 441;
-						this.match(PainlessParser.RBRACE);
+						this.match(painless_parser.RBRACE);
 						}
 						}
 						break;
@@ -2537,30 +2537,30 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 456;
-				this.match(PainlessParser.NEW);
+				this.match(painless_parser.NEW);
 				this.state = 457;
 				this.type();
 				this.state = 458;
-				this.match(PainlessParser.LBRACE);
+				this.match(painless_parser.LBRACE);
 				this.state = 459;
-				this.match(PainlessParser.RBRACE);
+				this.match(painless_parser.RBRACE);
 				this.state = 460;
-				this.match(PainlessParser.LBRACK);
+				this.match(painless_parser.LBRACK);
 				this.state = 469;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (PainlessParser.LBRACE - 5)) | (1 << (PainlessParser.LP - 5)) | (1 << (PainlessParser.NEW - 5)) | (1 << (PainlessParser.BOOLNOT - 5)) | (1 << (PainlessParser.BWNOT - 5)) | (1 << (PainlessParser.ADD - 5)) | (1 << (PainlessParser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (PainlessParser.INCR - 58)) | (1 << (PainlessParser.DECR - 58)) | (1 << (PainlessParser.OCTAL - 58)) | (1 << (PainlessParser.HEX - 58)) | (1 << (PainlessParser.INTEGER - 58)) | (1 << (PainlessParser.DECIMAL - 58)) | (1 << (PainlessParser.STRING - 58)) | (1 << (PainlessParser.REGEX - 58)) | (1 << (PainlessParser.TRUE - 58)) | (1 << (PainlessParser.FALSE - 58)) | (1 << (PainlessParser.NULL - 58)) | (1 << (PainlessParser.ID - 58)))) !== 0)) {
+				if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
 					{
 					this.state = 461;
 					this.expression();
 					this.state = 466;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
-					while (_la === PainlessParser.COMMA) {
+					while (_la === painless_parser.COMMA) {
 						{
 						{
 						this.state = 462;
-						this.match(PainlessParser.COMMA);
+						this.match(painless_parser.COMMA);
 						this.state = 463;
 						this.expression();
 						}
@@ -2573,7 +2573,7 @@ export class PainlessParser extends Parser {
 				}
 
 				this.state = 471;
-				this.match(PainlessParser.RBRACK);
+				this.match(painless_parser.RBRACK);
 				this.state = 475;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input, 45, this._ctx);
@@ -2611,7 +2611,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public listinitializer(): ListinitializerContext {
 		let _localctx: ListinitializerContext = new ListinitializerContext(this._ctx, this.state);
-		this.enterRule(_localctx, 62, PainlessParser.RULE_listinitializer);
+		this.enterRule(_localctx, 62, painless_parser.RULE_listinitializer);
 		let _la: number;
 		try {
 			this.state = 493;
@@ -2621,17 +2621,17 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 480;
-				this.match(PainlessParser.LBRACE);
+				this.match(painless_parser.LBRACE);
 				this.state = 481;
 				this.expression();
 				this.state = 486;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la === PainlessParser.COMMA) {
+				while (_la === painless_parser.COMMA) {
 					{
 					{
 					this.state = 482;
-					this.match(PainlessParser.COMMA);
+					this.match(painless_parser.COMMA);
 					this.state = 483;
 					this.expression();
 					}
@@ -2641,7 +2641,7 @@ export class PainlessParser extends Parser {
 					_la = this._input.LA(1);
 				}
 				this.state = 489;
-				this.match(PainlessParser.RBRACE);
+				this.match(painless_parser.RBRACE);
 				}
 				break;
 
@@ -2649,9 +2649,9 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 491;
-				this.match(PainlessParser.LBRACE);
+				this.match(painless_parser.LBRACE);
 				this.state = 492;
-				this.match(PainlessParser.RBRACE);
+				this.match(painless_parser.RBRACE);
 				}
 				break;
 			}
@@ -2673,7 +2673,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public mapinitializer(): MapinitializerContext {
 		let _localctx: MapinitializerContext = new MapinitializerContext(this._ctx, this.state);
-		this.enterRule(_localctx, 64, PainlessParser.RULE_mapinitializer);
+		this.enterRule(_localctx, 64, painless_parser.RULE_mapinitializer);
 		let _la: number;
 		try {
 			this.state = 509;
@@ -2683,17 +2683,17 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 495;
-				this.match(PainlessParser.LBRACE);
+				this.match(painless_parser.LBRACE);
 				this.state = 496;
 				this.maptoken();
 				this.state = 501;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la === PainlessParser.COMMA) {
+				while (_la === painless_parser.COMMA) {
 					{
 					{
 					this.state = 497;
-					this.match(PainlessParser.COMMA);
+					this.match(painless_parser.COMMA);
 					this.state = 498;
 					this.maptoken();
 					}
@@ -2703,7 +2703,7 @@ export class PainlessParser extends Parser {
 					_la = this._input.LA(1);
 				}
 				this.state = 504;
-				this.match(PainlessParser.RBRACE);
+				this.match(painless_parser.RBRACE);
 				}
 				break;
 
@@ -2711,11 +2711,11 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 506;
-				this.match(PainlessParser.LBRACE);
+				this.match(painless_parser.LBRACE);
 				this.state = 507;
-				this.match(PainlessParser.COLON);
+				this.match(painless_parser.COLON);
 				this.state = 508;
-				this.match(PainlessParser.RBRACE);
+				this.match(painless_parser.RBRACE);
 				}
 				break;
 			}
@@ -2737,14 +2737,14 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public maptoken(): MaptokenContext {
 		let _localctx: MaptokenContext = new MaptokenContext(this._ctx, this.state);
-		this.enterRule(_localctx, 66, PainlessParser.RULE_maptoken);
+		this.enterRule(_localctx, 66, painless_parser.RULE_maptoken);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 511;
 			this.expression();
 			this.state = 512;
-			this.match(PainlessParser.COLON);
+			this.match(painless_parser.COLON);
 			this.state = 513;
 			this.expression();
 			}
@@ -2766,29 +2766,29 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public arguments(): ArgumentsContext {
 		let _localctx: ArgumentsContext = new ArgumentsContext(this._ctx, this.state);
-		this.enterRule(_localctx, 68, PainlessParser.RULE_arguments);
+		this.enterRule(_localctx, 68, painless_parser.RULE_arguments);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
 			this.state = 515;
-			this.match(PainlessParser.LP);
+			this.match(painless_parser.LP);
 			this.state = 524;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (PainlessParser.LBRACE - 5)) | (1 << (PainlessParser.LP - 5)) | (1 << (PainlessParser.NEW - 5)) | (1 << (PainlessParser.THIS - 5)) | (1 << (PainlessParser.BOOLNOT - 5)) | (1 << (PainlessParser.BWNOT - 5)) | (1 << (PainlessParser.ADD - 5)) | (1 << (PainlessParser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (PainlessParser.INCR - 58)) | (1 << (PainlessParser.DECR - 58)) | (1 << (PainlessParser.OCTAL - 58)) | (1 << (PainlessParser.HEX - 58)) | (1 << (PainlessParser.INTEGER - 58)) | (1 << (PainlessParser.DECIMAL - 58)) | (1 << (PainlessParser.STRING - 58)) | (1 << (PainlessParser.REGEX - 58)) | (1 << (PainlessParser.TRUE - 58)) | (1 << (PainlessParser.FALSE - 58)) | (1 << (PainlessParser.NULL - 58)) | (1 << (PainlessParser.PRIMITIVE - 58)) | (1 << (PainlessParser.DEF - 58)) | (1 << (PainlessParser.ID - 58)))) !== 0)) {
+			if (((((_la - 5)) & ~0x1F) === 0 && ((1 << (_la - 5)) & ((1 << (painless_parser.LBRACE - 5)) | (1 << (painless_parser.LP - 5)) | (1 << (painless_parser.NEW - 5)) | (1 << (painless_parser.THIS - 5)) | (1 << (painless_parser.BOOLNOT - 5)) | (1 << (painless_parser.BWNOT - 5)) | (1 << (painless_parser.ADD - 5)) | (1 << (painless_parser.SUB - 5)))) !== 0) || ((((_la - 58)) & ~0x1F) === 0 && ((1 << (_la - 58)) & ((1 << (painless_parser.INCR - 58)) | (1 << (painless_parser.DECR - 58)) | (1 << (painless_parser.OCTAL - 58)) | (1 << (painless_parser.HEX - 58)) | (1 << (painless_parser.INTEGER - 58)) | (1 << (painless_parser.DECIMAL - 58)) | (1 << (painless_parser.STRING - 58)) | (1 << (painless_parser.REGEX - 58)) | (1 << (painless_parser.TRUE - 58)) | (1 << (painless_parser.FALSE - 58)) | (1 << (painless_parser.NULL - 58)) | (1 << (painless_parser.PRIMITIVE - 58)) | (1 << (painless_parser.DEF - 58)) | (1 << (painless_parser.ID - 58)))) !== 0)) {
 				{
 				this.state = 516;
 				this.argument();
 				this.state = 521;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la === PainlessParser.COMMA) {
+				while (_la === painless_parser.COMMA) {
 					{
 					{
 					this.state = 517;
-					this.match(PainlessParser.COMMA);
+					this.match(painless_parser.COMMA);
 					this.state = 518;
 					this.argument();
 					}
@@ -2801,7 +2801,7 @@ export class PainlessParser extends Parser {
 			}
 
 			this.state = 526;
-			this.match(PainlessParser.RP);
+			this.match(painless_parser.RP);
 			}
 			}
 		}
@@ -2822,7 +2822,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public argument(): ArgumentContext {
 		let _localctx: ArgumentContext = new ArgumentContext(this._ctx, this.state);
-		this.enterRule(_localctx, 70, PainlessParser.RULE_argument);
+		this.enterRule(_localctx, 70, painless_parser.RULE_argument);
 		try {
 			this.state = 531;
 			this._errHandler.sync(this);
@@ -2869,7 +2869,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public lambda(): LambdaContext {
 		let _localctx: LambdaContext = new LambdaContext(this._ctx, this.state);
-		this.enterRule(_localctx, 72, PainlessParser.RULE_lambda);
+		this.enterRule(_localctx, 72, painless_parser.RULE_lambda);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
@@ -2877,33 +2877,33 @@ export class PainlessParser extends Parser {
 			this.state = 546;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case PainlessParser.PRIMITIVE:
-			case PainlessParser.DEF:
-			case PainlessParser.ID:
+			case painless_parser.PRIMITIVE:
+			case painless_parser.DEF:
+			case painless_parser.ID:
 				{
 				this.state = 533;
 				this.lamtype();
 				}
 				break;
-			case PainlessParser.LP:
+			case painless_parser.LP:
 				{
 				this.state = 534;
-				this.match(PainlessParser.LP);
+				this.match(painless_parser.LP);
 				this.state = 543;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (((((_la - 81)) & ~0x1F) === 0 && ((1 << (_la - 81)) & ((1 << (PainlessParser.PRIMITIVE - 81)) | (1 << (PainlessParser.DEF - 81)) | (1 << (PainlessParser.ID - 81)))) !== 0)) {
+				if (((((_la - 81)) & ~0x1F) === 0 && ((1 << (_la - 81)) & ((1 << (painless_parser.PRIMITIVE - 81)) | (1 << (painless_parser.DEF - 81)) | (1 << (painless_parser.ID - 81)))) !== 0)) {
 					{
 					this.state = 535;
 					this.lamtype();
 					this.state = 540;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
-					while (_la === PainlessParser.COMMA) {
+					while (_la === painless_parser.COMMA) {
 						{
 						{
 						this.state = 536;
-						this.match(PainlessParser.COMMA);
+						this.match(painless_parser.COMMA);
 						this.state = 537;
 						this.lamtype();
 						}
@@ -2916,42 +2916,42 @@ export class PainlessParser extends Parser {
 				}
 
 				this.state = 545;
-				this.match(PainlessParser.RP);
+				this.match(painless_parser.RP);
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
 			this.state = 548;
-			this.match(PainlessParser.ARROW);
+			this.match(painless_parser.ARROW);
 			this.state = 551;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case PainlessParser.LBRACK:
+			case painless_parser.LBRACK:
 				{
 				this.state = 549;
 				this.block();
 				}
 				break;
-			case PainlessParser.LBRACE:
-			case PainlessParser.LP:
-			case PainlessParser.NEW:
-			case PainlessParser.BOOLNOT:
-			case PainlessParser.BWNOT:
-			case PainlessParser.ADD:
-			case PainlessParser.SUB:
-			case PainlessParser.INCR:
-			case PainlessParser.DECR:
-			case PainlessParser.OCTAL:
-			case PainlessParser.HEX:
-			case PainlessParser.INTEGER:
-			case PainlessParser.DECIMAL:
-			case PainlessParser.STRING:
-			case PainlessParser.REGEX:
-			case PainlessParser.TRUE:
-			case PainlessParser.FALSE:
-			case PainlessParser.NULL:
-			case PainlessParser.ID:
+			case painless_parser.LBRACE:
+			case painless_parser.LP:
+			case painless_parser.NEW:
+			case painless_parser.BOOLNOT:
+			case painless_parser.BWNOT:
+			case painless_parser.ADD:
+			case painless_parser.SUB:
+			case painless_parser.INCR:
+			case painless_parser.DECR:
+			case painless_parser.OCTAL:
+			case painless_parser.HEX:
+			case painless_parser.INTEGER:
+			case painless_parser.DECIMAL:
+			case painless_parser.STRING:
+			case painless_parser.REGEX:
+			case painless_parser.TRUE:
+			case painless_parser.FALSE:
+			case painless_parser.NULL:
+			case painless_parser.ID:
 				{
 				this.state = 550;
 				this.expression();
@@ -2979,7 +2979,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public lamtype(): LamtypeContext {
 		let _localctx: LamtypeContext = new LamtypeContext(this._ctx, this.state);
-		this.enterRule(_localctx, 74, PainlessParser.RULE_lamtype);
+		this.enterRule(_localctx, 74, painless_parser.RULE_lamtype);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
@@ -2994,7 +2994,7 @@ export class PainlessParser extends Parser {
 				break;
 			}
 			this.state = 556;
-			this.match(PainlessParser.ID);
+			this.match(painless_parser.ID);
 			}
 		}
 		catch (re) {
@@ -3014,7 +3014,7 @@ export class PainlessParser extends Parser {
 	// @RuleVersion(0)
 	public funcref(): FuncrefContext {
 		let _localctx: FuncrefContext = new FuncrefContext(this._ctx, this.state);
-		this.enterRule(_localctx, 76, PainlessParser.RULE_funcref);
+		this.enterRule(_localctx, 76, painless_parser.RULE_funcref);
 		try {
 			this.state = 569;
 			this._errHandler.sync(this);
@@ -3026,9 +3026,9 @@ export class PainlessParser extends Parser {
 				this.state = 558;
 				this.decltype();
 				this.state = 559;
-				this.match(PainlessParser.REF);
+				this.match(painless_parser.REF);
 				this.state = 560;
-				this.match(PainlessParser.ID);
+				this.match(painless_parser.ID);
 				}
 				break;
 
@@ -3039,9 +3039,9 @@ export class PainlessParser extends Parser {
 				this.state = 562;
 				this.decltype();
 				this.state = 563;
-				this.match(PainlessParser.REF);
+				this.match(painless_parser.REF);
 				this.state = 564;
-				this.match(PainlessParser.NEW);
+				this.match(painless_parser.NEW);
 				}
 				break;
 
@@ -3050,11 +3050,11 @@ export class PainlessParser extends Parser {
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 566;
-				this.match(PainlessParser.THIS);
+				this.match(painless_parser.THIS);
 				this.state = 567;
-				this.match(PainlessParser.REF);
+				this.match(painless_parser.REF);
 				this.state = 568;
-				this.match(PainlessParser.ID);
+				this.match(painless_parser.ID);
 				}
 				break;
 			}
@@ -3431,24 +3431,24 @@ export class PainlessParser extends Parser {
 		"\u0221\u0224\u0229\u022C\u023B";
 	public static readonly _serializedATN: string = Utils.join(
 		[
-			PainlessParser._serializedATNSegment0,
-			PainlessParser._serializedATNSegment1,
+			painless_parser._serializedATNSegment0,
+			painless_parser._serializedATNSegment1,
 		],
 		"",
 	);
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
-		if (!PainlessParser.__ATN) {
-			PainlessParser.__ATN = new ATNDeserializer().deserialize(Utils.toCharArray(PainlessParser._serializedATN));
+		if (!painless_parser.__ATN) {
+			painless_parser.__ATN = new ATNDeserializer().deserialize(Utils.toCharArray(painless_parser._serializedATN));
 		}
 
-		return PainlessParser.__ATN;
+		return painless_parser.__ATN;
 	}
 
 }
 
 export class SourceContext extends ParserRuleContext {
-	public EOF(): TerminalNode { return this.getToken(PainlessParser.EOF, 0); }
+	public EOF(): TerminalNode { return this.getToken(painless_parser.EOF, 0); }
 	public function(): FunctionContext[];
 	public function(i: number): FunctionContext;
 	public function(i?: number): FunctionContext | FunctionContext[] {
@@ -3471,15 +3471,15 @@ export class SourceContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_source; }
+	public get ruleIndex(): number { return painless_parser.RULE_source; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterSource) {
 			listener.enterSource(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitSource) {
 			listener.exitSource(this);
 		}
@@ -3491,7 +3491,7 @@ export class FunctionContext extends ParserRuleContext {
 	public decltype(): DecltypeContext {
 		return this.getRuleContext(0, DecltypeContext);
 	}
-	public ID(): TerminalNode { return this.getToken(PainlessParser.ID, 0); }
+	public ID(): TerminalNode { return this.getToken(painless_parser.ID, 0); }
 	public parameters(): ParametersContext {
 		return this.getRuleContext(0, ParametersContext);
 	}
@@ -3502,15 +3502,15 @@ export class FunctionContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_function; }
+	public get ruleIndex(): number { return painless_parser.RULE_function; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterFunction) {
 			listener.enterFunction(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitFunction) {
 			listener.exitFunction(this);
 		}
@@ -3519,8 +3519,8 @@ export class FunctionContext extends ParserRuleContext {
 
 
 export class ParametersContext extends ParserRuleContext {
-	public LP(): TerminalNode { return this.getToken(PainlessParser.LP, 0); }
-	public RP(): TerminalNode { return this.getToken(PainlessParser.RP, 0); }
+	public LP(): TerminalNode { return this.getToken(painless_parser.LP, 0); }
+	public RP(): TerminalNode { return this.getToken(painless_parser.RP, 0); }
 	public decltype(): DecltypeContext[];
 	public decltype(i: number): DecltypeContext;
 	public decltype(i?: number): DecltypeContext | DecltypeContext[] {
@@ -3534,33 +3534,33 @@ export class ParametersContext extends ParserRuleContext {
 	public ID(i: number): TerminalNode;
 	public ID(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.ID);
+			return this.getTokens(painless_parser.ID);
 		} else {
-			return this.getToken(PainlessParser.ID, i);
+			return this.getToken(painless_parser.ID, i);
 		}
 	}
 	public COMMA(): TerminalNode[];
 	public COMMA(i: number): TerminalNode;
 	public COMMA(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.COMMA);
+			return this.getTokens(painless_parser.COMMA);
 		} else {
-			return this.getToken(PainlessParser.COMMA, i);
+			return this.getToken(painless_parser.COMMA, i);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_parameters; }
+	public get ruleIndex(): number { return painless_parser.RULE_parameters; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterParameters) {
 			listener.enterParameters(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitParameters) {
 			listener.exitParameters(this);
 		}
@@ -3575,21 +3575,21 @@ export class StatementContext extends ParserRuleContext {
 	public dstatement(): DstatementContext | undefined {
 		return this.tryGetRuleContext(0, DstatementContext);
 	}
-	public SEMICOLON(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.SEMICOLON, 0); }
-	public EOF(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.EOF, 0); }
+	public SEMICOLON(): TerminalNode | undefined { return this.tryGetToken(painless_parser.SEMICOLON, 0); }
+	public EOF(): TerminalNode | undefined { return this.tryGetToken(painless_parser.EOF, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_statement; }
+	public get ruleIndex(): number { return painless_parser.RULE_statement; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterStatement) {
 			listener.enterStatement(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitStatement) {
 			listener.exitStatement(this);
 		}
@@ -3602,18 +3602,18 @@ export class RstatementContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_rstatement; }
+	public get ruleIndex(): number { return painless_parser.RULE_rstatement; }
 	public copyFrom(ctx: RstatementContext): void {
 		super.copyFrom(ctx);
 	}
 }
 export class IfContext extends RstatementContext {
-	public IF(): TerminalNode { return this.getToken(PainlessParser.IF, 0); }
-	public LP(): TerminalNode { return this.getToken(PainlessParser.LP, 0); }
+	public IF(): TerminalNode { return this.getToken(painless_parser.IF, 0); }
+	public LP(): TerminalNode { return this.getToken(painless_parser.LP, 0); }
 	public expression(): ExpressionContext {
 		return this.getRuleContext(0, ExpressionContext);
 	}
-	public RP(): TerminalNode { return this.getToken(PainlessParser.RP, 0); }
+	public RP(): TerminalNode { return this.getToken(painless_parser.RP, 0); }
 	public trailer(): TrailerContext[];
 	public trailer(i: number): TrailerContext;
 	public trailer(i?: number): TrailerContext | TrailerContext[] {
@@ -3623,31 +3623,31 @@ export class IfContext extends RstatementContext {
 			return this.getRuleContext(i, TrailerContext);
 		}
 	}
-	public ELSE(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.ELSE, 0); }
+	public ELSE(): TerminalNode | undefined { return this.tryGetToken(painless_parser.ELSE, 0); }
 	constructor(ctx: RstatementContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterIf) {
 			listener.enterIf(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitIf) {
 			listener.exitIf(this);
 		}
 	}
 }
 export class WhileContext extends RstatementContext {
-	public WHILE(): TerminalNode { return this.getToken(PainlessParser.WHILE, 0); }
-	public LP(): TerminalNode { return this.getToken(PainlessParser.LP, 0); }
+	public WHILE(): TerminalNode { return this.getToken(painless_parser.WHILE, 0); }
+	public LP(): TerminalNode { return this.getToken(painless_parser.LP, 0); }
 	public expression(): ExpressionContext {
 		return this.getRuleContext(0, ExpressionContext);
 	}
-	public RP(): TerminalNode { return this.getToken(PainlessParser.RP, 0); }
+	public RP(): TerminalNode { return this.getToken(painless_parser.RP, 0); }
 	public trailer(): TrailerContext | undefined {
 		return this.tryGetRuleContext(0, TrailerContext);
 	}
@@ -3659,31 +3659,31 @@ export class WhileContext extends RstatementContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterWhile) {
 			listener.enterWhile(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitWhile) {
 			listener.exitWhile(this);
 		}
 	}
 }
 export class ForContext extends RstatementContext {
-	public FOR(): TerminalNode { return this.getToken(PainlessParser.FOR, 0); }
-	public LP(): TerminalNode { return this.getToken(PainlessParser.LP, 0); }
+	public FOR(): TerminalNode { return this.getToken(painless_parser.FOR, 0); }
+	public LP(): TerminalNode { return this.getToken(painless_parser.LP, 0); }
 	public SEMICOLON(): TerminalNode[];
 	public SEMICOLON(i: number): TerminalNode;
 	public SEMICOLON(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.SEMICOLON);
+			return this.getTokens(painless_parser.SEMICOLON);
 		} else {
-			return this.getToken(PainlessParser.SEMICOLON, i);
+			return this.getToken(painless_parser.SEMICOLON, i);
 		}
 	}
-	public RP(): TerminalNode { return this.getToken(PainlessParser.RP, 0); }
+	public RP(): TerminalNode { return this.getToken(painless_parser.RP, 0); }
 	public trailer(): TrailerContext | undefined {
 		return this.tryGetRuleContext(0, TrailerContext);
 	}
@@ -3704,30 +3704,30 @@ export class ForContext extends RstatementContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterFor) {
 			listener.enterFor(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitFor) {
 			listener.exitFor(this);
 		}
 	}
 }
 export class EachContext extends RstatementContext {
-	public FOR(): TerminalNode { return this.getToken(PainlessParser.FOR, 0); }
-	public LP(): TerminalNode { return this.getToken(PainlessParser.LP, 0); }
+	public FOR(): TerminalNode { return this.getToken(painless_parser.FOR, 0); }
+	public LP(): TerminalNode { return this.getToken(painless_parser.LP, 0); }
 	public decltype(): DecltypeContext {
 		return this.getRuleContext(0, DecltypeContext);
 	}
-	public ID(): TerminalNode { return this.getToken(PainlessParser.ID, 0); }
-	public COLON(): TerminalNode { return this.getToken(PainlessParser.COLON, 0); }
+	public ID(): TerminalNode { return this.getToken(painless_parser.ID, 0); }
+	public COLON(): TerminalNode { return this.getToken(painless_parser.COLON, 0); }
 	public expression(): ExpressionContext {
 		return this.getRuleContext(0, ExpressionContext);
 	}
-	public RP(): TerminalNode { return this.getToken(PainlessParser.RP, 0); }
+	public RP(): TerminalNode { return this.getToken(painless_parser.RP, 0); }
 	public trailer(): TrailerContext {
 		return this.getRuleContext(0, TrailerContext);
 	}
@@ -3736,27 +3736,27 @@ export class EachContext extends RstatementContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterEach) {
 			listener.enterEach(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitEach) {
 			listener.exitEach(this);
 		}
 	}
 }
 export class IneachContext extends RstatementContext {
-	public FOR(): TerminalNode { return this.getToken(PainlessParser.FOR, 0); }
-	public LP(): TerminalNode { return this.getToken(PainlessParser.LP, 0); }
-	public ID(): TerminalNode { return this.getToken(PainlessParser.ID, 0); }
-	public IN(): TerminalNode { return this.getToken(PainlessParser.IN, 0); }
+	public FOR(): TerminalNode { return this.getToken(painless_parser.FOR, 0); }
+	public LP(): TerminalNode { return this.getToken(painless_parser.LP, 0); }
+	public ID(): TerminalNode { return this.getToken(painless_parser.ID, 0); }
+	public IN(): TerminalNode { return this.getToken(painless_parser.IN, 0); }
 	public expression(): ExpressionContext {
 		return this.getRuleContext(0, ExpressionContext);
 	}
-	public RP(): TerminalNode { return this.getToken(PainlessParser.RP, 0); }
+	public RP(): TerminalNode { return this.getToken(painless_parser.RP, 0); }
 	public trailer(): TrailerContext {
 		return this.getRuleContext(0, TrailerContext);
 	}
@@ -3765,20 +3765,20 @@ export class IneachContext extends RstatementContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterIneach) {
 			listener.enterIneach(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitIneach) {
 			listener.exitIneach(this);
 		}
 	}
 }
 export class TryContext extends RstatementContext {
-	public TRY(): TerminalNode { return this.getToken(PainlessParser.TRY, 0); }
+	public TRY(): TerminalNode { return this.getToken(painless_parser.TRY, 0); }
 	public block(): BlockContext {
 		return this.getRuleContext(0, BlockContext);
 	}
@@ -3796,13 +3796,13 @@ export class TryContext extends RstatementContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterTry) {
 			listener.enterTry(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitTry) {
 			listener.exitTry(this);
 		}
@@ -3815,34 +3815,34 @@ export class DstatementContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_dstatement; }
+	public get ruleIndex(): number { return painless_parser.RULE_dstatement; }
 	public copyFrom(ctx: DstatementContext): void {
 		super.copyFrom(ctx);
 	}
 }
 export class DoContext extends DstatementContext {
-	public DO(): TerminalNode { return this.getToken(PainlessParser.DO, 0); }
+	public DO(): TerminalNode { return this.getToken(painless_parser.DO, 0); }
 	public block(): BlockContext {
 		return this.getRuleContext(0, BlockContext);
 	}
-	public WHILE(): TerminalNode { return this.getToken(PainlessParser.WHILE, 0); }
-	public LP(): TerminalNode { return this.getToken(PainlessParser.LP, 0); }
+	public WHILE(): TerminalNode { return this.getToken(painless_parser.WHILE, 0); }
+	public LP(): TerminalNode { return this.getToken(painless_parser.LP, 0); }
 	public expression(): ExpressionContext {
 		return this.getRuleContext(0, ExpressionContext);
 	}
-	public RP(): TerminalNode { return this.getToken(PainlessParser.RP, 0); }
+	public RP(): TerminalNode { return this.getToken(painless_parser.RP, 0); }
 	constructor(ctx: DstatementContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterDo) {
 			listener.enterDo(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitDo) {
 			listener.exitDo(this);
 		}
@@ -3857,58 +3857,58 @@ export class DeclContext extends DstatementContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterDecl) {
 			listener.enterDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitDecl) {
 			listener.exitDecl(this);
 		}
 	}
 }
 export class ContinueContext extends DstatementContext {
-	public CONTINUE(): TerminalNode { return this.getToken(PainlessParser.CONTINUE, 0); }
+	public CONTINUE(): TerminalNode { return this.getToken(painless_parser.CONTINUE, 0); }
 	constructor(ctx: DstatementContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterContinue) {
 			listener.enterContinue(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitContinue) {
 			listener.exitContinue(this);
 		}
 	}
 }
 export class BreakContext extends DstatementContext {
-	public BREAK(): TerminalNode { return this.getToken(PainlessParser.BREAK, 0); }
+	public BREAK(): TerminalNode { return this.getToken(painless_parser.BREAK, 0); }
 	constructor(ctx: DstatementContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterBreak) {
 			listener.enterBreak(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitBreak) {
 			listener.exitBreak(this);
 		}
 	}
 }
 export class ReturnContext extends DstatementContext {
-	public RETURN(): TerminalNode { return this.getToken(PainlessParser.RETURN, 0); }
+	public RETURN(): TerminalNode { return this.getToken(painless_parser.RETURN, 0); }
 	public expression(): ExpressionContext | undefined {
 		return this.tryGetRuleContext(0, ExpressionContext);
 	}
@@ -3917,20 +3917,20 @@ export class ReturnContext extends DstatementContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterReturn) {
 			listener.enterReturn(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitReturn) {
 			listener.exitReturn(this);
 		}
 	}
 }
 export class ThrowContext extends DstatementContext {
-	public THROW(): TerminalNode { return this.getToken(PainlessParser.THROW, 0); }
+	public THROW(): TerminalNode { return this.getToken(painless_parser.THROW, 0); }
 	public expression(): ExpressionContext {
 		return this.getRuleContext(0, ExpressionContext);
 	}
@@ -3939,13 +3939,13 @@ export class ThrowContext extends DstatementContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterThrow) {
 			listener.enterThrow(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitThrow) {
 			listener.exitThrow(this);
 		}
@@ -3960,13 +3960,13 @@ export class ExprContext extends DstatementContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterExpr) {
 			listener.enterExpr(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitExpr) {
 			listener.exitExpr(this);
 		}
@@ -3985,15 +3985,15 @@ export class TrailerContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_trailer; }
+	public get ruleIndex(): number { return painless_parser.RULE_trailer; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterTrailer) {
 			listener.enterTrailer(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitTrailer) {
 			listener.exitTrailer(this);
 		}
@@ -4002,8 +4002,8 @@ export class TrailerContext extends ParserRuleContext {
 
 
 export class BlockContext extends ParserRuleContext {
-	public LBRACK(): TerminalNode { return this.getToken(PainlessParser.LBRACK, 0); }
-	public RBRACK(): TerminalNode { return this.getToken(PainlessParser.RBRACK, 0); }
+	public LBRACK(): TerminalNode { return this.getToken(painless_parser.LBRACK, 0); }
+	public RBRACK(): TerminalNode { return this.getToken(painless_parser.RBRACK, 0); }
 	public statement(): StatementContext[];
 	public statement(i: number): StatementContext;
 	public statement(i?: number): StatementContext | StatementContext[] {
@@ -4020,15 +4020,15 @@ export class BlockContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_block; }
+	public get ruleIndex(): number { return painless_parser.RULE_block; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterBlock) {
 			listener.enterBlock(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitBlock) {
 			listener.exitBlock(this);
 		}
@@ -4037,20 +4037,20 @@ export class BlockContext extends ParserRuleContext {
 
 
 export class EmptyContext extends ParserRuleContext {
-	public SEMICOLON(): TerminalNode { return this.getToken(PainlessParser.SEMICOLON, 0); }
+	public SEMICOLON(): TerminalNode { return this.getToken(painless_parser.SEMICOLON, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_empty; }
+	public get ruleIndex(): number { return painless_parser.RULE_empty; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterEmpty) {
 			listener.enterEmpty(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitEmpty) {
 			listener.exitEmpty(this);
 		}
@@ -4069,15 +4069,15 @@ export class InitializerContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_initializer; }
+	public get ruleIndex(): number { return painless_parser.RULE_initializer; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterInitializer) {
 			listener.enterInitializer(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitInitializer) {
 			listener.exitInitializer(this);
 		}
@@ -4093,15 +4093,15 @@ export class AfterthoughtContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_afterthought; }
+	public get ruleIndex(): number { return painless_parser.RULE_afterthought; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterAfterthought) {
 			listener.enterAfterthought(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitAfterthought) {
 			listener.exitAfterthought(this);
 		}
@@ -4126,24 +4126,24 @@ export class DeclarationContext extends ParserRuleContext {
 	public COMMA(i: number): TerminalNode;
 	public COMMA(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.COMMA);
+			return this.getTokens(painless_parser.COMMA);
 		} else {
-			return this.getToken(PainlessParser.COMMA, i);
+			return this.getToken(painless_parser.COMMA, i);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_declaration; }
+	public get ruleIndex(): number { return painless_parser.RULE_declaration; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterDeclaration) {
 			listener.enterDeclaration(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitDeclaration) {
 			listener.exitDeclaration(this);
 		}
@@ -4159,33 +4159,33 @@ export class DecltypeContext extends ParserRuleContext {
 	public LBRACE(i: number): TerminalNode;
 	public LBRACE(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.LBRACE);
+			return this.getTokens(painless_parser.LBRACE);
 		} else {
-			return this.getToken(PainlessParser.LBRACE, i);
+			return this.getToken(painless_parser.LBRACE, i);
 		}
 	}
 	public RBRACE(): TerminalNode[];
 	public RBRACE(i: number): TerminalNode;
 	public RBRACE(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.RBRACE);
+			return this.getTokens(painless_parser.RBRACE);
 		} else {
-			return this.getToken(PainlessParser.RBRACE, i);
+			return this.getToken(painless_parser.RBRACE, i);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_decltype; }
+	public get ruleIndex(): number { return painless_parser.RULE_decltype; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterDecltype) {
 			listener.enterDecltype(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitDecltype) {
 			listener.exitDecltype(this);
 		}
@@ -4194,40 +4194,40 @@ export class DecltypeContext extends ParserRuleContext {
 
 
 export class TypeContext extends ParserRuleContext {
-	public DEF(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.DEF, 0); }
-	public PRIMITIVE(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.PRIMITIVE, 0); }
-	public ID(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.ID, 0); }
+	public DEF(): TerminalNode | undefined { return this.tryGetToken(painless_parser.DEF, 0); }
+	public PRIMITIVE(): TerminalNode | undefined { return this.tryGetToken(painless_parser.PRIMITIVE, 0); }
+	public ID(): TerminalNode | undefined { return this.tryGetToken(painless_parser.ID, 0); }
 	public DOT(): TerminalNode[];
 	public DOT(i: number): TerminalNode;
 	public DOT(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.DOT);
+			return this.getTokens(painless_parser.DOT);
 		} else {
-			return this.getToken(PainlessParser.DOT, i);
+			return this.getToken(painless_parser.DOT, i);
 		}
 	}
 	public DOTID(): TerminalNode[];
 	public DOTID(i: number): TerminalNode;
 	public DOTID(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.DOTID);
+			return this.getTokens(painless_parser.DOTID);
 		} else {
-			return this.getToken(PainlessParser.DOTID, i);
+			return this.getToken(painless_parser.DOTID, i);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_type; }
+	public get ruleIndex(): number { return painless_parser.RULE_type; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterType) {
 			listener.enterType(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitType) {
 			listener.exitType(this);
 		}
@@ -4236,8 +4236,8 @@ export class TypeContext extends ParserRuleContext {
 
 
 export class DeclvarContext extends ParserRuleContext {
-	public ID(): TerminalNode { return this.getToken(PainlessParser.ID, 0); }
-	public ASSIGN(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.ASSIGN, 0); }
+	public ID(): TerminalNode { return this.getToken(painless_parser.ID, 0); }
+	public ASSIGN(): TerminalNode | undefined { return this.tryGetToken(painless_parser.ASSIGN, 0); }
 	public expression(): ExpressionContext | undefined {
 		return this.tryGetRuleContext(0, ExpressionContext);
 	}
@@ -4245,15 +4245,15 @@ export class DeclvarContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_declvar; }
+	public get ruleIndex(): number { return painless_parser.RULE_declvar; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterDeclvar) {
 			listener.enterDeclvar(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitDeclvar) {
 			listener.exitDeclvar(this);
 		}
@@ -4262,13 +4262,13 @@ export class DeclvarContext extends ParserRuleContext {
 
 
 export class TrapContext extends ParserRuleContext {
-	public CATCH(): TerminalNode { return this.getToken(PainlessParser.CATCH, 0); }
-	public LP(): TerminalNode { return this.getToken(PainlessParser.LP, 0); }
+	public CATCH(): TerminalNode { return this.getToken(painless_parser.CATCH, 0); }
+	public LP(): TerminalNode { return this.getToken(painless_parser.LP, 0); }
 	public type(): TypeContext {
 		return this.getRuleContext(0, TypeContext);
 	}
-	public ID(): TerminalNode { return this.getToken(PainlessParser.ID, 0); }
-	public RP(): TerminalNode { return this.getToken(PainlessParser.RP, 0); }
+	public ID(): TerminalNode { return this.getToken(painless_parser.ID, 0); }
+	public RP(): TerminalNode { return this.getToken(painless_parser.RP, 0); }
 	public block(): BlockContext {
 		return this.getRuleContext(0, BlockContext);
 	}
@@ -4276,15 +4276,15 @@ export class TrapContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_trap; }
+	public get ruleIndex(): number { return painless_parser.RULE_trap; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterTrap) {
 			listener.enterTrap(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitTrap) {
 			listener.exitTrap(this);
 		}
@@ -4297,7 +4297,7 @@ export class NoncondexpressionContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_noncondexpression; }
+	public get ruleIndex(): number { return painless_parser.RULE_noncondexpression; }
 	public copyFrom(ctx: NoncondexpressionContext): void {
 		super.copyFrom(ctx);
 	}
@@ -4311,13 +4311,13 @@ export class SingleContext extends NoncondexpressionContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterSingle) {
 			listener.enterSingle(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitSingle) {
 			listener.exitSingle(this);
 		}
@@ -4333,31 +4333,31 @@ export class BinaryContext extends NoncondexpressionContext {
 			return this.getRuleContext(i, NoncondexpressionContext);
 		}
 	}
-	public MUL(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.MUL, 0); }
-	public DIV(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.DIV, 0); }
-	public REM(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.REM, 0); }
-	public ADD(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.ADD, 0); }
-	public SUB(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.SUB, 0); }
-	public FIND(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.FIND, 0); }
-	public MATCH(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.MATCH, 0); }
-	public LSH(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.LSH, 0); }
-	public RSH(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.RSH, 0); }
-	public USH(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.USH, 0); }
-	public BWAND(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.BWAND, 0); }
-	public XOR(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.XOR, 0); }
-	public BWOR(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.BWOR, 0); }
+	public MUL(): TerminalNode | undefined { return this.tryGetToken(painless_parser.MUL, 0); }
+	public DIV(): TerminalNode | undefined { return this.tryGetToken(painless_parser.DIV, 0); }
+	public REM(): TerminalNode | undefined { return this.tryGetToken(painless_parser.REM, 0); }
+	public ADD(): TerminalNode | undefined { return this.tryGetToken(painless_parser.ADD, 0); }
+	public SUB(): TerminalNode | undefined { return this.tryGetToken(painless_parser.SUB, 0); }
+	public FIND(): TerminalNode | undefined { return this.tryGetToken(painless_parser.FIND, 0); }
+	public MATCH(): TerminalNode | undefined { return this.tryGetToken(painless_parser.MATCH, 0); }
+	public LSH(): TerminalNode | undefined { return this.tryGetToken(painless_parser.LSH, 0); }
+	public RSH(): TerminalNode | undefined { return this.tryGetToken(painless_parser.RSH, 0); }
+	public USH(): TerminalNode | undefined { return this.tryGetToken(painless_parser.USH, 0); }
+	public BWAND(): TerminalNode | undefined { return this.tryGetToken(painless_parser.BWAND, 0); }
+	public XOR(): TerminalNode | undefined { return this.tryGetToken(painless_parser.XOR, 0); }
+	public BWOR(): TerminalNode | undefined { return this.tryGetToken(painless_parser.BWOR, 0); }
 	constructor(ctx: NoncondexpressionContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterBinary) {
 			listener.enterBinary(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitBinary) {
 			listener.exitBinary(this);
 		}
@@ -4373,26 +4373,26 @@ export class CompContext extends NoncondexpressionContext {
 			return this.getRuleContext(i, NoncondexpressionContext);
 		}
 	}
-	public LT(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.LT, 0); }
-	public LTE(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.LTE, 0); }
-	public GT(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.GT, 0); }
-	public GTE(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.GTE, 0); }
-	public EQ(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.EQ, 0); }
-	public EQR(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.EQR, 0); }
-	public NE(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.NE, 0); }
-	public NER(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.NER, 0); }
+	public LT(): TerminalNode | undefined { return this.tryGetToken(painless_parser.LT, 0); }
+	public LTE(): TerminalNode | undefined { return this.tryGetToken(painless_parser.LTE, 0); }
+	public GT(): TerminalNode | undefined { return this.tryGetToken(painless_parser.GT, 0); }
+	public GTE(): TerminalNode | undefined { return this.tryGetToken(painless_parser.GTE, 0); }
+	public EQ(): TerminalNode | undefined { return this.tryGetToken(painless_parser.EQ, 0); }
+	public EQR(): TerminalNode | undefined { return this.tryGetToken(painless_parser.EQR, 0); }
+	public NE(): TerminalNode | undefined { return this.tryGetToken(painless_parser.NE, 0); }
+	public NER(): TerminalNode | undefined { return this.tryGetToken(painless_parser.NER, 0); }
 	constructor(ctx: NoncondexpressionContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterComp) {
 			listener.enterComp(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitComp) {
 			listener.exitComp(this);
 		}
@@ -4402,7 +4402,7 @@ export class InstanceofContext extends NoncondexpressionContext {
 	public noncondexpression(): NoncondexpressionContext {
 		return this.getRuleContext(0, NoncondexpressionContext);
 	}
-	public INSTANCEOF(): TerminalNode { return this.getToken(PainlessParser.INSTANCEOF, 0); }
+	public INSTANCEOF(): TerminalNode { return this.getToken(painless_parser.INSTANCEOF, 0); }
 	public decltype(): DecltypeContext {
 		return this.getRuleContext(0, DecltypeContext);
 	}
@@ -4411,13 +4411,13 @@ export class InstanceofContext extends NoncondexpressionContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterInstanceof) {
 			listener.enterInstanceof(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitInstanceof) {
 			listener.exitInstanceof(this);
 		}
@@ -4433,20 +4433,20 @@ export class BoolContext extends NoncondexpressionContext {
 			return this.getRuleContext(i, NoncondexpressionContext);
 		}
 	}
-	public BOOLAND(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.BOOLAND, 0); }
-	public BOOLOR(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.BOOLOR, 0); }
+	public BOOLAND(): TerminalNode | undefined { return this.tryGetToken(painless_parser.BOOLAND, 0); }
+	public BOOLOR(): TerminalNode | undefined { return this.tryGetToken(painless_parser.BOOLOR, 0); }
 	constructor(ctx: NoncondexpressionContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterBool) {
 			listener.enterBool(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitBool) {
 			listener.exitBool(this);
 		}
@@ -4462,19 +4462,19 @@ export class ElvisContext extends NoncondexpressionContext {
 			return this.getRuleContext(i, NoncondexpressionContext);
 		}
 	}
-	public ELVIS(): TerminalNode { return this.getToken(PainlessParser.ELVIS, 0); }
+	public ELVIS(): TerminalNode { return this.getToken(painless_parser.ELVIS, 0); }
 	constructor(ctx: NoncondexpressionContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterElvis) {
 			listener.enterElvis(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitElvis) {
 			listener.exitElvis(this);
 		}
@@ -4487,7 +4487,7 @@ export class ExpressionContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_expression; }
+	public get ruleIndex(): number { return painless_parser.RULE_expression; }
 	public copyFrom(ctx: ExpressionContext): void {
 		super.copyFrom(ctx);
 	}
@@ -4501,13 +4501,13 @@ export class NonconditionalContext extends ExpressionContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterNonconditional) {
 			listener.enterNonconditional(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitNonconditional) {
 			listener.exitNonconditional(this);
 		}
@@ -4517,7 +4517,7 @@ export class ConditionalContext extends ExpressionContext {
 	public noncondexpression(): NoncondexpressionContext {
 		return this.getRuleContext(0, NoncondexpressionContext);
 	}
-	public COND(): TerminalNode { return this.getToken(PainlessParser.COND, 0); }
+	public COND(): TerminalNode { return this.getToken(painless_parser.COND, 0); }
 	public expression(): ExpressionContext[];
 	public expression(i: number): ExpressionContext;
 	public expression(i?: number): ExpressionContext | ExpressionContext[] {
@@ -4527,19 +4527,19 @@ export class ConditionalContext extends ExpressionContext {
 			return this.getRuleContext(i, ExpressionContext);
 		}
 	}
-	public COLON(): TerminalNode { return this.getToken(PainlessParser.COLON, 0); }
+	public COLON(): TerminalNode { return this.getToken(painless_parser.COLON, 0); }
 	constructor(ctx: ExpressionContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterConditional) {
 			listener.enterConditional(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitConditional) {
 			listener.exitConditional(this);
 		}
@@ -4552,30 +4552,30 @@ export class AssignmentContext extends ExpressionContext {
 	public expression(): ExpressionContext {
 		return this.getRuleContext(0, ExpressionContext);
 	}
-	public ASSIGN(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.ASSIGN, 0); }
-	public AADD(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.AADD, 0); }
-	public ASUB(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.ASUB, 0); }
-	public AMUL(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.AMUL, 0); }
-	public ADIV(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.ADIV, 0); }
-	public AREM(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.AREM, 0); }
-	public AAND(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.AAND, 0); }
-	public AXOR(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.AXOR, 0); }
-	public AOR(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.AOR, 0); }
-	public ALSH(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.ALSH, 0); }
-	public ARSH(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.ARSH, 0); }
-	public AUSH(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.AUSH, 0); }
+	public ASSIGN(): TerminalNode | undefined { return this.tryGetToken(painless_parser.ASSIGN, 0); }
+	public AADD(): TerminalNode | undefined { return this.tryGetToken(painless_parser.AADD, 0); }
+	public ASUB(): TerminalNode | undefined { return this.tryGetToken(painless_parser.ASUB, 0); }
+	public AMUL(): TerminalNode | undefined { return this.tryGetToken(painless_parser.AMUL, 0); }
+	public ADIV(): TerminalNode | undefined { return this.tryGetToken(painless_parser.ADIV, 0); }
+	public AREM(): TerminalNode | undefined { return this.tryGetToken(painless_parser.AREM, 0); }
+	public AAND(): TerminalNode | undefined { return this.tryGetToken(painless_parser.AAND, 0); }
+	public AXOR(): TerminalNode | undefined { return this.tryGetToken(painless_parser.AXOR, 0); }
+	public AOR(): TerminalNode | undefined { return this.tryGetToken(painless_parser.AOR, 0); }
+	public ALSH(): TerminalNode | undefined { return this.tryGetToken(painless_parser.ALSH, 0); }
+	public ARSH(): TerminalNode | undefined { return this.tryGetToken(painless_parser.ARSH, 0); }
+	public AUSH(): TerminalNode | undefined { return this.tryGetToken(painless_parser.AUSH, 0); }
 	constructor(ctx: ExpressionContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterAssignment) {
 			listener.enterAssignment(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitAssignment) {
 			listener.exitAssignment(this);
 		}
@@ -4588,7 +4588,7 @@ export class UnaryContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_unary; }
+	public get ruleIndex(): number { return painless_parser.RULE_unary; }
 	public copyFrom(ctx: UnaryContext): void {
 		super.copyFrom(ctx);
 	}
@@ -4597,20 +4597,20 @@ export class PreContext extends UnaryContext {
 	public chain(): ChainContext {
 		return this.getRuleContext(0, ChainContext);
 	}
-	public INCR(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.INCR, 0); }
-	public DECR(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.DECR, 0); }
+	public INCR(): TerminalNode | undefined { return this.tryGetToken(painless_parser.INCR, 0); }
+	public DECR(): TerminalNode | undefined { return this.tryGetToken(painless_parser.DECR, 0); }
 	constructor(ctx: UnaryContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterPre) {
 			listener.enterPre(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitPre) {
 			listener.exitPre(this);
 		}
@@ -4620,20 +4620,20 @@ export class AddsubContext extends UnaryContext {
 	public unary(): UnaryContext {
 		return this.getRuleContext(0, UnaryContext);
 	}
-	public ADD(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.ADD, 0); }
-	public SUB(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.SUB, 0); }
+	public ADD(): TerminalNode | undefined { return this.tryGetToken(painless_parser.ADD, 0); }
+	public SUB(): TerminalNode | undefined { return this.tryGetToken(painless_parser.SUB, 0); }
 	constructor(ctx: UnaryContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterAddsub) {
 			listener.enterAddsub(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitAddsub) {
 			listener.exitAddsub(this);
 		}
@@ -4648,13 +4648,13 @@ export class NotaddsubContext extends UnaryContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterNotaddsub) {
 			listener.enterNotaddsub(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitNotaddsub) {
 			listener.exitNotaddsub(this);
 		}
@@ -4667,7 +4667,7 @@ export class UnarynotaddsubContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_unarynotaddsub; }
+	public get ruleIndex(): number { return painless_parser.RULE_unarynotaddsub; }
 	public copyFrom(ctx: UnarynotaddsubContext): void {
 		super.copyFrom(ctx);
 	}
@@ -4681,13 +4681,13 @@ export class ReadContext extends UnarynotaddsubContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterRead) {
 			listener.enterRead(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitRead) {
 			listener.exitRead(this);
 		}
@@ -4697,20 +4697,20 @@ export class PostContext extends UnarynotaddsubContext {
 	public chain(): ChainContext {
 		return this.getRuleContext(0, ChainContext);
 	}
-	public INCR(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.INCR, 0); }
-	public DECR(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.DECR, 0); }
+	public INCR(): TerminalNode | undefined { return this.tryGetToken(painless_parser.INCR, 0); }
+	public DECR(): TerminalNode | undefined { return this.tryGetToken(painless_parser.DECR, 0); }
 	constructor(ctx: UnarynotaddsubContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterPost) {
 			listener.enterPost(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitPost) {
 			listener.exitPost(this);
 		}
@@ -4720,20 +4720,20 @@ export class NotContext extends UnarynotaddsubContext {
 	public unary(): UnaryContext {
 		return this.getRuleContext(0, UnaryContext);
 	}
-	public BOOLNOT(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.BOOLNOT, 0); }
-	public BWNOT(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.BWNOT, 0); }
+	public BOOLNOT(): TerminalNode | undefined { return this.tryGetToken(painless_parser.BOOLNOT, 0); }
+	public BWNOT(): TerminalNode | undefined { return this.tryGetToken(painless_parser.BWNOT, 0); }
 	constructor(ctx: UnarynotaddsubContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterNot) {
 			listener.enterNot(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitNot) {
 			listener.exitNot(this);
 		}
@@ -4748,13 +4748,13 @@ export class CastContext extends UnarynotaddsubContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterCast) {
 			listener.enterCast(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitCast) {
 			listener.exitCast(this);
 		}
@@ -4767,17 +4767,17 @@ export class CastexpressionContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_castexpression; }
+	public get ruleIndex(): number { return painless_parser.RULE_castexpression; }
 	public copyFrom(ctx: CastexpressionContext): void {
 		super.copyFrom(ctx);
 	}
 }
 export class PrimordefcastContext extends CastexpressionContext {
-	public LP(): TerminalNode { return this.getToken(PainlessParser.LP, 0); }
+	public LP(): TerminalNode { return this.getToken(painless_parser.LP, 0); }
 	public primordefcasttype(): PrimordefcasttypeContext {
 		return this.getRuleContext(0, PrimordefcasttypeContext);
 	}
-	public RP(): TerminalNode { return this.getToken(PainlessParser.RP, 0); }
+	public RP(): TerminalNode { return this.getToken(painless_parser.RP, 0); }
 	public unary(): UnaryContext {
 		return this.getRuleContext(0, UnaryContext);
 	}
@@ -4786,24 +4786,24 @@ export class PrimordefcastContext extends CastexpressionContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterPrimordefcast) {
 			listener.enterPrimordefcast(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitPrimordefcast) {
 			listener.exitPrimordefcast(this);
 		}
 	}
 }
 export class RefcastContext extends CastexpressionContext {
-	public LP(): TerminalNode { return this.getToken(PainlessParser.LP, 0); }
+	public LP(): TerminalNode { return this.getToken(painless_parser.LP, 0); }
 	public refcasttype(): RefcasttypeContext {
 		return this.getRuleContext(0, RefcasttypeContext);
 	}
-	public RP(): TerminalNode { return this.getToken(PainlessParser.RP, 0); }
+	public RP(): TerminalNode { return this.getToken(painless_parser.RP, 0); }
 	public unarynotaddsub(): UnarynotaddsubContext {
 		return this.getRuleContext(0, UnarynotaddsubContext);
 	}
@@ -4812,13 +4812,13 @@ export class RefcastContext extends CastexpressionContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterRefcast) {
 			listener.enterRefcast(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitRefcast) {
 			listener.exitRefcast(this);
 		}
@@ -4827,21 +4827,21 @@ export class RefcastContext extends CastexpressionContext {
 
 
 export class PrimordefcasttypeContext extends ParserRuleContext {
-	public DEF(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.DEF, 0); }
-	public PRIMITIVE(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.PRIMITIVE, 0); }
+	public DEF(): TerminalNode | undefined { return this.tryGetToken(painless_parser.DEF, 0); }
+	public PRIMITIVE(): TerminalNode | undefined { return this.tryGetToken(painless_parser.PRIMITIVE, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_primordefcasttype; }
+	public get ruleIndex(): number { return painless_parser.RULE_primordefcasttype; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterPrimordefcasttype) {
 			listener.enterPrimordefcasttype(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitPrimordefcasttype) {
 			listener.exitPrimordefcasttype(this);
 		}
@@ -4850,58 +4850,58 @@ export class PrimordefcasttypeContext extends ParserRuleContext {
 
 
 export class RefcasttypeContext extends ParserRuleContext {
-	public DEF(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.DEF, 0); }
+	public DEF(): TerminalNode | undefined { return this.tryGetToken(painless_parser.DEF, 0); }
 	public LBRACE(): TerminalNode[];
 	public LBRACE(i: number): TerminalNode;
 	public LBRACE(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.LBRACE);
+			return this.getTokens(painless_parser.LBRACE);
 		} else {
-			return this.getToken(PainlessParser.LBRACE, i);
+			return this.getToken(painless_parser.LBRACE, i);
 		}
 	}
 	public RBRACE(): TerminalNode[];
 	public RBRACE(i: number): TerminalNode;
 	public RBRACE(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.RBRACE);
+			return this.getTokens(painless_parser.RBRACE);
 		} else {
-			return this.getToken(PainlessParser.RBRACE, i);
+			return this.getToken(painless_parser.RBRACE, i);
 		}
 	}
-	public PRIMITIVE(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.PRIMITIVE, 0); }
-	public ID(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.ID, 0); }
+	public PRIMITIVE(): TerminalNode | undefined { return this.tryGetToken(painless_parser.PRIMITIVE, 0); }
+	public ID(): TerminalNode | undefined { return this.tryGetToken(painless_parser.ID, 0); }
 	public DOT(): TerminalNode[];
 	public DOT(i: number): TerminalNode;
 	public DOT(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.DOT);
+			return this.getTokens(painless_parser.DOT);
 		} else {
-			return this.getToken(PainlessParser.DOT, i);
+			return this.getToken(painless_parser.DOT, i);
 		}
 	}
 	public DOTID(): TerminalNode[];
 	public DOTID(i: number): TerminalNode;
 	public DOTID(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.DOTID);
+			return this.getTokens(painless_parser.DOTID);
 		} else {
-			return this.getToken(PainlessParser.DOTID, i);
+			return this.getToken(painless_parser.DOTID, i);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_refcasttype; }
+	public get ruleIndex(): number { return painless_parser.RULE_refcasttype; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterRefcasttype) {
 			listener.enterRefcasttype(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitRefcasttype) {
 			listener.exitRefcasttype(this);
 		}
@@ -4914,7 +4914,7 @@ export class ChainContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_chain; }
+	public get ruleIndex(): number { return painless_parser.RULE_chain; }
 	public copyFrom(ctx: ChainContext): void {
 		super.copyFrom(ctx);
 	}
@@ -4937,13 +4937,13 @@ export class DynamicContext extends ChainContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterDynamic) {
 			listener.enterDynamic(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitDynamic) {
 			listener.exitDynamic(this);
 		}
@@ -4958,13 +4958,13 @@ export class NewarrayContext extends ChainContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterNewarray) {
 			listener.enterNewarray(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitNewarray) {
 			listener.exitNewarray(this);
 		}
@@ -4977,146 +4977,146 @@ export class PrimaryContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_primary; }
+	public get ruleIndex(): number { return painless_parser.RULE_primary; }
 	public copyFrom(ctx: PrimaryContext): void {
 		super.copyFrom(ctx);
 	}
 }
 export class PrecedenceContext extends PrimaryContext {
-	public LP(): TerminalNode { return this.getToken(PainlessParser.LP, 0); }
+	public LP(): TerminalNode { return this.getToken(painless_parser.LP, 0); }
 	public expression(): ExpressionContext {
 		return this.getRuleContext(0, ExpressionContext);
 	}
-	public RP(): TerminalNode { return this.getToken(PainlessParser.RP, 0); }
+	public RP(): TerminalNode { return this.getToken(painless_parser.RP, 0); }
 	constructor(ctx: PrimaryContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterPrecedence) {
 			listener.enterPrecedence(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitPrecedence) {
 			listener.exitPrecedence(this);
 		}
 	}
 }
 export class NumericContext extends PrimaryContext {
-	public OCTAL(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.OCTAL, 0); }
-	public HEX(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.HEX, 0); }
-	public INTEGER(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.INTEGER, 0); }
-	public DECIMAL(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.DECIMAL, 0); }
+	public OCTAL(): TerminalNode | undefined { return this.tryGetToken(painless_parser.OCTAL, 0); }
+	public HEX(): TerminalNode | undefined { return this.tryGetToken(painless_parser.HEX, 0); }
+	public INTEGER(): TerminalNode | undefined { return this.tryGetToken(painless_parser.INTEGER, 0); }
+	public DECIMAL(): TerminalNode | undefined { return this.tryGetToken(painless_parser.DECIMAL, 0); }
 	constructor(ctx: PrimaryContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterNumeric) {
 			listener.enterNumeric(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitNumeric) {
 			listener.exitNumeric(this);
 		}
 	}
 }
 export class TrueContext extends PrimaryContext {
-	public TRUE(): TerminalNode { return this.getToken(PainlessParser.TRUE, 0); }
+	public TRUE(): TerminalNode { return this.getToken(painless_parser.TRUE, 0); }
 	constructor(ctx: PrimaryContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterTrue) {
 			listener.enterTrue(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitTrue) {
 			listener.exitTrue(this);
 		}
 	}
 }
 export class FalseContext extends PrimaryContext {
-	public FALSE(): TerminalNode { return this.getToken(PainlessParser.FALSE, 0); }
+	public FALSE(): TerminalNode { return this.getToken(painless_parser.FALSE, 0); }
 	constructor(ctx: PrimaryContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterFalse) {
 			listener.enterFalse(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitFalse) {
 			listener.exitFalse(this);
 		}
 	}
 }
 export class NullContext extends PrimaryContext {
-	public NULL(): TerminalNode { return this.getToken(PainlessParser.NULL, 0); }
+	public NULL(): TerminalNode { return this.getToken(painless_parser.NULL, 0); }
 	constructor(ctx: PrimaryContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterNull) {
 			listener.enterNull(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitNull) {
 			listener.exitNull(this);
 		}
 	}
 }
 export class StringContext extends PrimaryContext {
-	public STRING(): TerminalNode { return this.getToken(PainlessParser.STRING, 0); }
+	public STRING(): TerminalNode { return this.getToken(painless_parser.STRING, 0); }
 	constructor(ctx: PrimaryContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterString) {
 			listener.enterString(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitString) {
 			listener.exitString(this);
 		}
 	}
 }
 export class RegexContext extends PrimaryContext {
-	public REGEX(): TerminalNode { return this.getToken(PainlessParser.REGEX, 0); }
+	public REGEX(): TerminalNode { return this.getToken(painless_parser.REGEX, 0); }
 	constructor(ctx: PrimaryContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterRegex) {
 			listener.enterRegex(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitRegex) {
 			listener.exitRegex(this);
 		}
@@ -5131,13 +5131,13 @@ export class ListinitContext extends PrimaryContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterListinit) {
 			listener.enterListinit(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitListinit) {
 			listener.exitListinit(this);
 		}
@@ -5152,39 +5152,39 @@ export class MapinitContext extends PrimaryContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterMapinit) {
 			listener.enterMapinit(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitMapinit) {
 			listener.exitMapinit(this);
 		}
 	}
 }
 export class VariableContext extends PrimaryContext {
-	public ID(): TerminalNode { return this.getToken(PainlessParser.ID, 0); }
+	public ID(): TerminalNode { return this.getToken(painless_parser.ID, 0); }
 	constructor(ctx: PrimaryContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterVariable) {
 			listener.enterVariable(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitVariable) {
 			listener.exitVariable(this);
 		}
 	}
 }
 export class CalllocalContext extends PrimaryContext {
-	public ID(): TerminalNode { return this.getToken(PainlessParser.ID, 0); }
+	public ID(): TerminalNode { return this.getToken(painless_parser.ID, 0); }
 	public arguments(): ArgumentsContext {
 		return this.getRuleContext(0, ArgumentsContext);
 	}
@@ -5193,20 +5193,20 @@ export class CalllocalContext extends PrimaryContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterCalllocal) {
 			listener.enterCalllocal(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitCalllocal) {
 			listener.exitCalllocal(this);
 		}
 	}
 }
 export class NewobjectContext extends PrimaryContext {
-	public NEW(): TerminalNode { return this.getToken(PainlessParser.NEW, 0); }
+	public NEW(): TerminalNode { return this.getToken(painless_parser.NEW, 0); }
 	public type(): TypeContext {
 		return this.getRuleContext(0, TypeContext);
 	}
@@ -5218,13 +5218,13 @@ export class NewobjectContext extends PrimaryContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterNewobject) {
 			listener.enterNewobject(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitNewobject) {
 			listener.exitNewobject(this);
 		}
@@ -5246,15 +5246,15 @@ export class PostfixContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_postfix; }
+	public get ruleIndex(): number { return painless_parser.RULE_postfix; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterPostfix) {
 			listener.enterPostfix(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitPostfix) {
 			listener.exitPostfix(this);
 		}
@@ -5273,15 +5273,15 @@ export class PostdotContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_postdot; }
+	public get ruleIndex(): number { return painless_parser.RULE_postdot; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterPostdot) {
 			listener.enterPostdot(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitPostdot) {
 			listener.exitPostdot(this);
 		}
@@ -5290,25 +5290,25 @@ export class PostdotContext extends ParserRuleContext {
 
 
 export class CallinvokeContext extends ParserRuleContext {
-	public DOTID(): TerminalNode { return this.getToken(PainlessParser.DOTID, 0); }
+	public DOTID(): TerminalNode { return this.getToken(painless_parser.DOTID, 0); }
 	public arguments(): ArgumentsContext {
 		return this.getRuleContext(0, ArgumentsContext);
 	}
-	public DOT(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.DOT, 0); }
-	public NSDOT(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.NSDOT, 0); }
+	public DOT(): TerminalNode | undefined { return this.tryGetToken(painless_parser.DOT, 0); }
+	public NSDOT(): TerminalNode | undefined { return this.tryGetToken(painless_parser.NSDOT, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_callinvoke; }
+	public get ruleIndex(): number { return painless_parser.RULE_callinvoke; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterCallinvoke) {
 			listener.enterCallinvoke(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitCallinvoke) {
 			listener.exitCallinvoke(this);
 		}
@@ -5317,23 +5317,23 @@ export class CallinvokeContext extends ParserRuleContext {
 
 
 export class FieldaccessContext extends ParserRuleContext {
-	public DOT(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.DOT, 0); }
-	public NSDOT(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.NSDOT, 0); }
-	public DOTID(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.DOTID, 0); }
-	public DOTINTEGER(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.DOTINTEGER, 0); }
+	public DOT(): TerminalNode | undefined { return this.tryGetToken(painless_parser.DOT, 0); }
+	public NSDOT(): TerminalNode | undefined { return this.tryGetToken(painless_parser.NSDOT, 0); }
+	public DOTID(): TerminalNode | undefined { return this.tryGetToken(painless_parser.DOTID, 0); }
+	public DOTINTEGER(): TerminalNode | undefined { return this.tryGetToken(painless_parser.DOTINTEGER, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_fieldaccess; }
+	public get ruleIndex(): number { return painless_parser.RULE_fieldaccess; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterFieldaccess) {
 			listener.enterFieldaccess(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitFieldaccess) {
 			listener.exitFieldaccess(this);
 		}
@@ -5342,24 +5342,24 @@ export class FieldaccessContext extends ParserRuleContext {
 
 
 export class BraceaccessContext extends ParserRuleContext {
-	public LBRACE(): TerminalNode { return this.getToken(PainlessParser.LBRACE, 0); }
+	public LBRACE(): TerminalNode { return this.getToken(painless_parser.LBRACE, 0); }
 	public expression(): ExpressionContext {
 		return this.getRuleContext(0, ExpressionContext);
 	}
-	public RBRACE(): TerminalNode { return this.getToken(PainlessParser.RBRACE, 0); }
+	public RBRACE(): TerminalNode { return this.getToken(painless_parser.RBRACE, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_braceaccess; }
+	public get ruleIndex(): number { return painless_parser.RULE_braceaccess; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterBraceaccess) {
 			listener.enterBraceaccess(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitBraceaccess) {
 			listener.exitBraceaccess(this);
 		}
@@ -5372,13 +5372,13 @@ export class ArrayinitializerContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_arrayinitializer; }
+	public get ruleIndex(): number { return painless_parser.RULE_arrayinitializer; }
 	public copyFrom(ctx: ArrayinitializerContext): void {
 		super.copyFrom(ctx);
 	}
 }
 export class NewstandardarrayContext extends ArrayinitializerContext {
-	public NEW(): TerminalNode { return this.getToken(PainlessParser.NEW, 0); }
+	public NEW(): TerminalNode { return this.getToken(painless_parser.NEW, 0); }
 	public type(): TypeContext {
 		return this.getRuleContext(0, TypeContext);
 	}
@@ -5386,9 +5386,9 @@ export class NewstandardarrayContext extends ArrayinitializerContext {
 	public LBRACE(i: number): TerminalNode;
 	public LBRACE(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.LBRACE);
+			return this.getTokens(painless_parser.LBRACE);
 		} else {
-			return this.getToken(PainlessParser.LBRACE, i);
+			return this.getToken(painless_parser.LBRACE, i);
 		}
 	}
 	public expression(): ExpressionContext[];
@@ -5404,9 +5404,9 @@ export class NewstandardarrayContext extends ArrayinitializerContext {
 	public RBRACE(i: number): TerminalNode;
 	public RBRACE(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.RBRACE);
+			return this.getTokens(painless_parser.RBRACE);
 		} else {
-			return this.getToken(PainlessParser.RBRACE, i);
+			return this.getToken(painless_parser.RBRACE, i);
 		}
 	}
 	public postdot(): PostdotContext | undefined {
@@ -5426,27 +5426,27 @@ export class NewstandardarrayContext extends ArrayinitializerContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterNewstandardarray) {
 			listener.enterNewstandardarray(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitNewstandardarray) {
 			listener.exitNewstandardarray(this);
 		}
 	}
 }
 export class NewinitializedarrayContext extends ArrayinitializerContext {
-	public NEW(): TerminalNode { return this.getToken(PainlessParser.NEW, 0); }
+	public NEW(): TerminalNode { return this.getToken(painless_parser.NEW, 0); }
 	public type(): TypeContext {
 		return this.getRuleContext(0, TypeContext);
 	}
-	public LBRACE(): TerminalNode { return this.getToken(PainlessParser.LBRACE, 0); }
-	public RBRACE(): TerminalNode { return this.getToken(PainlessParser.RBRACE, 0); }
-	public LBRACK(): TerminalNode { return this.getToken(PainlessParser.LBRACK, 0); }
-	public RBRACK(): TerminalNode { return this.getToken(PainlessParser.RBRACK, 0); }
+	public LBRACE(): TerminalNode { return this.getToken(painless_parser.LBRACE, 0); }
+	public RBRACE(): TerminalNode { return this.getToken(painless_parser.RBRACE, 0); }
+	public LBRACK(): TerminalNode { return this.getToken(painless_parser.LBRACK, 0); }
+	public RBRACK(): TerminalNode { return this.getToken(painless_parser.RBRACK, 0); }
 	public expression(): ExpressionContext[];
 	public expression(i: number): ExpressionContext;
 	public expression(i?: number): ExpressionContext | ExpressionContext[] {
@@ -5469,9 +5469,9 @@ export class NewinitializedarrayContext extends ArrayinitializerContext {
 	public COMMA(i: number): TerminalNode;
 	public COMMA(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.COMMA);
+			return this.getTokens(painless_parser.COMMA);
 		} else {
-			return this.getToken(PainlessParser.COMMA, i);
+			return this.getToken(painless_parser.COMMA, i);
 		}
 	}
 	constructor(ctx: ArrayinitializerContext) {
@@ -5479,13 +5479,13 @@ export class NewinitializedarrayContext extends ArrayinitializerContext {
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterNewinitializedarray) {
 			listener.enterNewinitializedarray(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitNewinitializedarray) {
 			listener.exitNewinitializedarray(this);
 		}
@@ -5494,7 +5494,7 @@ export class NewinitializedarrayContext extends ArrayinitializerContext {
 
 
 export class ListinitializerContext extends ParserRuleContext {
-	public LBRACE(): TerminalNode { return this.getToken(PainlessParser.LBRACE, 0); }
+	public LBRACE(): TerminalNode { return this.getToken(painless_parser.LBRACE, 0); }
 	public expression(): ExpressionContext[];
 	public expression(i: number): ExpressionContext;
 	public expression(i?: number): ExpressionContext | ExpressionContext[] {
@@ -5504,29 +5504,29 @@ export class ListinitializerContext extends ParserRuleContext {
 			return this.getRuleContext(i, ExpressionContext);
 		}
 	}
-	public RBRACE(): TerminalNode { return this.getToken(PainlessParser.RBRACE, 0); }
+	public RBRACE(): TerminalNode { return this.getToken(painless_parser.RBRACE, 0); }
 	public COMMA(): TerminalNode[];
 	public COMMA(i: number): TerminalNode;
 	public COMMA(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.COMMA);
+			return this.getTokens(painless_parser.COMMA);
 		} else {
-			return this.getToken(PainlessParser.COMMA, i);
+			return this.getToken(painless_parser.COMMA, i);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_listinitializer; }
+	public get ruleIndex(): number { return painless_parser.RULE_listinitializer; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterListinitializer) {
 			listener.enterListinitializer(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitListinitializer) {
 			listener.exitListinitializer(this);
 		}
@@ -5535,7 +5535,7 @@ export class ListinitializerContext extends ParserRuleContext {
 
 
 export class MapinitializerContext extends ParserRuleContext {
-	public LBRACE(): TerminalNode { return this.getToken(PainlessParser.LBRACE, 0); }
+	public LBRACE(): TerminalNode { return this.getToken(painless_parser.LBRACE, 0); }
 	public maptoken(): MaptokenContext[];
 	public maptoken(i: number): MaptokenContext;
 	public maptoken(i?: number): MaptokenContext | MaptokenContext[] {
@@ -5545,30 +5545,30 @@ export class MapinitializerContext extends ParserRuleContext {
 			return this.getRuleContext(i, MaptokenContext);
 		}
 	}
-	public RBRACE(): TerminalNode { return this.getToken(PainlessParser.RBRACE, 0); }
+	public RBRACE(): TerminalNode { return this.getToken(painless_parser.RBRACE, 0); }
 	public COMMA(): TerminalNode[];
 	public COMMA(i: number): TerminalNode;
 	public COMMA(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.COMMA);
+			return this.getTokens(painless_parser.COMMA);
 		} else {
-			return this.getToken(PainlessParser.COMMA, i);
+			return this.getToken(painless_parser.COMMA, i);
 		}
 	}
-	public COLON(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.COLON, 0); }
+	public COLON(): TerminalNode | undefined { return this.tryGetToken(painless_parser.COLON, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_mapinitializer; }
+	public get ruleIndex(): number { return painless_parser.RULE_mapinitializer; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterMapinitializer) {
 			listener.enterMapinitializer(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitMapinitializer) {
 			listener.exitMapinitializer(this);
 		}
@@ -5586,20 +5586,20 @@ export class MaptokenContext extends ParserRuleContext {
 			return this.getRuleContext(i, ExpressionContext);
 		}
 	}
-	public COLON(): TerminalNode { return this.getToken(PainlessParser.COLON, 0); }
+	public COLON(): TerminalNode { return this.getToken(painless_parser.COLON, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_maptoken; }
+	public get ruleIndex(): number { return painless_parser.RULE_maptoken; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterMaptoken) {
 			listener.enterMaptoken(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitMaptoken) {
 			listener.exitMaptoken(this);
 		}
@@ -5608,8 +5608,8 @@ export class MaptokenContext extends ParserRuleContext {
 
 
 export class ArgumentsContext extends ParserRuleContext {
-	public LP(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.LP, 0); }
-	public RP(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.RP, 0); }
+	public LP(): TerminalNode | undefined { return this.tryGetToken(painless_parser.LP, 0); }
+	public RP(): TerminalNode | undefined { return this.tryGetToken(painless_parser.RP, 0); }
 	public argument(): ArgumentContext[];
 	public argument(i: number): ArgumentContext;
 	public argument(i?: number): ArgumentContext | ArgumentContext[] {
@@ -5623,24 +5623,24 @@ export class ArgumentsContext extends ParserRuleContext {
 	public COMMA(i: number): TerminalNode;
 	public COMMA(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.COMMA);
+			return this.getTokens(painless_parser.COMMA);
 		} else {
-			return this.getToken(PainlessParser.COMMA, i);
+			return this.getToken(painless_parser.COMMA, i);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_arguments; }
+	public get ruleIndex(): number { return painless_parser.RULE_arguments; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterArguments) {
 			listener.enterArguments(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitArguments) {
 			listener.exitArguments(this);
 		}
@@ -5662,15 +5662,15 @@ export class ArgumentContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_argument; }
+	public get ruleIndex(): number { return painless_parser.RULE_argument; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterArgument) {
 			listener.enterArgument(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitArgument) {
 			listener.exitArgument(this);
 		}
@@ -5679,7 +5679,7 @@ export class ArgumentContext extends ParserRuleContext {
 
 
 export class LambdaContext extends ParserRuleContext {
-	public ARROW(): TerminalNode { return this.getToken(PainlessParser.ARROW, 0); }
+	public ARROW(): TerminalNode { return this.getToken(painless_parser.ARROW, 0); }
 	public lamtype(): LamtypeContext[];
 	public lamtype(i: number): LamtypeContext;
 	public lamtype(i?: number): LamtypeContext | LamtypeContext[] {
@@ -5689,8 +5689,8 @@ export class LambdaContext extends ParserRuleContext {
 			return this.getRuleContext(i, LamtypeContext);
 		}
 	}
-	public LP(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.LP, 0); }
-	public RP(): TerminalNode | undefined { return this.tryGetToken(PainlessParser.RP, 0); }
+	public LP(): TerminalNode | undefined { return this.tryGetToken(painless_parser.LP, 0); }
+	public RP(): TerminalNode | undefined { return this.tryGetToken(painless_parser.RP, 0); }
 	public block(): BlockContext | undefined {
 		return this.tryGetRuleContext(0, BlockContext);
 	}
@@ -5701,24 +5701,24 @@ export class LambdaContext extends ParserRuleContext {
 	public COMMA(i: number): TerminalNode;
 	public COMMA(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(PainlessParser.COMMA);
+			return this.getTokens(painless_parser.COMMA);
 		} else {
-			return this.getToken(PainlessParser.COMMA, i);
+			return this.getToken(painless_parser.COMMA, i);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_lambda; }
+	public get ruleIndex(): number { return painless_parser.RULE_lambda; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterLambda) {
 			listener.enterLambda(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitLambda) {
 			listener.exitLambda(this);
 		}
@@ -5727,7 +5727,7 @@ export class LambdaContext extends ParserRuleContext {
 
 
 export class LamtypeContext extends ParserRuleContext {
-	public ID(): TerminalNode { return this.getToken(PainlessParser.ID, 0); }
+	public ID(): TerminalNode { return this.getToken(painless_parser.ID, 0); }
 	public decltype(): DecltypeContext | undefined {
 		return this.tryGetRuleContext(0, DecltypeContext);
 	}
@@ -5735,15 +5735,15 @@ export class LamtypeContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_lamtype; }
+	public get ruleIndex(): number { return painless_parser.RULE_lamtype; }
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterLamtype) {
 			listener.enterLamtype(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitLamtype) {
 			listener.exitLamtype(this);
 		}
@@ -5756,7 +5756,7 @@ export class FuncrefContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return PainlessParser.RULE_funcref; }
+	public get ruleIndex(): number { return painless_parser.RULE_funcref; }
 	public copyFrom(ctx: FuncrefContext): void {
 		super.copyFrom(ctx);
 	}
@@ -5765,20 +5765,20 @@ export class ClassfuncrefContext extends FuncrefContext {
 	public decltype(): DecltypeContext {
 		return this.getRuleContext(0, DecltypeContext);
 	}
-	public REF(): TerminalNode { return this.getToken(PainlessParser.REF, 0); }
-	public ID(): TerminalNode { return this.getToken(PainlessParser.ID, 0); }
+	public REF(): TerminalNode { return this.getToken(painless_parser.REF, 0); }
+	public ID(): TerminalNode { return this.getToken(painless_parser.ID, 0); }
 	constructor(ctx: FuncrefContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterClassfuncref) {
 			listener.enterClassfuncref(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitClassfuncref) {
 			listener.exitClassfuncref(this);
 		}
@@ -5788,41 +5788,41 @@ export class ConstructorfuncrefContext extends FuncrefContext {
 	public decltype(): DecltypeContext {
 		return this.getRuleContext(0, DecltypeContext);
 	}
-	public REF(): TerminalNode { return this.getToken(PainlessParser.REF, 0); }
-	public NEW(): TerminalNode { return this.getToken(PainlessParser.NEW, 0); }
+	public REF(): TerminalNode { return this.getToken(painless_parser.REF, 0); }
+	public NEW(): TerminalNode { return this.getToken(painless_parser.NEW, 0); }
 	constructor(ctx: FuncrefContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterConstructorfuncref) {
 			listener.enterConstructorfuncref(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitConstructorfuncref) {
 			listener.exitConstructorfuncref(this);
 		}
 	}
 }
 export class LocalfuncrefContext extends FuncrefContext {
-	public THIS(): TerminalNode { return this.getToken(PainlessParser.THIS, 0); }
-	public REF(): TerminalNode { return this.getToken(PainlessParser.REF, 0); }
-	public ID(): TerminalNode { return this.getToken(PainlessParser.ID, 0); }
+	public THIS(): TerminalNode { return this.getToken(painless_parser.THIS, 0); }
+	public REF(): TerminalNode { return this.getToken(painless_parser.REF, 0); }
+	public ID(): TerminalNode { return this.getToken(painless_parser.ID, 0); }
 	constructor(ctx: FuncrefContext) {
 		super(ctx.parent, ctx.invokingState);
 		this.copyFrom(ctx);
 	}
 	// @Override
-	public enterRule(listener: PainlessParserListener): void {
+	public enterRule(listener: painless_parserListener): void {
 		if (listener.enterLocalfuncref) {
 			listener.enterLocalfuncref(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: PainlessParserListener): void {
+	public exitRule(listener: painless_parserListener): void {
 		if (listener.exitLocalfuncref) {
 			listener.exitLocalfuncref(this);
 		}

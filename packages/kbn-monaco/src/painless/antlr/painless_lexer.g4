@@ -17,7 +17,7 @@
  * under the License.
  */
 
-lexer grammar PainlessLexer;
+lexer grammar painless_lexer;
 
 WS: [ \t\n\r]+ -> skip;
 COMMENT: ( '//' .*? [\n\r] | '/*' .*? '*/' ) -> skip;

@@ -7,7 +7,7 @@
   "scripts": {
     "build": "node ./scripts/build.js",
     "kbn:bootstrap": "yarn build --dev",
-    "antlr4ts": "antlr4ts ./PainlessLexer.g4 ./PainlessParser.g4 -o ./src/painless/antlr && node ./scripts/ts_ignore_antlr.js"
+    "antlr4ts": "antlr4ts ./src/painless/antlr/painless_lexer.g4 ./src/painless/antlr/painless_parser.g4 && node ./scripts/ts_ignore_antlr.js"
   },
   "devDependencies": {
     "@kbn/babel-preset": "link:../kbn-babel-preset",

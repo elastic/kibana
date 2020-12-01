@@ -18,8 +18,8 @@
  */
 
 import { CommonTokenStream, CharStream, CharStreams } from 'antlr4ts';
-import { PainlessParser } from '../antlr/PainlessParser';
-import { PainlessLexer } from '../antlr/PainlessLexer';
+import { painless_parser as PainlessParser } from '../antlr/painless_parser';
+import { painless_lexer as PainlessLexer } from '../antlr/painless_lexer';
 import { PainlessError, PainlessErrorService } from './lib';
 
 class PainlessLexerEnhanced extends PainlessLexer {

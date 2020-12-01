@@ -1,6 +1,6 @@
-parser grammar PainlessParser;
+parser grammar painless_parser;
 
-options { tokenVocab=PainlessLexer; }
+options { tokenVocab=painless_lexer; }
 
 source
     : function* statement* EOF

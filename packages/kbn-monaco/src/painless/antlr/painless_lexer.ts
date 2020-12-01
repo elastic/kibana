@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Generated from ./PainlessLexer.g4 by ANTLR 4.7.3-SNAPSHOT
+// Generated from ./src/painless/antlr/painless_lexer.g4 by ANTLR 4.7.3-SNAPSHOT
 
 
 import { ATN } from "antlr4ts/atn/ATN";
@@ -16,7 +16,7 @@ import { VocabularyImpl } from "antlr4ts/VocabularyImpl";
 import * as Utils from "antlr4ts/misc/Utils";
 
 
-export class PainlessLexer extends Lexer {
+export class painless_lexer extends Lexer {
 	public static readonly WS = 1;
 	public static readonly COMMENT = 2;
 	public static readonly LBRACK = 3;
@@ -115,79 +115,81 @@ export class PainlessLexer extends Lexer {
 	];
 
 	public static readonly ruleNames: string[] = [
-		"WS", "COMMENT", "LBRACK", "RBRACK", "LBRACE", "RBRACE", "LP", "RP", "DOT", 
-		"NSDOT", "COMMA", "SEMICOLON", "IF", "IN", "ELSE", "WHILE", "DO", "FOR", 
-		"CONTINUE", "BREAK", "RETURN", "NEW", "TRY", "CATCH", "THROW", "THIS", 
-		"INSTANCEOF", "BOOLNOT", "BWNOT", "MUL", "DIV", "REM", "ADD", "SUB", "LSH", 
-		"RSH", "USH", "LT", "LTE", "GT", "GTE", "EQ", "EQR", "NE", "NER", "BWAND", 
-		"XOR", "BWOR", "BOOLAND", "BOOLOR", "COND", "COLON", "ELVIS", "REF", "ARROW", 
-		"FIND", "MATCH", "INCR", "DECR", "ASSIGN", "AADD", "ASUB", "AMUL", "ADIV", 
-		"AREM", "AAND", "AXOR", "AOR", "ALSH", "ARSH", "AUSH", "OCTAL", "HEX", 
-		"INTEGER", "DECIMAL", "STRING", "REGEX", "TRUE", "FALSE", "NULL", "PRIMITIVE", 
+		"WS", "COMMENT", "LBRACK", "RBRACK", "LBRACE", "RBRACE", "LP", "RP", "DOT",
+		"NSDOT", "COMMA", "SEMICOLON", "IF", "IN", "ELSE", "WHILE", "DO", "FOR",
+		"CONTINUE", "BREAK", "RETURN", "NEW", "TRY", "CATCH", "THROW", "THIS",
+		"INSTANCEOF", "BOOLNOT", "BWNOT", "MUL", "DIV", "REM", "ADD", "SUB", "LSH",
+		"RSH", "USH", "LT", "LTE", "GT", "GTE", "EQ", "EQR", "NE", "NER", "BWAND",
+		"XOR", "BWOR", "BOOLAND", "BOOLOR", "COND", "COLON", "ELVIS", "REF", "ARROW",
+		"FIND", "MATCH", "INCR", "DECR", "ASSIGN", "AADD", "ASUB", "AMUL", "ADIV",
+		"AREM", "AAND", "AXOR", "AOR", "ALSH", "ARSH", "AUSH", "OCTAL", "HEX",
+		"INTEGER", "DECIMAL", "STRING", "REGEX", "TRUE", "FALSE", "NULL", "PRIMITIVE",
 		"DEF", "ID", "DOTINTEGER", "DOTID",
 	];
 
 	private static readonly _LITERAL_NAMES: Array<string | undefined> = [
-		undefined, undefined, undefined, "'{'", "'}'", "'['", "']'", "'('", "')'", 
-		"'.'", "'?.'", "','", "';'", "'if'", "'in'", "'else'", "'while'", "'do'", 
-		"'for'", "'continue'", "'break'", "'return'", "'new'", "'try'", "'catch'", 
-		"'throw'", "'this'", "'instanceof'", "'!'", "'~'", "'*'", "'/'", "'%'", 
-		"'+'", "'-'", "'<<'", "'>>'", "'>>>'", "'<'", "'<='", "'>'", "'>='", "'=='", 
-		"'==='", "'!='", "'!=='", "'&'", "'^'", "'|'", "'&&'", "'||'", "'?'", 
-		"':'", "'?:'", "'::'", "'->'", "'=~'", "'==~'", "'++'", "'--'", "'='", 
-		"'+='", "'-='", "'*='", "'/='", "'%='", "'&='", "'^='", "'|='", "'<<='", 
-		"'>>='", "'>>>='", undefined, undefined, undefined, undefined, undefined, 
+		undefined, undefined, undefined, "'{'", "'}'", "'['", "']'", "'('", "')'",
+		"'.'", "'?.'", "','", "';'", "'if'", "'in'", "'else'", "'while'", "'do'",
+		"'for'", "'continue'", "'break'", "'return'", "'new'", "'try'", "'catch'",
+		"'throw'", "'this'", "'instanceof'", "'!'", "'~'", "'*'", "'/'", "'%'",
+		"'+'", "'-'", "'<<'", "'>>'", "'>>>'", "'<'", "'<='", "'>'", "'>='", "'=='",
+		"'==='", "'!='", "'!=='", "'&'", "'^'", "'|'", "'&&'", "'||'", "'?'",
+		"':'", "'?:'", "'::'", "'->'", "'=~'", "'==~'", "'++'", "'--'", "'='",
+		"'+='", "'-='", "'*='", "'/='", "'%='", "'&='", "'^='", "'|='", "'<<='",
+		"'>>='", "'>>>='", undefined, undefined, undefined, undefined, undefined,
 		undefined, "'true'", "'false'", "'null'", undefined, "'def'",
 	];
 	private static readonly _SYMBOLIC_NAMES: Array<string | undefined> = [
-		undefined, "WS", "COMMENT", "LBRACK", "RBRACK", "LBRACE", "RBRACE", "LP", 
-		"RP", "DOT", "NSDOT", "COMMA", "SEMICOLON", "IF", "IN", "ELSE", "WHILE", 
-		"DO", "FOR", "CONTINUE", "BREAK", "RETURN", "NEW", "TRY", "CATCH", "THROW", 
-		"THIS", "INSTANCEOF", "BOOLNOT", "BWNOT", "MUL", "DIV", "REM", "ADD", 
-		"SUB", "LSH", "RSH", "USH", "LT", "LTE", "GT", "GTE", "EQ", "EQR", "NE", 
-		"NER", "BWAND", "XOR", "BWOR", "BOOLAND", "BOOLOR", "COND", "COLON", "ELVIS", 
-		"REF", "ARROW", "FIND", "MATCH", "INCR", "DECR", "ASSIGN", "AADD", "ASUB", 
-		"AMUL", "ADIV", "AREM", "AAND", "AXOR", "AOR", "ALSH", "ARSH", "AUSH", 
-		"OCTAL", "HEX", "INTEGER", "DECIMAL", "STRING", "REGEX", "TRUE", "FALSE", 
+		undefined, "WS", "COMMENT", "LBRACK", "RBRACK", "LBRACE", "RBRACE", "LP",
+		"RP", "DOT", "NSDOT", "COMMA", "SEMICOLON", "IF", "IN", "ELSE", "WHILE",
+		"DO", "FOR", "CONTINUE", "BREAK", "RETURN", "NEW", "TRY", "CATCH", "THROW",
+		"THIS", "INSTANCEOF", "BOOLNOT", "BWNOT", "MUL", "DIV", "REM", "ADD",
+		"SUB", "LSH", "RSH", "USH", "LT", "LTE", "GT", "GTE", "EQ", "EQR", "NE",
+		"NER", "BWAND", "XOR", "BWOR", "BOOLAND", "BOOLOR", "COND", "COLON", "ELVIS",
+		"REF", "ARROW", "FIND", "MATCH", "INCR", "DECR", "ASSIGN", "AADD", "ASUB",
+		"AMUL", "ADIV", "AREM", "AAND", "AXOR", "AOR", "ALSH", "ARSH", "AUSH",
+		"OCTAL", "HEX", "INTEGER", "DECIMAL", "STRING", "REGEX", "TRUE", "FALSE",
 		"NULL", "PRIMITIVE", "DEF", "ID", "DOTINTEGER", "DOTID",
 	];
-	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(PainlessLexer._LITERAL_NAMES, PainlessLexer._SYMBOLIC_NAMES, []);
+	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(painless_lexer._LITERAL_NAMES, painless_lexer._SYMBOLIC_NAMES, []);
 
 	// @Override
 	// @NotNull
 	public get vocabulary(): Vocabulary {
-		return PainlessLexer.VOCABULARY;
+		return painless_lexer.VOCABULARY;
 	}
 	// tslint:enable:no-trailing-whitespace
 
 
 	constructor(input: CharStream) {
 		super(input);
-		this._interp = new LexerATNSimulator(PainlessLexer._ATN, this);
+		this._interp = new LexerATNSimulator(painless_lexer._ATN, this);
 	}
 
 	// @Override
-	public get grammarFileName(): string { return "PainlessLexer.g4"; }
+	public get grammarFileName(): string { return "painless_lexer.g4"; }
 
 	// @Override
-	public get ruleNames(): string[] { return PainlessLexer.ruleNames; }
+	public get ruleNames(): string[] { return painless_lexer.ruleNames; }
 
 	// @Override
-	public get serializedATN(): string { return PainlessLexer._serializedATN; }
+	public get serializedATN(): string { return painless_lexer._serializedATN; }
 
 	// @Override
-	public get channelNames(): string[] { return PainlessLexer.channelNames; }
+	public get channelNames(): string[] { return painless_lexer.channelNames; }
 
 	// @Override
-	public get modeNames(): string[] { return PainlessLexer.modeNames; }
+	public get modeNames(): string[] { return painless_lexer.modeNames; }
 
 	// @Override
 	public sempred(_localctx: RuleContext, ruleIndex: number, predIndex: number): boolean {
 		switch (ruleIndex) {
-		case 30:
+    // Manual fix to handle / appropriately
+		case 31:
 			return this.DIV_sempred(_localctx, predIndex);
 
-		case 76:
+    // Manual fix to handle / appropriately
+		case 77:
 			return this.REGEX_sempred(_localctx, predIndex);
 		}
 		return true;
@@ -516,18 +518,18 @@ export class PainlessLexer extends Lexer {
 		"\b\x02\x02\x04\x03\x02\x04\x02\x02";
 	public static readonly _serializedATN: string = Utils.join(
 		[
-			PainlessLexer._serializedATNSegment0,
-			PainlessLexer._serializedATNSegment1,
+			painless_lexer._serializedATNSegment0,
+			painless_lexer._serializedATNSegment1,
 		],
 		"",
 	);
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
-		if (!PainlessLexer.__ATN) {
-			PainlessLexer.__ATN = new ATNDeserializer().deserialize(Utils.toCharArray(PainlessLexer._serializedATN));
+		if (!painless_lexer.__ATN) {
+			painless_lexer.__ATN = new ATNDeserializer().deserialize(Utils.toCharArray(painless_lexer._serializedATN));
 		}
 
-		return PainlessLexer.__ATN;
+		return painless_lexer.__ATN;
 	}
 
 }
