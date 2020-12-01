@@ -18,21 +18,26 @@
  */
 import { Cache } from './cache';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 describe('Cache', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
   it('stores value for maxAge ms', async () => {
     const cache = new Cache<number>(500);
     cache.set(42);
     expect(cache.get()).toBe(42);
-    await delay(10);
+    jest.advanceTimersByTime(100);
     expect(cache.get()).toBe(42);
   });
   it('invalidates cache after maxAge ms', async () => {
-    const cache = new Cache<number>(10);
+    const cache = new Cache<number>(500);
     cache.set(42);
     expect(cache.get()).toBe(42);
-    await delay(100);
+    jest.advanceTimersByTime(1000);
     expect(cache.get()).toBe(null);
   });
   it('del invalidates cache immediately', async () => {

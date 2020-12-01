@@ -97,7 +97,12 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
-    const userProvided: UserProvided<T> = await this.read();
+    const cachedValue = this.cache.get();
+    if (cachedValue) {
+      return cachedValue;
+    }
+
+    const userProvided: UserProvided<T> = this.onReadHook(await this.read());
 
     // write all overridden keys, dropping the userValue is override is null and
     // adding keys for overrides that are not in saved object
@@ -105,6 +110,8 @@ export class UiSettingsClient implements IUiSettingsClient {
       userProvided[key] =
         value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
     }
+
+    this.cache.set(userProvided);
 
     return userProvided;
   }
@@ -212,18 +219,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     }
   }
 
-  private async read() {
-    const cachedValue = this.cache.get();
-    if (cachedValue) {
-      return cachedValue;
-    }
-
-    const value = this.onReadHook(await this._read());
-    this.cache.set(value);
-    return value;
-  }
-
-  private async _read({ autoCreateOrUpgradeIfMissing = true }: ReadOptions = {}): Promise<
+  private async read({ autoCreateOrUpgradeIfMissing = true }: ReadOptions = {}): Promise<
     Record<string, any>
   > {
     try {
@@ -240,7 +236,7 @@ export class UiSettingsClient implements IUiSettingsClient {
         });
 
         if (!failedUpgradeAttributes) {
-          return await this._read({ autoCreateOrUpgradeIfMissing: false });
+          return await this.read({ autoCreateOrUpgradeIfMissing: false });
         }
 
         return failedUpgradeAttributes;
