@@ -5,15 +5,23 @@
  */
 import React from 'react';
 import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 
 import { SummaryViewComponent } from './summary_view';
 import { mockAlertDetailsData } from './__mocks__';
 import { BrowserFields } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
 
 jest.mock('../../../timelines/components/timeline/body/renderers/formatted_field', () => {
   return {
     FormattedFieldValue: jest.fn(() => <div />),
+  };
+});
+
+jest.mock('../../../detections/containers/detection_engine/rules/use_rule_async', () => {
+  return {
+    useRuleAsync: jest.fn(),
   };
 });
 
@@ -30,13 +38,35 @@ const props = {
 };
 
 describe('SummaryViewComponent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useRuleAsync as jest.Mock).mockReturnValue({
+      rule: {
+        note: 'investigation guide',
+      },
+    });
+  });
   test('render correct items', () => {
     const wrapper = mount(<SummaryViewComponent {...props} />);
     expect(wrapper.find('[data-test-subj="summary-view"]').exists()).toEqual(true);
   });
 
-  test('render Investigation guide', () => {
+  test('render investigation guide', async () => {
     const wrapper = mount(<SummaryViewComponent {...props} />);
-    expect(wrapper.find('[data-test-subj="summary-view-message"]').exists()).toEqual(true);
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(true);
+    });
+  });
+
+  test("render no investigation guide if it doesn't exist", async () => {
+    (useRuleAsync as jest.Mock).mockReturnValue({
+      rule: {
+        note: null,
+      },
+    });
+    const wrapper = mount(<SummaryViewComponent {...props} />);
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(false);
+    });
   });
 });

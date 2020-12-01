@@ -165,7 +165,7 @@ export const SummaryViewComponent: React.FC<{
       {note != null && (
         <>
           <EuiSpacer />
-          <EuiDescriptionList data-test-subj="summary-view-message" compressed>
+          <EuiDescriptionList data-test-subj="summary-view-guide" compressed>
             <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               <LineClamp content={note} />
