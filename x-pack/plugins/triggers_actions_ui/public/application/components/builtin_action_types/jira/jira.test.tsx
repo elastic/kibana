@@ -93,7 +93,7 @@ describe('jira action params validation', () => {
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        title: ['Title is required.'],
+        title: ['Summary is required.'],
       },
     });
   });
