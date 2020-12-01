@@ -28,19 +28,31 @@ export function registerSessionRoutes(router: IRouter): void {
         body: schema.object({
           sessionId: schema.string(),
           name: schema.string(),
+          appId: schema.string(),
           expires: schema.maybe(schema.string()),
+          urlGeneratorId: schema.string(),
           initialState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           restoreState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
       },
     },
     async (context, request, res) => {
-      const { sessionId, name, expires, initialState, restoreState } = request.body;
+      const {
+        sessionId,
+        name,
+        expires,
+        initialState,
+        restoreState,
+        appId,
+        urlGeneratorId,
+      } = request.body;
 
       try {
         const response = await context.search!.session.save(sessionId, {
           name,
+          appId,
           expires,
+          urlGeneratorId,
           initialState,
           restoreState,
         });
