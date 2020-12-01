@@ -37,6 +37,7 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { PANEL_TYPES } from '../../../../common/panel_types';
+import { extractTimefieldName } from '../../../../common/timefield_utils';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
@@ -127,7 +128,7 @@ const TopHitAggUi = (props) => {
   const handleTextChange = createTextHandler(handleChange);
   const handleFieldsChange = createCustomLabelSelectHandled(handleChange);
 
-  const field = fields[indexPattern].find((f) => f.name === model.field);
+  const field = fields[indexPattern].find((f) => f.name === extractTimefieldName(model.field));
   const aggWithOptions = getAggWithOptions(field, aggWithOptionsRestrictFields);
   const orderOptions = getOrderOptions();
 
