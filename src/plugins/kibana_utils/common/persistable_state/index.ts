@@ -77,7 +77,7 @@ export interface PersistableState<P extends SerializableState = SerializableStat
    * @param state
    * @param collector
    */
-  telemetry: (state: P, collector: Record<string, any>) => Record<string, any>;
+  telemetry: <Stats extends Record<string, any>>(state: P, collector: Stats) => Stats;
   /**
    * inject function receives state and a list of references and should return state with references injected
    * default is identity function
