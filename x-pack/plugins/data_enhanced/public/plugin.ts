@@ -68,6 +68,7 @@ export class DataEnhancedPlugin
           React.createElement(
             createConnectedBackgroundSessionIndicator({
               sessionService: plugins.data.search.session,
+              application: core.application,
             })
           )
         ),
