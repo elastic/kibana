@@ -265,6 +265,13 @@ export default function ({ getService }: FtrProviderContext) {
                   id: 'elastic-observability',
                 },
               },
+              agent: {
+                hostname: 'gke-observability-8--observability-8--bc1afd95-nhhw',
+                id: 'c58a514c-e971-4590-8206-385400e184dd',
+                ephemeral_id: 'e9d46cb0-2e89-469d-bd3b-6f32d7c96cc0',
+                type: 'metricbeat',
+                version: '8.0.0',
+              },
               host: {
                 hostname: 'gke-observability-8--observability-8--bc1afd95-nhhw',
                 name: 'gke-observability-8--observability-8--bc1afd95-nhhw',
