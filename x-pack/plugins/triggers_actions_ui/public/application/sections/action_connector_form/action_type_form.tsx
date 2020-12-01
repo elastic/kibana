@@ -43,6 +43,7 @@ import { transformActionVariables } from '../../lib/action_variables';
 import { resolvedActionGroupMessage } from '../../constants';
 import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 import { useKibana } from '../../../common/lib/kibana';
+import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
