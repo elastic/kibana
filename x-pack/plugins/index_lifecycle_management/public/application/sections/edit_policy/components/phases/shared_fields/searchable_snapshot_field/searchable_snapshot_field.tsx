@@ -283,13 +283,24 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
           )}
           iconType="questionInCircle"
         >
-          {i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledForcemergeCalloutBody',
-            {
-              defaultMessage:
-                'To configure searchable snapshot in the hot phase disable force merge.',
-            }
-          )}
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledForcemergeCalloutBody"
+            defaultMessage="To configure searchable snapshot in the hot phase {linkToForceMerge} must be disabled."
+            values={{
+              linkToForceMerge: (
+                <EuiLink
+                  onClick={() =>
+                    document.querySelector<HTMLDivElement>('#hot-forceMergeToggle')?.focus()
+                  }
+                >
+                  {i18n.translate(
+                    'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledForcemergeCalloutBody.forceMergeLink',
+                    { defaultMessage: 'force merge' }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
         </EuiCallOut>
       );
     }
