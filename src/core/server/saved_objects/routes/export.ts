@@ -22,19 +22,19 @@ import stringify from 'json-stable-stringify';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
 import { IRouter } from '../../http';
-import { CoreUsageStatsServiceSetup } from '../../core_usage_stats';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { exportSavedObjectsToStream } from '../export';
 import { validateTypes, validateObjects } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
-  coreUsageStats: CoreUsageStatsServiceSetup;
+  coreUsageData: CoreUsageDataSetup;
 }
 
 export const registerExportRoute = (
   router: IRouter,
-  { config, coreUsageStats }: RouteDependencies
+  { config, coreUsageData }: RouteDependencies
 ) => {
   const { maxImportExportSize } = config;
 
@@ -105,7 +105,7 @@ export const registerExportRoute = (
       }
 
       const { headers } = req;
-      const usageStatsClient = coreUsageStats.getClient();
+      const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
         .incrementSavedObjectsExport({ headers, types, supportedTypes })
         .catch(() => {});

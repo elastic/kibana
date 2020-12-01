@@ -25,9 +25,9 @@ import * as exportMock from '../../export';
 import supertest from 'supertest';
 import type { UnwrapPromise } from '@kbn/utility-types';
 import { createListStream } from '@kbn/utils';
-import { CoreUsageStatsClient } from '../../../core_usage_stats';
-import { coreUsageStatsClientMock } from '../../../core_usage_stats/core_usage_stats_client.mock';
-import { coreUsageStatsServiceMock } from '../../../core_usage_stats/core_usage_stats_service.mock';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
 import { setupServer, createExportableType } from '../test_utils';
@@ -55,8 +55,8 @@ describe('POST /api/saved_objects/_export', () => {
     const router = httpSetup.createRouter('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsExport.mockRejectedValue(new Error('Oh no!')); // this error is intentionally swallowed so the export does not fail
-    const coreUsageStats = coreUsageStatsServiceMock.createSetupContract(coreUsageStatsClient);
-    registerExportRoute(router, { config, coreUsageStats });
+    const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+    registerExportRoute(router, { config, coreUsageData });
 
     await server.start();
   });

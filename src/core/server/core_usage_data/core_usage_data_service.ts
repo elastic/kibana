@@ -21,22 +21,29 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { CoreService } from 'src/core/types';
-import { SavedObjectsServiceStart } from 'src/core/server';
+import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
 import { CoreContext } from '../core_context';
-import { CoreUsageStatsClient, CoreUsageStatsServiceSetup } from '../core_usage_stats';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType } from '../http';
 import { LoggingConfigType } from '../logging';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
-import { CoreServicesUsageData, CoreUsageData, CoreUsageDataStart } from './types';
+import {
+  CoreServicesUsageData,
+  CoreUsageData,
+  CoreUsageDataStart,
+  CoreUsageDataSetup,
+} from './types';
 import { isConfigured } from './is_configured';
 import { ElasticsearchServiceStart } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
+import { coreUsageStatsType } from './core_usage_stats';
+import { CORE_USAGE_STATS_TYPE } from './constants';
+import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { MetricsServiceSetup, OpsMetrics } from '..';
 
 export interface SetupDeps {
   metrics: MetricsServiceSetup;
-  coreUsageStats: CoreUsageStatsServiceSetup;
+  savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
 }
 
 export interface StartDeps {
@@ -62,7 +69,8 @@ const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
   return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
 };
 
-export class CoreUsageDataService implements CoreService<void, CoreUsageDataStart> {
+export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, CoreUsageDataStart> {
+  private logger: Logger;
   private elasticsearchConfig?: ElasticsearchConfigType;
   private configService: CoreContext['configService'];
   private httpConfig?: HttpConfigType;
@@ -74,6 +82,7 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
   private coreUsageStatsClient?: CoreUsageStatsClient;
 
   constructor(core: CoreContext) {
+    this.logger = core.logger.get('core-usage-stats-service');
     this.configService = core.configService;
     this.stop$ = new Subject();
   }
@@ -239,13 +248,11 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
     };
   }
 
-  setup({ metrics, coreUsageStats }: SetupDeps) {
+  setup({ metrics, savedObjectsStartPromise }: SetupDeps) {
     metrics
       .getOpsMetrics$()
       .pipe(takeUntil(this.stop$))
       .subscribe((opsMetrics) => (this.opsMetrics = opsMetrics));
-
-    this.coreUsageStatsClient = coreUsageStats.getClient();
 
     this.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
@@ -281,6 +288,24 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
       .subscribe((config) => {
         this.kibanaConfig = config;
       });
+
+    const internalRepositoryPromise = savedObjectsStartPromise.then((savedObjects) =>
+      savedObjects.createInternalRepository([CORE_USAGE_STATS_TYPE])
+    );
+
+    const registerType = (typeRegistry: SavedObjectTypeRegistry) => {
+      typeRegistry.registerType(coreUsageStatsType);
+    };
+
+    const getClient = () => {
+      const debugLogger = (message: string) => this.logger.debug(message);
+
+      return new CoreUsageStatsClient(debugLogger, internalRepositoryPromise);
+    };
+
+    this.coreUsageStatsClient = getClient();
+
+    return { registerType, getClient } as CoreUsageDataSetup;
   }
 
   start({ savedObjects, elasticsearch }: StartDeps) {

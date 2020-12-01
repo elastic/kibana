@@ -21,14 +21,14 @@ import { extname } from 'path';
 import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
-import { CoreUsageStatsServiceSetup } from '../../core_usage_stats';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 import { resolveSavedObjectsImportErrors } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
-  coreUsageStats: CoreUsageStatsServiceSetup;
+  coreUsageData: CoreUsageDataSetup;
 }
 
 interface FileStream extends Readable {
@@ -39,7 +39,7 @@ interface FileStream extends Readable {
 
 export const registerResolveImportErrorsRoute = (
   router: IRouter,
-  { config, coreUsageStats }: RouteDependencies
+  { config, coreUsageData }: RouteDependencies
 ) => {
   const { maxImportExportSize, maxImportPayloadBytes } = config;
 
@@ -84,7 +84,7 @@ export const registerResolveImportErrorsRoute = (
       const { createNewCopies } = req.query;
 
       const { headers } = req;
-      const usageStatsClient = coreUsageStats.getClient();
+      const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
         .incrementSavedObjectsResolveImportErrors({ headers, createNewCopies })
         .catch(() => {});

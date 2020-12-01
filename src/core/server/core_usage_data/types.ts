@@ -17,7 +17,56 @@
  * under the License.
  */
 
-import { CoreUsageStats } from '../core_usage_stats';
+import { CoreUsageStatsClient } from './core_usage_stats_client';
+import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from '..';
+
+/**
+ * @internal
+ *
+ * CoreUsageStats are collected over time while Kibana is running. This is related to CoreUsageData, which is a superset of this that also
+ * includes point-in-time configuration information.
+ * */
+export interface CoreUsageStats {
+  apiCalls?: {
+    savedObjectsImport?: {
+      total: number;
+      kibanaRequest: {
+        yes: number;
+        no: number;
+      };
+      createNewCopiesEnabled: {
+        yes: number;
+        no: number;
+      };
+      overwriteEnabled: {
+        yes: number;
+        no: number;
+      };
+    };
+    savedObjectsResolveImportErrors?: {
+      total: number;
+      kibanaRequest: {
+        yes: number;
+        no: number;
+      };
+      createNewCopiesEnabled: {
+        yes: number;
+        no: number;
+      };
+    };
+    savedObjectsExport?: {
+      total: number;
+      kibanaRequest: {
+        yes: number;
+        no: number;
+      };
+      allTypesSelected: {
+        yes: number;
+        no: number;
+      };
+    };
+  };
+}
 
 /**
  * Type describing Core's usage data payload
@@ -141,6 +190,14 @@ export interface CoreConfigUsageData {
   // uiSettings: {
   //   overridesCount: number;
   // };
+}
+
+/** @internal */
+export interface CoreUsageDataSetup {
+  registerType(
+    typeRegistry: ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
+  ): void;
+  getClient(): CoreUsageStatsClient;
 }
 
 /**

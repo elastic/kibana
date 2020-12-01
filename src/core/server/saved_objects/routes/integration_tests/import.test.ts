@@ -22,9 +22,9 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerImportRoute } from '../import';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
-import { CoreUsageStatsClient } from '../../../core_usage_stats';
-import { coreUsageStatsClientMock } from '../../../core_usage_stats/core_usage_stats_client.mock';
-import { coreUsageStatsServiceMock } from '../../../core_usage_stats/core_usage_stats_service.mock';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectsErrorHelpers } from '../..';
@@ -77,8 +77,8 @@ describe(`POST ${URL}`, () => {
     const router = httpSetup.createRouter('/internal/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsImport.mockRejectedValue(new Error('Oh no!')); // this error is intentionally swallowed so the import does not fail
-    const coreUsageStats = coreUsageStatsServiceMock.createSetupContract(coreUsageStatsClient);
-    registerImportRoute(router, { config, coreUsageStats });
+    const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+    registerImportRoute(router, { config, coreUsageData });
 
     await server.start();
   });

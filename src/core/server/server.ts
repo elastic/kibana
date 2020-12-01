@@ -53,7 +53,6 @@ import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
-import { CoreUsageStatsService } from './core_usage_stats';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -69,7 +68,6 @@ export class Server {
   private readonly log: Logger;
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
-  private readonly coreUsageStats: CoreUsageStatsService;
   private readonly uiSettings: UiSettingsService;
   private readonly environment: EnvironmentService;
   private readonly metrics: MetricsService;
@@ -103,7 +101,6 @@ export class Server {
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
-    this.coreUsageStats = new CoreUsageStatsService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
@@ -165,22 +162,23 @@ export class Server {
       http: httpSetup,
     });
 
-    const coreUsageStatsSetup = this.coreUsageStats.setup({
+    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+
+    const coreUsageDataSetup = this.coreUsageData.setup({
+      metrics: metricsSetup,
       savedObjectsStartPromise: this.savedObjectsStartPromise,
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
-      coreUsageStats: coreUsageStatsSetup,
+      coreUsageData: coreUsageDataSetup,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({
       http: httpSetup,
       savedObjects: savedObjectsSetup,
     });
-
-    const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const statusSetup = await this.status.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -204,11 +202,6 @@ export class Server {
 
     const loggingSetup = this.logging.setup({
       loggingSystem: this.loggingSystem,
-    });
-
-    this.coreUsageData.setup({
-      metrics: metricsSetup,
-      coreUsageStats: coreUsageStatsSetup,
     });
 
     const coreSetup: InternalCoreSetup = {
