@@ -7,12 +7,18 @@
 import { DynamicActionsState } from '../../common';
 
 export const uiActionsCollector = (state: DynamicActionsState, stats: Record<string, any>) => {
-  stats['uiActions.dynamicActionsOnDashboardCount'] = state.events.length;
+  stats.dynamicActionCount = state.events.length;
 
   const factoryFrequency: Record<string, number | undefined> = {};
 
   for (const event of state.events) {
     const factoryId = event.action.factoryId;
     factoryFrequency[factoryId] = 1 + (factoryFrequency[factoryId] || 0);
+  }
+
+  const factoryIds = Object.keys(factoryFrequency);
+
+  for (const factoryId of factoryIds) {
+    stats[`dynamicAction.${factoryId}.count`] = factoryFrequency[factoryId];
   }
 };
