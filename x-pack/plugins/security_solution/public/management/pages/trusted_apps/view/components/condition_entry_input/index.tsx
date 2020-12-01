@@ -83,12 +83,14 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.PATH],
           value: ConditionEntryField.PATH,
         },
-        ...((os !== OperatingSystem.WINDOWS && []) || [
-          {
-            inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER],
-            value: ConditionEntryField.SIGNER,
-          },
-        ]),
+        ...(os === OperatingSystem.WINDOWS
+          ? [
+              {
+                inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER],
+                value: ConditionEntryField.SIGNER,
+              },
+            ]
+          : []),
       ];
     }, [os]);
 
