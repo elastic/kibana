@@ -59,7 +59,6 @@ export const fieldSpecSchemaFields = {
       ),
     })
   ),
-  indexed: schema.maybe(schema.boolean()),
   customLabel: schema.maybe(schema.string()),
   shortDotsEnable: schema.maybe(schema.boolean()),
 };
