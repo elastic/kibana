@@ -13,7 +13,7 @@ import {
   DataProviderType,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import { SerializedFilterQuery } from '../../../common/store/types';
 
 import { KqlMode, TimelineModel, ColumnHeaderOptions, TimelineTabs } from './model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
@@ -70,7 +70,6 @@ export interface TimelineInput {
   indexNames: string[];
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
-    filterQueryDraft: KueryFilterQuery | null;
   };
   show?: boolean;
   sort?: Sort;
@@ -180,11 +179,6 @@ export const updateDescription = actionCreator<{
 }>('UPDATE_DESCRIPTION');
 
 export const updateKqlMode = actionCreator<{ id: string; kqlMode: KqlMode }>('UPDATE_KQL_MODE');
-
-export const setKqlFilterQueryDraft = actionCreator<{
-  id: string;
-  filterQueryDraft: KueryFilterQuery;
-}>('SET_KQL_FILTER_QUERY_DRAFT');
 
 export const applyKqlFilterQuery = actionCreator<{
   id: string;

@@ -26,7 +26,6 @@ import { useTimelineEvents } from '../../../containers/index';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
-import { TimelineKqlFetch } from '../fetch_kql_timeline';
 import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
 import { combineQueries } from '../helpers';
@@ -256,8 +255,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   return (
     <>
-      <TimelineKqlFetch id={timelineId} indexPattern={indexPattern} inputId="timeline" />
-
       <TimelineRefetch
         id={timelineId}
         inputId="timeline"

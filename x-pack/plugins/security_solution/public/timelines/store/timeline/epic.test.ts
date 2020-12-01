@@ -135,7 +135,6 @@ describe('Epic Timeline', () => {
             serializedQuery:
               '{"bool":{"should":[{"match_phrase":{"endgame.user_name":"zeus"}}],"minimum_should_match":1}}',
           },
-          filterQueryDraft: { kind: 'kuery', expression: 'endgame.user_name : "zeus" ' },
         },
         loadingEventIds: [],
         title: 'saved',

@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import { Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
-import { KueryFilterQuery, KueryFilterQueryKind } from '../../../../common/store';
+import { KueryFilterQuery } from '../../../../common/store';
 import { KqlMode } from '../../../../timelines/store/timeline/model';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { DataProvider } from '../data_providers/data_provider';
@@ -41,7 +41,6 @@ interface Props {
   dataProviders: DataProvider[];
   filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
-  filterQueryDraft: KueryFilterQuery;
   from: string;
   fromStr: string;
   isRefreshPaused: boolean;
@@ -50,7 +49,6 @@ interface Props {
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
   refreshInterval: number;
   setFilters: (filters: Filter[]) => void;
-  setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
   filters: Filter[];
   savedQueryId: string | null;
@@ -87,7 +85,6 @@ export const SearchOrFilter = React.memo<Props>(
     filters,
     filterManager,
     filterQuery,
-    filterQueryDraft,
     from,
     fromStr,
     kqlMode,
@@ -95,7 +92,6 @@ export const SearchOrFilter = React.memo<Props>(
     refreshInterval,
     savedQueryId,
     setFilters,
-    setKqlFilterQueryDraft,
     setSavedQueryId,
     to,
     toStr,
@@ -131,7 +127,6 @@ export const SearchOrFilter = React.memo<Props>(
                 filters={filters}
                 filterManager={filterManager}
                 filterQuery={filterQuery}
-                filterQueryDraft={filterQueryDraft}
                 from={from}
                 fromStr={fromStr}
                 kqlMode={kqlMode}
@@ -139,7 +134,6 @@ export const SearchOrFilter = React.memo<Props>(
                 refreshInterval={refreshInterval}
                 savedQueryId={savedQueryId}
                 setFilters={setFilters}
-                setKqlFilterQueryDraft={setKqlFilterQueryDraft}
                 setSavedQueryId={setSavedQueryId}
                 timelineId={timelineId}
                 to={to}

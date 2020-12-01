@@ -92,7 +92,7 @@ const basicTimeline: TimelineModel = {
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50],
   kqlMode: 'filter',
-  kqlQuery: { filterQuery: null, filterQueryDraft: null },
+  kqlQuery: { filterQuery: null },
   loadingEventIds: [],
   noteIds: [],
   pinnedEventIds: {},

@@ -35,7 +35,6 @@ export interface QueryBarTimelineComponentProps {
   filters: Filter[];
   filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
-  filterQueryDraft: KueryFilterQuery;
   from: string;
   fromStr: string;
   kqlMode: KqlMode;
@@ -43,7 +42,6 @@ export interface QueryBarTimelineComponentProps {
   refreshInterval: number;
   savedQueryId: string | null;
   setFilters: (filters: Filter[]) => void;
-  setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
   timelineId: string;
   to: string;
@@ -62,14 +60,12 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     filters,
     filterManager,
     filterQuery,
-    filterQueryDraft,
     from,
     fromStr,
     kqlMode,
     isRefreshPaused,
     savedQueryId,
     setFilters,
-    setKqlFilterQueryDraft,
     setSavedQueryId,
     refreshInterval,
     timelineId,
@@ -86,7 +82,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     );
     const { browserFields, indexPattern } = useSourcererScope(SourcererScopeName.timeline);
 
-    const [savedQuery, setSavedQuery] = useState<SavedQuery | null>(null);
+    const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
       query: filterQuery != null ? filterQuery.expression : '',
       language: filterQuery != null ? filterQuery.kind : 'kuery',
@@ -195,10 +191,10 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
               });
             }
           } catch (exc) {
-            setSavedQuery(null);
+            setSavedQuery(undefined);
           }
         } else if (isSubscribed) {
-          setSavedQuery(null);
+          setSavedQuery(undefined);
         }
       }
       setSavedQueryByServices();
@@ -208,23 +204,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [savedQueryId]);
 
-    const onChangedQuery = useCallback(
-      (newQuery: Query) => {
-        if (
-          filterQueryDraft == null ||
-          (filterQueryDraft != null && filterQueryDraft.expression !== newQuery.query) ||
-          filterQueryDraft.kind !== newQuery.language
-        ) {
-          setKqlFilterQueryDraft(
-            newQuery.query as string,
-            newQuery.language as KueryFilterQueryKind
-          );
-        }
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [filterQueryDraft]
-    );
-
     const onSubmitQuery = useCallback(
       (newQuery: Query, timefilter?: SavedQueryTimeFilter) => {
         if (
@@ -232,10 +211,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           (filterQuery != null && filterQuery.expression !== newQuery.query) ||
           filterQuery.kind !== newQuery.language
         ) {
-          setKqlFilterQueryDraft(
-            newQuery.query as string,
-            newQuery.language as KueryFilterQueryKind
-          );
           applyKqlFilterQuery(newQuery.query as string, newQuery.language as KueryFilterQueryKind);
         }
         if (timefilter != null) {
@@ -256,7 +231,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     );
 
     const onSavedQuery = useCallback(
-      (newSavedQuery: SavedQuery | null) => {
+      (newSavedQuery: SavedQuery | undefined) => {
         if (newSavedQuery != null) {
           if (newSavedQuery.id !== savedQueryId) {
             setSavedQueryId(newSavedQuery.id);
@@ -306,10 +281,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         indexPattern={indexPattern}
         isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}
-        filterQueryDraft={filterQueryDraft}
         filterManager={filterManager}
         filters={queryBarFilters}
-        onChangedQuery={onChangedQuery}
         onSubmitQuery={onSubmitQuery}
         refreshInterval={refreshInterval}
         savedQuery={savedQuery}

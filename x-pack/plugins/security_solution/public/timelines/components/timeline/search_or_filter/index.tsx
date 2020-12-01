@@ -12,7 +12,6 @@ import deepEqual from 'fast-deep-equal';
 
 import { Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import {
-  KueryFilterQuery,
   SerializedFilterQuery,
   State,
   inputsModel,
@@ -37,7 +36,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     filters,
     filterManager,
     filterQuery,
-    filterQueryDraft,
     from,
     fromStr,
     isRefreshPaused,
@@ -45,7 +43,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     refreshInterval,
     savedQueryId,
     setFilters,
-    setKqlFilterQueryDraft,
     setSavedQueryId,
     timelineId,
     to,
@@ -53,18 +50,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     updateKqlMode,
     updateReduxTime,
   }) => {
-    const setFilterQueryDraftFromKueryExpression = useCallback(
-      (expression: string, kind) =>
-        setKqlFilterQueryDraft({
-          id: timelineId,
-          filterQueryDraft: {
-            kind,
-            expression,
-          },
-        }),
-      [timelineId, setKqlFilterQueryDraft]
-    );
-
     const setFiltersInTimeline = useCallback(
       (newFilters: Filter[]) =>
         setFilters({
@@ -89,7 +74,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         filters={filters}
         filterManager={filterManager}
         filterQuery={filterQuery}
-        filterQueryDraft={filterQueryDraft}
         from={from}
         fromStr={fromStr}
         isRefreshPaused={isRefreshPaused}
@@ -97,7 +81,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         refreshInterval={refreshInterval}
         savedQueryId={savedQueryId}
         setFilters={setFiltersInTimeline}
-        setKqlFilterQueryDraft={setFilterQueryDraftFromKueryExpression!}
         setSavedQueryId={setSavedQueryInTimeline}
         timelineId={timelineId}
         to={to}
@@ -120,7 +103,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.filters, nextProps.filters) &&
       deepEqual(prevProps.filterQuery, nextProps.filterQuery) &&
-      deepEqual(prevProps.filterQueryDraft, nextProps.filterQueryDraft) &&
       deepEqual(prevProps.kqlMode, nextProps.kqlMode) &&
       deepEqual(prevProps.savedQueryId, nextProps.savedQueryId) &&
       deepEqual(prevProps.timelineId, nextProps.timelineId)
@@ -131,7 +113,6 @@ StatefulSearchOrFilterComponent.displayName = 'StatefulSearchOrFilterComponent';
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const getKqlFilterQueryDraft = timelineSelectors.getKqlFilterQueryDraftSelector();
   const getKqlFilterQuery = timelineSelectors.getKqlFilterKuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const getInputsPolicy = inputsSelectors.getTimelinePolicySelector();
@@ -142,7 +123,6 @@ const makeMapStateToProps = () => {
     return {
       dataProviders: timeline.dataProviders,
       filterQuery: getKqlFilterQuery(state, timelineId)!,
-      filterQueryDraft: getKqlFilterQueryDraft(state, timelineId)!,
       filters: timeline.filters!,
       from: input.timerange.from,
       fromStr: input.timerange.fromStr!,
@@ -167,19 +147,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     ),
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) =>
     dispatch(timelineActions.updateKqlMode({ id, kqlMode })),
-  setKqlFilterQueryDraft: ({
-    id,
-    filterQueryDraft,
-  }: {
-    id: string;
-    filterQueryDraft: KueryFilterQuery;
-  }) =>
-    dispatch(
-      timelineActions.setKqlFilterQueryDraft({
-        id,
-        filterQueryDraft,
-      })
-    ),
   setSavedQueryId: ({ id, savedQueryId }: { id: string; savedQueryId: string | null }) =>
     dispatch(timelineActions.setSavedQueryId({ id, savedQueryId })),
   setFilters: ({ id, filters }: { id: string; filters: Filter[] }) =>
