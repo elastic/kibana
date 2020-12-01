@@ -47,9 +47,9 @@ export interface IndexPatternsServiceStartDeps {
 }
 
 export class IndexPatternsService implements Plugin<void, IndexPatternsServiceStart> {
-  #uiSettings?: CoreStart['uiSettings'];
-  #fieldFormats?: FieldFormatsStart;
-  #logger?: Logger;
+  private uiSettings?: CoreStart['uiSettings'];
+  private fieldFormats?: FieldFormatsStart;
+  private logger?: Logger;
 
   public setup(core: CoreSetup) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
@@ -59,9 +59,9 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
   }
 
   public start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps) {
-    this.#uiSettings = core.uiSettings;
-    this.#fieldFormats = fieldFormats;
-    this.#logger = logger;
+    this.uiSettings = core.uiSettings;
+    this.fieldFormats = fieldFormats;
+    this.logger = logger;
 
     return {
       indexPatternsServiceFactory: this.createIndexPatternsService.bind(this),
@@ -72,12 +72,12 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
     savedObjectsClient: SavedObjectsClientContract,
     elasticsearchClient: ElasticsearchClient
   ) {
-    if (!this.#uiSettings) throw new Error('UI Settings not set in IndexPatternsService.');
-    if (!this.#fieldFormats) throw new Error('Field formats not set in IndexPatternsService.');
-    if (!this.#logger) throw new Error('Logger not set in IndexPatternsService.');
+    if (!this.uiSettings) throw new Error('UI Settings not set in IndexPatternsService.');
+    if (!this.fieldFormats) throw new Error('Field formats not set in IndexPatternsService.');
+    if (!this.logger) throw new Error('Logger not set in IndexPatternsService.');
 
-    const uiSettingsClient = this.#uiSettings.asScopedToClient(savedObjectsClient);
-    const formats = await this.#fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
+    const uiSettingsClient = this.uiSettings.asScopedToClient(savedObjectsClient);
+    const formats = await this.fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
     return new IndexPatternsCommonService({
       uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
@@ -85,10 +85,10 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
       apiClient: new IndexPatternsApiServer(elasticsearchClient),
       fieldFormats: formats,
       onError: (error) => {
-        this.#logger!.error(error);
+        this.logger!.error(error);
       },
       onNotification: ({ title, text }) => {
-        this.#logger!.warn(`${title} : ${text}`);
+        this.logger!.warn(`${title} : ${text}`);
       },
     });
   }
