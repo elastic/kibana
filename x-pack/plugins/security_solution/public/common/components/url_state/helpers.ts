@@ -130,6 +130,7 @@ export const makeMapStateToProps = () => {
         ? {
             id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
             isOpen: flyoutTimeline.show,
+            activeTab: flyoutTimeline.activeTab,
             graphEventId: flyoutTimeline.graphEventId ?? '',
           }
         : { id: '', isOpen: false, graphEventId: '' };
