@@ -7,4 +7,8 @@
 module.exports = {
   rootDir: '..',
   projects: ['<rootDir>/x-pack/plugins/*/jest.config.js'],
+  reporters: [
+    'default',
+    ['<rootDir>/packages/kbn-test/target/jest/junit_reporter', { reportName: 'X-Pack Jest Tests' }],
+  ],
 };
