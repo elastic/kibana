@@ -342,12 +342,11 @@ export class SearchEmbeddable
     if (isFetchRequired) {
       this.filtersSearchSource!.setField('filter', this.input.filters);
       this.filtersSearchSource!.setField('query', this.input.query);
-
-      this.fetch();
-
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
       this.prevTimeRange = this.input.timeRange;
+
+      this.fetch();
     } else if (this.searchScope) {
       // trigger a digest cycle to make sure non-fetch relevant changes are propagated
       this.searchScope.$applyAsync();
