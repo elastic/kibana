@@ -20,7 +20,7 @@ export const FriendlyTimingLabels = {
   [Timings.Blocked]: i18n.translate(
     'xpack.uptime.synthetics.waterfallChart.labels.timings.blocked',
     {
-      defaultMessage: 'Blocked',
+      defaultMessage: 'Queued / Blocked',
     }
   ),
   [Timings.Dns]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.dns', {

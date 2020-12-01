@@ -27,13 +27,15 @@ import { WaterfallData } from '../../../waterfall';
 
 const microToMillis = (micro: number): number => (micro === -1 ? -1 : micro * 1000);
 
-// Based off the source code from:
+// The timing calculations here are based off several sources:
 // https://github.com/ChromeDevTools/devtools-frontend/blob/2fe91adefb2921b4deb2b4b125370ef9ccdb8d1b/front_end/sdk/HARLog.js#L307
 // and
 // https://chromium.googlesource.com/chromium/blink.git/+/master/Source/devtools/front_end/sdk/HAREntry.js#131
+// and
+// https://github.com/cyrus-and/chrome-har-capturer/blob/master/lib/har.js#L195
 // Order of events: request_start = 0, [proxy], [dns], [connect [ssl]], [send], receive_headers_end
 
-const getTimings = (
+export const getTimings = (
   timings: PayloadTimings,
   requestSentTime: number,
   responseReceivedTime: number
@@ -103,9 +105,7 @@ const getTimings = (
   const wait = timings.receive_headers_end - timings.send_end;
 
   // Receive
-  const sentOrStart = requestSentTime < requestStartTime ? requestSentTime : requestStartTime;
-  const duration = responseReceivedTime - sentOrStart;
-  const receive = duration - timings.receive_headers_end;
+  const receive = responseReceivedTime - (requestStartTime + timings.receive_headers_end);
 
   // SSL connection is a part of the overall connection time
   if (connect && ssl) {
@@ -116,38 +116,40 @@ const getTimings = (
 };
 
 // TODO: Switch to real API data, and type data as the payload response (if server response isn't preformatted)
-export const extractItems = (data?: any): NetworkItems => {
-  const items = TEST_DATA.map((entry) => {
-    const requestSentTime = microToMillis(entry.synthetics.payload.start);
-    const responseReceivedTime = microToMillis(entry.synthetics.payload.end);
-    const requestStartTime =
-      entry.synthetics.payload.response && entry.synthetics.payload.response.timing
-        ? microToMillis(entry.synthetics.payload.response.timing.request_time)
-        : null;
-
-    return {
-      timestamp: entry['@timestamp'],
-      method: entry.synthetics.payload.method,
-      url: entry.synthetics.payload.url,
-      status: entry.synthetics.payload.status,
-      mimeType: entry.synthetics.payload?.response?.mime_type,
-      requestSentTime,
-      responseReceivedTime,
-      earliestRequestTime: requestStartTime
-        ? Math.min(requestSentTime, requestStartTime)
-        : requestSentTime,
-      timings:
+export const extractItems = (data: any = TEST_DATA): NetworkItems => {
+  const items = data
+    .map((entry: any) => {
+      const requestSentTime = microToMillis(entry.synthetics.payload.start);
+      const responseReceivedTime = microToMillis(entry.synthetics.payload.end);
+      const requestStartTime =
         entry.synthetics.payload.response && entry.synthetics.payload.response.timing
-          ? getTimings(
-              entry.synthetics.payload.response.timing,
-              requestSentTime,
-              responseReceivedTime
-            )
-          : null,
-    };
-  }).sort((a, b) => {
-    return a.earliestRequestTime - b.earliestRequestTime;
-  });
+          ? microToMillis(entry.synthetics.payload.response.timing.request_time)
+          : null;
+
+      return {
+        timestamp: entry['@timestamp'],
+        method: entry.synthetics.payload.method,
+        url: entry.synthetics.payload.url,
+        status: entry.synthetics.payload.status,
+        mimeType: entry.synthetics.payload?.response?.mime_type,
+        requestSentTime,
+        responseReceivedTime,
+        earliestRequestTime: requestStartTime
+          ? Math.min(requestSentTime, requestStartTime)
+          : requestSentTime,
+        timings:
+          entry.synthetics.payload.response && entry.synthetics.payload.response.timing
+            ? getTimings(
+                entry.synthetics.payload.response.timing,
+                requestSentTime,
+                responseReceivedTime
+              )
+            : null,
+      };
+    })
+    .sort((a: any, b: any) => {
+      return a.earliestRequestTime - b.earliestRequestTime;
+    });
 
   return items;
 };

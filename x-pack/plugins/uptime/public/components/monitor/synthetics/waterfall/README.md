@@ -6,9 +6,11 @@ The waterfall chart component aims to be agnostic in it's approach, so that a va
 
 ## Requirements for usage
 
-The waterfall chart component asssumes that the consumer is making use of `KibanaReactContext`, and as such things like `useKibana` can be called. This is the only hard requirement.
+The waterfall chart component asssumes that the consumer is making use of `KibanaReactContext`, and as such things like `useKibana` can be called. 
 
-The waterfall chart does use the `EuiThemeProvider` from Observability for providing EUI theme information to styled-components, however as some solutions aren't utilising this the waterfall chart component actually sets up this provider itself just incase.
+Consumers are also expected to be using the `<EuiThemeProvider />` so that the waterfall chart can apply styled-component styles based on the EUI theme.
+
+These are the two hard requirements, but almost all plugins will be using these.
 
 ## Rendering
 

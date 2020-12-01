@@ -7,7 +7,7 @@
 import React, { createContext, useContext, Context } from 'react';
 import { WaterfallData, WaterfallDataEntry } from '../types';
 
-export interface WaterfallContext {
+export interface IWaterfallContext {
   data: WaterfallData;
   sidebarItems?: unknown[];
   legendItems?: unknown[];
@@ -17,13 +17,13 @@ export interface WaterfallContext {
   ) => JSX.Element;
 }
 
-export const WaterfallContext = createContext<Partial<WaterfallContext>>({});
+export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
 interface ProviderProps {
-  data: WaterfallContext['data'];
-  sidebarItems?: WaterfallContext['sidebarItems'];
-  legendItems?: WaterfallContext['legendItems'];
-  renderTooltipItem: WaterfallContext['renderTooltipItem'];
+  data: IWaterfallContext['data'];
+  sidebarItems?: IWaterfallContext['sidebarItems'];
+  legendItems?: IWaterfallContext['legendItems'];
+  renderTooltipItem: IWaterfallContext['renderTooltipItem'];
 }
 
 export const WaterfallProvider: React.FC<ProviderProps> = ({
@@ -41,4 +41,4 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
 };
 
 export const useWaterfallContext = () =>
-  useContext((WaterfallContext as unknown) as Context<WaterfallContext>);
+  useContext((WaterfallContext as unknown) as Context<IWaterfallContext>);
