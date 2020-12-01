@@ -102,7 +102,8 @@ export const getTermsBucketAgg = () =>
       aggConfig,
       searchSource,
       inspectorRequestAdapter,
-      abortSignal
+      abortSignal,
+      searchSessionId
     ) => {
       if (!resp.aggregations) return resp;
       const nestedSearchSource = searchSource.createChild();
@@ -124,6 +125,7 @@ export const getTermsBucketAgg = () =>
                   'This request counts the number of documents that fall ' +
                   'outside the criterion of the data buckets.',
               }),
+              searchSessionId,
             }
           );
           nestedSearchSource.getSearchRequestBody().then((body) => {
@@ -132,7 +134,10 @@ export const getTermsBucketAgg = () =>
           request.stats(getRequestInspectorStats(nestedSearchSource));
         }
 
-        const response = await nestedSearchSource.fetch({ abortSignal });
+        const response = await nestedSearchSource.fetch({
+          abortSignal,
+          sessionId: searchSessionId,
+        });
         if (request) {
           request
             .stats(getResponseInspectorStats(response, nestedSearchSource))

@@ -5,16 +5,22 @@
  */
 
 import { RequestHandler, RequestHandlerContext } from 'kibana/server';
+
+import { ExceptionListClient } from '../../../../../lists/server';
+
 import {
   DeleteTrustedAppsRequestParams,
   GetTrustedAppsListRequest,
-  GetTrustedListAppsResponse,
   PostTrustedAppCreateRequest,
 } from '../../../../common/endpoint/types';
+
 import { EndpointAppContext } from '../../types';
-import { exceptionItemToTrustedAppItem, newTrustedAppItemToExceptionItem } from './utils';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
-import { ExceptionListClient } from '../../../../../lists/server';
+import {
+  createTrustedApp,
+  deleteTrustedApp,
+  getTrustedAppsList,
+  MissingTrustedAppException,
+} from './service';
 
 const exceptionListClientFromContext = (context: RequestHandlerContext): ExceptionListClient => {
   const exceptionLists = context.lists?.getExceptionListClient();
@@ -33,22 +39,16 @@ export const getTrustedAppsDeleteRouteHandler = (
 
   return async (context, req, res) => {
     try {
-      const exceptionsListService = exceptionListClientFromContext(context);
-      const { id } = req.params;
-      const response = await exceptionsListService.deleteExceptionListItem({
-        id,
-        itemId: undefined,
-        namespaceType: 'agnostic',
-      });
-
-      if (response === null) {
-        return res.notFound({ body: `trusted app id [${id}] not found` });
-      }
+      await deleteTrustedApp(exceptionListClientFromContext(context), req.params);
 
       return res.ok();
     } catch (error) {
-      logger.error(error);
-      return res.internalError({ body: error });
+      if (error instanceof MissingTrustedAppException) {
+        return res.notFound({ body: `trusted app id [${req.params.id}] not found` });
+      } else {
+        logger.error(error);
+        return res.internalError({ body: error });
+      }
     }
   };
 };
@@ -59,28 +59,10 @@ export const getTrustedAppsListRouteHandler = (
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
-    const { page, per_page: perPage } = req.query;
-
     try {
-      const exceptionsListService = exceptionListClientFromContext(context);
-      // Ensure list is created if it does not exist
-      await exceptionsListService.createTrustedAppsList();
-      const results = await exceptionsListService.findExceptionListItem({
-        listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
-        page,
-        perPage,
-        filter: undefined,
-        namespaceType: 'agnostic',
-        sortField: 'name',
-        sortOrder: 'asc',
+      return res.ok({
+        body: await getTrustedAppsList(exceptionListClientFromContext(context), req.query),
       });
-      const body: GetTrustedListAppsResponse = {
-        data: results?.data.map(exceptionItemToTrustedAppItem) ?? [],
-        total: results?.total ?? 0,
-        page: results?.page ?? 1,
-        per_page: results?.per_page ?? perPage!,
-      };
-      return res.ok({ body });
     } catch (error) {
       logger.error(error);
       return res.internalError({ body: error });
@@ -94,21 +76,9 @@ export const getTrustedAppsCreateRouteHandler = (
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
-    const newTrustedApp = req.body;
-
     try {
-      const exceptionsListService = exceptionListClientFromContext(context);
-      // Ensure list is created if it does not exist
-      await exceptionsListService.createTrustedAppsList();
-
-      const createdTrustedAppExceptionItem = await exceptionsListService.createExceptionListItem(
-        newTrustedAppItemToExceptionItem(newTrustedApp)
-      );
-
       return res.ok({
-        body: {
-          data: exceptionItemToTrustedAppItem(createdTrustedAppExceptionItem),
-        },
+        body: await createTrustedApp(exceptionListClientFromContext(context), req.body),
       });
     } catch (error) {
       logger.error(error);

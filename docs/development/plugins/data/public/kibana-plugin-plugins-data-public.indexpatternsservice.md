@@ -23,6 +23,7 @@ export declare class IndexPatternsService
 |  [clearCache](./kibana-plugin-plugins-data-public.indexpatternsservice.clearcache.md) |  | <code>(id?: string &#124; undefined) =&gt; void</code> | Clear index pattern list cache |
 |  [ensureDefaultIndexPattern](./kibana-plugin-plugins-data-public.indexpatternsservice.ensuredefaultindexpattern.md) |  | <code>EnsureDefaultIndexPattern</code> |  |
 |  [fieldArrayToMap](./kibana-plugin-plugins-data-public.indexpatternsservice.fieldarraytomap.md) |  | <code>(fields: FieldSpec[], fieldAttrs?: FieldAttrs &#124; undefined) =&gt; Record&lt;string, FieldSpec&gt;</code> | Converts field array to map |
+|  [find](./kibana-plugin-plugins-data-public.indexpatternsservice.find.md) |  | <code>(search: string, size?: number) =&gt; Promise&lt;IndexPattern[]&gt;</code> |  |
 |  [get](./kibana-plugin-plugins-data-public.indexpatternsservice.get.md) |  | <code>(id: string) =&gt; Promise&lt;IndexPattern&gt;</code> | Get an index pattern by id. Cache optimized |
 |  [getCache](./kibana-plugin-plugins-data-public.indexpatternsservice.getcache.md) |  | <code>() =&gt; Promise&lt;SavedObject&lt;IndexPatternSavedObjectAttrs&gt;[] &#124; null &#124; undefined&gt;</code> |  |
 |  [getDefault](./kibana-plugin-plugins-data-public.indexpatternsservice.getdefault.md) |  | <code>() =&gt; Promise&lt;IndexPattern &#124; null&gt;</code> | Get default index pattern |
