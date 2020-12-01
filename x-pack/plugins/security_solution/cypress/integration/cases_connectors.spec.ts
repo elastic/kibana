@@ -59,5 +59,6 @@ describe('Cases connectors', () => {
     selectLastConnectorCreated();
 
     cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');
+    cy.get(TOASTER).should('have.text', 'Saved external connection settings');
   });
 });
