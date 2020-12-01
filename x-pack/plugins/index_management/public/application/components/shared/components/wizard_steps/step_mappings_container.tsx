@@ -15,7 +15,7 @@ interface Props {
 
 export const StepMappingsContainer: React.FunctionComponent<Props> = ({ esDocsBase }) => {
   const { defaultValue, updateContent, getSingleContentData } = Forms.useContent<
-    CommonWizardSteps,
+    CommonWizardSteps & { logistics: { indexPatterns: string[] } },
     'mappings'
   >('mappings');
 
@@ -23,6 +23,7 @@ export const StepMappingsContainer: React.FunctionComponent<Props> = ({ esDocsBa
     <StepMappings
       defaultValue={defaultValue}
       onChange={updateContent}
+      indexPatterns={getSingleContentData('logistics').indexPatterns}
       indexSettings={getSingleContentData('settings')}
       esDocsBase={esDocsBase}
     />

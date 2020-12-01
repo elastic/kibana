@@ -27,14 +27,18 @@ import {
 interface Props {
   onChange: (content: Forms.Content) => void;
   esDocsBase: string;
+  indexPatterns: string[];
   defaultValue?: { [key: string]: any };
   indexSettings?: IndexSettings;
 }
 
 export const StepMappings: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue = {}, onChange, indexSettings, esDocsBase }) => {
+  ({ defaultValue = {}, onChange, indexPatterns, indexSettings, esDocsBase }) => {
     const [mappings, setMappings] = useState(defaultValue);
-    const { docLinks } = useAppContext();
+    const {
+      docLinks,
+      plugins: { data },
+    } = useAppContext();
 
     const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(
       ({ isValid, getData, validate }) => {
@@ -109,7 +113,7 @@ export const StepMappings: React.FunctionComponent<Props> = React.memo(
           value={mappings}
           onChange={onMappingsEditorUpdate}
           indexSettings={indexSettings}
-          docLinks={docLinks}
+          ctx={{ docLinks, data, indexPatterns }}
         />
 
         <EuiSpacer size="m" />
