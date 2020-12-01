@@ -17,7 +17,7 @@ describe('MonitorListDrawer component', () => {
     summary = {
       monitor_id: 'foo',
       state: {
-        monitor: {},
+        monitor: { type: 'http' },
         summaryPings: [
           makePing({
             docId: 'foo',

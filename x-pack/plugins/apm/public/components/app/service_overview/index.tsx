@@ -21,6 +21,7 @@ import { TransactionErrorRateChart } from '../../shared/charts/transaction_error
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { SearchBar } from '../../shared/search_bar';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
+import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
 import { TableLinkFlexItem } from './table_link_flex_item';
 
@@ -64,18 +65,7 @@ export function ServiceOverview({
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={4}>
-                <EuiPanel>
-                  <EuiTitle size="xs">
-                    <h2>
-                      {i18n.translate(
-                        'xpack.apm.serviceOverview.trafficChartTitle',
-                        {
-                          defaultMessage: 'Traffic',
-                        }
-                      )}
-                    </h2>
-                  </EuiTitle>
-                </EuiPanel>
+                <ServiceOverviewThroughputChart height={chartHeight} />
               </EuiFlexItem>
               <EuiFlexItem grow={6}>
                 <EuiPanel>
