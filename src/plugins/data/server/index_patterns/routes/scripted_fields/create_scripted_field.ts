@@ -64,7 +64,11 @@ export const registerCreateScriptedFieldRoute = (router: IRouter) => {
             throw new Error(`Field [name = ${field.name}] already exists.`);
           }
 
-          indexPattern.fields.add(field);
+          indexPattern.fields.add({
+            ...field,
+            aggregatable: true,
+            searchable: true,
+          });
 
           await ip.updateSavedObject(indexPattern);
           if (refresh_fields) {

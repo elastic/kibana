@@ -65,7 +65,11 @@ export const registerPutScriptedFieldRoute = (router: IRouter) => {
             indexPattern.fields.remove(oldFieldObject);
           }
 
-          indexPattern.fields.add(field);
+          indexPattern.fields.add({
+            ...field,
+            aggregatable: true,
+            searchable: true,
+          });
 
           await ip.updateSavedObject(indexPattern);
           if (refresh_fields) {

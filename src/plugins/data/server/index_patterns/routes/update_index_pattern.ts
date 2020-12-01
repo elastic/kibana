@@ -124,7 +124,13 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           if (fields !== undefined) {
             changeCount++;
             doRefreshFields = true;
-            indexPattern.fields.replaceAll(Object.values(fields || {}));
+            indexPattern.fields.replaceAll(
+              Object.values(fields || {}).map((field) => ({
+                ...field,
+                aggregatable: true,
+                searchable: true,
+              }))
+            );
           }
 
           if (changeCount < 1) {
