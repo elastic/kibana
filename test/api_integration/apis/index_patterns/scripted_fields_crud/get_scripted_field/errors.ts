@@ -57,8 +57,6 @@ export default function ({ getService }: FtrProviderContext) {
               scripted: false,
               name: 'foo',
               type: 'string',
-              searchable: false,
-              aggregatable: false,
             },
           },
         },

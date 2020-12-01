@@ -40,8 +40,6 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'number',
             scripted: true,
             script: "doc['field_name'].value",
-            searchable: true,
-            aggregatable: true,
           },
         });
 
@@ -50,8 +48,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response2.body.field.type).to.be('number');
       expect(response2.body.field.scripted).to.be(true);
       expect(response2.body.field.script).to.be("doc['field_name'].value");
-      expect(response2.body.field.searchable).to.be(true);
-      expect(response2.body.field.aggregatable).to.be(true);
     });
 
     it('newly created scripted field is materialized in the index_pattern object', async () => {
@@ -70,8 +66,6 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'number',
             scripted: true,
             script: "doc['field_name'].value",
-            searchable: true,
-            aggregatable: true,
           },
         });
 
@@ -87,8 +81,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(field.type).to.be('number');
       expect(field.scripted).to.be(true);
       expect(field.script).to.be("doc['field_name'].value");
-      expect(field.searchable).to.be(true);
-      expect(field.aggregatable).to.be(true);
     });
   });
 }

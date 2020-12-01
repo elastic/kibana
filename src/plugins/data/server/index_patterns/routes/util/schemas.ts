@@ -32,8 +32,6 @@ export const fieldSpecSchemaFields = {
     defaultValue: 'string',
     maxLength: 1_000,
   }),
-  searchable: schema.boolean({ defaultValue: false }),
-  aggregatable: schema.boolean({ defaultValue: false }),
   count: schema.maybe(
     schema.number({
       min: 0,

@@ -271,8 +271,6 @@ export default function ({ getService }: FtrProviderContext) {
             foo: {
               name: 'foo',
               type: 'string',
-              searchable: false,
-              aggregatable: false,
             },
           },
         },
@@ -280,8 +278,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response1.body.index_pattern.fields.foo.name).to.be('foo');
       expect(response1.body.index_pattern.fields.foo.type).to.be('string');
-      expect(response1.body.index_pattern.fields.foo.searchable).to.be(false);
-      expect(response1.body.index_pattern.fields.foo.aggregatable).to.be(false);
 
       const id = response1.body.index_pattern.id;
       const response2 = await supertest.post('/api/index_patterns/index_pattern/' + id).send({
@@ -290,8 +286,6 @@ export default function ({ getService }: FtrProviderContext) {
             bar: {
               name: 'bar',
               type: 'number',
-              searchable: true,
-              aggregatable: true,
             },
           },
         },
@@ -299,15 +293,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response2.body.index_pattern.fields.bar.name).to.be('bar');
       expect(response2.body.index_pattern.fields.bar.type).to.be('number');
-      expect(response2.body.index_pattern.fields.bar.searchable).to.be(true);
-      expect(response2.body.index_pattern.fields.bar.aggregatable).to.be(true);
 
       const response3 = await supertest.get('/api/index_patterns/index_pattern/' + id);
 
       expect(response3.body.index_pattern.fields.bar.name).to.be('bar');
       expect(response3.body.index_pattern.fields.bar.type).to.be('number');
-      expect(response3.body.index_pattern.fields.bar.searchable).to.be(true);
-      expect(response3.body.index_pattern.fields.bar.aggregatable).to.be(true);
     });
 
     it('can update multiple index pattern fields at once', async () => {

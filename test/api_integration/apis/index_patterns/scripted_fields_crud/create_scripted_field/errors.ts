@@ -59,8 +59,6 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'bar',
             type: 'number',
             scripted: false,
-            searchable: true,
-            aggregatable: true,
           },
         });
 
@@ -86,8 +84,6 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'bar',
             type: 'number',
             scripted: false,
-            searchable: true,
-            aggregatable: true,
           },
         });
 

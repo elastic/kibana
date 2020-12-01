@@ -35,8 +35,6 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'number',
               scripted: true,
               script: "doc['field_name'].value",
-              searchable: true,
-              aggregatable: true,
             },
           },
         },

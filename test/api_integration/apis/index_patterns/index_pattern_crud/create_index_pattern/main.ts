@@ -97,8 +97,6 @@ export default function ({ getService }: FtrProviderContext) {
             foo: {
               name: 'foo',
               type: 'string',
-              searchable: false,
-              aggregatable: false,
             },
           },
         },
@@ -108,8 +106,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.index_pattern.title).to.be(title);
       expect(response.body.index_pattern.fields.foo.name).to.be('foo');
       expect(response.body.index_pattern.fields.foo.type).to.be('string');
-      expect(response.body.index_pattern.fields.foo.searchable).to.be(false);
-      expect(response.body.index_pattern.fields.foo.aggregatable).to.be(false);
     });
 
     it('can add two fields, one with all fields specified', async () => {
@@ -121,14 +117,10 @@ export default function ({ getService }: FtrProviderContext) {
             foo: {
               name: 'foo',
               type: 'string',
-              searchable: false,
-              aggregatable: false,
             },
             bar: {
               name: 'bar',
               type: 'number',
-              searchable: true,
-              aggregatable: true,
               count: 123,
               script: '',
               lang: 'test-lang',
@@ -148,13 +140,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.body.index_pattern.fields.foo.name).to.be('foo');
       expect(response.body.index_pattern.fields.foo.type).to.be('string');
-      expect(response.body.index_pattern.fields.foo.searchable).to.be(false);
-      expect(response.body.index_pattern.fields.foo.aggregatable).to.be(false);
 
       expect(response.body.index_pattern.fields.bar.name).to.be('bar');
       expect(response.body.index_pattern.fields.bar.type).to.be('number');
-      expect(response.body.index_pattern.fields.bar.searchable).to.be(true);
-      expect(response.body.index_pattern.fields.bar.aggregatable).to.be(true);
       expect(response.body.index_pattern.fields.bar.count).to.be(123);
       expect(response.body.index_pattern.fields.bar.script).to.be('');
       expect(response.body.index_pattern.fields.bar.lang).to.be('test-lang');

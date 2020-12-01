@@ -35,16 +35,12 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'string',
               scripted: true,
               script: "doc['field_name'].value",
-              searchable: true,
-              aggregatable: true,
             },
             bar: {
               name: 'bar',
               type: 'string',
               scripted: true,
               script: "doc['field_name'].value",
-              searchable: true,
-              aggregatable: true,
             },
           },
         },
@@ -58,8 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'number',
             scripted: true,
             script: "doc['field_name'].value",
-            searchable: true,
-            aggregatable: true,
           },
         });
 
@@ -93,8 +87,6 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'string',
               scripted: true,
               script: "doc['field_name'].value",
-              searchable: true,
-              aggregatable: true,
             },
           },
         },
@@ -108,8 +100,6 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'number',
             scripted: true,
             script: "doc['bar'].value",
-            searchable: true,
-            aggregatable: true,
           },
         });
 
