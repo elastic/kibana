@@ -6,7 +6,7 @@
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { RecoveredActionGroup } from '../../../../../alerts/common';
+import { ResolvedActionGroup } from '../../../../../alerts/common';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -89,7 +89,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const firstResult = first(alertResults);
         const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
         const actionGroupId =
-          nextState === AlertStates.OK ? RecoveredActionGroup.id : FIRED_ACTIONS.id;
+          nextState === AlertStates.OK ? ResolvedActionGroup.id : FIRED_ACTIONS.id;
         alertInstance.scheduleActions(actionGroupId, {
           group,
           alertState: stateToAlertMessage[nextState],
