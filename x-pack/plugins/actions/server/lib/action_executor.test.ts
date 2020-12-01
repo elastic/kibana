@@ -15,6 +15,9 @@ import { spacesServiceMock } from '../../../spaces/server/spaces_service/spaces_
 import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
 import { pick } from 'lodash';
+import sinon from 'sinon';
+
+let fakeTimer: sinon.SinonFakeTimers;
 
 const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
 const services = actionsMock.createServices();
@@ -45,11 +48,17 @@ actionExecutor.initialize({
   preconfiguredActions: [],
 });
 
+beforeAll(() => {
+  fakeTimer = sinon.useFakeTimers();
+});
+
 beforeEach(() => {
   jest.resetAllMocks();
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
   getActionsClientWithRequest.mockResolvedValue(actionsClient);
 });
+
+afterAll(() => fakeTimer.restore());
 
 test('successfully executes', async () => {
   const actionType: jest.Mocked<ActionType> = {
@@ -105,6 +114,8 @@ test('successfully executes', async () => {
     },
     params: { foo: true },
   });
+
+  expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1 at 1970-01-01T00:00:00.000Z');
 });
 
 test('provides empty config when config and / or secrets is empty', async () => {
