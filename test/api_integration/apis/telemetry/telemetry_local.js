@@ -62,6 +62,8 @@ export default function ({ getService }) {
       expect(body.length).to.be(1);
       const stats = body[0];
       expect(stats.collection).to.be('local');
+      expect(stats.collectionSource).to.be('local');
+      expect(stats.license).to.be.undefined; // OSS cannot get the license
       expect(stats.stack_stats.kibana.count).to.be.a('number');
       expect(stats.stack_stats.kibana.indices).to.be.a('number');
       expect(stats.stack_stats.kibana.os.platforms[0].platform).to.be.a('string');
