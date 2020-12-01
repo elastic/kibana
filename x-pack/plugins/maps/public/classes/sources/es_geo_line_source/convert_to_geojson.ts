@@ -17,7 +17,7 @@ export function convertToGeoJson(esResponse: any, entitySplitFieldName: string) 
   const buckets = _.get(esResponse, 'aggregations.entitySplit.buckets', []);
   buckets.forEach((bucket: any) => {
     const feature = bucket.path as Feature;
-    if (!feature.properties.complete) {
+    if (!feature.properties!.complete) {
       numTrimmedTracks++;
     }
     feature.id = bucket.key;

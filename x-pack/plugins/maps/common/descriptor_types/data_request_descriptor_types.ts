@@ -75,12 +75,21 @@ export type ESSearchSourceResponseMeta = {
   totalEntities?: number;
 };
 
+export type ESGeoLineSourceResponseMeta = {
+  areResultsTrimmed: boolean;
+  areEntitiesTrimmed: boolean;
+  entityCount: number;
+  numTrimmedTracks: number;
+  totalEntities: number;
+};
+
 // Partial because objects are justified downstream in constructors
 export type DataMeta = Partial<
   VectorSourceRequestMeta &
     VectorJoinSourceRequestMeta &
     VectorStyleRequestMeta &
-    ESSearchSourceResponseMeta
+    ESSearchSourceResponseMeta &
+    ESGeoLineSourceResponseMeta
 >;
 
 type NumericalStyleFieldData = {

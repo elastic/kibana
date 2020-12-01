@@ -7,11 +7,13 @@
 import _ from 'lodash';
 import React from 'react';
 
+import { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
 import {
   ESGeoLineSourceDescriptor,
+  ESGeoLineSourceResponseMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -29,14 +31,6 @@ import { IField } from '../../fields/field';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 
 const MAX_TRACKS = 1000;
-
-interface SourceMeta {
-  areResultsTrimmed: boolean;
-  areEntitiesTrimmed: boolean;
-  entityCount: number;
-  numTrimmedTracks: number;
-  totalEntities: number;
-}
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
   defaultMessage: 'Tracks',
@@ -217,13 +211,15 @@ export class ESGeoLineSource extends AbstractESAggSource {
         entityCount: entityBuckets.length,
         numTrimmedTracks,
         totalEntities,
-      } as SourceMeta,
+      } as ESGeoLineSourceResponseMeta,
     };
   }
 
   getSourceTooltipContent(sourceDataRequest?: DataRequest) {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
-    const meta = sourceDataRequest ? (sourceDataRequest.getMeta() as SourceMeta) : null;
+    const meta = sourceDataRequest
+      ? (sourceDataRequest.getMeta() as ESGeoLineSourceResponseMeta)
+      : null;
     if (!featureCollection || !meta) {
       // no tooltip content needed when there is no feature collection or meta
       return {
@@ -261,7 +257,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       // Used to show trimmed icon in legend. Trimmed icon signals the following
       // 1) number of entities are trimmed.
       // 2) one or more tracks are incomplete.
-      areResultsTrimmed: meta.areEntitiesTrimmed,
+      areResultsTrimmed: meta.areResultsTrimmed,
     };
   }
 
