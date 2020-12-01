@@ -58,7 +58,7 @@ describe('getSourceTooltipContent', () => {
       data: {},
       dataId: 'source',
       dataMeta: {
-        areResultsTrimmed: true,
+        areResultsTrimmed: false,
         areEntitiesTrimmed: false,
         entityCount: 70,
         numTrimmedTracks: 10,

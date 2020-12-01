@@ -206,7 +206,11 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return {
       data: featureCollection,
       meta: {
-        areResultsTrimmed: areEntitiesTrimmed || numTrimmedTracks > 0,
+        // meta.areResultsTrimmed is used by updateDueToExtent to skip re-fetching results
+        // when extent changes contained by original extent are not needed
+        // Only trigger re-fetch when the number of entities are trimmed
+        // Do not trigger re-fetch when tracks are trimmed since the tracks themselves are not filtered by map view extent.
+        areResultsTrimmed: areEntitiesTrimmed,
         areEntitiesTrimmed,
         entityCount: entityBuckets.length,
         numTrimmedTracks,
@@ -257,7 +261,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       // Used to show trimmed icon in legend. Trimmed icon signals the following
       // 1) number of entities are trimmed.
       // 2) one or more tracks are incomplete.
-      areResultsTrimmed: meta.areResultsTrimmed,
+      areResultsTrimmed: meta.areEntitiesTrimmed || meta.numTrimmedTracks > 0,
     };
   }
 
