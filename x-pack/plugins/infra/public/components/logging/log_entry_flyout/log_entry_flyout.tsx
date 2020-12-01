@@ -5,11 +5,14 @@
  */
 
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiLoadingSpinner,
+  EuiProgress,
   EuiSpacer,
   EuiTextColor,
   EuiTitle,
@@ -17,10 +20,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect } from 'react';
-import { euiStyled } from '../../../../../observability/public';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
-import { InfraLoadingPanel } from '../../loading';
+import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 import { LogEntryFieldsTable } from './log_entry_fields_table';
 
@@ -37,7 +39,14 @@ export const LogEntryFlyout = ({
   onSetFieldFilter,
   sourceId,
 }: LogEntryFlyoutProps) => {
-  const { fetchLogEntry, isRequestRunning, logEntry, errors: logEntryErrors } = useLogEntry({
+  const {
+    fetchLogEntry,
+    isRequestRunning,
+    logEntry,
+    errors: logEntryErrors,
+    total: logEntryRequestTotal,
+    loaded: logEntryRequestProgress,
+  } = useLogEntry({
     sourceId,
     logEntryId,
   });
@@ -59,12 +68,12 @@ export const LogEntryFlyout = ({
                   defaultMessage="Details for log entry {logEntryId}"
                   id="xpack.infra.logFlyout.flyoutTitle"
                   values={{
-                    logEntryId: flyoutItem ? <code>{flyoutItem.id}</code> : '',
+                    logEntryId: logEntryId ? <code>{logEntryId}</code> : '',
                   }}
                 />
               </h3>
             </EuiTitle>
-            {flyoutItem ? (
+            {logEntry ? (
               <>
                 <EuiSpacer size="s" />
                 <EuiTextColor color="subdued">
@@ -72,7 +81,7 @@ export const LogEntryFlyout = ({
                     id="xpack.infra.logFlyout.flyoutSubTitle"
                     defaultMessage="From index {indexName}"
                     values={{
-                      indexName: <code>{flyoutItem.index}</code>,
+                      indexName: <code>{logEntry.index}</code>,
                     }}
                   />
                 </EuiTextColor>
@@ -84,33 +93,32 @@ export const LogEntryFlyout = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {isRequestRunning ? (
-          <InfraFlyoutLoadingPanel>
-            <InfraLoadingPanel
-              height="100%"
-              width="100%"
-              text={i18n.translate('xpack.infra.logFlyout.loadingMessage', {
-                defaultMessage: 'Loading Event',
-              })}
-            />
-          </InfraFlyoutLoadingPanel>
-        ) : logEntry ? (
+      {isRequestRunning ? (
+        <CenteredEuiFlyoutBody>
+          {/* <EuiLoadingSpinner size="xl" /> */}
+          <EuiProgress
+            label={loadingProgressMessage}
+            max={logEntryRequestTotal}
+            value={logEntryRequestProgress}
+          />
+        </CenteredEuiFlyoutBody>
+      ) : logEntry ? (
+        <EuiFlyoutBody>
           <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />
-        ) : (
-          <div>{`${logEntryErrors}`}</div>
-        )}
-      </EuiFlyoutBody>
+        </EuiFlyoutBody>
+      ) : (
+        <CenteredEuiFlyoutBody>
+          <EuiCallOut color="danger" iconType="alert">
+            {`${logEntryErrors}`}
+          </EuiCallOut>
+        </CenteredEuiFlyoutBody>
+      )}
     </EuiFlyout>
   );
 };
 
-export const InfraFlyoutLoadingPanel = euiStyled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-`;
+const loadingProgressMessage = i18n.translate('xpack.infra.logFlyout.loadingMessage', {
+  defaultMessage: 'Loading log entry',
+});
 
 const noop = () => {};
