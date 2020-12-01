@@ -29,11 +29,33 @@
 //
 // See all cli options in https://facebook.github.io/jest/docs/cli.html
 
-if (process.argv.indexOf('--config') === -1) {
-  // append correct jest.config if none is provided
-  var configPath = require('path').resolve(__dirname, '../jest.config.oss.js');
+var resolve = require('path').resolve;
+var relative = require('path').relative;
+var existsSync = require('fs').existsSync;
+var REPO_ROOT = require('@kbn/dev-utils').REPO_ROOT;
+
+var configPath = process.argv[process.argv.indexOf('--config')];
+var cwd = process.env.INIT_CWD || process.cwd();
+
+if (!configPath) {
+  var wd = cwd;
+
+  if (!cwd.startsWith(REPO_ROOT)) {
+    console.error(`error: Must be called within Kibana repository [${REPO_ROOT}]`);
+    process.exit(1);
+  }
+
+  configPath = resolve(wd, 'jest.config.js');
+
+  while (!existsSync(configPath)) {
+    wd = resolve(wd, '..');
+    configPath = resolve(wd, 'jest.config.js');
+  }
+
   process.argv.push('--config', configPath);
-  console.log('Running Jest with --config', configPath);
+  process.argv.push(relative(wd, cwd));
+
+  console.log('$ yarn jest', process.argv.slice(2).join(' '));
 }
 
 if (process.env.NODE_ENV == null) {
