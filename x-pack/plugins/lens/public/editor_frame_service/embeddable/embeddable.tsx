@@ -34,7 +34,6 @@ import {
   IContainer,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
-  Adapters,
 } from '../../../../../../src/plugins/embeddable/public';
 import { Document, injectFilterReferences } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
@@ -45,7 +44,7 @@ import { IndexPatternsContract } from '../../../../../../src/plugins/data/public
 import { getEditPath, DOC_TYPE } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
-import { TableInspectorAdapter } from '../types';
+import { LensInspectorAdapters } from '../types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -56,7 +55,6 @@ export type LensByValueInput = {
 export type LensByReferenceInput = SavedObjectEmbeddableInput & EmbeddableInput;
 export type LensEmbeddableInput = (LensByValueInput | LensByReferenceInput) & {
   palette?: PaletteOutput;
-  activeData?: TableInspectorAdapter;
   renderMode?: RenderMode;
 };
 
@@ -87,7 +85,7 @@ export class Embeddable
   private subscription: Subscription;
   private autoRefreshFetchSubscription: Subscription;
   private isInitialized = false;
-  private activeData: TableInspectorAdapter | undefined;
+  private activeData: LensInspectorAdapters | undefined;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -183,7 +181,10 @@ export class Embeddable
     }
   }
 
-  private updateActiveData = (data: unknown, inspectorAdapters?: Adapters | undefined) => {
+  private updateActiveData = (
+    data: unknown,
+    inspectorAdapters?: LensInspectorAdapters | undefined
+  ) => {
     this.activeData = inspectorAdapters;
   };
 
