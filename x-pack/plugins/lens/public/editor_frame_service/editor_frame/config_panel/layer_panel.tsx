@@ -37,9 +37,9 @@ function isConfiguration(
   value: unknown
 ): value is { columnId: string; groupId: string; layerId: string } {
   return (
-    value &&
+    Boolean(value) &&
     typeof value === 'object' &&
-    'columnId' in value &&
+    'columnId' in value! &&
     'groupId' in value &&
     'layerId' in value
   );

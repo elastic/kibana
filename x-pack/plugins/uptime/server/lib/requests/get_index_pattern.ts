@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
 import { FieldDescriptor, IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
-import { DynamicSettings } from '../../../common/runtime_types';
+import { UptimeESClient } from '../lib';
+import { savedObjectsAdapter } from '../saved_objects';
 
 export interface IndexPatternTitleAndFields {
   title: string;
@@ -14,14 +14,15 @@ export interface IndexPatternTitleAndFields {
 }
 
 export const getUptimeIndexPattern = async ({
-  esClient,
-  dynamicSettings,
+  uptimeEsClient,
 }: {
-  esClient: ElasticsearchClient;
-  dynamicSettings: DynamicSettings;
+  uptimeEsClient: UptimeESClient;
 }): Promise<IndexPatternTitleAndFields | undefined> => {
-  const indexPatternsFetcher = new IndexPatternsFetcher(esClient);
+  const indexPatternsFetcher = new IndexPatternsFetcher(uptimeEsClient.baseESClient);
 
+  const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+    uptimeEsClient.getSavedObjectsClient()!
+  );
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
   // and since `getFieldsForWildcard` will throw if the specified indices don't exist,
   // we have to catch errors here to avoid all endpoints returning 500 for users without APM data

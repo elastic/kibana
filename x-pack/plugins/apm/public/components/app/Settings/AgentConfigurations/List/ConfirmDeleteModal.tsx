@@ -8,13 +8,14 @@ import React, { useState } from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AgentConfigurationListAPIResponse } from '../../../../../../server/lib/settings/agent_configuration/list_configurations';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
-import { callApmApi } from '../../../../../services/rest/createCallApmApi';
+import {
+  APIReturnType,
+  callApmApi,
+} from '../../../../../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 
-type Config = AgentConfigurationListAPIResponse[0];
+type Config = APIReturnType<'GET /api/apm/settings/agent-configuration'>[0];
 
 interface Props {
   config: Config;

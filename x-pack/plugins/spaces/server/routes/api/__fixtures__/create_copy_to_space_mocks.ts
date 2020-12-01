@@ -5,7 +5,7 @@
  */
 
 import { Readable } from 'stream';
-import { createPromiseFromStreams, createConcatStream } from 'src/core/server/utils';
+import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
 async function readStreamToCompletion(stream: Readable) {
   return (await (createPromiseFromStreams([stream, createConcatStream([])]) as unknown)) as any[];

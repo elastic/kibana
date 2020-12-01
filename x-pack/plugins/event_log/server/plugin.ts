@@ -115,6 +115,18 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       this.esContext.initialize();
     }
 
+    // Log an error if initialiization didn't succeed.
+    // Note that waitTillReady() is used elsewhere as a gate to having the
+    // event log initialization complete - successfully or not.  Other uses
+    // of this do not bother logging when success is false, as they are in
+    // paths that would cause log spamming.  So we do it once, here, just to
+    // ensure an unsucccess initialization is logged when it occurs.
+    this.esContext.waitTillReady().then((success) => {
+      if (!success) {
+        this.systemLogger.error(`initialization failed, events will not be indexed`);
+      }
+    });
+
     // will log the event after initialization
     this.eventLogger.logEvent({
       event: { action: ACTIONS.starting },
@@ -134,18 +146,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     return this.eventLogClientService;
   }
 
-  private createRouteHandlerContext = (): IContextProvider<
-    RequestHandler<unknown, unknown, unknown>,
-    'eventLog'
-  > => {
-    return async (context, request) => {
-      return {
-        getEventLogClient: () => this.eventLogClientService!.getClient(request),
-      };
-    };
-  };
-
-  stop() {
+  async stop(): Promise<void> {
     this.systemLogger.debug('stopping plugin');
 
     if (!this.eventLogger) throw new Error('eventLogger not initialized');
@@ -156,5 +157,20 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       event: { action: ACTIONS.stopping },
       message: 'eventLog stopping',
     });
+
+    this.systemLogger.debug('shutdown: waiting to finish');
+    await this.esContext?.shutdown();
+    this.systemLogger.debug('shutdown: finished');
   }
+
+  private createRouteHandlerContext = (): IContextProvider<
+    RequestHandler<unknown, unknown, unknown>,
+    'eventLog'
+  > => {
+    return async (context, request) => {
+      return {
+        getEventLogClient: () => this.eventLogClientService!.getClient(request),
+      };
+    };
+  };
 }

@@ -11,7 +11,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
   const noAccessUser = getService('supertestAsNoAccessUser');
 
   function getAnomalyDetectionJobs() {
-    return noAccessUser.get(`/api/apm/settings/anomaly-detection`).set('kbn-xsrf', 'foo');
+    return noAccessUser.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
   }
 
   function createAnomalyDetectionJobs(environments: string[]) {

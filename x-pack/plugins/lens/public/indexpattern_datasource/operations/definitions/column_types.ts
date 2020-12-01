@@ -4,31 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Operation } from '../../../types';
+import type { Operation } from '../../../types';
+import { TimeScaleUnit } from '../../time_scale';
 
-/**
- * This is the root type of a column. If you are implementing a new
- * operation, extend your column type on `BaseIndexPatternColumn` to make
- * sure it's matching all the basic requirements.
- */
 export interface BaseIndexPatternColumn extends Operation {
   // Private
   operationType: string;
   customLabel?: boolean;
+  timeScale?: TimeScaleUnit;
 }
 
 // Formatting can optionally be added to any column
-export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
+// export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
+export type FormattedIndexPatternColumn = BaseIndexPatternColumn & {
   params?: {
-    format: {
+    format?: {
       id: string;
       params?: {
         decimals: number;
       };
     };
   };
-}
+};
 
 export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
   sourceField: string;
+}
+
+export interface ReferenceBasedIndexPatternColumn
+  extends BaseIndexPatternColumn,
+    FormattedIndexPatternColumn {
+  references: string[];
+}
+
+// Used to store the temporary invalid state
+export interface IncompleteColumn {
+  operationType?: string;
+  sourceField?: string;
 }

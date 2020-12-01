@@ -16,14 +16,16 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
     });
 
     describe('Services', function () {
-      loadTestFile(require.resolve('./services/annotations'));
-      loadTestFile(require.resolve('./services/top_services'));
       loadTestFile(require.resolve('./services/agent_name'));
+      loadTestFile(require.resolve('./services/annotations'));
+      loadTestFile(require.resolve('./services/throughput'));
+      loadTestFile(require.resolve('./services/top_services'));
       loadTestFile(require.resolve('./services/transaction_types'));
     });
 
     describe('Service overview', function () {
       loadTestFile(require.resolve('./service_overview/error_groups'));
+      loadTestFile(require.resolve('./service_overview/transaction_groups'));
     });
 
     describe('Settings', function () {
@@ -59,8 +61,7 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
     });
 
     describe('Correlations', function () {
-      loadTestFile(require.resolve('./correlations/slow_durations'));
-      loadTestFile(require.resolve('./correlations/ranges'));
+      loadTestFile(require.resolve('./correlations/slow_transactions'));
     });
   });
 }

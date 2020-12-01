@@ -17,8 +17,7 @@ import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/83771
-describe.skip('Alerts timeline', () => {
+describe('Alerts timeline', () => {
   beforeEach(() => {
     esArchiverLoad('timeline_alerts');
     loginAndWaitForPage(DETECTIONS_URL);

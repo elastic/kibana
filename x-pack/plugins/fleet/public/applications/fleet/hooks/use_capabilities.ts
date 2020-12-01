@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCore } from './';
+import { useStartServices } from './';
 
 export function useCapabilities() {
-  const core = useCore();
+  const core = useStartServices();
   return core.application.capabilities.fleet;
 }

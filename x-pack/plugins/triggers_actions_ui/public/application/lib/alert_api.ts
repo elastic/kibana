@@ -5,7 +5,7 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-import * as t from 'io-ts';
+import { Errors, identity } from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
@@ -48,9 +48,9 @@ export async function loadAlertState({
     .then((state: AlertTaskState) => {
       return pipe(
         alertStateSchema.decode(state),
-        fold((e: t.Errors) => {
+        fold((e: Errors) => {
           throw new Error(`Alert "${alertId}" has invalid state`);
-        }, t.identity)
+        }, identity)
       );
     });
 }

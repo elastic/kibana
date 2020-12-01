@@ -20,7 +20,9 @@ const MockedTagsCache = (TagsCache as unknown) as jest.Mock<PublicMethodsOf<Tags
 describe('SavedObjectTaggingPlugin', () => {
   let plugin: SavedObjectTaggingPlugin;
   let managementPluginSetup: ReturnType<typeof managementPluginMock.createSetupContract>;
-  let savedObjectsTaggingOssPluginSetup: ReturnType<typeof savedObjectTaggingOssPluginMock.createSetup>;
+  let savedObjectsTaggingOssPluginSetup: ReturnType<
+    typeof savedObjectTaggingOssPluginMock.createSetup
+  >;
 
   beforeEach(() => {
     const rawConfig: SavedObjectsTaggingClientConfigRawType = {
