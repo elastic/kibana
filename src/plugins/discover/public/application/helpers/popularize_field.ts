@@ -30,7 +30,8 @@ async function popularizeField(
     return;
   }
 
-  field.count++;
+  field.count = 1 + (field.count || 0);
+
   // Catch 409 errors caused by user adding columns in a higher frequency that the changes can be persisted to Elasticsearch
   try {
     await indexPatternsService.updateSavedObject(indexPattern, 0, true);
