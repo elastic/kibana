@@ -31,7 +31,8 @@ export function useSnapshot(
   currentTime: number,
   accountId: string,
   region: string,
-  sendRequestImmediatly = true
+  sendRequestImmediatly = true,
+  timerange?: InfraTimerangeInput
 ) {
   const decodeResponse = (response: any) => {
     return pipe(
@@ -40,11 +41,11 @@ export function useSnapshot(
     );
   };
 
-  const timerange: InfraTimerangeInput = {
+  timerange = timerange || {
     interval: '1m',
     to: currentTime,
     from: currentTime - 1200 * 1000,
-    lookbackSize: 20,
+    lookbackSize: 5,
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(

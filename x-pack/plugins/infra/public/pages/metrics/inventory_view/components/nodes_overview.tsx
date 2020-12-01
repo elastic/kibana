@@ -37,6 +37,7 @@ interface Props {
   formatter: InfraFormatter;
   bottomMargin: number;
   topMargin: number;
+  showLoading: boolean;
 }
 
 export const NodesOverview = ({
@@ -53,6 +54,7 @@ export const NodesOverview = ({
   onDrilldown,
   bottomMargin,
   topMargin,
+  showLoading,
 }: Props) => {
   const handleDrilldown = useCallback(
     (filter: string) => {
@@ -66,7 +68,8 @@ export const NodesOverview = ({
   );
 
   const noData = !loading && nodes && nodes.length === 0;
-  if (loading) {
+  if (loading && showLoading) {
+    // Don't show loading screen when we're auto-reloading
     return (
       <InfraLoadingPanel
         height="100%"

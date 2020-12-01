@@ -7,32 +7,29 @@
 import { Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
-import { IndexPattern, IndexPatternPrivateState } from './types';
+import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
 
-function getExpressionForLayer(
-  indexPattern: IndexPattern,
-  columns: Record<string, IndexPatternColumn>,
-  columnOrder: string[]
-): Ast | null {
+function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPattern): Ast | null {
+  const { columns, columnOrder } = layer;
+
   if (columnOrder.length === 0) {
     return null;
-  }
-
-  function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
-    return operationDefinitionMap[column.operationType].toEsAggsConfig(
-      column,
-      columnId,
-      indexPattern
-    );
   }
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
 
   if (columnEntries.length) {
-    const aggs = columnEntries.map(([colId, col]) => {
-      return getEsAggsConfig(col, colId);
+    const aggs: unknown[] = [];
+    const expressions: ExpressionFunctionAST[] = [];
+    columnEntries.forEach(([colId, col]) => {
+      const def = operationDefinitionMap[col.operationType];
+      if (def.input === 'fullReference') {
+        expressions.push(...def.toExpression(layer, colId, indexPattern));
+      } else {
+        aggs.push(def.toEsAggsConfig(col, colId, indexPattern));
+      }
     });
 
     const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
@@ -62,7 +59,6 @@ function getExpressionForLayer(
           }
       >
     >;
-
     const columnsWithFormatters = columnEntries.filter(
       ([, col]) =>
         col.params &&
@@ -87,6 +83,45 @@ function getExpressionForLayer(
         };
 
         return base;
+      }
+    );
+
+    const firstDateHistogramColumn = columnEntries.find(
+      ([, col]) => col.operationType === 'date_histogram'
+    );
+
+    const columnsWithTimeScale = firstDateHistogramColumn
+      ? columnEntries.filter(
+          ([, col]) =>
+            col.timeScale &&
+            operationDefinitionMap[col.operationType].timeScalingMode &&
+            operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
+        )
+      : [];
+    const timeScaleFunctions: ExpressionFunctionAST[] = columnsWithTimeScale.flatMap(
+      ([id, col]) => {
+        const scalingCall: ExpressionFunctionAST = {
+          type: 'function',
+          function: 'lens_time_scale',
+          arguments: {
+            dateColumnId: [firstDateHistogramColumn![0]],
+            inputColumnId: [id],
+            outputColumnId: [id],
+            targetUnit: [col.timeScale!],
+          },
+        };
+
+        const formatCall: ExpressionFunctionAST = {
+          type: 'function',
+          function: 'lens_format_column',
+          arguments: {
+            format: [''],
+            columnId: [id],
+            parentFormat: [JSON.stringify({ id: 'suffix', params: { unit: col.timeScale } })],
+          },
+        };
+
+        return [scalingCall, formatCall];
       }
     );
 
@@ -119,6 +154,8 @@ function getExpressionForLayer(
           },
         },
         ...formatterOverrides,
+        ...expressions,
+        ...timeScaleFunctions,
       ],
     };
   }
@@ -129,9 +166,8 @@ function getExpressionForLayer(
 export function toExpression(state: IndexPatternPrivateState, layerId: string) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
-      state.indexPatterns[state.layers[layerId].indexPatternId],
-      state.layers[layerId].columns,
-      state.layers[layerId].columnOrder
+      state.layers[layerId],
+      state.indexPatterns[state.layers[layerId].indexPatternId]
     );
   }
 

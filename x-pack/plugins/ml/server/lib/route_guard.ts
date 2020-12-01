@@ -13,6 +13,7 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { SpacesPluginSetup } from '../../../spaces/server';
+import type { SecurityPluginSetup } from '../../../security/server';
 
 import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
 import { MlLicense } from '../../common/license';
@@ -36,6 +37,7 @@ export class RouteGuard {
   private _getMlSavedObjectClient: GetMlSavedObjectClient;
   private _getInternalSavedObjectClient: GetInternalSavedObjectClient;
   private _spacesPlugin: SpacesPluginSetup | undefined;
+  private _authorization: SecurityPluginSetup['authz'] | undefined;
   private _isMlReady: () => Promise<void>;
 
   constructor(
@@ -43,12 +45,14 @@ export class RouteGuard {
     getSavedObject: GetMlSavedObjectClient,
     getInternalSavedObject: GetInternalSavedObjectClient,
     spacesPlugin: SpacesPluginSetup | undefined,
+    authorization: SecurityPluginSetup['authz'] | undefined,
     isMlReady: () => Promise<void>
   ) {
     this._mlLicense = mlLicense;
     this._getMlSavedObjectClient = getSavedObject;
     this._getInternalSavedObjectClient = getInternalSavedObject;
     this._spacesPlugin = spacesPlugin;
+    this._authorization = authorization;
     this._isMlReady = isMlReady;
   }
 
@@ -81,6 +85,7 @@ export class RouteGuard {
         mlSavedObjectClient,
         internalSavedObjectsClient,
         this._spacesPlugin !== undefined,
+        this._authorization,
         this._isMlReady
       );
       const client = context.core.elasticsearch.client;

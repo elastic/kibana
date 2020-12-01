@@ -5,9 +5,9 @@
  */
 
 import React, { useContext } from 'react';
-import { IngestManagerConfigType } from '../../../plugin';
+import { FleetConfigType } from '../../../plugin';
 
-export const ConfigContext = React.createContext<IngestManagerConfigType | null>(null);
+export const ConfigContext = React.createContext<FleetConfigType | null>(null);
 
 export function useConfig() {
   const config = useContext(ConfigContext);

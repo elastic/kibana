@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memoize } from 'lodash';
+import { isString, memoize } from 'lodash';
 
 export enum IntervalCadence {
   Minute = 'm',
@@ -55,6 +55,16 @@ export function intervalFromDate(date: Date, interval?: string): Date | undefine
     return;
   }
   return secondsFromDate(date, parseIntervalAsSecond(interval));
+}
+
+export function maxIntervalFromDate(
+  date: Date,
+  ...intervals: Array<string | undefined>
+): Date | undefined {
+  const maxSeconds = Math.max(...intervals.filter(isString).map(parseIntervalAsSecond));
+  if (!isNaN(maxSeconds)) {
+    return secondsFromDate(date, maxSeconds);
+  }
 }
 
 /**

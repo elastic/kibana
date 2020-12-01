@@ -60,4 +60,19 @@ export function registerEnginesRoutes({
       })(context, request, response);
     }
   );
+  router.get(
+    {
+      path: '/api/app_search/engines/{name}/overview',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/as/engines/${request.params.name}/overview_metrics`,
+      })(context, request, response);
+    }
+  );
 }

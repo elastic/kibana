@@ -20,6 +20,7 @@ import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 import { MLCATEGORY } from '../constants/field_types';
+import { getDatafeedAggregations } from './datafeed_utils';
 
 export interface ValidationResults {
   valid: boolean;
@@ -94,7 +95,6 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       // Perform extra check to see if the detector is using a scripted field.
       const scriptFields = Object.keys(job.datafeed_config.script_fields);
       isSourceDataChartable =
-        scriptFields.indexOf(dtr.field_name!) === -1 &&
         scriptFields.indexOf(dtr.partition_field_name!) === -1 &&
         scriptFields.indexOf(dtr.by_field_name!) === -1 &&
         scriptFields.indexOf(dtr.over_field_name!) === -1;
@@ -549,6 +549,27 @@ export function basicDatafeedValidation(datafeed: Datafeed): ValidationResults {
       valid = false;
     }
     messages.push(frequencyMessage);
+  }
+
+  return {
+    messages,
+    valid,
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
+  };
+}
+
+export function basicJobAndDatafeedValidation(job: Job, datafeed: Datafeed): ValidationResults {
+  const messages: ValidationResults['messages'] = [];
+  let valid = true;
+
+  if (datafeed && job) {
+    const datafeedAggregations = getDatafeedAggregations(datafeed);
+
+    if (datafeedAggregations !== undefined && !job.analysis_config?.summary_count_field_name) {
+      valid = false;
+      messages.push({ id: 'missing_summary_count_field_name' });
+    }
   }
 
   return {

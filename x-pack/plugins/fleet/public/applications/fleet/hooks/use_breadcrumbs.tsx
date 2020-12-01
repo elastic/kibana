@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb } from 'src/core/public';
 import { BASE_PATH, Page, DynamicPagePathValues, pagePathGetters } from '../constants';
-import { useCore } from './use_core';
+import { useStartServices } from './use_core';
 
 const BASE_BREADCRUMB: ChromeBreadcrumb = {
   href: pagePathGetters.overview(),
@@ -204,7 +204,7 @@ const breadcrumbGetters: {
 };
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
-  const { chrome, http } = useCore();
+  const { chrome, http } = useStartServices();
   const breadcrumbs: ChromeBreadcrumb[] = breadcrumbGetters[page](values).map((breadcrumb) => ({
     ...breadcrumb,
     href: breadcrumb.href ? http.basePath.prepend(`${BASE_PATH}#${breadcrumb.href}`) : undefined,

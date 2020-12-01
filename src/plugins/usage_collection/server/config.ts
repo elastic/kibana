@@ -18,7 +18,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from 'src/core/server';
 import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../common/constants';
 
 export const configSchema = schema.object({

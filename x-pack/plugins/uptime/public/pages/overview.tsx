@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useGetUrlParams } from '../hooks';
-import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { PageHeader } from './page_header';
 import { IIndexPattern } from '../../../../../src/plugins/data/public';
 import { useUpdateKueryString } from '../hooks';
@@ -63,8 +62,6 @@ export const OverviewPageComponent = React.memo(
       dispatch(getMonitorAlertsAction.get());
     }, [dispatch]);
 
-    const linkParameters = stringifyUrlParams(params, true);
-
     const heading = i18n.translate('xpack.uptime.overviewPage.headerText', {
       defaultMessage: 'Overview',
       description: `The text that will be displayed in the app's heading when the Overview page loads.`,
@@ -93,7 +90,7 @@ export const OverviewPageComponent = React.memo(
           <EuiSpacer size="s" />
           <StatusPanel />
           <EuiSpacer size="s" />
-          <MonitorList filters={esFilters} linkParameters={linkParameters} />
+          <MonitorList filters={esFilters} />
         </EmptyState>
       </>
     );

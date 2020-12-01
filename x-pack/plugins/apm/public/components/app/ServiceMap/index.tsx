@@ -83,7 +83,7 @@ export function ServiceMap({
     if (start && end) {
       return callApmApi({
         isCachable: false,
-        pathname: '/api/apm/service-map',
+        endpoint: 'GET /api/apm/service-map',
         params: {
           query: {
             start,

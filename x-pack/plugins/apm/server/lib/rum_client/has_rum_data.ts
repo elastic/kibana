@@ -54,6 +54,6 @@ export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
         response.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
     };
   } catch (e) {
-    return false;
+    return { hasData: false, serviceName: undefined };
   }
 }

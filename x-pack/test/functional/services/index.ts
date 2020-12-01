@@ -6,6 +6,7 @@
 
 import { services as kibanaFunctionalServices } from '../../../../test/functional/services';
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
+import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
 
 import {
@@ -55,6 +56,7 @@ import {
   DashboardDrilldownsManageProvider,
   DashboardPanelTimeRangeProvider,
 } from './dashboard';
+import { SendToBackgroundProvider } from './data';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -64,6 +66,7 @@ export const services = {
   ...commonServices,
 
   supertest: kibanaApiIntegrationServices.supertest,
+  supertestWithoutAuth: kibanaXPackApiIntegrationServices.supertestWithoutAuth,
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   monitoringNoData: MonitoringNoDataProvider,
   monitoringClusterList: MonitoringClusterListProvider,
@@ -101,4 +104,5 @@ export const services = {
   dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
   dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
+  sendToBackground: SendToBackgroundProvider,
 };

@@ -40,6 +40,7 @@ function setDocsourcePayload(id: string | null, providedPayload: any) {
 describe('IndexPatterns', () => {
   let indexPatterns: IndexPatternsService;
   let savedObjectsClient: SavedObjectsClientCommon;
+  let SOClientGetDelay = 0;
 
   beforeEach(() => {
     const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
@@ -49,11 +50,14 @@ describe('IndexPatterns', () => {
     );
     savedObjectsClient.delete = jest.fn(() => Promise.resolve({}) as Promise<any>);
     savedObjectsClient.create = jest.fn();
-    savedObjectsClient.get = jest.fn().mockImplementation(async (type, id) => ({
-      id: object.id,
-      version: object.version,
-      attributes: object.attributes,
-    }));
+    savedObjectsClient.get = jest.fn().mockImplementation(async (type, id) => {
+      await new Promise((resolve) => setTimeout(resolve, SOClientGetDelay));
+      return {
+        id: object.id,
+        version: object.version,
+        attributes: object.attributes,
+      };
+    });
     savedObjectsClient.update = jest
       .fn()
       .mockImplementation(async (type, id, body, { version }) => {
@@ -87,6 +91,7 @@ describe('IndexPatterns', () => {
   });
 
   test('does cache gets for the same id', async () => {
+    SOClientGetDelay = 1000;
     const id = '1';
     setDocsourcePayload(id, {
       id: 'foo',
@@ -96,10 +101,17 @@ describe('IndexPatterns', () => {
       },
     });
 
-    const indexPattern = await indexPatterns.get(id);
+    // make two requests before first can complete
+    const indexPatternPromise = indexPatterns.get(id);
+    indexPatterns.get(id);
 
-    expect(indexPattern).toBeDefined();
-    expect(indexPattern).toBe(await indexPatterns.get(id));
+    indexPatternPromise.then((indexPattern) => {
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(indexPattern).toBeDefined();
+    });
+
+    expect(await indexPatternPromise).toBe(await indexPatterns.get(id));
+    SOClientGetDelay = 0;
   });
 
   test('savedObjectCache pre-fetches only title', async () => {
@@ -143,14 +155,10 @@ describe('IndexPatterns', () => {
 
     // Create a normal index patterns
     const pattern = await indexPatterns.get('foo');
-
-    expect(pattern.version).toBe('fooa');
     indexPatterns.clearCache();
 
     // Create the same one - we're going to handle concurrency
     const samePattern = await indexPatterns.get('foo');
-
-    expect(samePattern.version).toBe('fooaa');
 
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine
@@ -210,5 +218,26 @@ describe('IndexPatterns', () => {
     };
 
     expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
+  });
+
+  test('failed requests are not cached', async () => {
+    savedObjectsClient.get = jest
+      .fn()
+      .mockImplementation(async (type, id) => {
+        return {
+          id: object.id,
+          version: object.version,
+          attributes: object.attributes,
+        };
+      })
+      .mockRejectedValueOnce({});
+
+    const id = '1';
+
+    // failed request!
+    expect(indexPatterns.get(id)).rejects.toBeDefined();
+
+    // successful subsequent request
+    expect(async () => await indexPatterns.get(id)).toBeDefined();
   });
 });

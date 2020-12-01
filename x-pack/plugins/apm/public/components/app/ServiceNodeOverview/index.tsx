@@ -45,7 +45,9 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
   const { uiFilters, urlParams } = useUrlParams();
   const { start, end } = urlParams;
 
-  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
+  const localFiltersConfig: React.ComponentProps<
+    typeof LocalUIFilters
+  > = useMemo(
     () => ({
       filterNames: ['host', 'containerId', 'podName'],
       params: {
@@ -62,7 +64,7 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
         return undefined;
       }
       return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/serviceNodes',
+        endpoint: 'GET /api/apm/services/{serviceName}/serviceNodes',
         params: {
           path: {
             serviceName,
@@ -128,7 +130,7 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
       }),
       field: 'cpu',
       sortable: true,
-      render: (value: number | null) => asPercent(value || 0, 1),
+      render: (value: number | null) => asPercent(value, 1),
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.heapMemoryColumnLabel', {

@@ -12,6 +12,7 @@ import { ApiResponse as ApiResponse_2 } from '@elastic/elasticsearch';
 import { ApplicationStart as ApplicationStart_2 } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
+import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import Boom from '@hapi/boom';
 import { CoreSetup as CoreSetup_2 } from 'src/core/public';
 import { CoreSetup as CoreSetup_3 } from 'kibana/public';
@@ -28,10 +29,12 @@ import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
+import { EventEmitter } from 'events';
 import { ExclusiveUnion } from '@elastic/eui';
 import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { History } from 'history';
 import { Href } from 'history';
+import { HttpSetup as HttpSetup_2 } from 'kibana/public';
 import { I18nStart as I18nStart_2 } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { ISearchOptions } from 'src/plugins/data/public';
@@ -54,25 +57,30 @@ import { OverlayStart as OverlayStart_2 } from 'src/core/public';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext as PluginInitializerContext_3 } from 'kibana/public';
 import * as PropTypes from 'prop-types';
+import { PublicContract } from '@kbn/utility-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
 import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { RequestAdapter } from 'src/plugins/inspector/common';
+import { RequestAdapter as RequestAdapter_2 } from 'src/plugins/inspector/common';
 import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
-import { SavedObject as SavedObject_2 } from 'src/core/server';
+import { SavedObject as SavedObject_2 } from 'kibana/server';
+import { SavedObject as SavedObject_3 } from 'src/core/server';
 import { SavedObjectAttributes } from 'kibana/server';
 import { SavedObjectAttributes as SavedObjectAttributes_2 } from 'src/core/public';
 import { SavedObjectAttributes as SavedObjectAttributes_3 } from 'kibana/public';
 import { SavedObjectsClientContract as SavedObjectsClientContract_3 } from 'src/core/public';
+import { SavedObjectsFindResponse as SavedObjectsFindResponse_2 } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
 import { ShallowPromise } from '@kbn/utility-types';
 import { SimpleSavedObject as SimpleSavedObject_2 } from 'src/core/public';
 import { Start as Start_2 } from 'src/plugins/inspector/public';
+import { StartServicesAccessor as StartServicesAccessor_2 } from 'kibana/public';
 import { ToastInputFields as ToastInputFields_2 } from 'src/core/public/notifications';
 import { ToastsSetup as ToastsSetup_2 } from 'kibana/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
@@ -100,6 +108,14 @@ export const ACTION_EDIT_PANEL = "editPanel";
 export interface Adapters {
     // (undocumented)
     [key: string]: any;
+    // Warning: (ae-forgotten-export) The symbol "DataAdapter" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    data?: DataAdapter;
+    // Warning: (ae-forgotten-export) The symbol "RequestAdapter" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    requests?: RequestAdapter;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ActionContext" needs to be exported by the entry point index.d.ts

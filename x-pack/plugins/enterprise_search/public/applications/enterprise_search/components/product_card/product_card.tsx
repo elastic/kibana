@@ -10,7 +10,7 @@ import { snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiTextColor } from '@elastic/eui';
 
-import { EuiButton } from '../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { KibanaLogic } from '../../../shared/kibana';
 
@@ -63,7 +63,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
       paddingSize="l"
       description={<EuiTextColor color="subdued">{product.CARD_DESCRIPTION}</EuiTextColor>}
       footer={
-        <EuiButton
+        <EuiButtonTo
           fill
           to={product.URL}
           shouldNotCreateHref={true}
@@ -75,7 +75,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
           }
         >
           {config.host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
-        </EuiButton>
+        </EuiButtonTo>
       }
     />
   );

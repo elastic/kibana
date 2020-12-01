@@ -26,6 +26,7 @@ export type AgentActionType =
   | 'POLICY_CHANGE'
   | 'UNENROLL'
   | 'UPGRADE'
+  | 'SETTINGS'
   // INTERNAL* actions are mean to interupt long polling calls these actions will not be distributed to the agent
   | 'INTERNAL_POLICY_REASSIGN';
 

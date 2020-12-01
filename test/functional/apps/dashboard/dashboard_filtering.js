@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('tsvb time series shows no data message', async () => {
-        expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
+        expect(await testSubjects.exists('timeseriesVis > visNoResult')).to.be(true);
       });
 
       it('metric value shows no data', async () => {

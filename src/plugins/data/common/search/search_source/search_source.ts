@@ -142,10 +142,18 @@ export class SearchSource {
    */
   setField<K extends keyof SearchSourceFields>(field: K, value: SearchSourceFields[K]) {
     if (value == null) {
-      delete this.fields[field];
-    } else {
-      this.fields[field] = value;
+      return this.removeField(field);
     }
+    this.fields[field] = value;
+    return this;
+  }
+
+  /**
+   * remove field
+   * @param field: field name
+   */
+  removeField<K extends keyof SearchSourceFields>(field: K) {
+    delete this.fields[field];
     return this;
   }
 

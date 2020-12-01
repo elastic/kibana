@@ -111,9 +111,10 @@ export const useNetworkTopCountries = ({
     [limit]
   );
 
-  const [networkTopCountriesResponse, setNetworkTopCountriesResponse] = useState<
-    NetworkTopCountriesArgs
-  >({
+  const [
+    networkTopCountriesResponse,
+    setNetworkTopCountriesResponse,
+  ] = useState<NetworkTopCountriesArgs>({
     networkTopCountries: [],
     id: queryId,
     inspect: {
