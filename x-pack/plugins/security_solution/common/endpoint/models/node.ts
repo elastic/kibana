@@ -42,7 +42,6 @@ export function timestampAsDate(node: ResolverNode): Date | undefined {
 
 /**
  * Extracts the first non null value from the `@timestamp` field in the node data attribute.
- * TODO: shouldn't really be a string here
  */
 export function nodeDataTimestamp(node: ResolverNode): undefined | number | string {
   return firstNonNullValue(node?.data['@timestamp']);

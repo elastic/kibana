@@ -78,10 +78,16 @@ export function emptifyMock<T>(
           : dataAccessLayer.eventsWithEntityIDAndCategory(...args);
       },
 
+      /**
+       * Fetch the node data (lifecycle events for endpoint) for a set of nodes
+       */
       async nodeData(...args): Promise<SafeResolverEvent[]> {
         return dataShouldBeEmpty.includes('nodeData') ? [] : dataAccessLayer.nodeData(...args);
       },
 
+      /**
+       * Retrieve the related events for a node.
+       */
       async event(...args): Promise<SafeResolverEvent | null> {
         return dataShouldBeEmpty.includes('event') ? null : dataAccessLayer.event(...args);
       },
