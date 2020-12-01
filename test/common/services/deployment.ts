@@ -19,8 +19,7 @@
 
 import { get } from 'lodash';
 import fetch from 'node-fetch';
-// @ts-ignore not TS yet
-import getUrl from '../../../src/test_utils/get_url';
+import { getUrl } from '@kbn/test';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
