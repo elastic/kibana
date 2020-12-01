@@ -80,14 +80,14 @@ function getFormatsAccordingToDateDifference(
     return { dateFormat: dateFormatWithDays };
   }
 
-  if (getDateDifference(start, end, 'hours') >= 5) {
+  if (getDateDifference(start, end, 'minutes') >= 1) {
     return {
       dateFormat: dateFormatWithDays,
       timeFormat: getTimeFormat('minutes'),
     };
   }
 
-  if (getDateDifference(start, end, 'minutes') >= 5) {
+  if (getDateDifference(start, end, 'seconds') >= 10) {
     return {
       dateFormat: dateFormatWithDays,
       timeFormat: getTimeFormat('seconds'),
@@ -121,8 +121,8 @@ export function asAbsoluteDateTime(
  * | >= 5 years     | YYYY - YYYY                                    |
  * | >= 5 months    | MMM YYYY - MMM YYYY                            |
  * | > 1 day        | MMM D, YYYY - MMM D, YYYY                      |
- * | >= 5 hours     | MMM D, YYYY, HH:mm - HH:mm (UTC)               |
- * | >= 5 minutes   | MMM D, YYYY, HH:mm:ss - HH:mm:ss (UTC)         |
+ * | >= 1 minute    | MMM D, YYYY, HH:mm - HH:mm (UTC)               |
+ * | >= 10 seconds  | MMM D, YYYY, HH:mm:ss - HH:mm:ss (UTC)         |
  * | default        | MMM D, YYYY, HH:mm:ss.SSS - HH:mm:ss.SSS (UTC) |
  *
  * @param start timestamp

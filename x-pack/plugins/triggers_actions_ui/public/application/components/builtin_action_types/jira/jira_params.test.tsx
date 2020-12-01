@@ -9,6 +9,7 @@ import JiraParamsFields from './jira_params';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { ActionConnector } from '../../../../types';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('./use_get_issue_types');
@@ -86,7 +87,7 @@ describe('JiraParamsFields renders', () => {
         errors={{ title: [] }}
         editAction={() => {}}
         index={0}
-        messageVariables={[{ name: 'alertId', description: '' }]}
+        messageVariables={[{ name: AlertProvidedActionVariables.alertId, description: '' }]}
         actionConnector={connector}
       />
     );
