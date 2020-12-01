@@ -54,6 +54,14 @@ export const useResolver = (
       }
 
       try {
+        if (indexPatternId === '') {
+          throw new Error(
+            i18n.translate('xpack.ml.useResolver.errorIndexPatternIdEmptyString', {
+              defaultMessage: 'indexPatternId must not be empty string.',
+            })
+          );
+        }
+
         // note, currently we're using our own kibana context that requires a current index pattern to be set
         // this means, if the page uses this context, useResolver must be passed a string for the index pattern id
         // and loadIndexPatterns must be part of the resolvers.
