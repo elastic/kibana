@@ -24,9 +24,13 @@ interface CollapseQuery {
     name: string;
     size?: number;
     sort?: SortOptions;
-    _source?: {
-      includes: string[];
-    };
+    _source?:
+      | string
+      | string[]
+      | {
+          includes?: string | string[];
+          excludes?: string | string[];
+        };
     collapse?: {
       field: string;
     };

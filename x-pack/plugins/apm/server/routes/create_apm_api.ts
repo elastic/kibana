@@ -22,6 +22,7 @@ import {
   serviceAnnotationsRoute,
   serviceAnnotationsCreateRoute,
   serviceErrorGroupsRoute,
+  serviceThroughputRoute,
   serviceTransactionGroupsRoute,
   serviceDependenciesRoute,
 } from './services';
@@ -118,6 +119,7 @@ const createApmApi = () => {
     .add(serviceAnnotationsRoute)
     .add(serviceAnnotationsCreateRoute)
     .add(serviceErrorGroupsRoute)
+    .add(serviceThroughputRoute)
     .add(serviceTransactionGroupsRoute)
     .add(serviceDependenciesRoute)
 

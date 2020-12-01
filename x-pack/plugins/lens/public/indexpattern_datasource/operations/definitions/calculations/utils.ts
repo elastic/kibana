@@ -6,8 +6,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionAST } from '@kbn/interpreter/common';
+import { TimeScaleUnit } from '../../../time_scale';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
+import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
+
+export const buildLabelFunction = (ofName: (name?: string) => string) => (
+  name?: string,
+  timeScale?: TimeScaleUnit
+) => {
+  const rawLabel = ofName(name);
+  return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale);
+};
 
 /**
  * Checks whether the current layer includes a date histogram and returns an error otherwise
