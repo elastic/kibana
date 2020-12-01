@@ -38,7 +38,7 @@ export const registerUpdateFieldsRoute = (router: IRouter) => {
           { unknowns: 'allow' }
         ),
         body: schema.object({
-          refresh_fields: schema.maybe(schema.boolean({ defaultValue: true })),
+          refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
           fields: schema.recordOf(
             schema.string({
               minLength: 1,

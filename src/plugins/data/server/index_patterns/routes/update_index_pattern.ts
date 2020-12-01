@@ -55,7 +55,7 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           { unknowns: 'allow' }
         ),
         body: schema.object({
-          refresh_fields: schema.maybe(schema.boolean({ defaultValue: true })),
+          refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
           index_pattern: indexPatternUpdateSchema,
         }),
       },

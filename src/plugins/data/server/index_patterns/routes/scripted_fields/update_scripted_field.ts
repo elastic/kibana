@@ -44,7 +44,7 @@ export const registerUpdateScriptedFieldRoute = (router: IRouter) => {
           { unknowns: 'allow' }
         ),
         body: schema.object({
-          refresh_fields: schema.maybe(schema.boolean({ defaultValue: true })),
+          refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
           field: schema.object({
             ...fieldSpecSchemaFields,
 

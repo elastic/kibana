@@ -59,7 +59,7 @@ export const registerCreateIndexPatternRoute = (router: IRouter) => {
       validate: {
         body: schema.object({
           override: schema.maybe(schema.boolean({ defaultValue: false })),
-          refresh_fields: schema.maybe(schema.boolean({ defaultValue: true })),
+          refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
           index_pattern: indexPatternSpecSchema,
         }),
       },
