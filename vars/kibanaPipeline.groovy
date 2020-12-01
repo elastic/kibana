@@ -89,7 +89,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def esTransportPort = "61${parallelId}3"
   def fleetPackageRegistryPort = "61${parallelId}4"
   def alertingProxyPort = "61${parallelId}5"
-  def sampleRate = githubPr.isPr() ? "0.1" : "1.0";
+  def sampleRate = githubPr.isPr() ? "0.01" : "1.0";
 
   withEnv([
     "CI_GROUP=${parallelId}",
