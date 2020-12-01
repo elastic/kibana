@@ -26,7 +26,7 @@ import {
   EuiBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { AlertActionParam, ResolvedActionGroup } from '../../../../../alerts/common';
+import { AlertActionParam, RecoveredActionGroup } from '../../../../../alerts/common';
 import {
   IErrorObject,
   AlertAction,
@@ -40,7 +40,7 @@ import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_en
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
-import { resolvedActionGroupMessage } from '../../constants';
+import { recoveredActionGroupMessage } from '../../constants';
 import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 import { useKibana } from '../../../common/lib/kibana';
 
@@ -105,8 +105,8 @@ export const ActionTypeForm = ({
   useEffect(() => {
     setAvailableActionVariables(getAvailableActionVariables(messageVariables, actionItem.group));
     const res =
-      actionItem.group === ResolvedActionGroup.id
-        ? resolvedActionGroupMessage
+      actionItem.group === RecoveredActionGroup.id
+        ? recoveredActionGroupMessage
         : defaultActionMessage;
     setAvailableDefaultActionMessage(res);
     const paramsDefaults = getDefaultsForActionParams(actionItem.actionTypeId, actionItem.group);
@@ -374,7 +374,7 @@ function getAvailableActionVariables(
     return [];
   }
   const filteredActionVariables =
-    actionGroup === ResolvedActionGroup.id
+    actionGroup === RecoveredActionGroup.id
       ? { params: actionVariables.params, state: actionVariables.state }
       : actionVariables;
 
