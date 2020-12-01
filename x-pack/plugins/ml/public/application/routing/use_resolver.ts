@@ -70,9 +70,6 @@ export const useResolver = (
           );
         }
 
-        // note, currently we're using our own kibana context that requires a current index pattern to be set
-        // this means, if the page uses this context, useResolver must be passed a string for the index pattern id
-        // and loadIndexPatterns must be part of the resolvers.
         let indexPatternAndSavedSearch: IndexPatternAndSavedSearch = {
           savedSearch: null,
           indexPattern: null,
