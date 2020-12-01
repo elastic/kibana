@@ -13,6 +13,13 @@ export const CLOSE_TIMELINE = i18n.translate(
   }
 );
 
+export const AUTOSAVED = i18n.translate(
+  'xpack.securitySolution.timeline.properties.autosavedLabel',
+  {
+    defaultMessage: 'Autosaved',
+  }
+);
+
 export const INSPECT_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.properties.inspectTimelineTitle',
   {

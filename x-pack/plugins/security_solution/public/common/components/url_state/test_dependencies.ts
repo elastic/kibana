@@ -118,6 +118,7 @@ export const defaultProps: UrlStateContainerPropTypes = {
       activeTab: TimelineTabs.query,
       id: '',
       isOpen: false,
+      activeTab: TimelineTabs.query,
     },
     [CONSTANTS.sourcerer]: {},
   },

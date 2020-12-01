@@ -35,7 +35,7 @@ import * as commonI18n from '../../timeline/properties/translations';
 
 // to hide side borders
 const StyledPanel = styled(EuiPanel)`
-  margin: -1px -1px 0;
+  margin: 0 -1px 0;
 `;
 
 interface FlyoutHeaderProps {
@@ -171,7 +171,6 @@ const TimelineDescription = React.memo(TimelineDescriptionComponent);
 
 const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  // @ts-expect-error
   const { status: timelineStatus, updated } = useDeepEqualSelector((state) =>
     pick(['status', 'updated'], getTimeline(state, timelineId) ?? timelineDefaults)
   );
@@ -191,10 +190,11 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
   return (
     <EuiText size="xs">
       <EuiTextColor color="default">
+        {i18n.AUTOSAVED}{' '}
         <FormattedRelative
           data-test-subj="timeline-status"
           key="timeline-status-autosaved"
-          value={new Date(updated)}
+          value={new Date(updated!)}
         />
       </EuiTextColor>
     </EuiText>

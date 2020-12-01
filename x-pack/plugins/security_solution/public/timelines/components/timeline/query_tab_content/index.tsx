@@ -26,7 +26,6 @@ import { useTimelineEvents } from '../../../containers/index';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
-import { TimelineKqlFetch } from '../fetch_kql_timeline';
 import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
 import { combineQueries } from '../helpers';
@@ -256,8 +255,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   return (
     <>
-      <TimelineKqlFetch id={timelineId} indexPattern={indexPattern} inputId="timeline" />
-
       <TimelineRefetch
         id={timelineId}
         inputId="timeline"
@@ -286,8 +283,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             </div>
             <TimelineHeaderContainer data-test-subj="timelineHeader">
               <TimelineHeader
-                browserFields={browserFields}
-                indexPattern={indexPattern}
                 filterManager={filterManager}
                 showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
                 timelineId={timelineId}
@@ -362,12 +357,9 @@ const makeMapStateToProps = () => {
       eventType,
       expandedEvent,
       filters,
-      graphEventId,
       itemsPerPage,
       itemsPerPageOptions,
-      isSaving,
       kqlMode,
-      noteIds,
       sort,
       status,
       timelineType,
@@ -386,16 +378,12 @@ const makeMapStateToProps = () => {
       eventType: eventType ?? 'raw',
       end: input.timerange.to,
       filters: timelineFilter,
-      graphEventId,
       timelineId,
       isLive: input.policy.kind === 'interval',
-      isSaving,
-      isTimelineExists: getTimeline(state, timelineId) != null,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
       kqlQueryExpression,
-      noteIds,
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       showEventDetails: !!expandedEvent.eventId,
       sort,
@@ -431,8 +419,6 @@ const QueryTabContent = connector(
       isTimerangeSame(prevProps, nextProps) &&
       prevProps.eventType === nextProps.eventType &&
       prevProps.isLive === nextProps.isLive &&
-      prevProps.isSaving === nextProps.isSaving &&
-      prevProps.isTimelineExists === nextProps.isTimelineExists &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
@@ -441,7 +427,6 @@ const QueryTabContent = connector(
       prevProps.status === nextProps.status &&
       prevProps.timelineId === nextProps.timelineId &&
       prevProps.updateEventTypeAndIndexesName === nextProps.updateEventTypeAndIndexesName &&
-      deepEqual(prevProps.noteIds, nextProps.noteIds) &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.filters, nextProps.filters) &&

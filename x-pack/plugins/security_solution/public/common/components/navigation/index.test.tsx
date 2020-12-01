@@ -156,7 +156,7 @@ describe('SIEM Navigation', () => {
         flowTarget: undefined,
         savedQuery: undefined,
         timeline: {
-          activeTab: 'query',
+          activeTab: TimelineTabs.query,
           id: '',
           isOpen: false,
           graphEventId: '',
@@ -260,7 +260,7 @@ describe('SIEM Navigation', () => {
         sourcerer: {},
         state: undefined,
         tabName: 'authentications',
-        timeline: { activeTab: 'query', id: '', isOpen: false, graphEventId: '' },
+        timeline: { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' },
         timerange: {
           global: {
             linkTo: ['timeline'],

@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  // EuiButtonIcon
+} from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
@@ -12,7 +17,7 @@ import styled from 'styled-components';
 
 import { TimelineType } from '../../../../../common/types/timeline';
 import { UNTITLED_TIMELINE, UNTITLED_TEMPLATE } from '../../timeline/properties/translations';
-import { useCreateTimeline } from '../../timeline/properties/use_create_timeline';
+// import { useCreateTimeline } from '../../timeline/properties/use_create_timeline';
 import { timelineActions } from '../../../store/timeline';
 
 const ButtonWrapper = styled(EuiFlexItem)`
@@ -34,7 +39,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
   isOpen,
 }) => {
   const dispatch = useDispatch();
-  const handleCreateNewTimeline = useCreateTimeline({ timelineId, timelineType });
+  // const handleCreateNewTimeline = useCreateTimeline({ timelineId, timelineType });
 
   const handleToggleOpen = useCallback(
     () => dispatch(timelineActions.showTimeline({ id: timelineId, show: !isOpen })),
@@ -58,12 +63,12 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
         >
           {title}
         </EuiButtonEmpty>
-        <EuiButtonIcon
+        {/* <EuiButtonIcon
           href="#"
           iconType="cross"
           aria-label={`Close ${timelineTitle}`}
           onClick={handleCreateNewTimeline}
-        />
+        /> */}
       </ButtonWrapper>
     </EuiFlexGroup>
   );

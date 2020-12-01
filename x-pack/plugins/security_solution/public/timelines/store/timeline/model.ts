@@ -10,7 +10,7 @@ import { DataProvider } from '../../components/timeline/data_providers/data_prov
 import { Sort } from '../../components/timeline/body/sort';
 import { PinnedEvent } from '../../../graphql/types';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import { SerializedFilterQuery } from '../../../common/store/types';
 import type {
   TimelineEventsType,
   TimelineExpandedEvent,
@@ -97,7 +97,6 @@ export interface TimelineModel {
   /** the KQL query in the KQL bar */
   kqlQuery: {
     filterQuery: SerializedFilterQuery | null;
-    filterQueryDraft: KueryFilterQuery | null;
   };
   /** Title */
   title: string;
@@ -128,6 +127,8 @@ export interface TimelineModel {
   sort: Sort;
   /** status: active | draft */
   status: TimelineStatus;
+  /** updated saved object timestamp */
+  updated?: number;
   /** timeline is saving */
   isSaving: boolean;
   isLoading: boolean;

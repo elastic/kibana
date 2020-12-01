@@ -11,21 +11,21 @@ import { useDispatch } from 'react-redux';
 import { rgba } from 'polished';
 import styled from 'styled-components';
 
-import { timelineActions } from '../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
-import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
+import { getColumnHeaders } from '../../../timelines/components/timeline/body/column_headers/helpers';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 import { getColumns } from './columns';
 import { search } from './helpers';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 interface Props {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
   data: TimelineEventsDetailsItem[];
   eventId: string;
-  onUpdateColumns: OnUpdateColumns;
   timelineId: string;
 }
 
@@ -70,8 +70,9 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
-  ({ browserFields, columnHeaders, data, eventId, onUpdateColumns, timelineId }) => {
+  ({ browserFields, data, eventId, timelineId }) => {
     const dispatch = useDispatch();
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const items = useMemo(
       () =>
@@ -82,6 +83,12 @@ export const EventFieldsBrowser = React.memo<Props>(
         })),
       [data, fieldsByName]
     );
+
+    const columnHeaders = useDeepEqualSelector((state) => {
+      const { columns } = getTimeline(state, timelineId) ?? timelineDefaults;
+
+      return getColumnHeaders(columns, browserFields);
+    });
 
     const toggleColumn = useCallback(
       (column: ColumnHeaderOptions) => {
@@ -107,6 +114,11 @@ export const EventFieldsBrowser = React.memo<Props>(
         }
       },
       [columnHeaders, dispatch, timelineId]
+    );
+
+    const onUpdateColumns = useCallback(
+      (columns) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
+      [dispatch, timelineId]
     );
 
     const columns = useMemo(

@@ -46,13 +46,13 @@ describe('alert actions', () => {
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
 
     searchStrategyClient = {
+      ...dataPluginMock.createStartContract().search,
       aggs: {} as ISearchStart['aggs'],
       showError: jest.fn(),
       search: jest
         .fn()
         .mockImplementation(() => ({ toPromise: () => ({ data: mockTimelineDetails }) })),
       searchSource: {} as ISearchStart['searchSource'],
-      session: dataPluginMock.createStartContract().search.session,
     };
 
     jest.spyOn(apolloClient, 'query').mockImplementation((obj) => {
@@ -233,10 +233,6 @@ describe('alert actions', () => {
                 },
                 serializedQuery: '',
               },
-              filterQueryDraft: {
-                expression: '',
-                kind: 'kuery',
-              },
             },
             loadingEventIds: [],
             noteIds: [],
@@ -273,9 +269,6 @@ describe('alert actions', () => {
                 expression: [''],
               },
             },
-            filterQueryDraft: {
-              expression: [''],
-            },
           },
         };
         jest.spyOn(apolloClient, 'query').mockResolvedValue(mockTimelineApolloResultModified);
@@ -292,36 +285,6 @@ describe('alert actions', () => {
 
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQuery.kuery.kind).toEqual('kuery');
-      });
-
-      test('it invokes createTimeline with kqlQuery.filterQueryDraft.kuery.kind as "kuery" if not specified in returned timeline template', async () => {
-        const mockTimelineApolloResultModified = {
-          ...mockTimelineApolloResult,
-          kqlQuery: {
-            filterQuery: {
-              kuery: {
-                expression: [''],
-              },
-            },
-            filterQueryDraft: {
-              expression: [''],
-            },
-          },
-        };
-        jest.spyOn(apolloClient, 'query').mockResolvedValue(mockTimelineApolloResultModified);
-
-        await sendAlertToTimelineAction({
-          apolloClient,
-          createTimeline,
-          ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
-          updateTimelineIsLoading,
-          searchStrategyClient,
-        });
-        const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
-
-        expect(createTimeline).toHaveBeenCalledTimes(1);
-        expect(createTimelineArg.timeline.kqlQuery.filterQueryDraft.kind).toEqual('kuery');
       });
 
       test('it invokes createTimeline with default timeline if apolloClient throws', async () => {

@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTextColor, EuiLoadingContent, EuiTitle } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { find } from 'lodash/fp';
+import { EuiTextColor, EuiLoadingContent, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
 
 import { TimelineExpandedEvent } from '../../../../../common/types/timeline';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
-import { StatefulEventDetails } from '../../../../common/components/event_details/stateful_event_details';
+import {
+  EventDetails,
+  EventsViewType,
+  View,
+} from '../../../../common/components/event_details/event_details';
+import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useTimelineEventsDetails } from '../../../containers/details';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { getColumnHeaders } from '../body/column_headers/helpers';
-import { timelineDefaults } from '../../../store/timeline/defaults';
 import * as i18n from './translations';
 
 interface Props {
@@ -35,14 +36,7 @@ ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
 export const ExpandableEvent = React.memo<Props>(
   ({ browserFields, docValueFields, event, timelineId }) => {
-    const dispatch = useDispatch();
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-
-    const columnHeaders = useDeepEqualSelector((state) => {
-      const { columns } = getTimeline(state, timelineId) ?? timelineDefaults;
-
-      return getColumnHeaders(columns, browserFields);
-    });
+    const [view, setView] = useState<View>(EventsViewType.tableView);
 
     const [loading, detailsData] = useTimelineEventsDetails({
       docValueFields,
@@ -51,10 +45,18 @@ export const ExpandableEvent = React.memo<Props>(
       skip: !event.eventId,
     });
 
-    const onUpdateColumns = useCallback(
-      (columns) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
-      [dispatch, timelineId]
-    );
+    const message = useMemo(() => {
+      if (detailsData) {
+        const messageField = find({ category: 'base', field: 'message' }, detailsData) as
+          | TimelineEventsDetailsItem
+          | undefined;
+
+        if (messageField?.originalValue) {
+          return messageField?.originalValue;
+        }
+      }
+      return null;
+    }, [detailsData]);
 
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
@@ -65,14 +67,18 @@ export const ExpandableEvent = React.memo<Props>(
     }
 
     return (
-      <StatefulEventDetails
-        browserFields={browserFields}
-        columnHeaders={columnHeaders}
-        data={detailsData!}
-        id={event.eventId!}
-        onUpdateColumns={onUpdateColumns}
-        timelineId={timelineId}
-      />
+      <>
+        <EuiText>{message}</EuiText>
+        <EuiSpacer size="m" />
+        <EventDetails
+          browserFields={browserFields}
+          data={detailsData!}
+          id={event.eventId!}
+          onViewSelected={setView}
+          timelineId={timelineId}
+          view={view}
+        />
+      </>
     );
   }
 );

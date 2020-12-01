@@ -39,7 +39,6 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   kqlMode: 'filter',
   kqlQuery: {
     filterQuery: null,
-    filterQueryDraft: null,
   },
   loadingEventIds: [],
   title: '',

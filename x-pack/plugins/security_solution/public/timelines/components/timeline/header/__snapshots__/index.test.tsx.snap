@@ -6,7 +6,6 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
     timelineId="foo"
   />
   <Connect(StatefulSearchOrFilterComponent)
-    browserFields={Object {}}
     filterManager={
       FilterManager {
         "fetch$": Subject {
@@ -41,97 +40,6 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
           "observers": Array [],
           "thrownError": null,
         },
-      }
-    }
-    indexPattern={
-      Object {
-        "fields": Array [
-          Object {
-            "aggregatable": true,
-            "name": "@timestamp",
-            "searchable": true,
-            "type": "date",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "@version",
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "agent.ephemeral_id",
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "agent.hostname",
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "agent.id",
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "agent.test1",
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "agent.test2",
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "agent.test3",
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "agent.test4",
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "agent.test5",
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "agent.test6",
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "agent.test7",
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "agent.test8",
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "name": "host.name",
-            "searchable": true,
-            "type": "string",
-          },
-        ],
-        "title": "filebeat-*,auditbeat-*,packetbeat-*",
       }
     }
     timelineId="foo"

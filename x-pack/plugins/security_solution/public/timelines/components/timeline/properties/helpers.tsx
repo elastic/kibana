@@ -7,7 +7,6 @@
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
@@ -23,18 +22,12 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { APP_ID } from '../../../../../common/constants';
 import {
   TimelineTypeLiteral,
-  TimelineStatus,
   TimelineType,
   TimelineStatusLiteral,
-  TimelineId,
 } from '../../../../../common/types/timeline';
-import { SecurityPageName } from '../../../../app/types';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
-import { getCreateCaseUrl } from '../../../../common/components/link_to';
-import { useKibana } from '../../../../common/lib/kibana';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -46,7 +39,7 @@ import { AssociateNote } from '../../notes/helpers';
 import { NOTES_PANEL_WIDTH } from './notes_size';
 import { ButtonContainer, DescriptionContainer, LabelText, NameField, NameWrapper } from './styles';
 import * as i18n from './translations';
-import { setInsertTimeline, showTimeline, TimelineInput } from '../../../store/timeline/actions';
+import { TimelineInput } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 
@@ -242,122 +235,6 @@ export const Name = React.memo<NameProps>(
   }
 );
 Name.displayName = 'Name';
-
-interface NewCaseProps {
-  compact?: boolean;
-  graphEventId?: string;
-  onClosePopover: () => void;
-  timelineId: string;
-  timelineStatus: TimelineStatus;
-  timelineTitle: string;
-}
-
-export const NewCase = React.memo<NewCaseProps>(
-  ({ compact, graphEventId, onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
-    const dispatch = useDispatch();
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-    const savedObjectId = useShallowEqualSelector(
-      (state) => getTimeline(state, timelineId).savedObjectId
-    );
-    const { navigateToApp } = useKibana().services.application;
-    const buttonText = compact ? i18n.ATTACH_TO_NEW_CASE : i18n.ATTACH_TIMELINE_TO_NEW_CASE;
-
-    const handleClick = useCallback(() => {
-      onClosePopover();
-
-      dispatch(showTimeline({ id: TimelineId.active, show: false }));
-
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-        path: getCreateCaseUrl(),
-      }).then(() =>
-        dispatch(
-          setInsertTimeline({
-            graphEventId,
-            timelineId,
-            timelineSavedObjectId: savedObjectId,
-            timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
-          })
-        )
-      );
-    }, [
-      dispatch,
-      graphEventId,
-      navigateToApp,
-      onClosePopover,
-      savedObjectId,
-      timelineId,
-      timelineTitle,
-    ]);
-
-    const button = useMemo(
-      () => (
-        <EuiButtonEmpty
-          data-test-subj="attach-timeline-case"
-          color={compact ? undefined : 'text'}
-          iconSide="left"
-          iconType="paperClip"
-          disabled={timelineStatus === TimelineStatus.draft}
-          onClick={handleClick}
-          size={compact ? 'xs' : undefined}
-        >
-          {buttonText}
-        </EuiButtonEmpty>
-      ),
-      [compact, timelineStatus, handleClick, buttonText]
-    );
-    return timelineStatus === TimelineStatus.draft ? (
-      <EuiToolTip position="left" content={i18n.ATTACH_TIMELINE_TO_CASE_TOOLTIP}>
-        {button}
-      </EuiToolTip>
-    ) : (
-      button
-    );
-  }
-);
-NewCase.displayName = 'NewCase';
-
-interface ExistingCaseProps {
-  compact?: boolean;
-  onClosePopover: () => void;
-  onOpenCaseModal: () => void;
-  timelineStatus: TimelineStatus;
-}
-export const ExistingCase = React.memo<ExistingCaseProps>(
-  ({ compact, onClosePopover, onOpenCaseModal, timelineStatus }) => {
-    const handleClick = useCallback(() => {
-      onClosePopover();
-      onOpenCaseModal();
-    }, [onOpenCaseModal, onClosePopover]);
-    const buttonText = compact
-      ? i18n.ATTACH_TO_EXISTING_CASE
-      : i18n.ATTACH_TIMELINE_TO_EXISTING_CASE;
-
-    const button = useMemo(
-      () => (
-        <EuiButtonEmpty
-          data-test-subj="attach-timeline-existing-case"
-          color={compact ? undefined : 'text'}
-          iconSide="left"
-          iconType="paperClip"
-          disabled={timelineStatus === TimelineStatus.draft}
-          onClick={handleClick}
-          size={compact ? 'xs' : undefined}
-        >
-          {buttonText}
-        </EuiButtonEmpty>
-      ),
-      [buttonText, handleClick, timelineStatus, compact]
-    );
-    return timelineStatus === TimelineStatus.draft ? (
-      <EuiToolTip position="left" content={i18n.ATTACH_TIMELINE_TO_CASE_TOOLTIP}>
-        {button}
-      </EuiToolTip>
-    ) : (
-      button
-    );
-  }
-);
-ExistingCase.displayName = 'ExistingCase';
 
 export interface NewTimelineProps {
   closeGearMenu?: () => void;
