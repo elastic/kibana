@@ -10,12 +10,6 @@
 export declare class IndexPatternsService implements Plugin<void, IndexPatternsServiceStart> 
 ```
 
-## Properties
-
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  ["\#private"](./kibana-plugin-plugins-data-server.indexpatternsservice.__private_.md) |  | <code></code> |  |
-
 ## Methods
 
 |  Method | Modifiers | Description |

@@ -740,8 +740,6 @@ export class IndexPatternsFetcher {
 // @public (undocumented)
 export class IndexPatternsService implements Plugin_3<void, IndexPatternsServiceStart> {
     // (undocumented)
-    #private;
-    // (undocumented)
     createIndexPatternsService(savedObjectsClient: SavedObjectsClientContract_2, elasticsearchClient: ElasticsearchClient_2): Promise<IndexPatternsService_2>;
     // (undocumented)
     setup(core: CoreSetup_2): void;
@@ -751,7 +749,7 @@ export class IndexPatternsService implements Plugin_3<void, IndexPatternsService
     start(core: CoreStart_2, { fieldFormats, logger }: IndexPatternsServiceStartDeps): {
         indexPatternsServiceFactory: (savedObjectsClient: Pick<import("src/core/server").SavedObjectsClient, "update" | "find" | "get" | "delete" | "errors" | "create" | "bulkCreate" | "checkConflicts" | "bulkGet" | "addToNamespaces" | "deleteFromNamespaces" | "bulkUpdate" | "removeReferencesTo">, elasticsearchClient: ElasticsearchClient_2) => Promise<IndexPatternsService_2>;
     };
-}
+    }
 
 // Warning: (ae-missing-release-tag) "ISearchOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
