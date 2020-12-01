@@ -19,10 +19,9 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   const activeVisualization = props.visualizationMap[props.activeVisualizationId || ''];
   const { visualizationState } = props;
 
-  return (
-    activeVisualization &&
-    visualizationState && <LayerPanels {...props} activeVisualization={activeVisualization} />
-  );
+  return activeVisualization && visualizationState ? (
+    <LayerPanels {...props} activeVisualization={activeVisualization} />
+  ) : null;
 });
 
 function LayerPanels(
@@ -89,7 +88,7 @@ function LayerPanels(
   const layerIds = activeVisualization.getLayerIds(visualizationState);
 
   return (
-    <EuiForm className="lnsConfigPanel">
+    <EuiForm className="lnsConfigPanel" tabIndex={-1}>
       {layerIds.map((layerId, index) => (
         <LayerPanel
           {...props}

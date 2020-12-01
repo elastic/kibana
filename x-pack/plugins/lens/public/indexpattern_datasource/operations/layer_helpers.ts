@@ -22,6 +22,7 @@ import type {
 import { getSortScoreByPriority } from './operations';
 import { mergeLayer } from '../state_helpers';
 import { generateId } from '../../id_generator';
+import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
 
 interface ColumnChange {
   op: OperationType;
@@ -208,8 +209,7 @@ export function replaceColumn({
     let tempLayer = { ...layer };
 
     if (previousDefinition.input === 'fullReference') {
-      // @ts-expect-error references are not statically analyzed
-      previousColumn.references.forEach((id: string) => {
+      (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
         tempLayer = deleteColumn({ layer: tempLayer, columnId: id });
       });
     }
@@ -237,11 +237,8 @@ export function replaceColumn({
     }
 
     if (operationDefinition.input === 'none') {
-      const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
-      if (previousColumn.customLabel) {
-        newColumn.customLabel = true;
-        newColumn.label = previousColumn.label;
-      }
+      let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
+      newColumn = adjustLabel(newColumn, previousColumn);
 
       const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
       return {
@@ -255,12 +252,8 @@ export function replaceColumn({
       throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
     }
 
-    const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
-
-    if (previousColumn.customLabel) {
-      newColumn.customLabel = true;
-      newColumn.label = previousColumn.label;
-    }
+    let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
+    newColumn = adjustLabel(newColumn, previousColumn);
 
     const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
     return {
@@ -277,12 +270,7 @@ export function replaceColumn({
     // Same operation, new field
     const newColumn = operationDefinition.onFieldChange(previousColumn, field);
 
-    if (previousColumn.customLabel) {
-      newColumn.customLabel = true;
-      newColumn.label = previousColumn.label;
-    }
-
-    const newColumns = { ...layer.columns, [columnId]: newColumn };
+    const newColumns = { ...layer.columns, [columnId]: adjustLabel(newColumn, previousColumn) };
     return {
       ...layer,
       columnOrder: getColumnOrder({ ...layer, columns: newColumns }),
@@ -291,6 +279,16 @@ export function replaceColumn({
   } else {
     throw new Error('nothing changed');
   }
+}
+
+function adjustLabel(newColumn: IndexPatternColumn, previousColumn: IndexPatternColumn) {
+  const adjustedColumn = { ...newColumn };
+  if (previousColumn.customLabel) {
+    adjustedColumn.customLabel = true;
+    adjustedColumn.label = previousColumn.label;
+  }
+
+  return adjustedColumn;
 }
 
 function addBucket(
@@ -424,7 +422,6 @@ export function deleteColumn({
     };
   }
 
-  // @ts-expect-error this fails statically because there are no references added
   const extraDeletions: string[] = 'references' in column ? column.references : [];
 
   const hypotheticalColumns = { ...layer.columns };
@@ -452,11 +449,9 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
   );
   // If a reference has another reference as input, put it last in sort order
   referenceBased.sort(([idA, a], [idB, b]) => {
-    // @ts-expect-error not statically analyzed
     if ('references' in a && a.references.includes(idB)) {
       return 1;
     }
-    // @ts-expect-error not statically analyzed
     if ('references' in b && b.references.includes(idA)) {
       return -1;
     }
@@ -517,14 +512,12 @@ export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined
     }
 
     if ('references' in column) {
-      // @ts-expect-error references are not statically analyzed yet
       column.references.forEach((referenceId, index) => {
         if (!layer.columns[referenceId]) {
           errors.push(
             i18n.translate('xpack.lens.indexPattern.missingReferenceError', {
               defaultMessage: 'Dimension {dimensionLabel} is incomplete',
               values: {
-                // @ts-expect-error references are not statically analyzed yet
                 dimensionLabel: column.label,
               },
             })
@@ -544,7 +537,6 @@ export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined
               i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
                 defaultMessage: 'Dimension {dimensionLabel} does not have a valid configuration',
                 values: {
-                  // @ts-expect-error references are not statically analyzed yet
                   dimensionLabel: column.label,
                 },
               })
@@ -560,10 +552,7 @@ export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined
 
 export function isReferenced(layer: IndexPatternLayer, columnId: string): boolean {
   const allReferences = Object.values(layer.columns).flatMap((col) =>
-    'references' in col
-      ? // @ts-expect-error not statically analyzed
-        col.references
-      : []
+    'references' in col ? col.references : []
   );
   return allReferences.includes(columnId);
 }

@@ -82,8 +82,9 @@ interface Projection {
   name: string;
 }
 
-interface RequestDataObject {
+interface RequestDataObject<TUrlData = UrlObject> {
   name?: string;
+  url?: TUrlData;
   values: SearchResponse<unknown>;
 }
 
@@ -186,7 +187,7 @@ export interface CacheBounds {
   max: number;
 }
 
-interface Requests<TUrlData = UrlObject, TRequestDataObject = RequestDataObject> {
+interface Requests<TUrlData = UrlObject, TRequestDataObject = RequestDataObject<TUrlData>> {
   url: TUrlData;
   name: string;
   dataObject: TRequestDataObject;

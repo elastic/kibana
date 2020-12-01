@@ -45,6 +45,9 @@ import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
 import { useSavedSearch } from './use_saved_search';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
+import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
+import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
@@ -93,11 +96,18 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     trainingPercent,
     useEstimatedMml,
   } = form;
+  const [query, setQuery] = useState<Query>({
+    query: jobConfigQueryString ?? '',
+    language: SEARCH_QUERY_LANGUAGE.KUERY,
+  });
 
   const toastNotifications = getToastNotifications();
 
-  const setJobConfigQuery = ({ query, queryString }: { query: any; queryString: string }) => {
-    setFormState({ jobConfigQuery: query, jobConfigQueryString: queryString });
+  const setJobConfigQuery: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
+    if (update.query) {
+      setFormState({ jobConfigQuery: update.query, jobConfigQueryString: update.queryString });
+    }
+    setQuery({ query: update.queryString, language: update.language });
   };
 
   const indexData = useIndexData(
@@ -305,10 +315,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         >
           <ExplorationQueryBar
             indexPattern={currentIndexPattern}
-            // @ts-ignore
             setSearchQuery={setJobConfigQuery}
-            includeQueryString
-            defaultQueryString={jobConfigQueryString}
+            query={query}
           />
         </EuiFormRow>
       )}

@@ -449,4 +449,77 @@ describe('Data Streams tab', () => {
       expect(tableCellsValues).toEqual([['', 'non-managed-data-stream', 'green', '1', 'Delete']]);
     });
   });
+
+  describe('data stream privileges', () => {
+    describe('delete', () => {
+      const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+      const dataStreamWithDelete = createDataStreamPayload({
+        name: 'dataStreamWithDelete',
+        privileges: { delete_index: true },
+      });
+      const dataStreamNoDelete = createDataStreamPayload({
+        name: 'dataStreamNoDelete',
+        privileges: { delete_index: false },
+      });
+
+      beforeEach(async () => {
+        setLoadDataStreamsResponse([dataStreamWithDelete, dataStreamNoDelete]);
+
+        testBed = await setup({ history: createMemoryHistory() });
+        await act(async () => {
+          testBed.actions.goToDataStreamsList();
+        });
+        testBed.component.update();
+      });
+
+      test('displays/hides delete button depending on data streams privileges', async () => {
+        const { table } = testBed;
+        const { tableCellsValues } = table.getMetaData('dataStreamTable');
+
+        expect(tableCellsValues).toEqual([
+          ['', 'dataStreamNoDelete', 'green', '1', ''],
+          ['', 'dataStreamWithDelete', 'green', '1', 'Delete'],
+        ]);
+      });
+
+      test('displays/hides delete action depending on data streams privileges', async () => {
+        const {
+          actions: { selectDataStream },
+          find,
+        } = testBed;
+
+        selectDataStream('dataStreamNoDelete', true);
+        expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
+
+        selectDataStream('dataStreamWithDelete', true);
+        expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
+
+        selectDataStream('dataStreamNoDelete', false);
+        expect(find('deleteDataStreamsButton').exists()).toBeTruthy();
+      });
+
+      test('displays delete button in detail panel', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamWithDelete);
+        await clickNameAt(1);
+
+        expect(find('deleteDataStreamButton').exists()).toBeTruthy();
+      });
+
+      test('hides delete button in detail panel', async () => {
+        const {
+          actions: { clickNameAt },
+          find,
+        } = testBed;
+        setLoadDataStreamResponse(dataStreamNoDelete);
+        await clickNameAt(0);
+
+        expect(find('deleteDataStreamButton').exists()).toBeFalsy();
+      });
+    });
+  });
 });

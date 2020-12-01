@@ -8,8 +8,6 @@
 
 ```typescript
 getFieldAttrs: () => {
-        [x: string]: {
-            customLabel: string;
-        };
+        [x: string]: FieldAttrSet;
     };
 ```

@@ -18,7 +18,6 @@
  */
 
 export { esSearchStrategyProvider } from './es_search_strategy';
-export * from './get_default_search_params';
-export * from './es_search_rxjs_utils';
-
+export * from './request_utils';
+export * from './response_utils';
 export { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../../../common';

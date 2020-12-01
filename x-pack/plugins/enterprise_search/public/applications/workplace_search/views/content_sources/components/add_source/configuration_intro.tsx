@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import connectionIllustration from 'workplace_search/components/assets/connectionIllustration.svg';
+import connectionIllustration from '../../../../assets/connection_illustration.svg';
 
 interface ConfigurationIntroProps {
   header: React.ReactNode;

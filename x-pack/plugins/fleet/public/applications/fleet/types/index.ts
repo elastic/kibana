@@ -22,6 +22,7 @@ export {
   NewPackagePolicyInputStream,
   PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
+  PackagePolicyPackage,
   Output,
   DataStream,
   // API schema - misc setup, status
@@ -67,6 +68,8 @@ export {
   PutAgentReassignResponse,
   PostBulkAgentReassignRequest,
   PostBulkAgentReassignResponse,
+  PostNewAgentActionResponse,
+  PostNewAgentActionRequest,
   // API schemas - Enrollment API Keys
   GetEnrollmentAPIKeysResponse,
   GetEnrollmentAPIKeysRequest,

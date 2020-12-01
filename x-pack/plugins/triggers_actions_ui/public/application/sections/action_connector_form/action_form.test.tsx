@@ -10,15 +10,16 @@ import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, Alert, AlertAction } from '../../../types';
 import ActionForm from './action_form';
-import { ResolvedActionGroup } from '../../../../../alerts/common';
+import { RecoveredActionGroup } from '../../../../../alerts/common';
+import { useKibana } from '../../../common/lib/kibana';
+import { EuiScreenReaderOnly } from '@elastic/eui';
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
 }));
-const actionTypeRegistry = actionTypeRegistryMock.create();
+const setHasActionsWithBrokenConnector = jest.fn();
 describe('action_form', () => {
-  let deps: any;
-
   const mockedActionParamsFields = lazy(async () => ({
     default() {
       return <Fragment />;
@@ -110,9 +111,12 @@ describe('action_form', () => {
     actionConnectorFields: null,
     actionParamsFields: null,
   };
+  const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('action_form in alert', () => {
     async function setup(customActions?: AlertAction[]) {
+      const actionTypeRegistry = actionTypeRegistryMock.create();
+
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
       loadAllActions.mockResolvedValueOnce([
         {
@@ -164,20 +168,14 @@ describe('action_form', () => {
           application: { capabilities },
         },
       ] = await mocks.getStartServices();
-      deps = {
-        toastNotifications: mocks.notifications.toasts,
-        http: mocks.http,
-        capabilities: {
-          ...capabilities,
-          actions: {
-            delete: true,
-            save: true,
-            show: true,
-          },
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useKibanaMock().services.application.capabilities = {
+        ...capabilities,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
         },
-        setHasActionsWithBrokenConnector: jest.fn(),
-        actionTypeRegistry,
-        docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       };
       actionTypeRegistry.list.mockReturnValue([
         actionType,
@@ -188,7 +186,6 @@ describe('action_form', () => {
       ]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
-
       const initialAlert = ({
         name: 'test',
         params: {},
@@ -232,7 +229,7 @@ describe('action_form', () => {
           }}
           actionGroups={[
             { id: 'default', name: 'Default' },
-            { id: 'resolved', name: 'Resolved' },
+            { id: 'recovered', name: 'Recovered' },
           ]}
           setActionGroupIdByIndex={(group: string, index: number) => {
             initialAlert.actions[index].group = group;
@@ -241,9 +238,8 @@ describe('action_form', () => {
           setActionParamsProperty={(key: string, value: any, index: number) =>
             (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
           }
-          setHasActionsWithBrokenConnector={deps!.setHasActionsWithBrokenConnector}
-          http={deps!.http}
-          actionTypeRegistry={deps!.actionTypeRegistry}
+          actionTypeRegistry={actionTypeRegistry}
+          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
           defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
           actionTypes={[
             {
@@ -295,9 +291,6 @@ describe('action_form', () => {
               minimumLicenseRequired: 'basic',
             },
           ]}
-          toastNotifications={deps!.toastNotifications}
-          docLinks={deps.docLinks}
-          capabilities={deps.capabilities}
         />
       );
 
@@ -321,7 +314,7 @@ describe('action_form', () => {
           .find(`EuiToolTip [data-test-subj="${actionType.id}-ActionTypeSelectOption"]`)
           .exists()
       ).toBeFalsy();
-      expect(deps.setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
+      expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
     });
 
     it('does not render action types disabled by config', async () => {
@@ -355,18 +348,18 @@ describe('action_form', () => {
             "value": "default",
           },
           Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-resolved",
-            "inputDisplay": "Resolved",
-            "value": "resolved",
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-recovered",
+            "inputDisplay": "Recovered",
+            "value": "recovered",
           },
         ]
       `);
     });
 
-    it('renders selected Resolved action group', async () => {
+    it('renders selected Recovered action group', async () => {
       const wrapper = await setup([
         {
-          group: ResolvedActionGroup.id,
+          group: RecoveredActionGroup.id,
           id: 'test',
           actionTypeId: actionType.id,
           params: {
@@ -389,15 +382,17 @@ describe('action_form', () => {
             "value": "default",
           },
           Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-resolved",
-            "inputDisplay": "Resolved",
-            "value": "resolved",
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-recovered",
+            "inputDisplay": "Recovered",
+            "value": "recovered",
           },
         ]
       `);
-      expect(actionGroupsSelect.first().text()).toEqual(
-        'Select an option: Resolved, is selectedResolved'
+
+      expect(actionGroupsSelect.first().find(EuiScreenReaderOnly).text()).toEqual(
+        'Select an option: Recovered, is selected'
       );
+      expect(actionGroupsSelect.first().find('button').first().text()).toEqual('Recovered');
     });
 
     it('renders available connectors for the selected action type', async () => {
@@ -490,7 +485,7 @@ describe('action_form', () => {
           },
         },
       ]);
-      expect(deps.setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(true);
+      expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(true);
     });
   });
 });
