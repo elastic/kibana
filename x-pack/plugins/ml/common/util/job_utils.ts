@@ -206,7 +206,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
             'xpack.ml.timeSeriesJob.varyingBucketSpanAggregationInterval',
             {
               defaultMessage:
-                'bucket span and aggregation interval is not the same for datafeed with aggregation fields',
+                'the datafeed has aggregation fields and the aggregation interval is not the same as the bucket span',
             }
           );
         }
