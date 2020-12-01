@@ -202,6 +202,13 @@ export default function ({ getService }: FtrProviderContext) {
                   id: '6613144177892233360',
                   name: 'gke-observability-8--observability-8--bc1afd95-ngmh',
                 },
+                agent: {
+                  hostname: 'gke-observability-8--observability-8--bc1afd95-ngmh',
+                  id: '66dc19e6-da36-49d2-9471-2c9475503178',
+                  ephemeral_id: 'a0c3a9ff-470a-41a0-bf43-d1af6b7a3b5b',
+                  type: 'metricbeat',
+                  version: '8.0.0',
+                },
                 provider: 'gcp',
                 availability_zone: 'europe-west1-c',
                 machine: {
