@@ -12,11 +12,17 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { SavedObjectActions } from '../authorization/actions/saved_object';
 import { AuditEvent, EventOutcome } from '../audit';
 
-jest.mock('../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
-  SavedObjectsUtils: {
-    generateId: () => 'mock-saved-object-id',
-  },
-}));
+jest.mock('../../../../../src/core/server/saved_objects/service/lib/utils', () => {
+  const { SavedObjectsUtils } = jest.requireActual(
+    '../../../../../src/core/server/saved_objects/service/lib/utils'
+  );
+  return {
+    SavedObjectsUtils: {
+      createEmptyFindResponse: SavedObjectsUtils.createEmptyFindResponse,
+      generateId: () => 'mock-saved-object-id',
+    },
+  };
+});
 
 let clientOpts: ReturnType<typeof createSecureSavedObjectsClientWrapperOptions>;
 let client: SecureSavedObjectsClientWrapper;

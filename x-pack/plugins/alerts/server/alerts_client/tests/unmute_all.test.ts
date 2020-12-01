@@ -169,7 +169,7 @@ describe('unmuteAll()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_unmute',
+            action: 'alert_unmute',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -205,7 +205,7 @@ describe('unmuteAll()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_unmute',
+            action: 'alert_unmute',
             outcome: 'failure',
           }),
           kibana: {

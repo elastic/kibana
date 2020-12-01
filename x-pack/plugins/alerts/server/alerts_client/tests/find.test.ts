@@ -259,7 +259,7 @@ describe('find()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_find',
+            action: 'alert_find',
             outcome: 'success',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -275,7 +275,7 @@ describe('find()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_find',
+            action: 'alert_find',
             outcome: 'failure',
           }),
           error: {
@@ -299,7 +299,7 @@ describe('find()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_find',
+            action: 'alert_find',
             outcome: 'failure',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },

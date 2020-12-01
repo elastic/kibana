@@ -19,7 +19,7 @@ describe('#alertRuleEvent', () => {
       Object {
         "error": undefined,
         "event": Object {
-          "action": "alert_rule_create",
+          "action": "alert_create",
           "category": "database",
           "outcome": "unknown",
           "type": "creation",
@@ -30,7 +30,7 @@ describe('#alertRuleEvent', () => {
             "type": "alert",
           },
         },
-        "message": "User is creating alert rule [id=ALERT_ID]",
+        "message": "User is creating alert [id=ALERT_ID]",
       }
     `);
   });
@@ -45,7 +45,7 @@ describe('#alertRuleEvent', () => {
       Object {
         "error": undefined,
         "event": Object {
-          "action": "alert_rule_create",
+          "action": "alert_create",
           "category": "database",
           "outcome": "success",
           "type": "creation",
@@ -56,7 +56,7 @@ describe('#alertRuleEvent', () => {
             "type": "alert",
           },
         },
-        "message": "User has created alert rule [id=ALERT_ID]",
+        "message": "User has created alert [id=ALERT_ID]",
       }
     `);
   });
@@ -75,7 +75,7 @@ describe('#alertRuleEvent', () => {
           "message": "ERROR_MESSAGE",
         },
         "event": Object {
-          "action": "alert_rule_create",
+          "action": "alert_create",
           "category": "database",
           "outcome": "failure",
           "type": "creation",
@@ -86,7 +86,7 @@ describe('#alertRuleEvent', () => {
             "type": "alert",
           },
         },
-        "message": "Failed attempt to create alert rule [id=ALERT_ID]",
+        "message": "Failed attempt to create alert [id=ALERT_ID]",
       }
     `);
   });

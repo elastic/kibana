@@ -1341,7 +1341,7 @@ describe('update()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_update',
+            action: 'alert_update',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -1371,7 +1371,7 @@ describe('update()', () => {
         expect.objectContaining({
           event: expect.objectContaining({
             outcome: 'failure',
-            action: 'alert_rule_update',
+            action: 'alert_update',
           }),
           kibana: {
             saved_object: {

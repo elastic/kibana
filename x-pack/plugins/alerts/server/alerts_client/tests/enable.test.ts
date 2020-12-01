@@ -158,7 +158,7 @@ describe('enable()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_enable',
+            action: 'alert_enable',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -173,7 +173,7 @@ describe('enable()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_enable',
+            action: 'alert_enable',
             outcome: 'failure',
           }),
           kibana: {

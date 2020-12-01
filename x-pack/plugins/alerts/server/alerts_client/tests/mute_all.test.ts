@@ -169,7 +169,7 @@ describe('muteAll()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_mute',
+            action: 'alert_mute',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -205,7 +205,7 @@ describe('muteAll()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_mute',
+            action: 'alert_mute',
             outcome: 'failure',
           }),
           kibana: {

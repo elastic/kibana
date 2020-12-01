@@ -282,7 +282,7 @@ describe('updateApiKey()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_update_api_key',
+            action: 'alert_update_api_key',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -298,7 +298,7 @@ describe('updateApiKey()', () => {
         expect.objectContaining({
           event: expect.objectContaining({
             outcome: 'failure',
-            action: 'alert_rule_update_api_key',
+            action: 'alert_update_api_key',
           }),
           kibana: {
             saved_object: {

@@ -251,7 +251,7 @@ describe('delete()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_delete',
+            action: 'alert_delete',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -266,7 +266,7 @@ describe('delete()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_delete',
+            action: 'alert_delete',
             outcome: 'failure',
           }),
           kibana: {

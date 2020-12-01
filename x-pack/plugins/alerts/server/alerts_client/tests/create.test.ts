@@ -211,7 +211,7 @@ describe('create()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_create',
+            action: 'alert_create',
             outcome: 'unknown',
           }),
           kibana: { saved_object: { id: 'mock-saved-object-id', type: 'alert' } },
@@ -233,7 +233,7 @@ describe('create()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_rule_create',
+            action: 'alert_create',
             outcome: 'failure',
           }),
           kibana: {
