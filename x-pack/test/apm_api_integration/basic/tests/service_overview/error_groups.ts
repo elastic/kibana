@@ -7,7 +7,6 @@
 import expect from '@kbn/expect';
 import qs from 'querystring';
 import { pick, uniqBy } from 'lodash';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import archives from '../../../common/archives_metadata';
 
@@ -100,9 +99,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
         `);
 
-        expectSnapshot(
-          firstItem.occurrences.timeseries.filter(({ y }: any) => y > 0).length
-        ).toMatchInline(`7`);
+        const visibleDataPoints = firstItem.occurrences.timeseries.filter(({ y }: any) => y > 0);
+        expectSnapshot(visibleDataPoints.length).toMatchInline(`7`);
       });
 
       it('sorts items in the correct order', async () => {

@@ -59,6 +59,8 @@ export interface App<HistoryLocationState = unknown> {
     mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppSubLink"
+    searchDeepLinks?: AppSearchDeepLink[];
     status?: AppStatus;
     title: string;
     tooltip?: string;
@@ -176,6 +178,18 @@ export enum AppNavLinkStatus {
 }
 
 // @public
+export type AppSearchDeepLink = {
+    id: string;
+    title: string;
+} & ({
+    path: string;
+    searchDeepLinks?: AppSearchDeepLink[];
+} | {
+    path?: string;
+    searchDeepLinks: AppSearchDeepLink[];
+});
+
+// @public
 export enum AppStatus {
     accessible = 0,
     inaccessible = 1
@@ -185,7 +199,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'searchDeepLinks'>;
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
@@ -873,6 +887,60 @@ export interface OverlayBannersStart {
     replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 }
 
+// @public (undocumented)
+export interface OverlayFlyoutOpenOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+    // (undocumented)
+    ownFocus?: boolean;
+}
+
+// @public
+export interface OverlayFlyoutStart {
+    open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+}
+
+// @public (undocumented)
+export interface OverlayModalConfirmOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    buttonColor?: EuiConfirmModalProps['buttonColor'];
+    // (undocumented)
+    cancelButtonText?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+    // (undocumented)
+    confirmButtonText?: string;
+    // (undocumented)
+    defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];
+    maxWidth?: boolean | number | string;
+    // (undocumented)
+    title?: string;
+}
+
+// @public (undocumented)
+export interface OverlayModalOpenOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+}
+
+// @public
+export interface OverlayModalStart {
+    open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
+    openConfirm(message: MountPoint | string, options?: OverlayModalConfirmOptions): Promise<boolean>;
+}
+
 // @public
 export interface OverlayRef {
     close(): Promise<void>;
@@ -885,12 +953,8 @@ export interface OverlayStart {
     banners: OverlayBannersStart;
     // (undocumented)
     openConfirm: OverlayModalStart['openConfirm'];
-    // Warning: (ae-forgotten-export) The symbol "OverlayFlyoutStart" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     openFlyout: OverlayFlyoutStart['open'];
-    // Warning: (ae-forgotten-export) The symbol "OverlayModalStart" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     openModal: OverlayModalStart['open'];
 }
@@ -928,10 +992,16 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // @public
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'searchDeepLinks'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
+    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+};
+
+// @public
+export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks'> & {
+    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
 };
 
 // @public

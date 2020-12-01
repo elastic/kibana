@@ -57,7 +57,7 @@ export interface TableListViewProps {
   listingLimit: number;
   initialFilter: string;
   initialPageSize: number;
-  noItemsFragment: JSX.Element;
+  noItemsFragment?: JSX.Element;
   tableColumns: Array<EuiBasicTableColumn<any>>;
   tableListTitle: string;
   toastNotifications: ToastsStart;
@@ -73,7 +73,7 @@ export interface TableListViewProps {
   /**
    * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
    */
-  tableCaption: string;
+  tableCaption?: string;
   searchFilters?: SearchFilterConfig[];
 }
 
@@ -445,6 +445,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       defaultQuery: this.state.filter,
       box: {
         incremental: true,
+        'data-test-subj': 'tableListSearchBox',
       },
       filters: searchFilters ?? [],
     };

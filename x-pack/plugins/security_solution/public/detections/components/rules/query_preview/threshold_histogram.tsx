@@ -75,7 +75,7 @@ export const PreviewThresholdQueryHistogram = ({
       subtitle={subtitle}
       disclaimer={i18n.QUERY_PREVIEW_DISCLAIMER}
       isLoading={isLoading}
-      data-test-subj="thresholdQueryPreviewHistogram"
+      dataTestSubj="thresholdQueryPreviewHistogram"
     />
   );
 };

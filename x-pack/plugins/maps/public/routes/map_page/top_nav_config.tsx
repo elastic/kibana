@@ -14,6 +14,7 @@ import {
   getCoreI18n,
   getSavedObjectsClient,
   getCoreOverlays,
+  getSavedObjectsTagging,
 } from '../../kibana_services';
 import {
   checkForDuplicateTitle,
@@ -125,6 +126,19 @@ export function getTopNavConfig({
         }
       },
       run: () => {
+        let selectedTags = savedMap.getTags();
+        function onTagsSelected(newTags: string[]) {
+          selectedTags = newTags;
+        }
+
+        const savedObjectsTagging = getSavedObjectsTagging();
+        const tagSelector = savedObjectsTagging ? (
+          <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+            initialSelection={selectedTags}
+            onTagsSelected={onTagsSelected}
+          />
+        ) : undefined;
+
         const saveModal = (
           <SavedObjectSaveModalOrigin
             originatingApp={savedMap.getOriginatingApp()}
@@ -154,6 +168,7 @@ export function getTopNavConfig({
 
               await savedMap.save({
                 ...props,
+                newTags: selectedTags,
                 saveByReference: true,
               });
               // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
@@ -168,6 +183,7 @@ export function getTopNavConfig({
             objectType={i18n.translate('xpack.maps.topNav.saveModalType', {
               defaultMessage: 'map',
             })}
+            options={tagSelector}
           />
         );
         showSaveModal(saveModal, getCoreI18n().Context);

@@ -13,6 +13,10 @@ describe('config validation', () => {
         "healthCheck": Object {
           "interval": "60m",
         },
+        "invalidateApiKeysTask": Object {
+          "interval": "5m",
+          "removalDelay": "5m",
+        },
       }
     `);
   });

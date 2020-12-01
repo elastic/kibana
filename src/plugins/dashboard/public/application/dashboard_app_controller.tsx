@@ -74,7 +74,7 @@ import { NavAction, SavedDashboardPanel } from '../types';
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal, SaveOptions } from './top_nav/save_modal';
 import { showCloneModal } from './top_nav/show_clone_modal';
-import { saveDashboard } from './lib';
+import { createSessionRestorationDataProvider, saveDashboard } from './lib';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
@@ -150,7 +150,7 @@ export class DashboardAppController {
     dashboardCapabilities,
     scopedHistory,
     embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
-    data: { query: queryService, search: searchService },
+    data,
     core: {
       notifications,
       overlays,
@@ -168,6 +168,8 @@ export class DashboardAppController {
     navigation,
     savedObjectsTagging,
   }: DashboardAppControllerDependencies) {
+    const queryService = data.query;
+    const searchService = data.search;
     const filterManager = queryService.filterManager;
     const timefilter = queryService.timefilter.timefilter;
     const queryStringManager = queryService.queryString;
@@ -261,6 +263,16 @@ export class DashboardAppController {
     dashboardStateManager.startStateSyncing();
 
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
+
+    const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
+
+    const getDashTitle = () =>
+      getDashboardTitle(
+        dashboardStateManager.getTitle(),
+        dashboardStateManager.getViewMode(),
+        dashboardStateManager.getIsDirty(timefilter),
+        dashboardStateManager.isNew()
+      );
 
     const getShouldShowEditHelp = () =>
       !dashboardStateManager.getPanels().length &&
@@ -429,6 +441,15 @@ export class DashboardAppController {
       DashboardContainer
     >(DASHBOARD_CONTAINER_TYPE);
 
+    searchService.session.setSearchSessionInfoProvider(
+      createSessionRestorationDataProvider({
+        data,
+        getDashboardTitle: () => getDashTitle(),
+        getDashboardId: () => dash.id,
+        getAppState: () => dashboardStateManager.getAppState(),
+      })
+    );
+
     if (dashboardFactory) {
       const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
       if (searchSessionIdFromURL) {
@@ -552,16 +573,6 @@ export class DashboardAppController {
       filterManager.getFilters()
     );
 
-    const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
-
-    const getDashTitle = () =>
-      getDashboardTitle(
-        dashboardStateManager.getTitle(),
-        dashboardStateManager.getViewMode(),
-        dashboardStateManager.getIsDirty(timefilter),
-        dashboardStateManager.isNew()
-      );
-
     // Push breadcrumbs to new header navigation
     const updateBreadcrumbs = () => {
       chrome.setBreadcrumbs([
@@ -637,6 +648,13 @@ export class DashboardAppController {
         refreshDashboardContainer();
       }
     };
+
+    const searchServiceSessionRefreshSubscribtion = searchService.session.onRefresh$.subscribe(
+      () => {
+        lastReloadRequestTime = new Date().getTime();
+        refreshDashboardContainer();
+      }
+    );
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
       const allFilters = filterManager.getFilters();
@@ -1199,6 +1217,7 @@ export class DashboardAppController {
       if (dashboardContainer) {
         dashboardContainer.destroy();
       }
+      searchServiceSessionRefreshSubscribtion.unsubscribe();
       searchService.session.clear();
     });
   }

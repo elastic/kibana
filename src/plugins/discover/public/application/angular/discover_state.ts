@@ -20,15 +20,23 @@ import { isEqual } from 'lodash';
 import { History } from 'history';
 import { NotificationsStart } from 'kibana/public';
 import {
-  createStateContainer,
   createKbnUrlStateStorage,
-  syncState,
-  ReduxLikeStateContainer,
+  createStateContainer,
   IKbnUrlStateStorage,
+  ReduxLikeStateContainer,
+  StateContainer,
+  syncState,
   withNotifyOnErrors,
 } from '../../../../kibana_utils/public';
-import { esFilters, Filter, Query } from '../../../../data/public';
+import {
+  DataPublicPluginStart,
+  esFilters,
+  Filter,
+  Query,
+  SearchSessionInfoProvider,
+} from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
+import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../url_generator';
 
 export interface AppState {
   /**
@@ -65,7 +73,7 @@ interface GetStateParams {
   /**
    * Default state used for merging with with URL state to get the initial state
    */
-  defaultAppState?: AppState;
+  getStateDefaults?: () => AppState;
   /**
    * Determins the use of long vs. short/hashed urls
    */
@@ -123,7 +131,11 @@ export interface GetStateReturn {
   /**
    * Returns whether the current app state is different to the initial state
    */
-  isAppStateDirty: () => void;
+  isAppStateDirty: () => boolean;
+  /**
+   * Reset AppState to default, discarding all changes
+   */
+  resetAppState: () => void;
 }
 const APP_STATE_URL_KEY = '_a';
 
@@ -132,11 +144,12 @@ const APP_STATE_URL_KEY = '_a';
  * Used to sync URL with UI state
  */
 export function getState({
-  defaultAppState = {},
+  getStateDefaults,
   storeInSessionStorage = false,
   history,
   toasts,
 }: GetStateParams): GetStateReturn {
+  const defaultAppState = getStateDefaults ? getStateDefaults() : {};
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
@@ -184,6 +197,10 @@ export function getState({
     },
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
+    },
+    resetAppState: () => {
+      const defaultState = getStateDefaults ? getStateDefaults() : {};
+      setState(appStateContainerModified, defaultState);
     },
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.flush(),
@@ -237,4 +254,48 @@ export function isEqualState(stateA: AppState, stateB: AppState) {
   const { filters: stateAFilters = [], ...stateAPartial } = stateA;
   const { filters: stateBFilters = [], ...stateBPartial } = stateB;
   return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
+}
+
+export function createSearchSessionRestorationDataProvider(deps: {
+  appStateContainer: StateContainer<AppState>;
+  data: DataPublicPluginStart;
+  getSavedSearchId: () => string | undefined;
+}): SearchSessionInfoProvider {
+  return {
+    getName: async () => 'Discover',
+    getUrlGeneratorData: async () => {
+      return {
+        urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
+        initialState: createUrlGeneratorState({ ...deps, forceAbsoluteTime: false }),
+        restoreState: createUrlGeneratorState({ ...deps, forceAbsoluteTime: true }),
+      };
+    },
+  };
+}
+
+function createUrlGeneratorState({
+  appStateContainer,
+  data,
+  getSavedSearchId,
+  forceAbsoluteTime, // TODO: not implemented
+}: {
+  appStateContainer: StateContainer<AppState>;
+  data: DataPublicPluginStart;
+  getSavedSearchId: () => string | undefined;
+  forceAbsoluteTime: boolean;
+}): DiscoverUrlGeneratorState {
+  const appState = appStateContainer.get();
+  return {
+    filters: data.query.filterManager.getFilters(),
+    indexPatternId: appState.index,
+    query: appState.query,
+    savedSearchId: getSavedSearchId(),
+    timeRange: data.query.timefilter.timefilter.getTime(), // TODO: handle relative time range
+    searchSessionId: data.search.session.getSessionId(),
+    columns: appState.columns,
+    sort: appState.sort,
+    savedQuery: appState.savedQuery,
+    interval: appState.interval,
+    useHash: false,
+  };
 }

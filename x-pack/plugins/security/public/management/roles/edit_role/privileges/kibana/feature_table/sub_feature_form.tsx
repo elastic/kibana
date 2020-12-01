@@ -27,12 +27,20 @@ interface Props {
 }
 
 export const SubFeatureForm = (props: Props) => {
+  const groupsWithPrivileges = props.subFeature
+    .getPrivilegeGroups()
+    .filter((group) => group.privileges.length > 0);
+
+  if (groupsWithPrivileges.length === 0) {
+    return null;
+  }
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiText size="s">{props.subFeature.name}</EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>{props.subFeature.getPrivilegeGroups().map(renderPrivilegeGroup)}</EuiFlexItem>
+      <EuiFlexItem>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
     </EuiFlexGroup>
   );
 

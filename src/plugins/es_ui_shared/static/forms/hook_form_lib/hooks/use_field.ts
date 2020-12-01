@@ -118,16 +118,16 @@ export const useField = <T, FormType = FormData, I = T>(
    * updating the "value" state.
    */
   const formatInputValue = useCallback(
-    <T>(inputValue: unknown): T => {
+    <U>(inputValue: unknown): U => {
       const isEmptyString = typeof inputValue === 'string' && inputValue.trim() === '';
 
       if (isEmptyString || !formatters) {
-        return inputValue as T;
+        return inputValue as U;
       }
 
       const formData = __getFormData$().value;
 
-      return formatters.reduce((output, formatter) => formatter(output, formData), inputValue) as T;
+      return formatters.reduce((output, formatter) => formatter(output, formData), inputValue) as U;
     },
     [formatters, __getFormData$]
   );

@@ -18,7 +18,6 @@ export interface MinAgeField {
 }
 
 export interface ForcemergeFields {
-  forceMergeEnabled: boolean;
   bestCompression: boolean;
 }
 

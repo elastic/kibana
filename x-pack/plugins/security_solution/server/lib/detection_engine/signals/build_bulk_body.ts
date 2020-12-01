@@ -71,6 +71,7 @@ export const buildBulkBody = ({
     ...buildSignal([doc], rule),
     ...additionalSignalFields(doc),
   };
+  delete doc._source.threshold_result;
   const event = buildEventTypeSignal(doc);
   const signalHit: SignalHit = {
     ...doc._source,
@@ -102,6 +103,14 @@ export const buildSignalGroupFromSequence = (
     }),
     outputIndex
   );
+
+  if (
+    wrappedBuildingBlocks.some((block) =>
+      block._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleSO.id)
+    )
+  ) {
+    return [];
+  }
 
   // Now that we have an array of building blocks for the events in the sequence,
   // we can build the signal that links the building blocks together

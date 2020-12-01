@@ -37,7 +37,8 @@ import {
 function getDateHistogramOpts(start: number, end: number) {
   return {
     field: '@timestamp',
-    fixed_interval: getBucketSize(start, end, 20).intervalString,
+    fixed_interval: getBucketSize({ start, end, numBuckets: 20 })
+      .intervalString,
     min_doc_count: 0,
     extended_bounds: { min: start, max: end },
   };

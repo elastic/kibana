@@ -58,9 +58,9 @@ describe('registerVisualizationsCollector', () => {
   it('makeUsageCollector config.fetch calls getStats', async () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
     registerVisualizationsCollector(mockCollectorSet, mockConfig);
-    const usageCollectorConfig = mockCollectorSet.makeUsageCollector.mock.calls[0][0];
+    const usageCollector = mockCollectorSet.makeUsageCollector.mock.results[0].value;
     const mockCollectorFetchContext = createCollectorFetchContextMock();
-    const fetchResult = await usageCollectorConfig.fetch(mockCollectorFetchContext);
+    const fetchResult = await usageCollector.fetch(mockCollectorFetchContext);
     expect(mockGetStats).toBeCalledTimes(1);
     expect(mockGetStats).toBeCalledWith(mockCollectorFetchContext.callCluster, mockIndex);
     expect(fetchResult).toBe(mockStats);
