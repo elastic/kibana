@@ -326,10 +326,7 @@ describe('IndexMigrator', () => {
     let count = 0;
     const { client } = testOpts;
     const migrateAndConvertDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
-      return {
-        ...doc,
-        attributes: { name: ++count },
-      };
+      return [{ ...doc, attributes: { name: ++count } }];
     });
 
     testOpts.documentMigrator = {

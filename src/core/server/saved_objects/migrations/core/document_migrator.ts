@@ -72,14 +72,24 @@ import { MigrationLogger } from './migration_logger';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectMigrationFn } from '../types';
 import { DEFAULT_NAMESPACE_STRING } from '../../service/lib/utils';
+import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
 export type MigrateFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
-export type MigrateAndConvertFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
+export type MigrateAndConvertFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
 
-type TransformFn = (
-  doc: SavedObjectUnsanitizedDoc,
-  options?: TransformOptions
-) => SavedObjectUnsanitizedDoc;
+interface TransformResult {
+  /**
+   * This is the original document that has been transformed.
+   */
+  transformedDoc: SavedObjectUnsanitizedDoc;
+  /**
+   * These are any new document(s) that have been created during the transformation process; these are not transformed, but they are marked
+   * as up-to-date. Only conversion transforms generate additional documents.
+   */
+  additionalDocs: SavedObjectUnsanitizedDoc[];
+}
+
+type TransformFn = (doc: SavedObjectUnsanitizedDoc, options?: TransformOptions) => TransformResult;
 
 interface TransformOptions {
   convertTypes?: boolean;
@@ -101,7 +111,7 @@ interface ActiveMigrations {
 
 interface Transform {
   version: string;
-  transform: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
+  transform: (doc: SavedObjectUnsanitizedDoc) => TransformResult;
   transformType: 'migrate' | 'convert' | 'reference';
 }
 
@@ -169,22 +179,25 @@ export class DocumentMigrator implements VersionedTransformer {
     // Ex: Importing sample data that is cached at import level, migrations would
     // execute on mutated data the second time.
     const clonedDoc = _.cloneDeep(doc);
-    return this.transformDoc(clonedDoc);
+    const { transformedDoc } = this.transformDoc(clonedDoc);
+    return transformedDoc;
   };
 
   /**
-   * Migrates a document to the latest version and applies type conversions if applicable.
+   * Migrates a document to the latest version and applies type conversions if applicable. Also returns any additional document(s) that may
+   * have been created during the transformation process.
    *
    * @param {SavedObjectUnsanitizedDoc} doc
    * @returns {SavedObjectUnsanitizedDoc}
    * @memberof DocumentMigrator
    */
-  public migrateAndConvert = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc => {
+  public migrateAndConvert = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[] => {
     // Clone the document to prevent accidental mutations on the original data
     // Ex: Importing sample data that is cached at import level, migrations would
     // execute on mutated data the second time.
     const clonedDoc = _.cloneDeep(doc);
-    return this.transformDoc(clonedDoc, { convertTypes: true });
+    const { transformedDoc, additionalDocs } = this.transformDoc(clonedDoc, { convertTypes: true });
+    return [transformedDoc].concat(additionalDocs);
   };
 }
 
@@ -323,18 +336,26 @@ function buildDocumentTransform({
     options: TransformOptions = {}
   ) {
     const { convertTypes = false } = options;
-    const result = doc.migrationVersion
-      ? applyMigrations(doc, migrations, kibanaVersion, convertTypes)
-      : markAsUpToDate(doc, migrations, kibanaVersion);
+    let transformedDoc: SavedObjectUnsanitizedDoc;
+    let additionalDocs: SavedObjectUnsanitizedDoc[] = [];
+    if (doc.migrationVersion) {
+      const result = applyMigrations(doc, migrations, kibanaVersion, convertTypes);
+      transformedDoc = result.transformedDoc;
+      additionalDocs = additionalDocs.concat(
+        result.additionalDocs.map((x) => markAsUpToDate(x, migrations, kibanaVersion))
+      );
+    } else {
+      transformedDoc = markAsUpToDate(doc, migrations, kibanaVersion);
+    }
 
     // In order to keep tests a bit more stable, we won't
     // tack on an empy migrationVersion to docs that have
     // no migrations defined.
-    if (_.isEmpty(result.migrationVersion)) {
-      delete result.migrationVersion;
+    if (_.isEmpty(transformedDoc.migrationVersion)) {
+      delete transformedDoc.migrationVersion;
     }
 
-    return result;
+    return { transformedDoc, additionalDocs };
   };
 }
 
@@ -344,14 +365,20 @@ function applyMigrations(
   kibanaVersion: string,
   convertTypes: boolean
 ) {
+  let additionalDocs: SavedObjectUnsanitizedDoc[] = [];
   while (true) {
     const prop = nextUnmigratedProp(doc, migrations);
     if (!prop) {
       // regardless of whether or not any reference transform was applied, update the referencesMigrationVersion
       // this is needed to ensure that newly created documents have an up-to-date referencesMigrationVersion field
-      return { ...doc, referencesMigrationVersion: kibanaVersion };
+      return {
+        transformedDoc: { ...doc, referencesMigrationVersion: kibanaVersion },
+        additionalDocs,
+      };
     }
-    doc = migrateProp(doc, prop, migrations, convertTypes);
+    const result = migrateProp(doc, prop, migrations, convertTypes);
+    doc = result.transformedDoc;
+    additionalDocs = additionalDocs.concat(result.additionalDocs);
   }
 }
 
@@ -399,16 +426,35 @@ function markAsUpToDate(
  */
 function convertType(doc: SavedObjectUnsanitizedDoc) {
   const { namespace, ...otherAttrs } = doc;
+  const additionalDocs: SavedObjectUnsanitizedDoc[] = [];
 
   // If this object exists in the default namespace, return it with the appropriate `namespaces` field without changing its ID.
   if (namespace === undefined) {
-    return { ...otherAttrs, namespaces: [DEFAULT_NAMESPACE_STRING] };
+    return {
+      transformedDoc: { ...otherAttrs, namespaces: [DEFAULT_NAMESPACE_STRING] },
+      additionalDocs,
+    };
   }
 
   const { id: originId, type } = otherAttrs;
   // Deterministically generate a new ID for this object; the uuidv5 namespace constant (uuidv5.DNS) is arbitrary
   const id = uuidv5(`${namespace}:${type}:${originId}`, uuidv5.DNS);
-  return { ...otherAttrs, id, originId, namespaces: [namespace] };
+  if (namespace !== undefined) {
+    const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
+      id: `${namespace}:${type}:${originId}`,
+      type: LEGACY_URL_ALIAS_TYPE,
+      attributes: {
+        targetNamespace: namespace,
+        targetType: type,
+        targetId: id,
+      },
+    };
+    additionalDocs.push(legacyUrlAlias);
+  }
+  return {
+    transformedDoc: { ...otherAttrs, id, originId, namespaces: [namespace] },
+    additionalDocs,
+  };
 }
 
 /**
@@ -446,15 +492,18 @@ function getReferenceTransforms(typeRegistry: ISavedObjectTypeRegistry): Transfo
       const { namespace, references } = doc;
       if (namespace && references?.length) {
         return {
-          ...doc,
-          references: references.map(({ type, id, ...attrs }) => ({
-            ...attrs,
-            type,
-            id: val.has(type) ? uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS) : id,
-          })),
+          transformedDoc: {
+            ...doc,
+            references: references.map(({ type, id, ...attrs }) => ({
+              ...attrs,
+              type,
+              id: val.has(type) ? uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS) : id,
+            })),
+          },
+          additionalDocs: [],
         };
       }
-      return doc;
+      return { transformedDoc: doc, additionalDocs: [] };
     },
     transformType: 'reference',
   }));
@@ -506,7 +555,7 @@ function wrapWithTry(
         throw new Error(`Invalid saved object returned from migration ${type}:${version}.`);
       }
 
-      return result;
+      return { transformedDoc: result, additionalDocs: [] };
     } catch (error) {
       const failedTransform = `${type}:${version}`;
       const failedDoc = JSON.stringify(doc);
@@ -569,9 +618,10 @@ function migrateProp(
   prop: string,
   migrations: ActiveMigrations,
   convertTypes: boolean
-): SavedObjectUnsanitizedDoc {
+): TransformResult {
   const originalType = doc.type;
   let migrationVersion = _.clone(doc.migrationVersion) || {};
+  let additionalDocs: SavedObjectUnsanitizedDoc[] = [];
 
   for (const { version, transform, transformType } of applicableTransforms(migrations, doc, prop)) {
     const currentVersion = propVersion(doc, prop);
@@ -582,7 +632,9 @@ function migrateProp(
 
     if (transformType === 'migrate' || convertTypes) {
       // migrate transforms are always applied, but conversion transforms and reference transforms are only applied when Kibana is upgraded
-      doc = transform(doc);
+      const result = transform(doc);
+      doc = result.transformedDoc;
+      additionalDocs = additionalDocs.concat(result.additionalDocs);
     }
     if (transformType === 'reference') {
       // regardless of whether or not the reference transform was applied, increment the version
@@ -598,7 +650,7 @@ function migrateProp(
     }
   }
 
-  return doc;
+  return { transformedDoc: doc, additionalDocs };
 }
 
 /**

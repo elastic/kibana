@@ -25,6 +25,7 @@ import { DocumentMigrator } from './document_migrator';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectsType } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
@@ -741,14 +742,16 @@ describe('DocumentMigrator', () => {
           referencesMigrationVersion: kibanaVersion,
         } as SavedObjectUnsanitizedDoc;
         const actual = migrator.migrateAndConvert(obj);
-        expect(actual).toEqual({
-          id: 'mischievous',
-          type: 'dog',
-          attributes: { name: 'Ann' },
-          migrationVersion: { dog: '1.0.0' },
-          referencesMigrationVersion: kibanaVersion,
-          // there is no 'namespaces' field because no transforms were applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
-        });
+        expect(actual).toEqual([
+          {
+            id: 'mischievous',
+            type: 'dog',
+            attributes: { name: 'Ann' },
+            migrationVersion: { dog: '1.0.0' },
+            referencesMigrationVersion: kibanaVersion,
+            // there is no 'namespaces' field because no transforms were applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
+          },
+        ]);
       });
 
       it('skips reference transforms and conversion transforms when using `migrate`', () => {
@@ -800,27 +803,31 @@ describe('DocumentMigrator', () => {
         it('in the default space', () => {
           const actual = migrator.migrateAndConvert(obj);
           expect(mockUuidv5).not.toHaveBeenCalled();
-          expect(actual).toEqual({
-            id: 'bad',
-            type: 'dog',
-            attributes: { name: 'Sweet Peach' },
-            references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-            referencesMigrationVersion: kibanaVersion,
-          });
+          expect(actual).toEqual([
+            {
+              id: 'bad',
+              type: 'dog',
+              attributes: { name: 'Sweet Peach' },
+              references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
+              referencesMigrationVersion: kibanaVersion,
+            },
+          ]);
         });
 
         it('in a non-default space', () => {
           const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
           expect(mockUuidv5).toHaveBeenCalledTimes(1);
           expect(mockUuidv5).toHaveBeenCalledWith('foo-namespace:toy:favorite', 'DNSUUID');
-          expect(actual).toEqual({
-            id: 'bad',
-            type: 'dog',
-            attributes: { name: 'Sweet Peach' },
-            references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-            referencesMigrationVersion: kibanaVersion,
-            namespace: 'foo-namespace',
-          });
+          expect(actual).toEqual([
+            {
+              id: 'bad',
+              type: 'dog',
+              attributes: { name: 'Sweet Peach' },
+              references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
+              referencesMigrationVersion: kibanaVersion,
+              namespace: 'foo-namespace',
+            },
+          ]);
         });
       });
 
@@ -843,29 +850,44 @@ describe('DocumentMigrator', () => {
         it('in the default space', () => {
           const actual = migrator.migrateAndConvert(obj);
           expect(mockUuidv5).not.toHaveBeenCalled();
-          expect(actual).toEqual({
-            id: 'loud',
-            type: 'dog',
-            attributes: { name: 'Wally' },
-            migrationVersion: { dog: '1.0.0' },
-            referencesMigrationVersion: kibanaVersion,
-            namespaces: ['default'],
-          });
+          expect(actual).toEqual([
+            {
+              id: 'loud',
+              type: 'dog',
+              attributes: { name: 'Wally' },
+              migrationVersion: { dog: '1.0.0' },
+              referencesMigrationVersion: kibanaVersion,
+              namespaces: ['default'],
+            },
+          ]);
         });
 
         it('in a non-default space', () => {
           const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
           expect(mockUuidv5).toHaveBeenCalledTimes(1);
           expect(mockUuidv5).toHaveBeenCalledWith('foo-namespace:dog:loud', 'DNSUUID');
-          expect(actual).toEqual({
-            id: 'uuidv5',
-            type: 'dog',
-            attributes: { name: 'Wally' },
-            migrationVersion: { dog: '1.0.0' },
-            referencesMigrationVersion: kibanaVersion,
-            namespaces: ['foo-namespace'],
-            originId: 'loud',
-          });
+          expect(actual).toEqual([
+            {
+              id: 'uuidv5',
+              type: 'dog',
+              attributes: { name: 'Wally' },
+              migrationVersion: { dog: '1.0.0' },
+              referencesMigrationVersion: kibanaVersion,
+              namespaces: ['foo-namespace'],
+              originId: 'loud',
+            },
+            {
+              id: 'foo-namespace:dog:loud',
+              type: LEGACY_URL_ALIAS_TYPE,
+              attributes: {
+                targetNamespace: 'foo-namespace',
+                targetType: 'dog',
+                targetId: 'uuidv5',
+              },
+              migrationVersion: {},
+              referencesMigrationVersion: kibanaVersion,
+            },
+          ]);
         });
       });
 
@@ -888,15 +910,17 @@ describe('DocumentMigrator', () => {
         it('in the default space', () => {
           const actual = migrator.migrateAndConvert(obj);
           expect(mockUuidv5).not.toHaveBeenCalled();
-          expect(actual).toEqual({
-            id: 'cute',
-            type: 'dog',
-            attributes: { name: 'Too' },
-            migrationVersion: { dog: '1.0.0' },
-            references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-            referencesMigrationVersion: kibanaVersion,
-            namespaces: ['default'],
-          });
+          expect(actual).toEqual([
+            {
+              id: 'cute',
+              type: 'dog',
+              attributes: { name: 'Too' },
+              migrationVersion: { dog: '1.0.0' },
+              references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
+              referencesMigrationVersion: kibanaVersion,
+              namespaces: ['default'],
+            },
+          ]);
         });
 
         it('in a non-default space', () => {
@@ -904,16 +928,29 @@ describe('DocumentMigrator', () => {
           expect(mockUuidv5).toHaveBeenCalledTimes(2);
           expect(mockUuidv5).toHaveBeenNthCalledWith(1, 'foo-namespace:toy:favorite', 'DNSUUID');
           expect(mockUuidv5).toHaveBeenNthCalledWith(2, 'foo-namespace:dog:cute', 'DNSUUID');
-          expect(actual).toEqual({
-            id: 'uuidv5',
-            type: 'dog',
-            attributes: { name: 'Too' },
-            migrationVersion: { dog: '1.0.0' },
-            references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-            referencesMigrationVersion: kibanaVersion,
-            namespaces: ['foo-namespace'],
-            originId: 'cute',
-          });
+          expect(actual).toEqual([
+            {
+              id: 'uuidv5',
+              type: 'dog',
+              attributes: { name: 'Too' },
+              migrationVersion: { dog: '1.0.0' },
+              references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
+              referencesMigrationVersion: kibanaVersion,
+              namespaces: ['foo-namespace'],
+              originId: 'cute',
+            },
+            {
+              id: 'foo-namespace:dog:cute',
+              type: LEGACY_URL_ALIAS_TYPE,
+              attributes: {
+                targetNamespace: 'foo-namespace',
+                targetType: 'dog',
+                targetId: 'uuidv5',
+              },
+              migrationVersion: {},
+              referencesMigrationVersion: kibanaVersion,
+            },
+          ]);
         });
       });
 
@@ -943,29 +980,33 @@ describe('DocumentMigrator', () => {
         it('in the default space', () => {
           const actual = migrator.migrateAndConvert(obj);
           expect(mockUuidv5).not.toHaveBeenCalled();
-          expect(actual).toEqual({
-            id: 'sleepy',
-            type: 'dog',
-            attributes: { name: 'Patches' },
-            migrationVersion: { dog: '2.0.0' },
-            references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-            referencesMigrationVersion: kibanaVersion,
-          });
+          expect(actual).toEqual([
+            {
+              id: 'sleepy',
+              type: 'dog',
+              attributes: { name: 'Patches' },
+              migrationVersion: { dog: '2.0.0' },
+              references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
+              referencesMigrationVersion: kibanaVersion,
+            },
+          ]);
         });
 
         it('in a non-default space', () => {
           const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
           expect(mockUuidv5).toHaveBeenCalledTimes(1);
           expect(mockUuidv5).toHaveBeenCalledWith('foo-namespace:toy:favorite', 'DNSUUID');
-          expect(actual).toEqual({
-            id: 'sleepy',
-            type: 'dog',
-            attributes: { name: 'Patches' },
-            migrationVersion: { dog: '2.0.0' },
-            references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-            referencesMigrationVersion: kibanaVersion,
-            namespace: 'foo-namespace',
-          });
+          expect(actual).toEqual([
+            {
+              id: 'sleepy',
+              type: 'dog',
+              attributes: { name: 'Patches' },
+              migrationVersion: { dog: '2.0.0' },
+              references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
+              referencesMigrationVersion: kibanaVersion,
+              namespace: 'foo-namespace',
+            },
+          ]);
         });
       });
 
@@ -992,29 +1033,44 @@ describe('DocumentMigrator', () => {
         it('in the default space', () => {
           const actual = migrator.migrateAndConvert(obj);
           expect(mockUuidv5).not.toHaveBeenCalled();
-          expect(actual).toEqual({
-            id: 'hungry',
-            type: 'dog',
-            attributes: { name: 'Remy' },
-            migrationVersion: { dog: '2.0.0' },
-            referencesMigrationVersion: kibanaVersion,
-            namespaces: ['default'],
-          });
+          expect(actual).toEqual([
+            {
+              id: 'hungry',
+              type: 'dog',
+              attributes: { name: 'Remy' },
+              migrationVersion: { dog: '2.0.0' },
+              referencesMigrationVersion: kibanaVersion,
+              namespaces: ['default'],
+            },
+          ]);
         });
 
         it('in a non-default space', () => {
           const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
           expect(mockUuidv5).toHaveBeenCalledTimes(1);
           expect(mockUuidv5).toHaveBeenCalledWith('foo-namespace:dog:hungry', 'DNSUUID');
-          expect(actual).toEqual({
-            id: 'uuidv5',
-            type: 'dog',
-            attributes: { name: 'Remy' },
-            migrationVersion: { dog: '2.0.0' },
-            referencesMigrationVersion: kibanaVersion,
-            namespaces: ['foo-namespace'],
-            originId: 'hungry',
-          });
+          expect(actual).toEqual([
+            {
+              id: 'uuidv5',
+              type: 'dog',
+              attributes: { name: 'Remy' },
+              migrationVersion: { dog: '2.0.0' },
+              referencesMigrationVersion: kibanaVersion,
+              namespaces: ['foo-namespace'],
+              originId: 'hungry',
+            },
+            {
+              id: 'foo-namespace:dog:hungry',
+              type: LEGACY_URL_ALIAS_TYPE,
+              attributes: {
+                targetNamespace: 'foo-namespace',
+                targetType: 'dog',
+                targetId: 'uuidv5',
+              },
+              migrationVersion: {},
+              referencesMigrationVersion: kibanaVersion,
+            },
+          ]);
         });
       });
 
@@ -1045,15 +1101,17 @@ describe('DocumentMigrator', () => {
         it('in the default space', () => {
           const actual = migrator.migrateAndConvert(obj);
           expect(mockUuidv5).not.toHaveBeenCalled();
-          expect(actual).toEqual({
-            id: 'pretty',
-            type: 'dog',
-            attributes: { name: 'Sasha' },
-            migrationVersion: { dog: '2.0.0' },
-            references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-            referencesMigrationVersion: kibanaVersion,
-            namespaces: ['default'],
-          });
+          expect(actual).toEqual([
+            {
+              id: 'pretty',
+              type: 'dog',
+              attributes: { name: 'Sasha' },
+              migrationVersion: { dog: '2.0.0' },
+              references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
+              referencesMigrationVersion: kibanaVersion,
+              namespaces: ['default'],
+            },
+          ]);
         });
 
         it('in a non-default space', () => {
@@ -1061,16 +1119,29 @@ describe('DocumentMigrator', () => {
           expect(mockUuidv5).toHaveBeenCalledTimes(2);
           expect(mockUuidv5).toHaveBeenNthCalledWith(1, 'foo-namespace:toy:favorite', 'DNSUUID');
           expect(mockUuidv5).toHaveBeenNthCalledWith(2, 'foo-namespace:dog:pretty', 'DNSUUID');
-          expect(actual).toEqual({
-            id: 'uuidv5',
-            type: 'dog',
-            attributes: { name: 'Sasha' },
-            migrationVersion: { dog: '2.0.0' },
-            references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-            referencesMigrationVersion: kibanaVersion,
-            namespaces: ['foo-namespace'],
-            originId: 'pretty',
-          });
+          expect(actual).toEqual([
+            {
+              id: 'uuidv5',
+              type: 'dog',
+              attributes: { name: 'Sasha' },
+              migrationVersion: { dog: '2.0.0' },
+              references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
+              referencesMigrationVersion: kibanaVersion,
+              namespaces: ['foo-namespace'],
+              originId: 'pretty',
+            },
+            {
+              id: 'foo-namespace:dog:pretty',
+              type: LEGACY_URL_ALIAS_TYPE,
+              attributes: {
+                targetNamespace: 'foo-namespace',
+                targetType: 'dog',
+                targetId: 'uuidv5',
+              },
+              migrationVersion: {},
+              referencesMigrationVersion: kibanaVersion,
+            },
+          ]);
         });
       });
     });

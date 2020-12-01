@@ -51,10 +51,12 @@ export async function migrateRawDocs(
       const savedObject = serializer.rawToSavedObject(raw, options);
       savedObject.migrationVersion = savedObject.migrationVersion || {};
       processedDocs.push(
-        serializer.savedObjectToRaw({
-          references: [],
-          ...(await migrateDocWithoutBlocking(savedObject)),
-        })
+        ...(await migrateDocWithoutBlocking(savedObject)).map((attrs) =>
+          serializer.savedObjectToRaw({
+            references: [],
+            ...attrs,
+          })
+        )
       );
     } else {
       log.error(
@@ -76,7 +78,7 @@ export async function migrateRawDocs(
  */
 function transformNonBlocking(
   transform: MigrateAndConvertFn
-): (doc: SavedObjectUnsanitizedDoc) => Promise<SavedObjectUnsanitizedDoc> {
+): (doc: SavedObjectUnsanitizedDoc) => Promise<SavedObjectUnsanitizedDoc[]> {
   // promises aren't enough to unblock the event loop
   return (doc: SavedObjectUnsanitizedDoc) =>
     new Promise((resolve, reject) => {
