@@ -49,7 +49,7 @@ export const addsException = (exception: Exception) => {
   cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-  cy.get(CONFIRM_BTN).should('not.have.attr', 'disabled');
+  cy.get(CONFIRM_BTN).should('not.exist');
 };
 
 export const addsExceptionFromRuleSettings = (exception: Exception) => {
@@ -67,7 +67,7 @@ export const addsExceptionFromRuleSettings = (exception: Exception) => {
   cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-  cy.get(CONFIRM_BTN).should('not.have.attr', 'disabled');
+  cy.get(CONFIRM_BTN).should('not.exist');
 };
 
 export const goToAlertsTab = () => {
