@@ -131,13 +131,6 @@ export const relatedEventTotalCount: (
   dataSelectors.relatedEventTotalCount
 );
 
-export const relatedEventCountByCategory: (
-  state: ResolverState
-) => (nodeID: string, eventCategory: string) => number | undefined = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventCountByCategory
-);
-
 /**
  * the loading state of the current related event data for the `event_detail` view
  */
@@ -227,15 +220,6 @@ export const graphableProcesses = composeSelectors(
 const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
 
 const nodesAndEdgelines = composeSelectors(dataStateSelector, dataSelectors.nodesAndEdgelines);
-
-/**
- * Total count of related events for a process.
- * @deprecated
- */
-export const relatedEventTotalForProcess = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventTotalForProcess
-);
 
 /**
  * Return the visible edge lines and process nodes based on the camera position at `time`.

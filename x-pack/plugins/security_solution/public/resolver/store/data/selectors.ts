@@ -192,14 +192,6 @@ export const relatedEventTotalCount: (
   }
 );
 
-// /**
-//  * returns a map of entity_ids to related event data.
-//  * @deprecated
-//  */
-// export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRelatedEvents> {
-//   return data.relatedEvents;
-// }
-
 /**
  *
  *
@@ -215,10 +207,6 @@ export function dataRefreshRequestsMade(state: DataState) {
   return state.dataRefreshRequestsMade;
 }
 
-export function dataRefreshIsPending(state: DataState) {
-  return state.dataRefreshIsPending;
-}
-
 /**
  *
  *
@@ -229,104 +217,6 @@ export function dataRefreshIsPending(state: DataState) {
 export function currentRelatedEventData(state: DataState): SafeResolverEvent | null {
   return state.currentRelatedEvent.data;
 }
-// /**
-//  * Get an event (from memory) by its `event.id`.
-//  * @deprecated Use the API to find events by ID
-//  */
-// export const eventByID = createSelector(relatedEventsByEntityId, (relatedEvents) => {
-//   // A map of nodeID to a map of eventID to events. Lazily populated.
-//   const memo = new Map<string, Map<string | number, SafeResolverEvent>>();
-//   return ({ eventID, nodeID }: { eventID: string; nodeID: string }) => {
-//     // We keep related events in a map by their nodeID.
-//     const eventsWrapper = relatedEvents.get(nodeID);
-//     if (!eventsWrapper) {
-//       return undefined;
-//     }
-//     // When an event from a nodeID is requested, build a map for all events related to that node.
-//     if (!memo.has(nodeID)) {
-//       const map = new Map<string | number, SafeResolverEvent>();
-//       for (const event of eventsWrapper.events) {
-//         const id = eventModel.eventIDSafeVersion(event);
-//         if (id !== undefined) {
-//           map.set(id, event);
-//         }
-//       }
-//       memo.set(nodeID, map);
-//     }
-//     const eventMap = memo.get(nodeID);
-//     if (!eventMap) {
-//       // This shouldn't be possible.
-//       return undefined;
-//     }
-//     return eventMap.get(eventID);
-//   };
-// });
-
-/**
- * Returns a function that returns a function (when supplied with an entity id for a node)
- * that returns related events for a node that match an event.category (when supplied with the category)
- * @deprecated
- */
-// export const relatedEventsByCategory: (
-//   state: DataState
-// ) => (node: string, eventCategory: string) => SafeResolverEvent[] = createSelector(
-//   relatedEventsByEntityId,
-//   function (
-//     // eslint-disable-next-line @typescript-eslint/no-shadow
-//     relatedEventsByEntityId
-//   ) {
-//     // A map of nodeID -> event category -> SafeResolverEvent[]
-//     const nodeMap: Map<string, Map<string, SafeResolverEvent[]>> = new Map();
-//     for (const [nodeID, events] of relatedEventsByEntityId) {
-//       // A map of eventCategory -> SafeResolverEvent[]
-//       let categoryMap = nodeMap.get(nodeID);
-//       if (!categoryMap) {
-//         categoryMap = new Map();
-//         nodeMap.set(nodeID, categoryMap);
-//       }
-
-//       for (const event of events.events) {
-//         for (const category of eventModel.eventCategory(event)) {
-//           let eventsInCategory = categoryMap.get(category);
-//           if (!eventsInCategory) {
-//             eventsInCategory = [];
-//             categoryMap.set(category, eventsInCategory);
-//           }
-//           eventsInCategory.push(event);
-//         }
-//       }
-//     }
-
-//     // Use the same empty array for all values that are missing
-//     const emptyArray: SafeResolverEvent[] = [];
-
-//     return (entityID: string, category: string): SafeResolverEvent[] => {
-//       const categoryMap = nodeMap.get(entityID);
-//       if (!categoryMap) {
-//         return emptyArray;
-//       }
-//       const eventsInCategory = categoryMap.get(category);
-//       return eventsInCategory ?? emptyArray;
-//     };
-//   }
-// );
-
-export const relatedEventCountByCategory: (
-  state: DataState
-) => (nodeID: string, eventCategory: string) => number | undefined = createSelector(
-  relatedEventsStats,
-  (statsMap) => {
-    return (nodeID: string, eventCategory: string): number | undefined => {
-      const stats = statsMap(nodeID);
-      if (stats) {
-        const value = Object.prototype.hasOwnProperty.call(stats.events.byCategory, eventCategory);
-        if (typeof value === 'number' && Number.isFinite(value)) {
-          return value;
-        }
-      }
-    };
-  }
-);
 
 /**
  * `true` if there were more children than we got in the last request.
@@ -376,14 +266,6 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
 export function lastResponseParameters(state: DataState): TreeFetcherParameters | null {
   if (state.tree?.lastResponse) {
     return state.tree?.lastResponse?.parameters;
-  } else {
-    return null;
-  }
-}
-
-export function pendingResponseParameters(state: DataState): TreeFetcherParameters | null {
-  if (state.tree?.pendingRequestParameters) {
-    return state.tree?.pendingRequestParameters;
   } else {
     return null;
   }
@@ -637,28 +519,6 @@ export function treeRequestParametersToAbort(state: DataState): TreeFetcherParam
     return null;
   }
 }
-
-/**
- * The sum of all related event categories for a process.
- */
-export const relatedEventTotalForProcess: (
-  state: DataState
-) => (event: SafeResolverEvent) => number | null = createSelector(
-  relatedEventsStats,
-  (statsForProcess) => {
-    return (event: SafeResolverEvent) => {
-      const nodeID = eventModel.entityIDSafeVersion(event);
-      if (nodeID === undefined) {
-        return null;
-      }
-      const stats = statsForProcess(nodeID);
-      if (!stats) {
-        return null;
-      }
-      return stats.events.total;
-    };
-  }
-);
 
 /**
  * Total count of events related to `node`.

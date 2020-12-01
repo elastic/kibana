@@ -220,7 +220,7 @@ function EventDetailBreadcrumbs({
   breadcrumbEventCategory: string;
 }) {
   const countByCategory = useSelector((state: ResolverState) =>
-    selectors.relatedEventCountByCategory(state)(nodeID, breadcrumbEventCategory)
+    selectors.relatedEventCountOfTypeForNode(state)(nodeID, breadcrumbEventCategory)
   );
   const relatedEventCount: number | undefined = useSelector((state: ResolverState) =>
     selectors.relatedEventTotalCount(state)(nodeID)

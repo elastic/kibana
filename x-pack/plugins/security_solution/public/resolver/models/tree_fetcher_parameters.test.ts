@@ -29,9 +29,15 @@ describe('TreeFetcherParameters#equal:', () => {
       { databaseDocumentID: 'b', indices: ['1', '2'] },
       true,
     ],
+    // all parameters the same, except for the request id
+    [
+      { databaseDocumentID: 'b', indices: [], dataRequestID: 0 },
+      { databaseDocumentID: 'b', indices: [], dataRequestID: 1 },
+      false,
+    ],
   ];
   describe.each(cases)('%p when compared to %p', (first, second, expected) => {
-    it(`should ${expected ? '' : 'not'}be equal`, () => {
+    it(`should ${expected ? '' : 'not '}be equal`, () => {
       expect(equal(first, second)).toBe(expected);
     });
   });

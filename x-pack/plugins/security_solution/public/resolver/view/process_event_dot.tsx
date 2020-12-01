@@ -266,10 +266,6 @@ const UnstyledProcessEventDot = React.memo(
       [animationTarget, dispatch, nodeID, processDetailNavProps]
     );
 
-    const grandTotal: number | null = useSelector((state: ResolverState) =>
-      selectors.relatedEventTotalForProcess(state)(event)
-    );
-
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     /**
      * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
@@ -428,13 +424,11 @@ const UnstyledProcessEventDot = React.memo(
             }}
           >
             <EuiFlexItem grow={false} className="related-dropdown">
-              {grandTotal !== null && grandTotal > 0 && (
-                <NodeSubMenu
-                  buttonFill={colorMap.resolverBackground}
-                  relatedEventStats={relatedEventStats}
-                  nodeID={nodeID}
-                />
-              )}
+              <NodeSubMenu
+                buttonFill={colorMap.resolverBackground}
+                relatedEventStats={relatedEventStats}
+                nodeID={nodeID}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </StyledActionsContainer>
