@@ -61,11 +61,9 @@ export const IndexingStatusLogic = kea<MakeLogicType<IndexingStatusValues, Index
           const response = (await HttpLogic.values.http.get(statusPath)) as IIndexingStatus;
           if (response.percentageComplete >= 100) {
             clearInterval(pollingInterval);
-          }
-          actions.setIndexingStatus(response);
-          if (response.percentageComplete >= 100 && onComplete) {
             onComplete(response.numDocumentsWithErrors);
           }
+          actions.setIndexingStatus(response);
         } catch (e) {
           flashAPIErrors(e);
         }
