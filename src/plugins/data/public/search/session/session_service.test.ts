@@ -17,20 +17,27 @@
  * under the License.
  */
 
-import { SessionService } from './session_service';
-import { ISessionService } from '../../common';
-import { coreMock } from '../../../../core/public/mocks';
+import { SessionService, ISessionService } from './session_service';
+import { coreMock } from '../../../../../core/public/mocks';
 import { take, toArray } from 'rxjs/operators';
+import { getSessionsClientMock } from './mocks';
+import { BehaviorSubject } from 'rxjs';
+import { SessionState } from './session_state';
 
 describe('Session service', () => {
   let sessionService: ISessionService;
+  let state$: BehaviorSubject<SessionState>;
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext();
     sessionService = new SessionService(
       initializerContext,
-      coreMock.createSetup().getStartServices
+      coreMock.createSetup().getStartServices,
+      getSessionsClientMock(),
+      { freezeState: false } // needed to use mocks inside state container
     );
+    state$ = new BehaviorSubject<SessionState>(SessionState.None);
+    sessionService.state$.subscribe(state$);
   });
 
   describe('Session management', () => {
@@ -54,6 +61,36 @@ describe('Session service', () => {
       sessionService.clear();
 
       expect(await emittedValues).toEqual(['1', '2', undefined]);
+    });
+
+    it('Tracks searches for current session', () => {
+      expect(() => sessionService.trackSearch({ abort: () => {} })).toThrowError();
+      expect(state$.getValue()).toBe(SessionState.None);
+
+      sessionService.start();
+      const untrack1 = sessionService.trackSearch({ abort: () => {} });
+      expect(state$.getValue()).toBe(SessionState.Loading);
+      const untrack2 = sessionService.trackSearch({ abort: () => {} });
+      expect(state$.getValue()).toBe(SessionState.Loading);
+      untrack1();
+      expect(state$.getValue()).toBe(SessionState.Loading);
+      untrack2();
+      expect(state$.getValue()).toBe(SessionState.Completed);
+    });
+
+    it('Cancels all tracked searches within current session', async () => {
+      const abort = jest.fn();
+
+      sessionService.start();
+      sessionService.trackSearch({ abort });
+      sessionService.trackSearch({ abort });
+      sessionService.trackSearch({ abort });
+      const untrack = sessionService.trackSearch({ abort });
+
+      untrack();
+      await sessionService.cancel();
+
+      expect(abort).toBeCalledTimes(3);
     });
   });
 });
