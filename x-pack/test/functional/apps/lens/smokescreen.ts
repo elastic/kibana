@@ -12,6 +12,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
+  const elasticChart = getService('elasticChart');
+  const retry = getService('retry');
 
   describe('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
@@ -189,6 +191,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).to.equal(true);
       await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
       await testSubjects.missingOrFail('lnsXY_yDimensionPanel > lns-dimensionTrigger');
+    });
+
+    it('should allow creation of a multi-axis chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('bar');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'geo.dest',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'cardinality',
+        field: 'bytes',
+        keepOpen: true,
+      });
+
+      await PageObjects.lens.changeAxisSide('right');
+
+      await PageObjects.lens.closeDimensionEditor();
+
+      await retry.tryForTime(3000, async () => {
+        const data = await PageObjects.lens.getCurrentChartDebugState();
+        expect(data?.axes?.y.length).to.eql(2);
+        expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(true);
+      });
     });
 
     it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {

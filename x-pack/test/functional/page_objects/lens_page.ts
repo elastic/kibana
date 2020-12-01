@@ -328,6 +328,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async changeAxisSide(newSide: string) {
+      await testSubjects.click(`lnsXY_axisSide_groups_${newSide}`);
+    },
+
     /**
      * Checks a specific subvisualization in the chart switcher for a "data loss" indicator
      *
