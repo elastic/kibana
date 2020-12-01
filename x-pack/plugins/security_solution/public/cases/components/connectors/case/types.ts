@@ -4,4 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getActionType as getCaseConnectorUI } from './case';
+export interface CaseActionParams {
+  subAction: string;
+  subActionParams: {
+    caseId: string;
+    comment: {
+      alertId: string;
+      index: string;
+      type: 'alert';
+    };
+  };
+}
