@@ -19567,7 +19567,7 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredApiUrlTextField": "URLが必要です。",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredDescriptionTextField": "説明が必要です。",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredEmailTextField": "電子メールアドレスまたはユーザー名が必要です",
-    "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredProjectKeyTextField": "プロジェクトキーが必要です",,
+    "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredProjectKeyTextField": "プロジェクトキーが必要です",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.searchIssuesComboBoxAriaLabel": "親問題を選択",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.searchIssuesComboBoxPlaceholder": "親問題を選択",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.searchIssuesLoading": "読み込み中…",
