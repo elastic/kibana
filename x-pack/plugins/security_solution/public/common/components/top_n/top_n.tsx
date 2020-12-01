@@ -132,6 +132,7 @@ const TopNComponent: React.FC<Props> = ({
             filters={filters}
             from={from}
             headerChildren={headerChildren}
+            indexPattern={indexPattern}
             onlyField={field}
             query={query}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}

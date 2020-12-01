@@ -17,11 +17,13 @@ export const NetworkTopCountriesQueryTable = ({
   endDate,
   filterQuery,
   flowTarget,
+  indexNames,
   ip,
   setQuery,
   skip,
   startDate,
   type,
+  indexPattern,
 }: NetworkWithIndexComponentsQueryTableProps) => {
   const [
     loading,
@@ -30,6 +32,7 @@ export const NetworkTopCountriesQueryTable = ({
     endDate,
     flowTarget,
     filterQuery,
+    indexNames,
     ip,
     skip,
     startDate,
@@ -42,6 +45,7 @@ export const NetworkTopCountriesQueryTable = ({
       fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       flowTargeted={flowTarget}
       id={id}
+      indexPattern={indexPattern}
       inspect={inspect}
       isInspect={isInspected}
       loading={loading}

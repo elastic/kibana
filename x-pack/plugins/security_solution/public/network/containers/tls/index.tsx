@@ -26,7 +26,6 @@ import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common
 
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const ID = 'networkTlsQuery';
 
@@ -43,6 +42,7 @@ export interface NetworkTlsArgs {
 
 interface UseNetworkTls {
   flowTarget: FlowTargetSourceDest;
+  indexNames: string[];
   ip: string;
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
@@ -57,6 +57,7 @@ export const useNetworkTls = ({
   filterQuery,
   flowTarget,
   id = ID,
+  indexNames,
   ip,
   skip,
   startDate,
@@ -70,7 +71,6 @@ export const useNetworkTls = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const { selectedPatterns: indexNames } = useSourcererScope();
 
   const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions | null>(
     !skip

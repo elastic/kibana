@@ -26,8 +26,10 @@ import { HostAlertsQueryTabBody } from './navigation/alerts_query_tab_body';
 export const HostsTabs = memo<HostsTabsProps>(
   ({
     deleteQuery,
+    docValueFields,
     filterQuery,
     from,
+    indexNames,
     isInitializing,
     setAbsoluteRangeDatePicker,
     setQuery,
@@ -65,6 +67,7 @@ export const HostsTabs = memo<HostsTabsProps>(
       deleteQuery,
       endDate: to,
       filterQuery,
+      indexNames,
       skip: isInitializing,
       setQuery,
       startDate: from,
@@ -76,10 +79,10 @@ export const HostsTabs = memo<HostsTabsProps>(
     return (
       <Switch>
         <Route path={`/:tabName(${HostsTableType.hosts})`}>
-          <HostsQueryTabBody {...tabProps} />
+          <HostsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
         <Route path={`/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
+          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
         <Route path={`/:tabName(${HostsTableType.uncommonProcesses})`}>
           <UncommonProcessQueryTabBody {...tabProps} />

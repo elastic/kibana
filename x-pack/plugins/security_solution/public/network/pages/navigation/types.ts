@@ -5,6 +5,7 @@
  */
 
 import { ESTermQuery } from '../../../../common/typed_json';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 import { NavTab } from '../../../common/components/navigation/types';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
@@ -22,6 +23,7 @@ interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQue
   endDate: string;
   filterQuery?: string | ESTermQuery;
   narrowDateRange?: NarrowDateRange;
+  indexNames: string[];
 }
 
 export type NetworkComponentQueryProps = QueryTabBodyProps & {
@@ -29,6 +31,7 @@ export type NetworkComponentQueryProps = QueryTabBodyProps & {
 };
 
 export type IPsQueryTabBodyProps = QueryTabBodyProps & {
+  indexPattern: IIndexPattern;
   flowTarget: FlowTargetSourceDest;
 };
 
@@ -42,9 +45,12 @@ export type HttpQueryTabBodyProps = QueryTabBodyProps & {
 };
 
 export type NetworkRoutesProps = GlobalTimeArgs & {
+  docValueFields: DocValueFields[];
   networkPagePath: string;
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
+  indexPattern: IIndexPattern;
+  indexNames: string[];
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 };
 

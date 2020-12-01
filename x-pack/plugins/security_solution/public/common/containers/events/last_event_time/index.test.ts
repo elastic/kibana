@@ -41,12 +41,6 @@ jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('../../sourcerer', () => ({
-  useSourcererScope: jest.fn().mockReturnValue({
-    docValueFields: [],
-    selectedPatterns: [],
-  }),
-}));
 describe('useTimelineLastEventTime', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -62,6 +56,8 @@ describe('useTimelineLastEventTime', () => {
         useTimelineLastEventTime({
           indexKey: LastEventIndexKey.hostDetails,
           details: {},
+          docValueFields: [],
+          indexNames: [],
         })
       );
       await waitForNextUpdate();
@@ -79,6 +75,8 @@ describe('useTimelineLastEventTime', () => {
           useTimelineLastEventTime({
             indexKey: LastEventIndexKey.hostDetails,
             details: {},
+            docValueFields: [],
+            indexNames: [],
           })
       );
       await waitForNextUpdate();
@@ -102,6 +100,8 @@ describe('useTimelineLastEventTime', () => {
         useTimelineLastEventTime({
           indexKey: LastEventIndexKey.hostDetails,
           details: {},
+          docValueFields: [],
+          indexNames: [],
         })
       );
       await waitForNextUpdate();

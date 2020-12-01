@@ -9,7 +9,6 @@ import React from 'react';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import { TimelineId } from '../../../../common/types/timeline';
 import { AlertsView } from '../../../common/components/alerts_viewer';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { NetworkComponentQueryProps } from './types';
 
 export const filterNetworkData: Filter[] = [
@@ -63,17 +62,12 @@ export const filterNetworkData: Filter[] = [
   },
 ];
 
-export const NetworkAlertsQueryTabBody = React.memo((alertsProps: NetworkComponentQueryProps) => {
-  const { selectedPatterns: indexNames } = useSourcererScope();
-
-  return (
-    <AlertsView
-      timelineId={TimelineId.networkPageExternalAlerts}
-      {...alertsProps}
-      indexNames={indexNames}
-      pageFilters={filterNetworkData}
-    />
-  );
-});
+export const NetworkAlertsQueryTabBody = React.memo((alertsProps: NetworkComponentQueryProps) => (
+  <AlertsView
+    timelineId={TimelineId.networkPageExternalAlerts}
+    {...alertsProps}
+    pageFilters={filterNetworkData}
+  />
+));
 
 NetworkAlertsQueryTabBody.displayName = 'NetworkAlertsQueryTabBody';

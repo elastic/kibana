@@ -19,9 +19,11 @@ const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
 export const CountriesQueryTabBody = ({
   endDate,
   filterQuery,
+  indexNames,
   skip,
   startDate,
   setQuery,
+  indexPattern,
   flowTarget,
 }: CountriesQueryTabBodyProps) => {
   const [
@@ -31,6 +33,7 @@ export const CountriesQueryTabBody = ({
     endDate,
     flowTarget,
     filterQuery,
+    indexNames,
     skip,
     startDate,
     type: networkModel.NetworkType.page,
@@ -42,6 +45,7 @@ export const CountriesQueryTabBody = ({
       fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       flowTargeted={flowTarget}
       id={id}
+      indexPattern={indexPattern}
       inspect={inspect}
       isInspect={isInspected}
       loading={loading}

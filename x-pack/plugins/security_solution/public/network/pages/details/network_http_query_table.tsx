@@ -16,6 +16,7 @@ const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
 export const NetworkHttpQueryTable = ({
   endDate,
   filterQuery,
+  indexNames,
   ip,
   setQuery,
   skip,
@@ -28,6 +29,7 @@ export const NetworkHttpQueryTable = ({
   ] = useNetworkHttp({
     endDate,
     filterQuery,
+    indexNames,
     ip,
     skip,
     startDate,

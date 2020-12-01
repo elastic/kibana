@@ -28,7 +28,6 @@ import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common
 import * as i18n from './translations';
 import { InspectResponse } from '../../../types';
 import { getInspectResponse } from '../../../helpers';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const ID = 'networkHttpQuery';
 
@@ -47,6 +46,7 @@ export interface NetworkHttpArgs {
 interface UseNetworkHttp {
   id?: string;
   ip?: string;
+  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -58,6 +58,7 @@ export const useNetworkHttp = ({
   endDate,
   filterQuery,
   id = ID,
+  indexNames,
   ip,
   skip,
   startDate,
@@ -69,7 +70,6 @@ export const useNetworkHttp = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const { selectedPatterns: indexNames } = useSourcererScope();
 
   const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptions | null>(
     !skip

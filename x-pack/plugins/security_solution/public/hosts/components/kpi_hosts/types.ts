@@ -11,6 +11,7 @@ export interface HostsKpiProps {
   filterQuery: string;
   from: string;
   to: string;
+  indexNames: string[];
   narrowDateRange: UpdateDateRange;
   setQuery: GlobalTimeArgs['setQuery'];
   skip: boolean;

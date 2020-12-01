@@ -22,7 +22,6 @@ import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { networkSelectors } from '../../store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 
@@ -48,8 +47,10 @@ export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
 
 const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   deleteQuery,
+  docValueFields,
   endDate,
   filterQuery,
+  indexNames,
   skip,
   startDate,
   setQuery,
@@ -60,14 +61,22 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     (state) => getNetworkDnsSelector(state).isPtrIncluded
   );
 
-  const { docValueFields, selectedPatterns: indexNames } = useSourcererScope();
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: HISTOGRAM_ID });
+      }
+    };
+  }, [deleteQuery]);
 
   const [
     loading,
     { totalCount, networkDns, pageInfo, loadPage, id, inspect, isInspected, refetch },
   ] = useNetworkDns({
+    docValueFields: docValueFields ?? [],
     endDate,
     filterQuery,
+    indexNames,
     skip,
     startDate,
     type,
@@ -85,14 +94,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     }),
     [getTitle]
   );
-
-  useEffect(() => {
-    return () => {
-      if (deleteQuery) {
-        deleteQuery({ id: HISTOGRAM_ID });
-      }
-    };
-  }, [deleteQuery]);
 
   return (
     <>

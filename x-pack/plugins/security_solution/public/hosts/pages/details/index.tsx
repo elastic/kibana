@@ -120,7 +120,12 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               <HeaderPage
                 border
                 subtitle={
-                  <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={detailName} />
+                  <LastEventTime
+                    docValueFields={docValueFields}
+                    indexKey={LastEventIndexKey.hostDetails}
+                    hostName={detailName}
+                    indexNames={selectedPatterns}
+                  />
                 }
                 title={detailName}
               />
@@ -173,6 +178,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               <HostsDetailsKpiComponent
                 filterQuery={filterQuery}
                 from={from}
+                indexNames={selectedPatterns}
                 setQuery={setQuery}
                 to={to}
                 narrowDateRange={narrowDateRange}

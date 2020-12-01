@@ -19,7 +19,6 @@ import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { HostsKpiChartColors } from '../../components/kpi_hosts/types';
 import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 
@@ -64,8 +63,10 @@ const histogramConfigs: MatrixHistogramConfigs = {
 
 const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   deleteQuery,
+  docValueFields,
   endDate,
   filterQuery,
+  indexNames,
   skip,
   setQuery,
   startDate,
@@ -75,13 +76,14 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
     loading,
     { authentications, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
   ] = useAuthentications({
+    docValueFields,
     endDate,
     filterQuery,
+    indexNames,
     skip,
     startDate,
     type,
   });
-  const { selectedPatterns: indexNames } = useSourcererScope();
 
   useEffect(() => {
     return () => {

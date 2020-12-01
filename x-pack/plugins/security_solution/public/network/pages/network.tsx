@@ -90,7 +90,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [dispatch]
     );
 
-    const { indicesExist, indexPattern } = useSourcererScope();
+    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
     const filterQuery = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -117,7 +117,13 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
               <Display show={!globalFullScreen}>
                 <HeaderPage
                   border
-                  subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
+                  subtitle={
+                    <LastEventTime
+                      docValueFields={docValueFields}
+                      indexKey={LastEventIndexKey.network}
+                      indexNames={selectedPatterns}
+                    />
+                  }
                   title={i18n.PAGE_TITLE}
                 />
 
@@ -134,6 +140,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <NetworkKpiComponent
                   filterQuery={filterQuery}
                   from={from}
+                  indexNames={selectedPatterns}
                   narrowDateRange={narrowDateRange}
                   setQuery={setQuery}
                   skip={isInitializing}
@@ -152,9 +159,12 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   </Display>
 
                   <NetworkRoutes
+                    docValueFields={docValueFields}
                     filterQuery={tabsFilterQuery}
                     from={from}
                     isInitializing={isInitializing}
+                    indexPattern={indexPattern}
+                    indexNames={selectedPatterns}
                     setQuery={setQuery}
                     setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     type={networkModel.NetworkType.page}

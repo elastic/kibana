@@ -7,6 +7,7 @@
 import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { CountryFlagAndName } from '../source_destination/country_flag';
 import {
@@ -45,7 +46,9 @@ export type NetworkTopCountriesColumnsNetworkDetails = [
 ];
 
 export const getNetworkTopCountriesColumns = (
+  indexPattern: IIndexPattern,
   flowTarget: FlowTargetSourceDest,
+  type: networkModel.NetworkType,
   tableId: string
 ): NetworkTopCountriesColumns => [
   {
@@ -157,11 +160,12 @@ export const getNetworkTopCountriesColumns = (
 ];
 
 export const getCountriesColumnsCurated = (
+  indexPattern: IIndexPattern,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
 ): NetworkTopCountriesColumns | NetworkTopCountriesColumnsNetworkDetails => {
-  const columns = getNetworkTopCountriesColumns(flowTarget, tableId);
+  const columns = getNetworkTopCountriesColumns(indexPattern, flowTarget, type, tableId);
 
   // Columns to exclude from host details pages
   if (type === networkModel.NetworkType.details) {

@@ -9,7 +9,6 @@ import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo, useCallback } from 'react';
-import deepEqual from 'fast-deep-equal';
 
 import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { ESQuery } from '../../../../common/typed_json';
@@ -131,12 +130,4 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
 
 OverviewHostComponent.displayName = 'OverviewHostComponent';
 
-export const OverviewHost = React.memo(
-  OverviewHostComponent,
-  (prevProps, nextProps) =>
-    prevProps.endDate === nextProps.endDate &&
-    prevProps.filterQuery === nextProps.filterQuery &&
-    prevProps.startDate === nextProps.startDate &&
-    prevProps.setQuery === nextProps.setQuery &&
-    deepEqual(prevProps.indexNames, nextProps.indexNames)
-);
+export const OverviewHost = React.memo(OverviewHostComponent);

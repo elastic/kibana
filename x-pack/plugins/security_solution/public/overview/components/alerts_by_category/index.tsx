@@ -13,7 +13,12 @@ import { SHOWING, UNIT } from '../../../common/components/alerts_viewer/translat
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { Filter, esQuery, Query } from '../../../../../../../src/plugins/data/public';
+import {
+  Filter,
+  esQuery,
+  IIndexPattern,
+  Query,
+} from '../../../../../../../src/plugins/data/public';
 import { HostsTableType } from '../../../hosts/store/model';
 
 import * as i18n from '../../pages/translations';
@@ -27,7 +32,6 @@ import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkButton } from '../../../common/components/links';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const ID = 'alertsByCategoryOverview';
 
@@ -38,6 +42,8 @@ const DEFAULT_STACK_BY = 'event.module';
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   filters?: Filter[];
   hideHeaderChildren?: boolean;
+  indexPattern: IIndexPattern;
+  indexNames: string[];
   query?: Query;
 }
 
@@ -46,16 +52,18 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   filters = NO_FILTERS,
   from,
   hideHeaderChildren = false,
+  indexPattern,
+  indexNames,
   query = DEFAULT_QUERY,
   setQuery,
   to,
 }) => {
-  const kibana = useKibana();
+  const {
+    uiSettings,
+    application: { navigateToApp },
+  } = useKibana().services;
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.hosts);
-  const { navigateToApp } = kibana.services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-
-  const { indexPattern, selectedPatterns: indexNames } = useSourcererScope();
 
   const goToHostAlerts = useCallback(
     (ev) => {
@@ -96,12 +104,12 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   const filterQuery = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+        config: esQuery.getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters,
       }),
-    [filters, indexPattern, kibana.services.uiSettings, query]
+    [filters, indexPattern, uiSettings, query]
   );
 
   useEffect(() => {
@@ -110,8 +118,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
         deleteQuery({ id: ID });
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [deleteQuery]);
 
   return (
     <MatrixHistogram

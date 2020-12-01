@@ -9,7 +9,7 @@ import React from 'react';
 
 import { OverviewHostProps } from '../overview_host';
 import { OverviewNetworkProps } from '../overview_network';
-import { TestProviders } from '../../../common/mock';
+import { mockIndexPattern, TestProviders } from '../../../common/mock';
 import '../../../common/mock/match_media';
 
 import { EventCounts } from '.';
@@ -22,6 +22,8 @@ describe('EventCounts', () => {
 
   const testProps = {
     from,
+    indexNames: [],
+    indexPattern: mockIndexPattern,
     setQuery: jest.fn(),
     to,
   };
@@ -30,7 +32,7 @@ describe('EventCounts', () => {
     const wrapper = mount(<EventCounts {...testProps} />, { wrappingComponent: TestProviders });
 
     expect(
-      (wrapper.find('OverviewHostComponent').first().props() as OverviewHostProps).filterQuery
+      (wrapper.find('Memo(OverviewHostComponent)').first().props() as OverviewHostProps).filterQuery
     ).toContain('[{"bool":{"should":[{"exists":{"field":"host.name"}}]');
   });
 
@@ -38,7 +40,8 @@ describe('EventCounts', () => {
     const wrapper = mount(<EventCounts {...testProps} />, { wrappingComponent: TestProviders });
 
     expect(
-      (wrapper.find('OverviewNetworkComponent').first().props() as OverviewNetworkProps).filterQuery
+      (wrapper.find('Memo(OverviewNetworkComponent)').first().props() as OverviewNetworkProps)
+        .filterQuery
     ).toContain(
       '{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"exists":{"field":"source.ip"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"destination.ip"}}],"minimum_should_match":1}}],"minimum_should_match":1}}]}}]'
     );

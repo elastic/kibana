@@ -129,7 +129,14 @@ const NetworkDetailsComponent: React.FC = () => {
               border
               data-test-subj="network-details-headline"
               draggableArguments={headerDraggableArguments}
-              subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
+              subtitle={
+                <LastEventTime
+                  docValueFields={docValueFields}
+                  indexKey={LastEventIndexKey.ipDetails}
+                  indexNames={selectedPatterns}
+                  ip={ip}
+                />
+              }
               title={ip}
             >
               <FlowTargetSelectConnected flowTarget={flowTarget} />
@@ -160,11 +167,13 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   filterQuery={filterQuery}
                   flowTarget={FlowTargetSourceDest.source}
+                  indexNames={selectedPatterns}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
+                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
 
@@ -173,11 +182,13 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   flowTarget={FlowTargetSourceDest.destination}
                   filterQuery={filterQuery}
+                  indexNames={selectedPatterns}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
+                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
             </ConditionalFlexGroup>
@@ -190,11 +201,13 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   filterQuery={filterQuery}
                   flowTarget={FlowTargetSourceDest.source}
+                  indexNames={selectedPatterns}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
+                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
 
@@ -203,11 +216,13 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   flowTarget={FlowTargetSourceDest.destination}
                   filterQuery={filterQuery}
+                  indexNames={selectedPatterns}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
+                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
             </ConditionalFlexGroup>
@@ -218,6 +233,7 @@ const NetworkDetailsComponent: React.FC = () => {
               endDate={to}
               filterQuery={filterQuery}
               flowTarget={flowTarget}
+              indexNames={selectedPatterns}
               ip={ip}
               skip={isInitializing}
               startDate={from}
@@ -230,6 +246,7 @@ const NetworkDetailsComponent: React.FC = () => {
             <NetworkHttpQueryTable
               endDate={to}
               filterQuery={filterQuery}
+              indexNames={selectedPatterns}
               ip={ip}
               skip={isInitializing}
               startDate={from}
@@ -243,6 +260,7 @@ const NetworkDetailsComponent: React.FC = () => {
               endDate={to}
               filterQuery={filterQuery}
               flowTarget={(flowTarget as unknown) as FlowTargetSourceDest}
+              indexNames={selectedPatterns}
               ip={ip}
               setQuery={setQuery}
               skip={isInitializing}
@@ -258,6 +276,7 @@ const NetworkDetailsComponent: React.FC = () => {
               startDate={from}
               endDate={to}
               skip={isInitializing}
+              indexNames={selectedPatterns}
               ip={ip}
               type={type}
               flowTarget={flowTarget}
