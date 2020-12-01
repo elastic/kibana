@@ -89,6 +89,8 @@ Here's a list of the available global configuration options and an explanation o
 * `xpack.actions.proxyRejectUnauthorizedCertificates`: Set to `false` to bypass certificate validation for proxy, if using a proxy for actions.
 * `xpack.actions.rejectUnauthorized`: Set to `false` to bypass certificate validation for actions.
 
+*NOTE:* As an alternative to both `xpack.actions.proxyRejectUnauthorizedCertificates` and `xpack.actions.rejectUnauthorized`, the OS level environment variable `NODE_EXTRA_CA_CERTS` can be set to point to a file that contains the root CA(s) needed for certificates to be trusted. 
+
 [float]
 === Managing alerts
 

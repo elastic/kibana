@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
-import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../../common/constants/search';
+import {
+  SEARCH_QUERY_LANGUAGE,
+  ErrorMessage,
+  SearchQueryLanguage,
+} from '../../../../../../common/constants/search';
 
 import {
   esKuery,
@@ -30,7 +34,7 @@ interface Props {
   setSearchString(s: Query['query']): void;
   searchQuery: Query['query'];
   setSearchQuery(q: Query['query']): void;
-  searchQueryLanguage: SEARCH_QUERY_LANGUAGE;
+  searchQueryLanguage: SearchQueryLanguage;
   setSearchQueryLanguage(q: any): void;
   samplerShardSize: number;
   setSamplerShardSize(s: number): void;
