@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
+exports[`FieldName renders a geo field 1`] = `
 <div
   class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
 >
@@ -24,7 +24,7 @@ exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
       class="euiToolTipAnchor eui-textTruncate"
     >
       <span>
-        t.t.test
+        test.test.test
       </span>
     </span>
   </div>

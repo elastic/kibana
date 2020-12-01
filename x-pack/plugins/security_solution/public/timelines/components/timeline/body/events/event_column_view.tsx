@@ -46,7 +46,6 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   isEventPinned: boolean;
   isEventViewer?: boolean;
-  loading: boolean;
   loadingEventIds: Readonly<string[]>;
   onColumnResized: OnColumnResized;
   onEventToggled: () => void;
@@ -81,7 +80,6 @@ export const EventColumnView = React.memo<Props>(
     getNotesByIds,
     isEventPinned = false,
     isEventViewer = false,
-    loading,
     loadingEventIds,
     onColumnResized,
     onEventToggled,
@@ -194,7 +192,6 @@ export const EventColumnView = React.memo<Props>(
           expanded={expanded}
           data-test-subj="actions"
           eventId={id}
-          loading={loading}
           loadingEventIds={loadingEventIds}
           onEventToggled={onEventToggled}
           showCheckboxes={showCheckboxes}

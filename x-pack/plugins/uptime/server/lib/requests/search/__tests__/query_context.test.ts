@@ -19,9 +19,7 @@ describe(QueryContext, () => {
   };
 
   let qc: QueryContext;
-  beforeEach(
-    () => (qc = new QueryContext({}, 'indexName', rangeStart, rangeEnd, pagination, null, 10))
-  );
+  beforeEach(() => (qc = new QueryContext({}, rangeStart, rangeEnd, pagination, null, 10)));
 
   describe('dateRangeFilter()', () => {
     const expectedRange = {

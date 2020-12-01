@@ -10,7 +10,7 @@ export function useAnomalyDetectionJobs() {
   return useFetcher(
     (callApmApi) =>
       callApmApi({
-        pathname: `/api/apm/settings/anomaly-detection`,
+        endpoint: `GET /api/apm/settings/anomaly-detection`,
       }),
     [],
     { showToastOnError: false }

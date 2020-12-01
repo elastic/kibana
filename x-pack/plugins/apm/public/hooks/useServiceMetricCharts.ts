@@ -17,7 +17,8 @@ const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
 
 export function useServiceMetricCharts(
   urlParams: IUrlParams,
-  agentName?: string
+  agentName?: string,
+  serviceNodeName?: string
 ) {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end } = urlParams;
@@ -26,10 +27,11 @@ export function useServiceMetricCharts(
     (callApmApi) => {
       if (serviceName && start && end && agentName) {
         return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/metrics/charts',
+          endpoint: 'GET /api/apm/services/{serviceName}/metrics/charts',
           params: {
             path: { serviceName },
             query: {
+              serviceNodeName,
               start,
               end,
               agentName,
@@ -39,7 +41,7 @@ export function useServiceMetricCharts(
         });
       }
     },
-    [serviceName, start, end, agentName, uiFilters]
+    [serviceName, start, end, agentName, serviceNodeName, uiFilters]
   );
 
   return {

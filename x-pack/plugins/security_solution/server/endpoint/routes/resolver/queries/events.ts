@@ -54,9 +54,9 @@ export class EventsQuery {
     if (kql) {
       kqlQuery.push(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kql)));
     }
-    const response: ApiResponse<SearchResponse<
-      SafeResolverEvent
-    >> = await client.asCurrentUser.search(this.buildSearch(kqlQuery));
+    const response: ApiResponse<
+      SearchResponse<SafeResolverEvent>
+    > = await client.asCurrentUser.search(this.buildSearch(kqlQuery));
     return response.body.hits.hits.map((hit) => hit._source);
   }
 }

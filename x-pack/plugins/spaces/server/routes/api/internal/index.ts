@@ -5,12 +5,12 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { SpacesServiceSetup } from '../../../spaces_service/spaces_service';
+import { SpacesServiceStart } from '../../../spaces_service/spaces_service';
 import { initGetActiveSpaceApi } from './get_active_space';
 
 export interface InternalRouteDeps {
   internalRouter: IRouter;
-  spacesService: SpacesServiceSetup;
+  getSpacesService: () => SpacesServiceStart;
 }
 
 export function initInternalSpacesApi(deps: InternalRouteDeps) {

@@ -776,7 +776,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiPanel"
+                  class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
                 >
                   <div
                     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"

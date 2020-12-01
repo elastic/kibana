@@ -23,10 +23,9 @@ import { EndpointAppContext } from '../../endpoint/types';
 export function compose(
   core: CoreSetup,
   plugins: SetupPlugins,
-  isProductionMode: boolean,
   endpointContext: EndpointAppContext
 ): AppBackendLibs {
-  const framework = new KibanaBackendFrameworkAdapter(core, plugins, isProductionMode);
+  const framework = new KibanaBackendFrameworkAdapter(core, plugins);
   const sources = new Sources(new ConfigurationSourcesAdapter());
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 

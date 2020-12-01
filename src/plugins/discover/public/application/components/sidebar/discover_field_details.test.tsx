@@ -48,55 +48,46 @@ describe('discover sidebar field details', function () {
   }
 
   it('should enable the visualize link for a number field', function () {
-    const visualizableField = new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    );
+    const visualizableField = new IndexPatternField({
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
     const comp = mountComponent(visualizableField);
     expect(findTestSubject(comp, 'fieldVisualize-bytes')).toBeTruthy();
   });
 
   it('should disable the visualize link for an _id field', function () {
-    const conflictField = new IndexPatternField(
-      {
-        name: '_id',
-        type: 'string',
-        esTypes: ['_id'],
-        count: 0,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'test'
-    );
+    const conflictField = new IndexPatternField({
+      name: '_id',
+      type: 'string',
+      esTypes: ['_id'],
+      count: 0,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
     const comp = mountComponent(conflictField);
     expect(findTestSubject(comp, 'fieldVisualize-_id')).toEqual({});
   });
 
   it('should disable the visualize link for an unknown field', function () {
-    const unknownField = new IndexPatternField(
-      {
-        name: 'test',
-        type: 'unknown',
-        esTypes: ['double'],
-        count: 0,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'test'
-    );
+    const unknownField = new IndexPatternField({
+      name: 'test',
+      type: 'unknown',
+      esTypes: ['double'],
+      count: 0,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
     const comp = mountComponent(unknownField);
     expect(findTestSubject(comp, 'fieldVisualize-test')).toEqual({});
   });

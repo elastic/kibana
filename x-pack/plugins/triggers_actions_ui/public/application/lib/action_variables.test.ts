@@ -32,8 +32,16 @@ describe('transformActionVariables', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
         },
       ]
     `);
@@ -67,8 +75,16 @@ describe('transformActionVariables', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
         },
         Object {
           "description": "foo-description",
@@ -110,8 +126,16 @@ describe('transformActionVariables', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
         },
         Object {
           "description": "foo-description",
@@ -156,8 +180,16 @@ describe('transformActionVariables', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
         },
         Object {
           "description": "fooC-description",

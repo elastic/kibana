@@ -31,7 +31,7 @@ export const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
 
 export const getPinTooltip = ({
   isPinned,
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   eventHasNotes,
   timelineType,
 }: {

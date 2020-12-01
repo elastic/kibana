@@ -24,7 +24,7 @@ import { AgentConfigurationList } from './List';
 export function AgentConfigurations() {
   const { refetch, data = [], status } = useFetcher(
     (callApmApi) =>
-      callApmApi({ pathname: '/api/apm/settings/agent-configuration' }),
+      callApmApi({ endpoint: 'GET /api/apm/settings/agent-configuration' }),
     [],
     { preservePreviousData: false, showToastOnError: false }
   );
