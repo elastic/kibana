@@ -42,8 +42,11 @@ import {
 } from './settings/apm_indices';
 import { metricsChartsRoute } from './metrics';
 import { serviceNodesRoute } from './service_nodes';
-import { tracesRoute, tracesByIdRoute } from './traces';
-import { transactionByTraceIdRoute } from './transaction';
+import {
+  tracesRoute,
+  tracesByIdRoute,
+  rootTransactionByTraceIdRoute,
+} from './traces';
 import {
   correlationsForSlowTransactionsRoute,
   correlationsForFailedTransactionsRoute,
@@ -147,6 +150,7 @@ const createApmApi = () => {
     // Traces
     .add(tracesRoute)
     .add(tracesByIdRoute)
+    .add(rootTransactionByTraceIdRoute)
 
     // Transaction groups
     .add(transactionGroupsBreakdownRoute)
@@ -165,9 +169,6 @@ const createApmApi = () => {
     .add(transactionsLocalFiltersRoute)
     .add(serviceNodesLocalFiltersRoute)
     .add(uiFiltersEnvironmentsRoute)
-
-    // Transaction
-    .add(transactionByTraceIdRoute)
 
     // Service map
     .add(serviceMapRoute)
