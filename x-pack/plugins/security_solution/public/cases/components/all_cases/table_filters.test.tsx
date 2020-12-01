@@ -25,6 +25,7 @@ const setFilterRefetch = jest.fn();
 const props = {
   countClosedCases: 1234,
   countOpenCases: 99,
+  countInProgressCases: 54,
   onFilterChanged,
   initial: DEFAULT_FILTER_OPTIONS,
   setFilterRefetch,
@@ -41,6 +42,7 @@ describe('CasesTableFilters ', () => {
       fetchReporters,
     });
   });
+
   it('should render the initial case count', () => {
     const wrapper = mount(
       <TestProviders>
@@ -54,6 +56,7 @@ describe('CasesTableFilters ', () => {
       'Closed cases (1234)'
     );
   });
+
   it('should call onFilterChange when selected tags change', () => {
     const wrapper = mount(
       <TestProviders>
@@ -65,6 +68,7 @@ describe('CasesTableFilters ', () => {
 
     expect(onFilterChanged).toBeCalledWith({ tags: ['coke'] });
   });
+
   it('should call onFilterChange when selected reporters change', () => {
     const wrapper = mount(
       <TestProviders>
@@ -80,6 +84,7 @@ describe('CasesTableFilters ', () => {
 
     expect(onFilterChanged).toBeCalledWith({ reporters: [{ username: 'casetester' }] });
   });
+
   it('should call onFilterChange when search changes', () => {
     const wrapper = mount(
       <TestProviders>
@@ -93,6 +98,7 @@ describe('CasesTableFilters ', () => {
       .simulate('keyup', { key: 'Enter', target: { value: 'My search' } });
     expect(onFilterChanged).toBeCalledWith({ search: 'My search' });
   });
+
   it('should call onFilterChange when status toggled', () => {
     const wrapper = mount(
       <TestProviders>
@@ -103,6 +109,7 @@ describe('CasesTableFilters ', () => {
 
     expect(onFilterChanged).toBeCalledWith({ status: CaseStatuses.closed });
   });
+
   it('should call on load setFilterRefetch', () => {
     mount(
       <TestProviders>
@@ -111,6 +118,7 @@ describe('CasesTableFilters ', () => {
     );
     expect(setFilterRefetch).toHaveBeenCalled();
   });
+
   it('should remove tag from selected tags when tag no longer exists', () => {
     const ourProps = {
       ...props,
@@ -126,6 +134,7 @@ describe('CasesTableFilters ', () => {
     );
     expect(onFilterChanged).toHaveBeenCalledWith({ tags: ['pepsi'] });
   });
+
   it('should remove reporter from selected reporters when reporter no longer exists', () => {
     const ourProps = {
       ...props,

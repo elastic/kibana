@@ -18,7 +18,12 @@ import {
   getCommentContextFromAttributes,
 } from '../utils';
 
-import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../../../../common/api';
+import {
+  CaseExternalServiceRequestRt,
+  CaseResponseRt,
+  throwErrors,
+  CaseStatuses,
+} from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASE_DETAILS_URL } from '../../../../common/constants';

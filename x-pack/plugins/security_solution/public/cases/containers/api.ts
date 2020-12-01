@@ -135,7 +135,7 @@ export const getCases = async ({
   const query = {
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
     tags: filterOptions.tags.map((t) => `"${t.replace(/"/g, '\\"')}"`),
-    ...(filterOptions.status !== '' ? { status: filterOptions.status } : {}),
+    status: filterOptions.status,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...queryParams,
   };

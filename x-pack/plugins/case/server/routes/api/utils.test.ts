@@ -247,6 +247,7 @@ describe('Utils', () => {
         },
         2,
         2,
+        2,
         extraCaseData
       );
       expect(res).toEqual({
@@ -259,6 +260,7 @@ describe('Utils', () => {
         ),
         count_open_cases: 2,
         count_closed_cases: 2,
+        count_in_progress_cases: 2,
       });
     });
   });

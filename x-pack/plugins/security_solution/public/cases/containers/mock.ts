@@ -99,8 +99,9 @@ export const basicCaseCommentPatch = {
 };
 
 export const casesStatus: CasesStatus = {
-  countClosedCases: 130,
   countOpenCases: 20,
+  countInProgressCases: 40,
+  countClosedCases: 130,
 };
 
 export const basicPush = {
@@ -223,6 +224,7 @@ export const basicCaseSnake: CaseResponse = {
 
 export const casesStatusSnake: CasesStatusResponse = {
   count_closed_cases: 130,
+  count_in_progress_cases: 40,
   count_open_cases: 20,
 };
 
