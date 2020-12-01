@@ -8,6 +8,7 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -40,7 +41,6 @@ export interface NetworkKpiNetworkEventsArgs {
 interface UseNetworkKpiNetworkEvents {
   filterQuery?: ESTermQuery | string;
   endDate: string;
-  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -48,7 +48,6 @@ interface UseNetworkKpiNetworkEvents {
 export const useNetworkKpiNetworkEvents = ({
   filterQuery,
   endDate,
-  indexNames,
   skip = false,
   startDate,
 }: UseNetworkKpiNetworkEvents): [boolean, NetworkKpiNetworkEventsArgs] => {
@@ -56,6 +55,7 @@ export const useNetworkKpiNetworkEvents = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
+  const { selectedPatterns: indexNames } = useSourcererScope();
   const [
     networkKpiNetworkEventsRequest,
     setNetworkKpiNetworkEventsRequest,

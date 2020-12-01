@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { TimelineId } from '../../../../common/types/timeline';
 import { AlertsView } from '../../../common/components/alerts_viewer';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { AlertsComponentQueryProps } from './types';
 
 export const filterHostData: Filter[] = [
@@ -48,11 +49,13 @@ export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQu
     () => (pageFilters != null ? [...filterHostData, ...pageFilters] : filterHostData),
     [pageFilters]
   );
+  const { selectedPatterns: indexNames } = useSourcererScope();
 
   return (
     <AlertsView
       timelineId={TimelineId.hostsPageExternalAlerts}
       {...rest}
+      indexNames={indexNames}
       pageFilters={hostPageFilters}
     />
   );

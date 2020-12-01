@@ -10,7 +10,6 @@ import React, { forwardRef, useCallback } from 'react';
 import styled from 'styled-components';
 import { OutPortal } from 'react-reverse-portal';
 
-import { gutterTimeline } from '../../lib/helpers';
 import { navTabs } from '../../../app/home/home_navigations';
 import { useFullScreen } from '../../containers/use_full_screen';
 import { SecurityPageName } from '../../../app/types';
@@ -54,7 +53,7 @@ const FlexGroup = styled(EuiFlexGroup)<{ $hasSibling: boolean }>`
     margin-bottom: 1px;
     padding-bottom: 4px;
     padding-left: ${theme.eui.paddingSizes.l};
-    padding-right: ${gutterTimeline};
+    padding-right: ${theme.eui.paddingSizes.l};
     ${$hasSibling ? `border-bottom: ${theme.eui.euiBorderThin};` : 'border-bottom-width: 0px;'}
   `}
 `;

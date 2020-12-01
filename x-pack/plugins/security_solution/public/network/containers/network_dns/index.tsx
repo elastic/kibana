@@ -16,7 +16,6 @@ import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
-  DocValueFields,
   NetworkQueries,
   NetworkDnsRequestOptions,
   NetworkDnsStrategyResponse,
@@ -29,6 +28,7 @@ import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const ID = 'networkDnsQuery';
 
@@ -47,8 +47,6 @@ export interface NetworkDnsArgs {
 
 interface UseNetworkDns {
   id?: string;
-  docValueFields: DocValueFields[];
-  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -57,10 +55,8 @@ interface UseNetworkDns {
 }
 
 export const useNetworkDns = ({
-  docValueFields,
   endDate,
   filterQuery,
-  indexNames,
   skip,
   startDate,
   type,
@@ -71,6 +67,7 @@ export const useNetworkDns = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
+  const { docValueFields, selectedPatterns: indexNames } = useSourcererScope();
 
   const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions | null>(
     !skip

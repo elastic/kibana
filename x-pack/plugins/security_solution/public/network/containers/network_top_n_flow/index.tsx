@@ -28,6 +28,7 @@ import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const ID = 'networkTopNFlowQuery';
 
@@ -45,7 +46,6 @@ export interface NetworkTopNFlowArgs {
 interface UseNetworkTopNFlow {
   flowTarget: FlowTargetSourceDest;
   ip?: string;
-  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -57,7 +57,6 @@ export const useNetworkTopNFlow = ({
   endDate,
   filterQuery,
   flowTarget,
-  indexNames,
   ip,
   skip,
   startDate,
@@ -71,6 +70,7 @@ export const useNetworkTopNFlow = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
+  const { selectedPatterns: indexNames } = useSourcererScope();
 
   const [
     networkTopNFlowRequest,

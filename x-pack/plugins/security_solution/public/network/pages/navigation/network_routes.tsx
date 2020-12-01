@@ -27,14 +27,11 @@ import { UpdateDateRange } from '../../../common/components/charts/common';
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(
   ({
     networkPagePath,
-    docValueFields,
     type,
     to,
     filterQuery,
     isInitializing,
     from,
-    indexPattern,
-    indexNames,
     setQuery,
     setAbsoluteRangeDatePicker,
   }) => {
@@ -85,7 +82,6 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     const commonProps = {
       startDate: from,
       endDate: to,
-      indexNames,
       skip: isInitializing,
       type,
       narrowDateRange,
@@ -95,7 +91,6 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
 
     const tabProps = {
       ...commonProps,
-      indexPattern,
       updateDateRange,
     };
 
@@ -108,7 +103,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     return (
       <Switch>
         <Route path={`/:tabName(${NetworkRouteType.dns})`}>
-          <DnsQueryTabBody {...tabProps} docValueFields={docValueFields} />
+          <DnsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`/:tabName(${NetworkRouteType.flows})`}>
           <>

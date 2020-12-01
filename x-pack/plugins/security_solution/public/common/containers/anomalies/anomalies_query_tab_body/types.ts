@@ -24,7 +24,6 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   deleteQuery?: ({ id }: { id: string }) => void;
   endDate: GlobalTimeArgs['to'];
   flowTarget?: FlowTarget;
-  indexNames: string[];
   narrowDateRange: NarrowDateRange;
   setQuery: GlobalTimeArgs['setQuery'];
   startDate: GlobalTimeArgs['from'];

@@ -263,8 +263,6 @@ In other use cases the message field can be used to concatenate different values
   eventType="all"
   filters={Array []}
   isLive={false}
-  isSaving={false}
-  isTimelineExists={true}
   itemsPerPage={5}
   itemsPerPageOptions={
     Array [
@@ -275,7 +273,6 @@ In other use cases the message field can be used to concatenate different values
   }
   kqlMode="search"
   kqlQueryExpression=""
-  noteIds={Array []}
   showCallOutUnauthorizedMsg={false}
   showEventDetails={false}
   sort={

@@ -15,7 +15,6 @@ import { FlowTargetSourceDest } from '../../../../common/search_strategy/securit
 import {
   apolloClientObservable,
   mockGlobalState,
-  mockIndexPattern,
   TestProviders,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
@@ -61,7 +60,6 @@ describe('NetworkTopCountries Table Component', () => {
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo)}
             flowTargeted={FlowTargetSourceDest.source}
             id="topCountriesSource"
-            indexPattern={mockIndexPattern}
             isInspect={false}
             loading={false}
             loadPage={loadPage}
@@ -86,7 +84,6 @@ describe('NetworkTopCountries Table Component', () => {
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo)}
             flowTargeted={FlowTargetSourceDest.source}
             id="topCountriesSource"
-            indexPattern={mockIndexPattern}
             isInspect={false}
             loading={false}
             loadPage={loadPage}
@@ -116,7 +113,6 @@ describe('NetworkTopCountries Table Component', () => {
               flowTargeted={FlowTargetSourceDest.source}
               id="topCountriesSource"
               isInspect={false}
-              indexPattern={mockIndexPattern}
               loading={false}
               loadPage={loadPage}
               showMorePagesIndicator={getOr(

@@ -17,7 +17,6 @@ import { generateTablePaginationOptions } from '../../../common/components/pagin
 import { createFilter } from '../../../common/containers/helpers';
 import { hostsModel, hostsSelectors } from '../../store';
 import {
-  DocValueFields,
   SortField,
   PageInfoPaginated,
   HostsUncommonProcessesEdges,
@@ -31,6 +30,7 @@ import { ESTermQuery } from '../../../../common/typed_json';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const ID = 'hostsUncommonProcessesQuery';
 
@@ -46,20 +46,16 @@ export interface UncommonProcessesArgs {
 }
 
 interface UseUncommonProcesses {
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
-  indexNames: string[];
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
 }
 
 export const useUncommonProcesses = ({
-  docValueFields,
   filterQuery,
   endDate,
-  indexNames,
   skip = false,
   startDate,
   type,
@@ -75,6 +71,7 @@ export const useUncommonProcesses = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
+  const { docValueFields, selectedPatterns: indexNames } = useSourcererScope();
   const [
     uncommonProcessesRequest,
     setUncommonProcessesRequest,

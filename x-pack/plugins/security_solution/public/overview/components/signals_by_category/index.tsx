@@ -11,7 +11,7 @@ import { AlertsHistogramPanel } from '../../../detections/components/alerts_hist
 import { alertsHistogramOptions } from '../../../detections/components/alerts_histogram_panel/config';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
+import { Filter, Query } from '../../../../../../../src/plugins/data/public';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import * as i18n from '../../pages/translations';
 import { UpdateDateRange } from '../../../common/components/charts/common';
@@ -23,7 +23,6 @@ const NO_FILTERS: Filter[] = [];
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   filters?: Filter[];
   headerChildren?: React.ReactNode;
-  indexPattern: IIndexPattern;
   /** Override all defaults, and only display this field */
   onlyField?: string;
   query?: Query;

@@ -8,7 +8,6 @@ import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
-import { IIndexPattern } from 'src/plugins/data/public';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import {
@@ -30,7 +29,6 @@ interface NetworkTopCountriesTableProps {
   fakeTotalCount: number;
   flowTargeted: FlowTargetSourceDest;
   id: string;
-  indexPattern: IIndexPattern;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -57,7 +55,6 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
   fakeTotalCount,
   flowTargeted,
   id,
-  indexPattern,
   isInspect,
   loading,
   loadPage,
@@ -149,8 +146,8 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
   );
 
   const columns = useMemo(
-    () => getCountriesColumnsCurated(indexPattern, flowTargeted, type, NetworkTopCountriesTableId),
-    [indexPattern, flowTargeted, type]
+    () => getCountriesColumnsCurated(flowTargeted, type, NetworkTopCountriesTableId),
+    [flowTargeted, type]
   );
 
   return (

@@ -42,7 +42,6 @@ export const fieldsMapping: Readonly<StatItems[]> = [
 const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
   filterQuery,
   from,
-  indexNames,
   to,
   narrowDateRange,
   setQuery,
@@ -51,7 +50,6 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
   const [loading, { refetch, id, inspect, ...data }] = useHostsKpiAuthentications({
     filterQuery,
     endDate: to,
-    indexNames,
     startDate: from,
     skip,
   });
@@ -71,5 +69,7 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
     />
   );
 };
+
+HostsKpiAuthenticationsComponent.displayName = 'HostsKpiAuthenticationsComponent';
 
 export const HostsKpiAuthentications = React.memo(HostsKpiAuthenticationsComponent);

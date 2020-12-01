@@ -28,7 +28,6 @@ export const fieldsMapping: Readonly<StatItems[]> = [
 const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
   filterQuery,
   from,
-  indexNames,
   to,
   narrowDateRange,
   setQuery,
@@ -37,7 +36,6 @@ const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiTlsHandshakes({
     filterQuery,
     endDate: to,
-    indexNames,
     startDate: from,
     skip,
   });

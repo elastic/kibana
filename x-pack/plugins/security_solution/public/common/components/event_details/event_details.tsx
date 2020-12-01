@@ -10,8 +10,6 @@ import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
-import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';
@@ -24,11 +22,9 @@ export enum EventsViewType {
 
 interface Props {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
   data: TimelineEventsDetailsItem[];
   id: string;
   view: EventsViewType;
-  onUpdateColumns: OnUpdateColumns;
   onViewSelected: (selected: EventsViewType) => void;
   timelineId: string;
 }
@@ -49,11 +45,9 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
 
 const EventDetailsComponent: React.FC<Props> = ({
   browserFields,
-  columnHeaders,
   data,
   id,
   view,
-  onUpdateColumns,
   onViewSelected,
   timelineId,
 }) => {
@@ -68,15 +62,11 @@ const EventDetailsComponent: React.FC<Props> = ({
         name: i18n.TABLE,
         content: (
           <>
-            <EuiSpacer size="m" />
-
-            <EuiSpacer size="m" />
+            <EuiSpacer size="l" />
             <EventFieldsBrowser
               browserFields={browserFields}
-              columnHeaders={columnHeaders}
               data={data}
               eventId={id}
-              onUpdateColumns={onUpdateColumns}
               timelineId={timelineId}
             />
           </>
@@ -93,7 +83,7 @@ const EventDetailsComponent: React.FC<Props> = ({
         ),
       },
     ],
-    [browserFields, columnHeaders, data, id, onUpdateColumns, timelineId]
+    [browserFields, data, id, timelineId]
   );
 
   const selectedTab = useMemo(() => (view === EventsViewType.tableView ? tabs[0] : tabs[1]), [

@@ -17,7 +17,6 @@ import {
   HostAuthenticationsStrategyResponse,
   AuthenticationsEdges,
   PageInfoPaginated,
-  DocValueFields,
   SortField,
 } from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
@@ -33,6 +32,7 @@ import { InspectResponse } from '../../../types';
 import { hostsModel, hostsSelectors } from '../../store';
 
 import * as i18n from './translations';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const ID = 'hostsAuthenticationsQuery';
 
@@ -49,20 +49,16 @@ export interface AuthenticationArgs {
 }
 
 interface UseAuthentications {
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
-  indexNames: string[];
   startDate: string;
   type: hostsModel.HostsType;
   skip: boolean;
 }
 
 export const useAuthentications = ({
-  docValueFields,
   filterQuery,
   endDate,
-  indexNames,
   startDate,
   type,
   skip,
@@ -75,6 +71,7 @@ export const useAuthentications = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
+  const { docValueFields, selectedPatterns: indexNames } = useSourcererScope();
   const [
     authenticationsRequest,
     setAuthenticationsRequest,

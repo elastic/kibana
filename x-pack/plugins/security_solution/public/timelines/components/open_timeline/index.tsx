@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ApolloClient from 'apollo-client';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -12,6 +11,7 @@ import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../../g
 import { sourcererSelectors } from '../../../common/store';
 import { useShallowEqualSelector, useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
+import { useApolloClient } from '../../../common/utils/apollo_context';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import {
@@ -48,7 +48,6 @@ import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 
 interface OwnProps<TCache = object> {
-  apolloClient: ApolloClient<TCache>;
   /** Displays open timeline in modal */
   isModal: boolean;
   closeModalTimeline?: () => void;
@@ -75,7 +74,6 @@ export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): str
 /** Manages the state (e.g table selection) of the (pure) `OpenTimeline` component */
 export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   ({
-    apolloClient,
     closeModalTimeline,
     defaultPageSize,
     hideActions = [],
@@ -85,6 +83,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     setImportDataModalToggle,
     title,
   }) => {
+    const apolloClient = useApolloClient();
     const dispatch = useDispatch();
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
@@ -214,7 +213,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           );
         }
 
-        await apolloClient.mutate<
+        await apolloClient!.mutate<
           DeleteTimelineMutation.Mutation,
           DeleteTimelineMutation.Variables
         >({

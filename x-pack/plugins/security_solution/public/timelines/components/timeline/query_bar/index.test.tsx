@@ -29,14 +29,12 @@ const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 jest.mock('../../../../common/lib/kibana');
 
 describe('Timeline QueryBar ', () => {
-  const mockApplyKqlFilterQuery = jest.fn();
   const mockSetFilters = jest.fn();
   const mockSetKqlFilterQueryDraft = jest.fn();
   const mockSetSavedQueryId = jest.fn();
   const mockUpdateReduxTime = jest.fn();
 
   beforeEach(() => {
-    mockApplyKqlFilterQuery.mockClear();
     mockSetFilters.mockClear();
     mockSetKqlFilterQueryDraft.mockClear();
     mockSetSavedQueryId.mockClear();
@@ -77,8 +75,6 @@ describe('Timeline QueryBar ', () => {
     const wrapper = mount(
       <TestProviders>
         <QueryBarTimeline
-          applyKqlFilterQuery={mockApplyKqlFilterQuery}
-          browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={filters}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -89,7 +85,6 @@ describe('Timeline QueryBar ', () => {
           to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
-          indexPattern={mockIndexPattern}
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
@@ -121,8 +116,6 @@ describe('Timeline QueryBar ', () => {
 
       const wrapper = mount(
         <Proxy
-          applyKqlFilterQuery={mockApplyKqlFilterQuery}
-          browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -133,7 +126,6 @@ describe('Timeline QueryBar ', () => {
           to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
-          indexPattern={mockIndexPattern}
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
@@ -168,8 +160,6 @@ describe('Timeline QueryBar ', () => {
 
       const wrapper = mount(
         <Proxy
-          applyKqlFilterQuery={mockApplyKqlFilterQuery}
-          browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -180,7 +170,6 @@ describe('Timeline QueryBar ', () => {
           to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
-          indexPattern={mockIndexPattern}
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
@@ -213,8 +202,6 @@ describe('Timeline QueryBar ', () => {
 
       const wrapper = mount(
         <Proxy
-          applyKqlFilterQuery={mockApplyKqlFilterQuery}
-          browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -225,7 +212,6 @@ describe('Timeline QueryBar ', () => {
           to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
-          indexPattern={mockIndexPattern}
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
@@ -260,8 +246,6 @@ describe('Timeline QueryBar ', () => {
 
       const wrapper = mount(
         <Proxy
-          applyKqlFilterQuery={mockApplyKqlFilterQuery}
-          browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -272,7 +256,6 @@ describe('Timeline QueryBar ', () => {
           to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
-          indexPattern={mockIndexPattern}
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
@@ -305,8 +288,6 @@ describe('Timeline QueryBar ', () => {
 
       const wrapper = mount(
         <Proxy
-          applyKqlFilterQuery={mockApplyKqlFilterQuery}
-          browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -317,7 +298,6 @@ describe('Timeline QueryBar ', () => {
           to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
-          indexPattern={mockIndexPattern}
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}

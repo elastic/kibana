@@ -17,7 +17,6 @@ import { generateTablePaginationOptions } from '../../../common/components/pagin
 import {
   HostsEdges,
   PageInfoPaginated,
-  DocValueFields,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
@@ -29,6 +28,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const ID = 'hostsAllQuery';
 
@@ -47,20 +47,16 @@ export interface HostsArgs {
 }
 
 interface UseAllHost {
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
-  indexNames: string[];
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
 }
 
 export const useAllHost = ({
-  docValueFields,
   filterQuery,
   endDate,
-  indexNames,
   skip = false,
   startDate,
   type,
@@ -73,6 +69,7 @@ export const useAllHost = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
+  const { docValueFields, selectedPatterns: indexNames } = useSourcererScope();
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(
     !skip
       ? {

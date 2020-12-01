@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
-
 import { ESTermQuery } from '../../../../common/typed_json';
 import { NetworkType } from '../../store/model';
 import {
@@ -22,7 +20,6 @@ export interface OwnProps {
   endDate: string;
   filterQuery: string | ESTermQuery;
   ip: string;
-  indexNames: string[];
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];
 }
@@ -37,5 +34,4 @@ export type TlsQueryTableComponentProps = OwnProps & {
 
 export type NetworkWithIndexComponentsQueryTableProps = OwnProps & {
   flowTarget: FlowTargetSourceDest;
-  indexPattern: IIndexPattern;
 };

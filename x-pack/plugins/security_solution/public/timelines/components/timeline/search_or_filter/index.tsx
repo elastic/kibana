@@ -10,13 +10,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 
-import {
-  Filter,
-  FilterManager,
-  IIndexPattern,
-} from '../../../../../../../../src/plugins/data/public';
-import { BrowserFields } from '../../../../common/containers/source';
-import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
+import { Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import {
   KueryFilterQuery,
   SerializedFilterQuery,
@@ -31,9 +25,7 @@ import { dispatchUpdateReduxTime } from '../../../../common/components/super_dat
 import { SearchOrFilter } from './search_or_filter';
 
 interface OwnProps {
-  browserFields: BrowserFields;
   filterManager: FilterManager;
-  indexPattern: IIndexPattern;
   timelineId: string;
 }
 
@@ -41,8 +33,6 @@ type Props = OwnProps & PropsFromRedux;
 
 const StatefulSearchOrFilterComponent = React.memo<Props>(
   ({
-    applyKqlFilterQuery,
-    browserFields,
     dataProviders,
     filters,
     filterManager,
@@ -50,7 +40,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     filterQueryDraft,
     from,
     fromStr,
-    indexPattern,
     isRefreshPaused,
     kqlMode,
     refreshInterval,
@@ -64,21 +53,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     updateKqlMode,
     updateReduxTime,
   }) => {
-    const applyFilterQueryFromKueryExpression = useCallback(
-      (expression: string, kind) =>
-        applyKqlFilterQuery({
-          id: timelineId,
-          filterQuery: {
-            kuery: {
-              kind,
-              expression,
-            },
-            serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
-          },
-        }),
-      [applyKqlFilterQuery, indexPattern, timelineId]
-    );
-
     const setFilterQueryDraftFromKueryExpression = useCallback(
       (expression: string, kind) =>
         setKqlFilterQueryDraft({
@@ -111,8 +85,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
 
     return (
       <SearchOrFilter
-        applyKqlFilterQuery={applyFilterQueryFromKueryExpression}
-        browserFields={browserFields}
         dataProviders={dataProviders}
         filters={filters}
         filterManager={filterManager}
@@ -120,7 +92,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         filterQueryDraft={filterQueryDraft}
         from={from}
         fromStr={fromStr}
-        indexPattern={indexPattern}
         isRefreshPaused={isRefreshPaused}
         kqlMode={kqlMode!}
         refreshInterval={refreshInterval}
@@ -146,12 +117,10 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       prevProps.isRefreshPaused === nextProps.isRefreshPaused &&
       prevProps.refreshInterval === nextProps.refreshInterval &&
       prevProps.timelineId === nextProps.timelineId &&
-      deepEqual(prevProps.browserFields, nextProps.browserFields) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.filters, nextProps.filters) &&
       deepEqual(prevProps.filterQuery, nextProps.filterQuery) &&
       deepEqual(prevProps.filterQueryDraft, nextProps.filterQueryDraft) &&
-      deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
       deepEqual(prevProps.kqlMode, nextProps.kqlMode) &&
       deepEqual(prevProps.savedQueryId, nextProps.savedQueryId) &&
       deepEqual(prevProps.timelineId, nextProps.timelineId)

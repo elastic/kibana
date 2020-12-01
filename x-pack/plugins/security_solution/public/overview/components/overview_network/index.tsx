@@ -9,6 +9,7 @@ import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo, useCallback } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { ESQuery } from '../../../../common/typed_json';
@@ -137,4 +138,12 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
 
 OverviewNetworkComponent.displayName = 'OverviewNetworkComponent';
 
-export const OverviewNetwork = React.memo(OverviewNetworkComponent);
+export const OverviewNetwork = React.memo(
+  OverviewNetworkComponent,
+  (prevProps, nextProps) =>
+    prevProps.endDate === nextProps.endDate &&
+    prevProps.filterQuery === nextProps.filterQuery &&
+    prevProps.startDate === nextProps.startDate &&
+    prevProps.setQuery === nextProps.setQuery &&
+    deepEqual(prevProps.indexNames, nextProps.indexNames)
+);

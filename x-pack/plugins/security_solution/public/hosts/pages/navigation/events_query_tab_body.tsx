@@ -21,6 +21,7 @@ import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
@@ -55,7 +56,6 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   deleteQuery,
   endDate,
   filterQuery,
-  indexNames,
   pageFilters,
   setQuery,
   startDate,
@@ -63,6 +63,8 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   const dispatch = useDispatch();
   const { initializeTimeline } = useManageTimeline();
   const { globalFullScreen } = useFullScreen();
+  const { selectedPatterns: indexNames } = useSourcererScope();
+
   useEffect(() => {
     initializeTimeline({
       id: TimelineId.hostsPageEvents,

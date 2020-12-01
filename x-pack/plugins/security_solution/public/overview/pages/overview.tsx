@@ -97,7 +97,6 @@ const OverviewComponent = () => {
                     <SignalsByCategory
                       filters={filters}
                       from={from}
-                      indexPattern={indexPattern}
                       query={query}
                       setQuery={setQuery}
                       to={to}
@@ -110,8 +109,6 @@ const OverviewComponent = () => {
                       deleteQuery={deleteQuery}
                       filters={filters}
                       from={from}
-                      indexPattern={indexPattern}
-                      indexNames={selectedPatterns}
                       query={query}
                       setQuery={setQuery}
                       to={to}
@@ -135,8 +132,6 @@ const OverviewComponent = () => {
                     <EventCounts
                       filters={filters}
                       from={from}
-                      indexNames={selectedPatterns}
-                      indexPattern={indexPattern}
                       query={query}
                       setQuery={setQuery}
                       to={to}
