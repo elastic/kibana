@@ -139,7 +139,7 @@ export class IndexPatternsService {
     const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
       fields: ['title'],
-      search,
+      search: `"${search}"`,
       searchFields: ['title'],
       perPage: size,
     });
@@ -186,20 +186,6 @@ export class IndexPatternsService {
       await this.refreshSavedObjectsCache();
     }
     return this.savedObjectsCache;
-  };
-
-  find = async (search: string, size: number = 10): Promise<IndexPattern[]> => {
-    const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
-      type: 'index-pattern',
-      fields: ['title'],
-      search,
-      searchFields: ['title'],
-      perPage: size,
-    });
-    const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
-      return await this.get(savedObject.id);
-    });
-    return await Promise.all(getIndexPatternPromises);
   };
 
   /**
