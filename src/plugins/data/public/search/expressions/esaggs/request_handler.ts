@@ -182,7 +182,8 @@ export const handleRequest = async ({
         agg,
         requestSearchSource,
         inspectorAdapters.requests,
-        abortSignal
+        abortSignal,
+        searchSessionId
       );
     }
   }

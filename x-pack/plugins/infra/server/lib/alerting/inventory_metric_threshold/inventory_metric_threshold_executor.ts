@@ -9,7 +9,7 @@ import moment from 'moment';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertStates, InventoryMetricConditions } from './types';
-import { ResolvedActionGroup } from '../../../../../alerts/common';
+import { RecoveredActionGroup } from '../../../../../alerts/common';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
@@ -103,7 +103,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     }
     if (reason) {
       const actionGroupId =
-        nextState === AlertStates.OK ? ResolvedActionGroup.id : FIRED_ACTIONS.id;
+        nextState === AlertStates.OK ? RecoveredActionGroup.id : FIRED_ACTIONS.id;
       alertInstance.scheduleActions(actionGroupId, {
         group: item,
         alertState: stateToAlertMessage[nextState],
