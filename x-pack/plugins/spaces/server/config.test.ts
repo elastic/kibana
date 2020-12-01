@@ -42,7 +42,7 @@ describe('spaces config', () => {
       });
 
       it('does not log a warning if no settings are explicitly set', () => {
-        const originalConfig = deepFreeze({ xpack: { spaces: {} } });
+        const originalConfig = deepFreeze({});
 
         const { messages, migrated } = applyConfigDeprecations({ ...originalConfig });
 
