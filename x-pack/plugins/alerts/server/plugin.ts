@@ -82,11 +82,8 @@ export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
   executeAction: 'execute-action',
   newInstance: 'new-instance',
-  recoveredInstance: 'recovered-instance',
-  activeInstance: 'active-instance',
-};
-export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
+  activeInstance: 'active-instance',
 };
 
 export interface PluginSetupContract {
