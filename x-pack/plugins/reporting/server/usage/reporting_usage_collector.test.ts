@@ -463,7 +463,6 @@ describe('Ready for collection observable', () => {
     expect(args).toMatchInlineSnapshot(`
       Object {
         "fetch": [Function],
-        "formatForBulkUpload": [Function],
         "isReady": [Function],
         "schema": Object {
           "PNG": Object {

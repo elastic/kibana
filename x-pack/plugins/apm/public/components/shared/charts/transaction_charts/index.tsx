@@ -20,13 +20,14 @@ import {
   TRANSACTION_ROUTE_CHANGE,
 } from '../../../../../common/transaction_types';
 import { asTransactionRate } from '../../../../../common/utils/formatters';
-import { ChartsSyncContextProvider } from '../../../../context/charts_sync_context';
+import { AnnotationsContextProvider } from '../../../../context/annotations_context';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event_context';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITransactionChartData } from '../../../../selectors/chart_selectors';
-import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TimeseriesChart } from '../timeseries_chart';
+import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 import { getResponseTimeTickFormatter } from './helper';
 import { MLHeader } from './ml_header';
@@ -45,71 +46,76 @@ export function TransactionCharts({
 }: TransactionChartProps) {
   const { transactionType } = urlParams;
 
-  const { responseTimeSeries, tpmSeries } = charts;
+  const { responseTimeSeries, tpmSeries, anomalySeries } = charts;
 
   const { formatter, toggleSerie } = useFormatter(responseTimeSeries);
 
   return (
     <>
-      <ChartsSyncContextProvider>
-        <EuiFlexGrid columns={2} gutterSize="s">
-          <EuiFlexItem data-cy={`transaction-duration-charts`}>
-            <EuiPanel>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <span>{responseTimeLabel(transactionType)}</span>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <LicenseContext.Consumer>
-                  {(license) => (
-                    <MLHeader
-                      hasValidMlLicense={license?.getFeature('ml').isAvailable}
-                      mlJobId={charts.mlJobId}
-                    />
-                  )}
-                </LicenseContext.Consumer>
-              </EuiFlexGroup>
-              <TimeseriesChart
-                fetchStatus={fetchStatus}
-                id="transactionDuration"
-                timeseries={responseTimeSeries || []}
-                yLabelFormat={getResponseTimeTickFormatter(formatter)}
-                onToggleLegend={(serie) => {
-                  if (serie) {
-                    toggleSerie(serie);
-                  }
-                }}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
+      <AnnotationsContextProvider>
+        <ChartPointerEventContextProvider>
+          <EuiFlexGrid columns={2} gutterSize="s">
+            <EuiFlexItem data-cy={`transaction-duration-charts`}>
+              <EuiPanel>
+                <EuiFlexGroup justifyContent="spaceBetween">
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <span>{responseTimeLabel(transactionType)}</span>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <LicenseContext.Consumer>
+                    {(license) => (
+                      <MLHeader
+                        hasValidMlLicense={
+                          license?.getFeature('ml').isAvailable
+                        }
+                        mlJobId={charts.mlJobId}
+                      />
+                    )}
+                  </LicenseContext.Consumer>
+                </EuiFlexGroup>
+                <TimeseriesChart
+                  fetchStatus={fetchStatus}
+                  id="transactionDuration"
+                  timeseries={responseTimeSeries || []}
+                  yLabelFormat={getResponseTimeTickFormatter(formatter)}
+                  anomalySeries={anomalySeries}
+                  onToggleLegend={(serie) => {
+                    if (serie) {
+                      toggleSerie(serie);
+                    }
+                  }}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
 
-          <EuiFlexItem style={{ flexShrink: 1 }}>
-            <EuiPanel>
-              <EuiTitle size="xs">
-                <span>{tpmLabel(transactionType)}</span>
-              </EuiTitle>
-              <TimeseriesChart
-                fetchStatus={fetchStatus}
-                id="requestPerMinutes"
-                timeseries={tpmSeries || []}
-                yLabelFormat={asTransactionRate}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGrid>
+            <EuiFlexItem style={{ flexShrink: 1 }}>
+              <EuiPanel>
+                <EuiTitle size="xs">
+                  <span>{tpmLabel(transactionType)}</span>
+                </EuiTitle>
+                <TimeseriesChart
+                  fetchStatus={fetchStatus}
+                  id="requestPerMinutes"
+                  timeseries={tpmSeries || []}
+                  yLabelFormat={asTransactionRate}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGrid>
 
-        <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-        <EuiFlexGrid columns={2} gutterSize="s">
-          <EuiFlexItem>
-            <TransactionErrorRateChart />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <TransactionBreakdownChart />
-          </EuiFlexItem>
-        </EuiFlexGrid>
-      </ChartsSyncContextProvider>
+          <EuiFlexGrid columns={2} gutterSize="s">
+            <EuiFlexItem>
+              <TransactionErrorRateChart />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <TransactionBreakdownChart />
+            </EuiFlexItem>
+          </EuiFlexGrid>
+        </ChartPointerEventContextProvider>
+      </AnnotationsContextProvider>
     </>
   );
 }
