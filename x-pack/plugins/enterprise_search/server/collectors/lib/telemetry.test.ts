@@ -61,7 +61,7 @@ describe('Telemetry helpers', () => {
       expect(incrementCounterMock).toHaveBeenCalledWith(
         'app_search_telemetry',
         'app_search_telemetry',
-        'ui_clicked.button'
+        ['ui_clicked.button']
       );
       expect(response).toEqual({ success: true });
     });
