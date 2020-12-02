@@ -9,6 +9,7 @@ import {
   ProcessListAPIChartRequest,
   ProcessListAPIChartQueryAggregation,
   ProcessListAPIRow,
+  ProcessListAPIChartResponse,
 } from '../../../common/http_api';
 import { ESSearchClient } from '../metrics/types';
 import { CMDLINE_FIELD } from './common';
@@ -119,7 +120,7 @@ export const getProcessListChart = async (
         )
       )
     );
-    return timeseries;
+    return timeseries as ProcessListAPIChartResponse;
   } catch (e) {
     throw e;
   }

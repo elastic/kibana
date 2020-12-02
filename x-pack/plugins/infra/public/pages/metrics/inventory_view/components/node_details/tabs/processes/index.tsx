@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar, EuiSpacer, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
