@@ -6,7 +6,7 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFieldText, EuiFormRow, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiIconTip, EuiPanel, EuiText } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { policyConfig } from '../store/policy_details/selectors';
@@ -57,6 +57,7 @@ export const AdvancedPolicyForms = React.memo(() => {
               configPath={configPath}
               firstSupportedVersion={advancedField.first_supported_version}
               lastSupportedVersion={advancedField.last_supported_version}
+              documentation={advancedField.documentation}
             />
           );
         })}
@@ -72,10 +73,12 @@ const PolicyAdvanced = React.memo(
     configPath,
     firstSupportedVersion,
     lastSupportedVersion,
+    documentation,
   }: {
     configPath: string[];
     firstSupportedVersion: string;
     lastSupportedVersion?: string;
+    documentation: string;
   }) => {
     const dispatch = useDispatch();
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
@@ -105,7 +108,7 @@ const PolicyAdvanced = React.memo(
       <>
         <EuiFormRow
           fullWidth
-          label={configPath.join('.')}
+          label={configPath.join('.') + <EuiIconTip content={documentation} position="right" />}
           labelAppend={
             <EuiText size="xs">
               {lastSupportedVersion
