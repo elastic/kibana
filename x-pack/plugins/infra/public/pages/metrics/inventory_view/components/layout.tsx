@@ -103,7 +103,18 @@ export const Layout = () => {
     if (currentView != null || !shouldLoadDefault) {
       reload();
     }
-  }, [reload, currentView, shouldLoadDefault]);
+
+    /**
+     * INFO: why disable exhaustive-deps
+     * We need to wait on the currentView not to be null because it is loaded async and could change the view state.
+     * We don't actually need to watch the value of currentView though, since the view state will be synched up by the
+     * changing params in the reload method so we should only "watch" the reload method.
+     *
+     * TODO: Should refactor this in the future to make it more clear where all the view state is coming
+     * from and it's precedence [query params, localStorage, defaultView, out of the box view]
+     */
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [reload, shouldLoadDefault]);
 
   useEffect(() => {
     setShowLoading(true);
