@@ -154,6 +154,12 @@ export interface ElasticsearchSource {
             ms: number;
           };
         };
+        handles: {
+          limit: {
+            hard: number;
+            soft: number;
+          };
+        };
       };
       libbeat: {
         config: {
