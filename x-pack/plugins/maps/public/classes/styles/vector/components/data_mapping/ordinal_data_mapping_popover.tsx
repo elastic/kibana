@@ -37,7 +37,7 @@ const percentilesTitle = i18n.translate('xpack.maps.styles.ordinalDataMapping.pe
   defaultMessage: `Use percentiles`,
 });
 
-const DATA_MAPPING_FUNCTION_OPTIONS = [
+const DATA_MAPPING_OPTIONS = [
   {
     value: DATA_MAPPING_FUNCTION.INTERPOLATE,
     inputDisplay: interpolateTitle,
@@ -221,7 +221,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
     );
   }
 
-  const dataMappingFunctionOptions = DATA_MAPPING_FUNCTION_OPTIONS.filter((option) => {
+  const dataMappingOptions = DATA_MAPPING_OPTIONS.filter((option) => {
     return props.supportedDataMappingFunctions.includes(option.value);
   });
 
@@ -229,18 +229,18 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
     <DataMappingPopover>
       <Fragment>
         <EuiFormRow
-          label={i18n.translate('xpack.maps.styles.ordinalDataMapping.dataMappingFunctionLabel', {
+          label={i18n.translate('xpack.maps.styles.ordinalDataMapping.dataMappingLabel', {
             defaultMessage: 'Fitting',
           })}
           helpText={i18n.translate(
-            'xpack.maps.styles.ordinalDataMapping.dataMappingFunctionTooltipContent',
+            'xpack.maps.styles.ordinalDataMapping.dataMappingTooltipContent',
             {
               defaultMessage: `Fit values from the data domain to the style`,
             }
           )}
         >
           <EuiSuperSelect
-            options={dataMappingFunctionOptions}
+            options={dataMappingOptions}
             valueOfSelected={props.dataMappingFunction}
             onChange={onDataMappingFunctionChange}
             itemLayoutAlign="top"

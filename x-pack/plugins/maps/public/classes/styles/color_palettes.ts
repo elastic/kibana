@@ -46,8 +46,14 @@ const RED = 'rgb(256, 0, 0)';
 const HEATMAP_PALETTE = [ROYAL_BLUE, CYAN, LIME, YELLOW, RED];
 
 type COLOR_PALETTE = EuiColorPalettePickerPaletteProps & {
-  getPalette?: (steps: number) => string[];
+  getPalette: (steps: number) => string[];
 };
+
+function getColorBlindPalette(steps: number) {
+  const rotations = Math.ceil(steps / 10);
+  const palette = euiPaletteColorBlind({ rotations });
+  return palette.slice(0, steps - 1);
+}
 
 const COLOR_PALETTES: COLOR_PALETTE[] = [
   {
@@ -116,16 +122,19 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
   },
   {
     value: 'palette_0',
+    getPalette: getColorBlindPalette,
     palette: euiPaletteColorBlind(),
     type: 'fixed',
   },
   {
     value: 'palette_20',
+    getPalette: getColorBlindPalette,
     palette: euiPaletteColorBlind({ rotations: 2 }),
     type: 'fixed',
   },
   {
     value: 'palette_30',
+    getPalette: getColorBlindPalette,
     palette: euiPaletteColorBlind({ rotations: 3 }),
     type: 'fixed',
   },
@@ -199,19 +208,17 @@ export function getPercentilesMbColorRampStops(
     return null;
   }
 
-  const paletteObject = COLOR_PALETTES.find(({ value }: COLOR_PALETTE) => {
+  const paletteObject = NUMERICAL_COLOR_PALETTES.find(({ value }: COLOR_PALETTE) => {
     return value === colorPaletteId;
   });
 
-  if (!paletteObject || paletteObject.getPalette === undefined) {
-    return null;
-  }
-
   return paletteObject
-    .getPalette(percentiles.length)
-    .reduce((accu: Array<number | string>, stopColor: string, idx: number) => {
-      return [...accu, percentiles[idx].value, stopColor];
-    }, []);
+    ? paletteObject
+        .getPalette(percentiles.length)
+        .reduce((accu: Array<number | string>, stopColor: string, idx: number) => {
+          return [...accu, percentiles[idx].value, stopColor];
+        }, [])
+    : null;
 }
 
 export function getLinearGradient(colorStrings: string[]): string {
