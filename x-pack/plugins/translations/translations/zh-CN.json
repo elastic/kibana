@@ -20057,7 +20057,6 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredDescriptionTextField": "“描述”必填。",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredEmailTextField": "“电子邮件”或“用户名”必填",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredProjectKeyTextField": "“项目键”必填",
-    "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredTitleTextField": "“标题”必填。",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldHelp": "JIRA 将此操作与 Kibana 已保存对象的 ID 关联。",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldLabel": "对象 ID（可选）",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.searchIssuesComboBoxAriaLabel": "选择父问题",
