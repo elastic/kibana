@@ -23,6 +23,7 @@ import { promisify } from 'util';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { run } from '../run';
+import { createFailError } from '../run';
 import { SCRIPT_SOURCE } from './script_source';
 import { getGitDir, isCorrectGitVersionInstalled } from './git_utils';
 
@@ -33,7 +34,7 @@ run(
   async ({ log }) => {
     try {
       if (!(await isCorrectGitVersionInstalled())) {
-        throw new Error(
+        throw createFailError(
           `We could not detect a git version in the required range. Please install a git version >= 2.5. Skipping Kibana pre-commit git hook installation.`
         );
       }
