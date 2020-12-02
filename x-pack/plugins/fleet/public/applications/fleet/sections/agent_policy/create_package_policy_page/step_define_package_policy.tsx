@@ -143,6 +143,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 description: e.target.value,
               })
             }
+            data-test-subj="packagePolicyDescriptionInput"
           />
         </EuiFormRow>
         <EuiSpacer size="m" />
