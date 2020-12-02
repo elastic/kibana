@@ -44,10 +44,16 @@ export const MultiselectPicker: FC<{
   checkedOptions: string[];
 }> = ({ options, onChange, title, checkedOptions }) => {
   const [items, setItems] = useState<Option[]>(options);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
-    setItems(options);
-  }, [options]);
+    if (searchTerm === '') {
+      setItems(options);
+    } else {
+      const filteredOptions = options.filter((o) => o?.value?.includes(searchTerm));
+      setItems(filteredOptions);
+    }
+  }, [options, searchTerm]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -95,7 +101,7 @@ export const MultiselectPicker: FC<{
         panelPaddingSize="none"
       >
         <EuiPopoverTitle paddingSize="s">
-          <EuiFieldSearch compressed />
+          <EuiFieldSearch compressed onChange={(e) => setSearchTerm(e.target.value)} />
         </EuiPopoverTitle>
         <div style={{ maxHeight: 250, overflow: 'auto' }}>
           {Array.isArray(items) && items.length > 0 ? (
