@@ -17,7 +17,7 @@ export function registerAlertTypes({
   alertTypeRegistry: TriggersAndActionsUIPublicPluginSetup['alertTypeRegistry'];
   config: Config;
 }) {
-  if (config.enableGeoTrackingThresholdAlert) {
+  if (config.enableGeoAlerts) {
     alertTypeRegistry.register(getGeoThresholdAlertType());
     alertTypeRegistry.register(getGeoContainmentAlertType());
   }
