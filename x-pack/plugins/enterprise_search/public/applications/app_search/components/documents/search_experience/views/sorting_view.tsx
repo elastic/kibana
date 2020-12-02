@@ -22,7 +22,7 @@ const wrapSortingOptionForEuiSelect: (option: Option) => EuiSelectOption = (opti
 const getValueFromOption: (option: Option) => string = (option) => option.value;
 
 interface Props {
-  options: Array<{ label: string; value: string }>;
+  options: Option[];
   value: string;
   onChange(value: string): void;
 }
