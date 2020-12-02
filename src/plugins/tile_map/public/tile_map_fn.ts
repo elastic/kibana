@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 
 import type { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
 import { TileMapVisConfig, TileMapVisData } from './types';
-import { convertToGeoJson } from './utils';
 
 interface Arguments {
   visConfig: string | null;
@@ -38,7 +37,7 @@ export type TileMapExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'tilemap',
   Datatable,
   Arguments,
-  Render<TileMapVisRenderValue>
+  Promise<Render<TileMapVisRenderValue>>
 >;
 
 export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
@@ -57,9 +56,11 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
       help: '',
     },
   },
-  fn(context, args) {
+  async fn(context, args) {
     const visConfig = args.visConfig && JSON.parse(args.visConfig);
     const { geohash, metric, geocentroid } = visConfig.dimensions;
+
+    const { convertToGeoJson } = await import('./utils');
     const convertedData = convertToGeoJson(context, {
       geohash,
       metric,
