@@ -63,11 +63,11 @@ export interface ExecutionContext<
   getSearchSessionId: () => string | undefined;
 
   /**
-   * Makes a `KibanaRequest` object available to expression functions. Useful for
-   * functions which are running on the server and need to perform operations that
-   * are scoped to a specific user.
+   * Getter to retrieve the `KibanaRequest` object inside an expression function.
+   * Useful for functions which are running on the server and need to perform
+   * operations that are scoped to a specific user.
    */
-  kibanaRequest?: KibanaRequest;
+  getKibanaRequest?: () => KibanaRequest;
 
   /**
    * Allows to fetch saved objects from ElasticSearch. In browser `getSavedObject`

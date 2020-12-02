@@ -48,7 +48,12 @@ export function getFunctionDefinition({
 }): () => EsaggsExpressionFunctionDefinition {
   return () => ({
     ...getEsaggsMeta(),
-    async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId, kibanaRequest }) {
+    async fn(
+      input,
+      args,
+      { inspectorAdapters, abortSignal, getSearchSessionId, getKibanaRequest }
+    ) {
+      const kibanaRequest = getKibanaRequest ? getKibanaRequest() : null;
       if (!kibanaRequest) {
         throw new Error(
           i18n.translate('data.search.esaggs.error.kibanaRequest', {

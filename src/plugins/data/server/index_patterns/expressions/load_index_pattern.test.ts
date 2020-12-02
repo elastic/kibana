@@ -38,9 +38,18 @@ describe('indexPattern expression function', () => {
   test('returns serialized index pattern', async () => {
     const indexPatternDefinition = getFunctionDefinition({ getStartDependencies });
     const result = await indexPatternDefinition().fn(null, { id: '1' }, {
-      kibanaRequest: {},
+      getKibanaRequest: () => ({}),
     } as any);
     expect(result.type).toEqual('index_pattern');
     expect(result.value.title).toEqual('value');
+  });
+
+  test('throws if getKibanaRequest is not available', async () => {
+    const indexPatternDefinition = getFunctionDefinition({ getStartDependencies });
+    expect(async () => {
+      await indexPatternDefinition().fn(null, { id: '1' }, {} as any);
+    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"A KibanaRequest is required to execute this search on the server. Please provide a request object to the expression execution params."`
+    );
   });
 });

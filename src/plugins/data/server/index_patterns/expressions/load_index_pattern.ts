@@ -46,7 +46,8 @@ export function getFunctionDefinition({
 }) {
   return (): IndexPatternLoadExpressionFunctionDefinition => ({
     ...getIndexPatternLoadMeta(),
-    async fn(input, args, { kibanaRequest }) {
+    async fn(input, args, { getKibanaRequest }) {
+      const kibanaRequest = getKibanaRequest ? getKibanaRequest() : null;
       if (!kibanaRequest) {
         throw new Error(
           i18n.translate('data.indexPatterns.indexPatternLoad.error.kibanaRequest', {
