@@ -9,6 +9,7 @@ import ReactDOM from 'react-dom';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, IBasePath } from 'src/core/public';
+import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 
 interface Props {
@@ -25,7 +26,7 @@ export function LoggedOutPage({ basePath }: Props) {
         />
       }
     >
-      <EuiButton href={basePath.prepend('/')}>
+      <EuiButton href={parseNext(window.location.href, basePath.serverBasePath)}>
         <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Log in" />
       </EuiButton>
     </AuthenticationStatePage>
