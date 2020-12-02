@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
-import { EuiFieldNumber, EuiFormRow, EuiSpacer, EuiTextAlign } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RowActionButtons } from '../row_action_buttons';
 
