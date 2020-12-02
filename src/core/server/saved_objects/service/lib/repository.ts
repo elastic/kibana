@@ -101,8 +101,17 @@ export interface SavedObjectsRepositoryOptions {
  * @public
  */
 export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+  /**
+   * (default=false) If true, sets all the counter fields to 0 if they don't
+   * already exist. Existing fields will be left as-is and won't be incremented.
+   */
+  initialize?: boolean;
+  /** {@link SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
-  /** The Elasticsearch Refresh setting for this operation */
+  /**
+   * (default='wait_for') The Elasticsearch refresh setting for this
+   * operation. See {@link MutatingOperationRefreshSetting}
+   */
   refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -1515,32 +1524,64 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Increases a counter field by one. Creates the document if one doesn't exist for the given id.
+   * Increments all the specified counter fields by one. Creates the document
+   * if one doesn't exist for the given id.
    *
-   * @param {string} type
-   * @param {string} id
-   * @param {string} counterFieldName
-   * @param {object} [options={}]
-   * @property {object} [options.migrationVersion=undefined]
-   * @returns {promise}
+   * @remarks
+   * When supplying a field name like `stats.api.counter` the field name will
+   * be used as-is to create a document like:
+   *   `{attributes: {'stats.api.counter': 1}}`
+   * It will not create a nested structure like:
+   *   `{attributes: {stats: {api: {counter: 1}}}}`
+   *
+   * When using incrementCounter for collecting usage data, you need to ensure
+   * that usage collection happens on a best-effort basis and doesn't
+   * negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.md#tracking-interactions-with-incrementcounter)
+   *
+   * @example
+   * ```ts
+   * const repository = coreStart.savedObjects.createInternalRepository();
+   *
+   * // Initialize all fields to 0
+   * repository
+   *   .incrementCounter('dashboard_counter_type', 'counter_id', [
+   *     'stats.apiCalls',
+   *     'stats.sampleDataInstalled',
+   *   ], {initialize: true});
+   *
+   * // Increment the apiCalls field counter
+   * repository
+   *   .incrementCounter('dashboard_counter_type', 'counter_id', [
+   *     'stats.apiCalls',
+   *   ])
+   * ```
+   *
+   * @param type - The type of saved object whose fields should be incremented
+   * @param id - The id of the document whose fields should be incremented
+   * @param counterFieldNames - An array of field names to increment
+   * @param options - {@link SavedObjectsIncrementCounterOptions}
+   * @returns The saved object after the specified fields were incremented
    */
   async incrementCounter(
     type: string,
     id: string,
-    counterFieldName: string,
+    counterFieldNames: string[],
     options: SavedObjectsIncrementCounterOptions = {}
   ): Promise<SavedObject> {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
     }
-    if (typeof counterFieldName !== 'string') {
-      throw new Error('"counterFieldName" argument must be a string');
+    const isArrayOfStrings =
+      Array.isArray(counterFieldNames) &&
+      !counterFieldNames.some((field) => typeof field !== 'string');
+    if (!isArrayOfStrings) {
+      throw new Error('"counterFieldNames" argument must be an array of strings');
     }
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const { migrationVersion, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { migrationVersion, refresh = DEFAULT_REFRESH_SETTING, initialize = false } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     const time = this._getCurrentTime();
@@ -1558,7 +1599,10 @@ export class SavedObjectsRepository {
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      attributes: { [counterFieldName]: 1 },
+      attributes: counterFieldNames.reduce((acc, counterFieldName) => {
+        acc[counterFieldName] = initialize ? 0 : 1;
+        return acc;
+      }, {} as Record<string, number>),
       migrationVersion,
       updated_at: time,
     });
@@ -1573,20 +1617,22 @@ export class SavedObjectsRepository {
       body: {
         script: {
           source: `
-              if (ctx._source[params.type][params.counterFieldName] == null) {
-                ctx._source[params.type][params.counterFieldName] = params.count;
-              }
-              else {
-                ctx._source[params.type][params.counterFieldName] += params.count;
+              for (counterFieldName in params.counterFieldNames) {
+                if (ctx._source[params.type][counterFieldName] == null) {
+                  ctx._source[params.type][counterFieldName] = params.count;
+                }
+                else {
+                  ctx._source[params.type][counterFieldName] += params.count;
+                }
               }
               ctx._source.updated_at = params.time;
             `,
           lang: 'painless',
           params: {
-            count: 1,
+            count: initialize ? 0 : 1,
             time,
             type,
-            counterFieldName,
+            counterFieldNames,
           },
         },
         upsert: raw._source,
