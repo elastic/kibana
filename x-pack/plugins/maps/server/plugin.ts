@@ -158,9 +158,7 @@ export class MapsPlugin implements Plugin {
 
     initRoutes(
       core.http.createRouter(),
-      () => {
-        return lastLicenseId;
-      },
+      () => lastLicenseId,
       emsSettings,
       this.kibanaVersion,
       this._logger

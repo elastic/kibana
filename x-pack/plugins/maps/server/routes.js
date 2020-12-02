@@ -58,7 +58,7 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
 
   function getEMSClient() {
     const currentLicenseId = getLicenseId();
-    if (emsClient && lastLicenseId === currentLicenseId) {
+    if (emsClient && emsSettings.isEMSEnabled() && lastLicenseId === currentLicenseId) {
       return emsClient;
     }
 
@@ -74,10 +74,10 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
         fetchFunction: fetch,
       });
       emsClient.addQueryParams({ license: currentLicenseId });
+      return emsClient;
     } else {
-      emsClient = EMPTY_EMS_CLIENT;
+      return EMPTY_EMS_CLIENT;
     }
-    return emsSettings.isEMSEnabled() ? emsClient : EMPTY_EMS_CLIENT;
   }
 
   router.get(
