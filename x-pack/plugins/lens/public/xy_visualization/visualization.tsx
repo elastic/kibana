@@ -192,8 +192,10 @@ export const getXyVisualization = ({
       mappedAccessors = getAccessorColorConfig(
         colorAssignments,
         frame,
-        layer,
-        sortedAccessors,
+        {
+          ...layer,
+          accessors: sortedAccessors.filter((sorted) => layer.accessors.includes(sorted)),
+        },
         paletteService
       );
     }
@@ -379,13 +381,12 @@ function getAccessorColorConfig(
   colorAssignments: ColorAssignments,
   frame: FramePublicAPI,
   layer: LayerConfig,
-  sortedAccessors: string[],
   paletteService: PaletteRegistry
 ): AccessorConfig[] {
   const layerContainsSplits = Boolean(layer.splitAccessor);
   const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
   const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
-  return sortedAccessors.map((accessor) => {
+  return layer.accessors.map((accessor) => {
     const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
     if (layerContainsSplits) {
       return {
