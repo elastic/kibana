@@ -16,7 +16,7 @@ describe('alertType', () => {
     expect(alertType.id).toBe('.geo-containment');
     expect(alertType.name).toBe('Geo tracking containment');
     expect(alertType.actionGroups).toEqual([
-      { id: 'tracking containment met', name: 'Tracking containment met' },
+      { id: 'Tracked entity contained', name: 'Tracking containment met' },
     ]);
 
     expect(alertType.actionVariables).toMatchSnapshot();

@@ -8,52 +8,28 @@ Object {
       "name": "entityId",
     },
     Object {
+      "description": "The date the entity was recorded in the boundary",
+      "name": "entityDateTime",
+    },
+    Object {
+      "description": "The id of the contained entity document",
+      "name": "entityDocumentId",
+    },
+    Object {
       "description": "The alert interval end time this change was recorded",
-      "name": "timeOfDetection",
+      "name": "detectionDateTime",
     },
     Object {
-      "description": "GeoJSON line connecting the two locations that were used to determine the crossing event",
-      "name": "crossingLine",
+      "description": "The location of the entity",
+      "name": "entityLocation",
     },
     Object {
-      "description": "The most recently captured location of the entity",
-      "name": "toEntityLocation",
+      "description": "The id of the boundary containing the entity",
+      "name": "containingBoundaryId",
     },
     Object {
-      "description": "The time the entity was detected in the current boundary",
-      "name": "toEntityDateTime",
-    },
-    Object {
-      "description": "The id of the crossing entity document",
-      "name": "toEntityDocumentId",
-    },
-    Object {
-      "description": "The current boundary id containing the entity (if any)",
-      "name": "toBoundaryId",
-    },
-    Object {
-      "description": "The boundary (if any) the entity has crossed into and is currently located",
-      "name": "toBoundaryName",
-    },
-    Object {
-      "description": "The previously captured location of the entity",
-      "name": "fromEntityLocation",
-    },
-    Object {
-      "description": "The last time the entity was recorded in the previous boundary",
-      "name": "fromEntityDateTime",
-    },
-    Object {
-      "description": "The id of the crossing entity document",
-      "name": "fromEntityDocumentId",
-    },
-    Object {
-      "description": "The previous boundary id containing the entity (if any)",
-      "name": "fromBoundaryId",
-    },
-    Object {
-      "description": "The boundary (if any) the entity has crossed from and was previously located",
-      "name": "fromBoundaryName",
+      "description": "The boundary the entity is currently located within",
+      "name": "containingBoundaryName",
     },
   ],
 }
