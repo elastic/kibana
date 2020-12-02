@@ -108,10 +108,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                   iconType="plusInCircle"
                   color="text"
                   aria-label={i18n.translate('data.inspector.table.filterForValueButtonAriaLabel', {
-                    defaultMessage: 'Filter for value: {currentValue}',
-                    values: {
-                      currentValue: formattedValue,
-                    },
+                    defaultMessage: 'Filter for value',
                   })}
                   data-test-subj="filterForInspectorCellValue"
                   className="insDataTableFormat__filter"
@@ -143,10 +140,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                     aria-label={i18n.translate(
                       'data.inspector.table.filterOutValueButtonAriaLabel',
                       {
-                        defaultMessage: 'Filter out value: {currentValue}',
-                        values: {
-                          currentValue: formattedValue,
-                        },
+                        defaultMessage: 'Filter out value',
                       }
                     )}
                     data-test-subj="filterOutInspectorCellValue"

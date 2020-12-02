@@ -20,8 +20,12 @@
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiPageContentHeader } from '@elastic/eui';
 import { first } from 'rxjs/operators';
-import { IInterpreterRenderHandlers, ExpressionValue } from 'src/plugins/expressions';
-import { RequestAdapter, DataAdapter } from '../../../../../../../src/plugins/inspector/public';
+import {
+  IInterpreterRenderHandlers,
+  ExpressionValue,
+  TablesAdapter,
+} from 'src/plugins/expressions';
+import { RequestAdapter } from '../../../../../../../src/plugins/inspector/public';
 import { Adapters, ExpressionRenderHandler } from '../../types';
 import { getExpressions } from '../../services';
 
@@ -58,7 +62,7 @@ class Main extends React.Component<{}, State> {
       this.setState({ expression });
       const adapters: Adapters = {
         requests: new RequestAdapter(),
-        data: new DataAdapter(),
+        tables: new TablesAdapter(),
       };
       return getExpressions()
         .execute(expression, context || { type: 'null' }, {
