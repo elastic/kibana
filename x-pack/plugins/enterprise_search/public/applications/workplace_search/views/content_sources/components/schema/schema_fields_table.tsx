@@ -8,6 +8,8 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +23,10 @@ import {
 
 import { SchemaExistingField } from '../../../../../shared/schema/schema_existing_field';
 import { SchemaLogic } from './schema_logic';
+import {
+  SCHEMA_ERRORS_TABLE_FIELD_NAME_HEADER,
+  SCHEMA_ERRORS_TABLE_DATA_TYPE_HEADER,
+} from './constants';
 
 export const SchemaFieldsTable: React.FC = () => {
   const { updateExistingFieldType } = useActions(SchemaLogic);
@@ -30,8 +36,8 @@ export const SchemaFieldsTable: React.FC = () => {
   return Object.keys(filteredSchemaFields).length > 0 ? (
     <EuiTable>
       <EuiTableHeader>
-        <EuiTableHeaderCell>Field Name</EuiTableHeaderCell>
-        <EuiTableHeaderCell>Data Type</EuiTableHeaderCell>
+        <EuiTableHeaderCell>{SCHEMA_ERRORS_TABLE_FIELD_NAME_HEADER}</EuiTableHeaderCell>
+        <EuiTableHeaderCell>{SCHEMA_ERRORS_TABLE_DATA_TYPE_HEADER}</EuiTableHeaderCell>
       </EuiTableHeader>
       <EuiTableBody>
         {Object.keys(filteredSchemaFields).map((fieldName) => (
@@ -58,6 +64,14 @@ export const SchemaFieldsTable: React.FC = () => {
       </EuiTableBody>
     </EuiTable>
   ) : (
-    <p>No results found for &apos;{filterValue}&apos;.</p>
+    <p>
+      {i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.errors.header.dataType',
+        {
+          defaultMessage: 'No results found for "{filterValue}".',
+          values: { filterValue },
+        }
+      )}
+    </p>
   );
 };

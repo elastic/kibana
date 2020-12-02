@@ -31,6 +31,17 @@ import { IndexingStatus } from '../../../../../shared/indexing_status';
 import { SchemaFieldsTable } from './schema_fields_table';
 import { SchemaLogic } from './schema_logic';
 
+import {
+  SCHEMA_ADD_FIELD_BUTTON,
+  SCHEMA_MANAGE_SCHEMA_TITLE,
+  SCHEMA_MANAGE_SCHEMA_DESCRIPTION,
+  SCHEMA_FILTER_PLACEHOLDER,
+  SCHEMA_UPDATING,
+  SCHEMA_SAVE_BUTTON,
+  SCHEMA_EMPTY_SCHEMA_TITLE,
+  SCHEMA_EMPTY_SCHEMA_DESCRIPTION,
+} from './constants';
+
 export const Schema: React.FC = () => {
   const {
     initializeSchema,
@@ -66,7 +77,7 @@ export const Schema: React.FC = () => {
 
   const addFieldButton = (
     <EuiButtonEmpty color="primary" data-test-subj="AddFieldButton" onClick={openAddFieldModal}>
-      Add Field
+      {SCHEMA_ADD_FIELD_BUTTON}
     </EuiButtonEmpty>
   );
   const statusPath = isOrganization
@@ -76,8 +87,8 @@ export const Schema: React.FC = () => {
   return (
     <>
       <ViewContentHeader
-        title="Manage source schema"
-        description="Add new fields or change the types of existing ones"
+        title={SCHEMA_MANAGE_SCHEMA_TITLE}
+        description={SCHEMA_MANAGE_SCHEMA_DESCRIPTION}
       />
       <div>
         {(isActive || hasErrors) && (
@@ -101,7 +112,7 @@ export const Schema: React.FC = () => {
                 <EuiFieldSearch
                   value={filterValue}
                   data-test-subj="FilterSchemaInput"
-                  placeholder="Filter schema fields..."
+                  placeholder={SCHEMA_FILTER_PLACEHOLDER}
                   onChange={(e) => setFilterValue(e.target.value)}
                 />
               </EuiFlexItem>
@@ -111,7 +122,7 @@ export const Schema: React.FC = () => {
                   <EuiFlexItem grow={false}>
                     {percentageComplete < 100 ? (
                       <EuiButton isLoading={true} fill={true}>
-                        Updating schema...
+                        {SCHEMA_UPDATING}
                       </EuiButton>
                     ) : (
                       <EuiButton
@@ -120,7 +131,7 @@ export const Schema: React.FC = () => {
                         onClick={updateFields}
                         fill={true}
                       >
-                        Save Schema
+                        {SCHEMA_SAVE_BUTTON}
                       </EuiButton>
                     )}
                   </EuiFlexItem>
@@ -134,13 +145,8 @@ export const Schema: React.FC = () => {
           <EuiPanel className="euiPanel--inset">
             <EuiEmptyPrompt
               iconType="managementApp"
-              title={<h2>Content source does not have a schema</h2>}
-              body={
-                <p>
-                  A schema is created for you once you index some documents. Click below to create
-                  schema fields in advance.
-                </p>
-              }
+              title={<h2>{SCHEMA_EMPTY_SCHEMA_TITLE}</h2>}
+              body={<p>{SCHEMA_EMPTY_SCHEMA_DESCRIPTION}</p>}
               actions={addFieldButton}
             />
           </EuiPanel>

@@ -23,6 +23,12 @@ import {
 import { AppLogic } from '../../../../app_logic';
 import { SourceLogic } from '../../source_logic';
 
+import {
+  SCHEMA_FIELD_ERRORS_ERROR_MESSAGE,
+  SCHEMA_FIELD_ADDED_MESSAGE,
+  SCHEMA_UPDATED_MESSAGE,
+} from './constants';
+
 interface SchemaActions {
   onInitializeSchema(schemaProps: SchemaInitialData): SchemaInitialData;
   onInitializeSchemaFieldErrors(
@@ -111,8 +117,6 @@ const dataTypeOptions = [
   { value: 'number', text: 'Number' },
   { value: 'geolocation', text: 'Geo Location' },
 ];
-
-const FIELD_ERRORS_ERROR = 'Oops, we were not able to find any errors for this Schema';
 
 export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
   actions: {
@@ -295,7 +299,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
           fieldCoercionErrors: response.fieldCoercionErrors,
         });
       } catch (e) {
-        flashAPIErrors({ ...e, message: FIELD_ERRORS_ERROR });
+        flashAPIErrors({ ...e, message: SCHEMA_FIELD_ERRORS_ERROR_MESSAGE });
       }
     },
     addNewField: ({ fieldName, newFieldType }) => {
@@ -314,7 +318,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       const { http } = HttpLogic.values;
       const isAdding = operation === ADD;
       const { sourceId } = values;
-      const successMessage = isAdding ? 'New field added.' : 'Schema updated.';
+      const successMessage = isAdding ? SCHEMA_FIELD_ADDED_MESSAGE : SCHEMA_UPDATED_MESSAGE;
       const route = isOrganization
         ? `/api/workplace_search/org/sources/${sourceId}/schemas`
         : `/api/workplace_search/account/sources/${sourceId}/schemas`;
