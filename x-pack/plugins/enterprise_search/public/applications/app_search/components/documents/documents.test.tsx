@@ -26,7 +26,7 @@ describe('Documents', () => {
 
   it('renders', () => {
     const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
-    expect(wrapper.find(EuiPageHeader).exists()).toBe(true);
+    expect(wrapper.find(SearchExperience).exists()).toBe(true);
   });
 
   it('renders a DocumentCreationButton if the user can manage engine documents', () => {
@@ -37,11 +37,6 @@ describe('Documents', () => {
 
     const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
     expect(wrapper.find(DocumentCreationButton).exists()).toBe(true);
-  });
-
-  it('renders a SearchExperience', () => {
-    const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
-    expect(wrapper.find(SearchExperience).exists()).toBe(true);
   });
 
   describe('Meta Engines', () => {
