@@ -17,17 +17,17 @@ import url from 'url';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
-import { useAnomalyDetectionJobs } from '../../../hooks/useAnomalyDetectionJobs';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { SearchBar } from '../../shared/search_bar';
 import { Correlations } from '../Correlations';
 import { NoServicesMessage } from './no_services_message';
 import { ServiceList } from './ServiceList';
 import { MLCallout } from './ServiceList/MLCallout';
+import { useAnomalyDetectionJobsFetcher } from './use_anomaly_detection_jobs_fetcher';
 
 const initialData = {
   items: [],
@@ -37,12 +37,10 @@ const initialData = {
 
 let hasDisplayedToast = false;
 
-export function ServiceInventory() {
+function useServicesFetcher() {
+  const { urlParams, uiFilters } = useUrlParams();
   const { core } = useApmPluginContext();
-  const {
-    urlParams: { start, end },
-    uiFilters,
-  } = useUrlParams();
+  const { start, end } = urlParams;
   const { data = initialData, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -92,6 +90,13 @@ export function ServiceInventory() {
     }
   }, [data.hasLegacyData, core.http.basePath, core.notifications.toasts]);
 
+  return { servicesData: data, servicesStatus: status };
+}
+
+export function ServiceInventory() {
+  const { core } = useApmPluginContext();
+  const { servicesData, servicesStatus } = useServicesFetcher();
+
   // The page is called "service inventory" to avoid confusion with the
   // "service overview", but this is tracked in some dashboards because it's the
   // initial landing page for APM, so it stays as "services_overview" (plural.)
@@ -110,9 +115,9 @@ export function ServiceInventory() {
   );
 
   const {
-    data: anomalyDetectionJobsData,
-    status: anomalyDetectionJobsStatus,
-  } = useAnomalyDetectionJobs();
+    anomalyDetectionJobsData,
+    anomalyDetectionJobsStatus,
+  } = useAnomalyDetectionJobsFetcher();
 
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.userHasDismissedServiceInventoryMlCallout',
@@ -148,11 +153,11 @@ export function ServiceInventory() {
               <EuiFlexItem>
                 <EuiPanel>
                   <ServiceList
-                    items={data.items}
+                    items={servicesData.items}
                     noItemsMessage={
                       <NoServicesMessage
-                        historicalDataFound={data.hasHistoricalData}
-                        status={status}
+                        historicalDataFound={servicesData.hasHistoricalData}
+                        status={servicesStatus}
                       />
                     }
                   />
