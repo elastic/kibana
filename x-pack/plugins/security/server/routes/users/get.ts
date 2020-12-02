@@ -9,7 +9,7 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
-export function defineGetUserRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineGetUserRoutes({ router }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/users/{username}',
@@ -20,9 +20,13 @@ export function defineGetUserRoutes({ router, clusterClient }: RouteDefinitionPa
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const username = request.params.username;
-        const users = (await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('shield.getUser', { username })) as Record<string, {}>;
+        const {
+          body: users,
+        } = await context.core.elasticsearch.client.asCurrentUser.security.getUser<
+          Record<string, {}>
+        >({
+          username,
+        });
 
         if (!users[username]) {
           return response.notFound();
