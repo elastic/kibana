@@ -5,7 +5,7 @@
  */
 
 import { ApiToken } from '../credentials/types';
-import { Schema, SchemaConflicts, IndexingStatus } from '../schema/types';
+import { Schema, SchemaConflicts, IndexingStatus } from '../../../shared/types';
 
 export interface Engine {
   name: string;
