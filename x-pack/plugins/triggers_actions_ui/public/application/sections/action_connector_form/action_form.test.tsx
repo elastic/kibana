@@ -10,8 +10,9 @@ import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, Alert, AlertAction } from '../../../types';
 import ActionForm from './action_form';
-import { ResolvedActionGroup } from '../../../../../alerts/common';
+import { RecoveredActionGroup } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
+import { EuiScreenReaderOnly } from '@elastic/eui';
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -252,7 +253,7 @@ describe('action_form', () => {
           }}
           actionGroups={[
             { id: 'default', name: 'Default' },
-            { id: 'resolved', name: 'Resolved' },
+            { id: 'recovered', name: 'Recovered' },
           ]}
           setActionGroupIdByIndex={(group: string, index: number) => {
             initialAlert.actions[index].group = group;
@@ -381,10 +382,10 @@ describe('action_form', () => {
             "value": "default",
           },
           Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-resolved",
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-recovered",
             "disabled": false,
-            "inputDisplay": "Resolved",
-            "value": "resolved",
+            "inputDisplay": "Recovered",
+            "value": "recovered",
           },
         ]
       `);
@@ -393,7 +394,7 @@ describe('action_form', () => {
     it('renders disabled action groups for selected action type', async () => {
       const wrapper = await setup([
         {
-          group: ResolvedActionGroup.id,
+          group: RecoveredActionGroup.id,
           id: 'test',
           actionTypeId: actionType.id,
           params: {
@@ -417,19 +418,19 @@ describe('action_form', () => {
             "value": "default",
           },
           Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-1-option-resolved",
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-recovered",
             "disabled": true,
             "inputDisplay": "Resolved (Not Currently Supported)",
-            "value": "resolved",
+            "value": "recovered",
           },
         ]
       `);
     });
 
-    it('renders selected Resolved action group', async () => {
+    it('renders selected Recovered action group', async () => {
       const wrapper = await setup([
         {
-          group: ResolvedActionGroup.id,
+          group: RecoveredActionGroup.id,
           id: 'test',
           actionTypeId: actionType.id,
           params: {
@@ -453,16 +454,18 @@ describe('action_form', () => {
             "value": "default",
           },
           Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-resolved",
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-recovered",
             "disabled": false,
-            "inputDisplay": "Resolved",
-            "value": "resolved",
+            "inputDisplay": "Recovered",
+            "value": "recovered",
           },
         ]
       `);
-      expect(actionGroupsSelect.first().text()).toEqual(
-        'Select an option: Resolved, is selectedResolved'
+
+      expect(actionGroupsSelect.first().find(EuiScreenReaderOnly).text()).toEqual(
+        'Select an option: Recovered, is selected'
       );
+      expect(actionGroupsSelect.first().find('button').first().text()).toEqual('Recovered');
     });
 
     it('renders available connectors for the selected action type', async () => {

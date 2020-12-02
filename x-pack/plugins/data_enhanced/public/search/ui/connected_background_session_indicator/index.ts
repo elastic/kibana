@@ -8,4 +8,3 @@ export {
   BackgroundSessionIndicatorDeps,
   createConnectedBackgroundSessionIndicator,
 } from './connected_background_session_indicator';
-export { BackgroundSessionViewState } from './background_session_view_state';
