@@ -15,7 +15,7 @@ import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesRangeInput } from './values_range_input';
 import { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
-import { IndexPatternPrivateState, IndexPattern } from '../../../types';
+import { IndexPatternPrivateState, IndexPattern, IndexPatternLayer } from '../../../types';
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
@@ -368,7 +368,7 @@ describe('terms', () => {
   });
 
   describe('onOtherColumnChanged', () => {
-    it('should keep the column if order by column still exists and is metric', () => {
+    it('should keep the column if order by column still exists and is isSortableByColumn metric', () => {
       const initialColumn: TermsIndexPatternColumn = {
         label: 'Top value of category',
         dataType: 'string',
@@ -393,6 +393,40 @@ describe('terms', () => {
         },
       });
       expect(updatedColumn).toBe(initialColumn);
+    });
+
+    it('should switch to alphabetical ordering if metric is of type last_value', () => {
+      const initialColumn: TermsIndexPatternColumn = {
+        label: 'Top value of category',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'column', columnId: 'col1' },
+          size: 3,
+          orderDirection: 'asc',
+        },
+        sourceField: 'category',
+      };
+      const updatedColumn = termsOperation.onOtherColumnChanged!(initialColumn, {
+        col1: {
+          label: 'Last Value',
+          dataType: 'number',
+          isBucketed: false,
+          sourceField: 'bytes',
+          operationType: 'last_value',
+          params: {
+            sortField: 'time',
+          },
+        },
+      });
+      expect(updatedColumn.params).toEqual(
+        expect.objectContaining({
+          orderBy: { type: 'alphabetical' },
+        })
+      );
     });
 
     it('should switch to alphabetical ordering if there are no columns to order by', () => {
@@ -768,6 +802,51 @@ describe('terms', () => {
           },
         },
       });
+    });
+  });
+  describe('getErrorMessage', () => {
+    let indexPattern: IndexPattern;
+    let layer: IndexPatternLayer;
+    beforeEach(() => {
+      indexPattern = createMockedIndexPattern();
+      layer = {
+        columns: {
+          col1: {
+            dataType: 'boolean',
+            isBucketed: true,
+            label: 'Top values of bytes',
+            operationType: 'terms',
+            params: {
+              missingBucket: false,
+              orderBy: { type: 'alphabetical' },
+              orderDirection: 'asc',
+              otherBucket: true,
+              size: 5,
+            },
+            scale: 'ordinal',
+            sourceField: 'bytes',
+          },
+        },
+        columnOrder: [],
+        indexPatternId: '',
+      };
+    });
+    it('returns undefined if sourceField exists in index pattern', () => {
+      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual(undefined);
+    });
+    it('returns error message if the sourceField does not exist in index pattern', () => {
+      layer = {
+        ...layer,
+        columns: {
+          col1: {
+            ...layer.columns.col1,
+            sourceField: 'notExisting',
+          } as TermsIndexPatternColumn,
+        },
+      };
+      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
+        'Field notExisting was not found',
+      ]);
     });
   });
 });
