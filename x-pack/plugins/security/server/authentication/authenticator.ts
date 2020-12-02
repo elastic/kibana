@@ -12,6 +12,7 @@ import {
 } from '../../../../../src/core/server';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../common/constants';
@@ -392,7 +393,7 @@ export class Authenticator {
     const sessionValue = await this.getSessionValue(request);
     const suggestedProviderName =
       sessionValue?.provider.name ??
-      request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
+      request.url.searchParams.get(LOGOUT_PROVIDER_QUERY_STRING_PARAMETER);
     if (suggestedProviderName) {
       await this.session.clear(request);
 

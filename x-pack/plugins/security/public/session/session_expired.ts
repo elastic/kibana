@@ -5,7 +5,7 @@
  */
 
 import {
-  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../common/constants';
@@ -24,7 +24,7 @@ const getProviderParameter = (tenant: string) => {
   const key = `${tenant}/session_provider`;
   const providerName = sessionStorage.getItem(key);
   return providerName
-    ? `&${AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER}=${encodeURIComponent(providerName)}`
+    ? `&${LOGOUT_PROVIDER_QUERY_STRING_PARAMETER}=${encodeURIComponent(providerName)}`
     : '';
 };
 

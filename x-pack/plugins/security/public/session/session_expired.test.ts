@@ -59,7 +59,7 @@ describe('#logout', () => {
     expect(mockGetItem).toHaveBeenCalledWith(`${TENANT}/session_provider`);
 
     const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
-    const provider = `&auth_provider_hint=${providerName}`;
+    const provider = `&provider=${providerName}`;
     await expect(window.location.assign).toBeCalledWith(
       `${LOGOUT_URL}?msg=SESSION_EXPIRED${next}${provider}`
     );

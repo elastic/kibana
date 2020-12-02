@@ -1817,7 +1817,7 @@ describe('Authenticator', () => {
 
     it('if session does not exist but provider name is valid, returns whatever authentication provider returns.', async () => {
       const request = httpServerMock.createKibanaRequest({
-        query: { auth_provider_hint: 'basic1' },
+        query: { provider: 'basic1' },
       });
       mockOptions.session.get.mockResolvedValue(null);
 
@@ -1852,7 +1852,7 @@ describe('Authenticator', () => {
     });
 
     it('returns `notHandled` if session does not exist and provider name is invalid', async () => {
-      const request = httpServerMock.createKibanaRequest({ query: { auth_provider_hint: 'foo' } });
+      const request = httpServerMock.createKibanaRequest({ query: { provider: 'foo' } });
       mockOptions.session.get.mockResolvedValue(null);
 
       await expect(authenticator.logout(request)).resolves.toEqual(
