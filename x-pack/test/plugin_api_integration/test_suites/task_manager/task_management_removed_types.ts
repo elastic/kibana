@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response) => response.body);
     }
 
-    it('should successfully schedule tasks', async () => {
+    it('should successfully schedule registered tasks and mark unregistered tasks as unrecognized', async () => {
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
         schedule: { interval: `1s` },
@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
         const removedTaskInstance = tasks.find((task) => task.id === REMOVED_TASK_TYPE_ID);
 
         expect(scheduledTaskInstance?.status).to.eql('claiming');
-        expect(removedTaskInstance?.status).to.eql('idle');
+        expect(removedTaskInstance?.status).to.eql('unrecognized');
       });
     });
   });

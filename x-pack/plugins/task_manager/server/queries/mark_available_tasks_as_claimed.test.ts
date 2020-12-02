@@ -123,6 +123,8 @@ if (doc['task.runAt'].size()!=0) {
     } else {
       ctx._source.task.status = "failed";
     }
+  } else {
+    ctx._source.task.status = "unrecognized";
   }
   `,
         lang: 'painless',

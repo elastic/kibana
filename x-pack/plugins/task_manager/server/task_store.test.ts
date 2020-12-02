@@ -586,6 +586,8 @@ if (doc['task.runAt'].size()!=0) {
     } else {
       ctx._source.task.status = "failed";
     }
+  } else {
+    ctx._source.task.status = "unrecognized";
   }
   `,
         lang: 'painless',
@@ -655,6 +657,8 @@ if (doc['task.runAt'].size()!=0) {
     } else {
       ctx._source.task.status = "failed";
     }
+  } else {
+    ctx._source.task.status = "unrecognized";
   }
   `,
         lang: 'painless',
@@ -1224,7 +1228,7 @@ if (doc['task.runAt'].size()!=0) {
 
   describe('getLifecycle', () => {
     test('returns the task status if the task exists ', async () => {
-      expect.assertions(4);
+      expect.assertions(5);
       return Promise.all(
         Object.values(TaskStatus).map(async (status) => {
           const task = {

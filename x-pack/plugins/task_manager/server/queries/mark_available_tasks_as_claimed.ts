@@ -117,6 +117,8 @@ export const updateFieldsAndMarkAsFailed = (
     } else {
       ctx._source.task.status = "failed";
     }
+  } else {
+    ctx._source.task.status = "unrecognized";
   }
   `,
   lang: 'painless',
