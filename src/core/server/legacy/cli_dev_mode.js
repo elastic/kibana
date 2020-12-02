@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { ClusterManager } from '../../../cli/cluster/cluster_manager';
+export { CliDevMode } from '../../../dev/cli_dev_mode';

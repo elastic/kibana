@@ -7085,6 +7085,11 @@ argparse@^1.0.7, argparse@~1.0.9:
   dependencies:
     sprintf-js "~1.0.2"
 
+argsplit@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/argsplit/-/argsplit-1.0.5.tgz#9319a6ef63411716cfeb216c45ec1d13b35c5e99"
+  integrity sha1-kxmm72NBFxbP6yFsRewdE7NcXpk=
+
 aria-hidden@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/aria-hidden/-/aria-hidden-1.1.1.tgz#0c356026d3f65e2bd487a3adb73f0c586be2c37e"

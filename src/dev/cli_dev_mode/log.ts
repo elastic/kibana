@@ -17,9 +17,18 @@
  * under the License.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import Chalk from 'chalk';
 
-export class Log {
+export interface Log {
+  good(label: string, ...args: any[]): void;
+  warn(label: string, ...args: any[]): void;
+  bad(label: string, ...args: any[]): void;
+  write(label: string, ...args: any[]): void;
+}
+
+export class CliLog implements Log {
   constructor(private readonly quiet: boolean, private readonly silent: boolean) {}
 
   good(label: string, ...args: any[]) {
@@ -52,5 +61,37 @@ export class Log {
   write(label: string, ...args: any[]) {
     // eslint-disable-next-line no-console
     console.log(` ${label.trim()} `, ...args);
+  }
+}
+
+export class TestLog implements Log {
+  public readonly messages: Array<{ type: string; args: any[] }> = [];
+
+  bad(label: string, ...args: any[]) {
+    this.messages.push({
+      type: 'bad',
+      args: [label, ...args],
+    });
+  }
+
+  good(label: string, ...args: any[]) {
+    this.messages.push({
+      type: 'good',
+      args: [label, ...args],
+    });
+  }
+
+  warn(label: string, ...args: any[]) {
+    this.messages.push({
+      type: 'warn',
+      args: [label, ...args],
+    });
+  }
+
+  write(label: string, ...args: any[]) {
+    this.messages.push({
+      type: 'write',
+      args: [label, ...args],
+    });
   }
 }

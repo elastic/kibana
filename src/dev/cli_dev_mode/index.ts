@@ -17,14 +17,5 @@
  * under the License.
  */
 
-import { BinderBase, Emitter } from './binder';
-
-export class BinderFor extends BinderBase {
-  constructor(private readonly emitter: Emitter) {
-    super();
-  }
-
-  public on(...args: any[]) {
-    super.on(this.emitter, ...args);
-  }
-}
+export * from './cli_dev_mode';
+export * from './log';

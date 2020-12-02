@@ -42,8 +42,8 @@ function canRequire(path) {
   }
 }
 
-const CLUSTER_MANAGER_PATH = resolve(__dirname, '../cluster/cluster_manager');
-const DEV_MODE_SUPPORTED = canRequire(CLUSTER_MANAGER_PATH);
+const DEV_MODE_PATH = resolve(__dirname, '../../dev/cli_dev_mode');
+const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
 
 const REPL_PATH = resolve(__dirname, '../repl');
 const CAN_REPL = canRequire(REPL_PATH);
