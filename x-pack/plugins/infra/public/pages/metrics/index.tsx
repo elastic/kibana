@@ -77,7 +77,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
                     {setHeaderActionMenu && (
                       <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
-                        <EuiFlexGroup alignItems="center" gutterSize="none">
+                        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
                           <EuiFlexItem grow={false}>
                             <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
                           </EuiFlexItem>
