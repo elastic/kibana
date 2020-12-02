@@ -5,8 +5,6 @@
  */
 
 import React, { FC } from 'react';
-import { parse } from 'query-string';
-import { decode } from 'rison-node';
 
 import { i18n } from '@kbn/i18n';
 
@@ -19,6 +17,7 @@ import { Page } from '../../../data_frame_analytics/pages/analytics_exploration'
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
+import { useUrlState } from '../../../util/url_state';
 
 export const analyticsJobExplorationRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -39,8 +38,9 @@ export const analyticsJobExplorationRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { context } = useResolver('', undefined, deps.config, basicResolvers(deps));
-  const { _g }: Record<string, any> = parse(location.search, { sort: false });
+  const { context } = useResolver(undefined, undefined, deps.config, basicResolvers(deps));
+
+  const [globalState] = useUrlState('_g');
 
   const urlGenerator = useMlUrlGenerator();
   const {
@@ -54,24 +54,16 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     await navigateToUrl(url);
   };
 
-  let globalState: any = null;
-  try {
-    globalState = decode(_g);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(
-      'Could not parse global state. Redirecting to Data Frame Analytics Management Page.'
-    );
-    redirectToAnalyticsManagementPage();
-    return <></>;
-  }
   const jobId: string = globalState.ml.jobId;
   const analysisType: DataFrameAnalysisConfigType = globalState.ml.analysisType;
-  const defaultIsTraining: boolean | undefined = globalState.ml.defaultIsTraining;
+
+  if (!analysisType) {
+    redirectToAnalyticsManagementPage();
+  }
 
   return (
     <PageLoader context={context}>
-      <Page {...{ jobId, analysisType, defaultIsTraining }} />
+      <Page {...{ jobId, analysisType }} />
     </PageLoader>
   );
 };

@@ -1,0 +1,26 @@
+{
+  "type": "index",
+  "value": {
+    "index": "signal_overrides",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "my_severity": {
+          "type": "keyword"
+        },
+        "my_risk": {
+          "type": "integer"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

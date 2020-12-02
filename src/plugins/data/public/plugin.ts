@@ -238,7 +238,7 @@ export class DataPublicPlugin
     return {
       ...dataServices,
       ui: {
-        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
+        IndexPatternSelect: createIndexPatternSelect(indexPatterns),
         SearchBar,
       },
     };

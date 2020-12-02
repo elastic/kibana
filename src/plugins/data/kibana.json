@@ -6,8 +6,9 @@
   "requiredPlugins": [
     "bfetch",
     "expressions",
-    "inspector",
-    "uiActions"
+    "uiActions",
+    "share"
+    "inspector"
   ],
   "optionalPlugins": ["usageCollection"],
   "extraPublicDirs": ["common"],
