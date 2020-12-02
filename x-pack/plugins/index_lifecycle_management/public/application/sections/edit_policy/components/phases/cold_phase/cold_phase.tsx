@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-import { EuiDescribedFormGroup, EuiTextColor } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiTextColor, EuiAccordion } from '@elastic/eui';
 
 import { Phases } from '../../../../../../../common/types';
 
@@ -101,11 +101,6 @@ export const ColdPhase: FunctionComponent = () => {
         {enabled && (
           <>
             <SearchableSnapshotField phase="cold" />
-            {/* Data tier allocation section */}
-            <DataTierAllocationField
-              description={i18nTexts.dataTierAllocation.description}
-              phase={coldProperty}
-            />
 
             {
               /* Replicas section */
@@ -186,7 +181,24 @@ export const ColdPhase: FunctionComponent = () => {
                 />
               </EuiDescribedFormGroup>
             )}
-            <SetPriorityInputField phase={coldProperty} />
+
+            <EuiAccordion
+              id="ilmWarmPhaseAdvancedSettings"
+              buttonContent={i18n.translate(
+                'xpack.indexLifecycleMgmt.warmPhase.advancedSettingsButton',
+                {
+                  defaultMessage: 'Advanced settings',
+                }
+              )}
+              paddingSize="m"
+            >
+              {/* Data tier allocation section */}
+              <DataTierAllocationField
+                description={i18nTexts.dataTierAllocation.description}
+                phase={coldProperty}
+              />
+              <SetPriorityInputField phase={coldProperty} />
+            </EuiAccordion>
           </>
         )}
       </>

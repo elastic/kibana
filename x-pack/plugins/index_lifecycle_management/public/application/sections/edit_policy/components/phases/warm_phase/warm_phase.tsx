@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiDescribedFormGroup,
+  EuiAccordion,
 } from '@elastic/eui';
 
 import { useFormData, UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
@@ -80,7 +81,7 @@ export const WarmPhase: FunctionComponent = () => {
           }
           titleSize="s"
           description={
-            <Fragment>
+            <>
               <p>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
@@ -99,13 +100,13 @@ export const WarmPhase: FunctionComponent = () => {
                   },
                 }}
               />
-            </Fragment>
+            </>
           }
           fullWidth
         >
-          <Fragment>
+          <>
             {enabled && (
-              <Fragment>
+              <>
                 {hotPhaseRolloverEnabled && (
                   <UseField
                     path={formFieldPaths.warmPhaseOnRollover}
@@ -124,19 +125,13 @@ export const WarmPhase: FunctionComponent = () => {
                     <MinAgeInputField phase="warm" />
                   </>
                 )}
-              </Fragment>
+              </>
             )}
-          </Fragment>
+          </>
         </EuiDescribedFormGroup>
 
         {enabled && (
-          <Fragment>
-            {/* Data tier allocation section */}
-            <DataTierAllocationField
-              description={i18nTexts.dataTierAllocation.description}
-              phase={warmProperty}
-            />
-
+          <>
             <DescribedFormField
               title={
                 <h3>
@@ -226,8 +221,24 @@ export const WarmPhase: FunctionComponent = () => {
 
             {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="warm" />}
 
-            <SetPriorityInputField phase="warm" />
-          </Fragment>
+            <EuiAccordion
+              id="ilmWarmPhaseAdvancedSettings"
+              buttonContent={i18n.translate(
+                'xpack.indexLifecycleMgmt.warmPhase.advancedSettingsButton',
+                {
+                  defaultMessage: 'Advanced settings',
+                }
+              )}
+              paddingSize="m"
+            >
+              {/* Data tier allocation section */}
+              <DataTierAllocationField
+                description={i18nTexts.dataTierAllocation.description}
+                phase={warmProperty}
+              />
+              <SetPriorityInputField phase="warm" />
+            </EuiAccordion>
+          </>
         )}
       </>
     </div>

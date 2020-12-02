@@ -51,18 +51,13 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
     services: { cloud },
   } = useKibana();
   const { getUrlForApp, policy, license } = useEditPolicyContext();
-  const {
-    isUsingSearchableSnapshotInHotPhase,
-    isUsingForceMergeInHotPhase,
-  } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
 
   const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
   const isDisabledInColdDueToHotPhase = phase === 'cold' && isUsingSearchableSnapshotInHotPhase;
-  const isDisabledInHotDueToForceMerge = phase === 'hot' && isUsingForceMergeInHotPhase;
 
-  const isDisabled =
-    isDisabledDueToLicense || isDisabledInColdDueToHotPhase || isDisabledInHotDueToForceMerge;
+  const isDisabled = isDisabledDueToLicense || isDisabledInColdDueToHotPhase;
 
   const renderField = () => (
     <SearchableSnapshotDataProvider>
@@ -269,25 +264,6 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             {
               defaultMessage:
                 'Cannot perform searchable snapshot in cold when it is configured in hot phase.',
-            }
-          )}
-        </EuiCallOut>
-      );
-    } else if (isDisabledInHotDueToForceMerge) {
-      disabledCallout = (
-        <EuiCallOut
-          data-test-subj="searchableSnapshotFieldsDisabledDueToForceMerge"
-          title={i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledCalloutTitle',
-            { defaultMessage: 'Searchable snapshot disabled' }
-          )}
-          iconType="questionInCircle"
-        >
-          {i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledForcemergeCalloutBody',
-            {
-              defaultMessage:
-                'To configure searchable snapshot in the hot phase disable force merge.',
             }
           )}
         </EuiCallOut>

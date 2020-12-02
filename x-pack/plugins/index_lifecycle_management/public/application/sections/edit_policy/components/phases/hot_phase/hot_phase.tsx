@@ -29,7 +29,7 @@ import {
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { ROLLOVER_EMPTY_VALIDATION } from '../../../form';
+import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues } from '../../../form';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
@@ -55,6 +55,8 @@ export const HotPhase: FunctionComponent = () => {
   });
   const isRolloverEnabled = get(formData, useRolloverPath);
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
+
+  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   return (
     <>
@@ -229,23 +231,19 @@ export const HotPhase: FunctionComponent = () => {
         )}
       </EuiDescribedFormGroup>
 
-      {isRolloverEnabled && <ForcemergeField phase="hot" />}
-
-      <SetPriorityInputField phase={hotProperty} />
-
-      {license.canUseSearchableSnapshot() && (
-        <EuiAccordion
-          initialIsOpen={Boolean(policy.phases.hot?.actions.searchable_snapshot)}
-          id="ilmHotPhaseAdvancedSettings"
-          buttonContent={i18n.translate(
-            'xpack.indexLifecycleMgmt.hotPhase.advancedSettingsButton',
-            { defaultMessage: 'Advanced settings' }
-          )}
-          paddingSize="m"
-        >
-          <SearchableSnapshotField phase="hot" />
-        </EuiAccordion>
-      )}
+      <EuiAccordion
+        id="ilmHotPhaseAdvancedSettings"
+        buttonContent={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.advancedSettingsButton', {
+          defaultMessage: 'Advanced settings',
+        })}
+        paddingSize="m"
+      >
+        {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
+        {isRolloverEnabled && !isUsingSearchableSnapshotInHotPhase && (
+          <ForcemergeField phase="hot" />
+        )}
+        <SetPriorityInputField phase={hotProperty} />
+      </EuiAccordion>
     </>
   );
 };
