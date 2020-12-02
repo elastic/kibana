@@ -27,7 +27,7 @@ import { ValuesType } from 'utility-types';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { useTheme } from '../../../../../../observability/public';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { IUrlParams } from '../../../../context/url_params_context/types';
+import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../../shared/charts/chart_container';
