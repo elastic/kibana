@@ -18,7 +18,7 @@ import { ClosureType } from '../../containers/configure/types';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionConnectorTableItem } from '../../../../../triggers_actions_ui/public/types';
-import { connectorsConfiguration } from '../../../common/lib/connectors/config';
+import { connectorsConfiguration } from '../connectors';
 
 import { SectionWrapper } from '../wrappers';
 import { Connectors } from './connectors';
