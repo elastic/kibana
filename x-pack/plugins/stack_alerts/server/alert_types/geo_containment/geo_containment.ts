@@ -28,52 +28,50 @@ export function transformResults(
   if (!results) {
     return [];
   }
+  // For the latest of all results, get most recent
+  const buckets = _.get(results, 'aggregations.shapes.buckets', {});
+  // @ts-expect-error
+  const arrResults = _.flatMap(buckets, (bucket: unknown, bucketKey: string) => {
+    const subBuckets = _.get(bucket, 'entitySplit.buckets', []);
+    return _.map(subBuckets, (subBucket) => {
+      const locationFieldResult = _.get(
+        subBucket,
+        `entityHits.hits.hits[0].fields["${geoField}"][0]`,
+        ''
+      );
+      const location = locationFieldResult
+        ? _.chain(locationFieldResult)
+            .split(', ')
+            .map((coordString) => +coordString)
+            .reverse()
+            .value()
+        : null;
+      const dateInShape = _.get(
+        subBucket,
+        `entityHits.hits.hits[0].fields["${dateField}"][0]`,
+        null
+      );
+      const docId = _.get(subBucket, `entityHits.hits.hits[0]._id`);
 
-  return (
-    _.chain(results)
-      .get('aggregations.shapes.buckets', {})
-      // @ts-expect-error
-      .flatMap((bucket: unknown, bucketKey: string) => {
-        const subBuckets = _.get(bucket, 'entitySplit.buckets', []);
-        return _.map(subBuckets, (subBucket) => {
-          const locationFieldResult = _.get(
-            subBucket,
-            `entityHits.hits.hits[0].fields["${geoField}"][0]`,
-            ''
-          );
-          const location = locationFieldResult
-            ? _.chain(locationFieldResult)
-                .split(', ')
-                .map((coordString) => +coordString)
-                .reverse()
-                .value()
-            : null;
-          const dateInShape = _.get(
-            subBucket,
-            `entityHits.hits.hits[0].fields["${dateField}"][0]`,
-            null
-          );
-          const docId = _.get(subBucket, `entityHits.hits.hits[0]._id`);
-
-          return {
-            location,
-            shapeLocationId: bucketKey,
-            entityName: subBucket.key,
-            dateInShape,
-            docId,
-          };
-        });
-      })
-      .orderBy(['entityName', 'dateInShape'], ['asc', 'desc'])
-      .reduce((accu: Map<string, EntityLocation>, el: LatestEntityLocation) => {
-        const { entityName, ...locationData } = el;
-        if (!accu.size || entityName !== Array.from(accu)[accu.size - 1].entityName) {
-          accu.set(entityName, locationData);
-        }
-        return accu;
-      }, new Map())
-      .value()
-  );
+      return {
+        location,
+        shapeLocationId: bucketKey,
+        entityName: subBucket.key,
+        dateInShape,
+        docId,
+      };
+    });
+  });
+  const orderedResults = _.orderBy(arrResults, ['entityName', 'dateInShape'], ['asc', 'desc'])
+    // Get unique
+    .reduce((accu: Map<string, EntityLocation>, el: LatestEntityLocation) => {
+      const { entityName, ...locationData } = el;
+      if (!accu.has(entityName)) {
+        accu.set(entityName, locationData);
+      }
+      return accu;
+    }, new Map());
+  return orderedResults;
 }
 
 function getOffsetTime(delayOffsetWithUnits: string, oldTime: Date): Date {
@@ -134,29 +132,17 @@ export const getGeoContainmentExecutor = (log: Logger) =>
     }
 
     // Start collecting data only on the first cycle
+    let currentIntervalResults: SearchResponse<unknown> | undefined;
     if (!currIntervalStartTime) {
       log.debug(`alert ${GEO_CONTAINMENT_ID}:${alertId} alert initialized. Collecting data`);
       // Consider making first time window configurable?
+      const START_TIME_WINDOW = 1;
       const tempPreviousEndTime = new Date(currIntervalEndTime);
-      tempPreviousEndTime.setMinutes(tempPreviousEndTime.getMinutes() - 5);
-      const prevToCurrentIntervalResults:
-        | SearchResponse<unknown>
-        | undefined = await executeEsQuery(tempPreviousEndTime, currIntervalEndTime);
-      return {
-        prevLocationArr: transformResults(
-          prevToCurrentIntervalResults,
-          params.dateField,
-          params.geoField
-        ),
-        shapesFilters,
-        shapesIdsNamesMap,
-      };
+      tempPreviousEndTime.setMinutes(tempPreviousEndTime.getMinutes() - START_TIME_WINDOW);
+      currentIntervalResults = await executeEsQuery(tempPreviousEndTime, currIntervalEndTime);
+    } else {
+      currentIntervalResults = await executeEsQuery(currIntervalStartTime, currIntervalEndTime);
     }
-
-    const currentIntervalResults: SearchResponse<unknown> | undefined = await executeEsQuery(
-      currIntervalStartTime,
-      currIntervalEndTime
-    );
 
     const currLocationMap: Map<string, EntityLocation> = transformResults(
       currentIntervalResults,
@@ -169,9 +155,9 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
       const context = {
         entityId: entityName,
-        entityDateTime: dateInShape,
+        entityDateTime: new Date(currIntervalEndTime).toISOString(),
         entityDocumentId: docId,
-        detectionDateTime: new Date(currIntervalEndTime).getTime(),
+        detectionDateTime: new Date(currIntervalEndTime).toISOString(),
         entityLocation: `POINT (${location[0]} ${location[1]})`,
         containingBoundaryId: shapeLocationId,
         containingBoundaryName,
