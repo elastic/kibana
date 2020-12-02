@@ -118,10 +118,10 @@ export abstract class Embeddable<
   public abstract reload(): void;
 
   /**
-   * Merges input$ and output$ streams and denounces emit till next macro-task
-   * Could be useful to batch reactions to input$ and output$ updates that happen separately but synchronously
-   * In case corresponding state change triggered `reload` this stream is guarantied to emit later
-   * which allows to skip any state handling in case `reload` already handled it
+   * Merges input$ and output$ streams and debounces emit till next macro-task.
+   * Could be useful to batch reactions to input$ and output$ updates that happen separately but synchronously.
+   * In case corresponding state change triggered `reload` this stream is guarantied to emit later,
+   * which allows to skip any state handling in case `reload` already handled it.
    */
   public getUpdated$(): Readonly<Rx.Observable<void>> {
     return merge(this.getInput$().pipe(skip(1)), this.getOutput$().pipe(skip(1))).pipe(
