@@ -64,6 +64,13 @@ export class Plugin {
       namespaceType: 'single',
       mappings,
     });
+    core.savedObjects.registerType({
+      name: 'resolvetype',
+      hidden: false,
+      namespaceType: 'multiple',
+      management,
+      mappings,
+    });
   }
 
   public start() {

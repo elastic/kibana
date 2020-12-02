@@ -176,6 +176,28 @@
             }
           }
         },
+        "legacy-url-alias": {
+          "properties": {
+            "targetNamespace": {
+              "type": "keyword"
+            },
+            "targetType": {
+              "type": "keyword"
+            },
+            "targetId": {
+              "type": "keyword"
+            },
+            "lastResolved": {
+              "type": "date"
+            },
+            "resolveCounter": {
+              "type": "integer"
+            },
+            "disabled": {
+              "type": "boolean"
+            }
+          }
+        },
         "namespace": {
           "type": "keyword"
         },
@@ -184,6 +206,13 @@
         },
         "originId": {
           "type": "keyword"
+        },
+        "resolvetype": {
+          "properties": {
+            "title": {
+              "type": "text"
+            }
+          }
         },
         "search": {
           "properties": {
