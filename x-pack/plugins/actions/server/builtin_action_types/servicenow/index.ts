@@ -37,8 +37,6 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const DISABLED_ACTION_GROUPS: string[] = ['resolved'];
-
 // action type definition
 export function getActionType(
   params: GetActionTypeParams
@@ -63,7 +61,6 @@ export function getActionType(
       params: ExecutorParamsSchema,
     },
     executor: curry(executor)({ logger }),
-    disabledActionGroups: DISABLED_ACTION_GROUPS,
   };
 }
 

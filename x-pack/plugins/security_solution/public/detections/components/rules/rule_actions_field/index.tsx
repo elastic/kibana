@@ -31,6 +31,7 @@ interface Props {
 const DEFAULT_ACTION_GROUP_ID = 'default';
 const DEFAULT_ACTION_MESSAGE =
   'Rule {{context.rule.name}} generated {{state.signals_count}} alerts';
+const RECOVERED_ACTION_GROUP_ID = 'recovered;';
 
 const FieldErrorsContainer = styled.div`
   p {
@@ -118,6 +119,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         actions={actions}
         messageVariables={messageVariables}
         defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
+        recoveredActionGroupId={RECOVERED_ACTION_GROUP_ID}
         setActionIdByIndex={setActionIdByIndex}
         setActions={setAlertActionsProperty}
         setActionParamsProperty={setActionParamsProperty}

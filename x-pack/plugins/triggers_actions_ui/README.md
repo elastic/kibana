@@ -1469,6 +1469,7 @@ ActionForm Props definition:
 interface ActionAccordionFormProps {
   actions: AlertAction[];
   defaultActionGroupId: string;
+  recoveredActionGroupId: string;
   actionGroups?: ActionGroup[];
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;

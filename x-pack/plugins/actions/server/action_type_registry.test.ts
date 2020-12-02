@@ -54,7 +54,6 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'gold',
-      disabledActionGroups: ['no no no'],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
@@ -82,7 +81,6 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      disabledActionGroups: ['no no no'],
       executor,
     };
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
@@ -97,7 +95,6 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      disabledActionGroups: ['no no no'],
       executor,
     });
     expect(() =>
@@ -118,7 +115,6 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      disabledActionGroups: ['no no no'],
       executor,
     });
     expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
@@ -139,7 +135,6 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'gold',
-      disabledActionGroups: ['no no no'],
       executor,
     });
     expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
@@ -154,7 +149,6 @@ describe('register()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      disabledActionGroups: ['no no no'],
       executor,
     });
     expect(actionTypeRegistryParams.licensing.featureUsage.register).not.toHaveBeenCalled();
@@ -168,15 +162,11 @@ describe('get()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      disabledActionGroups: ['no no no'],
       executor,
     });
     const actionType = actionTypeRegistry.get('my-action-type');
     expect(actionType).toMatchInlineSnapshot(`
       Object {
-        "disabledActionGroups": Array [
-          "no no no",
-        ],
         "executor": [Function],
         "id": "my-action-type",
         "minimumLicenseRequired": "basic",
@@ -201,7 +191,6 @@ describe('list()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      disabledActionGroups: ['no no no'],
       executor,
     });
     actionTypeRegistry.register({
@@ -219,7 +208,6 @@ describe('list()', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic',
-        disabledActionGroups: ['no no no'],
       },
       {
         id: 'my-action-type-no-disabled-action-group',
@@ -247,7 +235,6 @@ describe('has()', () => {
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
-      disabledActionGroups: ['no no no'],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type'));
@@ -260,7 +247,6 @@ describe('isActionTypeEnabled', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'basic',
-    disabledActionGroups: ['no no no'],
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },
@@ -328,7 +314,6 @@ describe('ensureActionTypeEnabled', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'basic',
-    disabledActionGroups: ['no no no'],
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },
@@ -374,7 +359,6 @@ describe('isActionExecutable()', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'basic',
-    disabledActionGroups: ['no no no'],
     executor: async (options) => {
       return { status: 'ok', actionId: options.actionId };
     },

@@ -39,7 +39,6 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const DISABLED_ACTION_GROUPS: string[] = ['resolved'];
 const supportedSubActions: string[] = [
   'getFields',
   'pushToService',
@@ -73,7 +72,6 @@ export function getActionType(
       params: ExecutorParamsSchema,
     },
     executor: curry(executor)({ logger }),
-    disabledActionGroups: DISABLED_ACTION_GROUPS,
   };
 }
 

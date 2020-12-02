@@ -6,7 +6,6 @@
 
 import React, { Fragment, Suspense, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -28,7 +27,11 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 import { pick } from 'lodash';
-import { AlertActionParam } from '../../../../../alerts/common';
+import {
+  AlertActionParam,
+  RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId,
+} from '../../../../../alerts/common';
 import {
   IErrorObject,
   AlertAction,
@@ -63,6 +66,7 @@ export type ActionTypeFormProps = {
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
+  | 'recoveredActionGroupId'
   | 'actionGroups'
   | 'setActionGroupIdByIndex'
   | 'setActionParamsProperty'
@@ -90,6 +94,7 @@ export const ActionTypeForm = ({
   connectors,
   defaultActionGroupId,
   defaultActionMessage,
+  recoveredActionGroupId,
   messageVariables,
   actionGroups,
   setActionGroupIdByIndex,
@@ -145,9 +150,12 @@ export const ActionTypeForm = ({
 
   const actionType = actionTypesIndex[actionItem.actionTypeId];
 
-  const isActionGroupDisabledForActionType = (actionGroupId: string): boolean =>
-    !isEmpty(actionType.disabledActionGroups) &&
-    actionType.disabledActionGroups!.includes(actionGroupId);
+  const isActionGroupDisabledForActionType = (actionGroupId: string): boolean => {
+    return isActionGroupDisabledForActionTypeId(
+      actionGroupId === recoveredActionGroupId ? RecoveredActionGroup.id : actionGroupId,
+      actionItem.actionTypeId
+    );
+  };
 
   const optionsList = connectors
     .filter(
