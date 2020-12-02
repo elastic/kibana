@@ -245,8 +245,7 @@ export class VectorStyle implements IVectorStyle {
     nextFields: IField[],
     styleFieldsHelper: StyleFieldsHelper,
     originalProperties: VectorStylePropertiesDescriptor,
-    previousFields: IField[],
-    mapColors: string[]
+    previousFields: IField[]
   ) {
     const invalidStyleNames: VECTOR_STYLES[] = (Object.keys(
       originalProperties
@@ -273,22 +272,18 @@ export class VectorStyle implements IVectorStyle {
         if (previousField.isEqual(nextField)) {
           continue;
         }
-        let newFieldDescriptor: StylePropertyField | undefined;
         const isFieldDataTypeCompatible = styleFieldsHelper.hasFieldForStyle(
           nextField,
           invalidStyleName
         );
-        if (isFieldDataTypeCompatible) {
-          newFieldDescriptor = rectifyFieldDescriptor(nextField as IESAggField, {
-            origin: previousField.getOrigin(),
-            name: previousField.getName(),
-          });
-
-          if (newFieldDescriptor) {
-            hasChanges = true;
-          }
+        if (!isFieldDataTypeCompatible) {
+          return;
         }
-
+        const newFieldDescriptor = rectifyFieldDescriptor(nextField as IESAggField, {
+          origin: previousField.getOrigin(),
+          name: previousField.getName(),
+        });
+        hasChanges = true;
         (originalProperties[invalidStyleName]!
           .options! as DynamicStylePropertyOptions).field = newFieldDescriptor;
       }
@@ -987,11 +982,6 @@ function rectifyFieldDescriptor(
   currentField: IESAggField,
   previousFieldDescriptor: StylePropertyField
 ): Promise<StylePropertyField | undefined> {
-  if (previousFieldDescriptor.name.endsWith(TOP_TERM_PERCENTAGE_SUFFIX)) {
-    // Don't support auto-switching for top-term-percentages
-    return;
-  }
-
   return {
     origin: previousFieldDescriptor.origin,
     name: currentField.getName(),
