@@ -31,7 +31,10 @@ export class GaugeChart extends Chart {
   addEvents(element) {
     const events = this.events;
 
-    return element.call(events.addHoverEvent()).call(events.addMouseoutEvent());
+    return element
+      .call(events.addHoverEvent())
+      .call(events.addMouseoutEvent())
+      .call(events.addClickEvent());
   }
 
   /**
