@@ -62,7 +62,7 @@ const packages: Package[] = [
       // * checkout the node-re2 project,
       // * install Node using the same minor used by Kibana
       // * npm install, which will also create a build
-      // * gzip -c build/Release/re2.node > linux-arm64-72.gz
+      // * gzip -c build/Release/re2.node > linux-arm64-83.gz
       // * upload to kibana-ci-proxy-cache bucket
       'linux-arm64': {
         url:
