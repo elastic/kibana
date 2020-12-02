@@ -17,13 +17,16 @@
  * under the License.
  */
 
+import { StartServicesAccessor } from 'src/core/public';
 import {
   getIndexPatternLoadMeta,
   IndexPatternLoadExpressionFunctionDefinition,
   IndexPatternLoadStartDependencies,
 } from '../../../common/index_patterns/expressions';
+import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
-export function getIndexPatternLoad({
+/** @internal */
+export function createIndexPatternLoad({
   getStartDependencies,
 }: {
   getStartDependencies: () => Promise<IndexPatternLoadStartDependencies>;
@@ -36,6 +39,20 @@ export function getIndexPatternLoad({
       const indexPattern = await indexPatterns.get(args.id);
 
       return { type: 'index_pattern', value: indexPattern.toSpec() };
+    },
+  });
+}
+
+/** @internal */
+export function getIndexPatternLoad({
+  getStartServices,
+}: {
+  getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+}) {
+  return createIndexPatternLoad({
+    getStartDependencies: async () => {
+      const [, , { indexPatterns }] = await getStartServices();
+      return { indexPatterns };
     },
   });
 }

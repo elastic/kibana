@@ -48,7 +48,6 @@ import {
   setUiSettings,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
-import { getEsaggs } from './search/expressions';
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
@@ -109,29 +108,7 @@ export class DataPublicPlugin
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    expressions.registerFunction(
-      getIndexPatternLoad({
-        getStartDependencies: async () => {
-          const [, , { indexPatterns }] = await core.getStartServices();
-          return { indexPatterns };
-        },
-      })
-    );
-    expressions.registerFunction(
-      getEsaggs({
-        getStartDependencies: async () => {
-          const [, , self] = await core.getStartServices();
-          const { fieldFormats, indexPatterns, query, search } = self;
-          return {
-            addFilters: query.filterManager.addFilters.bind(query.filterManager),
-            aggs: search.aggs,
-            deserializeFieldFormat: fieldFormats.deserialize.bind(fieldFormats),
-            indexPatterns,
-            searchSource: search.searchSource,
-          };
-        },
-      })
-    );
+    expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
 
     this.usageCollection = usageCollection;
 

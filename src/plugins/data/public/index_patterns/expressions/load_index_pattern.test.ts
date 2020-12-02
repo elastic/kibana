@@ -18,7 +18,7 @@
  */
 
 import { IndexPatternLoadStartDependencies } from '../../../common/index_patterns/expressions';
-import { getIndexPatternLoad } from './load_index_pattern';
+import { createIndexPatternLoad } from './load_index_pattern';
 
 describe('indexPattern expression function', () => {
   let getStartDependencies: () => Promise<IndexPatternLoadStartDependencies>;
@@ -36,7 +36,7 @@ describe('indexPattern expression function', () => {
   });
 
   test('returns serialized index pattern', async () => {
-    const indexPatternDefinition = getIndexPatternLoad({ getStartDependencies });
+    const indexPatternDefinition = createIndexPatternLoad({ getStartDependencies });
     const result = await indexPatternDefinition().fn(null, { id: '1' }, {} as any);
     expect(result.type).toEqual('index_pattern');
     expect(result.value.title).toEqual('value');

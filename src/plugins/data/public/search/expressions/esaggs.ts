@@ -18,6 +18,7 @@
  */
 
 import { get } from 'lodash';
+import { StartServicesAccessor } from 'src/core/public';
 import { Adapters } from 'src/plugins/inspector/common';
 import {
   EsaggsExpressionFunctionDefinition,
@@ -25,9 +26,9 @@ import {
   getEsaggsMeta,
   handleEsaggsRequest,
 } from '../../../common/search/expressions';
+import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
-/** @internal */
-export function getEsaggs({
+function createEsaggs({
   getStartDependencies,
 }: {
   getStartDependencies: () => Promise<EsaggsStartDependencies>;
@@ -63,6 +64,27 @@ export function getEsaggs({
         timeFields: args.timeFields,
         timeRange: get(input, 'timeRange', undefined),
       });
+    },
+  });
+}
+
+/** @internal */
+export function getEsaggs({
+  getStartServices,
+}: {
+  getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+}) {
+  return createEsaggs({
+    getStartDependencies: async () => {
+      const [, , self] = await getStartServices();
+      const { fieldFormats, indexPatterns, query, search } = self;
+      return {
+        addFilters: query.filterManager.addFilters.bind(query.filterManager),
+        aggs: search.aggs,
+        deserializeFieldFormat: fieldFormats.deserialize.bind(fieldFormats),
+        indexPatterns,
+        searchSource: search.searchSource,
+      };
     },
   });
 }
