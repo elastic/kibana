@@ -24,30 +24,27 @@ jest.mock('react', () => ({
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 
 import { useSearchContextState, useSearchContextActions } from './hooks';
 
 describe('hooks', () => {
   describe('useSearchContextState', () => {
-    it('exposes search state', () => {
-      const TestComponent = () => {
-        const { foo } = useSearchContextState();
-        return <div>{foo}</div>;
-      };
+    const TestComponent = () => {
+      const { foo } = useSearchContextState();
+      return <div>{foo}</div>;
+    };
 
-      const wrapper = mount(<TestComponent />);
+    let wrapper: ReactWrapper;
+    beforeAll(() => {
+      wrapper = mount(<TestComponent />);
+    });
+
+    it('exposes search state', () => {
       expect(wrapper.text()).toEqual('foo');
     });
 
     it('subscribes to state changes', () => {
-      const TestComponent = () => {
-        const { foo } = useSearchContextState();
-        return <div>{foo}</div>;
-      };
-
-      const wrapper = mount(<TestComponent />);
-
       act(() => {
         mockSubcription({ foo: 'bar' });
       });
@@ -56,13 +53,6 @@ describe('hooks', () => {
     });
 
     it('unsubscribes to state changes when unmounted', () => {
-      const TestComponent = () => {
-        const { foo } = useSearchContextState();
-        return <div>{foo}</div>;
-      };
-
-      const wrapper = mount(<TestComponent />);
-
       wrapper.unmount();
 
       expect(mockDriver.unsubscribeToStateChanges).toHaveBeenCalled();
