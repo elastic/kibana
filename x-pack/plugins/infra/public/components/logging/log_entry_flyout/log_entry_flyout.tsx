@@ -5,13 +5,13 @@
  */
 
 import {
+  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiLoadingSpinner,
   EuiProgress,
   EuiSpacer,
   EuiTextColor,
@@ -23,6 +23,7 @@ import React, { useEffect } from 'react';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
+import { DataSearchProgress } from '../../data_search_progress';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 import { LogEntryFieldsTable } from './log_entry_fields_table';
 
@@ -40,12 +41,13 @@ export const LogEntryFlyout = ({
   sourceId,
 }: LogEntryFlyoutProps) => {
   const {
+    cancelRequest: cancelLogEntryRequest,
+    errors: logEntryErrors,
     fetchLogEntry,
     isRequestRunning,
-    logEntry,
-    errors: logEntryErrors,
-    total: logEntryRequestTotal,
     loaded: logEntryRequestProgress,
+    logEntry,
+    total: logEntryRequestTotal,
   } = useLogEntry({
     sourceId,
     logEntryId,
@@ -95,12 +97,14 @@ export const LogEntryFlyout = ({
       </EuiFlyoutHeader>
       {isRequestRunning ? (
         <CenteredEuiFlyoutBody>
-          {/* <EuiLoadingSpinner size="xl" /> */}
-          <EuiProgress
-            label={loadingProgressMessage}
-            max={logEntryRequestTotal}
-            value={logEntryRequestProgress}
-          />
+          <div style={{ width: 400 }}>
+            <DataSearchProgress
+              label={loadingProgressMessage}
+              maxValue={logEntryRequestTotal}
+              onCancel={cancelLogEntryRequest}
+              value={logEntryRequestProgress}
+            />
+          </div>
         </CenteredEuiFlyoutBody>
       ) : logEntry ? (
         <EuiFlyoutBody>
@@ -108,8 +112,18 @@ export const LogEntryFlyout = ({
         </EuiFlyoutBody>
       ) : (
         <CenteredEuiFlyoutBody>
-          <EuiCallOut color="danger" iconType="alert">
-            {`${logEntryErrors}`}
+          <EuiCallOut
+            style={{ width: '61.8%' /* golden ratio */ }}
+            color="danger"
+            iconType="alert"
+            title={loadingErrorCalloutTitle}
+          >
+            {logEntryErrors?.map((error) => (
+              <p>{error.message}</p>
+            ))}
+            <EuiButton color="danger" size="s" onClick={fetchLogEntry}>
+              {loadingErrorRetryButtonLabel}
+            </EuiButton>
           </EuiCallOut>
         </CenteredEuiFlyoutBody>
       )}
@@ -120,5 +134,16 @@ export const LogEntryFlyout = ({
 const loadingProgressMessage = i18n.translate('xpack.infra.logFlyout.loadingMessage', {
   defaultMessage: 'Loading log entry',
 });
+
+const loadingErrorCalloutTitle = i18n.translate('xpack.infra.logFlyout.loadingErrorCalloutTitle', {
+  defaultMessage: 'Failed to load the log entry',
+});
+
+const loadingErrorRetryButtonLabel = i18n.translate(
+  'xpack.infra.logFlyout.loadingErrorRetryButtonLabel',
+  {
+    defaultMessage: 'Retry',
+  }
+);
 
 const noop = () => {};
