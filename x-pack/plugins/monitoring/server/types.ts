@@ -154,7 +154,7 @@ export interface ElasticsearchSource {
             ms: number;
           };
         };
-        handles: {
+        handles?: {
           limit: {
             hard: number;
             soft: number;

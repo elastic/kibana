@@ -30,8 +30,8 @@ export function handleResponse(response: ElasticsearchResponse, beatUuid: string
   const eventsEmittedLast = stats?.metrics.libbeat.pipeline.events.published;
   const eventsDroppedLast = stats?.metrics.libbeat.pipeline.events.dropped;
   const bytesWrittenLast = stats?.metrics.libbeat.output.write.bytes;
-  const handlesHardLimit = stats?.metrics.beat.handles.limit.hard;
-  const handlesSoftLimit = stats?.metrics.beat.handles.limit.soft;
+  const handlesHardLimit = stats?.metrics.beat.handles?.limit.hard;
+  const handlesSoftLimit = stats?.metrics.beat.handles?.limit.soft;
 
   return {
     uuid: beatUuid,
