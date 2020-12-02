@@ -31,7 +31,7 @@ const Status = {
   Unhealthy: (
     <EuiBadge color="warning">
       <FormattedMessage
-        id="xpack.fleet.agentHealth.inactiveStatusText"
+        id="xpack.fleet.agentHealth.unhealthyStatusText"
         defaultMessage="Unhealthy"
       />
     </EuiBadge>
