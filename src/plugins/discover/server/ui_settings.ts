@@ -34,6 +34,7 @@ import {
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
+  SEARCH_FIELDS_FROM_SOURCE,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -179,5 +180,14 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       type: METRIC_TYPE.CLICK,
       name: 'discover:modifyColumnsOnSwitchTitle',
     },
+  },
+  [SEARCH_FIELDS_FROM_SOURCE]: {
+    name: 'Read fields from _source',
+    description: `Disable to retrieve fields via the new <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-fields.html#search-fields"
+        target="_blank" rel="noopener">Fields API</a> in the high-level search service. Keep this setting enabled
+        to continue retrieving fields directly from \`_source\`.`,
+    value: true,
+    category: ['discover'],
+    schema: schema.boolean(),
   },
 };

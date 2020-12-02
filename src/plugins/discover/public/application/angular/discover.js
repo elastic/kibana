@@ -38,7 +38,6 @@ import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
-import { UI_SETTINGS } from '../../../../data/common';
 import {
   getAngularModule,
   getHeaderActionMenuMounter,
@@ -66,6 +65,7 @@ import {
   DEFAULT_COLUMNS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
   SEARCH_ON_PAGE_LOAD_SETTING,
 } from '../../../common';
 import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_pattern';
@@ -194,9 +194,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     $scope.searchSource,
     toastNotifications
   );
-  $scope.useNewFieldsApi = !$scope.searchSource.dependencies?.getConfig(
-    UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE
-  );
+  $scope.useNewFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
   $scope.showUnmappedFields = false;
   $scope.onShowUnmappedFieldsChange = (val) => {
     $scope.showUnmappedFields = val;
@@ -420,7 +418,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   setBreadcrumbsTitle(savedSearch, chrome);
 
   function getDefaultColumns() {
-    const { columns } = savedSearch;
+    const columns = [...savedSearch.columns];
     if ($scope.useNewFieldsApi) {
       const indexOfSource = columns.indexOf('_source');
       if (indexOfSource !== -1 && columns.splice(indexOfSource, 1).length > 0) {
