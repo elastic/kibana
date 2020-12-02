@@ -11,7 +11,6 @@ import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mock
 import { PolicyWatcher } from './license_watch';
 import { ILicense } from '../../../../../licensing/common/types';
 import { licenseMock } from '../../../../../licensing/common/licensing.mock';
-import { SavedObjectsServiceStart } from 'src/core/server';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { PackagePolicy } from '../../../../../fleet/common';
 import { createPackagePolicyMock } from '../../../../../fleet/common/mocks';
