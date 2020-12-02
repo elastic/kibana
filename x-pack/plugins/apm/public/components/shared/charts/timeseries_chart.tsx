@@ -29,11 +29,11 @@ import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { RectCoordinate, TimeSeries } from '../../../../typings/timeseries';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { useTheme } from '../../../hooks/useTheme';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useAnnotations } from '../../../hooks/use_annotations';
-import { useChartPointerEvent } from '../../../hooks/use_chart_pointer_event';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useTheme } from '../../../hooks/use_theme';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
+import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { AnomalySeries } from '../../../selectors/chart_selectors';
 import { unit } from '../../../style/variables';
 import { ChartContainer } from './chart_container';
@@ -72,9 +72,9 @@ export function TimeseriesChart({
 }: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
-  const { annotations } = useAnnotations();
+  const { annotations } = useAnnotationsContext();
   const chartTheme = useChartTheme();
-  const { pointerEvent, setPointerEvent } = useChartPointerEvent();
+  const { pointerEvent, setPointerEvent } = useChartPointerEventContext();
   const { urlParams } = useUrlParams();
   const theme = useTheme();
 
