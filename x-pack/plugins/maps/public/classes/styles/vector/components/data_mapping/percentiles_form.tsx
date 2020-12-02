@@ -6,9 +6,8 @@
 
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
-import { EuiButton, EuiFieldNumber, EuiFormRow, EuiSpacer, EuiTextAlign } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { RowActionButtons } from '../row_action_buttons';
 
 interface Props {
@@ -37,7 +36,10 @@ export class PercentilesForm extends Component<Props, State> {
   }
 
   _onSubmit = () => {
-    this.props.onChange(this.state.percentiles as number[]);
+    const hasInvalidPercentile = this.state.percentiles.some(isInvalidPercentile);
+    if (!hasInvalidPercentile) {
+      this.props.onChange(this.state.percentiles as number[]);
+    }
   };
 
   render() {
@@ -72,7 +74,7 @@ export class PercentilesForm extends Component<Props, State> {
           newPercentile,
           ...this.state.percentiles.slice(index + 1),
         ];
-        this.setState({ percentiles });
+        this.setState({ percentiles }, this._onSubmit);
       };
 
       const onRemove = () => {
@@ -83,14 +85,14 @@ export class PercentilesForm extends Component<Props, State> {
                 ...this.state.percentiles.slice(0, index),
                 ...this.state.percentiles.slice(index + 1),
               ];
-        this.setState({ percentiles });
+        this.setState({ percentiles }, this._onSubmit);
       };
 
       const onPercentileChange = (event: ChangeEvent<HTMLInputElement>) => {
         const sanitizedValue = parseFloat(event.target.value);
         const percentiles = [...this.state.percentiles];
         percentiles[index] = isNaN(sanitizedValue) ? '' : sanitizedValue;
-        this.setState({ percentiles });
+        this.setState({ percentiles }, this._onSubmit);
       };
 
       const isInvalid = isInvalidPercentile(percentile);
@@ -119,30 +121,6 @@ export class PercentilesForm extends Component<Props, State> {
       );
     });
 
-    const applyButton = !_.isEqual(this.state.percentiles, this.props.initialPercentiles) ? (
-      <>
-        <EuiSpacer />
-        <EuiTextAlign textAlign="right">
-          <EuiButton
-            fill
-            isDisabled={this.state.percentiles.some(isInvalidPercentile)}
-            onClick={this._onSubmit}
-            size="s"
-          >
-            <FormattedMessage
-              id="xpack.maps.styles.percentlesForm.submitBtnLabel"
-              defaultMessage="Apply changes"
-            />
-          </EuiButton>
-        </EuiTextAlign>
-      </>
-    ) : null;
-
-    return (
-      <div>
-        {rows}
-        {applyButton}
-      </div>
-    );
+    return <div>{rows}</div>;
   }
 }
