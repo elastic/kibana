@@ -11,7 +11,8 @@ import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
-} from 'src/plugins/data/public';
+} from '../../../../../src/plugins/data/public';
+import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
 import { SearchStrategyError } from '../../common/search_strategies/common/errors';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 import { tapUnsubscribe, useObservable, useObservableState } from '../utils/use_observable';
@@ -168,10 +169,14 @@ export const useLatestPartialDataSearchRequest = <
                     response: {
                       data: currentInitialResponse,
                       errors: [
-                        {
-                          type: 'generic' as const,
-                          message: `${error.message ?? error}`,
-                        },
+                        error instanceof AbortError
+                          ? {
+                              type: 'aborted' as const,
+                            }
+                          : {
+                              type: 'generic' as const,
+                              message: `${error.message ?? error}`,
+                            },
                       ],
                       isPartial: true,
                       isRunning: false,
