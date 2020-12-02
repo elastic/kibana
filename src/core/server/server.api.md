@@ -2000,6 +2000,7 @@ export class SavedObjectsClient {
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
+    resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObjectsResolveResponse<T>>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
@@ -2420,6 +2421,11 @@ export interface SavedObjectsRawDoc {
     _type?: string;
 }
 
+// @public
+export interface SavedObjectsRawDocParseOptions {
+    flexible?: boolean;
+}
+
 // @public (undocumented)
 export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
     refresh?: boolean;
@@ -2450,6 +2456,7 @@ export class SavedObjectsRepository {
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter(type: string, id: string, counterFieldNames: string[], options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
+    resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObjectsResolveResponse<T>>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
@@ -2470,13 +2477,22 @@ export interface SavedObjectsResolveImportErrorsOptions {
     typeRegistry: ISavedObjectTypeRegistry;
 }
 
+// @public (undocumented)
+export interface SavedObjectsResolveResponse<T = unknown> {
+    // (undocumented)
+    outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+    // (undocumented)
+    saved_object: SavedObject<T>;
+}
+
 // @public
 export class SavedObjectsSerializer {
     // @internal
     constructor(registry: ISavedObjectTypeRegistry);
     generateRawId(namespace: string | undefined, type: string, id?: string): string;
-    isRawSavedObject(rawDoc: SavedObjectsRawDoc): boolean;
-    rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc;
+    generateRawLegacyUrlAliasId(namespace: string, type: string, id: string): string;
+    isRawSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): boolean;
+    rawToSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): SavedObjectSanitizedDoc;
     savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
     }
 
@@ -2510,6 +2526,7 @@ export interface SavedObjectStatusMeta {
 // @public (undocumented)
 export interface SavedObjectsType {
     convertToAliasScript?: string;
+    convertToMultiNamespaceTypeVersion?: string;
     hidden: boolean;
     indexPattern?: string;
     management?: SavedObjectsTypeManagementDefinition;

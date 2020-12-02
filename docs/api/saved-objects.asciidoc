@@ -10,6 +10,8 @@ The following saved objects APIs are available:
 
 * <<saved-objects-api-get, Get object API>> to retrieve a single {kib} saved object by ID
 
+* <<saved-objects-api-resolve, Resolve object API>> to retrieve a single {kib} saved object by ID, using any legacy URL alias if it exists
+
 * <<saved-objects-api-bulk-get, Bulk get objects API>> to retrieve multiple {kib} saved objects by ID
 
 * <<saved-objects-api-find, Find objects API>> to retrieve a paginated set of {kib} saved objects by various conditions
@@ -40,4 +42,5 @@ include::saved-objects/delete.asciidoc[]
 include::saved-objects/export.asciidoc[]
 include::saved-objects/import.asciidoc[]
 include::saved-objects/resolve_import_errors.asciidoc[]
+include::saved-objects/resolve.asciidoc[]
 include::saved-objects/rotate_encryption_key.asciidoc[]
