@@ -64,16 +64,9 @@ interface DataVisualizerPageState {
   totalMetricFieldCount: number;
   populatedMetricFieldCount: number;
   showAllMetrics: boolean;
-  metricFieldQuery?: string;
   nonMetricConfigs: FieldVisConfig[];
-  totalNonMetricFieldCount: number;
-  populatedNonMetricFieldCount: number;
   showAllNonMetrics: boolean;
-  nonMetricShowFieldType: ML_JOB_FIELD_TYPES | '*';
-  nonMetricFieldQuery?: string;
   documentCountStats?: FieldVisConfig;
-  visibleFieldTypes: string[];
-  visibleFieldNames: string[];
 }
 
 const defaultSearchQuery = {
@@ -98,13 +91,8 @@ function getDefaultPageState(): DataVisualizerPageState {
     populatedMetricFieldCount: 0,
     showAllMetrics: false,
     nonMetricConfigs: [],
-    totalNonMetricFieldCount: 0,
-    populatedNonMetricFieldCount: 0,
     showAllNonMetrics: false,
-    nonMetricShowFieldType: '*',
     documentCountStats: undefined,
-    visibleFieldTypes: [],
-    visibleFieldNames: [],
   };
 }
 export const getDefaultDataVisualizerListState = (): DataVisualizerIndexBasedAppState => ({
@@ -112,13 +100,16 @@ export const getDefaultDataVisualizerListState = (): DataVisualizerIndexBasedApp
   pageSize: 10,
   sortField: 'fieldName',
   sortDirection: 'asc',
+  visibleFieldTypes: [],
+  visibleFieldNames: [],
 });
 
 export const Page: FC = () => {
   const mlContext = useMlContext();
+  const restorableDefaults = getDefaultDataVisualizerListState();
   const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(
     ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
-    getDefaultDataVisualizerListState()
+    restorableDefaults
   );
 
   const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = mlContext;
@@ -193,32 +184,13 @@ export const Page: FC = () => {
 
   const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
-  const [totalMetricFieldCount, setTotalMetricFieldCount] = useState(
-    defaults.totalMetricFieldCount
-  );
-  const [populatedMetricFieldCount, setPopulatedMetricFieldCount] = useState(
-    defaults.populatedMetricFieldCount
-  );
   const [showAllMetrics, setShowAllMetrics] = useState(defaults.showAllMetrics);
-  const [metricFieldQuery, setMetricFieldQuery] = useState(defaults.metricFieldQuery);
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
-  const [totalNonMetricFieldCount, setTotalNonMetricFieldCount] = useState(
-    defaults.totalNonMetricFieldCount
-  );
-  const [populatedNonMetricFieldCount, setPopulatedNonMetricFieldCount] = useState(
-    defaults.populatedNonMetricFieldCount
-  );
   const [showAllNonMetrics, setShowAllNonMetrics] = useState(defaults.showAllNonMetrics);
 
-  const [nonMetricShowFieldType, setNonMetricShowFieldType] = useState(
-    defaults.nonMetricShowFieldType
-  );
-
-  const [nonMetricFieldQuery, setNonMetricFieldQuery] = useState(defaults.nonMetricFieldQuery);
-
-  const [visibleFieldTypes, setVisibleFieldTypes] = useState(defaults.visibleFieldTypes);
-  const [visibleFieldNames, setVisibleFieldNames] = useState(defaults.visibleFieldNames);
+  const [visibleFieldTypes, setVisibleFieldTypes] = useState(restorableDefaults.visibleFieldTypes);
+  const [visibleFieldNames, setVisibleFieldNames] = useState(restorableDefaults.visibleFieldNames);
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -255,7 +227,7 @@ export const Page: FC = () => {
 
   useEffect(() => {
     createMetricCards();
-  }, [showAllMetrics, metricFieldQuery]);
+  }, [showAllMetrics]);
 
   /**
    * Extract query data from the saved search object.
@@ -467,20 +439,13 @@ export const Page: FC = () => {
     const configs: FieldVisConfig[] = [];
     const aggregatableExistsFields: any[] = overallStats.aggregatableExistsFields || [];
 
-    let allMetricFields = indexPatternFields.filter((f) => {
+    const allMetricFields = indexPatternFields.filter((f) => {
       return (
         f.type === KBN_FIELD_TYPES.NUMBER &&
         f.displayName !== undefined &&
         dataLoader.isDisplayField(f.displayName) === true
       );
     });
-    if (metricFieldQuery !== undefined) {
-      const metricFieldRegexp = new RegExp(`(${metricFieldQuery})`, 'gi');
-      allMetricFields = allMetricFields.filter((f) => {
-        const addField = f.displayName !== undefined && !!f.displayName.match(metricFieldRegexp);
-        return addField;
-      });
-    }
 
     const metricExistsFields = allMetricFields.filter((f) => {
       return aggregatableExistsFields.find((existsF) => {
@@ -501,10 +466,6 @@ export const Page: FC = () => {
       allFieldCount++;
       popFieldCount++;
     }
-
-    // Add on 1 for the document count card.
-    setTotalMetricFieldCount(allFieldCount);
-    setPopulatedMetricFieldCount(popFieldCount);
 
     if (allMetricFields.length === metricExistsFields.length && showAllMetrics === false) {
       setShowAllMetrics(true);
@@ -540,49 +501,13 @@ export const Page: FC = () => {
   }
 
   function createNonMetricCards() {
-    let allNonMetricFields = [];
-    if (nonMetricShowFieldType === '*') {
-      allNonMetricFields = indexPatternFields.filter((f) => {
-        return (
-          f.type !== KBN_FIELD_TYPES.NUMBER &&
-          f.displayName !== undefined &&
-          dataLoader.isDisplayField(f.displayName) === true
-        );
-      });
-    } else {
-      if (
-        nonMetricShowFieldType === ML_JOB_FIELD_TYPES.TEXT ||
-        nonMetricShowFieldType === ML_JOB_FIELD_TYPES.KEYWORD
-      ) {
-        const aggregatableCheck =
-          nonMetricShowFieldType === ML_JOB_FIELD_TYPES.KEYWORD ? true : false;
-        allNonMetricFields = indexPatternFields.filter((f) => {
-          return (
-            f.displayName !== undefined &&
-            dataLoader.isDisplayField(f.displayName) === true &&
-            f.type === KBN_FIELD_TYPES.STRING &&
-            f.aggregatable === aggregatableCheck
-          );
-        });
-      } else {
-        allNonMetricFields = indexPatternFields.filter((f) => {
-          return (
-            f.type === nonMetricShowFieldType &&
-            f.displayName !== undefined &&
-            dataLoader.isDisplayField(f.displayName) === true
-          );
-        });
-      }
-    }
-
-    // If a field filter has been entered, perform another filter on the entered regexp.
-    if (nonMetricFieldQuery !== undefined) {
-      const nonMetricFieldRegexp = new RegExp(`(${nonMetricFieldQuery})`, 'gi');
-      allNonMetricFields = allNonMetricFields.filter(
-        (f) => f.displayName !== undefined && f.displayName.match(nonMetricFieldRegexp)
+    const allNonMetricFields = indexPatternFields.filter((f) => {
+      return (
+        f.type !== KBN_FIELD_TYPES.NUMBER &&
+        f.displayName !== undefined &&
+        dataLoader.isDisplayField(f.displayName) === true
       );
-    }
-
+    });
     // Obtain the list of all non-metric fields which appear in documents
     // (aggregatable or not aggregatable).
     const populatedNonMetricFields: any[] = []; // Kibana index pattern non metric fields.
@@ -609,9 +534,6 @@ export const Page: FC = () => {
         }
       }
     });
-
-    setTotalNonMetricFieldCount(allNonMetricFields.length);
-    setPopulatedNonMetricFieldCount(nonMetricFieldData.length);
 
     if (allNonMetricFields.length === nonMetricFieldData.length && showAllNonMetrics === false) {
       setShowAllNonMetrics(true);

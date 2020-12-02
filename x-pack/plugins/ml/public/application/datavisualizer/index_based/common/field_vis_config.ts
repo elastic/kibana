@@ -43,6 +43,8 @@ export interface FieldVisStats {
   topValuesSampleSize?: number;
   topValuesSamplerShardSize?: number;
   examples?: Array<string | object>;
+  timeRangeEarliest?: number;
+  timeRangeLatest?: number;
 }
 
 // The internal representation of the configuration used to build the visuals

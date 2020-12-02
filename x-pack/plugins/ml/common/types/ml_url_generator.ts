@@ -44,6 +44,8 @@ export interface DataVisualizerIndexBasedAppState {
   sortField?: string;
   sortDirection?: string;
   queryText?: string;
+  visibleFieldTypes: string[];
+  visibleFieldNames: string[];
 }
 export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER
