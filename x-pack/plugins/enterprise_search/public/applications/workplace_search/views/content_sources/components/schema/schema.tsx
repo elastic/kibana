@@ -8,9 +8,6 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import routes from 'workplace_search/routes';
-import { getReindexJobRoute } from 'workplace_search/utils/routePaths';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,6 +21,7 @@ import {
 
 import { AppLogic } from 'workplace_search/App/AppLogic';
 import { Loading, ViewContentHeader } from 'workplace_search/components';
+import { getReindexJobRoute } from '../../../../routes';
 
 import IndexingStatus from 'shared/components/IndexingStatus';
 import { SchemaAddFieldModal } from 'shared/components/Schema';
@@ -62,16 +60,16 @@ export const Schema: React.FC = () => {
   if (dataLoading) return <Loading />;
 
   const hasSchemaFields = Object.keys(activeSchema).length > 0;
-  const { isActive, hasErrors, percentageComplete } = mostRecentIndexJob;
+  const { isActive, hasErrors, percentageComplete, activeReindexJobId } = mostRecentIndexJob;
 
   const addFieldButton = (
     <EuiButtonEmpty color="primary" data-test-subj="AddFieldButton" onClick={openAddFieldModal}>
       Add Field
     </EuiButtonEmpty>
   );
-  const getStatusPath = isOrganization
-    ? routes.statusFritoPieOrganizationContentSourceReindexJobPath
-    : routes.statusFritoPieAccountContentSourceReindexJobPath;
+  const statusPath = isOrganization
+    ? `/api/workplace_search/org/sources/${sourceId}/reindex_job/${activeReindexJobId}`
+    : `/api/workplace_search/account/sources/${sourceId}/reindex_job/${activeReindexJobId}`;
 
   return (
     <>
@@ -85,10 +83,10 @@ export const Schema: React.FC = () => {
             itemId={sourceId}
             viewLinkPath={getReindexJobRoute(
               sourceId,
-              mostRecentIndexJob.activeReindexJobId,
+              mostRecentIndexJob.activeReindexJobId.toString(),
               isOrganization
             )}
-            getStatusPath={getStatusPath}
+            statusPath={statusPath}
             onComplete={onIndexingComplete}
             {...mostRecentIndexJob}
           />
