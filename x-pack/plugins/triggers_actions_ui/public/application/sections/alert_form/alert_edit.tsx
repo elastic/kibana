@@ -34,12 +34,13 @@ import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 
-interface AlertEditProps {
+export interface AlertEditProps<MetaData = Record<string, any>> {
   initialAlert: Alert;
   alertTypeRegistry: AlertTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose(): void;
   reloadAlerts?: () => Promise<void>;
+  metadata?: MetaData;
 }
 
 export const AlertEdit = ({
@@ -48,6 +49,7 @@ export const AlertEdit = ({
   reloadAlerts,
   alertTypeRegistry,
   actionTypeRegistry,
+  metadata,
 }: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
     alert: initialAlert,
@@ -155,6 +157,7 @@ export const AlertEdit = ({
                 operation="i18n.translate('xpack.triggersActionsUI.sections.alertEdit.operationName', {
                   defaultMessage: 'edit',
                 })"
+                metadata={metadata}
               />
             </EuiFlyoutBody>
             <EuiFlyoutFooter>

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
-import { AlertAdd } from '../../../../../triggers_actions_ui/public';
+import React, { useContext, useMemo } from 'react';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/metric_threshold/types';
@@ -22,23 +21,23 @@ interface Props {
 export const AlertFlyout = (props: Props) => {
   const { triggersActionsUI } = useContext(TriggerActionsContext);
 
-  return (
-    <>
-      {triggersActionsUI && (
-        <AlertAdd
-          addFlyoutVisible={props.visible!}
-          setAddFlyoutVisibility={props.setVisible}
-          alertTypeId={METRIC_THRESHOLD_ALERT_TYPE_ID}
-          canChangeTrigger={false}
-          consumer={'infrastructure'}
-          metadata={{
-            currentOptions: props.options,
-            series: props.series,
-          }}
-          actionTypeRegistry={triggersActionsUI.actionTypeRegistry}
-          alertTypeRegistry={triggersActionsUI.alertTypeRegistry}
-        />
-      )}
-    </>
+  const AddAlertFlyout = useMemo(
+    () =>
+      triggersActionsUI &&
+      triggersActionsUI.getAddAlertFlyout({
+        consumer: 'logs',
+        addFlyoutVisible: props.visible!,
+        setAddFlyoutVisibility: props.setVisible,
+        canChangeTrigger: false,
+        alertTypeId: METRIC_THRESHOLD_ALERT_TYPE_ID,
+        metadata: {
+          currentOptions: props.options,
+          series: props.series,
+        },
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [triggersActionsUI, props.visible, props.options, props.series]
   );
+
+  return <>{AddAlertFlyout}</>;
 };

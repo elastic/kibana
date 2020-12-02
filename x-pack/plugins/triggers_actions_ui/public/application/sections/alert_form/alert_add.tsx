@@ -24,7 +24,7 @@ import AlertAddFooter from './alert_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 
-interface AlertAddProps<MetaData = Record<string, any>> {
+export interface AlertAddProps<MetaData = Record<string, any>> {
   consumer: string;
   addFlyoutVisible: boolean;
   alertTypeRegistry: AlertTypeRegistryContract;
@@ -37,7 +37,7 @@ interface AlertAddProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
 }
 
-export const AlertAdd = ({
+const AlertAdd = ({
   consumer,
   addFlyoutVisible,
   alertTypeRegistry,

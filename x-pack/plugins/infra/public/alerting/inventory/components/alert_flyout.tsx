@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 
-import { AlertAdd } from '../../../../../triggers_actions_ui/public';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
@@ -28,25 +27,25 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
   const { inventoryPrefill } = useAlertPrefillContext();
   const { customMetrics } = inventoryPrefill;
 
-  return (
-    <>
-      {triggersActionsUI && (
-        <AlertAdd
-          addFlyoutVisible={visible!}
-          setAddFlyoutVisibility={setVisible}
-          alertTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
-          canChangeTrigger={false}
-          consumer={'infrastructure'}
-          metadata={{
-            options,
-            nodeType,
-            filter,
-            customMetrics,
-          }}
-          actionTypeRegistry={triggersActionsUI.actionTypeRegistry}
-          alertTypeRegistry={triggersActionsUI.alertTypeRegistry}
-        />
-      )}
-    </>
+  const AddAlertFlyout = useMemo(
+    () =>
+      triggersActionsUI &&
+      triggersActionsUI.getAddAlertFlyout({
+        consumer: 'infrastructure',
+        addFlyoutVisible: visible!,
+        setAddFlyoutVisibility: setVisible,
+        canChangeTrigger: false,
+        alertTypeId: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+        metadata: {
+          options,
+          nodeType,
+          filter,
+          customMetrics,
+        },
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [triggersActionsUI, visible]
   );
+
+  return <>{AddAlertFlyout}</>;
 };

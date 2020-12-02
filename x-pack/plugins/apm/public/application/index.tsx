@@ -28,7 +28,7 @@ import {
 import { LicenseProvider } from '../context/LicenseContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { ApmPluginSetupDeps } from '../plugin';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
@@ -65,8 +65,10 @@ function App() {
 
 export function ApmAppRoot({
   apmPluginContextValue,
+  startDeps,
 }: {
   apmPluginContextValue: ApmPluginContextValue;
+  startDeps: ApmPluginStartDeps;
 }) {
   const { appMountParameters, core, plugins } = apmPluginContextValue;
   const { history } = appMountParameters;
@@ -75,7 +77,7 @@ export function ApmAppRoot({
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <KibanaContextProvider services={{ ...core, ...startDeps }}>
           <i18nCore.Context>
             <Router history={history}>
               <UrlParamsProvider>
@@ -99,7 +101,8 @@ export const renderApp = (
   core: CoreStart,
   setupDeps: ApmPluginSetupDeps,
   appMountParameters: AppMountParameters,
-  config: ConfigSchema
+  config: ConfigSchema,
+  startDeps: ApmPluginStartDeps
 ) => {
   const { element } = appMountParameters;
   const apmPluginContextValue = {
@@ -121,7 +124,10 @@ export const renderApp = (
   });
 
   ReactDOM.render(
-    <ApmAppRoot apmPluginContextValue={apmPluginContextValue} />,
+    <ApmAppRoot
+      apmPluginContextValue={apmPluginContextValue}
+      startDeps={startDeps}
+    />,
     element
   );
   return () => {
