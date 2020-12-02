@@ -1229,6 +1229,24 @@ describe('IndexPatternDimensionEditorPanel', () => {
     );
   });
 
+  it('should not update when selecting the current field again', () => {
+    wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
+
+    const comboBox = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="indexPattern-dimension-field"]');
+
+    const option = comboBox
+      .prop('options')![1]
+      .options!.find(({ label }) => label === 'timestampLabel')!;
+
+    act(() => {
+      comboBox.prop('onChange')!([option]);
+    });
+
+    expect(setState).not.toHaveBeenCalled();
+  });
+
   it('should show all operations that are not filtered out', () => {
     wrapper = mount(
       <IndexPatternDimensionEditorComponent
