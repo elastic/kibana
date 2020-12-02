@@ -39,7 +39,7 @@ export class Root {
     env: Env,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
-    this.loggingSystem = new LoggingSystem();
+    this.loggingSystem = new LoggingSystem(env);
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('root');
     this.server = new Server(rawConfigProvider, env, this.loggingSystem);

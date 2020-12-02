@@ -19,6 +19,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@kbn/logging';
+import { Env } from '@kbn/config';
 import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';
@@ -30,6 +31,7 @@ import {
   LoggerContextConfigType,
   LoggerContextConfigInput,
   loggerContextConfigSchema,
+  config as loggingConfig,
 } from './logging_config';
 
 export type ILoggingSystem = PublicMethodsOf<LoggingSystem>;
@@ -47,6 +49,8 @@ export class LoggingSystem implements LoggerFactory {
   private readonly bufferAppender = new BufferAppender();
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
   private readonly contextConfigs = new Map<string, LoggerContextConfigType>();
+
+  constructor(private readonly env: Env) {}
 
   public get(...contextParts: string[]): Logger {
     const context = LoggingConfig.getLoggerContext(contextParts);
@@ -68,7 +72,10 @@ export class LoggingSystem implements LoggerFactory {
    * @param rawConfig New config instance.
    */
   public upgrade(rawConfig: LoggingConfigType) {
-    const config = new LoggingConfig(rawConfig)!;
+    // We only want the console appender for the CLI process,
+    // so we use the 'default' configuration as defined by the schema.
+    const usedConfig = this.env.isDevCliParent ? loggingConfig.schema.validate({}) : rawConfig;
+    const config = new LoggingConfig(usedConfig)!;
     this.applyBaseConfig(config);
   }
 

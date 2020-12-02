@@ -182,6 +182,8 @@ export class LoggingConfig {
     this.fillLoggersConfig(configType);
   }
 
+  // if (!this.env.isDevCliParent) {
+
   /**
    * Returns a new LoggingConfig that merges the existing config with the specified config.
    *
