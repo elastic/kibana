@@ -18,7 +18,7 @@ import { DynamicColorProperty } from './dynamic_color_property';
 import {
   COLOR_MAP_TYPE,
   RawValue,
-  STEP_FUNCTION,
+  DATA_MAPPING_FUNCTION,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
 import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
@@ -96,7 +96,7 @@ describe('renderLegendDetailRow', () => {
       const colorStyle = makeProperty({
         color: 'Blues',
         type: undefined,
-        stepFunction: STEP_FUNCTION.PERCENTILES,
+        dataMappingFunction: DATA_MAPPING_FUNCTION.PERCENTILES,
         fieldMetaOptions: {
           isEnabled: true,
           percentiles: [50, 75, 90, 95, 99],

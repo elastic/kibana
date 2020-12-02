@@ -269,7 +269,7 @@ export enum MB_LOOKUP_FUNCTION {
   FEATURE_STATE = 'feature-state',
 }
 
-export enum STEP_FUNCTION {
+export enum DATA_MAPPING_FUNCTION {
   INTERPOLATE = 'INTERPOLATE',
   PERCENTILES = 'PERCENTILES',
 }

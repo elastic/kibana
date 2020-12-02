@@ -8,9 +8,9 @@ exports[`renderDataMappingPopover Should disable toggle when field is not backed
     }
   }
   onChange={[Function]}
-  stepFunction="INTERPOLATE"
+  dataMappingFunction="INTERPOLATE"
   styleName="lineColor"
-  supportedStepFunctions={
+  supportedDataMappingFunctions={
     Array [
       "INTERPOLATE",
       "PERCENTILES",
@@ -28,9 +28,9 @@ exports[`renderDataMappingPopover Should enable toggle when field is backed by g
     }
   }
   onChange={[Function]}
-  stepFunction="INTERPOLATE"
+  dataMappingFunction="INTERPOLATE"
   styleName="lineColor"
-  supportedStepFunctions={
+  supportedDataMappingFunctions={
     Array [
       "INTERPOLATE",
       "PERCENTILES",

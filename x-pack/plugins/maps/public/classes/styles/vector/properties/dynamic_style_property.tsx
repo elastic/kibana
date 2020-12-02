@@ -15,7 +15,7 @@ import {
   FIELD_ORIGIN,
   MB_LOOKUP_FUNCTION,
   SOURCE_META_DATA_REQUEST_ID,
-  STEP_FUNCTION,
+  DATA_MAPPING_FUNCTION,
   STYLE_TYPE,
   VECTOR_STYLES,
   RawValue,
@@ -208,9 +208,12 @@ export class DynamicStyleProperty<T>
     const fieldMetaOptions = this.getFieldMetaOptions();
     const parts: string[] = [fieldMetaOptions.isEnabled.toString()];
     if (this.isOrdinal()) {
-      const stepFunction = this.getStepFunction();
-      parts.push(stepFunction);
-      if (stepFunction === STEP_FUNCTION.PERCENTILES && fieldMetaOptions.percentiles) {
+      const dataMappingFunction = this.getDataMappingFunction();
+      parts.push(dataMappingFunction);
+      if (
+        dataMappingFunction === DATA_MAPPING_FUNCTION.PERCENTILES &&
+        fieldMetaOptions.percentiles
+      ) {
         parts.push(fieldMetaOptions.percentiles.join(''));
       }
     } else if (this.isCategorical()) {
@@ -242,7 +245,7 @@ export class DynamicStyleProperty<T>
     }
 
     if (this.isOrdinal()) {
-      return this.getStepFunction() === STEP_FUNCTION.INTERPOLATE
+      return this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.INTERPOLATE
         ? this._field.getExtendedStatsFieldMetaRequest()
         : this._field.getPercentilesFieldMetaRequest(
             this.getFieldMetaOptions().percentiles !== undefined
@@ -273,10 +276,10 @@ export class DynamicStyleProperty<T>
     return _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
   }
 
-  getStepFunction() {
-    return 'stepFunction' in this._options
-      ? (this._options as T & { stepFunction: STEP_FUNCTION }).stepFunction
-      : STEP_FUNCTION.INTERPOLATE;
+  getDataMappingFunction() {
+    return 'dataMappingFunction' in this._options
+      ? (this._options as T & { dataMappingFunction: DATA_MAPPING_FUNCTION }).dataMappingFunction
+      : DATA_MAPPING_FUNCTION.INTERPOLATE;
   }
 
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]) {
@@ -393,8 +396,8 @@ export class DynamicStyleProperty<T>
     }
   }
 
-  _getSupportedStepFunctions(): STEP_FUNCTION[] {
-    return [STEP_FUNCTION.INTERPOLATE];
+  _getSupportedDataMappingFunctions(): DATA_MAPPING_FUNCTION[] {
+    return [DATA_MAPPING_FUNCTION.INTERPOLATE];
   }
 
   renderDataMappingPopover(onChange: (updatedOptions: Partial<T>) => void) {
@@ -416,8 +419,8 @@ export class DynamicStyleProperty<T>
         styleName={this.getStyleName()}
         onChange={onChange}
         switchDisabled={switchDisabled}
-        stepFunction={this.getStepFunction()}
-        supportedStepFunctions={this._getSupportedStepFunctions()}
+        dataMappingFunction={this.getDataMappingFunction()}
+        supportedDataMappingFunctions={this._getSupportedDataMappingFunctions()}
       />
     );
   }

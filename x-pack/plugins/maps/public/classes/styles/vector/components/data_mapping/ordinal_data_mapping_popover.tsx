@@ -24,7 +24,7 @@ import { DataMappingPopover } from './data_mapping_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 import {
   DEFAULT_PERCENTILES,
-  STEP_FUNCTION,
+  DATA_MAPPING_FUNCTION,
   VECTOR_STYLES,
 } from '../../../../../../common/constants';
 import { PercentilesForm } from './percentiles_form';
@@ -37,9 +37,9 @@ const percentilesTitle = i18n.translate('xpack.maps.styles.ordinalDataMapping.pe
   defaultMessage: `Use percentiles`,
 });
 
-const STEP_FUNCTION_OPTIONS = [
+const DATA_MAPPING_FUNCTION_OPTIONS = [
   {
-    value: STEP_FUNCTION.INTERPOLATE,
+    value: DATA_MAPPING_FUNCTION.INTERPOLATE,
     inputDisplay: interpolateTitle,
     dropdownDisplay: (
       <Fragment>
@@ -48,7 +48,7 @@ const STEP_FUNCTION_OPTIONS = [
           <p className="euiTextColor--subdued">
             <FormattedMessage
               id="xpack.maps.styles.ordinalDataMapping.interpolateDescription"
-              defaultMessage="Fit values from the data domain to the style on a linear scale"
+              defaultMessage="Interpolate values from the data domain to the style on a linear scale"
             />
           </p>
         </EuiText>
@@ -56,7 +56,7 @@ const STEP_FUNCTION_OPTIONS = [
     ),
   },
   {
-    value: STEP_FUNCTION.PERCENTILES,
+    value: DATA_MAPPING_FUNCTION.PERCENTILES,
     inputDisplay: percentilesTitle,
     dropdownDisplay: (
       <Fragment>
@@ -79,8 +79,8 @@ interface Props<DynamicOptions> {
   styleName: VECTOR_STYLES;
   onChange: (updatedOptions: DynamicOptions) => void;
   switchDisabled: boolean;
-  stepFunction: STEP_FUNCTION;
-  supportedStepFunctions: STEP_FUNCTION[];
+  dataMappingFunction: DATA_MAPPING_FUNCTION;
+  supportedDataMappingFunctions: DATA_MAPPING_FUNCTION[];
 }
 
 export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOptions>) {
@@ -104,11 +104,11 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
     });
   }
 
-  function onStepFunctionChange(value: STEP_FUNCTION) {
+  function onDataMappingFunctionChange(value: DATA_MAPPING_FUNCTION) {
     const updatedOptions =
-      value === STEP_FUNCTION.PERCENTILES
+      value === DATA_MAPPING_FUNCTION.PERCENTILES
         ? {
-            stepFunction: value,
+            dataMappingFunction: value,
             fieldMetaOptions: {
               ...props.fieldMetaOptions,
               isEnabled: true,
@@ -118,7 +118,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
             },
           }
         : {
-            stepFunction: value,
+            dataMappingFunction: value,
           };
     // @ts-expect-error
     props.onChange(updatedOptions);
@@ -131,7 +131,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
           <EuiToolTip
             anchorClassName="eui-alignMiddle"
             content={i18n.translate('xpack.maps.styles.ordinalDataMapping.sigmaTooltipContent', {
-              defaultMessage: `To minimize outliers, set sigma to a smaller value. Smaller sigmas move the min and max closer to the median.`,
+              defaultMessage: `To de-emphasize outliers, set sigma to a smaller value. Smaller sigmas move the min and max closer to the median.`,
             })}
           >
             <span>
@@ -204,7 +204,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
       props.onChange({
         fieldMetaOptions: {
           ...props.fieldMetaOptions,
-          percentiles: percentiles.sort(),
+          percentiles: _.uniq(percentiles.sort()),
         },
       });
     }
@@ -221,28 +221,28 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
     );
   }
 
-  const stepFunctionOptions = STEP_FUNCTION_OPTIONS.filter((option) => {
-    return props.supportedStepFunctions.includes(option.value);
+  const dataMappingFunctionOptions = DATA_MAPPING_FUNCTION_OPTIONS.filter((option) => {
+    return props.supportedDataMappingFunctions.includes(option.value);
   });
 
   return (
     <DataMappingPopover>
       <Fragment>
         <EuiFormRow
-          label={i18n.translate('xpack.maps.styles.ordinalDataMapping.stepFunctionLabel', {
+          label={i18n.translate('xpack.maps.styles.ordinalDataMapping.dataMappingFunctionLabel', {
             defaultMessage: 'Fitting',
           })}
           helpText={i18n.translate(
-            'xpack.maps.styles.ordinalDataMapping.stepFunctionTooltipContent',
+            'xpack.maps.styles.ordinalDataMapping.dataMappingFunctionTooltipContent',
             {
               defaultMessage: `Fit values from the data domain to the style`,
             }
           )}
         >
           <EuiSuperSelect
-            options={stepFunctionOptions}
-            valueOfSelected={props.stepFunction}
-            onChange={onStepFunctionChange}
+            options={dataMappingFunctionOptions}
+            valueOfSelected={props.dataMappingFunction}
+            onChange={onDataMappingFunctionChange}
             itemLayoutAlign="top"
             hasDividers
           />
@@ -250,7 +250,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
 
         <EuiHorizontalRule />
 
-        {props.stepFunction === STEP_FUNCTION.PERCENTILES
+        {props.dataMappingFunction === DATA_MAPPING_FUNCTION.PERCENTILES
           ? renderPercentilesForm()
           : renderEasingForm()}
       </Fragment>

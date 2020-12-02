@@ -15,7 +15,7 @@ import {
   getPercentilesMbColorRampStops,
   getColorPalette,
 } from '../../color_palettes';
-import { COLOR_MAP_TYPE, STEP_FUNCTION } from '../../../../../common/constants';
+import { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION } from '../../../../../common/constants';
 import {
   isCategoricalStopsInvalid,
   getOtherCategoryLabel,
@@ -129,8 +129,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     return colors ? colors.length : 0;
   }
 
-  _getSupportedStepFunctions(): STEP_FUNCTION[] {
-    return [STEP_FUNCTION.INTERPOLATE, STEP_FUNCTION.PERCENTILES];
+  _getSupportedDataMappingFunctions(): DATA_MAPPING_FUNCTION[] {
+    return [DATA_MAPPING_FUNCTION.INTERPOLATE, DATA_MAPPING_FUNCTION.PERCENTILES];
   }
 
   _getMbColor() {
@@ -167,7 +167,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       ];
     }
 
-    if (this.getStepFunction() === STEP_FUNCTION.PERCENTILES) {
+    if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
       const percentilesFieldMeta = this.getPercentilesFieldMeta();
       if (!percentilesFieldMeta || !percentilesFieldMeta.length) {
         return null;
@@ -310,7 +310,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       });
     }
 
-    if (this.getStepFunction() === STEP_FUNCTION.PERCENTILES) {
+    if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
       const percentilesFieldMeta = this.getPercentilesFieldMeta();
       if (!percentilesFieldMeta) {
         return [];
