@@ -56,7 +56,7 @@ export const initSourcererScope = {
   errorMessage: null,
   indexPattern: EMPTY_INDEX_PATTERN,
   indicesExist: true,
-  loading: true,
+  loading: false,
   selectedPatterns: [],
 };
 

@@ -9,7 +9,7 @@ or SAML.
 
 Role mappings have no effect for users inside the `native` or `file` realms.
 
-To manage your role mappings, open the menu, then go to *Stack Management > Security > Role Mappings*.
+To manage your role mappings, open the main menu, then click *Stack Management > Role Mappings*.
 
 With *Role mappings*, you can:
 
@@ -19,11 +19,16 @@ With *Role mappings*, you can:
 [role="screenshot"]
 image:user/security/role-mappings/images/role-mappings-grid.png["Role mappings"]
 
+[float]
+==== Required permissions
+
+The `manage_security` cluster privilege is required to manage Role Mappings.
+
 
 [float]
 === Create a role mapping
 
-. Open the menu, then go to *Stack Management > Security > Role Mappings*.
+. Open the main menu, then click *Stack Management > Role Mappings*.
 . Click *Create role mapping*.
 . Give your role mapping a unique name, and choose which roles you wish to assign to your users.
 +

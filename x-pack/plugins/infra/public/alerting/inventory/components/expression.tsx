@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import { debounce, pick, uniqBy, isEqual } from 'lodash';
+import { debounce, pick } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
+import { IFieldType } from 'src/plugins/data/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertPreview } from '../../common';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
@@ -95,13 +94,18 @@ interface Props {
   setAlertProperty(key: string, value: any): void;
 }
 
-const defaultExpression = {
+export const defaultExpression = {
   metric: 'cpu' as SnapshotMetricType,
   comparator: Comparator.GT,
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
-  customMetric: undefined,
+  customMetric: {
+    type: 'custom',
+    id: 'alert-custom-metric',
+    field: '',
+    aggregation: 'avg',
+  },
 } as InventoryMetricConditions;
 
 export const Expressions: React.FC<Props> = (props) => {
@@ -143,7 +147,6 @@ export const Expressions: React.FC<Props> = (props) => {
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
     setAlertParams('criteria', exp);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
@@ -226,7 +229,7 @@ export const Expressions: React.FC<Props> = (props) => {
           metric: md.options.metric!.type,
           customMetric: SnapshotCustomMetricInputRT.is(md.options.metric)
             ? md.options.metric
-            : undefined,
+            : defaultExpression.customMetric,
         } as InventoryMetricConditions,
       ]);
     } else {
@@ -306,6 +309,7 @@ export const Expressions: React.FC<Props> = (props) => {
               errors={errors[idx] || emptyError}
               expression={e || {}}
               alertsContextMetadata={alertsContext.metadata}
+              fields={derivedIndexPattern.fields}
             />
           );
         })}
@@ -365,7 +369,7 @@ export const Expressions: React.FC<Props> = (props) => {
           defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
         })}
         fullWidth
-        compressed
+        display="rowCompressed"
       >
         {(alertsContext.metadata && (
           <MetricsExplorerKueryBar
@@ -415,6 +419,7 @@ interface ExpressionRowProps {
   remove(id: number): void;
   setAlertParams(id: number, params: Partial<InventoryMetricConditions>): void;
   alertsContextMetadata: AlertsContextValue<AlertContextMeta>['metadata'];
+  fields: IFieldType[];
 }
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
@@ -428,48 +433,25 @@ const StyledExpression = euiStyled.div`
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const {
-    setAlertParams,
-    expression,
-    errors,
-    expressionId,
-    remove,
-    canDelete,
-    alertsContextMetadata,
-  } = props;
+  const { setAlertParams, expression, errors, expressionId, remove, canDelete, fields } = props;
   const { metric, comparator = Comparator.GT, threshold = [], customMetric } = expression;
-  const [customMetrics, updateCustomMetrics] = useState<SnapshotCustomMetricInput[]>([]);
-
-  // Create and uniquify a list of custom metrics including:
-  // - The alert metadata context (which only gives us custom metrics on the inventory page)
-  // - The custom metric stored in the expression (necessary when editing this alert without having
-  //    access to the metadata context)
-  // - Whatever custom metrics were previously stored in this list (to preserve the custom metric in the dropdown
-  //    if the user edits the alert and switches away from the custom metric)
-  useEffect(() => {
-    const ctxCustomMetrics = alertsContextMetadata?.customMetrics ?? [];
-    const expressionCustomMetrics = customMetric ? [customMetric] : [];
-    const newCustomMetrics = uniqBy(
-      [...customMetrics, ...ctxCustomMetrics, ...expressionCustomMetrics],
-      (cm: SnapshotCustomMetricInput) => cm.id
-    );
-    if (!isEqual(customMetrics, newCustomMetrics)) updateCustomMetrics(newCustomMetrics);
-  }, [alertsContextMetadata, customMetric, customMetrics, updateCustomMetrics]);
 
   const updateMetric = useCallback(
     (m?: SnapshotMetricType | string) => {
-      const newMetric = SnapshotMetricTypeRT.is(m) ? m : 'custom';
+      const newMetric = SnapshotMetricTypeRT.is(m) ? m : Boolean(m) ? 'custom' : undefined;
       const newAlertParams = { ...expression, metric: newMetric };
-      if (newMetric === 'custom' && customMetrics) {
-        set(
-          newAlertParams,
-          'customMetric',
-          customMetrics.find((cm) => cm.id === m)
-        );
-      }
       setAlertParams(expressionId, newAlertParams);
     },
-    [expressionId, expression, setAlertParams, customMetrics]
+    [expressionId, expression, setAlertParams]
+  );
+
+  const updateCustomMetric = useCallback(
+    (cm?: SnapshotCustomMetricInput) => {
+      if (SnapshotCustomMetricInputRT.is(cm)) {
+        setAlertParams(expressionId, { ...expression, customMetric: cm });
+      }
+    },
+    [expressionId, expression, setAlertParams]
   );
 
   const updateComparator = useCallback(
@@ -515,17 +497,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         myMetrics = containerMetricTypes;
         break;
     }
-    const baseMetricOpts = myMetrics.map(toMetricOpt);
-    const customMetricOpts = customMetrics
-      ? customMetrics.map((m, i) => ({
-          text: getCustomMetricLabel(m),
-          value: m.id,
-        }))
-      : [];
-    return [...baseMetricOpts, ...customMetricOpts];
-  }, [props.nodeType, customMetrics]);
-
-  const selectedMetricValue = metric === 'custom' && customMetric ? customMetric.id : metric!;
+    return myMetrics.map(toMetricOpt);
+  }, [props.nodeType]);
 
   return (
     <>
@@ -535,8 +508,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             <StyledExpression>
               <MetricExpression
                 metric={{
-                  value: selectedMetricValue,
-                  text: ofFields.find((v) => v?.value === selectedMetricValue)?.text || '',
+                  value: metric!,
+                  text: ofFields.find((v) => v?.value === metric)?.text || '',
                 }}
                 metrics={
                   ofFields.filter((m) => m !== undefined && m.value !== undefined) as Array<{
@@ -545,7 +518,10 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   }>
                 }
                 onChange={updateMetric}
+                onChangeCustom={updateCustomMetric}
                 errors={errors}
+                customMetric={customMetric}
+                fields={fields}
               />
             </StyledExpression>
             <StyledExpression>

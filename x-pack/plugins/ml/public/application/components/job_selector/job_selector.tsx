@@ -165,7 +165,11 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
   function renderFlyout() {
     if (isFlyoutVisible) {
       return (
-        <EuiFlyout onClose={closeFlyout}>
+        <EuiFlyout
+          onClose={closeFlyout}
+          data-test-subj="mlFlyoutJobSelector"
+          aria-labelledby="jobSelectorFlyout"
+        >
           <JobSelectorFlyoutContent
             dateFormatTz={dateFormatTz}
             timeseriesOnly={timeseriesOnly}

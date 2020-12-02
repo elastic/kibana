@@ -39,9 +39,9 @@ export const kbnTestConfig = new (class KbnTestConfig {
       const testKibanaUrl = url.parse(process.env.TEST_KIBANA_URL);
       return {
         protocol: testKibanaUrl.protocol?.slice(0, -1),
-        hostname: testKibanaUrl.hostname,
+        hostname: testKibanaUrl.hostname === null ? undefined : testKibanaUrl.hostname,
         port: testKibanaUrl.port ? parseInt(testKibanaUrl.port, 10) : undefined,
-        auth: testKibanaUrl.auth,
+        auth: testKibanaUrl.auth === null ? undefined : testKibanaUrl.auth,
         username: testKibanaUrl.auth?.split(':')[0],
         password: testKibanaUrl.auth?.split(':')[1],
       };

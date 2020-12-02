@@ -144,7 +144,7 @@ export class LegacyService implements CoreService {
     this.log.debug('starting legacy service');
 
     // Receive initial config and create kbnServer/ClusterManager.
-    if (this.coreContext.env.isDevClusterMaster) {
+    if (this.coreContext.env.isDevCliParent) {
       await this.createClusterManager(this.legacyRawConfig!);
     } else {
       this.kbnServer = await this.createKbnServer(
@@ -216,7 +216,6 @@ export class LegacyService implements CoreService {
         getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
-      auditTrail: startDeps.core.auditTrail,
       coreUsageData: {
         getCoreUsageData: () => {
           throw new Error('core.start.coreUsageData.getCoreUsageData is unsupported in legacy');
@@ -252,6 +251,7 @@ export class LegacyService implements CoreService {
         csp: setupDeps.core.http.csp,
         getServerInfo: setupDeps.core.http.getServerInfo,
       },
+      i18n: setupDeps.core.i18n,
       logging: {
         configure: (config$) => setupDeps.core.logging.configure([], config$),
       },
@@ -284,7 +284,6 @@ export class LegacyService implements CoreService {
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
       },
-      auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };
 
@@ -311,10 +310,8 @@ export class LegacyService implements CoreService {
       logger: this.coreContext.logger,
     });
 
-    // The kbnWorkerType check is necessary to prevent the repl
-    // from being started multiple times in different processes.
-    // We only want one REPL.
-    if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
+    // Prevent the repl from being started multiple times in different processes.
+    if (this.coreContext.env.cliArgs.repl && process.env.isDevCliChild) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('./cli').startRepl(kbnServer);
     }

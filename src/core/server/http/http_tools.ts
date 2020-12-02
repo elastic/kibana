@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from 'hapi';
-import Hoek from 'hoek';
+import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from '@hapi/hapi';
+import Hoek from '@hapi/hoek';
 import { ServerOptions as TLSOptions } from 'https';
 import { ValidationError } from 'joi';
 import uuid from 'uuid';

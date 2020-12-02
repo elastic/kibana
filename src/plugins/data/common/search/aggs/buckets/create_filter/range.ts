@@ -25,7 +25,7 @@ import { IBucketAggConfig } from '../bucket_agg_type';
 export const createFilterRange = (
   getFieldFormatsStart: AggTypesDependencies['getFieldFormatsStart']
 ) => {
-  return (aggConfig: IBucketAggConfig, params: any) => {
+  return (aggConfig: IBucketAggConfig, { label, ...params }: any) => {
     const { deserialize } = getFieldFormatsStart();
     return buildRangeFilter(
       aggConfig.params.field,

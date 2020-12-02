@@ -15,44 +15,27 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertInstanceState,
-} from './types';
+  CommonAlertFilter,
+  CommonAlertParams,
+} from '../../common/types/alerts';
 import { AlertInstance, AlertServices } from '../../../alerts/server';
-import { INDEX_PATTERN_ELASTICSEARCH, ALERT_MEMORY_USAGE } from '../../common/constants';
+import {
+  INDEX_PATTERN_ELASTICSEARCH,
+  ALERT_MEMORY_USAGE,
+  ALERT_DETAILS,
+} from '../../common/constants';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { AlertMessageTokenType, AlertSeverity, AlertParamType } from '../../common/enums';
+import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { RawAlertInstance } from '../../../alerts/common';
-import { CommonAlertFilter, CommonAlertParams, CommonAlertParamDetail } from '../../common/types';
-import { AlertingDefaults, createLink } from './alerts_common';
+import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerts/common/parse_duration';
 
-interface ParamDetails {
-  [key: string]: CommonAlertParamDetail;
-}
-
 export class MemoryUsageAlert extends BaseAlert {
-  public static readonly PARAM_DETAILS: ParamDetails = {
-    threshold: {
-      label: i18n.translate('xpack.monitoring.alerts.memoryUsage.paramDetails.threshold.label', {
-        defaultMessage: `Notify when memory usage is over`,
-      }),
-      type: AlertParamType.Percentage,
-    },
-    duration: {
-      label: i18n.translate('xpack.monitoring.alerts.memoryUsage.paramDetails.duration.label', {
-        defaultMessage: `Look at the average over`,
-      }),
-      type: AlertParamType.Duration,
-    },
-  };
-  public static paramDetails = MemoryUsageAlert.PARAM_DETAILS;
-  public static readonly TYPE = ALERT_MEMORY_USAGE;
-  public static readonly LABEL = i18n.translate('xpack.monitoring.alerts.memoryUsage.label', {
-    defaultMessage: 'Memory Usage (JVM)',
-  });
-  public type = MemoryUsageAlert.TYPE;
-  public label = MemoryUsageAlert.LABEL;
+  public type = ALERT_MEMORY_USAGE;
+  public label = ALERT_DETAILS[ALERT_MEMORY_USAGE].label;
+  public description = ALERT_DETAILS[ALERT_MEMORY_USAGE].description;
 
   protected defaultParams = {
     threshold: 85,

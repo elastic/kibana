@@ -18,7 +18,6 @@
  */
 
 import { LegacyScopedClusterClient } from './scoped_cluster_client';
-import { auditTrailServiceMock } from '../../audit_trail/audit_trail_service.mock';
 
 let internalAPICaller: jest.Mock;
 let scopedAPICaller: jest.Mock;
@@ -83,28 +82,6 @@ describe('#callAsInternalUser', () => {
     await expect(clusterClient.callAsInternalUser('ping')).rejects.toBe(mockErrorResponse);
 
     expect(scopedAPICaller).not.toHaveBeenCalled();
-  });
-
-  describe('Auditor', () => {
-    it('does not fail when no auditor provided', () => {
-      const clusterClientWithoutAuditor = new LegacyScopedClusterClient(jest.fn(), jest.fn());
-      expect(() => clusterClientWithoutAuditor.callAsInternalUser('endpoint')).not.toThrow();
-    });
-    it('creates an audit record if auditor provided', () => {
-      const auditor = auditTrailServiceMock.createAuditor();
-      const clusterClientWithoutAuditor = new LegacyScopedClusterClient(
-        jest.fn(),
-        jest.fn(),
-        {},
-        auditor
-      );
-      clusterClientWithoutAuditor.callAsInternalUser('endpoint');
-      expect(auditor.add).toHaveBeenCalledTimes(1);
-      expect(auditor.add).toHaveBeenLastCalledWith({
-        message: 'endpoint',
-        type: 'elasticsearch.call.internalUser',
-      });
-    });
   });
 });
 
@@ -228,27 +205,5 @@ describe('#callAsCurrentUser', () => {
     );
 
     expect(internalAPICaller).not.toHaveBeenCalled();
-  });
-
-  describe('Auditor', () => {
-    it('does not fail when no auditor provided', () => {
-      const clusterClientWithoutAuditor = new LegacyScopedClusterClient(jest.fn(), jest.fn());
-      expect(() => clusterClientWithoutAuditor.callAsCurrentUser('endpoint')).not.toThrow();
-    });
-    it('creates an audit record if auditor provided', () => {
-      const auditor = auditTrailServiceMock.createAuditor();
-      const clusterClientWithoutAuditor = new LegacyScopedClusterClient(
-        jest.fn(),
-        jest.fn(),
-        {},
-        auditor
-      );
-      clusterClientWithoutAuditor.callAsCurrentUser('endpoint');
-      expect(auditor.add).toHaveBeenCalledTimes(1);
-      expect(auditor.add).toHaveBeenLastCalledWith({
-        message: 'endpoint',
-        type: 'elasticsearch.call.currentUser',
-      });
-    });
   });
 });

@@ -10,7 +10,7 @@ export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
 
 export const COLLAPSED_ACTION_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
 
-export const CUSTOM_RULES_BTN = '[data-test-subj="show-custom-rules-filter-button"]';
+export const CUSTOM_RULES_BTN = '[data-test-subj="showCustomRulesFilterButton"]';
 
 export const DELETE_RULE_ACTION_BTN = '[data-test-subj="deleteRuleAction"]';
 
@@ -18,7 +18,7 @@ export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 
 export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
-export const ELASTIC_RULES_BTN = '[data-test-subj="show-elastic-rules-filter-button"]';
+export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
 
@@ -31,7 +31,7 @@ export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
 export const LOADING_INITIAL_PREBUILT_RULES_TABLE =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
 
-export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
+export const ASYNC_LOADING_PROGRESS = '[data-test-subj="loadingRulesInfoProgress"]';
 
 export const NEXT_BTN = '[data-test-subj="pagination-button-next"]';
 
@@ -47,9 +47,9 @@ export const RULE_CHECKBOX = '.euiTableRow .euiCheckbox__input';
 
 export const RULE_NAME = '[data-test-subj="ruleName"]';
 
-export const RULE_SWITCH = '[data-test-subj="rule-switch"]';
+export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
 
-export const RULE_SWITCH_LOADER = '[data-test-subj="rule-switch-loader"]';
+export const RULE_SWITCH_LOADER = '[data-test-subj="ruleSwitchLoader"]';
 
 export const RULES_TABLE = '[data-test-subj="rules-table"]';
 
@@ -64,3 +64,7 @@ export const SHOWING_RULES_TEXT = '[data-test-subj="showingRules"]';
 export const SORT_RULES_BTN = '[data-test-subj="tableHeaderSortButton"]';
 
 export const THREE_HUNDRED_ROWS = '[data-test-subj="tablePagination-300-rows"]';
+
+export const RULE_AUTO_REFRESH_IDLE_MODAL = '[data-test-subj="allRulesIdleModal"]';
+
+export const RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE = '[data-test-subj="allRulesIdleModal"] button';

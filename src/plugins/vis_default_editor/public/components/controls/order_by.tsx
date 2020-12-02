@@ -20,7 +20,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 
 import {
   isCompatibleAggregation,
@@ -77,7 +77,12 @@ function OrderByParamEditor({
   const options = useAvailableOptions(termsAggFilter, metricAggs, DEFAULT_OPTIONS);
 
   return (
-    <EuiFormRow label={label} fullWidth isInvalid={showValidation && !isValid} compressed>
+    <EuiFormRow
+      label={label}
+      fullWidth
+      isInvalid={showValidation && !isValid}
+      display="rowCompressed"
+    >
       <EuiSelect
         options={options}
         value={value}

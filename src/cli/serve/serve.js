@@ -27,7 +27,7 @@ import { getConfigPath } from '@kbn/utils';
 import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { fromRoot } from '../../core/server/utils';
 import { bootstrap } from '../../core/server';
-import { readKeystore } from './read_keystore';
+import { readKeystore } from '../keystore/read_keystore';
 
 function canRequire(path) {
   try {
@@ -43,7 +43,7 @@ function canRequire(path) {
 }
 
 const CLUSTER_MANAGER_PATH = resolve(__dirname, '../cluster/cluster_manager');
-const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
+const DEV_MODE_SUPPORTED = canRequire(CLUSTER_MANAGER_PATH);
 
 const REPL_PATH = resolve(__dirname, '../repl');
 const CAN_REPL = canRequire(REPL_PATH);
@@ -189,10 +189,9 @@ export default function (program) {
       );
   }
 
-  if (CAN_CLUSTER) {
+  if (DEV_MODE_SUPPORTED) {
     command
       .option('--dev', 'Run the server with development mode defaults')
-      .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
       .option('--dist', 'Use production assets from kbn/optimizer')
       .option(
@@ -222,7 +221,6 @@ export default function (program) {
       configs: [].concat(opts.config || []),
       cliArgs: {
         dev: !!opts.dev,
-        open: !!opts.open,
         envName: unknownOptions.env ? unknownOptions.env.name : undefined,
         quiet: !!opts.quiet,
         silent: !!opts.silent,
@@ -242,7 +240,7 @@ export default function (program) {
         dist: !!opts.dist,
       },
       features: {
-        isClusterModeSupported: CAN_CLUSTER,
+        isCliDevModeSupported: DEV_MODE_SUPPORTED,
         isReplModeSupported: CAN_REPL,
       },
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),

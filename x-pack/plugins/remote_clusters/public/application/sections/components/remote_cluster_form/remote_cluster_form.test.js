@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, renderWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, renderWithIntl } from '@kbn/test/jest';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 import { RemoteClusterForm } from './remote_cluster_form';
 

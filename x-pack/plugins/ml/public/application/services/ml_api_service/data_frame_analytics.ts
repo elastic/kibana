@@ -83,6 +83,14 @@ export const dataFrameAnalytics = {
       body,
     });
   },
+  getDataFrameAnalyticsMap(id: string, treatAsRoot: boolean, type?: string) {
+    const idString = id !== undefined ? `/${id}` : '';
+    return http({
+      path: `${basePath()}/data_frame/analytics/map${idString}`,
+      method: 'GET',
+      query: { treatAsRoot, type },
+    });
+  },
   evaluateDataFrameAnalytics(evaluateConfig: any) {
     const body = JSON.stringify(evaluateConfig);
     return http<any>({
@@ -133,12 +141,6 @@ export const dataFrameAnalytics = {
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
-    });
-  },
-  getAnalyticsBaseline(analyticsId: string) {
-    return http<any>({
-      path: `${basePath()}/data_frame/analytics/${analyticsId}/baseline`,
-      method: 'POST',
     });
   },
 };

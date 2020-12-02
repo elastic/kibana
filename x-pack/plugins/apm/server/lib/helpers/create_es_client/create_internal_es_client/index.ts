@@ -15,7 +15,7 @@ import { APMRequestHandlerContext } from '../../../../routes/typings';
 import {
   ESSearchResponse,
   ESSearchRequest,
-} from '../../../../../typings/elasticsearch';
+} from '../../../../../../../typings/elasticsearch';
 import { callClientWithDebug } from '../call_client_with_debug';
 
 // `type` was deprecated in 7.0

@@ -18,7 +18,7 @@ export const StateProvider: React.FC = ({ children }) => {
     configuration: {
       defaultValue: {},
       data: {
-        raw: {},
+        internal: {},
         format: () => ({}),
       },
       validate: () => Promise.resolve(true),
@@ -26,7 +26,7 @@ export const StateProvider: React.FC = ({ children }) => {
     templates: {
       defaultValue: {},
       data: {
-        raw: {},
+        internal: {},
         format: () => ({}),
       },
       validate: () => Promise.resolve(true),

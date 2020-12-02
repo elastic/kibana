@@ -2,9 +2,12 @@
   extends: [
     'config:base',
   ],
-  includePaths: [
-    'package.json',
-    'x-pack/package.json',
+  ignorePaths: [
+    '**/__fixtures__/**',
+    '**/fixtures/**',
+  ],
+  enabledManagers: [
+    'npm',
   ],
   baseBranches: [
     'master',

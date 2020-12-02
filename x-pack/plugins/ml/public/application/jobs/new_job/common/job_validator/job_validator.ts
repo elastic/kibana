@@ -10,6 +10,7 @@ import { map, startWith, tap } from 'rxjs/operators';
 import {
   basicJobValidation,
   basicDatafeedValidation,
+  basicJobAndDatafeedValidation,
 } from '../../../../../../common/util/job_utils';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { JobCreator, JobCreatorType, isCategorizationJobCreator } from '../job_creator';
@@ -53,6 +54,7 @@ export interface BasicValidations {
   scrollSize: Validation;
   categorizerMissingPerPartition: Validation;
   categorizerVaryingPerPartitionField: Validation;
+  summaryCountField: Validation;
 }
 
 export interface AdvancedValidations {
@@ -80,6 +82,7 @@ export class JobValidator {
     scrollSize: { valid: true },
     categorizerMissingPerPartition: { valid: true },
     categorizerVaryingPerPartitionField: { valid: true },
+    summaryCountField: { valid: true },
   };
   private _advancedValidations: AdvancedValidations = {
     categorizationFieldValid: { valid: true },
@@ -197,6 +200,14 @@ export class JobValidator {
       datafeedConfig
     );
 
+    const basicJobAndDatafeedResults = basicJobAndDatafeedValidation(jobConfig, datafeedConfig);
+    populateValidationMessages(
+      basicJobAndDatafeedResults,
+      this._basicValidations,
+      jobConfig,
+      datafeedConfig
+    );
+
     // run addition job and group id validation
     const idResults = checkForExistingJobAndGroupIds(
       this._jobCreator.jobId,
@@ -227,6 +238,9 @@ export class JobValidator {
 
   public get bucketSpan(): Validation {
     return this._basicValidations.bucketSpan;
+  }
+  public get summaryCountField(): Validation {
+    return this._basicValidations.summaryCountField;
   }
 
   public get duplicateDetectors(): Validation {
@@ -297,6 +311,7 @@ export class JobValidator {
       this.duplicateDetectors.valid &&
       this.categorizerMissingPerPartition.valid &&
       this.categorizerVaryingPerPartitionField.valid &&
+      this.summaryCountField.valid &&
       !this.validating &&
       (this._jobCreator.type !== JOB_TYPE.CATEGORIZATION ||
         (this._jobCreator.type === JOB_TYPE.CATEGORIZATION && this.categorizationField))

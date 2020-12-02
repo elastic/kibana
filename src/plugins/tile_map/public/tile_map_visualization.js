@@ -73,19 +73,19 @@ export const createTileMapVisualization = (dependencies) => {
       };
       const bounds = this._kibanaMap.getBounds();
       const mapCollar = scaleBounds(bounds);
-      if (!geoContains(geohashAgg.aggConfigParams.boundingBox, mapCollar)) {
+      if (!geoContains(geohashAgg.sourceParams.params.boundingBox, mapCollar)) {
         updateVarsObject.data.boundingBox = {
           top_left: mapCollar.top_left,
           bottom_right: mapCollar.bottom_right,
         };
       } else {
-        updateVarsObject.data.boundingBox = geohashAgg.aggConfigParams.boundingBox;
+        updateVarsObject.data.boundingBox = geohashAgg.sourceParams.params.boundingBox;
       }
       // todo: autoPrecision should be vis parameter, not aggConfig one
       const zoomPrecision = getZoomPrecision();
-      updateVarsObject.data.precision = geohashAgg.aggConfigParams.autoPrecision
+      updateVarsObject.data.precision = geohashAgg.sourceParams.params.autoPrecision
         ? zoomPrecision[this.vis.getUiState().get('mapZoom')]
-        : getPrecision(geohashAgg.aggConfigParams.precision);
+        : getPrecision(geohashAgg.sourceParams.params.precision);
 
       this.vis.eventsSubject.next(updateVarsObject);
     };
@@ -118,8 +118,8 @@ export const createTileMapVisualization = (dependencies) => {
           return;
         }
         const isAutoPrecision =
-          typeof geohashAgg.aggConfigParams.autoPrecision === 'boolean'
-            ? geohashAgg.aggConfigParams.autoPrecision
+          typeof geohashAgg.sourceParams.params.autoPrecision === 'boolean'
+            ? geohashAgg.sourceParams.params.autoPrecision
             : true;
         if (!isAutoPrecision) {
           return;
@@ -243,7 +243,7 @@ export const createTileMapVisualization = (dependencies) => {
       }
 
       const indexPatternName = agg.indexPatternId;
-      const field = agg.aggConfigParams.field;
+      const field = agg.field;
       const filter = { meta: { negate: false, index: indexPatternName } };
       filter[filterName] = { ignore_unmapped: true };
       filter[filterName][field] = filterData;
@@ -264,7 +264,7 @@ export const createTileMapVisualization = (dependencies) => {
       const DEFAULT = false;
       const agg = this._getGeoHashAgg();
       if (agg) {
-        return get(agg, 'aggConfigParams.isFilteredByCollar', DEFAULT);
+        return get(agg, 'sourceParams.params.isFilteredByCollar', DEFAULT);
       } else {
         return DEFAULT;
       }

@@ -18,7 +18,7 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -180,9 +180,7 @@ describe('create_rules_bulk', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unexpected_type" supplied to "type"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
     });
 
     test('disallows invalid "from" param on rule', async () => {

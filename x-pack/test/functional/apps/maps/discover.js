@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }) {
       expect(doesLayerExist).to.equal(true);
       const hits = await PageObjects.maps.getHits();
       expect(hits).to.equal('4');
+      await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
     });
 
     it('should link geo_point fields to Maps application with time and query context', async () => {
@@ -55,6 +56,7 @@ export default function ({ getService, getPageObjects }) {
       expect(doesLayerExist).to.equal(true);
       const hits = await PageObjects.maps.getHits();
       expect(hits).to.equal('7');
+      await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
     });
   });
 }

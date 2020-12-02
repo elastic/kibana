@@ -28,11 +28,13 @@ import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigati
 import { LensAttributeService } from '../lens_attribute_service';
 import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DashboardFeatureFlagConfig } from '../../../../../src/plugins/dashboard/public';
+import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
 } from '../../../../../src/plugins/ui_actions/public';
 import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/public';
+import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { EditorFrameInstance } from '..';
 
 export interface LensAppState {
@@ -59,6 +61,7 @@ export interface LensAppState {
   filters: Filter[];
   savedQuery?: SavedQuery;
   isSaveable: boolean;
+  activeData?: TableInspectorAdapter;
 }
 
 export interface RedirectToOriginProps {
@@ -99,6 +102,7 @@ export interface LensAppServices {
   navigation: NavigationPublicPluginStart;
   attributeService: LensAttributeService;
   savedObjectsClient: SavedObjectsStart['client'];
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
 
   // Temporarily required until the 'by value' paradigm is default.
@@ -109,4 +113,5 @@ export interface LensTopNavActions {
   saveAndReturn: () => void;
   showSaveModal: () => void;
   cancel: () => void;
+  exportToCSV: () => void;
 }

@@ -2,6 +2,7 @@ def call(branchOverride) {
   def repoInfo = [
     branch: branchOverride ?: env.ghprbSourceBranch,
     targetBranch: env.ghprbTargetBranch,
+    targetsTrackedBranch: true
   ]
 
   if (repoInfo.branch == null) {
@@ -35,6 +36,10 @@ def call(branchOverride) {
       label: "determining merge point with '${repoInfo.targetBranch}' at origin",
       returnStdout: true
     ).trim()
+
+    def pkgJson = readFile("package.json")
+    def releaseBranch = toJSON(pkgJson).branch
+    repoInfo.targetsTrackedBranch = releaseBranch == repoInfo.targetBranch
   }
 
   print "repoInfo: ${repoInfo}"

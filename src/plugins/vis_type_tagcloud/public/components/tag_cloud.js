@@ -48,7 +48,11 @@ export class TagCloud extends EventEmitter {
     this.resize();
 
     //SETTING (non-configurable)
-    this._fontFamily = 'Open Sans, sans-serif';
+    /**
+     * the fontFamily should be set explicitly for calculating a layout
+     * and to avoid words overlapping
+     */
+    this._fontFamily = 'Inter UI, sans-serif';
     this._fontStyle = 'normal';
     this._fontWeight = 'normal';
     this._spiral = 'archimedean'; //layout shape

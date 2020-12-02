@@ -15,7 +15,11 @@ import {
 } from '../../../../../common/http_api/inventory_meta_api';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 
-export function useInventoryMeta(sourceId: string, nodeType: InventoryItemType) {
+export function useInventoryMeta(
+  sourceId: string,
+  nodeType: InventoryItemType,
+  currentTime: number
+) {
   const decodeResponse = (response: any) => {
     return pipe(
       InventoryMetaResponseRT.decode(response),
@@ -29,6 +33,7 @@ export function useInventoryMeta(sourceId: string, nodeType: InventoryItemType) 
     JSON.stringify({
       sourceId,
       nodeType,
+      currentTime,
     }),
     decodeResponse
   );

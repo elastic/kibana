@@ -39,7 +39,7 @@ exports[`is rendered 1`] = `
                   size="l"
                   type="logoElastic"
                 >
-                  <div
+                  <span
                     data-euiicon-type="logoElastic"
                     size="l"
                   />
@@ -80,7 +80,7 @@ exports[`is rendered 1`] = `
                   className="dshExitFullScreenButton__icon"
                   type="fullScreen"
                 >
-                  <div
+                  <span
                     className="dshExitFullScreenButton__icon"
                     data-euiicon-type="fullScreen"
                   />

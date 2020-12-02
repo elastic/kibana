@@ -102,6 +102,7 @@ describe('epicLocalStorage', () => {
       status: TimelineStatus.active,
       sort,
       timelineType: TimelineType.default,
+      timerangeKind: 'absolute',
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 
-export function registerWSOverviewRoute({
+export function registerOverviewRoute({
   router,
   enterpriseSearchRequestHandler,
-}: IRouteDependencies) {
+}: RouteDependencies) {
   router.get(
     {
       path: '/api/workplace_search/overview',

@@ -31,7 +31,7 @@ describe('query builder v1', () => {
             match_all: {},
           },
           collapse: {
-            field: 'host.id',
+            field: 'agent.id',
             inner_hits: {
               name: 'most_recent',
               size: 1,
@@ -41,7 +41,7 @@ describe('query builder v1', () => {
           aggs: {
             total: {
               cardinality: {
-                field: 'host.id',
+                field: 'agent.id',
               },
             },
           },
@@ -92,7 +92,7 @@ describe('query builder v1', () => {
               },
             },
             collapse: {
-              field: 'host.id',
+              field: 'agent.id',
               inner_hits: {
                 name: 'most_recent',
                 size: 1,
@@ -102,7 +102,7 @@ describe('query builder v1', () => {
             aggs: {
               total: {
                 cardinality: {
-                  field: 'host.id',
+                  field: 'agent.id',
                 },
               },
             },
@@ -165,7 +165,7 @@ describe('query builder v1', () => {
             },
           },
           collapse: {
-            field: 'host.id',
+            field: 'agent.id',
             inner_hits: {
               name: 'most_recent',
               size: 1,
@@ -175,7 +175,7 @@ describe('query builder v1', () => {
           aggs: {
             total: {
               cardinality: {
-                field: 'host.id',
+                field: 'agent.id',
               },
             },
           },
@@ -251,7 +251,7 @@ describe('query builder v1', () => {
               },
             },
             collapse: {
-              field: 'host.id',
+              field: 'agent.id',
               inner_hits: {
                 name: 'most_recent',
                 size: 1,
@@ -261,7 +261,7 @@ describe('query builder v1', () => {
             aggs: {
               total: {
                 cardinality: {
-                  field: 'host.id',
+                  field: 'agent.id',
                 },
               },
             },
@@ -289,7 +289,7 @@ describe('query builder v1', () => {
 
       expect(query).toEqual({
         body: {
-          query: { match: { 'host.id': mockID } },
+          query: { match: { 'agent.id': mockID } },
           sort: [{ 'event.created': { order: 'desc' } }],
           size: 1,
         },

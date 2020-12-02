@@ -24,9 +24,9 @@ import * as i18n from './translations';
 import { ConnectorTypes, ResilientFieldsType } from '../../../../../../case/common/api/connectors';
 import { ConnectorCard } from '../card';
 
-const ResilientSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
-  ResilientFieldsType
->> = ({ isEdit = true, fields, connector, onChange }) => {
+const ResilientSettingFieldsComponent: React.FunctionComponent<
+  SettingFieldsProps<ResilientFieldsType>
+> = ({ isEdit = true, fields, connector, onChange }) => {
   const { incidentTypes = null, severityCode = null } = fields ?? {};
 
   const { http, notifications } = useKibana().services;

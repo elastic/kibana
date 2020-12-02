@@ -3,13 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { Reducer, combineReducers } from 'redux';
-import { animateProcessIntoView } from './methods';
+import { animatePanning } from './camera/methods';
+import { layout } from './selectors';
 import { cameraReducer } from './camera/reducer';
 import { dataReducer } from './data/reducer';
 import { ResolverAction } from './actions';
 import { ResolverState, ResolverUIState } from '../types';
-import * as eventModel from '../../../common/endpoint/models/event';
+import { nodePosition } from '../models/indexed_process_tree/isometric_taxi_layout';
 
 const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
   state = {
@@ -37,18 +39,15 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
       selectedNode: action.payload,
     };
     return next;
-  } else if (action.type === 'userBroughtProcessIntoView') {
-    const nodeID = eventModel.entityIDSafeVersion(action.payload.process);
-    if (nodeID !== undefined) {
-      const next: ResolverUIState = {
-        ...state,
-        ariaActiveDescendant: nodeID,
-        selectedNode: nodeID,
-      };
-      return next;
-    } else {
-      return state;
-    }
+  } else if (action.type === 'userBroughtNodeIntoView') {
+    const { nodeID } = action.payload;
+    const next: ResolverUIState = {
+      ...state,
+      // Select the node. NB: Animation is handled in the reducer as well.
+      ariaActiveDescendant: nodeID,
+      selectedNode: nodeID,
+    };
+    return next;
   } else if (action.type === 'appReceivedNewExternalProperties') {
     const next: ResolverUIState = {
       ...state,
@@ -66,11 +65,21 @@ const concernReducers = combineReducers({
   data: dataReducer,
   ui: uiReducer,
 });
+const animationDuration = 1000;
 
 export const resolverReducer: Reducer<ResolverState, ResolverAction> = (state, action) => {
   const nextState = concernReducers(state, action);
-  if (action.type === 'userBroughtProcessIntoView') {
-    return animateProcessIntoView(nextState, action.payload.time, action.payload.process);
+  if (action.type === 'userBroughtNodeIntoView') {
+    const position = nodePosition(layout(nextState), action.payload.nodeID);
+    if (position) {
+      const withAnimation: ResolverState = {
+        ...nextState,
+        camera: animatePanning(nextState.camera, action.payload.time, position, animationDuration),
+      };
+      return withAnimation;
+    } else {
+      return nextState;
+    }
   } else {
     return nextState;
   }

@@ -176,120 +176,124 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   }
 
   return (
-    <EuiResizeObserver onResize={handleResize}>
-      {(resizeRef) => (
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-          ref={(e) => {
-            flyoutEl.current = e;
-            resizeRef(e);
-          }}
-          aria-labelledby="jobSelectorFlyout"
-          data-test-subj="mlFlyoutJobSelector"
-        >
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2 id="flyoutTitle">
-                {i18n.translate('xpack.ml.jobSelector.flyoutTitle', {
-                  defaultMessage: 'Job selection',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody className="mlJobSelectorFlyoutBody">
-            {isLoading ? (
-              <EuiProgress size="xs" color="accent" />
-            ) : (
-              <>
-                <EuiFlexGroup direction="column" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
-                      <NewSelectionIdBadges
-                        limit={BADGE_LIMIT}
-                        maps={jobGroupsMaps}
-                        newSelection={newSelection}
-                        onDeleteClick={removeId}
-                        onLinkClick={() => setShowAllBadges(!showAllBadges)}
-                        showAllBadges={showAllBadges}
-                      />
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup direction="row" justifyContent="spaceBetween" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        {!singleSelection && newSelection.length > 0 && (
-                          <EuiButtonEmpty
-                            onClick={clearSelection}
-                            size="xs"
-                            data-test-subj="mlFlyoutJobSelectorButtonClearSelection"
-                          >
-                            {i18n.translate('xpack.ml.jobSelector.clearAllFlyoutButton', {
-                              defaultMessage: 'Clear all',
-                            })}
-                          </EuiButtonEmpty>
-                        )}
-                      </EuiFlexItem>
-                      {withTimeRangeSelector && (
+    <>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id="flyoutTitle">
+            {i18n.translate('xpack.ml.jobSelector.flyoutTitle', {
+              defaultMessage: 'Job selection',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody className="mlJobSelectorFlyoutBody">
+        <EuiResizeObserver onResize={handleResize}>
+          {(resizeRef) => (
+            <div
+              ref={(e) => {
+                flyoutEl.current = e;
+                resizeRef(e);
+              }}
+            >
+              {isLoading ? (
+                <EuiProgress size="xs" color="accent" />
+              ) : (
+                <>
+                  <EuiFlexGroup direction="column" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
+                        <NewSelectionIdBadges
+                          limit={BADGE_LIMIT}
+                          maps={jobGroupsMaps}
+                          newSelection={newSelection}
+                          onDeleteClick={removeId}
+                          onLinkClick={() => setShowAllBadges(!showAllBadges)}
+                          showAllBadges={showAllBadges}
+                        />
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup
+                        direction="row"
+                        justifyContent="spaceBetween"
+                        responsive={false}
+                      >
                         <EuiFlexItem grow={false}>
-                          <EuiSwitch
-                            label={i18n.translate(
-                              'xpack.ml.jobSelector.applyTimerangeSwitchLabel',
-                              {
-                                defaultMessage: 'Apply time range',
-                              }
-                            )}
-                            checked={applyTimeRange}
-                            onChange={toggleTimerangeSwitch}
-                            data-test-subj="mlFlyoutJobSelectorSwitchApplyTimeRange"
-                          />
+                          {!singleSelection && newSelection.length > 0 && (
+                            <EuiButtonEmpty
+                              onClick={clearSelection}
+                              size="xs"
+                              data-test-subj="mlFlyoutJobSelectorButtonClearSelection"
+                            >
+                              {i18n.translate('xpack.ml.jobSelector.clearAllFlyoutButton', {
+                                defaultMessage: 'Clear all',
+                              })}
+                            </EuiButtonEmpty>
+                          )}
                         </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <JobSelectorTable
-                  jobs={jobs}
-                  ganttBarWidth={ganttBarWidth}
-                  groupsList={groups}
-                  onSelection={handleNewSelection}
-                  selectedIds={newSelection}
-                  singleSelection={singleSelection}
-                  timeseriesOnly={timeseriesOnly}
-                  withTimeRangeSelector={withTimeRangeSelector}
-                />
-              </>
-            )}
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={applySelection}
-                  fill
-                  isDisabled={newSelection.length === 0}
-                  data-test-subj="mlFlyoutJobSelectorButtonApply"
-                >
-                  {i18n.translate('xpack.ml.jobSelector.applyFlyoutButton', {
-                    defaultMessage: 'Apply',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  onClick={onFlyoutClose}
-                  data-test-subj="mlFlyoutJobSelectorButtonClose"
-                >
-                  {i18n.translate('xpack.ml.jobSelector.closeFlyoutButton', {
-                    defaultMessage: 'Close',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
+                        {withTimeRangeSelector && (
+                          <EuiFlexItem grow={false}>
+                            <EuiSwitch
+                              label={i18n.translate(
+                                'xpack.ml.jobSelector.applyTimerangeSwitchLabel',
+                                {
+                                  defaultMessage: 'Apply time range',
+                                }
+                              )}
+                              checked={applyTimeRange}
+                              onChange={toggleTimerangeSwitch}
+                              data-test-subj="mlFlyoutJobSelectorSwitchApplyTimeRange"
+                            />
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <JobSelectorTable
+                    jobs={jobs}
+                    ganttBarWidth={ganttBarWidth}
+                    groupsList={groups}
+                    onSelection={handleNewSelection}
+                    selectedIds={newSelection}
+                    singleSelection={singleSelection}
+                    timeseriesOnly={timeseriesOnly}
+                    withTimeRangeSelector={withTimeRangeSelector}
+                  />
+                </>
+              )}
+            </div>
+          )}
+        </EuiResizeObserver>
+      </EuiFlyoutBody>
+
+      <EuiFlyoutFooter>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={applySelection}
+              fill
+              isDisabled={newSelection.length === 0}
+              data-test-subj="mlFlyoutJobSelectorButtonApply"
+            >
+              {i18n.translate('xpack.ml.jobSelector.applyFlyoutButton', {
+                defaultMessage: 'Apply',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={onFlyoutClose}
+              data-test-subj="mlFlyoutJobSelectorButtonClose"
+            >
+              {i18n.translate('xpack.ml.jobSelector.closeFlyoutButton', {
+                defaultMessage: 'Close',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
-      )}
-    </EuiResizeObserver>
+      </EuiFlyoutFooter>
+    </>
   );
 };

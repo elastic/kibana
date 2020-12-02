@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { EmptyIndexPatternPrompt } from '../empty_index_pattern_prompt';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@kbn/test/jest';
 
 describe('EmptyIndexPatternPrompt', () => {
   it('should render normally', () => {

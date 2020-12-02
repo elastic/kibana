@@ -9,7 +9,7 @@ import { EuiSpacer, EuiSwitch, EuiSwitchProps } from '@elastic/eui';
 
 export interface Props extends Omit<EuiSwitchProps, 'checked' | 'onChange'> {
   initialValue: boolean;
-  onChange: (nextValue: boolean) => void;
+  onChange?: (nextValue: boolean) => void;
 }
 
 export const ToggleableField: FunctionComponent<Props> = ({
@@ -28,7 +28,9 @@ export const ToggleableField: FunctionComponent<Props> = ({
         onChange={(e) => {
           const nextValue = e.target.checked;
           setIsContentVisible(nextValue);
-          onChange(nextValue);
+          if (onChange) {
+            onChange(nextValue);
+          }
         }}
       />
       <EuiSpacer size="m" />

@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { Markdown } from '../../../../common/components/markdown';
+import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import * as i18n from '../translations';
 import { TimelineResultNote } from '../types';
 
@@ -59,8 +59,7 @@ export const NotePreview = React.memo<Pick<TimelineResultNote, 'note' | 'updated
               </p>
             </EuiText>
           </NotePreviewHeader>
-
-          <Markdown raw={note || ''} size="s" />
+          <MarkdownRenderer>{note ?? ''}</MarkdownRenderer>
         </EuiFlexItem>
       </EuiFlexGroup>
     </NotePreviewGroup>

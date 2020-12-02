@@ -17,7 +17,7 @@ Object {
           "col-0-1": 0,
         },
       ],
-      "type": "kibana_datatable",
+      "type": "datatable",
     },
     "visParams": Object {
       "maxFontSize": 72,

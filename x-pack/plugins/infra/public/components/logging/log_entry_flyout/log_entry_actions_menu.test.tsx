@@ -29,7 +29,7 @@ describe('LogEntryActionsMenu component', () => {
         <ProviderWrapper>
           <LogEntryActionsMenu
             logItem={{
-              fields: [{ field: 'host.ip', value: 'HOST_IP' }],
+              fields: [{ field: 'host.ip', value: ['HOST_IP'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
               key: {
@@ -59,7 +59,7 @@ describe('LogEntryActionsMenu component', () => {
         <ProviderWrapper>
           <LogEntryActionsMenu
             logItem={{
-              fields: [{ field: 'container.id', value: 'CONTAINER_ID' }],
+              fields: [{ field: 'container.id', value: ['CONTAINER_ID'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
               key: {
@@ -89,7 +89,7 @@ describe('LogEntryActionsMenu component', () => {
         <ProviderWrapper>
           <LogEntryActionsMenu
             logItem={{
-              fields: [{ field: 'kubernetes.pod.uid', value: 'POD_UID' }],
+              fields: [{ field: 'kubernetes.pod.uid', value: ['POD_UID'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
               key: {
@@ -120,9 +120,9 @@ describe('LogEntryActionsMenu component', () => {
           <LogEntryActionsMenu
             logItem={{
               fields: [
-                { field: 'container.id', value: 'CONTAINER_ID' },
-                { field: 'host.ip', value: 'HOST_IP' },
-                { field: 'kubernetes.pod.uid', value: 'POD_UID' },
+                { field: 'container.id', value: ['CONTAINER_ID'] },
+                { field: 'host.ip', value: ['HOST_IP'] },
+                { field: 'kubernetes.pod.uid', value: ['POD_UID'] },
               ],
               id: 'ITEM_ID',
               index: 'INDEX',
@@ -189,7 +189,7 @@ describe('LogEntryActionsMenu component', () => {
         <ProviderWrapper>
           <LogEntryActionsMenu
             logItem={{
-              fields: [{ field: 'trace.id', value: '1234567' }],
+              fields: [{ field: 'trace.id', value: ['1234567'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
               key: {
@@ -221,8 +221,8 @@ describe('LogEntryActionsMenu component', () => {
           <LogEntryActionsMenu
             logItem={{
               fields: [
-                { field: 'trace.id', value: '1234567' },
-                { field: '@timestamp', value: timestamp },
+                { field: 'trace.id', value: ['1234567'] },
+                { field: '@timestamp', value: [timestamp] },
               ],
               id: 'ITEM_ID',
               index: 'INDEX',

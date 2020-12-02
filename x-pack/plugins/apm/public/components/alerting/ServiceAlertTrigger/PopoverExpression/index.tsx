@@ -20,7 +20,6 @@ export function PopoverExpression(props: Props) {
   return (
     <EuiPopover
       isOpen={popoverOpen}
-      withTitle
       anchorPosition="downLeft"
       closePopover={() => setPopoverOpen(false)}
       button={

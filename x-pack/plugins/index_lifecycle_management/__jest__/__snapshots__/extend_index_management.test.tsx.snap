@@ -292,7 +292,7 @@ exports[`extend index management ilm summary extension should return extension w
           size="m"
           type="cross"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
             data-euiicon-type="cross"
@@ -552,7 +552,9 @@ exports[`extend index management ilm summary extension should return extension w
                   2018-12-07 13:02:55
                 </dd>
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle
+                key="phaseDefinition_title"
+              >
                 <dt
                   className="euiDescriptionList__title"
                 >
@@ -594,14 +596,13 @@ exports[`extend index management ilm summary extension should return extension w
                     key="phaseExecutionPopover"
                     ownFocus={false}
                     panelPaddingSize="m"
-                    withTitle={true}
                   >
                     <EuiOutsideClickDetector
                       isDisabled={true}
                       onOutsideClick={[Function]}
                     >
                       <div
-                        className="euiPopover euiPopover--anchorDownCenter euiPopover--withTitle"
+                        className="euiPopover euiPopover--anchorDownCenter"
                         id="phaseExecutionPopover"
                         onKeyDown={[Function]}
                         onMouseDown={[Function]}

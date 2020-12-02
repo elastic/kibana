@@ -6,13 +6,13 @@
 
 // Order of node roles matters here, the warm phase prefers allocating data
 // to the data_warm role.
-import { NodeDataRole, PhaseWithAllocation } from '../types';
+import { DataTierRole, PhaseWithAllocation } from '../types';
 
-const WARM_PHASE_NODE_PREFERENCE: NodeDataRole[] = ['data_warm', 'data_hot'];
+const WARM_PHASE_NODE_PREFERENCE: DataTierRole[] = ['data_warm', 'data_hot'];
 
-const COLD_PHASE_NODE_PREFERENCE: NodeDataRole[] = ['data_cold', 'data_warm', 'data_hot'];
+const COLD_PHASE_NODE_PREFERENCE: DataTierRole[] = ['data_cold', 'data_warm', 'data_hot'];
 
-export const phaseToNodePreferenceMap: Record<PhaseWithAllocation, NodeDataRole[]> = Object.freeze({
+export const phaseToNodePreferenceMap: Record<PhaseWithAllocation, DataTierRole[]> = Object.freeze({
   warm: WARM_PHASE_NODE_PREFERENCE,
   cold: COLD_PHASE_NODE_PREFERENCE,
 });

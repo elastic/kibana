@@ -18,9 +18,6 @@ import { text } from './plugins/text';
 const { plot: strings } = RendererStrings;
 
 const render: RendererSpec<any>['render'] = async (domNode, config, handlers) => {
-  // @ts-expect-error
-  await import('../../lib/flot-charts');
-
   // TODO: OH NOES
   if (!includes($.plot.plugins, size)) {
     $.plot.plugins.push(size);

@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
-import { render, waitFor, RenderResult, fireEvent } from '@testing-library/react';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useCamera, useAutoUpdatingClientRect } from './use_camera';
+// Extend jest with a custom matcher
+import '../test_utilities/extend_jest';
+
+import { mount, ReactWrapper } from 'enzyme';
+import React from 'react';
+import { useCamera } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
-import { Matrix3, ResolverStore, SideEffectSimulator } from '../types';
+import { Matrix3, ResolverStore, SideEffectors, SideEffectSimulator } from '../types';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../models/vector2';
@@ -21,45 +23,121 @@ import { ResolverAction } from '../store/actions';
 import { createStore } from 'redux';
 import { resolverReducer } from '../store/reducer';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
+import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
+import { act } from 'react-dom/test-utils';
 
 describe('useCamera on an unpainted element', () => {
-  let element: HTMLElement;
+  /** Enzyme full DOM wrapper for the element the camera is attached to. */
+  let element: ReactWrapper;
+  /**
+   * Enzyme full DOM wrapper for the alternate element that the camera can be attached to. Used for testing that the `ResizeObserver` attaches itself to the latest `ref`.
+   */
+  let alternateElement: ReactWrapper;
+  /**
+   * projection matrix returned by camera on last render.
+   */
   let projectionMatrix: Matrix3;
+  /**
+   * A `data-test-subj` ID used to identify the element the camera normally attaches to.
+   */
   const testID = 'camera';
-  let reactRenderResult: RenderResult;
+  /**
+   * A `data-test-subj` ID used to identify the element the camera alternatively attaches to.
+   */
+  const alternateTestID = 'alternate';
+  /**
+   * Returned by the legacy framework's render/mount function.
+   */
+  let wrapper: ReactWrapper;
   let store: ResolverStore;
   let simulator: SideEffectSimulator;
+
+  /** Used to find an element by the data-test-subj attribute.
+   */
+  let domElementByTestSubj: (testSubj: string) => ReactWrapper;
+
+  /**
+   * Yield the result of `mapper` over and over, once per event-loop cycle.
+   * After 10 times, quit.
+   * Use this to continually check a value. See `toYieldEqualTo`.
+   */
+  async function* map<R>(mapper: () => R): AsyncIterable<R> {
+    let timeoutCount = 0;
+    while (timeoutCount < 10) {
+      timeoutCount++;
+      yield mapper();
+      await new Promise<void>((resolve) => {
+        setTimeout(() => {
+          wrapper.update();
+          resolve();
+        }, 0);
+      });
+    }
+  }
+
+  function TestWrapper({
+    useSecondElement: useAlternateElement = false,
+    resolverStore,
+    sideEffectors,
+  }: {
+    /**
+     * Pass `true`, to attach the camera to an alternate element. Used to test that the `ResizeObserver` attaches itself to the latest `ref`.
+     */
+    useSecondElement?: boolean;
+    resolverStore: ResolverStore;
+    sideEffectors: SideEffectors;
+  }) {
+    return (
+      <Provider store={resolverStore}>
+        <SideEffectContext.Provider value={sideEffectors}>
+          <Test useAlternateElement={useAlternateElement} />
+        </SideEffectContext.Provider>
+      </Provider>
+    );
+  }
+
+  function Test({
+    useAlternateElement = false,
+  }: {
+    /**
+     * Pass `true`, to attach the camera to an alternate element. Used to test that the `ResizeObserver` attaches itself to the latest `ref`.
+     */
+    useAlternateElement?: boolean;
+  }) {
+    const camera = useCamera();
+    const { ref, onMouseDown } = camera;
+    projectionMatrix = camera.projectionMatrix;
+    return useAlternateElement ? (
+      <>
+        <div data-test-subj={testID} onMouseDown={onMouseDown} ref={ref} />
+        <div data-test-subj={alternateTestID} />
+      </>
+    ) : (
+      <>
+        <div data-test-subj={testID} />
+        <div data-test-subj={alternateTestID} onMouseDown={onMouseDown} ref={ref} />
+      </>
+    );
+  }
 
   beforeEach(async () => {
     store = createStore(resolverReducer);
 
-    const Test = function () {
-      const camera = useCamera();
-      const { ref, onMouseDown } = camera;
-      projectionMatrix = camera.projectionMatrix;
-      return <div data-test-subj={testID} onMouseDown={onMouseDown} ref={ref} />;
-    };
-
     simulator = sideEffectSimulatorFactory();
 
-    reactRenderResult = render(
-      <Provider store={store}>
-        <SideEffectContext.Provider value={simulator.mock}>
-          <Test />
-        </SideEffectContext.Provider>
-      </Provider>
-    );
+    wrapper = mount(<TestWrapper resolverStore={store} sideEffectors={simulator.mock} />);
 
-    const { findByTestId } = reactRenderResult;
-    element = await findByTestId(testID);
+    domElementByTestSubj = (testSubj: string) =>
+      wrapper
+        .find(`[data-test-subj="${testSubj}"]`)
+        // Omit React components that may be returned.
+        .filterWhere((item) => typeof item.type() === 'string');
+
+    element = domElementByTestSubj(testID);
+
+    alternateElement = domElementByTestSubj(alternateTestID);
   });
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-  it('should be usable in React', async () => {
-    expect(element).toBeInTheDocument();
-  });
-  test('returns a projectionMatrix that changes everything to 0', () => {
+  it('returns a projectionMatrix that changes everything to 0', () => {
     expect(applyMatrix3([0, 0], projectionMatrix)).toEqual([0, 0]);
   });
   describe('which has been resized to 800x600', () => {
@@ -70,8 +148,8 @@ describe('useCamera on an unpainted element', () => {
     const centerX = width / 2 + leftMargin;
     const centerY = height / 2 + topMargin;
     beforeEach(async () => {
-      await waitFor(() => {
-        simulator.controls.simulateElementResize(element, {
+      act(() => {
+        simulator.controls.simulateElementResize(element.getDOMNode(), {
           width,
           height,
           left: leftMargin,
@@ -86,73 +164,82 @@ describe('useCamera on an unpainted element', () => {
         });
       });
     });
-    test('should observe all resize reference changes', async () => {
-      const wrapper: FunctionComponent = ({ children }) => (
-        <Provider store={store}>
-          <SideEffectContext.Provider value={simulator.mock}>{children}</SideEffectContext.Provider>
-        </Provider>
-      );
 
-      const { result } = renderHook(() => useAutoUpdatingClientRect(), { wrapper });
-      const resizeObserverSpy = jest.spyOn(simulator.mock.ResizeObserver.prototype, 'observe');
-
-      let [rect, ref] = result.current;
-      act(() => ref(element));
-      expect(resizeObserverSpy).toHaveBeenCalledWith(element);
-
-      const div = document.createElement('div');
-      act(() => ref(div));
-      expect(resizeObserverSpy).toHaveBeenCalledWith(div);
-
-      [rect, ref] = result.current;
-      expect(rect?.width).toBe(0);
-    });
-
-    test('provides a projection matrix that inverts the y axis and translates 400,300 (center of the element)', () => {
-      expect(applyMatrix3([0, 0], projectionMatrix)).toEqual([400, 300]);
+    it('provides a projection matrix that inverts the y axis and translates 400,300 (center of the element)', () => {
+      expect(map(() => applyMatrix3([0, 0], projectionMatrix))).toYieldEqualTo([400, 300]);
     });
     describe('when the user presses the mousedown button in the middle of the element', () => {
       beforeEach(() => {
-        fireEvent.mouseDown(element, {
+        element.simulate('mousedown', {
           clientX: centerX,
           clientY: centerY,
         });
       });
       describe('when the user moves the mouse 50 pixels to the right', () => {
         beforeEach(() => {
-          fireEvent.mouseMove(element, {
+          element.simulate('mousemove', {
             clientX: centerX + 50,
             clientY: centerY,
           });
         });
         it('should project [0, 0] in world corrdinates 50 pixels to the right of the center of the element', () => {
-          expect(applyMatrix3([0, 0], projectionMatrix)).toEqual([450, 300]);
+          expect(map(() => applyMatrix3([0, 0], projectionMatrix))).toYieldEqualTo([450, 300]);
         });
       });
     });
 
     describe('when the user uses the mousewheel w/ ctrl held down', () => {
       beforeEach(() => {
-        fireEvent.wheel(element, {
+        element.simulate('wheel', {
           ctrlKey: true,
           deltaY: -10,
           deltaMode: 0,
         });
       });
       it('should zoom in', () => {
-        expect(projectionMatrix).toMatchInlineSnapshot(`
-          Array [
-            1.0292841801261479,
-            0,
-            400,
-            0,
-            -1.0292841801261479,
-            300,
-            0,
-            0,
-            0,
-          ]
-        `);
+        expect(map(() => projectionMatrix)).toYieldEqualTo([
+          1.0292841801261479,
+          0,
+          400,
+          0,
+          -1.0292841801261479,
+          300,
+          0,
+          0,
+          0,
+        ]);
+      });
+    });
+
+    describe('when the element the camera is attached to is switched', () => {
+      beforeEach(() => {
+        wrapper.setProps({
+          useAlternateElement: true,
+        });
+      });
+      describe('and when that element changes size to 1200x800', () => {
+        beforeEach(() => {
+          act(() => {
+            const alternateElementWidth = 1200;
+            const alternateElementHeight = 800;
+            simulator.controls.simulateElementResize(alternateElement.getDOMNode(), {
+              width: alternateElementWidth,
+              height: alternateElementHeight,
+              left: leftMargin,
+              top: topMargin,
+              right: leftMargin + alternateElementWidth,
+              bottom: topMargin + alternateElementHeight,
+              x: leftMargin,
+              y: topMargin,
+              toJSON() {
+                return this;
+              },
+            });
+          });
+        });
+        it('provides a projection matrix that inverts the y axis and translates 600,400', () => {
+          expect(map(() => applyMatrix3([0, 0], projectionMatrix))).toYieldEqualTo([600, 400]);
+        });
       });
     });
 
@@ -184,9 +271,7 @@ describe('useCamera on an unpainted element', () => {
             type: 'serverReturnedResolverData',
             payload: { result: tree, parameters: mockTreeFetcherParameters() },
           };
-          await waitFor(() => {
-            store.dispatch(serverResponseAction);
-          });
+          store.dispatch(serverResponseAction);
         } else {
           throw new Error('failed to create tree');
         }
@@ -198,16 +283,18 @@ describe('useCamera on an unpainted element', () => {
           throw new Error('missing the process to bring into view');
         }
         simulator.controls.time = 0;
+        const nodeID = entityIDSafeVersion(process);
+        if (!nodeID) {
+          throw new Error('could not find nodeID for process');
+        }
         const cameraAction: ResolverAction = {
-          type: 'userBroughtProcessIntoView',
+          type: 'userBroughtNodeIntoView',
           payload: {
             time: simulator.controls.time,
-            process,
+            nodeID,
           },
         };
-        await waitFor(() => {
-          store.dispatch(cameraAction);
-        });
+        store.dispatch(cameraAction);
       });
 
       it('should request animation frames in a loop', () => {

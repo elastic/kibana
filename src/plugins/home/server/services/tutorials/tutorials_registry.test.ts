@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { TutorialsRegistry } from './tutorials_registry';
 import { coreMock } from '../../../../../core/server/mocks';
 import { CoreSetup } from '../../../../../core/server';

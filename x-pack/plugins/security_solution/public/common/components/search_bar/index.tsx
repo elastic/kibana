@@ -132,7 +132,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         if (!isStateUpdated) {
           // That mean we are doing a refresh!
-          if (isQuickSelection) {
+          if (isQuickSelection && payload.dateRange.to !== payload.dateRange.from) {
             updateSearchBar.updateTime = true;
             updateSearchBar.end = payload.dateRange.to;
             updateSearchBar.start = payload.dateRange.from;
@@ -313,7 +313,7 @@ const makeMapStateToProps = () => {
       fromStr: getFromStrSelector(inputsRange),
       filterQuery: getFilterQuerySelector(inputsRange),
       isLoading: getIsLoadingSelector(inputsRange),
-      queries: getQueriesSelector(inputsRange),
+      queries: getQueriesSelector(state, id),
       savedQuery: getSavedQuerySelector(inputsRange),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
@@ -351,15 +351,27 @@ export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
     const fromDate = formatDate(start);
     let toDate = formatDate(end, { roundUp: true });
     if (isQuickSelection) {
-      dispatch(
-        inputsActions.setRelativeRangeDatePicker({
-          id,
-          fromStr: start,
-          toStr: end,
-          from: fromDate,
-          to: toDate,
-        })
-      );
+      if (end === start) {
+        dispatch(
+          inputsActions.setAbsoluteRangeDatePicker({
+            id,
+            fromStr: start,
+            toStr: end,
+            from: fromDate,
+            to: toDate,
+          })
+        );
+      } else {
+        dispatch(
+          inputsActions.setRelativeRangeDatePicker({
+            id,
+            fromStr: start,
+            toStr: end,
+            from: fromDate,
+            to: toDate,
+          })
+        );
+      }
     } else {
       toDate = formatDate(end);
       dispatch(

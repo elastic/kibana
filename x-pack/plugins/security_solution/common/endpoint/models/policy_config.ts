@@ -24,8 +24,17 @@ export const factory = (): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
       },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
+      },
       logging: {
         file: 'info',
+      },
+      antivirus_registration: {
+        enabled: false,
       },
     },
     mac: {
@@ -36,6 +45,12 @@ export const factory = (): PolicyConfig => {
       },
       malware: {
         mode: ProtectionModes.prevent,
+      },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
       },
       logging: {
         file: 'info',
@@ -53,3 +68,8 @@ export const factory = (): PolicyConfig => {
     },
   };
 };
+
+/**
+ * Reflects what string the Endpoint will use when message field is default/empty
+ */
+export const DefaultMalwareMessage = 'Elastic Security { action } { filename }';

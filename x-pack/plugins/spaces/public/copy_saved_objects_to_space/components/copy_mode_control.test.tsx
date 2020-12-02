@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { CopyModeControl, CopyModeControlProps } from './copy_mode_control';
 
 describe('CopyModeControl', () => {

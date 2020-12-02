@@ -6,7 +6,7 @@
 
 import { Pager } from '@elastic/eui';
 
-import { registerTestBed } from '../../../../../../../test_utils';
+import { registerTestBed } from '@kbn/test/jest';
 import { getJobs, jobCount } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';

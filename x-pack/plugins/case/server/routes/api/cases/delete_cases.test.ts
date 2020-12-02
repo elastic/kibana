@@ -32,7 +32,7 @@ describe('DELETE case', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
@@ -51,7 +51,7 @@ describe('DELETE case', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
@@ -70,7 +70,7 @@ describe('DELETE case', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCasesErrorTriggerData,
         caseCommentSavedObject: mockCaseComments,
@@ -89,7 +89,7 @@ describe('DELETE case', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCasesErrorTriggerData,
         caseCommentSavedObject: mockCasesErrorTriggerData,

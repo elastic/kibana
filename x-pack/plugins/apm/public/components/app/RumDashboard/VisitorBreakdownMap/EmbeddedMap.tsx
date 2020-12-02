@@ -20,8 +20,8 @@ import {
   ViewMode,
   isErrorEmbeddable,
 } from '../../../../../../../../src/plugins/embeddable/public';
-import { getLayerList } from './LayerList';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useLayerList } from './useLayerList';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { MapToolTip } from './MapToolTip';
 import { useMapFilters } from './useMapFilters';
@@ -55,13 +55,15 @@ export function EmbeddedMapComponent() {
 
   const mapFilters = useMapFilters();
 
+  const layerList = useLayerList();
+
   const [embeddable, setEmbeddable] = useState<
     MapEmbeddable | ErrorEmbeddable | undefined
   >();
 
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<
-    HTMLDivElement
-  >(null);
+  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(
+    null
+  );
 
   const {
     services: { embeddable: embeddablePlugin },
@@ -75,6 +77,7 @@ export function EmbeddedMapComponent() {
   );
 
   const input: MapEmbeddableInput = {
+    attributes: { title: '' },
     id: uuid.v4(),
     filters: mapFilters,
     refreshConfig: {
@@ -148,7 +151,7 @@ export function EmbeddedMapComponent() {
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
         embeddableObject.setRenderTooltipContent(renderTooltipContent);
-        await embeddableObject.setLayerList(getLayerList());
+        await embeddableObject.setLayerList(layerList);
       }
 
       setEmbeddable(embeddableObject);

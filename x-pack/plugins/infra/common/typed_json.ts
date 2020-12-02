@@ -4,11 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type JsonValue = null | boolean | number | string | JsonObject | JsonArray;
+import * as rt from 'io-ts';
+import { JsonArray, JsonObject, JsonValue } from '../../../../src/plugins/kibana_utils/common';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface JsonArray extends Array<JsonValue> {}
+export const jsonScalarRT = rt.union([rt.null, rt.boolean, rt.number, rt.string]);
 
-export interface JsonObject {
-  [key: string]: JsonValue;
-}
+export const jsonValueRT: rt.Type<JsonValue> = rt.recursion('JsonValue', () =>
+  rt.union([jsonScalarRT, jsonArrayRT, jsonObjectRT])
+);
+
+export const jsonArrayRT: rt.Type<JsonArray> = rt.recursion('JsonArray', () =>
+  rt.array(jsonValueRT)
+);
+
+export const jsonObjectRT: rt.Type<JsonObject> = rt.recursion('JsonObject', () =>
+  rt.record(rt.string, jsonValueRT)
+);
+
+export { JsonValue, JsonArray, JsonObject };

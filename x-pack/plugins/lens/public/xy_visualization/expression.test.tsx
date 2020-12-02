@@ -17,9 +17,10 @@ import {
   SeriesNameFn,
   Fit,
 } from '@elastic/charts';
-import { xyChart, XYChart } from './expression';
+import { PaletteOutput } from 'src/plugins/charts/public';
+import { calculateMinInterval, xyChart, XYChart, XYChartProps } from './expression';
 import { LensMultiTable } from '../types';
-import { KibanaDatatable, KibanaDatatableRow } from '../../../../../src/plugins/expressions/public';
+import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';
 import {
@@ -33,7 +34,7 @@ import {
   gridlinesConfig,
 } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 
@@ -41,12 +42,19 @@ const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
+const paletteService = chartPluginMock.createPaletteRegistry();
+
+const mockPaletteOutput: PaletteOutput = {
+  type: 'palette',
+  name: 'mock',
+  params: {},
+};
 
 const dateHistogramData: LensMultiTable = {
   type: 'lens_multitable',
   tables: {
     timeLayer: {
-      type: 'kibana_datatable',
+      type: 'datatable',
       rows: [
         {
           xAccessorId: 1585758120000,
@@ -104,48 +112,60 @@ const dateHistogramData: LensMultiTable = {
           id: 'xAccessorId',
           name: 'order_date per minute',
           meta: {
-            type: 'date_histogram',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {
-              field: 'order_date',
-              timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
-              useNormalizedEsInterval: true,
-              scaleMetricValues: false,
-              interval: '1m',
-              drop_partials: false,
-              min_doc_count: 0,
-              extended_bounds: {},
+            type: 'date',
+            field: 'order_date',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'date_histogram',
+              params: {
+                field: 'order_date',
+                timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
+                useNormalizedEsInterval: true,
+                scaleMetricValues: false,
+                interval: '1m',
+                drop_partials: false,
+                min_doc_count: 0,
+                extended_bounds: {},
+              },
             },
+            params: { id: 'date', params: { pattern: 'HH:mm' } },
           },
-          formatHint: { id: 'date', params: { pattern: 'HH:mm' } },
         },
         {
           id: 'splitAccessorId',
           name: 'Top values of category.keyword',
           meta: {
-            type: 'terms',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {
-              field: 'category.keyword',
-              orderBy: 'yAccessorId',
-              order: 'desc',
-              size: 3,
-              otherBucket: false,
-              otherBucketLabel: 'Other',
-              missingBucket: false,
-              missingBucketLabel: 'Missing',
+            type: 'string',
+            field: 'category.keyword',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'terms',
+              params: {
+                field: 'category.keyword',
+                orderBy: 'yAccessorId',
+                order: 'desc',
+                size: 3,
+                otherBucket: false,
+                otherBucketLabel: 'Other',
+                missingBucket: false,
+                missingBucketLabel: 'Missing',
+              },
             },
-          },
-          formatHint: {
-            id: 'terms',
             params: {
-              id: 'string',
-              otherBucketLabel: 'Other',
-              missingBucketLabel: 'Missing',
-              parsedUrl: {
-                origin: 'http://localhost:5601',
-                pathname: '/jiy/app/kibana',
-                basePath: '/jiy',
+              id: 'terms',
+              params: {
+                id: 'string',
+                otherBucketLabel: 'Other',
+                missingBucketLabel: 'Missing',
+                parsedUrl: {
+                  origin: 'http://localhost:5601',
+                  pathname: '/jiy/app/kibana',
+                  basePath: '/jiy',
+                },
               },
             },
           },
@@ -154,11 +174,15 @@ const dateHistogramData: LensMultiTable = {
           id: 'yAccessorId',
           name: 'Count of records',
           meta: {
-            type: 'count',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {},
+            type: 'number',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              params: {},
+            },
+            params: { id: 'number' },
           },
-          formatHint: { id: 'number' },
         },
       ],
     },
@@ -179,24 +203,33 @@ const dateHistogramLayer: LayerArgs = {
   splitAccessor: 'splitAccessorId',
   seriesType: 'bar_stacked',
   accessors: ['yAccessorId'],
+  palette: mockPaletteOutput,
 };
 
-const createSampleDatatableWithRows = (rows: KibanaDatatableRow[]): KibanaDatatable => ({
-  type: 'kibana_datatable',
+const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable => ({
+  type: 'datatable',
   columns: [
     {
       id: 'a',
       name: 'a',
-      formatHint: { id: 'number', params: { pattern: '0,0.000' } },
+      meta: { type: 'number', params: { id: 'number', params: { pattern: '0,0.000' } } },
     },
-    { id: 'b', name: 'b', formatHint: { id: 'number', params: { pattern: '000,0' } } },
+    {
+      id: 'b',
+      name: 'b',
+      meta: { type: 'number', params: { id: 'number', params: { pattern: '000,0' } } },
+    },
     {
       id: 'c',
       name: 'c',
-      formatHint: { id: 'string' },
-      meta: { type: 'date-histogram', aggConfigParams: { interval: 'auto' } },
+      meta: {
+        type: 'date',
+        field: 'order_date',
+        sourceParams: { type: 'date-histogram', params: { interval: 'auto' } },
+        params: { id: 'string' },
+      },
     },
-    { id: 'd', name: 'ColD', formatHint: { id: 'string' } },
+    { id: 'd', name: 'ColD', meta: { type: 'string' } },
   ],
   rows,
 });
@@ -211,6 +244,7 @@ const sampleLayer: LayerArgs = {
   xScaleType: 'ordinal',
   yScaleType: 'linear',
   isHistogram: false,
+  palette: mockPaletteOutput,
 };
 
 const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
@@ -222,6 +256,7 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     isVisible: false,
     position: Position.Top,
   },
+  valueLabels: 'hide',
   axisTitlesVisibilitySettings: {
     type: 'lens_xy_axisTitlesVisibilityConfig',
     x: true,
@@ -251,6 +286,10 @@ function sampleArgs() {
         { a: 1, b: 2, c: 'I', d: 'Foo' },
         { a: 1, b: 5, c: 'J', d: 'Bar' },
       ]),
+    },
+    dateRange: {
+      fromDate: new Date('2019-01-02T05:00:00.000Z'),
+      toDate: new Date('2019-01-03T05:00:00.000Z'),
     },
   };
 
@@ -285,6 +324,7 @@ describe('xy_expression', () => {
         xScaleType: 'linear',
         yScaleType: 'linear',
         isHistogram: false,
+        palette: mockPaletteOutput,
       };
 
       const result = layerConfig.fn(null, args, createMockExecutionContext());
@@ -347,12 +387,12 @@ describe('xy_expression', () => {
       type: 'lens_multitable',
       tables: {
         first: {
-          type: 'kibana_datatable',
+          type: 'datatable',
           columns: [
-            { id: 'a', name: 'a' },
-            { id: 'b', name: 'b' },
-            { id: 'c', name: 'c' },
-            { id: 'd', name: 'd' },
+            { id: 'a', name: 'a', meta: { type: 'number' } },
+            { id: 'b', name: 'b', meta: { type: 'number' } },
+            { id: 'c', name: 'c', meta: { type: 'string' } },
+            { id: 'd', name: 'd', meta: { type: 'string' } },
           ],
           rows: [
             { a: 1, b: 2, c: 'I', d: 'Row 1' },
@@ -365,12 +405,12 @@ describe('xy_expression', () => {
       type: 'lens_multitable',
       tables: {
         first: {
-          type: 'kibana_datatable',
+          type: 'datatable',
           columns: [
-            { id: 'a', name: 'a' },
-            { id: 'b', name: 'b' },
-            { id: 'c', name: 'c' },
-            { id: 'd', name: 'd', formatHint: { id: 'custom' } },
+            { id: 'a', name: 'a', meta: { type: 'number' } },
+            { id: 'b', name: 'b', meta: { type: 'number' } },
+            { id: 'c', name: 'c', meta: { type: 'string' } },
+            { id: 'd', name: 'd', meta: { type: 'string', params: { id: 'custom' } } },
           ],
           rows: [
             { a: 1, b: 2, c: 'I', d: 'Row 1' },
@@ -387,8 +427,10 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -410,8 +452,10 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'line' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -433,6 +477,7 @@ describe('xy_expression', () => {
         xScaleType: 'time',
         yScaleType: 'linear',
         isHistogram: false,
+        palette: mockPaletteOutput,
       };
       const multiLayerArgs = createArgsWithLayers([
         timeSampleLayer,
@@ -461,8 +506,10 @@ describe('xy_expression', () => {
             }}
             formatFactory={getFormatSpy}
             timeZone="UTC"
+            renderMode="display"
             chartsThemeService={chartsThemeService}
-            histogramBarTarget={50}
+            paletteService={paletteService}
+            minInterval={undefined}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
           />
@@ -476,7 +523,7 @@ describe('xy_expression', () => {
         `);
       });
 
-      test('it generates correct xDomain for a layer with single value and a layer with no data (1-0) ', () => {
+      test('it uses passed in minInterval', () => {
         const data: LensMultiTable = {
           type: 'lens_multitable',
           tables: {
@@ -497,8 +544,10 @@ describe('xy_expression', () => {
             args={multiLayerArgs}
             formatFactory={getFormatSpy}
             timeZone="UTC"
+            renderMode="display"
             chartsThemeService={chartsThemeService}
-            histogramBarTarget={50}
+            paletteService={paletteService}
+            minInterval={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
           />
@@ -509,128 +558,9 @@ describe('xy_expression', () => {
           Object {
             "max": 1546491600000,
             "min": 1546405200000,
-            "minInterval": 1728000,
+            "minInterval": 50,
           }
         `);
-      });
-
-      test('it generates correct xDomain for two layers with single value(1-1)', () => {
-        const data: LensMultiTable = {
-          type: 'lens_multitable',
-          tables: {
-            first: createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]),
-            second: createSampleDatatableWithRows([{ a: 10, b: 5, c: 'J', d: 'Bar' }]),
-          },
-        };
-        const component = shallow(
-          <XYChart
-            data={{
-              ...data,
-              dateRange: {
-                fromDate: new Date('2019-01-02T05:00:00.000Z'),
-                toDate: new Date('2019-01-03T05:00:00.000Z'),
-              },
-            }}
-            args={multiLayerArgs}
-            formatFactory={getFormatSpy}
-            timeZone="UTC"
-            chartsThemeService={chartsThemeService}
-            histogramBarTarget={50}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-          />
-        );
-
-        expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
-        Object {
-          "max": 1546491600000,
-          "min": 1546405200000,
-          "minInterval": undefined,
-        }
-      `);
-      });
-      test('it generates correct xDomain for a layer with single value and layer with multiple value data (1-n)', () => {
-        const data: LensMultiTable = {
-          type: 'lens_multitable',
-          tables: {
-            first: createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]),
-            second: createSampleDatatableWithRows([
-              { a: 10, b: 5, c: 'J', d: 'Bar' },
-              { a: 8, b: 5, c: 'K', d: 'Buzz' },
-            ]),
-          },
-        };
-        const component = shallow(
-          <XYChart
-            data={{
-              ...data,
-              dateRange: {
-                fromDate: new Date('2019-01-02T05:00:00.000Z'),
-                toDate: new Date('2019-01-03T05:00:00.000Z'),
-              },
-            }}
-            args={multiLayerArgs}
-            formatFactory={getFormatSpy}
-            timeZone="UTC"
-            chartsThemeService={chartsThemeService}
-            histogramBarTarget={50}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-          />
-        );
-
-        expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
-          Object {
-            "max": 1546491600000,
-            "min": 1546405200000,
-            "minInterval": undefined,
-          }
-        `);
-      });
-
-      test('it generates correct xDomain for 2 layers with multiple value data (n-n)', () => {
-        const data: LensMultiTable = {
-          type: 'lens_multitable',
-          tables: {
-            first: createSampleDatatableWithRows([
-              { a: 1, b: 2, c: 'I', d: 'Foo' },
-              { a: 8, b: 5, c: 'K', d: 'Buzz' },
-              { a: 9, b: 7, c: 'L', d: 'Bar' },
-              { a: 10, b: 2, c: 'G', d: 'Bear' },
-            ]),
-            second: createSampleDatatableWithRows([
-              { a: 10, b: 5, c: 'J', d: 'Bar' },
-              { a: 8, b: 4, c: 'K', d: 'Fi' },
-              { a: 1, b: 8, c: 'O', d: 'Pi' },
-            ]),
-          },
-        };
-        const component = shallow(
-          <XYChart
-            data={{
-              ...data,
-              dateRange: {
-                fromDate: new Date('2019-01-02T05:00:00.000Z'),
-                toDate: new Date('2019-01-03T05:00:00.000Z'),
-              },
-            }}
-            args={multiLayerArgs}
-            formatFactory={getFormatSpy}
-            timeZone="UTC"
-            chartsThemeService={chartsThemeService}
-            histogramBarTarget={50}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-          />
-        );
-
-        expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
-        Object {
-          "max": 1546491600000,
-          "min": 1546405200000,
-          "minInterval": undefined,
-        }
-      `);
       });
     });
 
@@ -652,8 +582,10 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -669,8 +601,10 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -689,8 +623,10 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -709,8 +645,10 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_horizontal' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -734,8 +672,10 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -757,8 +697,10 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -786,13 +728,14 @@ describe('xy_expression', () => {
         isHistogram: true,
         seriesType: 'bar_stacked',
         accessors: ['yAccessorId'],
+        palette: mockPaletteOutput,
       };
 
       const numberHistogramData: LensMultiTable = {
         type: 'lens_multitable',
         tables: {
           numberLayer: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             rows: [
               {
                 xAccessorId: 5,
@@ -815,10 +758,12 @@ describe('xy_expression', () => {
               {
                 id: 'xAccessorId',
                 name: 'bytes',
+                meta: { type: 'number' },
               },
               {
                 id: 'yAccessorId',
                 name: 'Count of records',
+                meta: { type: 'number' },
               },
             ],
           },
@@ -838,8 +783,10 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -853,6 +800,27 @@ describe('xy_expression', () => {
         range: [5, 8],
         timeFieldName: undefined,
       });
+    });
+
+    test('onBrushEnd is not set on noInteractivity mode', () => {
+      const { args, data } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          renderMode="noInteractivity"
+          chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
+          minInterval={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(wrapper.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
     });
 
     test('onElementClick returns correct context data', () => {
@@ -883,13 +851,16 @@ describe('xy_expression', () => {
                 splitAccessor: 'b',
                 accessors: ['d'],
                 columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+                palette: mockPaletteOutput,
               },
             ],
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -917,6 +888,27 @@ describe('xy_expression', () => {
       });
     });
 
+    test('onElementClick is not triggering event on noInteractivity mode', () => {
+      const { args, data } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          renderMode="noInteractivity"
+          chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
+          minInterval={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(wrapper.find(Settings).first().prop('onElementClick')).toBeUndefined();
+    });
+
     test('it renders stacked bar', () => {
       const { data, args } = sampleArgs();
       const component = shallow(
@@ -925,8 +917,10 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -945,8 +939,10 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area_stacked' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -968,8 +964,10 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1000,8 +998,10 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1019,8 +1019,10 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="CEST"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1044,8 +1046,10 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [firstLayer] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1063,8 +1067,10 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [firstLayer] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1085,8 +1091,10 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [firstLayer, secondLayer] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1112,8 +1120,10 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1133,8 +1143,10 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1272,9 +1284,24 @@ describe('xy_expression', () => {
         } as XYArgs;
 
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
-        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual('#550000');
-        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual('#FFFF00');
-        expect((component.find(LineSeries).at(2).prop('color') as Function)!()).toEqual('#FEECDF');
+        expect(
+          (component.find(LineSeries).at(0).prop('color') as Function)!({
+            yAccessor: 'a',
+            seriesKeys: ['a'],
+          })
+        ).toEqual('#550000');
+        expect(
+          (component.find(LineSeries).at(1).prop('color') as Function)!({
+            yAccessor: 'b',
+            seriesKeys: ['b'],
+          })
+        ).toEqual('#FFFF00');
+        expect(
+          (component.find(LineSeries).at(2).prop('color') as Function)!({
+            yAccessor: 'c',
+            seriesKeys: ['c'],
+          })
+        ).toEqual('#FEECDF');
       });
       test('color is not applied to chart when splitAccessor is defined or when yConfig is not configured', () => {
         const args = createArgsWithLayers();
@@ -1300,8 +1327,18 @@ describe('xy_expression', () => {
         } as XYArgs;
 
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
-        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual(null);
-        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual(null);
+        expect(
+          (component.find(LineSeries).at(0).prop('color') as Function)!({
+            yAccessor: 'a',
+            seriesKeys: ['a'],
+          })
+        ).toEqual('blue');
+        expect(
+          (component.find(LineSeries).at(1).prop('color') as Function)!({
+            yAccessor: 'c',
+            seriesKeys: ['c'],
+          })
+        ).toEqual('blue');
       });
     });
 
@@ -1508,8 +1545,10 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], xScaleType: 'ordinal' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1527,8 +1566,10 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], yScaleType: 'sqrt' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1546,8 +1587,10 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1565,8 +1608,10 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], accessors: ['a'] }] }}
           formatFactory={getFormatSpy}
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           timeZone="UTC"
+          renderMode="display"
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1586,8 +1631,10 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1620,8 +1667,10 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1652,8 +1701,10 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1684,8 +1735,10 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1716,8 +1769,10 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1737,11 +1792,11 @@ describe('xy_expression', () => {
         type: 'lens_multitable',
         tables: {
           first: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
+              { id: 'a', name: 'a', meta: { type: 'number' } },
+              { id: 'b', name: 'b', meta: { type: 'number' } },
+              { id: 'c', name: 'c', meta: { type: 'string' } },
             ],
             rows: [
               { a: undefined, b: 2, c: 'I', d: 'Row 1' },
@@ -1749,11 +1804,11 @@ describe('xy_expression', () => {
             ],
           },
           second: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
+              { id: 'a', name: 'a', meta: { type: 'number' } },
+              { id: 'b', name: 'b', meta: { type: 'number' } },
+              { id: 'c', name: 'c', meta: { type: 'string' } },
             ],
             rows: [
               { a: undefined, b: undefined, c: undefined },
@@ -1768,6 +1823,7 @@ describe('xy_expression', () => {
         yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        valueLabels: 'hide',
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
@@ -1791,6 +1847,7 @@ describe('xy_expression', () => {
             xScaleType: 'ordinal',
             yScaleType: 'linear',
             isHistogram: false,
+            palette: mockPaletteOutput,
           },
           {
             layerId: 'second',
@@ -1802,6 +1859,7 @@ describe('xy_expression', () => {
             xScaleType: 'ordinal',
             yScaleType: 'linear',
             isHistogram: false,
+            palette: mockPaletteOutput,
           },
         ],
       };
@@ -1812,8 +1870,10 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1831,11 +1891,11 @@ describe('xy_expression', () => {
         type: 'lens_multitable',
         tables: {
           first: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
+              { id: 'a', name: 'a', meta: { type: 'number' } },
+              { id: 'b', name: 'b', meta: { type: 'number' } },
+              { id: 'c', name: 'c', meta: { type: 'number' } },
             ],
             rows: [
               { a: 0, b: 2, c: 5 },
@@ -1850,6 +1910,7 @@ describe('xy_expression', () => {
         yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        valueLabels: 'hide',
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
@@ -1873,6 +1934,7 @@ describe('xy_expression', () => {
             xScaleType: 'ordinal',
             yScaleType: 'linear',
             isHistogram: false,
+            palette: mockPaletteOutput,
           },
         ],
       };
@@ -1883,8 +1945,10 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1903,11 +1967,11 @@ describe('xy_expression', () => {
         type: 'lens_multitable',
         tables: {
           first: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
+              { id: 'a', name: 'a', meta: { type: 'number' } },
+              { id: 'b', name: 'b', meta: { type: 'number' } },
+              { id: 'c', name: 'c', meta: { type: 'string' } },
             ],
             rows: [{ a: 1, b: 5, c: 'J' }],
           },
@@ -1919,6 +1983,7 @@ describe('xy_expression', () => {
         yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
+        valueLabels: 'hide',
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
@@ -1942,6 +2007,7 @@ describe('xy_expression', () => {
             xScaleType: 'ordinal',
             yScaleType: 'linear',
             isHistogram: false,
+            palette: mockPaletteOutput,
           },
         ],
       };
@@ -1952,8 +2018,10 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1975,8 +2043,10 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -1997,8 +2067,10 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -2019,8 +2091,10 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -2053,8 +2127,10 @@ describe('xy_expression', () => {
           args={{ ...args, fittingFunction: 'Carry' }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -2079,8 +2155,10 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -2100,8 +2178,10 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -2126,8 +2206,10 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -2158,8 +2240,10 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
+          renderMode="display"
           chartsThemeService={chartsThemeService}
-          histogramBarTarget={50}
+          paletteService={paletteService}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -2168,6 +2252,49 @@ describe('xy_expression', () => {
       expect(component.find(Axis).at(0).prop('gridLine')).toMatchObject({
         visible: true,
       });
+    });
+  });
+
+  describe('calculateMinInterval', () => {
+    let xyProps: XYChartProps;
+
+    beforeEach(() => {
+      xyProps = sampleArgs();
+      xyProps.args.layers[0].xScaleType = 'time';
+    });
+    it('should use first valid layer and determine interval', async () => {
+      const result = await calculateMinInterval(
+        xyProps,
+        jest.fn().mockResolvedValue({ interval: '5m' })
+      );
+      expect(result).toEqual(5 * 60 * 1000);
+    });
+
+    it('should return undefined if data table is empty', async () => {
+      xyProps.data.tables.first.rows = [];
+      const result = await calculateMinInterval(
+        xyProps,
+        jest.fn().mockResolvedValue({ interval: '5m' })
+      );
+      expect(result).toEqual(undefined);
+    });
+
+    it('should return undefined if interval can not be checked', async () => {
+      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      expect(result).toEqual(undefined);
+    });
+
+    it('should return undefined if date column is not found', async () => {
+      xyProps.data.tables.first.columns.splice(2, 1);
+      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      expect(result).toEqual(undefined);
+    });
+
+    it('should return undefined if x axis is not a date', async () => {
+      xyProps.args.layers[0].xScaleType = 'ordinal';
+      xyProps.data.tables.first.columns.splice(2, 1);
+      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      expect(result).toEqual(undefined);
     });
   });
 });

@@ -5,7 +5,12 @@
  */
 import React from 'react';
 
-import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
+import {
+  NormalizedField,
+  Field as FieldType,
+  ParameterName,
+  ComboBoxOption,
+} from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import {
   StoreParameter,
@@ -33,9 +38,9 @@ export const RangeType = ({ field }: Props) => {
       <BasicParametersSection>
         <IndexParameter hasIndexOptions={false} />
 
-        <FormDataProvider pathsToWatch="subType">
+        <FormDataProvider<{ subType?: ComboBoxOption[] }> pathsToWatch="subType">
           {(formData) =>
-            formData.subType === 'date_range' ? (
+            formData.subType?.[0]?.value === 'date_range' ? (
               <FormatParameter
                 defaultValue={field.source.format as string}
                 defaultToggleValue={getDefaultToggleValue('format', field.source)}
@@ -46,9 +51,9 @@ export const RangeType = ({ field }: Props) => {
       </BasicParametersSection>
 
       <AdvancedParametersSection>
-        <FormDataProvider pathsToWatch="subType">
+        <FormDataProvider<{ subType?: ComboBoxOption[] }> pathsToWatch="subType">
           {(formData) =>
-            formData.subType === 'date_range' ? (
+            formData.subType?.[0]?.value === 'date_range' ? (
               <LocaleParameter defaultToggleValue={getDefaultToggleValue('locale', field.source)} />
             ) : null
           }

@@ -11,9 +11,10 @@ import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@e
 import { TemplateDeserialized } from '../../../../common';
 import { breadcrumbService } from '../../services/breadcrumbs';
 import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
-import { decodePathFromReactRouter, getTemplateDetailsLink } from '../../services/routing';
+import { getTemplateDetailsLink } from '../../services/routing';
 import { SectionLoading, SectionError, TemplateForm, Error } from '../../components';
 import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
+import { attemptToURIDecode } from '../../../shared_imports';
 
 interface MatchParams {
   name: string;
@@ -26,7 +27,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   location,
   history,
 }) => {
-  const decodedTemplateName = decodePathFromReactRouter(name);
+  const decodedTemplateName = attemptToURIDecode(name)!;
   const isLegacy = getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -51,7 +52,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       return;
     }
 
-    history.push(getTemplateDetailsLink(name, updatedTemplate._kbnMeta.isLegacy));
+    history.push(getTemplateDetailsLink(decodedTemplateName, updatedTemplate._kbnMeta.isLegacy));
   };
 
   const clearSaveError = () => {

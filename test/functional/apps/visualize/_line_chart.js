@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
 
     const initLineChart = async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickLineChart');
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
@@ -136,15 +136,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should request new data when autofresh is enabled', async () => {
-      // enable autorefresh
-      const interval = 3;
-      await PageObjects.timePicker.openQuickSelectTimeMenu();
-      await PageObjects.timePicker.inputValue(
-        'superDatePickerRefreshIntervalInput',
-        interval.toString()
-      );
-      await testSubjects.click('superDatePickerToggleRefreshButton');
-      await PageObjects.timePicker.closeQuickSelectTimeMenu();
+      const intervalS = 3;
+      await PageObjects.timePicker.startAutoRefresh(intervalS);
 
       // check inspector panel request stats for timestamp
       await inspector.open();
@@ -155,7 +148,7 @@ export default function ({ getService, getPageObjects }) {
       )[0][1];
 
       // pause to allow time for autorefresh to fire another request
-      await PageObjects.common.sleep(interval * 1000 * 1.5);
+      await PageObjects.common.sleep(intervalS * 1000 * 1.5);
 
       // get the latest timestamp from request stats
       const requestStatsAfter = await inspector.getTableData();
@@ -251,7 +244,7 @@ export default function ({ getService, getPageObjects }) {
     describe('pipeline aggregations', () => {
       before(async () => {
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickLineChart');
         await PageObjects.visualize.clickLineChart();
         await PageObjects.visualize.clickNewSearch();

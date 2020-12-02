@@ -41,7 +41,7 @@ const specLabel = i18n.translate('visTypeVega.inspector.specLabel', {
   defaultMessage: 'Spec',
 });
 
-export const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
+const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
   const tabs = [
     {
       id: 'data-viewer--id',
@@ -75,3 +75,7 @@ export const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
     />
   );
 };
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { VegaDataInspector as default };

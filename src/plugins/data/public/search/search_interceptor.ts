@@ -17,28 +17,36 @@
  * under the License.
  */
 
-import { get, trimEnd, debounce } from 'lodash';
+import { get, memoize } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
-import {
-  getCombinedSignal,
-  AbortError,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-  ES_SEARCH_STRATEGY,
-} from '../../common';
+import { i18n } from '@kbn/i18n';
+import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
+import { IKibanaSearchRequest, IKibanaSearchResponse, ISearchOptions } from '../../common';
 import { SearchUsageCollector } from './collectors';
-import { SearchTimeoutError, PainlessError, isPainlessError, TimeoutErrorMode } from './errors';
+import {
+  SearchTimeoutError,
+  PainlessError,
+  isPainlessError,
+  TimeoutErrorMode,
+  isEsError,
+  EsError,
+  getHttpError,
+} from './errors';
 import { toMountPoint } from '../../../kibana_react/public';
+import { AbortError, getCombinedAbortSignal } from '../../../kibana_utils/public';
+import { ISessionService } from './session';
 
 export interface SearchInterceptorDeps {
+  bfetch: BfetchPublicSetup;
   http: CoreSetup['http'];
   uiSettings: CoreSetup['uiSettings'];
   startServices: Promise<[CoreStart, any, unknown]>;
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
+  session: ISessionService;
 }
 
 export class SearchInterceptor {
@@ -58,6 +66,10 @@ export class SearchInterceptor {
    * @internal
    */
   protected application!: CoreStart['application'];
+  private batchedFetch!: BatchedFunc<
+    { request: IKibanaSearchRequest; options: ISearchOptions },
+    IKibanaSearchResponse
+  >;
 
   /*
    * @internal
@@ -67,6 +79,10 @@ export class SearchInterceptor {
 
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
+    });
+
+    this.batchedFetch = deps.bfetch.batchedFunction({
+      url: '/internal/bsearch',
     });
   }
 
@@ -82,24 +98,24 @@ export class SearchInterceptor {
    * @returns `Error` a search service specific error or the original error, if a specific error can't be recognized.
    * @internal
    */
-  protected handleSearchError(
-    e: any,
-    request: IKibanaSearchRequest,
-    timeoutSignal: AbortSignal,
-    appAbortSignal?: AbortSignal
-  ): Error {
+  protected handleSearchError(e: any, timeoutSignal: AbortSignal, options?: ISearchOptions): Error {
     if (timeoutSignal.aborted || get(e, 'body.message') === 'Request timed out') {
       // Handle a client or a server side timeout
       const err = new SearchTimeoutError(e, this.getTimeoutMode());
 
       // Show the timeout error here, so that it's shown regardless of how an application chooses to handle errors.
-      this.showTimeoutError(err);
+      // The timeout error is shown any time a request times out, or once per session, if the request is part of a session.
+      this.showTimeoutError(err, options?.sessionId);
       return err;
-    } else if (appAbortSignal?.aborted) {
+    } else if (options?.abortSignal?.aborted) {
       // In the case an application initiated abort, throw the existing AbortError.
       return e;
-    } else if (isPainlessError(e)) {
-      return new PainlessError(e, request);
+    } else if (isEsError(e)) {
+      if (isPainlessError(e)) {
+        return new PainlessError(e);
+      } else {
+        return new EsError(e);
+      }
     } else {
       return e;
     }
@@ -110,19 +126,23 @@ export class SearchInterceptor {
    */
   protected runSearch(
     request: IKibanaSearchRequest,
-    signal: AbortSignal,
-    strategy?: string
-  ): Observable<IKibanaSearchResponse> {
-    const { id, ...searchRequest } = request;
-    const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
-    const body = JSON.stringify(searchRequest);
-    return from(
-      this.deps.http.fetch({
-        method: 'POST',
-        path,
-        body,
-        signal,
-      })
+    options?: ISearchOptions
+  ): Promise<IKibanaSearchResponse> {
+    const { abortSignal, ...requestOptions } = options || {};
+
+    const isCurrentSession =
+      options?.sessionId && this.deps.session.getSessionId() === options.sessionId;
+
+    return this.batchedFetch(
+      {
+        request,
+        options: {
+          ...requestOptions,
+          isStored: isCurrentSession ? this.deps.session.isStored() : false,
+          isRestore: isCurrentSession ? this.deps.session.isRestore() : false,
+        },
+      },
+      abortSignal
     );
   }
 
@@ -144,45 +164,66 @@ export class SearchInterceptor {
       timeoutController.abort();
     });
 
+    const selfAbortController = new AbortController();
+
     // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
     // 1. The user manually aborts (via `cancelPending`)
     // 2. The request times out
-    // 3. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
+    // 3. abort() is called on `selfAbortController`. This is used by session service to abort all pending searches that it tracks
+    //    in the current session
+    // 4. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
     const signals = [
       this.abortController.signal,
       timeoutSignal,
+      selfAbortController.signal,
       ...(abortSignal ? [abortSignal] : []),
     ];
 
-    const combinedSignal = getCombinedSignal(signals);
+    const { signal: combinedSignal, cleanup: cleanupCombinedSignal } = getCombinedAbortSignal(
+      signals
+    );
     const cleanup = () => {
       subscription.unsubscribe();
+      combinedSignal.removeEventListener('abort', cleanup);
+      cleanupCombinedSignal();
     };
-
     combinedSignal.addEventListener('abort', cleanup);
 
     return {
-      combinedSignal,
       timeoutSignal,
+      combinedSignal,
       cleanup,
+      abort: () => {
+        selfAbortController.abort();
+      },
     };
   }
 
+  private showTimeoutErrorToast = (e: SearchTimeoutError, sessionId?: string) => {
+    this.deps.toasts.addDanger({
+      title: 'Timed out',
+      text: toMountPoint(e.getErrorMessage(this.application)),
+    });
+  };
+
+  private showTimeoutErrorMemoized = memoize(
+    this.showTimeoutErrorToast,
+    (_: SearchTimeoutError, sessionId: string) => {
+      return sessionId;
+    }
+  );
+
   /**
-   * Right now we are throttling but we will hook this up with background sessions to show only one
-   * error notification per session.
+   * Show one error notification per session.
    * @internal
    */
-  private showTimeoutError = debounce(
-    (e: SearchTimeoutError) => {
-      this.deps.toasts.addDanger({
-        title: 'Timed out',
-        text: toMountPoint(e.getErrorMessage(this.application)),
-      });
-    },
-    30000,
-    { leading: true, trailing: false }
-  );
+  private showTimeoutError = (e: SearchTimeoutError, sessionId?: string) => {
+    if (sessionId) {
+      this.showTimeoutErrorMemoized(e, sessionId);
+    } else {
+      this.showTimeoutErrorToast(e, sessionId);
+    }
+  };
 
   /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
@@ -191,7 +232,7 @@ export class SearchInterceptor {
    *
    * @param request
    * @options
-   * @returns `Observalbe` emitting the search response or an error.
+   * @returns `Observable` emitting the search response or an error.
    */
   public search(
     request: IKibanaSearchRequest,
@@ -207,12 +248,9 @@ export class SearchInterceptor {
         abortSignal: options?.abortSignal,
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-
-      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
-        catchError((e: any) => {
-          return throwError(
-            this.handleSearchError(e, request, timeoutSignal, options?.abortSignal)
-          );
+      return from(this.runSearch(request, { ...options, abortSignal: combinedSignal })).pipe(
+        catchError((e: Error) => {
+          return throwError(this.handleSearchError(e, timeoutSignal, options));
         }),
         finalize(() => {
           this.pendingCount$.next(this.pendingCount$.getValue() - 1);
@@ -226,24 +264,28 @@ export class SearchInterceptor {
    *
    */
   public showError(e: Error) {
-    if (e instanceof AbortError) return;
-
-    if (e instanceof SearchTimeoutError) {
+    if (e instanceof AbortError || e instanceof SearchTimeoutError) {
       // The SearchTimeoutError is shown by the interceptor in getSearchError (regardless of how the app chooses to handle errors)
       return;
-    }
-
-    if (e instanceof PainlessError) {
+    } else if (e instanceof EsError) {
       this.deps.toasts.addDanger({
-        title: 'Search Error',
+        title: i18n.translate('data.search.esErrorTitle', {
+          defaultMessage: 'Cannot retrieve search results',
+        }),
         text: toMountPoint(e.getErrorMessage(this.application)),
       });
-      return;
+    } else if (e.constructor.name === 'HttpFetchError') {
+      this.deps.toasts.addDanger({
+        title: i18n.translate('data.search.httpErrorTitle', {
+          defaultMessage: 'Cannot retrieve your data',
+        }),
+        text: toMountPoint(getHttpError(e.message)),
+      });
+    } else {
+      this.deps.toasts.addError(e, {
+        title: 'Search Error',
+      });
     }
-
-    this.deps.toasts.addError(e, {
-      title: 'Search Error',
-    });
   }
 }
 

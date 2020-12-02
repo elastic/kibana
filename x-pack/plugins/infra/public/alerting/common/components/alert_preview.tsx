@@ -127,7 +127,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
         defaultMessage: 'Preview',
       })}
       fullWidth
-      compressed
+      display="rowCompressed"
     >
       <>
         <EuiFlexGroup>

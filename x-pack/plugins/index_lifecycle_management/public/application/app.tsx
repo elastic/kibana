@@ -13,8 +13,9 @@ import { UIM_APP_LOAD } from './constants/ui_metric';
 import { EditPolicy } from './sections/edit_policy';
 import { PolicyTable } from './sections/policy_table';
 import { trackUiMetric } from './services/ui_metric';
+import { ROUTES } from './services/navigation';
 
-export const App = ({
+export const AppWithRouter = ({
   history,
   navigateToApp,
   getUrlForApp,
@@ -22,23 +23,33 @@ export const App = ({
   history: ScopedHistory;
   navigateToApp: ApplicationStart['navigateToApp'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
+}) => (
+  <Router history={history}>
+    <App navigateToApp={navigateToApp} getUrlForApp={getUrlForApp} />
+  </Router>
+);
+
+export const App = ({
+  navigateToApp,
+  getUrlForApp,
+}: {
+  navigateToApp: ApplicationStart['navigateToApp'];
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }) => {
   useEffect(() => trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD), []);
 
   return (
-    <Router history={history}>
-      <Switch>
-        <Redirect exact from="/" to="/policies" />
-        <Route
-          exact
-          path={`/policies`}
-          render={(props) => <PolicyTable {...props} navigateToApp={navigateToApp} />}
-        />
-        <Route
-          path={`/policies/edit/:policyName?`}
-          render={(props) => <EditPolicy {...props} getUrlForApp={getUrlForApp} />}
-        />
-      </Switch>
-    </Router>
+    <Switch>
+      <Redirect exact from="/" to={ROUTES.list} />
+      <Route
+        exact
+        path={ROUTES.list}
+        render={(props) => <PolicyTable {...props} navigateToApp={navigateToApp} />}
+      />
+      <Route
+        path={ROUTES.edit}
+        render={(props) => <EditPolicy {...props} getUrlForApp={getUrlForApp} />}
+      />
+    </Switch>
   );
 };

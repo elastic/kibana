@@ -24,6 +24,7 @@ import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } fr
 import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { ISessionsClient, ISessionService } from './session';
 
 export { ISearchStartSearchSource };
 
@@ -38,6 +39,16 @@ export interface SearchEnhancements {
 export interface ISearchSetup {
   aggs: AggsSetup;
   usageCollector?: SearchUsageCollector;
+  /**
+   * Current session management
+   * {@link ISessionService}
+   */
+  session: ISessionService;
+  /**
+   * Background search sessions SO CRUD
+   * {@link ISessionsClient}
+   */
+  sessionsClient: ISessionsClient;
   /**
    * @internal
    */
@@ -67,6 +78,16 @@ export interface ISearchStart {
    * {@link ISearchStartSearchSource}
    */
   searchSource: ISearchStartSearchSource;
+  /**
+   * Current session management
+   * {@link ISessionService}
+   */
+  session: ISessionService;
+  /**
+   * Background search sessions SO CRUD
+   * {@link ISessionsClient}
+   */
+  sessionsClient: ISessionsClient;
 }
 
 export { SEARCH_EVENT_TYPE } from './collectors';

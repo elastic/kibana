@@ -21,13 +21,6 @@ export const PRE_BUILT_MSG = i18n.translate(
   }
 );
 
-export const PRE_BUILT_ACTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.prePackagedRules.loadPreBuiltButton',
-  {
-    defaultMessage: 'Load prebuilt detection rules and timeline templates',
-  }
-);
-
 export const CREATE_RULE_ACTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.prePackagedRules.createOwnRuletButton',
   {

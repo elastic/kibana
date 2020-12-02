@@ -22,6 +22,7 @@ import {
 } from '../abstract_dashboard_drilldown';
 import { KibanaURL } from '../../../../../../../src/plugins/share/public';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
+import { createExtract, createInject } from '../../../../common';
 
 type Trigger = typeof APPLY_FILTER_TRIGGER;
 type Context = TriggerContextMapping[Trigger];
@@ -80,4 +81,8 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<T
 
     return url;
   }
+
+  public readonly inject = createInject({ drilldownId: this.id });
+
+  public readonly extract = createExtract({ drilldownId: this.id });
 }

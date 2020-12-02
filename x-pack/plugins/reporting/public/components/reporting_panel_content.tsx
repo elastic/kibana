@@ -10,10 +10,11 @@ import React, { Component, ReactElement } from 'react';
 import { ToastsSetup } from 'src/core/public';
 import url from 'url';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { CSV_REPORT_TYPE, PDF_REPORT_TYPE, PNG_REPORT_TYPE } from '../../common/constants';
 import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
-interface Props {
+export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;
@@ -165,12 +166,12 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   private prettyPrintReportingType = () => {
     switch (this.props.reportType) {
-      case 'printablePdf':
+      case PDF_REPORT_TYPE:
         return 'PDF';
       case 'csv':
-        return 'CSV';
+        return CSV_REPORT_TYPE;
       case 'png':
-        return 'PNG';
+        return PNG_REPORT_TYPE;
       default:
         return this.props.reportType;
     }

@@ -42,13 +42,15 @@ export function registerRoutes(http: HttpServiceSetup) {
           meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
+          type: schema.maybe(schema.string()),
+          rollup_index: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
-      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
-      const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
-      const { pattern, meta_fields: metaFields } = request.query;
+      const { asCurrentUser } = context.core.elasticsearch.client;
+      const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
+      const { pattern, meta_fields: metaFields, type, rollup_index: rollupIndex } = request.query;
 
       let parsedFields: string[] = [];
       try {
@@ -61,6 +63,8 @@ export function registerRoutes(http: HttpServiceSetup) {
         const fields = await indexPatterns.getFieldsForWildcard({
           pattern,
           metaFields: parsedFields,
+          type,
+          rollupIndex,
         });
 
         return response.ok({
@@ -105,8 +109,8 @@ export function registerRoutes(http: HttpServiceSetup) {
       },
     },
     async (context: RequestHandlerContext, request: any, response: any) => {
-      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
-      const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
+      const { asCurrentUser } = context.core.elasticsearch.client;
+      const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
 
       let parsedFields: string[] = [];

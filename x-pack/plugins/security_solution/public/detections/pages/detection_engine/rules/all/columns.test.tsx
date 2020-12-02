@@ -40,7 +40,7 @@ describe('AllRulesTable Columns', () => {
     test('duplicate rule onClick should call refetch after the rule is duplicated', async () => {
       (duplicateRulesAction as jest.Mock).mockImplementation(
         () =>
-          new Promise((resolve) =>
+          new Promise<void>((resolve) =>
             setTimeout(() => {
               results.push('duplicateRulesAction');
               resolve();
@@ -52,7 +52,8 @@ describe('AllRulesTable Columns', () => {
         dispatch,
         dispatchToaster,
         history,
-        reFetchRules
+        reFetchRules,
+        true
       )[1];
       await duplicateRulesActionObject.onClick(rule);
       expect(results).toEqual(['duplicateRulesAction', 'reFetchRules']);
@@ -61,7 +62,7 @@ describe('AllRulesTable Columns', () => {
     test('delete rule onClick should call refetch after the rule is deleted', async () => {
       (deleteRulesAction as jest.Mock).mockImplementation(
         () =>
-          new Promise((resolve) =>
+          new Promise<void>((resolve) =>
             setTimeout(() => {
               results.push('deleteRulesAction');
               resolve();
@@ -73,7 +74,8 @@ describe('AllRulesTable Columns', () => {
         dispatch,
         dispatchToaster,
         history,
-        reFetchRules
+        reFetchRules,
+        true
       )[3];
       await deleteRulesActionObject.onClick(rule);
       expect(results).toEqual(['deleteRulesAction', 'reFetchRules']);

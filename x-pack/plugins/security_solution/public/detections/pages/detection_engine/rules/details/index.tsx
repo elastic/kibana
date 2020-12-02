@@ -23,6 +23,7 @@ import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'reac
 import { useParams, useHistory } from 'react-router-dom';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { useKibana } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
@@ -78,8 +79,7 @@ import { ExceptionsViewer } from '../../../../../common/components/exceptions/vi
 import { DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
-import { ExceptionListTypeEnum, ExceptionIdentifiers } from '../../../../../shared_imports';
-import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { ExceptionListTypeEnum, ExceptionListIdentifiers } from '../../../../../shared_imports';
 import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { useRuleAsync } from '../../../../containers/detection_engine/rules/use_rule_async';
 import { showGlobalFilters } from '../../../../../timelines/components/timeline/helpers';
@@ -88,6 +88,12 @@ import { timelineDefaults } from '../../../../../timelines/store/timeline/defaul
 import { TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import {
+  getToolTipContent,
+  canEditRuleWithActions,
+  isBoolean,
+} from '../../../../../common/utils/privileges';
+
 import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
 
 enum RuleDetailTabs {
@@ -97,22 +103,25 @@ enum RuleDetailTabs {
 }
 
 const getRuleDetailsTabs = (rule: Rule | null) => {
-  const canUseExceptions = rule && !isMlRule(rule.type) && !isThresholdRule(rule.type);
+  const canUseExceptions = rule && !isThresholdRule(rule.type);
   return [
     {
       id: RuleDetailTabs.alerts,
       name: detectionI18n.ALERT,
       disabled: false,
+      dataTestSubj: 'alertsTab',
     },
     {
       id: RuleDetailTabs.exceptions,
       name: i18n.EXCEPTIONS_TAB,
       disabled: !canUseExceptions,
+      dataTestSubj: 'exceptionsTab',
     },
     {
       id: RuleDetailTabs.failures,
       name: i18n.FAILURE_HISTORY_TAB,
       disabled: false,
+      dataTestSubj: 'failureHistoryTab',
     },
   ];
 };
@@ -166,6 +175,19 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const ruleDetailTabs = getRuleDetailsTabs(rule);
+  const {
+    services: {
+      application: {
+        capabilities: { actions },
+      },
+    },
+  } = useKibana();
+  const hasActionsPrivileges = useMemo(() => {
+    if (rule?.actions != null && rule?.actions.length > 0 && isBoolean(actions.show)) {
+      return actions.show;
+    }
+    return true;
+  }, [actions, rule?.actions]);
 
   // persist rule until refresh is complete
   useEffect(() => {
@@ -243,6 +265,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
             isSelected={tab.id === ruleDetailTab}
             disabled={tab.disabled}
             key={tab.id}
+            data-test-subj={tab.dataTestSubj}
           >
             {tab.name}
           </EuiTab>
@@ -251,19 +274,33 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     ),
     [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
   );
-  const ruleError = useMemo(
-    () =>
+  const ruleError = useMemo(() => {
+    if (
       rule?.status === 'failed' &&
       ruleDetailTab === RuleDetailTabs.alerts &&
-      rule?.last_failure_at != null ? (
+      rule?.last_failure_at != null
+    ) {
+      return (
         <RuleStatusFailedCallOut
           message={rule?.last_failure_message ?? ''}
           date={rule?.last_failure_at}
         />
-      ) : null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rule, ruleDetailTab]
-  );
+      );
+    } else if (
+      rule?.status === 'partial failure' &&
+      ruleDetailTab === RuleDetailTabs.alerts &&
+      rule?.last_success_at != null
+    ) {
+      return (
+        <RuleStatusFailedCallOut
+          message={rule?.last_success_message ?? ''}
+          date={rule?.last_success_at}
+          color="warning"
+        />
+      );
+    }
+    return null;
+  }, [rule, ruleDetailTab]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -297,6 +334,33 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [history, ruleId]
   );
 
+  const editRule = useMemo(() => {
+    if (!hasActionsPrivileges) {
+      return (
+        <EuiToolTip position="top" content={ruleI18n.EDIT_RULE_SETTINGS_TOOLTIP}>
+          <LinkButton
+            onClick={goToEditRule}
+            iconType="controlsHorizontal"
+            isDisabled={true}
+            href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
+          >
+            {ruleI18n.EDIT_RULE_SETTINGS}
+          </LinkButton>
+        </EuiToolTip>
+      );
+    }
+    return (
+      <LinkButton
+        onClick={goToEditRule}
+        iconType="controlsHorizontal"
+        isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
+        href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
+      >
+        {ruleI18n.EDIT_RULE_SETTINGS}
+      </LinkButton>
+    );
+  }, [canUserCRUD, formatUrl, goToEditRule, hasActionsPrivileges, ruleId]);
+
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
     (newShowBuildingBlockAlerts: boolean) => {
       setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
@@ -307,12 +371,12 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
 
   const exceptionLists = useMemo((): {
-    lists: ExceptionIdentifiers[];
+    lists: ExceptionListIdentifiers[];
     allowedExceptionListTypes: ExceptionListTypeEnum[];
   } => {
     if (rule != null && rule.exceptions_list != null) {
       return rule.exceptions_list.reduce<{
-        lists: ExceptionIdentifiers[];
+        lists: ExceptionListIdentifiers[];
         allowedExceptionListTypes: ExceptionListTypeEnum[];
       }>(
         (acc, { id, list_id: listId, namespace_type: namespaceType, type }) => {
@@ -390,16 +454,14 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       position="top"
-                      content={
-                        isMlRule(rule?.type) && !hasMlPermissions
-                          ? detectionI18n.ML_RULES_DISABLED_MESSAGE
-                          : undefined
-                      }
+                      content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
                     >
                       <RuleSwitch
                         id={rule?.id ?? '-1'}
                         isDisabled={
-                          userHasNoPermissions(canUserCRUD) || (!hasMlPermissions && !rule?.enabled)
+                          !canEditRuleWithActions(rule, hasActionsPrivileges) ||
+                          userHasNoPermissions(canUserCRUD) ||
+                          (!hasMlPermissions && !rule?.enabled)
                         }
                         enabled={rule?.enabled ?? false}
                         optionLabel={i18n.ACTIVATE_RULE}
@@ -410,20 +472,15 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <LinkButton
-                          onClick={goToEditRule}
-                          iconType="controlsHorizontal"
-                          isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
-                          href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
-                        >
-                          {ruleI18n.EDIT_RULE_SETTINGS}
-                        </LinkButton>
-                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{editRule}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <RuleActionsOverflow
                           rule={rule}
                           userHasNoPermissions={userHasNoPermissions(canUserCRUD)}
+                          canDuplicateRuleWithActions={canEditRuleWithActions(
+                            rule,
+                            hasActionsPrivileges
+                          )}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -502,6 +559,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
                     onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
+                    onRuleChange={refreshRule}
                     to={to}
                   />
                 )}

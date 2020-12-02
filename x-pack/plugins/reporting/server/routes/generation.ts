@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { kibanaResponseFactory } from 'src/core/server';
 import { ReportingCore } from '../';

@@ -2446,6 +2446,161 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
+  describe('#removeReferencesTo', () => {
+    const type = 'type';
+    const id = 'id';
+    const defaultOptions = {};
+
+    const updatedCount = 42;
+
+    const removeReferencesToSuccess = async (options = defaultOptions) => {
+      client.updateByQuery.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          updated: updatedCount,
+        })
+      );
+      return await savedObjectsRepository.removeReferencesTo(type, id, options);
+    };
+
+    describe('client calls', () => {
+      it('should use the ES updateByQuery action', async () => {
+        await removeReferencesToSuccess();
+        expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+      });
+
+      it('uses the correct default `refresh` value', async () => {
+        await removeReferencesToSuccess();
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            refresh: true,
+          }),
+          expect.any(Object)
+        );
+      });
+
+      it('merges output of getSearchDsl into es request body', async () => {
+        const query = { query: 1, aggregations: 2 };
+        getSearchDslNS.getSearchDsl.mockReturnValue(query);
+        await removeReferencesToSuccess({ type });
+
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({ ...query }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should set index to all known SO indices on the request', async () => {
+        await removeReferencesToSuccess();
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: ['.kibana-test', 'custom'],
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should use the `refresh` option in the request', async () => {
+        const refresh = Symbol();
+
+        await removeReferencesToSuccess({ refresh });
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            refresh,
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should pass the correct parameters to the update script', async () => {
+        await removeReferencesToSuccess();
+        expect(client.updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              script: expect.objectContaining({
+                params: {
+                  type,
+                  id,
+                },
+              }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
+    });
+
+    describe('search dsl', () => {
+      it(`passes mappings and registry to getSearchDsl`, async () => {
+        await removeReferencesToSuccess();
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.anything()
+        );
+      });
+
+      it('passes namespace to getSearchDsl', async () => {
+        await removeReferencesToSuccess({ namespace: 'some-ns' });
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            namespaces: ['some-ns'],
+          })
+        );
+      });
+
+      it('passes hasReference to getSearchDsl', async () => {
+        await removeReferencesToSuccess();
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            hasReference: {
+              type,
+              id,
+            },
+          })
+        );
+      });
+
+      it('passes all known types to getSearchDsl', async () => {
+        await removeReferencesToSuccess();
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            type: registry.getAllTypes().map((type) => type.name),
+          })
+        );
+      });
+    });
+
+    describe('returns', () => {
+      it('returns the updated count from the ES response', async () => {
+        const response = await removeReferencesToSuccess();
+        expect(response.updated).toBe(updatedCount);
+      });
+    });
+
+    describe('errors', () => {
+      it(`throws when ES returns failures`, async () => {
+        client.updateByQuery.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            updated: 7,
+            failures: ['failure', 'another-failure'],
+          })
+        );
+
+        await expect(
+          savedObjectsRepository.removeReferencesTo(type, id, defaultOptions)
+        ).rejects.toThrowError(createConflictError(type, id));
+      });
+    });
+  });
+
   describe('#find', () => {
     const generateSearchResults = (namespace) => {
       return {
@@ -2811,6 +2966,19 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
+      it(`accepts hasReferenceOperator`, async () => {
+        const relevantOpts = {
+          ...commonOptions,
+          hasReferenceOperator: 'AND',
+        };
+
+        await findSuccess(relevantOpts, namespace);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+          ...relevantOpts,
+          hasReferenceOperator: 'AND',
+        });
+      });
+
       it(`accepts KQL expression filter and passes KueryNode to getSearchDsl`, async () => {
         const findOpts = {
           namespaces: [namespace],
@@ -3104,11 +3272,11 @@ describe('SavedObjectsRepository', () => {
   describe('#incrementCounter', () => {
     const type = 'config';
     const id = 'one';
-    const field = 'buildNum';
+    const counterFields = ['buildNum', 'apiCallsCount'];
     const namespace = 'foo-namespace';
     const originId = 'some-origin-id';
 
-    const incrementCounterSuccess = async (type, id, field, options) => {
+    const incrementCounterSuccess = async (type, id, fields, options) => {
       const isMultiNamespace = registry.isMultiNamespace(type);
       if (isMultiNamespace) {
         const response = getMockGetResponse({ type, id }, options?.namespace);
@@ -3127,7 +3295,10 @@ describe('SavedObjectsRepository', () => {
               type,
               ...mockTimestampFields,
               [type]: {
-                [field]: 8468,
+                ...fields.reduce((acc, field) => {
+                  acc[field] = 8468;
+                  return acc;
+                }, {}),
                 defaultIndex: 'logstash-*',
               },
             },
@@ -3135,25 +3306,25 @@ describe('SavedObjectsRepository', () => {
         })
       );
 
-      const result = await savedObjectsRepository.incrementCounter(type, id, field, options);
+      const result = await savedObjectsRepository.incrementCounter(type, id, fields, options);
       expect(client.get).toHaveBeenCalledTimes(isMultiNamespace ? 1 : 0);
       return result;
     };
 
     describe('client calls', () => {
       it(`should use the ES update action if type is not multi-namespace`, async () => {
-        await incrementCounterSuccess(type, id, field, { namespace });
+        await incrementCounterSuccess(type, id, counterFields, { namespace });
         expect(client.update).toHaveBeenCalledTimes(1);
       });
 
       it(`should use the ES get action then update action if type is multi-namespace, ID is defined, and overwrite=true`, async () => {
-        await incrementCounterSuccess(MULTI_NAMESPACE_TYPE, id, field, { namespace });
+        await incrementCounterSuccess(MULTI_NAMESPACE_TYPE, id, counterFields, { namespace });
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(client.update).toHaveBeenCalledTimes(1);
       });
 
       it(`defaults to a refresh setting of wait_for`, async () => {
-        await incrementCounterSuccess(type, id, field, { namespace });
+        await incrementCounterSuccess(type, id, counterFields, { namespace });
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             refresh: 'wait_for',
@@ -3163,7 +3334,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        await incrementCounterSuccess(type, id, field, { namespace });
+        await incrementCounterSuccess(type, id, counterFields, { namespace });
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${namespace}:${type}:${id}`,
@@ -3173,7 +3344,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        await incrementCounterSuccess(type, id, field);
+        await incrementCounterSuccess(type, id, counterFields);
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
@@ -3183,7 +3354,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        await incrementCounterSuccess(type, id, field, { namespace: 'default' });
+        await incrementCounterSuccess(type, id, counterFields, { namespace: 'default' });
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
@@ -3193,7 +3364,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
-        await incrementCounterSuccess(NAMESPACE_AGNOSTIC_TYPE, id, field, { namespace });
+        await incrementCounterSuccess(NAMESPACE_AGNOSTIC_TYPE, id, counterFields, { namespace });
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${NAMESPACE_AGNOSTIC_TYPE}:${id}`,
@@ -3202,7 +3373,7 @@ describe('SavedObjectsRepository', () => {
         );
 
         client.update.mockClear();
-        await incrementCounterSuccess(MULTI_NAMESPACE_TYPE, id, field, { namespace });
+        await incrementCounterSuccess(MULTI_NAMESPACE_TYPE, id, counterFields, { namespace });
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${MULTI_NAMESPACE_TYPE}:${id}`,
@@ -3221,7 +3392,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
-          savedObjectsRepository.incrementCounter(type, id, field, {
+          savedObjectsRepository.incrementCounter(type, id, counterFields, {
             namespace: ALL_NAMESPACES_STRING,
           })
         ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
@@ -3230,7 +3401,7 @@ describe('SavedObjectsRepository', () => {
       it(`throws when type is not a string`, async () => {
         const test = async (type) => {
           await expect(
-            savedObjectsRepository.incrementCounter(type, id, field)
+            savedObjectsRepository.incrementCounter(type, id, counterFields)
           ).rejects.toThrowError(`"type" argument must be a string`);
           expect(client.update).not.toHaveBeenCalled();
         };
@@ -3245,23 +3416,24 @@ describe('SavedObjectsRepository', () => {
         const test = async (field) => {
           await expect(
             savedObjectsRepository.incrementCounter(type, id, field)
-          ).rejects.toThrowError(`"counterFieldName" argument must be a string`);
+          ).rejects.toThrowError(`"counterFieldNames" argument must be an array of strings`);
           expect(client.update).not.toHaveBeenCalled();
         };
 
-        await test(null);
-        await test(42);
-        await test(false);
-        await test({});
+        await test([null]);
+        await test([42]);
+        await test([false]);
+        await test([{}]);
+        await test([{}, false, 42, null, 'string']);
       });
 
       it(`throws when type is invalid`, async () => {
-        await expectUnsupportedTypeError('unknownType', id, field);
+        await expectUnsupportedTypeError('unknownType', id, counterFields);
         expect(client.update).not.toHaveBeenCalled();
       });
 
       it(`throws when type is hidden`, async () => {
-        await expectUnsupportedTypeError(HIDDEN_TYPE, id, field);
+        await expectUnsupportedTypeError(HIDDEN_TYPE, id, counterFields);
         expect(client.update).not.toHaveBeenCalled();
       });
 
@@ -3271,7 +3443,9 @@ describe('SavedObjectsRepository', () => {
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
         await expect(
-          savedObjectsRepository.incrementCounter(MULTI_NAMESPACE_TYPE, id, field, { namespace })
+          savedObjectsRepository.incrementCounter(MULTI_NAMESPACE_TYPE, id, counterFields, {
+            namespace,
+          })
         ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_TYPE, id));
         expect(client.get).toHaveBeenCalledTimes(1);
       });
@@ -3284,8 +3458,8 @@ describe('SavedObjectsRepository', () => {
 
       it(`migrates a document and serializes the migrated doc`, async () => {
         const migrationVersion = mockMigrationVersion;
-        await incrementCounterSuccess(type, id, field, { migrationVersion });
-        const attributes = { buildNum: 1 }; // this is added by the incrementCounter function
+        await incrementCounterSuccess(type, id, counterFields, { migrationVersion });
+        const attributes = { buildNum: 1, apiCallsCount: 1 }; // this is added by the incrementCounter function
         const doc = { type, id, attributes, migrationVersion, ...mockTimestampFields };
         expectMigrationArgs(doc);
 
@@ -3308,6 +3482,7 @@ describe('SavedObjectsRepository', () => {
                 ...mockTimestampFields,
                 config: {
                   buildNum: 8468,
+                  apiCallsCount: 100,
                   defaultIndex: 'logstash-*',
                 },
                 originId,
@@ -3319,7 +3494,7 @@ describe('SavedObjectsRepository', () => {
         const response = await savedObjectsRepository.incrementCounter(
           'config',
           '6.0.0-alpha1',
-          'buildNum',
+          ['buildNum', 'apiCallsCount'],
           {
             namespace: 'foo-namespace',
           }
@@ -3332,6 +3507,7 @@ describe('SavedObjectsRepository', () => {
           version: mockVersion,
           attributes: {
             buildNum: 8468,
+            apiCallsCount: 100,
             defaultIndex: 'logstash-*',
           },
           originId,

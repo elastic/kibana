@@ -437,7 +437,7 @@ describe('helpers', () => {
     it('returns a humanized description for a threat_match type', () => {
       const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threat_match');
 
-      expect(result.description).toEqual('Threat Match');
+      expect(result.description).toEqual('Indicator Match');
     });
   });
 });

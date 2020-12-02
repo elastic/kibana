@@ -23,9 +23,9 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { SearchResponse } from 'elasticsearch';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 
-import { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
+import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
 import { shimHitsTotal } from './shim_hits_total';
-import { getShardTimeout, getDefaultSearchParams, toSnakeCase, shimAbortSignal } from '..';
+import { getShardTimeout, getDefaultSearchParams, shimAbortSignal } from '..';
 
 /** @internal */
 export function convertRequestBody(
@@ -70,7 +70,7 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
     const timeout = getShardTimeout(config);
 
     // trackTotalHits is not supported by msearch
-    const { trackTotalHits, ...defaultParams } = await getDefaultSearchParams(uiSettings);
+    const { track_total_hits: _, ...defaultParams } = await getDefaultSearchParams(uiSettings);
 
     const body = convertRequestBody(params.body, timeout);
 
@@ -80,7 +80,7 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
           body,
         },
         {
-          querystring: toSnakeCase(defaultParams),
+          querystring: defaultParams,
         }
       ),
       params.signal

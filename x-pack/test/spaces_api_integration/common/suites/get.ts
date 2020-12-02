@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { SuperAgent } from 'superagent';
-import { getUrlPrefix } from '../lib/space_test_utils';
+import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface GetTest {
@@ -80,12 +80,14 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${tests.default.statusCode}`, async () => {
-        return supertest
-          .get(`${getUrlPrefix(currentSpaceId)}/api/spaces/space/${spaceId}`)
-          .auth(user.username, user.password)
-          .expect(tests.default.statusCode)
-          .then(tests.default.response);
+      getTestScenariosForSpace(currentSpaceId).forEach(({ urlPrefix, scenario }) => {
+        it(`should return ${tests.default.statusCode} ${scenario}`, async () => {
+          return supertest
+            .get(`${urlPrefix}/api/spaces/space/${spaceId}`)
+            .auth(user.username, user.password)
+            .expect(tests.default.statusCode)
+            .then(tests.default.response);
+        });
       });
     });
   };

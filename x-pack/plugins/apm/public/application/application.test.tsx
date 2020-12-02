@@ -8,7 +8,7 @@ import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart, HttpSetup } from 'src/core/public';
-import { mockApmPluginContextValue } from '../context/ApmPluginContext/MockApmPluginContext';
+import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
 import { ApmPluginSetupDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { renderApp } from './';
@@ -53,6 +53,7 @@ describe('renderApp', () => {
     const params = {
       element: document.createElement('div'),
       history: createMemoryHistory(),
+      setHeaderActionMenu: () => {},
     };
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
     createCallApmApi((core.http as unknown) as HttpSetup);

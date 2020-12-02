@@ -33,7 +33,7 @@ distributed tracing will not work, and the connection will not be drawn on the m
 Select the **Service Map** tab to get started.
 By default, all instrumented services and connections are shown.
 Whether you're onboarding a new engineer, or just trying to grasp the big picture,
-click around, zoom in and out, and begin to visualize how your services are connected.
+drag things around, zoom in and out, and begin to visualize how your services are connected.
 
 If there's a specific service that interests you, select that service to highlight its connections.
 Clicking **Focus map** will refocus the map on that specific service and lock the connection highlighting.

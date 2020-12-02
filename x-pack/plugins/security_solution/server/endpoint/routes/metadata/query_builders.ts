@@ -116,14 +116,14 @@ function buildQueryBody(
 }
 
 export function getESQueryHostMetadataByID(
-  hostID: string,
+  agentID: string,
   metadataQueryStrategy: MetadataQueryStrategy
 ) {
   return {
     body: {
       query: {
         match: {
-          [metadataQueryStrategy.hostIdProperty]: hostID,
+          [metadataQueryStrategy.hostIdProperty]: agentID,
         },
       },
       sort: metadataQueryStrategy.sortProperty,

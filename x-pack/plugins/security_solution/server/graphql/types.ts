@@ -492,6 +492,8 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: Maybe<string>;
 
+  agent?: Maybe<AgentFields>;
+
   cloud?: Maybe<CloudFields>;
 
   endpoint?: Maybe<EndpointFields>;
@@ -501,6 +503,10 @@ export interface HostItem {
   inspect?: Maybe<Inspect>;
 
   lastSeen?: Maybe<string>;
+}
+
+export interface AgentFields {
+  id?: Maybe<string>;
 }
 
 export interface CloudFields {
@@ -2268,6 +2274,8 @@ export namespace HostItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HostItem> {
     _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
 
+    agent?: AgentResolver<Maybe<AgentFields>, TypeParent, TContext>;
+
     cloud?: CloudResolver<Maybe<CloudFields>, TypeParent, TContext>;
 
     endpoint?: EndpointResolver<Maybe<EndpointFields>, TypeParent, TContext>;
@@ -2284,6 +2292,11 @@ export namespace HostItemResolvers {
     Parent,
     TContext
   >;
+  export type AgentResolver<
+    R = Maybe<AgentFields>,
+    Parent = HostItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
   export type CloudResolver<
     R = Maybe<CloudFields>,
     Parent = HostItem,
@@ -2310,6 +2323,19 @@ export namespace HostItemResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
+
+export namespace AgentFieldsResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = AgentFields> {
+    id?: IdResolver<Maybe<string>, TypeParent, TContext>;
+  }
+
+  export type IdResolver<
+    R = Maybe<string>,
+    Parent = AgentFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
 
 export namespace CloudFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = CloudFields> {
@@ -6043,6 +6069,7 @@ export type IResolvers<TContext = SiemContext> = {
   HostsData?: HostsDataResolvers.Resolvers<TContext>;
   HostsEdges?: HostsEdgesResolvers.Resolvers<TContext>;
   HostItem?: HostItemResolvers.Resolvers<TContext>;
+  AgentFields?: AgentFieldsResolvers.Resolvers<TContext>;
   CloudFields?: CloudFieldsResolvers.Resolvers<TContext>;
   CloudInstance?: CloudInstanceResolvers.Resolvers<TContext>;
   CloudMachine?: CloudMachineResolvers.Resolvers<TContext>;

@@ -10,6 +10,7 @@ export interface LoginSelectorProvider {
   type: string;
   name: string;
   usesLoginForm: boolean;
+  showInSelector: boolean;
   description?: string;
   hint?: string;
   icon?: string;

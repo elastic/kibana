@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
+import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
 import { RepositoryEdit } from '../../../public/application/sections/repository_edit';
 import { WithAppDependencies } from './setup_environment';
 import { REPOSITORY_NAME } from './constant';

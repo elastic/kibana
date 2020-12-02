@@ -29,7 +29,7 @@ import {
   PostAgentCheckinResponse,
   PostAgentAcksResponse,
   PostAgentAcksRequest,
-} from '../../../ingest_manager/common';
+} from '../../../fleet/common';
 import { factory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
 import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/kbn_client_with_api_key_support';
@@ -52,10 +52,9 @@ export async function indexHostsAndAlerts(
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
   // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
-
   for (let i = 0; i < numHosts; i++) {
     const generator = new EndpointDocGenerator(random);
-    await indexHostDocs(
+    await indexHostDocs({
       numDocs,
       client,
       kbnClient,
@@ -63,10 +62,17 @@ export async function indexHostsAndAlerts(
       epmEndpointPackage,
       metadataIndex,
       policyResponseIndex,
-      fleet,
-      generator
-    );
-    await indexAlerts(client, eventIndex, alertIndex, generator, alertsPerHost, options);
+      enrollFleet: fleet,
+      generator,
+    });
+    await indexAlerts({
+      client,
+      eventIndex,
+      alertIndex,
+      generator,
+      numAlerts: alertsPerHost,
+      options,
+    });
   }
   await client.indices.refresh({
     index: eventIndex,
@@ -81,17 +87,27 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function indexHostDocs(
-  numDocs: number,
-  client: Client,
-  kbnClient: KbnClientWithApiKeySupport,
-  realPolicies: Record<string, CreatePackagePolicyResponse['item']>,
-  epmEndpointPackage: GetPackagesResponse['response'][0],
-  metadataIndex: string,
-  policyResponseIndex: string,
-  enrollFleet: boolean,
-  generator: EndpointDocGenerator
-) {
+async function indexHostDocs({
+  numDocs,
+  client,
+  kbnClient,
+  realPolicies,
+  epmEndpointPackage,
+  metadataIndex,
+  policyResponseIndex,
+  enrollFleet,
+  generator,
+}: {
+  numDocs: number;
+  client: Client;
+  kbnClient: KbnClientWithApiKeySupport;
+  realPolicies: Record<string, CreatePackagePolicyResponse['item']>;
+  epmEndpointPackage: GetPackagesResponse['response'][0];
+  metadataIndex: string;
+  policyResponseIndex: string;
+  enrollFleet: boolean;
+  generator: EndpointDocGenerator;
+}) {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
   const timestamp = new Date().getTime();
   let hostMetadata: HostMetadata;
@@ -102,7 +118,10 @@ async function indexHostDocs(
     generator.updateHostData();
     generator.updateHostPolicyData();
 
-    hostMetadata = generator.generateHostMetadata(timestamp - timeBetweenDocs * (numDocs - j - 1));
+    hostMetadata = generator.generateHostMetadata(
+      timestamp - timeBetweenDocs * (numDocs - j - 1),
+      EndpointDocGenerator.createDataStreamFromIndex(metadataIndex)
+    );
 
     if (enrollFleet) {
       const { id: appliedPolicyId, name: appliedPolicyName } = hostMetadata.Endpoint.policy.applied;
@@ -156,20 +175,30 @@ async function indexHostDocs(
     });
     await client.index({
       index: policyResponseIndex,
-      body: generator.generatePolicyResponse(timestamp - timeBetweenDocs * (numDocs - j - 1)),
+      body: generator.generatePolicyResponse({
+        ts: timestamp - timeBetweenDocs * (numDocs - j - 1),
+        policyDataStream: EndpointDocGenerator.createDataStreamFromIndex(policyResponseIndex),
+      }),
       op_type: 'create',
     });
   }
 }
 
-async function indexAlerts(
-  client: Client,
-  eventIndex: string,
-  alertIndex: string,
-  generator: EndpointDocGenerator,
-  numAlerts: number,
-  options: TreeOptions = {}
-) {
+async function indexAlerts({
+  client,
+  eventIndex,
+  alertIndex,
+  generator,
+  numAlerts,
+  options = {},
+}: {
+  client: Client;
+  eventIndex: string;
+  alertIndex: string;
+  generator: EndpointDocGenerator;
+  numAlerts: number;
+  options: TreeOptions;
+}) {
   const alertGenerator = generator.alertsGenerator(numAlerts, options);
   let result = alertGenerator.next();
   while (!result.done) {

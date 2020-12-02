@@ -18,10 +18,12 @@
  */
 
 interface ComboBoxOption<T> {
+  key?: string;
   label: string;
   target: T;
 }
 interface ComboBoxGroupedOption<T> {
+  key?: string;
   label: string;
   options: Array<ComboBoxOption<T>>;
 }
@@ -40,15 +42,22 @@ export type ComboBoxGroupedOptions<T> = Array<GroupOrOption<T>>;
  * @returns An array of grouped and sorted alphabetically `objects` that are compatible with EuiComboBox options.
  */
 export function groupAndSortBy<
-  T extends Record<TGroupBy | TLabelName, string>,
+  T extends Record<TGroupBy | TLabelName | TKeyName, string>,
   TGroupBy extends string = 'type',
-  TLabelName extends string = 'title'
->(objects: T[], groupBy: TGroupBy, labelName: TLabelName): ComboBoxGroupedOptions<T> {
+  TLabelName extends string = 'title',
+  TKeyName extends string = never
+>(
+  objects: T[],
+  groupBy: TGroupBy,
+  labelName: TLabelName,
+  keyName?: TKeyName
+): ComboBoxGroupedOptions<T> {
   const groupedOptions = objects.reduce((array, obj) => {
     const group = array.find((element) => element.label === obj[groupBy]);
     const option = {
       label: obj[labelName],
       target: obj,
+      ...(keyName ? { key: obj[keyName] } : {}),
     };
 
     if (group && group.options) {

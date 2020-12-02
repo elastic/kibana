@@ -36,7 +36,33 @@ function generator({
   #
   set -euo pipefail
 
-  docker pull ${baseOSImage}
+  retry_docker_pull() {
+    image=$1
+    attempt=0
+    max_retries=5
+
+    while true
+    do
+      attempt=$((attempt+1))
+
+      if [ $attempt -gt $max_retries ]
+      then
+        echo "Docker pull retries exceeded, aborting."
+        exit 1
+      fi
+
+      if docker pull "$image"
+      then
+        echo "Docker pull successful."
+        break
+      else
+        echo "Docker pull unsuccessful, attempt '$attempt'."
+      fi
+
+    done
+  }
+
+  retry_docker_pull ${baseOSImage}
 
   echo "Building: kibana${imageFlavor}${ubiImageFlavor}-docker"; \\
   docker build -t ${imageTag}${imageFlavor}${ubiImageFlavor}:${version} -f Dockerfile . || exit 1;

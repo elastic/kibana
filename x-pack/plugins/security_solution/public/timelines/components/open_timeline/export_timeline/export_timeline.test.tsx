@@ -12,7 +12,7 @@ import { mockSelectedTimeline } from './mocks';
 import * as i18n from '../translations';
 
 import { ReactWrapper, mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 
 jest.mock('../translations', () => {
@@ -102,15 +102,14 @@ describe('TimelineDownloader', () => {
         ...defaultTestProps,
       };
 
-      await act(() => {
-        wrapper = mount(<TimelineDownloader {...testProps} />);
+      wrapper = mount(<TimelineDownloader {...testProps} />);
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(mockDispatchToaster.mock.calls[0][0].title).toEqual(
+          i18n.SUCCESSFULLY_EXPORTED_TIMELINES
+        );
       });
-
-      wrapper.update();
-
-      expect(mockDispatchToaster.mock.calls[0][0].title).toEqual(
-        i18n.SUCCESSFULLY_EXPORTED_TIMELINES
-      );
     });
 
     test('With correct toast message on success for exported templates', async () => {
@@ -119,15 +118,15 @@ describe('TimelineDownloader', () => {
       };
       (useParams as jest.Mock).mockReturnValue({ tabName: 'template' });
 
-      await act(() => {
-        wrapper = mount(<TimelineDownloader {...testProps} />);
+      wrapper = mount(<TimelineDownloader {...testProps} />);
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(mockDispatchToaster.mock.calls[0][0].title).toEqual(
+          i18n.SUCCESSFULLY_EXPORTED_TIMELINES
+        );
       });
-
-      wrapper.update();
-
-      expect(mockDispatchToaster.mock.calls[0][0].title).toEqual(
-        i18n.SUCCESSFULLY_EXPORTED_TIMELINES
-      );
     });
   });
 });

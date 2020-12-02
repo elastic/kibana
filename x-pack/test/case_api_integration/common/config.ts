@@ -26,6 +26,7 @@ const enabledActionTypes = [
   '.servicenow',
   '.slack',
   '.webhook',
+  '.case',
   'test.authorization',
   'test.failing',
   'test.index-record',

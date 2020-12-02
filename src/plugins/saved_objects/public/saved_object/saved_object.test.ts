@@ -25,12 +25,14 @@ import {
   SavedObjectKibanaServices,
   SavedObjectSaveOpts,
 } from '../types';
+import { SavedObjectDecorator } from './decorators';
 
 import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
 import { getStubIndexPattern, StubIndexPattern } from '../../../../plugins/data/public/test_utils';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
 import { IIndexPattern } from '../../../data/common/index_patterns';
+import { savedObjectsDecoratorRegistryMock } from './decorators/registry.mock';
 
 const getConfig = (cfg: any) => cfg;
 
@@ -39,6 +41,7 @@ describe('Saved Object', () => {
   const dataStartMock = dataPluginMock.createStartContract();
   const saveOptionsMock = {} as SavedObjectSaveOpts;
   const savedObjectsClientStub = startMock.savedObjects.client;
+  let decoratorRegistry: ReturnType<typeof savedObjectsDecoratorRegistryMock.create>;
 
   let SavedObjectClass: new (config: SavedObjectConfig) => SavedObject;
 
@@ -94,26 +97,116 @@ describe('Saved Object', () => {
    * @returns {Promise<SavedObject>} A promise that resolves with an instance of
    * SavedObject
    */
-  function createInitializedSavedObject(config: SavedObjectConfig = {}) {
+  function createInitializedSavedObject(config: SavedObjectConfig = { type: 'dashboard' }) {
     const savedObject = new SavedObjectClass(config);
     savedObject.title = 'my saved object';
 
     return savedObject.init!();
   }
 
-  beforeEach(() => {
-    SavedObjectClass = createSavedObjectClass(({
-      savedObjectsClient: savedObjectsClientStub,
-      indexPatterns: dataStartMock.indexPatterns,
-      search: {
-        ...dataStartMock.search,
-        searchSource: {
-          ...dataStartMock.search.searchSource,
-          create: createSearchSourceMock,
-          createEmpty: createSearchSourceMock,
+  const initSavedObjectClass = () => {
+    SavedObjectClass = createSavedObjectClass(
+      ({
+        savedObjectsClient: savedObjectsClientStub,
+        indexPatterns: dataStartMock.indexPatterns,
+        search: {
+          ...dataStartMock.search,
+          searchSource: {
+            ...dataStartMock.search.searchSource,
+            create: createSearchSourceMock,
+            createEmpty: createSearchSourceMock,
+          },
         },
-      },
-    } as unknown) as SavedObjectKibanaServices);
+      } as unknown) as SavedObjectKibanaServices,
+      decoratorRegistry
+    );
+  };
+
+  beforeEach(() => {
+    decoratorRegistry = savedObjectsDecoratorRegistryMock.create();
+    initSavedObjectClass();
+  });
+
+  describe('decorators', () => {
+    it('calls the decorators during construct', () => {
+      const decorA = {
+        getId: () => 'A',
+        decorateConfig: jest.fn(),
+        decorateObject: jest.fn(),
+      };
+      const decorB = {
+        getId: () => 'B',
+        decorateConfig: jest.fn(),
+        decorateObject: jest.fn(),
+      };
+
+      decoratorRegistry.getOrderedDecorators.mockReturnValue([decorA, decorB]);
+
+      initSavedObjectClass();
+      createInitializedSavedObject();
+
+      expect(decorA.decorateConfig).toHaveBeenCalledTimes(1);
+      expect(decorA.decorateObject).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls the decorators in correct order', () => {
+      const decorA = {
+        getId: () => 'A',
+        decorateConfig: jest.fn(),
+        decorateObject: jest.fn(),
+      };
+      const decorB = {
+        getId: () => 'B',
+        decorateConfig: jest.fn(),
+        decorateObject: jest.fn(),
+      };
+
+      decoratorRegistry.getOrderedDecorators.mockReturnValue([decorA, decorB]);
+
+      initSavedObjectClass();
+      createInitializedSavedObject();
+
+      expect(decorA.decorateConfig.mock.invocationCallOrder[0]).toBeLessThan(
+        decorB.decorateConfig.mock.invocationCallOrder[0]
+      );
+      expect(decorA.decorateObject.mock.invocationCallOrder[0]).toBeLessThan(
+        decorB.decorateObject.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('passes the mutated config and object down the decorator chain', () => {
+      expect.assertions(2);
+
+      const newMappingValue = 'string';
+      const newObjectMethod = jest.fn();
+
+      const decorA: SavedObjectDecorator = {
+        getId: () => 'A',
+        decorateConfig: (config) => {
+          config.mapping = {
+            ...config.mapping,
+            addedFromA: newMappingValue,
+          };
+        },
+        decorateObject: (object) => {
+          (object as any).newMethod = newObjectMethod;
+        },
+      };
+      const decorB: SavedObjectDecorator = {
+        getId: () => 'B',
+        decorateConfig: (config) => {
+          expect(config.mapping!.addedFromA).toBe(newMappingValue);
+        },
+        decorateObject: (object) => {
+          expect((object as any).newMethod).toBe(newObjectMethod);
+        },
+      };
+
+      decoratorRegistry.getOrderedDecorators.mockReturnValue([decorA, decorB]);
+
+      initSavedObjectClass();
+      createInitializedSavedObject();
+    });
   });
 
   describe('save', () => {
@@ -123,9 +216,9 @@ describe('Saved Object', () => {
 
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(
           (savedObject) => {
-            stubSavedObjectsClientCreate({ id: 'myId' } as SimpleSavedObject<
-              SavedObjectAttributes
-            >);
+            stubSavedObjectsClientCreate({
+              id: 'myId',
+            } as SimpleSavedObject<SavedObjectAttributes>);
 
             return savedObject.save({ confirmOverwrite: false }).then(() => {
               expect(startMock.overlays.openModal).not.toHaveBeenCalled();
@@ -578,13 +671,16 @@ describe('Saved Object', () => {
     });
 
     it('passes references to search source parsing function', async () => {
-      SavedObjectClass = createSavedObjectClass(({
-        savedObjectsClient: savedObjectsClientStub,
-        indexPatterns: dataStartMock.indexPatterns,
-        search: {
-          ...dataStartMock.search,
-        },
-      } as unknown) as SavedObjectKibanaServices);
+      SavedObjectClass = createSavedObjectClass(
+        ({
+          savedObjectsClient: savedObjectsClientStub,
+          indexPatterns: dataStartMock.indexPatterns,
+          search: {
+            ...dataStartMock.search,
+          },
+        } as unknown) as SavedObjectKibanaServices,
+        decoratorRegistry
+      );
       const savedObject = new SavedObjectClass({ type: 'dashboard', searchSource: true });
       return savedObject.init!().then(async () => {
         const searchSourceJSON = JSON.stringify({

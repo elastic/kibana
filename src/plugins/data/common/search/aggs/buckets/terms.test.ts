@@ -18,6 +18,7 @@
  */
 
 import { AggConfigs } from '../agg_configs';
+import { METRIC_TYPES } from '../metrics';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
@@ -132,6 +133,50 @@ describe('Terms Agg', () => {
       expect(params.field).toBe('number_field');
       expect(params.include).toStrictEqual([1.1, 2, 3.33]);
       expect(params.exclude).toStrictEqual([4, 5.555, 6]);
+    });
+
+    test('uses correct bucket path for sorting by median', () => {
+      const indexPattern = {
+        id: '1234',
+        title: 'logstash-*',
+        fields: {
+          getByName: () => field,
+          filter: () => [field],
+        },
+      } as any;
+
+      const field = {
+        name: 'field',
+        indexPattern,
+      };
+
+      const aggConfigs = new AggConfigs(
+        indexPattern,
+        [
+          {
+            id: 'test',
+            params: {
+              field: {
+                name: 'string_field',
+                type: 'string',
+              },
+              orderAgg: {
+                type: METRIC_TYPES.MEDIAN,
+                params: {
+                  field: {
+                    name: 'number_field',
+                    type: 'number',
+                  },
+                },
+              },
+            },
+            type: BUCKET_TYPES.TERMS,
+          },
+        ],
+        { typesRegistry: mockAggTypesRegistry() }
+      );
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });
     });
   });
 });

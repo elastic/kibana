@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { NotificationsStart } from 'src/core/public';
 import { ScopedHistory } from 'kibana/public';
 import {
@@ -58,7 +59,7 @@ interface State {
 }
 
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
-  return `/${action}${roleName ? `/${roleName}` : ''}`;
+  return `/${action}${roleName ? `/${encodeURIComponent(roleName)}` : ''}`;
 };
 
 export class RolesGridPage extends Component<Props, State> {

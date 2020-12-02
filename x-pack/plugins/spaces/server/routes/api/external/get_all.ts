@@ -11,22 +11,25 @@ import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, log, spacesService } = deps;
+  const { externalRouter, log, getSpacesService } = deps;
 
   externalRouter.get(
     {
       path: '/api/spaces/space',
       validate: {
         query: schema.object({
-          purpose: schema.oneOf(
-            [
+          purpose: schema.maybe(
+            schema.oneOf([
               schema.literal('any'),
               schema.literal('copySavedObjectsIntoSpace'),
               schema.literal('shareSavedObjectsIntoSpace'),
-            ],
-            {
-              defaultValue: 'any',
-            }
+            ])
+          ),
+          include_authorized_purposes: schema.conditional(
+            schema.siblingRef('purpose'),
+            schema.string(),
+            schema.maybe(schema.literal(false)),
+            schema.maybe(schema.boolean())
           ),
         }),
       },
@@ -34,18 +37,24 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside GET /api/spaces/space`);
 
-      const purpose = request.query.purpose;
+      const { purpose, include_authorized_purposes: includeAuthorizedPurposes } = request.query;
 
-      const spacesClient = await spacesService.scopedClient(request);
+      const spacesClient = getSpacesService().createSpacesClient(request);
 
       let spaces: Space[];
 
       try {
-        log.debug(`Attempting to retrieve all spaces for ${purpose} purpose`);
-        spaces = await spacesClient.getAll(purpose);
-        log.debug(`Retrieved ${spaces.length} spaces for ${purpose} purpose`);
+        log.debug(
+          `Attempting to retrieve all spaces for ${purpose} purpose with includeAuthorizedPurposes=${includeAuthorizedPurposes}`
+        );
+        spaces = await spacesClient.getAll({ purpose, includeAuthorizedPurposes });
+        log.debug(
+          `Retrieved ${spaces.length} spaces for ${purpose} purpose with includeAuthorizedPurposes=${includeAuthorizedPurposes}`
+        );
       } catch (error) {
-        log.debug(`Error retrieving spaces for ${purpose} purpose: ${error}`);
+        log.debug(
+          `Error retrieving spaces for ${purpose} purpose with includeAuthorizedPurposes=${includeAuthorizedPurposes}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
 

@@ -13,8 +13,8 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
-import { useEnvironments } from '../../../hooks/useEnvironments';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 
 function updateEnvironmentUrl(
@@ -67,16 +67,21 @@ export function EnvironmentFilter() {
 
   const { environment } = uiFilters;
   const { start, end } = urlParams;
-  const { environments, status = 'loading' } = useEnvironments({
+  const { environments, status = 'loading' } = useEnvironmentsFetcher({
     serviceName,
     start,
     end,
   });
 
+  // Set the min-width so we don't see as much collapsing of the select during
+  // the loading state. 200px is what is looks like if "production" is
+  // the contents.
+  const minWidth = 200;
+
   return (
     <EuiSelect
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
-        defaultMessage: 'environment',
+        defaultMessage: 'Environment',
       })}
       options={getOptions(environments)}
       value={environment || ENVIRONMENT_ALL.value}
@@ -84,6 +89,7 @@ export function EnvironmentFilter() {
         updateEnvironmentUrl(history, location, event.target.value);
       }}
       isLoading={status === 'loading'}
+      style={{ minWidth }}
     />
   );
 }

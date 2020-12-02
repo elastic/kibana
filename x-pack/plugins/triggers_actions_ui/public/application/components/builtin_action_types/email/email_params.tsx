@@ -27,12 +27,21 @@ export const EmailParamsFields = ({
   const [addCC, setAddCC] = useState<boolean>(false);
   const [addBCC, setAddBCC] = useState<boolean>(false);
 
+  const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
+    [boolean, string | undefined]
+  >([false, defaultMessage]);
   useEffect(() => {
-    if (!message && defaultMessage && defaultMessage.length > 0) {
+    if (
+      !actionParams?.message ||
+      (isUsingDefault &&
+        actionParams?.message === defaultMessageUsed &&
+        defaultMessageUsed !== defaultMessage)
+    ) {
+      setDefaultMessageUsage([true, defaultMessage]);
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [defaultMessage]);
 
   return (
     <Fragment>
@@ -52,7 +61,7 @@ export const EmailParamsFields = ({
               {!addCC ? (
                 <EuiButtonEmpty size="xs" onClick={() => setAddCC(true)}>
                   <FormattedMessage
-                    defaultMessage="Add Cc"
+                    defaultMessage="Cc"
                     id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton"
                   />
                 </EuiButtonEmpty>
@@ -60,9 +69,8 @@ export const EmailParamsFields = ({
               {!addBCC ? (
                 <EuiButtonEmpty size="xs" onClick={() => setAddBCC(true)}>
                   <FormattedMessage
-                    defaultMessage="{titleBcc}"
+                    defaultMessage="Bcc"
                     id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addBccButton"
-                    values={{ titleBcc: !addCC ? '/ Bcc' : 'Add Bcc' }}
                   />
                 </EuiButtonEmpty>
               ) : null}

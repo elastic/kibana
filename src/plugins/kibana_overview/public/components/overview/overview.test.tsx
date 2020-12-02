@@ -20,7 +20,7 @@
 import moment from 'moment';
 import React from 'react';
 import { Overview } from './overview';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 
 jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({

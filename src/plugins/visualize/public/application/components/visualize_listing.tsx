@@ -21,9 +21,12 @@ import './visualize_listing.scss';
 
 import React, { useCallback, useRef, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useUnmount, useMount } from 'react-use';
+import useUnmount from 'react-use/lib/useUnmount';
+import useMount from 'react-use/lib/useMount';
+
 import { useLocation } from 'react-router-dom';
 
+import { SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { useKibana, TableListView } from '../../../../kibana_react/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
 import { VisualizeServices } from '../types';
@@ -41,6 +44,7 @@ export const VisualizeListing = () => {
       visualizations,
       savedObjects,
       savedObjectsPublic,
+      savedObjectsTagging,
       uiSettings,
       visualizeCapabilities,
     },
@@ -95,19 +99,34 @@ export const VisualizeListing = () => {
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
-  const tableColumns = useMemo(() => getTableColumns(application, history), [application, history]);
+  const tableColumns = useMemo(() => getTableColumns(application, history, savedObjectsTagging), [
+    application,
+    history,
+    savedObjectsTagging,
+  ]);
 
   const fetchItems = useCallback(
     (filter) => {
+      let searchTerm = filter;
+      let references: SavedObjectsFindOptionsReference[] | undefined;
+
+      if (savedObjectsTagging) {
+        const parsedQuery = savedObjectsTagging.ui.parseSearchQuery(filter, { useName: true });
+        searchTerm = parsedQuery.searchTerm;
+        references = parsedQuery.tagReferences;
+      }
+
       const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
       return savedVisualizations
-        .findListItems(filter, listingLimit)
+        .findListItems(searchTerm, { size: listingLimit, references })
         .then(({ total, hits }: { total: number; hits: object[] }) => ({
           total,
-          hits: hits.filter((result: any) => isLabsEnabled || result.type.stage !== 'experimental'),
+          hits: hits.filter(
+            (result: any) => isLabsEnabled || result.type?.stage !== 'experimental'
+          ),
         }));
     },
-    [listingLimit, savedVisualizations, uiSettings]
+    [listingLimit, savedVisualizations, uiSettings, savedObjectsTagging]
   );
 
   const deleteItems = useCallback(
@@ -125,12 +144,21 @@ export const VisualizeListing = () => {
     [savedObjects.client, toastNotifications]
   );
 
+  const searchFilters = useMemo(() => {
+    return savedObjectsTagging
+      ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
+      : [];
+  }, [savedObjectsTagging]);
+
   return (
     <TableListView
       headingId="visualizeListingHeading"
       // we allow users to create visualizations even if they can't save them
       // for data exploration purposes
       createItem={createNewVis}
+      tableCaption={i18n.translate('visualize.listing.table.listTitle', {
+        defaultMessage: 'Visualizations',
+      })}
       findItems={fetchItems}
       deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
       editItem={visualizeCapabilities.save ? editItem : undefined}
@@ -138,6 +166,7 @@ export const VisualizeListing = () => {
       listingLimit={listingLimit}
       initialPageSize={savedObjectsPublic.settings.getPerPage()}
       initialFilter={''}
+      rowHeader="title"
       noItemsFragment={noItemsFragment}
       entityName={i18n.translate('visualize.listing.table.entityName', {
         defaultMessage: 'visualization',
@@ -149,6 +178,7 @@ export const VisualizeListing = () => {
         defaultMessage: 'Visualizations',
       })}
       toastNotifications={toastNotifications}
+      searchFilters={searchFilters}
     />
   );
 };

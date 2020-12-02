@@ -15,7 +15,6 @@ import {
 
 import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initCaseConfigureGetActionConnector } from './get_connectors';
-import { getActions } from '../../__mocks__/request_responses';
 import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../common/constants';
 
 describe('GET connectors', () => {
@@ -24,13 +23,13 @@ describe('GET connectors', () => {
     routeHandler = await createRoute(initCaseConfigureGetActionConnector, 'get');
   });
 
-  it('returns the connectors', async () => {
+  it('returns case owned connectors', async () => {
     const req = httpServerMock.createKibanaRequest({
       path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
       method: 'get',
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
       })
@@ -38,9 +37,67 @@ describe('GET connectors', () => {
 
     const res = await routeHandler(context, req, kibanaResponseFactory);
     expect(res.status).toEqual(200);
-    expect(res.payload).toEqual(
-      getActions().filter((action) => action.actionTypeId === '.servicenow')
-    );
+    expect(res.payload).toEqual([
+      {
+        id: '123',
+        actionTypeId: '.servicenow',
+        name: 'ServiceNow',
+        config: {
+          incidentConfiguration: {
+            mapping: [
+              {
+                source: 'title',
+                target: 'short_description',
+                actionType: 'overwrite',
+              },
+              {
+                source: 'description',
+                target: 'description',
+                actionType: 'overwrite',
+              },
+              {
+                source: 'comments',
+                target: 'comments',
+                actionType: 'append',
+              },
+            ],
+          },
+          apiUrl: 'https://dev102283.service-now.com',
+          isCaseOwned: true,
+        },
+        isPreconfigured: false,
+        referencedByCount: 0,
+      },
+      {
+        id: '456',
+        actionTypeId: '.jira',
+        name: 'Connector without isCaseOwned',
+        config: {
+          incidentConfiguration: {
+            mapping: [
+              {
+                source: 'title',
+                target: 'short_description',
+                actionType: 'overwrite',
+              },
+              {
+                source: 'description',
+                target: 'description',
+                actionType: 'overwrite',
+              },
+              {
+                source: 'comments',
+                target: 'comments',
+                actionType: 'append',
+              },
+            ],
+          },
+          apiUrl: 'https://elastic.jira.com',
+        },
+        isPreconfigured: false,
+        referencedByCount: 0,
+      },
+    ]);
   });
 
   it('it throws an error when actions client is null', async () => {
@@ -49,7 +106,7 @@ describe('GET connectors', () => {
       method: 'get',
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
       })

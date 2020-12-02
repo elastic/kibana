@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
+exports[`FieldName renders a geo field 1`] = `
 <div
   class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
 >
@@ -10,7 +10,7 @@ exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
     <span
       class="euiToken euiToken--euiColorVis5 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
     >
-      <div
+      <span
         aria-label="Geo point field"
         data-euiicon-type="tokenGeo"
         title="Geo point field"
@@ -24,7 +24,7 @@ exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
       class="euiToolTipAnchor eui-textTruncate"
     >
       <span>
-        t.t.test
+        test.test.test
       </span>
     </span>
   </div>
@@ -41,7 +41,7 @@ exports[`FieldName renders a number field by providing a field record, useShortD
     <span
       class="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
     >
-      <div
+      <span
         aria-label="Number field"
         data-euiicon-type="tokenNumber"
         title="Number field"
@@ -72,7 +72,7 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
     <span
       class="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
     >
-      <div
+      <span
         aria-label="String field"
         data-euiicon-type="tokenString"
         title="String field"

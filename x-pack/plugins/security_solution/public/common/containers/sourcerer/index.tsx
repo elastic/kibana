@@ -16,6 +16,9 @@ import { ManageScope, SourcererScopeName } from '../../store/sourcerer/model';
 import { useIndexFields } from '../source';
 import { State } from '../../store';
 import { useUserInfo } from '../../../detections/components/user_info';
+import { timelineSelectors } from '../../../timelines/store/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineModel } from '../../../timelines/store/timeline/model';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -29,6 +32,12 @@ export const useInitSourcerer = (
   );
   const ConfigIndexPatterns = useSelector(getConfigIndexPatternsSelector, isEqual);
 
+  const getTimelineSelector = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const activeTimeline = useSelector<State, TimelineModel>(
+    (state) => getTimelineSelector(state, TimelineId.active),
+    isEqual
+  );
+
   useIndexFields(scopeId);
   useIndexFields(SourcererScopeName.timeline);
 
@@ -40,7 +49,11 @@ export const useInitSourcerer = (
 
   // Related to timeline
   useEffect(() => {
-    if (!loadingSignalIndex && signalIndexName != null) {
+    if (
+      !loadingSignalIndex &&
+      signalIndexName != null &&
+      (activeTimeline == null || (activeTimeline != null && activeTimeline.savedObjectId == null))
+    ) {
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,
@@ -48,7 +61,7 @@ export const useInitSourcerer = (
         })
       );
     }
-  }, [ConfigIndexPatterns, dispatch, loadingSignalIndex, signalIndexName]);
+  }, [activeTimeline, ConfigIndexPatterns, dispatch, loadingSignalIndex, signalIndexName]);
 
   // Related to the detection page
   useEffect(() => {

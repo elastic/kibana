@@ -13,7 +13,7 @@ Array [
       <span
         className="canvasVarHeader__iconWrapper"
       >
-        <div
+        <span
           data-euiicon-type="sortLeft"
           style={
             Object {
@@ -41,7 +41,7 @@ Array [
         <div
           className="euiCallOutHeader"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
             data-euiicon-type="alert"
@@ -112,7 +112,7 @@ Array [
                         className="euiToken euiToken--euiColorVis7 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
-                        <div
+                        <span
                           data-euiicon-type="tokenBoolean"
                           size="m"
                         />
@@ -141,7 +141,7 @@ Array [
                         className="euiToken euiToken--euiColorVis7 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
-                        <div
+                        <span
                           data-euiicon-type="tokenBoolean"
                           size="m"
                         />
@@ -158,7 +158,7 @@ Array [
                     <span
                       className="euiFormControlLayoutCustomIcon"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiFormControlLayoutCustomIcon__icon"
                         data-euiicon-type="arrowDown"
@@ -227,69 +227,77 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <fieldset
-            className="euiButtonGroup__fieldset euiButtonGroup__fieldset--fullWidth"
+            className="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text euiButtonGroup--fullWidth"
+            disabled={false}
           >
-            <div
-              className="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--fullWidth"
+            <legend
+              className="euiScreenReaderOnly"
             >
-              <div
-                className="euiToggle euiToggle--checked euiButtonToggle__wrapper euiButtonGroup__toggle"
+              Boolean value
+            </legend>
+            <div
+              className="euiButtonGroup__buttons"
+            >
+              <label
+                className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected"
+                disabled={false}
+                htmlFor="generated-id-true"
+                onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
               >
-                <input
-                  aria-label="True"
-                  checked={true}
-                  className="euiToggle__input euiButtonToggle__input"
-                  name="value"
-                  onChange={[Function]}
-                  title="True"
-                  type="radio"
-                />
-                <button
-                  className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonGroup__button euiButtonGroup__button--selected"
-                  id="generated-id-true"
-                  tabIndex={-1}
-                  type="button"
+                <span
+                  className="euiButtonContent euiButton__content"
                 >
                   <span
-                    className="euiButtonContent euiButton__content"
+                    className="euiButton__text euiButtonGroupButton__textShift"
                   >
-                    <span
-                      className="euiButton__text"
-                    >
-                      True
-                    </span>
+                    <input
+                      checked={true}
+                      className="euiScreenReaderOnly"
+                      disabled={false}
+                      id="generated-id-true"
+                      name="value"
+                      onChange={[Function]}
+                      type="radio"
+                    />
+                    True
                   </span>
-                </button>
-              </div>
-              <div
-                className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+                </span>
+              </label>
+              <label
+                className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                disabled={false}
+                htmlFor="generated-id-false"
+                onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
               >
-                <input
-                  aria-label="False"
-                  checked={false}
-                  className="euiToggle__input euiButtonToggle__input"
-                  name="value"
-                  onChange={[Function]}
-                  title="False"
-                  type="radio"
-                />
-                <button
-                  className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonGroup__button"
-                  id="generated-id-false"
-                  tabIndex={-1}
-                  type="button"
+                <span
+                  className="euiButtonContent euiButton__content"
                 >
                   <span
-                    className="euiButtonContent euiButton__content"
+                    className="euiButton__text euiButtonGroupButton__textShift"
                   >
-                    <span
-                      className="euiButton__text"
-                    >
-                      False
-                    </span>
+                    <input
+                      checked={false}
+                      className="euiScreenReaderOnly"
+                      disabled={false}
+                      id="generated-id-false"
+                      name="value"
+                      onChange={[Function]}
+                      type="radio"
+                    />
+                    False
                   </span>
-                </button>
-              </div>
+                </span>
+              </label>
             </div>
           </fieldset>
         </div>
@@ -307,12 +315,17 @@ Array [
             className="euiButton euiButton--secondary euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
             type="button"
           >
             <span
               className="euiButtonContent euiButton__content"
             >
-              <div
+              <span
                 className="euiButtonContent__icon"
                 data-euiicon-type="save"
                 size="m"
@@ -363,7 +376,7 @@ Array [
       <span
         className="canvasVarHeader__iconWrapper"
       >
-        <div
+        <span
           data-euiicon-type="sortLeft"
           style={
             Object {
@@ -391,7 +404,7 @@ Array [
         <div
           className="euiCallOutHeader"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
             data-euiicon-type="alert"
@@ -462,7 +475,7 @@ Array [
                         className="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
-                        <div
+                        <span
                           data-euiicon-type="tokenNumber"
                           size="m"
                         />
@@ -491,7 +504,7 @@ Array [
                         className="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
-                        <div
+                        <span
                           data-euiicon-type="tokenNumber"
                           size="m"
                         />
@@ -508,7 +521,7 @@ Array [
                     <span
                       className="euiFormControlLayoutCustomIcon"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiFormControlLayoutCustomIcon__icon"
                         data-euiicon-type="arrowDown"
@@ -606,12 +619,17 @@ Array [
             className="euiButton euiButton--secondary euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
             type="button"
           >
             <span
               className="euiButtonContent euiButton__content"
             >
-              <div
+              <span
                 className="euiButtonContent__icon"
                 data-euiicon-type="save"
                 size="m"
@@ -662,7 +680,7 @@ Array [
       <span
         className="canvasVarHeader__iconWrapper"
       >
-        <div
+        <span
           data-euiicon-type="sortLeft"
           style={
             Object {
@@ -690,7 +708,7 @@ Array [
         <div
           className="euiCallOutHeader"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
             data-euiicon-type="alert"
@@ -761,7 +779,7 @@ Array [
                         className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
-                        <div
+                        <span
                           data-euiicon-type="tokenString"
                           size="m"
                         />
@@ -790,7 +808,7 @@ Array [
                         className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
-                        <div
+                        <span
                           data-euiicon-type="tokenString"
                           size="m"
                         />
@@ -807,7 +825,7 @@ Array [
                     <span
                       className="euiFormControlLayoutCustomIcon"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiFormControlLayoutCustomIcon__icon"
                         data-euiicon-type="arrowDown"
@@ -905,12 +923,17 @@ Array [
             className="euiButton euiButton--secondary euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
             type="button"
           >
             <span
               className="euiButtonContent euiButton__content"
             >
-              <div
+              <span
                 className="euiButtonContent__icon"
                 data-euiicon-type="save"
                 size="m"
@@ -961,7 +984,7 @@ Array [
       <span
         className="canvasVarHeader__iconWrapper"
       >
-        <div
+        <span
           data-euiicon-type="sortLeft"
           style={
             Object {
@@ -1036,7 +1059,7 @@ Array [
                         className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
-                        <div
+                        <span
                           data-euiicon-type="tokenString"
                           size="m"
                         />
@@ -1065,7 +1088,7 @@ Array [
                         className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
                         style={Object {}}
                       >
-                        <div
+                        <span
                           data-euiicon-type="tokenString"
                           size="m"
                         />
@@ -1082,7 +1105,7 @@ Array [
                     <span
                       className="euiFormControlLayoutCustomIcon"
                     >
-                      <div
+                      <span
                         aria-hidden="true"
                         className="euiFormControlLayoutCustomIcon__icon"
                         data-euiicon-type="arrowDown"
@@ -1180,12 +1203,17 @@ Array [
             className="euiButton euiButton--secondary euiButton--small euiButton--fill euiButton-isDisabled"
             disabled={true}
             onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
             type="button"
           >
             <span
               className="euiButtonContent euiButton__content"
             >
-              <div
+              <span
                 className="euiButtonContent__icon"
                 data-euiicon-type="save"
                 size="m"

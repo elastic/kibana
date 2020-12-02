@@ -8,14 +8,8 @@ import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { NotificationsSetup } from 'src/core/public';
-import { JobSummarySet, JobSummary } from '../';
-import { JobId, ReportDocument } from '../../common/types';
-import {
-  JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
-  JOB_STATUS_COMPLETED,
-  JOB_STATUS_FAILED,
-  JOB_STATUS_WARNINGS,
-} from '../../constants';
+import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUSES } from '../../common/constants';
+import { JobId, JobSummary, JobSummarySet, ReportDocument } from '../../common/types';
 import {
   getFailureToast,
   getGeneralErrorToast,
@@ -107,9 +101,9 @@ export class ReportingNotifierStreamHandler {
             _source: { status: jobStatus },
           } = job;
           if (storedJobs.includes(jobId)) {
-            if (jobStatus === JOB_STATUS_COMPLETED || jobStatus === JOB_STATUS_WARNINGS) {
+            if (jobStatus === JOB_STATUSES.COMPLETED || jobStatus === JOB_STATUSES.WARNINGS) {
               completedJobs.push(getReportStatus(job));
-            } else if (jobStatus === JOB_STATUS_FAILED) {
+            } else if (jobStatus === JOB_STATUSES.FAILED) {
               failedJobs.push(getReportStatus(job));
             } else {
               pending.push(jobId);

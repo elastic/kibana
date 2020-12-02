@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickTagCloud');
       await PageObjects.visualize.clickTagCloud();
       await PageObjects.visualize.clickNewSearch();

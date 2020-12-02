@@ -155,7 +155,9 @@ export const SourceFieldSection = () => {
     >
       <FormDataProvider pathsToWatch={['sourceField.enabled']}>
         {(formData) => {
-          const { 'sourceField.enabled': enabled } = formData;
+          const {
+            sourceField: { enabled },
+          } = formData;
 
           if (enabled === undefined) {
             return null;

@@ -26,7 +26,7 @@ import {
   sendGetAgentPolicyList,
   sendGetFleetAgentsWithEndpoint,
 } from '../../policy/store/policy_list/services/ingest';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 
@@ -314,7 +314,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       // call the policy response api
       try {
         const policyResponse = await coreStart.http.get(`/api/endpoint/policy_response`, {
-          query: { hostId: selectedEndpoint },
+          query: { agentId: selectedEndpoint },
         });
         dispatch({
           type: 'serverReturnedEndpointPolicyResponse',

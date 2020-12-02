@@ -8,7 +8,6 @@ import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { isThresholdRule } from '../../../../../common/detection_engine/utils';
 import {
   RuleStepProps,
@@ -76,10 +75,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
   const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
 
-  const canUseExceptions =
-    defineRuleData?.ruleType &&
-    !isMlRule(defineRuleData.ruleType) &&
-    !isThresholdRule(defineRuleData.ruleType);
+  const canUseExceptions = defineRuleData?.ruleType && !isThresholdRule(defineRuleData.ruleType);
 
   const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
@@ -87,10 +83,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     schema,
   });
   const { getFields, getFormData, submit } = form;
-  const [{ severity: formSeverity }] = (useFormData({
+  const [{ severity: formSeverity }] = useFormData<AboutStepRule>({
     form,
     watch: ['severity'],
-  }) as unknown) as [Partial<AboutStepRule>];
+  });
 
   useEffect(() => {
     const formSeverityValue = formSeverity?.value;
@@ -122,9 +118,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   }, [onSubmit]);
 
   useEffect(() => {
-    if (setForm) {
+    let didCancel = false;
+    if (setForm && !didCancel) {
       setForm(RuleStep.aboutRule, getData);
     }
+    return () => {
+      didCancel = true;
+    };
   }, [getData, setForm]);
 
   return isReadOnlyView ? (

@@ -42,7 +42,7 @@ describe('firstValueFrom()', () => {
     );
   });
 
-  it('does not unsubscribe from the source observable that emits synchronously', async () => {
+  it('unsubscribes from a source observable that emits synchronously', async () => {
     const values = [1, 2, 3, 4];
     let unsubscribed = false;
     const source = new Rx.Observable<number>((subscriber) => {
@@ -54,10 +54,10 @@ describe('firstValueFrom()', () => {
     });
 
     await expect(firstValueFrom(source)).resolves.toMatchInlineSnapshot(`1`);
-    if (unsubscribed) {
-      throw new Error('expected source to not be unsubscribed');
+    if (!unsubscribed) {
+      throw new Error('expected source to be unsubscribed');
     }
-    expect(values).toEqual([]);
+    expect(values).toEqual([2, 3, 4]);
   });
 
   it('unsubscribes from the source observable after first async notification', async () => {

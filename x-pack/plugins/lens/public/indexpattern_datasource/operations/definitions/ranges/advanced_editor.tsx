@@ -8,7 +8,6 @@ import './advanced_editor.scss';
 
 import React, { useState, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDebounce } from 'react-use';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,12 +19,18 @@ import {
   EuiPopover,
   EuiToolTip,
   htmlIdGenerator,
+  keys,
 } from '@elastic/eui';
-import { keys } from '@elastic/eui';
 import { IFieldFormat } from '../../../../../../../../src/plugins/data/common';
 import { RangeTypeLens, isValidRange, isValidNumber } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
-import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
+import {
+  NewBucketButton,
+  DragDropBuckets,
+  DraggableBucketContainer,
+  LabelInput,
+} from '../shared_components';
+import { useDebounceWithOptions } from '../helpers';
 
 const generateId = htmlIdGenerator();
 
@@ -34,8 +39,8 @@ type LocalRangeType = RangeTypeLens & { id: string };
 const getBetterLabel = (range: RangeTypeLens, formatter: IFieldFormat) =>
   range.label ||
   formatter.convert({
-    gte: isValidNumber(range.from) ? range.from : FROM_PLACEHOLDER,
-    lt: isValidNumber(range.to) ? range.to : TO_PLACEHOLDER,
+    gte: isValidNumber(range.from) ? range.from : -Infinity,
+    lt: isValidNumber(range.to) ? range.to : Infinity,
   });
 
 export const RangePopover = ({
@@ -50,7 +55,6 @@ export const RangePopover = ({
   Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
   isOpenByCreation: boolean;
   setIsOpenByCreation: (open: boolean) => void;
-  formatter: IFieldFormat;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [tempRange, setTempRange] = useState(range);
@@ -63,7 +67,7 @@ export const RangePopover = ({
     // send the range back to the main state
     setRange(newRange);
   };
-  const { from, to } = tempRange;
+  const { from, to, label } = tempRange;
 
   const lteAppendLabel = i18n.translate('xpack.lens.indexPattern.ranges.lessThanOrEqualAppend', {
     defaultMessage: '\u2264',
@@ -82,9 +86,12 @@ export const RangePopover = ({
   });
 
   const onSubmit = () => {
-    setIsPopoverOpen(false);
-    setIsOpenByCreation(false);
-    saveRangeAndReset(tempRange, true);
+    if (isOpenByCreation) {
+      setIsOpenByCreation(false);
+    }
+    if (isPopoverOpen) {
+      setIsPopoverOpen(false);
+    }
   };
 
   return (
@@ -96,8 +103,10 @@ export const RangePopover = ({
       button={
         <Button
           onClick={() => {
+            if (isOpenByCreation) {
+              setIsOpenByCreation(false);
+            }
             setIsPopoverOpen((isOpen) => !isOpen);
-            setIsOpenByCreation(false);
           }}
         />
       }
@@ -107,6 +116,7 @@ export const RangePopover = ({
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem>
             <EuiFieldNumber
+              className="lnsRangesOperation__popoverNumberField"
               value={isValidNumber(from) ? Number(from) : ''}
               onChange={({ target }) => {
                 const newRange = {
@@ -121,7 +131,6 @@ export const RangePopover = ({
                   <EuiText size="s">{lteAppendLabel}</EuiText>
                 </EuiToolTip>
               }
-              fullWidth
               compressed
               placeholder={FROM_PLACEHOLDER}
               isInvalid={!isValidRange(tempRange)}
@@ -132,6 +141,7 @@ export const RangePopover = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldNumber
+              className="lnsRangesOperation__popoverNumberField"
               value={isValidNumber(to) ? Number(to) : ''}
               onChange={({ target }) => {
                 const newRange = {
@@ -146,7 +156,6 @@ export const RangePopover = ({
                   <EuiText size="s">{ltPrependLabel}</EuiText>
                 </EuiToolTip>
               }
-              fullWidth
               compressed
               placeholder={TO_PLACEHOLDER}
               isInvalid={!isValidRange(tempRange)}
@@ -158,6 +167,26 @@ export const RangePopover = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+      </EuiFormRow>
+      <EuiFormRow>
+        <LabelInput
+          value={label || ''}
+          onChange={(newLabel) => {
+            const newRange = {
+              ...tempRange,
+              label: newLabel,
+            };
+            setTempRange(newRange);
+            saveRangeAndReset(newRange);
+          }}
+          placeholder={i18n.translate(
+            'xpack.lens.indexPattern.ranges.customRangeLabelPlaceholder',
+            { defaultMessage: 'Custom label' }
+          )}
+          onSubmit={onSubmit}
+          compressed
+          dataTestSubj="indexPattern-ranges-label"
+        />
       </EuiFormRow>
     </EuiPopover>
   );
@@ -184,12 +213,13 @@ export const AdvancedRangeEditor = ({
 
   const lastIndex = localRanges.length - 1;
 
-  // Update locally all the time, but bounce the parents prop function
-  // to aviod too many requests
-  useDebounce(
+  // Update locally all the time, but bounce the parents prop function to avoid too many requests
+  // Avoid to trigger on first render
+  useDebounceWithOptions(
     () => {
       setRanges(localRanges.map(({ id, ...rest }) => ({ ...rest })));
     },
+    { skipFirstRender: true },
     TYPING_DEBOUNCE_TIME,
     [localRanges]
   );
@@ -225,7 +255,11 @@ export const AdvancedRangeEditor = ({
       <>
         <DragDropBuckets
           onDragEnd={setLocalRanges}
-          onDragStart={() => setIsOpenByCreation(false)}
+          onDragStart={() => {
+            if (isOpenByCreation) {
+              setIsOpenByCreation(false);
+            }
+          }}
           droppableId="RANGES_DROPPABLE_AREA"
           items={localRanges}
         >
@@ -260,7 +294,6 @@ export const AdvancedRangeEditor = ({
                   }
                   setLocalRanges(newRanges);
                 }}
-                formatter={formatter}
                 Button={({ onClick }: { onClick: MouseEventHandler }) => (
                   <EuiLink
                     color="text"

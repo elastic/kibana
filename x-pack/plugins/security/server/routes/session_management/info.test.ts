@@ -11,6 +11,7 @@ import {
   RequestHandlerContext,
   RouteConfig,
 } from '../../../../../../src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Session } from '../../session_management';
 import { defineSessionInfoRoutes } from './info';
 

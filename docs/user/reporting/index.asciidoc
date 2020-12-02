@@ -14,7 +14,7 @@ Reporting is available from the *Share* menu
 in *Discover*, *Dashboard*, and *Canvas*.
 
 [role="screenshot"]
-image::user/reporting/images/share-button.png["Share"]
+image::user/reporting/images/share-menu.png["Share"]
 
 [float]
 == Setup
@@ -55,6 +55,8 @@ click the share icon image:user/reporting/images/canvas-share-button.png["Canvas
 +
 A notification appears when the report is complete.
 
+NOTE: When you export a data table or saved search from a dashboard report, the PDF includes only the visible data.
+
 [float]
 [[reporting-layout-sizing]]
 == Layout and sizing
@@ -94,7 +96,7 @@ image::user/reporting/images/preserve-layout-switch.png["Share"]
 [[manage-report-history]]
 == View and manage report history
 
-For a list of your reports, open the menu, then go to *Stack Management > Alerts and Insights > Reporting*.
+For a list of your reports, open the main menu, then click *Stack Management > Reporting*.
 From this view, you can monitor the generation of a report and
 download reports that you previously generated.
 

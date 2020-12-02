@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import Boom from 'boom';
 import { SavedObject } from '../types';
 
 export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {
@@ -30,11 +29,7 @@ export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {
   function includeObjects(objects: SavedObject[]) {
     for (const object of objects) {
       if (path.has(object)) {
-        throw Boom.badRequest(
-          `circular reference: ${[...path, object]
-            .map((obj) => `[${obj.type}:${obj.id}]`)
-            .join(' ref-> ')}`
-        );
+        continue;
       }
 
       const refdObjects = object.references

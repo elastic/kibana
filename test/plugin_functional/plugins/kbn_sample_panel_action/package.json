@@ -9,11 +9,6 @@
   "license": "Apache-2.0",
   "scripts": {
     "kbn": "node ../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && tsc"
-  },
-  "devDependencies": {
-    "@elastic/eui": "29.3.0",
-    "react": "^16.12.0",
-    "typescript": "4.0.2"
+    "build": "rm -rf './target' && ../../../../node_modules/.bin/tsc"
   }
 }

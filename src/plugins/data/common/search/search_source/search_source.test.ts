@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { IndexPattern } from '../../index_patterns';
 import { GetConfigFn } from '../../types';
 import { fetchSoon } from './legacy';
@@ -53,7 +53,7 @@ describe('SearchSource', () => {
   let searchSourceDependencies: SearchSourceDependencies;
 
   beforeEach(() => {
-    mockSearchMethod = jest.fn().mockResolvedValue({ rawResponse: '' });
+    mockSearchMethod = jest.fn().mockReturnValue(of({ rawResponse: '' }));
 
     searchSourceDependencies = {
       getConfig: jest.fn(),
@@ -79,6 +79,15 @@ describe('SearchSource', () => {
       const searchSource = new SearchSource({}, searchSourceDependencies);
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).toBe(5);
+    });
+  });
+
+  describe('#removeField()', () => {
+    test('remove property', () => {
+      const searchSource = new SearchSource({}, searchSourceDependencies);
+      searchSource.setField('aggs', 5);
+      searchSource.removeField('aggs');
+      expect(searchSource.getField('aggs')).toBeFalsy();
     });
   });
 

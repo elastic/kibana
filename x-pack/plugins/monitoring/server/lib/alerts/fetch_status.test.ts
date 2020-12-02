@@ -5,14 +5,18 @@
  */
 
 import { fetchStatus } from './fetch_status';
-import { AlertUiState, AlertState } from '../../alerts/types';
+import { AlertUiState, AlertState } from '../../../common/types/alerts';
 import { AlertSeverity } from '../../../common/enums';
-import { ALERT_CPU_USAGE, ALERT_CLUSTER_HEALTH } from '../../../common/constants';
+import {
+  ALERT_CPU_USAGE,
+  ALERT_CLUSTER_HEALTH,
+  ALERT_DISK_USAGE,
+  ALERT_MISSING_MONITORING_DATA,
+} from '../../../common/constants';
 
 describe('fetchStatus', () => {
   const alertType = ALERT_CPU_USAGE;
   const alertTypes = [alertType];
-  const log = { warn: jest.fn() };
   const start = 0;
   const end = 0;
   const id = 1;
@@ -53,6 +57,7 @@ describe('fetchStatus', () => {
   afterEach(() => {
     (alertsClient.find as jest.Mock).mockClear();
     (alertsClient.getAlertState as jest.Mock).mockClear();
+    alertStates.length = 0;
   });
 
   it('should fetch from the alerts client', async () => {
@@ -62,8 +67,7 @@ describe('fetchStatus', () => {
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
-      end,
-      log as any
+      end
     );
     expect(status).toEqual({
       monitoring_alert_cpu_usage: {
@@ -98,8 +102,7 @@ describe('fetchStatus', () => {
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
-      end,
-      log as any
+      end
     );
     expect(Object.values(status).length).toBe(1);
     expect(Object.keys(status)).toEqual(alertTypes);
@@ -126,8 +129,7 @@ describe('fetchStatus', () => {
       alertTypes,
       defaultClusterState.clusterUuid,
       customStart,
-      customEnd,
-      log as any
+      customEnd
     );
     expect(Object.values(status).length).toBe(1);
     expect(Object.keys(status)).toEqual(alertTypes);
@@ -141,8 +143,7 @@ describe('fetchStatus', () => {
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
-      end,
-      log as any
+      end
     );
     expect((alertsClient.find as jest.Mock).mock.calls[0][0].options.filter).toBe(
       `alert.attributes.alertTypeId:${alertType}`
@@ -160,8 +161,7 @@ describe('fetchStatus', () => {
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
-      end,
-      log as any
+      end
     );
     expect(status[alertType].states.length).toEqual(0);
   });
@@ -178,8 +178,7 @@ describe('fetchStatus', () => {
       alertTypes,
       defaultClusterState.clusterUuid,
       start,
-      end,
-      log as any
+      end
     );
     expect(status).toEqual({});
   });
@@ -197,9 +196,51 @@ describe('fetchStatus', () => {
       [ALERT_CLUSTER_HEALTH],
       defaultClusterState.clusterUuid,
       start,
-      end,
-      log as any
+      end
     );
     expect(customLicenseService.getWatcherFeature).toHaveBeenCalled();
+  });
+
+  it('should sort the alerts', async () => {
+    const customAlertsClient = {
+      find: jest.fn(() => ({
+        total: 1,
+        data: [
+          {
+            id,
+          },
+        ],
+      })),
+      getAlertState: jest.fn(() => ({
+        alertInstances: {
+          abc: {
+            state: {
+              alertStates: [
+                {
+                  cluster: defaultClusterState,
+                  ui: {
+                    ...defaultUiState,
+                    isFiring: true,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      })),
+    };
+    const status = await fetchStatus(
+      customAlertsClient as any,
+      licenseService as any,
+      [ALERT_CPU_USAGE, ALERT_DISK_USAGE, ALERT_MISSING_MONITORING_DATA],
+      defaultClusterState.clusterUuid,
+      start,
+      end
+    );
+    expect(Object.keys(status)).toEqual([
+      ALERT_CPU_USAGE,
+      ALERT_DISK_USAGE,
+      ALERT_MISSING_MONITORING_DATA,
+    ]);
   });
 });

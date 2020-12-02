@@ -16,15 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  createSavedObjectClass,
-  SavedObject,
-  SavedObjectKibanaServices,
-} from '../../../../plugins/saved_objects/public';
-import { extractReferences, injectReferences } from './saved_dashboard_references';
+import { SavedObject, SavedObjectsStart } from '../../../../plugins/saved_objects/public';
 
 import { Filter, ISearchSource, Query, RefreshInterval } from '../../../../plugins/data/public';
 import { createDashboardEditUrl } from '../dashboard_constants';
+import { EmbeddableStart } from '../../../embeddable/public';
+import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
+import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
 
 export interface SavedObjectDashboard extends SavedObject {
   id?: string;
@@ -45,10 +43,10 @@ export interface SavedObjectDashboard extends SavedObject {
 
 // Used only by the savedDashboards service, usually no reason to change this
 export function createSavedDashboardClass(
-  services: SavedObjectKibanaServices
+  savedObjectStart: SavedObjectsStart,
+  embeddableStart: EmbeddableStart
 ): new (id: string) => SavedObjectDashboard {
-  const SavedObjectClass = createSavedObjectClass(services);
-  class SavedDashboard extends SavedObjectClass {
+  class SavedDashboard extends savedObjectStart.SavedObjectClass {
     // save these objects with the 'dashboard' type
     public static type = 'dashboard';
 
@@ -82,8 +80,19 @@ export function createSavedDashboardClass(
         type: SavedDashboard.type,
         mapping: SavedDashboard.mapping,
         searchSource: SavedDashboard.searchSource,
-        extractReferences,
-        injectReferences,
+        extractReferences: (opts: {
+          attributes: SavedObjectAttributes;
+          references: SavedObjectReference[];
+        }) => extractReferences(opts, { embeddablePersistableStateService: embeddableStart }),
+        injectReferences: (so: SavedObjectDashboard, references: SavedObjectReference[]) => {
+          const newAttributes = injectReferences(
+            { attributes: so._serialize().attributes, references },
+            {
+              embeddablePersistableStateService: embeddableStart,
+            }
+          );
+          Object.assign(so, newAttributes);
+        },
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id,

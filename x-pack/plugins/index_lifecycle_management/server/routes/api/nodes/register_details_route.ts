@@ -29,7 +29,11 @@ const paramsSchema = schema.object({
   nodeAttrs: schema.string(),
 });
 
-export function registerDetailsRoute({ router, license }: RouteDependencies) {
+export function registerDetailsRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     { path: addBasePath('/nodes/{nodeAttrs}/details'), validate: { params: paramsSchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -40,15 +44,8 @@ export function registerDetailsRoute({ router, license }: RouteDependencies) {
         const statsResponse = await context.core.elasticsearch.client.asCurrentUser.nodes.stats();
         const okResponse = { body: findMatchingNodes(statsResponse.body, nodeAttrs) };
         return response.ok(okResponse);
-      } catch (e) {
-        if (e.name === 'ResponseError') {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: { message: e.body.error?.reason },
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

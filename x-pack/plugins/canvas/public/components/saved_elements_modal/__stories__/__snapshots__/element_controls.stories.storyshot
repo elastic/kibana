@@ -29,7 +29,7 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
           onFocus={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="pencil"
@@ -56,7 +56,7 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
           onFocus={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="trash"

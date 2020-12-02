@@ -11,7 +11,7 @@ import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import { ShareContext } from '../../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../../licensing/public';
 import { JobParamsCSV, SearchRequest } from '../../server/export_types/csv/types';
-import { ReportingPanelContent } from '../components/reporting_panel_content';
+import { ReportingPanelContent } from '../components/reporting_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 

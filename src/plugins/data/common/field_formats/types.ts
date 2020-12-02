@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { GetConfigFn } from '../types';
 import { FieldFormat } from './field_format';
 import { FieldFormatsRegistry } from './field_formats_registry';

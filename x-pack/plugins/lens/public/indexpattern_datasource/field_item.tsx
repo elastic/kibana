@@ -153,10 +153,10 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     }
   }
 
-  const value = React.useMemo(() => ({ field, indexPatternId: indexPattern.id } as DraggedField), [
-    field,
-    indexPattern.id,
-  ]);
+  const value = React.useMemo(
+    () => ({ field, indexPatternId: indexPattern.id, id: field.name } as DraggedField),
+    [field, indexPattern.id]
+  );
   const lensFieldIcon = <LensFieldIcon type={field.type as DataType} />;
   const lensInfoIcon = (
     <EuiIconTip
@@ -325,7 +325,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             id: 'histogram',
           },
         ]}
-        onChange={(optionId) => {
+        onChange={(optionId: string) => {
           setShowingHistogram(optionId === 'histogram');
         }}
         idSelected={showingHistogram ? 'histogram' : 'topValues'}

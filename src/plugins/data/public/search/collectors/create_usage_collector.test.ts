@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreSetup, CoreStart } from '../../../../../core/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { usageCollectionPluginMock, Setup } from '../../../../usage_collection/public/mocks';

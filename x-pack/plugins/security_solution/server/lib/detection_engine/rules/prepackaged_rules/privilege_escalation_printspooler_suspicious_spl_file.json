@@ -21,7 +21,10 @@
   "severity": "high",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
   ],
   "threat": [
     {

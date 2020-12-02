@@ -17,4 +17,17 @@
  * under the License.
  */
 
-export * from './adapters';
+export {
+  Adapters,
+  DataAdapter,
+  FormattedData,
+  RequestAdapter,
+  RequestStatistic,
+  RequestStatistics,
+  RequestStatus,
+  RequestResponder,
+  TabularData,
+  TabularDataColumn,
+  TabularDataRow,
+  TabularDataValue,
+} from './adapters';

@@ -5,7 +5,7 @@
  */
 
 import {
-  EuiButtonToggle,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
@@ -242,10 +242,10 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const toggleStatusCase = useCallback(
-      (e) =>
+      (nextStatus) =>
         onUpdateField({
           key: 'status',
-          value: e.target.checked ? 'closed' : 'open',
+          value: nextStatus ? 'closed' : 'open',
         }),
       [onUpdateField]
     );
@@ -307,6 +307,11 @@ export const CaseComponent = React.memo<CaseProps>(
       [allCasesLink]
     );
 
+    const isSelected = useMemo(() => caseStatusData.isSelected, [caseStatusData]);
+    const handleToggleStatusCase = useCallback(() => {
+      toggleStatusCase(!isSelected);
+    }, [toggleStatusCase, isSelected]);
+
     return (
       <>
         <HeaderWrapper>
@@ -330,7 +335,7 @@ export const CaseComponent = React.memo<CaseProps>(
               disabled={!userCanCrud}
               isLoading={isLoading && updateKey === 'status'}
               onRefresh={handleRefresh}
-              toggleStatusCase={toggleStatusCase}
+              toggleStatusCase={handleToggleStatusCase}
               {...caseStatusData}
             />
           </HeaderPage>
@@ -358,15 +363,16 @@ export const CaseComponent = React.memo<CaseProps>(
                     <MyEuiHorizontalRule margin="s" />
                     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
                       <EuiFlexItem grow={false}>
-                        <EuiButtonToggle
+                        <EuiButton
                           data-test-subj={caseStatusData['data-test-subj']}
                           iconType={caseStatusData.icon}
                           isDisabled={!userCanCrud}
-                          isSelected={caseStatusData.isSelected}
                           isLoading={isLoading && updateKey === 'status'}
-                          label={caseStatusData.buttonLabel}
-                          onChange={toggleStatusCase}
-                        />
+                          fill={caseStatusData.isSelected}
+                          onClick={handleToggleStatusCase}
+                        >
+                          {caseStatusData.buttonLabel}
+                        </EuiButton>
                       </EuiFlexItem>
                       {hasDataToPush && (
                         <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>

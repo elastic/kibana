@@ -9,6 +9,7 @@ import {
   getMockEventScope,
   ValueClickTriggerEventScope,
 } from './url_drilldown_scope';
+import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
 
 const createPoint = ({
   field,
@@ -23,10 +24,12 @@ const createPoint = ({
         name: field,
         id: '1-1',
         meta: {
-          type: 'histogram',
-          indexPatternId: 'logstash-*',
-          aggConfigParams: {
-            field,
+          type: 'date' as DatatableColumnType,
+          field,
+          source: 'esaggs',
+          sourceParams: {
+            type: 'histogram',
+            indexPatternId: 'logstash-*',
             interval: 30,
             otherBucket: true,
           },
@@ -84,25 +87,25 @@ describe('VALUE_CLICK_TRIGGER', () => {
       ]) as ValueClickTriggerEventScope;
       expect(mockEventScope.points.length).toBeGreaterThan(3);
       expect(mockEventScope.points).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "key": "event.points.0.key",
-          "value": "event.points.0.value",
-        },
-        Object {
-          "key": "event.points.1.key",
-          "value": "event.points.1.value",
-        },
-        Object {
-          "key": "event.points.2.key",
-          "value": "event.points.2.value",
-        },
-        Object {
-          "key": "event.points.3.key",
-          "value": "event.points.3.value",
-        },
-      ]
-    `);
+              Array [
+                Object {
+                  "key": "event.points.0.key",
+                  "value": "event.points.0.value",
+                },
+                Object {
+                  "key": "event.points.1.key",
+                  "value": "event.points.1.value",
+                },
+                Object {
+                  "key": "event.points.2.key",
+                  "value": "event.points.2.value",
+                },
+                Object {
+                  "key": "event.points.3.key",
+                  "value": "event.points.3.value",
+                },
+              ]
+          `);
     });
   });
 
@@ -125,5 +128,14 @@ describe('VALUE_CLICK_TRIGGER', () => {
 
       expect(eventScope.value).toBeNull();
     });
+  });
+});
+
+describe('CONTEXT_MENU_TRIGGER', () => {
+  test('getMockEventScope() results in empty scope', () => {
+    const mockEventScope = getMockEventScope([
+      'CONTEXT_MENU_TRIGGER',
+    ]) as ValueClickTriggerEventScope;
+    expect(mockEventScope).toEqual({});
   });
 });

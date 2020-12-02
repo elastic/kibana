@@ -39,13 +39,13 @@ import {
  * @param chartData {Object} Elasticsearch query results for this specific chart
  */
 export class Chart {
-  constructor(handler, element, chartData, deps) {
+  constructor(handler, element, chartData, uiSettings) {
     this.handler = handler;
     this.chartEl = element;
     this.chartData = chartData;
     this.tooltips = [];
 
-    const events = (this.events = new Dispatch(handler, deps.uiSettings));
+    const events = (this.events = new Dispatch(handler, uiSettings));
 
     const fieldFormatter = getFormatService().deserialize(
       this.handler.data.get('tooltipFormatter')

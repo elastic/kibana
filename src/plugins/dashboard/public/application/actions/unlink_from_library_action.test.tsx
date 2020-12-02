@@ -30,7 +30,11 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { UnlinkFromLibraryAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { ViewMode, SavedObjectEmbeddableInput } from '../../../../embeddable/public';
+import {
+  ViewMode,
+  SavedObjectEmbeddableInput,
+  ErrorEmbeddable,
+} from '../../../../embeddable/public';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -80,20 +84,30 @@ beforeEach(async () => {
   embeddable.updateInput({ viewMode: ViewMode.EDIT });
 });
 
+test('Unlink is incompatible with Error Embeddables', async () => {
+  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
+  const errorEmbeddable = new ErrorEmbeddable(
+    'Wow what an awful error',
+    { id: ' 404' },
+    embeddable.getRoot() as IContainer
+  );
+  expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
+});
+
 test('Unlink is compatible when embeddable on dashboard has reference type input', async () => {
-  const action = new UnlinkFromLibraryAction();
+  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
   embeddable.updateInput(await embeddable.getInputAsRefType());
   expect(await action.isCompatible({ embeddable })).toBe(true);
 });
 
 test('Unlink is not compatible when embeddable input is by value', async () => {
-  const action = new UnlinkFromLibraryAction();
+  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
   embeddable.updateInput(await embeddable.getInputAsValueType());
   expect(await action.isCompatible({ embeddable })).toBe(false);
 });
 
 test('Unlink is not compatible when view mode is set to view', async () => {
-  const action = new UnlinkFromLibraryAction();
+  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
   embeddable.updateInput(await embeddable.getInputAsRefType());
   embeddable.updateInput({ viewMode: ViewMode.VIEW });
   expect(await action.isCompatible({ embeddable })).toBe(false);
@@ -114,15 +128,15 @@ test('Unlink is not compatible when embeddable is not in a dashboard container',
     mockedByReferenceInput: { savedObjectId: 'test', id: orphanContactCard.id },
     mockedByValueInput: { firstName: 'Kibanana', id: orphanContactCard.id },
   });
-  const action = new UnlinkFromLibraryAction();
+  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
   expect(await action.isCompatible({ embeddable: orphanContactCard })).toBe(false);
 });
 
-test('Unlink replaces embeddableId but retains panel count', async () => {
+test('Unlink replaces embeddableId and retains panel count', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
-  const action = new UnlinkFromLibraryAction();
+  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
   await action.execute({ embeddable });
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount);
 
@@ -152,7 +166,7 @@ test('Unlink unwraps all attributes from savedObject', async () => {
   });
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
-  const action = new UnlinkFromLibraryAction();
+  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
   await action.execute({ embeddable });
   const newPanelId = Object.keys(container.getInput().panels).find(
     (key) => !originalPanelKeySet.has(key)

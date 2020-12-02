@@ -54,7 +54,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
             <span
               class="euiFormControlLayoutCustomIcon"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
                 data-euiicon-type="arrowDown"
@@ -104,11 +104,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
             <span
               class="euiSwitch__track"
             >
-              <div
+              <span
                 class="euiSwitch__icon"
                 data-euiicon-type="cross"
               />
-              <div
+              <span
                 class="euiSwitch__icon euiSwitch__icon--checked"
                 data-euiicon-type="check"
               />

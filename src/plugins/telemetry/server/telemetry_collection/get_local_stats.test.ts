@@ -20,8 +20,11 @@
 import { merge, omit } from 'lodash';
 
 import { getLocalStats, handleLocalStats } from './get_local_stats';
-import { usageCollectionPluginMock } from '../../../usage_collection/server/mocks';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import {
+  usageCollectionPluginMock,
+  createCollectorFetchContextMock,
+} from '../../../usage_collection/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
 
 function mockUsageCollection(kibanaUsage = {}) {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -77,6 +80,16 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   // @ts-ignore we only care about the response body
   esClient.indices.stats.mockResolvedValue({ body: { indices: {} } });
   return esClient;
+}
+
+function mockStatsCollectionConfig(clusterInfo: any, clusterStats: any, kibana: {}) {
+  return {
+    ...createCollectorFetchContextMock(),
+    esClient: mockGetLocalStats(clusterInfo, clusterStats),
+    usageCollection: mockUsageCollection(kibana),
+    kibanaRequest: httpServerMock.createKibanaRequest(),
+    timestamp: Date.now(),
+  };
 }
 
 describe('get_local_stats', () => {
@@ -224,12 +237,10 @@ describe('get_local_stats', () => {
 
   describe('getLocalStats', () => {
     it('returns expected object with kibana data', async () => {
-      const callCluster = jest.fn();
-      const usageCollection = mockUsageCollection(kibana);
-      const esClient = mockGetLocalStats(clusterInfo, clusterStats);
+      const statsCollectionConfig = mockStatsCollectionConfig(clusterInfo, clusterStats, kibana);
       const response = await getLocalStats(
         [{ clusterUuid: 'abc123' }],
-        { callCluster, usageCollection, esClient, start: '', end: '' },
+        { ...statsCollectionConfig },
         context
       );
       const result = response[0];
@@ -244,14 +255,8 @@ describe('get_local_stats', () => {
     });
 
     it('returns an empty array when no cluster uuid is provided', async () => {
-      const callCluster = jest.fn();
-      const usageCollection = mockUsageCollection(kibana);
-      const esClient = mockGetLocalStats(clusterInfo, clusterStats);
-      const response = await getLocalStats(
-        [],
-        { callCluster, usageCollection, esClient, start: '', end: '' },
-        context
-      );
+      const statsCollectionConfig = mockStatsCollectionConfig(clusterInfo, clusterStats, kibana);
+      const response = await getLocalStats([], { ...statsCollectionConfig }, context);
       expect(response).toBeDefined();
       expect(response.length).toEqual(0);
     });

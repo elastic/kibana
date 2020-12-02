@@ -12,17 +12,17 @@ import {
   MockOSVersion,
 } from './endpoint.mocks';
 import { ISavedObjectsRepository, SavedObjectsFindResponse } from 'src/core/server';
-import { AgentEventSOAttributes } from '../../../../ingest_manager/common/types/models/agent';
-import { Agent } from '../../../../ingest_manager/common';
+import { AgentEventSOAttributes } from '../../../../fleet/common/types/models/agent';
+import { Agent } from '../../../../fleet/common';
 import * as endpointTelemetry from './index';
 import * as fleetSavedObjects from './fleet_saved_objects';
 
 describe('test security solution endpoint telemetry', () => {
   let mockSavedObjectsRepository: jest.Mocked<ISavedObjectsRepository>;
   let getFleetSavedObjectsMetadataSpy: jest.SpyInstance<Promise<SavedObjectsFindResponse<Agent>>>;
-  let getLatestFleetEndpointEventSpy: jest.SpyInstance<Promise<
-    SavedObjectsFindResponse<AgentEventSOAttributes>
-  >>;
+  let getLatestFleetEndpointEventSpy: jest.SpyInstance<
+    Promise<SavedObjectsFindResponse<AgentEventSOAttributes>>
+  >;
 
   beforeAll(() => {
     getLatestFleetEndpointEventSpy = jest.spyOn(fleetSavedObjects, 'getLatestFleetEndpointEvent');

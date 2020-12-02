@@ -22,13 +22,16 @@ import React from 'react';
 import { FormData } from '../types';
 import { useFormData } from '../hooks';
 
-interface Props {
-  children: (formData: FormData) => JSX.Element | null;
+interface Props<I> {
+  children: (formData: I) => JSX.Element | null;
   pathsToWatch?: string | string[];
 }
 
-export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) => {
-  const { 0: formData, 2: isReady } = useFormData({ watch: pathsToWatch });
+const FormDataProviderComp = function <I extends FormData = FormData>({
+  children,
+  pathsToWatch,
+}: Props<I>) {
+  const { 0: formData, 2: isReady } = useFormData<I>({ watch: pathsToWatch });
 
   if (!isReady) {
     // No field has mounted yet, don't render anything
@@ -36,4 +39,6 @@ export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) =
   }
 
   return children(formData);
-});
+};
+
+export const FormDataProvider = React.memo(FormDataProviderComp) as typeof FormDataProviderComp;

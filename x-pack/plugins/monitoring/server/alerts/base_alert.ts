@@ -28,14 +28,16 @@ import {
   AlertData,
   AlertInstanceState,
   AlertEnableAction,
-} from './types';
+  CommonAlertFilter,
+  CommonAlertParams,
+  CommonBaseAlert,
+} from '../../common/types/alerts';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { MonitoringConfig } from '../config';
 import { AlertSeverity } from '../../common/enums';
-import { CommonAlertFilter, CommonAlertParams, CommonBaseAlert } from '../../common/types';
 import { MonitoringLicenseService } from '../types';
 import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
@@ -43,6 +45,7 @@ import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 export class BaseAlert {
   public type!: string;
   public label!: string;
+  public description!: string;
   public defaultThrottle: string = '1d';
   public defaultInterval: string = '1m';
   public rawAlert: Alert | undefined;
@@ -269,18 +272,18 @@ export class BaseAlert {
   }
 
   protected async fetchData(
-    params: CommonAlertParams,
+    params: CommonAlertParams | unknown,
     callCluster: any,
     clusters: AlertCluster[],
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
-  ): Promise<AlertData[]> {
+  ): Promise<Array<AlertData & unknown>> {
     // Child should implement
     throw new Error('Child classes must implement `fetchData`');
   }
 
   protected async processData(
-    data: AlertData[],
+    data: Array<AlertData & unknown>,
     clusters: AlertCluster[],
     services: AlertServices,
     logger: Logger,
@@ -365,15 +368,18 @@ export class BaseAlert {
     };
   }
 
-  protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
+  protected getUiMessage(
+    alertState: AlertState | unknown,
+    item: AlertData | unknown
+  ): AlertMessage {
     throw new Error('Child classes must implement `getUiMessage`');
   }
 
   protected executeActions(
     instance: AlertInstance,
-    instanceState: AlertInstanceState,
-    item: AlertData,
-    cluster: AlertCluster
+    instanceState: AlertInstanceState | unknown,
+    item: AlertData | unknown,
+    cluster?: AlertCluster | unknown
   ) {
     throw new Error('Child classes must implement `executeActions`');
   }

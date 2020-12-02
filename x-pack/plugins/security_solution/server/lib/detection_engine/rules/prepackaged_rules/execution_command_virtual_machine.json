@@ -24,11 +24,12 @@
   "rule_id": "60884af6-f553-4a6c-af13-300047455491",
   "severity": "medium",
   "tags": [
-    "Azure",
     "Elastic",
-    "SecOps",
+    "Cloud",
+    "Azure",
     "Continuous Monitoring",
-    "Logging"
+    "SecOps",
+    "Log Auditing"
   ],
   "threat": [
     {

@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { ContextWrapper } from './context_wrapper';
 export { ShareSavedObjectsToSpaceFlyout } from './share_to_space_flyout';

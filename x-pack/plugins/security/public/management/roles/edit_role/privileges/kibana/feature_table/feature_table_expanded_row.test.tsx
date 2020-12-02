@@ -9,9 +9,9 @@ import { Role } from '../../../../../../../common/model';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 import { act } from '@testing-library/react';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {

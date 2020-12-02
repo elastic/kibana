@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Request, Server } from 'hapi';
-import hapiAuthCookie from 'hapi-auth-cookie';
+import { Request, Server } from '@hapi/hapi';
+import hapiAuthCookie from '@hapi/cookie';
 // @ts-expect-error no TS definitions
-import Statehood from 'statehood';
+import Statehood from '@hapi/statehood';
 
 import { KibanaRequest, ensureRawRequest } from './router';
 import { SessionStorageFactory, SessionStorage } from './session_storage';
@@ -80,7 +80,7 @@ class ScopedCookieSessionStorage<T extends Record<string, any>> implements Sessi
       const session = await this.server.auth.test('security-cookie', this.request);
       // A browser can send several cookies, if it's not an array, just return the session value
       if (!Array.isArray(session)) {
-        return session as T;
+        return session.credentials as T;
       }
 
       // If we have an array with one value, we're good also
@@ -141,20 +141,22 @@ export async function createCookieSessionStorageFactory<T>(
   await server.register({ plugin: hapiAuthCookie });
 
   server.auth.strategy('security-cookie', 'cookie', {
-    cookie: cookieOptions.name,
-    password: cookieOptions.encryptionKey,
-    validateFunc: async (req, session: T | T[]) => {
+    cookie: {
+      name: cookieOptions.name,
+      password: cookieOptions.encryptionKey,
+      isSecure: cookieOptions.isSecure,
+      path: basePath === undefined ? '/' : basePath,
+      clearInvalid: false,
+      isHttpOnly: true,
+      isSameSite: cookieOptions.sameSite === 'None' ? false : cookieOptions.sameSite ?? false,
+    },
+    validateFunc: async (req: Request, session: T | T[]) => {
       const result = cookieOptions.validate(session);
       if (!result.isValid) {
         clearInvalidCookie(req, result.path);
       }
       return { valid: result.isValid };
     },
-    isSecure: cookieOptions.isSecure,
-    path: basePath,
-    clearInvalid: false,
-    isHttpOnly: true,
-    isSameSite: cookieOptions.sameSite === 'None' ? false : cookieOptions.sameSite ?? false,
   });
 
   // A hack to support SameSite: 'None'.

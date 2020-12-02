@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import '../../flot';
 import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';

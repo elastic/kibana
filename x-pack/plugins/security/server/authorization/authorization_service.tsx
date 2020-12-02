@@ -168,7 +168,7 @@ export class AuthorizationService {
     http.registerOnPreResponse((request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
         const basePath = http.basePath.get(request);
-        const next = `${basePath}${request.url.path}`;
+        const next = `${basePath}${request.url.pathname}${request.url.search}`;
         const regularBundlePath = `${basePath}/${buildNumber}/bundles`;
 
         const logoutUrl = http.basePath.prepend(

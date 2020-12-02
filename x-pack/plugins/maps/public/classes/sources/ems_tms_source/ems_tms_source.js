@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { getEmsTmsServices } from '../../../meta';
@@ -20,25 +19,18 @@ export const sourceTitle = i18n.translate('xpack.maps.source.emsTileTitle', {
 });
 
 export class EMSTMSSource extends AbstractTMSSource {
-  static type = SOURCE_TYPES.EMS_TMS;
-
-  static createDescriptor(sourceConfig) {
+  static createDescriptor(descriptor) {
     return {
-      type: EMSTMSSource.type,
-      id: sourceConfig.id,
-      isAutoSelect: sourceConfig.isAutoSelect,
+      type: SOURCE_TYPES.EMS_TMS,
+      id: descriptor.id,
+      isAutoSelect:
+        typeof descriptor.isAutoSelect !== 'undefined' ? !!descriptor.isAutoSelect : false,
     };
   }
 
   constructor(descriptor, inspectorAdapters) {
-    super(
-      {
-        id: descriptor.id,
-        type: EMSTMSSource.type,
-        isAutoSelect: _.get(descriptor, 'isAutoSelect', false),
-      },
-      inspectorAdapters
-    );
+    descriptor = EMSTMSSource.createDescriptor(descriptor);
+    super(descriptor, inspectorAdapters);
   }
 
   renderSourceSettingsEditor({ onChange }) {

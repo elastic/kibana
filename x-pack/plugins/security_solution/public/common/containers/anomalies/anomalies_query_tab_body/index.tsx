@@ -29,6 +29,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   AnomaliesTableComponent,
   flowTarget,
   ip,
+  hostName,
   indexNames,
 }) => {
   const { jobs } = useInstalledSecurityJobs();
@@ -71,6 +72,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
         narrowDateRange={narrowDateRange}
         flowTarget={flowTarget}
         ip={ip}
+        hostName={hostName}
       />
     </>
   );

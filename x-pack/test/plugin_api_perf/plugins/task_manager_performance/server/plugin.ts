@@ -79,7 +79,6 @@ export class SampleTaskManagerFixturePlugin
 
     taskManager.registerTaskDefinitions({
       performanceTestTask: {
-        type: 'performanceTestTask',
         title,
         description: 'A task for stress testing task_manager.',
         timeout: '1m',

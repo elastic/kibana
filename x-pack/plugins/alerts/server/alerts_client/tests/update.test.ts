@@ -7,19 +7,19 @@ import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
-import { IntervalSchedule } from '../../types';
+import { IntervalSchedule, InvalidatePendingApiKey } from '../../types';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { resolvable } from '../../test_utils';
-import { ActionsAuthorization } from '../../../../actions/server';
+import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
-const taskManager = taskManagerMock.start();
+const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
@@ -38,7 +38,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -141,8 +140,8 @@ describe('update()', () => {
         ],
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
-      updated_at: new Date().toISOString(),
       references: [
         {
           name: 'action_0',
@@ -160,6 +159,15 @@ describe('update()', () => {
           id: '2',
         },
       ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '234',
+        createdAt: '2019-02-12T21:01:22.479Z',
+      },
+      references: [],
     });
     const result = await alertsClient.update({
       id: '1',
@@ -241,7 +249,7 @@ describe('update()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
@@ -292,6 +300,7 @@ describe('update()', () => {
           "foo",
         ],
         "throttle": null,
+        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);
@@ -319,6 +328,9 @@ describe('update()', () => {
         "version": "123",
       }
     `);
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
+    expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test2', { notifyUsage: true });
   });
 
   it('calls the createApiKey function', async () => {
@@ -349,6 +361,7 @@ describe('update()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -370,6 +383,24 @@ describe('update()', () => {
           id: '1',
         },
       ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '234',
+        createdAt: '2019-02-12T21:01:22.479Z',
+      },
+      references: [],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '234',
+        createdAt: '2019-02-12T21:01:22.479Z',
+      },
+      references: [],
     });
     const result = await alertsClient.update({
       id: '1',
@@ -418,7 +449,7 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
@@ -453,6 +484,7 @@ describe('update()', () => {
           "foo",
         ],
         "throttle": "5m",
+        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);
@@ -503,6 +535,7 @@ describe('update()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -524,6 +557,15 @@ describe('update()', () => {
           id: '1',
         },
       ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '234',
+        createdAt: '2019-02-12T21:01:22.479Z',
+      },
+      references: [],
     });
     const result = await alertsClient.update({
       id: '1',
@@ -573,7 +615,7 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
@@ -608,6 +650,7 @@ describe('update()', () => {
           "foo",
         ],
         "throttle": "5m",
+        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);
@@ -727,7 +770,6 @@ describe('update()', () => {
   });
 
   it('swallows error when invalidate API key throws', async () => {
-    alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
     unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -770,6 +812,7 @@ describe('update()', () => {
         },
       ],
     });
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail')); // add ApiKey to invalidate
     await alertsClient.update({
       id: '1',
       data: {
@@ -792,7 +835,7 @@ describe('update()', () => {
       },
     });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to invalidate API Key: Fail'
+      'Failed to mark for API key [id="MTIzOmFiYw=="] for invalidation: Fail'
     );
   });
 
@@ -960,8 +1003,9 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalledWith({ id: '123' });
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '234' });
+    expect(
+      (unsecuredSavedObjectsClient.create.mock.calls[1][1] as InvalidatePendingApiKey).apiKeyId
+    ).toBe('234');
   });
 
   describe('updating an alert schedule', () => {

@@ -30,7 +30,7 @@ import {
 } from '../../../core/public';
 import { reportApplicationUsage } from './services/application_usage';
 
-interface PublicConfigType {
+export interface PublicConfigType {
   uiMetric: {
     enabled: boolean;
     debug: boolean;

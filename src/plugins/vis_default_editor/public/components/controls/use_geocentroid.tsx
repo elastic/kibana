@@ -28,7 +28,7 @@ function UseGeocentroidParamEditor({ value = false, setValue }: AggParamEditorPr
   });
 
   return (
-    <EuiFormRow compressed>
+    <EuiFormRow display="rowCompressed">
       <EuiSwitch
         compressed={true}
         label={label}

@@ -35,13 +35,12 @@ import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public'
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
-import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
-import { SavedObjectLoader } from '../../saved_objects/public';
+import { SavedObjectLoader, SavedObjectsStart } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
@@ -70,6 +69,7 @@ import {
   DiscoverUrlGenerator,
 } from './url_generator';
 import { SearchEmbeddableFactory } from './application/embeddable';
+import { UsageCollectionSetup } from '../../usage_collection/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -123,7 +123,6 @@ export interface DiscoverSetupPlugins {
   kibanaLegacy: KibanaLegacySetup;
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
-  visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
 }
 
@@ -140,7 +139,8 @@ export interface DiscoverStartPlugins {
   kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
-  visualizations: VisualizationsStart;
+  savedObjects: SavedObjectsStart;
+  usageCollection?: UsageCollectionSetup;
 }
 
 const innerAngularName = 'app/discover';
@@ -351,10 +351,7 @@ export class DiscoverPlugin
       urlGenerator: this.urlGenerator,
       savedSearchLoader: createSavedSearchesLoader({
         savedObjectsClient: core.savedObjects.client,
-        indexPatterns: plugins.data.indexPatterns,
-        search: plugins.data.search,
-        chrome: core.chrome,
-        overlays: core.overlays,
+        savedObjects: plugins.savedObjects,
       }),
     };
   }

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl as shallow } from '@kbn/test/jest';
 import { LegendSettingsPopover, LegendSettingsPopoverProps } from './legend_settings_popover';
 
 describe('Legend Settings', () => {

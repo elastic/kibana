@@ -363,6 +363,25 @@ describe('start', () => {
     });
   });
 
+  describe('breadcrumbsAppendExtension$', () => {
+    it('updates the breadcrumbsAppendExtension$', async () => {
+      const { chrome, service } = await start();
+      const promise = chrome.getBreadcrumbsAppendExtension$().pipe(toArray()).toPromise();
+
+      chrome.setBreadcrumbsAppendExtension({ content: (element) => () => {} });
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+              Array [
+                undefined,
+                Object {
+                  "content": [Function],
+                },
+              ]
+            `);
+    });
+  });
+
   describe('custom nav link', () => {
     it('updates/emits the current custom nav link', async () => {
       const { chrome, service } = await start();
@@ -429,33 +448,33 @@ describe('start', () => {
 
       expect(docTitleResetSpy).toBeCalledTimes(1);
       await expect(promises).resolves.toMatchInlineSnapshot(`
-        Array [
-          Array [
-            undefined,
-            Object {
-              "appName": "App name",
-            },
-            undefined,
-          ],
-          Array [
-            Array [],
-            Array [
-              Object {
-                "text": "App breadcrumb",
-              },
-            ],
-            Array [],
-          ],
-          Array [
-            undefined,
-            Object {
-              "text": "App badge",
-              "tooltip": "App tooltip",
-            },
-            undefined,
-          ],
-        ]
-      `);
+                      Array [
+                        Array [
+                          undefined,
+                          Object {
+                            "appName": "App name",
+                          },
+                          undefined,
+                        ],
+                        Array [
+                          Array [],
+                          Array [
+                            Object {
+                              "text": "App breadcrumb",
+                            },
+                          ],
+                          Array [],
+                        ],
+                        Array [
+                          undefined,
+                          Object {
+                            "text": "App badge",
+                            "tooltip": "App tooltip",
+                          },
+                          undefined,
+                        ],
+                      ]
+                  `);
     });
   });
 });

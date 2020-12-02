@@ -101,8 +101,8 @@ jest.doMock('./logging/logging_service', () => ({
   LoggingService: jest.fn(() => mockLoggingService),
 }));
 
-import { auditTrailServiceMock } from './audit_trail/audit_trail_service.mock';
-export const mockAuditTrailService = auditTrailServiceMock.create();
-jest.doMock('./audit_trail/audit_trail_service', () => ({
-  AuditTrailService: jest.fn(() => mockAuditTrailService),
+import { i18nServiceMock } from './i18n/i18n_service.mock';
+export const mockI18nService = i18nServiceMock.create();
+jest.doMock('./i18n/i18n_service', () => ({
+  I18nService: jest.fn(() => mockI18nService),
 }));

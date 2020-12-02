@@ -15,6 +15,14 @@
   overflow-y: auto;
 }
 
+.timHelp__links {
+  color: $euiColorPrimary;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 /**
  * 1. Override bootstrap .table styles.
  */

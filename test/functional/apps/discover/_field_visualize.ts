@@ -32,7 +32,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover field visualize button', () => {
+  describe('discover field visualize button', function () {
+    // unskipped on cloud as these tests test the navigation
+    // from Discover to Visualize which happens only on OSS
+    this.tags(['skipCloud']);
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');

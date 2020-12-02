@@ -28,12 +28,12 @@ This page has moved. Please see the new section in the {heartbeat-ref}/securing-
 [role="exclude",id="infra-read-only-access"]
 == Configure source read-only access
 
-This page has moved. Please see the new section in the {metrics-guide}/configure-metrics-source.html[Metrics Monitoring Guide].
+This page has moved. Please see {observability-guide}/configure-settings.html[configure settings].
 
 [role="exclude",id="logs-read-only-access"]
 == Configure source read-only access
 
-This page has moved. Please see {logs-guide}/configure-logs-source.html[logs configuration].
+This page has moved. Please see {observability-guide}/configure-data-sources.html[configure data sources].
 
 [role="exclude",id="extend"]
 == Extend your use case
@@ -143,3 +143,53 @@ This content has moved. See
 This content has moved. See
 <<get-started, Quick start>>.
 
+[role="exclude",id="managing-indices"]
+== Index management
+
+This content has moved. See {ref}/index-mgmt.html[Index management].
+
+[role="exclude",id="field-filter"]
+== Filter by field
+
+This content has moved. See <<discover, **Discover**>>.
+
+[role="exclude",id="document-context"]
+== View a document in context
+
+This content has moved. See <<discover, **Discover**>>.
+
+[role="exclude",id="document-data"]
+== View document data
+
+This content has moved. See <<discover, **Discover**>>.
+
+[role="exclude",id="viewing-field-stats"]
+== View field data statistics
+
+This content has moved. See <<discover, **Discover**>>.
+
+[role="exclude",id="known-plugins"]
+== Known plugins
+
+This content has moved. See <<known-kibana-plugins>>.
+
+[role="exclude",id="url-drilldown"]
+== URL drilldown
+
+[float]
+[[trigger-picker]]
+=== Picking a trigger for a URL drilldown
+
+This page has moved. Refer to <<url-drilldowns>>.
+
+[float]
+[[templating]]
+=== URL templating
+
+This page has moved. Refer to <<url_templating-language>>.
+
+[float]
+[[variables]]
+=== Variables
+
+This page has moved. Refer to <<url-template-variables>>.

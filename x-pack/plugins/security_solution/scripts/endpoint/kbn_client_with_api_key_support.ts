@@ -4,29 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KbnClient, ToolingLog } from '@kbn/dev-utils';
-import { KibanaConfig } from '@kbn/dev-utils/target/kbn_client/kbn_client_requester';
-import fetch, { RequestInit as FetchRequestInit } from 'node-fetch';
+import { URL } from 'url';
+
+import { KbnClient, KbnClientOptions } from '@kbn/dev-utils';
+import fetch, { RequestInit } from 'node-fetch';
 
 export class KbnClientWithApiKeySupport extends KbnClient {
-  private kibanaUrlNoAuth: string;
-  constructor(log: ToolingLog, kibanaConfig: KibanaConfig) {
-    super(log, kibanaConfig);
-    const kibanaUrl = this.resolveUrl(kibanaConfig.url);
-    const matches = kibanaUrl.match(/(https?:\/\/)(.*\:.*\@)(.*)/);
+  private kibanaUrlNoAuth: URL;
+
+  constructor(options: KbnClientOptions) {
+    super(options);
+
     // strip auth from url
-    this.kibanaUrlNoAuth =
-      matches && matches.length >= 3
-        ? matches[1] + matches[3].replace('/', '')
-        : kibanaUrl.replace('/', '');
+    const url = new URL(this.resolveUrl('/'));
+    url.username = '';
+    url.password = '';
+
+    this.kibanaUrlNoAuth = url;
   }
+
   /**
-   * The fleet api to enroll and agent requires an api key when you mke the request, however KbnClient currently does not support sending an api key with the request. This function allows you to send an api key with a request.
+   * The fleet api to enroll and agent requires an api key when you make
+   * the request, however KbnClient currently does not support sending
+   * an api key with the request. This function allows you to send an
+   * api key with a request.
    */
-  requestWithApiKey(path: string, init?: RequestInit | undefined): Promise<Response> {
-    return (fetch(
-      `${this.kibanaUrlNoAuth}${path}`,
-      init as FetchRequestInit
-    ) as unknown) as Promise<Response>;
+  requestWithApiKey(path: string, init?: RequestInit) {
+    return fetch(new URL(path, this.kibanaUrlNoAuth), init);
   }
 }

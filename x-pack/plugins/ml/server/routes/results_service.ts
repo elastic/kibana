@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -14,17 +12,18 @@ import {
   categoryExamplesSchema,
   maxAnomalyScoreSchema,
   partitionFieldValuesSchema,
+  anomalySearchSchema,
 } from './schemas/results_service_schema';
 import { resultsServiceProvider } from '../models/results_service';
-import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import {
   getCategorizerStatsSchema,
   getCategorizerStoppedPartitionsSchema,
 } from './schemas/results_service_schema';
+import type { MlClient } from '../lib/ml_client';
 
-function getAnomaliesTableData(client: IScopedClusterClient, payload: any) {
-  const rs = resultsServiceProvider(client);
+function getAnomaliesTableData(mlClient: MlClient, payload: any) {
+  const rs = resultsServiceProvider(mlClient);
   const {
     jobIds,
     criteriaFields,
@@ -37,6 +36,7 @@ function getAnomaliesTableData(client: IScopedClusterClient, payload: any) {
     maxRecords,
     maxExamples,
     influencersFilterQuery,
+    functionDescription,
   } = payload;
   return rs.getAnomaliesTableData(
     jobIds,
@@ -49,50 +49,58 @@ function getAnomaliesTableData(client: IScopedClusterClient, payload: any) {
     dateFormatTz,
     maxRecords,
     maxExamples,
-    influencersFilterQuery
+    influencersFilterQuery,
+    functionDescription
   );
 }
 
-function getCategoryDefinition(client: IScopedClusterClient, payload: any) {
-  const rs = resultsServiceProvider(client);
+function getCategoryDefinition(mlClient: MlClient, payload: any) {
+  const rs = resultsServiceProvider(mlClient);
   return rs.getCategoryDefinition(payload.jobId, payload.categoryId);
 }
 
-function getCategoryExamples(client: IScopedClusterClient, payload: any) {
-  const rs = resultsServiceProvider(client);
+function getCategoryExamples(mlClient: MlClient, payload: any) {
+  const rs = resultsServiceProvider(mlClient);
   const { jobId, categoryIds, maxExamples } = payload;
   return rs.getCategoryExamples(jobId, categoryIds, maxExamples);
 }
 
-function getMaxAnomalyScore(client: IScopedClusterClient, payload: any) {
-  const rs = resultsServiceProvider(client);
+function getMaxAnomalyScore(mlClient: MlClient, payload: any) {
+  const rs = resultsServiceProvider(mlClient);
   const { jobIds, earliestMs, latestMs } = payload;
   return rs.getMaxAnomalyScore(jobIds, earliestMs, latestMs);
 }
 
-function getPartitionFieldsValues(client: IScopedClusterClient, payload: any) {
-  const rs = resultsServiceProvider(client);
-  const { jobId, searchTerm, criteriaFields, earliestMs, latestMs } = payload;
-  return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
+function getPartitionFieldsValues(mlClient: MlClient, payload: any) {
+  const rs = resultsServiceProvider(mlClient);
+  const { jobId, searchTerm, criteriaFields, earliestMs, latestMs, fieldsConfig } = payload;
+  return rs.getPartitionFieldsValues(
+    jobId,
+    searchTerm,
+    criteriaFields,
+    earliestMs,
+    latestMs,
+    fieldsConfig
+  );
 }
 
-function getCategorizerStats(client: IScopedClusterClient, params: any, query: any) {
+function getCategorizerStats(mlClient: MlClient, params: any, query: any) {
   const { jobId } = params;
   const { partitionByValue } = query;
-  const rs = resultsServiceProvider(client);
+  const rs = resultsServiceProvider(mlClient);
   return rs.getCategorizerStats(jobId, partitionByValue);
 }
 
-function getCategoryStoppedPartitions(client: IScopedClusterClient, payload: any) {
+function getCategoryStoppedPartitions(mlClient: MlClient, payload: any) {
   const { jobIds, fieldToBucket } = payload;
-  const rs = resultsServiceProvider(client);
+  const rs = resultsServiceProvider(mlClient);
   return rs.getCategoryStoppedPartitions(jobIds, fieldToBucket);
 }
 
 /**
  * Routes for results service
  */
-export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization) {
+export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup ResultsService
    *
@@ -112,9 +120,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const resp = await getAnomaliesTableData(client, request.body);
+        const resp = await getAnomaliesTableData(mlClient, request.body);
 
         return response.ok({
           body: resp,
@@ -144,9 +152,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const resp = await getCategoryDefinition(client, request.body);
+        const resp = await getCategoryDefinition(mlClient, request.body);
 
         return response.ok({
           body: resp,
@@ -176,9 +184,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const resp = await getMaxAnomalyScore(client, request.body);
+        const resp = await getMaxAnomalyScore(mlClient, request.body);
 
         return response.ok({
           body: resp,
@@ -208,9 +216,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const resp = await getCategoryExamples(client, request.body);
+        const resp = await getCategoryExamples(mlClient, request.body);
 
         return response.ok({
           body: resp,
@@ -240,9 +248,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const resp = await getPartitionFieldsValues(client, request.body);
+        const resp = await getPartitionFieldsValues(mlClient, request.body);
 
         return response.ok({
           body: resp,
@@ -263,18 +271,16 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
     {
       path: '/api/ml/results/anomaly_search',
       validate: {
-        body: schema.maybe(schema.any()),
+        body: anomalySearchSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
-      const { body } = await client.asInternalUser.search({
-        ...request.body,
-        index: ML_RESULTS_INDEX_PATTERN,
-      });
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
+        const { jobIds, query } = request.body;
+        const { body } = await mlClient.anomalySearch(query, jobIds);
         return response.ok({
           body,
         });
@@ -304,9 +310,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const resp = await getCategorizerStats(client, request.params, request.query);
+        const resp = await getCategorizerStats(mlClient, request.params, request.query);
         return response.ok({
           body: resp,
         });
@@ -334,9 +340,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const resp = await getCategoryStoppedPartitions(client, request.body);
+        const resp = await getCategoryStoppedPartitions(mlClient, request.body);
         return response.ok({
           body: resp,
         });

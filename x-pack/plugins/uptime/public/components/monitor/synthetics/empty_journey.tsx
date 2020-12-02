@@ -8,11 +8,11 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 
-interface EmptyStepStateProps {
+interface Props {
   checkGroup?: string;
 }
 
-export const EmptyStepState: FC<EmptyStepStateProps> = ({ checkGroup }) => (
+export const EmptyJourney: FC<Props> = ({ checkGroup }) => (
   <EuiEmptyPrompt
     iconType="cross"
     title={

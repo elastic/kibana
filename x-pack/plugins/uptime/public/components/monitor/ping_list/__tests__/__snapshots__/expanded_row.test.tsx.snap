@@ -175,9 +175,19 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
                 target="_blank"
               >
                 docs 
-                <div
+                <span
                   data-euiicon-type="popout"
                 />
+                <span
+                  aria-label="External link"
+                  class="euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                />
+                <span
+                  class="euiScreenReaderOnly"
+                >
+                  (opens in a new tab or window)
+                </span>
               </a>
                for more information on recording response bodies.
             </div>

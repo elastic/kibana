@@ -6,6 +6,7 @@ files:
     - 'src/plugins/vis_type_vislib/**/*.s+(a|c)ss'
     - 'src/plugins/vis_type_vega/**/*.s+(a|c)ss'
     - 'src/plugins/vis_type_xy/**/*.s+(a|c)ss'
+    - 'src/plugins/visualizations/public/wizard/**/*.s+(a|c)ss'
     - 'x-pack/plugins/canvas/**/*.s+(a|c)ss'
     - 'x-pack/plugins/triggers_actions_ui/**/*.s+(a|c)ss'
     - 'x-pack/plugins/lens/**/*.s+(a|c)ss'

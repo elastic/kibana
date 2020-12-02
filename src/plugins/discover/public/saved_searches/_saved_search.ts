@@ -16,16 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  createSavedObjectClass,
-  SavedObject,
-  SavedObjectKibanaServices,
-} from '../../../saved_objects/public';
+import { SavedObject, SavedObjectsStart } from '../../../saved_objects/public';
 
-export function createSavedSearchClass(services: SavedObjectKibanaServices) {
-  const SavedObjectClass = createSavedObjectClass(services);
-
-  class SavedSearch extends SavedObjectClass {
+export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
+  class SavedSearch extends savedObjects.SavedObjectClass {
     public static type: string = 'search';
     public static mapping = {
       title: 'text',
@@ -70,5 +64,5 @@ export function createSavedSearchClass(services: SavedObjectKibanaServices) {
     }
   }
 
-  return SavedSearch as new (id: string) => SavedObject;
+  return (SavedSearch as unknown) as new (id: string) => SavedObject;
 }

@@ -6,9 +6,9 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { registerActionsUsageCollector } from './actions_usage_collector';
-import { taskManagerMock } from '../../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../task_manager/server/mocks';
 
-const mockTaskManagerStart = taskManagerMock.start();
+const mockTaskManagerStart = taskManagerMock.createStart();
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -24,7 +24,7 @@ describe('registerActionsUsageCollector', () => {
   it('should call registerCollector', () => {
     registerActionsUsageCollector(
       usageCollectionMock as UsageCollectionSetup,
-      mockTaskManagerStart
+      new Promise(() => mockTaskManagerStart)
     );
     expect(usageCollectionMock.registerCollector).toHaveBeenCalledTimes(1);
   });
@@ -32,7 +32,7 @@ describe('registerActionsUsageCollector', () => {
   it('should call makeUsageCollector with type = actions', () => {
     registerActionsUsageCollector(
       usageCollectionMock as UsageCollectionSetup,
-      mockTaskManagerStart
+      new Promise(() => mockTaskManagerStart)
     );
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('actions');

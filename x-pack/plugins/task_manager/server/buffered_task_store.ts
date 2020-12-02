@@ -6,7 +6,7 @@
 
 import { TaskStore } from './task_store';
 import { ConcreteTaskInstance } from './task';
-import { Updatable } from './task_runner';
+import { Updatable } from './task_running';
 import { createBuffer, Operation, BufferOptions } from './lib/bulk_operation_buffer';
 import { unwrapPromise } from './lib/result_type';
 

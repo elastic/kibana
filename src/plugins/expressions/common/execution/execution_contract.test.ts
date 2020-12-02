@@ -30,7 +30,7 @@ const createExecution = (
   const execution = new Execution({
     executor,
     ast: parseExpression(expression),
-    context,
+    params: { ...context },
   });
   return execution;
 };
@@ -59,7 +59,7 @@ describe('ExecutionContract', () => {
 
   test('can cancel execution', () => {
     const execution = createExecution('foo bar=123');
-    const spy = jest.spyOn(execution, 'cancel');
+    const spy = jest.spyOn(execution, 'cancel').mockImplementation(() => {});
     const contract = new ExecutionContract(execution);
 
     expect(spy).toHaveBeenCalledTimes(0);

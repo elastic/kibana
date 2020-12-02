@@ -25,6 +25,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
       ...xPackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        '--map.proxyElasticMapsServiceInMaps=true',
         '--xpack.security.session.idleTimeout=3600000', // 1 hour
         '--telemetry.optIn=true',
         '--xpack.fleet.enabled=true',

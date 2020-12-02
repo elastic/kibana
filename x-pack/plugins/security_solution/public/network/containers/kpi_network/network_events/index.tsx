@@ -20,10 +20,10 @@ import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -65,7 +65,6 @@ export const useNetworkKpiNetworkEvents = ({
           defaultIndex: indexNames,
           factoryQueryType: NetworkKpiQueries.networkEvents,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -75,9 +74,10 @@ export const useNetworkKpiNetworkEvents = ({
       : null
   );
 
-  const [networkKpiNetworkEventsResponse, setNetworkKpiNetworkEventsResponse] = useState<
-    NetworkKpiNetworkEventsArgs
-  >({
+  const [
+    networkKpiNetworkEventsResponse,
+    setNetworkKpiNetworkEventsResponse,
+  ] = useState<NetworkKpiNetworkEventsArgs>({
     networkEvents: 0,
     id: ID,
     inspect: {
@@ -157,7 +157,6 @@ export const useNetworkKpiNetworkEvents = ({
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.networkEvents,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

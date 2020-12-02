@@ -5,7 +5,7 @@
  */
 
 import { HttpFetchError } from 'kibana/public';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 export interface EsErrorRootCause {
   type: string;

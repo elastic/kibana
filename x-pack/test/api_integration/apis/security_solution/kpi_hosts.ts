@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiHosts data', async () => {
         const { body: kpiHosts } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/hostsKpiHostsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: HostsKpiQueries.kpiHosts,
@@ -106,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiAuthentications data', async () => {
         const { body } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/hostsKpiAuthenticationsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: HostsKpiQueries.kpiAuthentications,
@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiUniqueIps data', async () => {
         const { body } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/hostsKpiUniqueIpsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: HostsKpiQueries.kpiUniqueIps,
@@ -197,7 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiHosts data', async () => {
         const { body: kpiHosts } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/hostsKpiHostsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: HostsKpiQueries.kpiHosts,
@@ -218,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiAuthentications data', async () => {
         const { body } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/hostsKpiAuthenticationsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: HostsKpiQueries.kpiAuthentications,
@@ -240,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiUniqueIps data', async () => {
         const { body } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/hostsKpiUniqueIpsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: HostsKpiQueries.kpiUniqueIps,

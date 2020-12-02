@@ -11,13 +11,6 @@ exports[`AddNote renders correctly 1`] = `
     noteInputHeight={200}
     updateNewNote={[MockFunction]}
   />
-  <EuiFlexItem
-    grow={true}
-  >
-    <MarkdownHint
-      show={true}
-    />
-  </EuiFlexItem>
   <ButtonsContainer
     gutterSize="none"
   >

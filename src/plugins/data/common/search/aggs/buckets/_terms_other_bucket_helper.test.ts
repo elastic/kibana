@@ -21,6 +21,7 @@ import {
   buildOtherBucketAgg,
   mergeOtherBucketAggResponse,
   updateMissingBucket,
+  OTHER_BUCKET_SEPARATOR as SEP,
 } from './_terms_other_bucket_helper';
 import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -145,7 +146,7 @@ const nestedTermResponse = {
               { key: '__missing__', doc_count: 1430 },
             ],
           },
-          key: 'US',
+          key: 'US-with-dash',
           doc_count: 2850,
         },
         {
@@ -158,7 +159,7 @@ const nestedTermResponse = {
               { key: '__missing__', doc_count: 130 },
             ],
           },
-          key: 'IN',
+          key: 'IN-with-dash',
           doc_count: 2830,
         },
       ],
@@ -211,7 +212,10 @@ const nestedOtherResponse = {
   hits: { total: 14005, max_score: 0, hits: [] },
   aggregations: {
     'other-filter': {
-      buckets: { '-US': { doc_count: 2805 }, '-IN': { doc_count: 2804 } },
+      buckets: {
+        [`${SEP}US-with-dash`]: { doc_count: 2805 },
+        [`${SEP}IN-with-dash`]: { doc_count: 2804 },
+      },
     },
   },
   status: 200,
@@ -278,11 +282,11 @@ describe('Terms Agg Other bucket helper', () => {
           aggs: undefined,
           filters: {
             filters: {
-              '-IN': {
+              [`${SEP}IN-with-dash`]: {
                 bool: {
                   must: [],
                   filter: [
-                    { match_phrase: { 'geo.src': 'IN' } },
+                    { match_phrase: { 'geo.src': 'IN-with-dash' } },
                     { exists: { field: 'machine.os.raw' } },
                   ],
                   should: [],
@@ -292,11 +296,11 @@ describe('Terms Agg Other bucket helper', () => {
                   ],
                 },
               },
-              '-US': {
+              [`${SEP}US-with-dash`]: {
                 bool: {
                   must: [],
                   filter: [
-                    { match_phrase: { 'geo.src': 'US' } },
+                    { match_phrase: { 'geo.src': 'US-with-dash' } },
                     { exists: { field: 'machine.os.raw' } },
                   ],
                   should: [],
@@ -329,10 +333,10 @@ describe('Terms Agg Other bucket helper', () => {
           aggs: undefined,
           filters: {
             filters: {
-              '-IN': {
+              [`${SEP}IN-with-dash`]: {
                 bool: {
                   must: [],
-                  filter: [{ match_phrase: { 'geo.src': 'IN' } }],
+                  filter: [{ match_phrase: { 'geo.src': 'IN-with-dash' } }],
                   should: [],
                   must_not: [
                     {
@@ -356,10 +360,10 @@ describe('Terms Agg Other bucket helper', () => {
                   ],
                 },
               },
-              '-US': {
+              [`${SEP}US-with-dash`]: {
                 bool: {
                   must: [],
-                  filter: [{ match_phrase: { 'geo.src': 'US' } }],
+                  filter: [{ match_phrase: { 'geo.src': 'US-with-dash' } }],
                   should: [],
                   must_not: [
                     {

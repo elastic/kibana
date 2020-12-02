@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { ml } from '../../../services/ml_api_service';
 
 import { CalendarsList } from './calendars_list';

@@ -49,32 +49,39 @@ function reduceStepStatus(prev: StepStatusCount, cur: Ping): StepStatusCount {
   return prev;
 }
 
+function isStepEnd(step: Ping) {
+  return step.synthetics?.type === 'step/end';
+}
+
 interface ExecutedJourneyProps {
   journey: JourneyState;
 }
 
-export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey }) => (
-  <div>
-    <EuiText>
-      <h3>
-        <FormattedMessage
-          id="xpack.uptime.synthetics.executedJourney.heading"
-          defaultMessage="Summary information"
-        />
-      </h3>
-      <p>
-        {statusMessage(
-          journey.steps.reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 })
-        )}
-      </p>
-    </EuiText>
-    <EuiSpacer />
-    <EuiFlexGroup direction="column">
-      {journey.steps
-        .filter((step) => step.synthetics?.type === 'step/end')
-        .map((step, index) => (
+export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey }) => {
+  return (
+    <div>
+      <EuiText>
+        <h3>
+          <FormattedMessage
+            id="xpack.uptime.synthetics.executedJourney.heading"
+            defaultMessage="Summary information"
+          />
+        </h3>
+        <p>
+          {statusMessage(
+            journey.steps
+              .filter(isStepEnd)
+              .reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 })
+          )}
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <EuiFlexGroup direction="column">
+        {journey.steps.filter(isStepEnd).map((step, index) => (
           <ExecutedStep key={index} index={index} step={step} />
         ))}
-    </EuiFlexGroup>
-  </div>
-);
+        <EuiSpacer size="s" />
+      </EuiFlexGroup>
+    </div>
+  );
+};

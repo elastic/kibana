@@ -8,7 +8,8 @@
     "home",
     "licensing",
     "management",
-    "features"
+    "features",
+    "savedObjects"
   ],
   "optionalPlugins": [
     "security",
@@ -20,7 +21,6 @@
     "discover",
     "kibanaUtils",
     "kibanaReact",
-    "savedObjects",
     "ml"
   ]
 }

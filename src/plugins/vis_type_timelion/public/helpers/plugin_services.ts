@@ -17,14 +17,17 @@
  * under the License.
  */
 
-import { IndexPatternsContract } from 'src/plugins/data/public';
-import { SavedObjectsClientContract } from 'kibana/public';
+import type { IndexPatternsContract, ISearchStart } from 'src/plugins/data/public';
+import type { SavedObjectsClientContract } from 'kibana/public';
 import { createGetterSetter } from '../../../kibana_utils/public';
 
 export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
   'IndexPatterns'
 );
 
-export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<
-  SavedObjectsClientContract
->('SavedObjectsClient');
+export const [getDataSearch, setDataSearch] = createGetterSetter<ISearchStart>('Search');
+
+export const [
+  getSavedObjectsClient,
+  setSavedObjectsClient,
+] = createGetterSetter<SavedObjectsClientContract>('SavedObjectsClient');

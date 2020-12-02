@@ -32,7 +32,12 @@ interface Props {
   [key: string]: any;
 }
 
-export const SuperSelectField = ({ field, euiFieldProps = { options: [] }, ...rest }: Props) => {
+export const SuperSelectField = ({
+  field,
+  euiFieldProps = { options: [] },
+  idAria,
+  ...rest
+}: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
@@ -42,8 +47,8 @@ export const SuperSelectField = ({ field, euiFieldProps = { options: [] }, ...re
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      data-test-subj={rest['data-test-subj']}
-      describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      describedByIds={idAria ? [idAria] : undefined}
+      {...rest}
     >
       <EuiSuperSelect
         fullWidth

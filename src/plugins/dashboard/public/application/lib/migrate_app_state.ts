@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import semver from 'semver';
+import semverSatisfies from 'semver/functions/satisfies';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -68,7 +68,7 @@ export function migrateAppState(
       usageCollection.reportUiStats('DashboardPanelVersionInUrl', METRIC_TYPE.LOADED, `${version}`);
     }
 
-    return semver.satisfies(version, '<7.3');
+    return semverSatisfies(version, '<7.3');
   });
 
   if (panelNeedsMigration) {

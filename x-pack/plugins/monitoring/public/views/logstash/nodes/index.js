@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
@@ -12,6 +12,7 @@ import { getPageData } from './get_page_data';
 import template from './index.html';
 import { Listing } from '../../../components/logstash/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import {
   CODE_PATH_LOGSTASH,
   LOGSTASH_SYSTEM_ID,
@@ -65,7 +66,7 @@ uiRoutes.when('/logstash/nodes', {
               injector={$injector}
               productName={LOGSTASH_SYSTEM_ID}
               render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-                <Fragment>
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
                   {flyoutComponent}
                   <Listing
                     data={data.nodes}
@@ -77,7 +78,7 @@ uiRoutes.when('/logstash/nodes', {
                     onTableChange={this.onTableChange}
                   />
                   {bottomBarComponent}
-                </Fragment>
+                </SetupModeContext.Provider>
               )}
             />
           );

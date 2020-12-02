@@ -49,7 +49,8 @@ import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
-import { UiActionsStart, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+import { UiActionsSetup, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import {
   setUISettings,
   setApplication,
@@ -69,7 +70,7 @@ export interface VisualizePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
-  uiActions: UiActionsStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -77,6 +78,7 @@ export interface VisualizePluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
   data: DataPublicPluginSetup;
   share?: SharePluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export class VisualizePlugin
@@ -90,7 +92,7 @@ export class VisualizePlugin
 
   public async setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
-    { home, urlForwarding, data, share }: VisualizePluginSetupDependencies
+    { home, urlForwarding, data, share, uiActions }: VisualizePluginSetupDependencies
   ) {
     const {
       appMounted,
@@ -135,6 +137,7 @@ export class VisualizePlugin
       );
     }
     setUISettings(core.uiSettings);
+    uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
 
     core.application.register({
       id: 'visualize',
@@ -197,6 +200,7 @@ export class VisualizePlugin
           restorePreviousUrl,
           dashboard: pluginsStart.dashboard,
           setHeaderActionMenu: params.setHeaderActionMenu,
+          savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
         };
 
         params.element.classList.add('visAppWrapper');
@@ -236,7 +240,6 @@ export class VisualizePlugin
     if (plugins.share) {
       setShareService(plugins.share);
     }
-    plugins.uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
   }
 
   stop() {

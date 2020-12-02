@@ -32,7 +32,7 @@ jest.mock('lodash', () => {
   };
 });
 
-import { registerTestBed, TestBed } from '../../../../../../../../test_utils/testbed';
+import { registerTestBed, TestBed } from '@kbn/test/jest';
 
 const setup = ({ onDone }: { onDone: OnDoneLoadJsonHandler }) => {
   return registerTestBed(

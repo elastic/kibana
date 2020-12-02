@@ -10,6 +10,7 @@ import React, {
   useRef,
   useState,
   KeyboardEvent,
+  useEffect,
 } from 'react';
 import {
   EuiFlexGroup,
@@ -30,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { useEvent } from 'react-use';
+import useEvent from 'react-use/lib/useEvent';
 import {
   formatOptions,
   selectableRenderOptions,
@@ -67,6 +68,7 @@ interface Props {
   searchValue: string;
   onClose: () => void;
   popoverIsOpen: boolean;
+  initialValue?: string;
   setPopoverIsOpen: React.Dispatch<SetStateAction<boolean>>;
 }
 
@@ -80,6 +82,7 @@ export function SelectableUrlList({
   onClose,
   popoverIsOpen,
   setPopoverIsOpen,
+  initialValue,
 }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
@@ -92,6 +95,9 @@ export function SelectableUrlList({
     if (evt.key.toLowerCase() === 'enter') {
       onTermChange();
       setPopoverIsOpen(false);
+      if (searchRef) {
+        searchRef.blur();
+      }
     }
   };
 
@@ -125,6 +131,16 @@ export function SelectableUrlList({
       searchRef.blur();
     }
   };
+
+  useEffect(() => {
+    if (searchRef && initialValue) {
+      searchRef.value = initialValue;
+    }
+
+    // only want to call it at initial render to set value
+    // coming from initial value/url
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchRef]);
 
   const loadingMessage = (
     <EuiSelectableMessage style={{ minHeight: 300 }}>
@@ -165,12 +181,12 @@ export function SelectableUrlList({
       renderOption={selectableRenderOptions}
       singleSelection={false}
       searchProps={{
-        placeholder: I18LABELS.searchByUrl,
         isClearable: true,
         onFocus: searchOnFocus,
         onBlur: searchOnBlur,
         onInput: onSearchInput,
         inputRef: setSearchRef,
+        placeholder: I18LABELS.searchByUrl,
       }}
       listProps={{
         rowHeight: 68,
@@ -197,7 +213,7 @@ export function SelectableUrlList({
                 <EuiText size="s">
                   <FormattedMessage
                     id="xpack.apm.ux.url.hitEnter.include"
-                    defaultMessage="Hit {icon} to include all urls matching {searchValue}"
+                    defaultMessage="Hit {icon} or click apply to include all urls matching {searchValue}"
                     values={{
                       searchValue: <strong>{searchValue}</strong>,
                       icon: (

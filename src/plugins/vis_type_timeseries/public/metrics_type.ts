@@ -19,21 +19,20 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
-import { metricsRequestHandler } from './request_handler';
 import { EditorController } from './application';
-// @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
-import { VisEditor } from './application/components/vis_editor_lazy';
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { toExpressionAst } from './to_ast';
+import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
+import { getDataStart } from './services';
 
 export const metricsVisDefinition = {
   name: 'metrics',
   title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
   description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
-    defaultMessage: 'Build time-series using a visual pipeline interface',
+    defaultMessage: 'Perform advanced analysis of your time series data.',
   }),
   icon: 'visVisualBuilder',
+  group: VisGroups.PROMOTED,
   visConfig: {
     defaults: {
       id: '61ca57f0-469d-11e7-af02-69e470af7417',
@@ -70,7 +69,6 @@ export const metricsVisDefinition = {
       show_grid: 1,
       tooltip_mode: 'show_all',
     },
-    component: VisEditor,
   },
   editor: EditorController,
   options: {
@@ -78,10 +76,14 @@ export const metricsVisDefinition = {
     showFilterBar: false,
     showIndexSelection: false,
   },
-  requestHandler: metricsRequestHandler,
+  toExpressionAst,
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.applyFilter];
   },
   inspectorAdapters: {},
-  responseHandler: 'none',
+  getUsedIndexPattern: async (params: VisParams) => {
+    const { indexPatterns } = getDataStart();
+
+    return params.index_pattern ? await indexPatterns.find(params.index_pattern) : [];
+  },
 };

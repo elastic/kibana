@@ -37,6 +37,7 @@ describe('query builder', () => {
               },
             },
           ],
+          track_total_hits: true,
         },
         from: 0,
         size: 10,
@@ -84,6 +85,7 @@ describe('query builder', () => {
                 },
               },
             ],
+            track_total_hits: true,
           },
           from: 0,
           size: 10,
@@ -142,6 +144,7 @@ describe('query builder', () => {
               },
             },
           ],
+          track_total_hits: true,
         },
         from: 0,
         size: 10,
@@ -213,6 +216,7 @@ describe('query builder', () => {
                 },
               },
             ],
+            track_total_hits: true,
           },
           from: 0,
           size: 10,
@@ -230,7 +234,7 @@ describe('query builder', () => {
 
       expect(query).toEqual({
         body: {
-          query: { match: { 'HostDetails.host.id': mockID } },
+          query: { match: { 'HostDetails.agent.id': mockID } },
           sort: [{ 'HostDetails.event.created': { order: 'desc' } }],
           size: 1,
         },

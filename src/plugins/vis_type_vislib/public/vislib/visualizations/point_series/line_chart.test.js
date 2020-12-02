@@ -24,7 +24,7 @@ import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../../test_utils/public';
+} from '@kbn/test/jest';
 
 // Data
 import seriesPos from '../../../fixtures/mock_data/date_histogram/_series';
@@ -71,14 +71,14 @@ describe('Vislib Line Chart', function () {
       let mockUiState;
 
       beforeEach(() => {
-        const visLibParams = {
+        const vislibParams = {
           type: 'line',
           addLegend: true,
           addTooltip: true,
           drawLinesBetweenPoints: true,
         };
 
-        vis = getVis(visLibParams);
+        vis = getVis(vislibParams);
         mockUiState = getMockUiState();
         vis.render(data, mockUiState);
         vis.on('brush', _.noop);

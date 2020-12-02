@@ -7,11 +7,9 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import readline from 'readline';
 import fs from 'fs';
 import { Readable } from 'stream';
+import { createListStream } from '@kbn/utils';
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-
-import { createListStream } from '../../../../../../../../src/core/server/utils';
-
 import { SetupPlugins } from '../../../../plugin';
 
 import { FrameworkRequest } from '../../../framework';
@@ -41,7 +39,7 @@ export const getReadables = (dataPath: string): Promise<Readable> =>
     const readable = fs.createReadStream(dataPath, { encoding: 'utf-8' });
 
     readable.on('data', (stream) => {
-      contents.push(stream);
+      contents.push(stream as string);
     });
 
     readable.on('end', () => {

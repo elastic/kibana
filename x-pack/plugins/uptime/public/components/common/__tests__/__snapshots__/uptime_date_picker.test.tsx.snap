@@ -26,14 +26,14 @@ exports[`UptimeDatePicker component renders properly with mock data 1`] = `
             <span
               class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
             >
-              <div
+              <span
                 class="euiButtonContent__icon"
                 data-euiicon-type="arrowDown"
               />
               <span
                 class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
               >
-                <div
+                <span
                   data-euiicon-type="clock"
                 />
               </span>
@@ -69,14 +69,14 @@ exports[`UptimeDatePicker component renders properly with mock data 1`] = `
       class="euiToolTipAnchor"
     >
       <button
-        class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
+        class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
         data-test-subj="superDatePickerApplyTimeButton"
         type="button"
       >
         <span
           class="euiButtonContent euiButton__content"
         >
-          <div
+          <span
             class="euiButtonContent__icon"
             data-euiicon-type="refresh"
           />

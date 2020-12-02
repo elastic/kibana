@@ -4,26 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { MouseEventHandler, FC, useContext, useEffect, useState } from 'react';
+import React, { MouseEventHandler, FC, useContext, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiBasicTable,
-  EuiBasicTableProps,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSearchBar,
-  EuiSpacer,
   EuiPopover,
   EuiTitle,
+  EuiInMemoryTable,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 
-import { TransformId } from '../../../../../../common/types/transform';
+import type { TransformId } from '../../../../../../common/types/transform';
 
 import {
   useRefreshTransformList,
@@ -47,7 +45,7 @@ import { StopActionName } from '../action_stop';
 import { ItemIdToExpandedRowMap } from './common';
 import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
-import { TransformSearchBar, filterTransforms } from './transform_search_bar';
+import { transformFilters, filterTransforms } from './transform_search_bar_filters';
 import { useTableSettings } from './use_table_settings';
 
 function getItemIdToExpandedRowMap(
@@ -81,7 +79,8 @@ export const TransformList: FC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
 
-  const [searchQueryText, setSearchQueryText] = useState<string>('');
+  const [filterActive, setFilterActive] = useState(false);
+
   const [filteredTransforms, setFilteredTransforms] = useState<TransformListRow[]>([]);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
@@ -89,6 +88,7 @@ export const TransformList: FC<Props> = ({
   const bulkStartAction = useStartAction(false);
   const bulkDeleteAction = useDeleteAction(false);
 
+  const [searchError, setSearchError] = useState<any>(undefined);
   const stopTransforms = useStopTransforms();
 
   const { capabilities } = useContext(AuthorizationContext);
@@ -97,42 +97,38 @@ export const TransformList: FC<Props> = ({
     !capabilities.canPreviewTransform ||
     !capabilities.canStartStopTransform;
 
+  const { sorting, pagination, onTableChange } = useTableSettings<TransformListRow>(
+    TRANSFORM_LIST_COLUMN.ID,
+    transforms
+  );
+
   const { columns, modals: singleActionModals } = useColumns(
     expandedRowItemIds,
     setExpandedRowItemIds,
     transformSelection
   );
 
-  const updateFilteredItems = (queryClauses: any) => {
-    if (queryClauses.length) {
-      const filtered = filterTransforms(transforms, queryClauses);
-      setFilteredTransforms(filtered);
+  const onQueryChange = ({
+    query,
+    error,
+  }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]) => {
+    if (error) {
+      setSearchError(error.message);
     } else {
-      setFilteredTransforms(transforms);
+      let clauses: any = [];
+      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
+        clauses = query.ast.clauses;
+      }
+      if (clauses.length > 0) {
+        setFilterActive(true);
+        const filtered = filterTransforms(transforms, clauses);
+        setFilteredTransforms(filtered);
+      } else {
+        setFilterActive(false);
+      }
+      setSearchError(undefined);
     }
   };
-
-  useEffect(() => {
-    const filterList = () => {
-      if (searchQueryText !== '') {
-        const query = EuiSearchBar.Query.parse(searchQueryText);
-        let clauses: any = [];
-        if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
-          clauses = query.ast.clauses;
-        }
-        updateFilteredItems(clauses);
-      } else {
-        updateFilteredItems([]);
-      }
-    };
-    filterList();
-    // eslint-disable-next-line
-  }, [searchQueryText, transforms]); // missing dependency updateFilteredItems
-
-  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings<TransformListRow>(
-    TRANSFORM_LIST_COLUMN.ID,
-    filteredTransforms
-  );
 
   // Before the transforms have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No transforms found' during the initial loading.
@@ -265,6 +261,16 @@ export const TransformList: FC<Props> = ({
     </EuiFlexGroup>
   );
 
+  const search = {
+    toolsLeft: transformSelection.length > 0 ? renderToolsLeft() : undefined,
+    toolsRight,
+    onChange: onQueryChange,
+    box: {
+      incremental: true,
+    },
+    filters: transformFilters,
+  };
+
   const selection = {
     onSelectionChange: (selected: TransformListRow[]) => setTransformSelection(selected),
   };
@@ -277,38 +283,30 @@ export const TransformList: FC<Props> = ({
 
       {/* Single Action Modals */}
       {singleActionModals}
-      <EuiFlexGroup alignItems="center">
-        {transformSelection.length > 0 ? (
-          <EuiFlexItem grow={false}>{renderToolsLeft()}</EuiFlexItem>
-        ) : null}
-        <EuiFlexItem>
-          <TransformSearchBar
-            searchQueryText={searchQueryText}
-            setSearchQueryText={setSearchQueryText}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{toolsRight}</EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      <EuiBasicTable<TransformListRow>
+
+      <EuiInMemoryTable
+        allowNeutralSort={false}
+        className="transform__TransformTable"
         columns={columns}
+        error={searchError}
         hasActions={false}
         isExpandable={true}
         isSelectable={false}
-        items={pageOfItems as TransformListRow[]}
+        items={filterActive ? filteredTransforms : transforms}
         itemId={TRANSFORM_LIST_COLUMN.ID}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         loading={isLoading || transformsLoading}
-        onChange={onTableChange as EuiBasicTableProps<TransformListRow>['onChange']}
-        selection={selection}
-        pagination={pagination!}
-        sorting={sorting}
-        data-test-subj={`transformListTable ${
-          isLoading || transformsLoading ? 'loading' : 'loaded'
-        }`}
+        onTableChange={onTableChange}
+        pagination={pagination}
         rowProps={(item) => ({
           'data-test-subj': `transformListRow row-${item.id}`,
         })}
+        selection={selection}
+        sorting={sorting}
+        search={search}
+        data-test-subj={`transformListTable ${
+          isLoading || transformsLoading ? 'loading' : 'loaded'
+        }`}
       />
     </div>
   );

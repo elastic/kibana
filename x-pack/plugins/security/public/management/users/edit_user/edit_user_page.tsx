@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { NotificationsStart, ScopedHistory } from 'src/core/public';
 import { User, EditUser, Role, isRoleDeprecated } from '../../../../common/model';
 import { AuthenticationServiceSetup } from '../../../authentication';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { find, reduce, values, sortBy } from 'lodash';
 import { decorateShards } from '../lib/decorate_shards';
 
 export function indicesByNodes() {
@@ -39,7 +39,7 @@ export function indicesByNodes() {
         return obj;
       }
 
-      let nodeObj = _.find(obj[index].children, { id: node });
+      let nodeObj = find(obj[index].children, { id: node });
       if (!nodeObj) {
         nodeObj = {
           id: node,
@@ -55,7 +55,7 @@ export function indicesByNodes() {
       return obj;
     }
 
-    const data = _.reduce(
+    const data = reduce(
       decorateShards(shards, nodes),
       function (obj, shard) {
         obj = createIndex(obj, shard);
@@ -64,10 +64,11 @@ export function indicesByNodes() {
       },
       {}
     );
-
-    return _(data)
-      .values()
-      .sortBy((index) => [!index.unassignedPrimaries, /^\./.test(index.name), index.name])
-      .value();
+    const dataValues = values(data);
+    return sortBy(dataValues, (index) => [
+      !index.unassignedPrimaries,
+      /^\./.test(index.name),
+      index.name,
+    ]);
   };
 }

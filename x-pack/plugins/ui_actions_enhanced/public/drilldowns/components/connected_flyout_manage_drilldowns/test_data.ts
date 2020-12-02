@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedDynamicActionManagerState as DynamicActionManagerState,

@@ -8,7 +8,8 @@
   ],
   "index": [
     "filebeat-*",
-    "packetbeat-*"
+    "packetbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -19,7 +20,10 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Network"
+    "Host",
+    "Network",
+    "Threat Detection",
+    "Command and Control"
   ],
   "threat": [
     {
@@ -54,5 +58,5 @@
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

@@ -26,6 +26,10 @@ export const hostsSchema = gql`
     type: String
   }
 
+  type AgentFields {
+    id: String
+  }
+
   type CloudInstance {
     id: [String]
   }
@@ -55,6 +59,7 @@ export const hostsSchema = gql`
 
   type HostItem {
     _id: String
+    agent: AgentFields
     cloud: CloudFields
     endpoint: EndpointFields
     host: HostEcsFields

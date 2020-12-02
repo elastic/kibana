@@ -5,10 +5,10 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import _ from 'lodash';
+import { get, each } from 'lodash';
 
 function addOne(obj, key) {
-  let value = _.get(obj, key);
+  let value = get(obj, key);
   set(obj, key, ++value);
 }
 
@@ -34,8 +34,8 @@ export function calculateShardStats(state) {
     data[shard.index] = metrics;
   };
   if (state) {
-    const shards = _.get(state, 'cluster_state.shards');
-    _.each(shards, processShards);
+    const shards = get(state, 'cluster_state.shards');
+    each(shards, processShards);
   }
   return data;
 }

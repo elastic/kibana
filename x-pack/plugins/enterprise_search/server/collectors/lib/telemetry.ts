@@ -37,7 +37,7 @@ export const getSavedObjectAttributesFromRepo = async (
  * Set saved objection attributes - used by telemetry route
  */
 
-interface IIncrementUICounter {
+interface IncrementUICounter {
   id: string; // Telemetry name
   savedObjects: SavedObjectsServiceStart;
   uiAction: string;
@@ -49,13 +49,13 @@ export async function incrementUICounter({
   savedObjects,
   uiAction,
   metric,
-}: IIncrementUICounter) {
+}: IncrementUICounter) {
   const internalRepository = savedObjects.createInternalRepository();
 
   await internalRepository.incrementCounter(
     id,
     id,
-    `${uiAction}.${metric}` // e.g., ui_viewed.setup_guide
+    [`${uiAction}.${metric}`] // e.g., ui_viewed.setup_guide
   );
 
   return { success: true };

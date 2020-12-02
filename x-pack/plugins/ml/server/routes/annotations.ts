@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
 import { SecurityPluginSetup } from '../../../security/server';
@@ -33,7 +33,7 @@ function getAnnotationsFeatureUnavailableErrorMessage() {
  * Routes for annotations
  */
 export function annotationRoutes(
-  { router, mlLicense }: RouteInitialization,
+  { router, routeGuard }: RouteInitialization,
   securityPlugin?: SecurityPluginSetup
 ) {
   /**
@@ -58,7 +58,7 @@ export function annotationRoutes(
         tags: ['access:ml:canGetAnnotations'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { getAnnotations } = annotationServiceProvider(client);
         const resp = await getAnnotations(request.body);
@@ -91,7 +91,7 @@ export function annotationRoutes(
         tags: ['access:ml:canCreateAnnotation'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(client);
         if (annotationsFeatureAvailable === false) {
@@ -134,7 +134,7 @@ export function annotationRoutes(
         tags: ['access:ml:canDeleteAnnotation'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(client);
         if (annotationsFeatureAvailable === false) {

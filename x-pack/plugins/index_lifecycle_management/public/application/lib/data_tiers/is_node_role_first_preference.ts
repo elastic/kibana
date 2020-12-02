@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NodeDataRole, PhaseWithAllocation } from '../../../../common/types';
+import { DataTierRole, PhaseWithAllocation } from '../../../../common/types';
 import { phaseToNodePreferenceMap } from '../../../../common/constants';
 
-export const isNodeRoleFirstPreference = (phase: PhaseWithAllocation, nodeRole: NodeDataRole) => {
+export const isNodeRoleFirstPreference = (phase: PhaseWithAllocation, nodeRole: DataTierRole) => {
   return phaseToNodePreferenceMap[phase][0] === nodeRole;
 };

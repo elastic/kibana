@@ -5,7 +5,7 @@
  */
 
 import './xy_config_panel.scss';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { debounce } from 'lodash';
@@ -22,19 +22,35 @@ import {
   EuiToolTip,
   EuiIcon,
 } from '@elastic/eui';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import {
   VisualizationLayerWidgetProps,
-  VisualizationDimensionEditorProps,
   VisualizationToolbarProps,
+  VisualizationDimensionEditorProps,
+  FormatFactory,
 } from '../types';
-import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
-import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
+import {
+  State,
+  SeriesType,
+  visualizationTypes,
+  YAxisMode,
+  AxesSettingsConfig,
+  ValidLayer,
+} from './types';
+import {
+  isHorizontalChart,
+  isHorizontalSeries,
+  getSeriesColor,
+  hasHistogramSeries,
+} from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
 import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration } from './axes_configuration';
+import { PalettePicker } from '../shared_components';
+import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -69,6 +85,27 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
     value: 'hide',
     label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
       defaultMessage: 'Hide',
+    }),
+  },
+];
+
+const valueLabelsOptions: Array<{
+  id: string;
+  value: 'hide' | 'inside' | 'outside';
+  label: string;
+}> = [
+  {
+    id: `value_labels_hide`,
+    value: 'hide',
+    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.auto', {
+      defaultMessage: 'Hide',
+    }),
+  },
+  {
+    id: `value_labels_inside`,
+    value: 'inside',
+    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.inside', {
+      defaultMessage: 'Show',
     }),
   },
 ];
@@ -117,10 +154,22 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
 }
 
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
-  const { state, setState } = props;
+  const { state, setState, frame } = props;
 
   const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
     ['area_stacked', 'area', 'line'].includes(seriesType)
+  );
+
+  const hasBarNotStacked = state?.layers.some(({ seriesType }) =>
+    ['bar', 'bar_horizontal'].includes(seriesType)
+  );
+
+  const isAreaPercentage = state?.layers.some(
+    ({ seriesType }) => seriesType === 'area_percentage_stacked'
+  );
+
+  const isHistogramSeries = Boolean(
+    hasHistogramSeries(state?.layers as ValidLayer[], frame.datasourceLayers)
   );
 
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
@@ -190,54 +239,99 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       : !state?.legend.isVisible
       ? 'hide'
       : 'show';
+
+  const valueLabelsVisibilityMode = state?.valueLabels || 'hide';
+
+  const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
+  const isFittingEnabled = hasNonBarSeries;
+
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <TooltipWrapper
-            tooltipContent={i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
-              defaultMessage: 'This setting only applies to line and area charts.',
-            })}
-            condition={!hasNonBarSeries}
+            tooltipContent={
+              isAreaPercentage
+                ? i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
+                    defaultMessage: 'This setting cannot be changed on percentage area charts.',
+                  })
+                : i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
+                    defaultMessage: 'This setting cannot be changed on histograms.',
+                  })
+            }
+            condition={!isValueLabelsEnabled && !isFittingEnabled}
           >
             <ToolbarPopover
               title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
                 defaultMessage: 'Values',
               })}
-              isDisabled={!hasNonBarSeries}
               type="values"
               groupPosition="left"
-              buttonDataTestSubj="lnsMissingValuesButton"
+              buttonDataTestSubj="lnsValuesButton"
+              isDisabled={!isValueLabelsEnabled && !isFittingEnabled}
             >
-              <EuiFormRow
-                display="columnCompressed"
-                label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
-                  defaultMessage: 'Missing values',
-                })}
-              >
-                <EuiSuperSelect
-                  data-test-subj="lnsMissingValuesSelect"
-                  compressed
-                  options={fittingFunctionDefinitions.map(({ id, title, description }) => {
-                    return {
-                      value: id,
-                      dropdownDisplay: (
-                        <>
-                          <strong>{title}</strong>
-                          <EuiText size="xs" color="subdued">
-                            <p>{description}</p>
-                          </EuiText>
-                        </>
-                      ),
-                      inputDisplay: title,
-                    };
+              {isValueLabelsEnabled ? (
+                <EuiFormRow
+                  display="columnCompressed"
+                  label={
+                    <span>
+                      {i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
+                        defaultMessage: 'Labels',
+                      })}
+                    </span>
+                  }
+                >
+                  <EuiButtonGroup
+                    isFullWidth
+                    legend={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
+                      defaultMessage: 'Labels',
+                    })}
+                    data-test-subj="lnsValueLabelsDisplay"
+                    name="valueLabelsDisplay"
+                    buttonSize="compressed"
+                    options={valueLabelsOptions}
+                    idSelected={
+                      valueLabelsOptions.find(({ value }) => value === valueLabelsVisibilityMode)!
+                        .id
+                    }
+                    onChange={(modeId) => {
+                      const newMode = valueLabelsOptions.find(({ id }) => id === modeId)!.value;
+                      setState({ ...state, valueLabels: newMode });
+                    }}
+                  />
+                </EuiFormRow>
+              ) : null}
+              {isFittingEnabled ? (
+                <EuiFormRow
+                  display="columnCompressed"
+                  label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
+                    defaultMessage: 'Missing values',
                   })}
-                  valueOfSelected={state?.fittingFunction || 'None'}
-                  onChange={(value) => setState({ ...state, fittingFunction: value })}
-                  itemLayoutAlign="top"
-                  hasDividers
-                />
-              </EuiFormRow>
+                >
+                  <EuiSuperSelect
+                    data-test-subj="lnsMissingValuesSelect"
+                    compressed
+                    options={fittingFunctionDefinitions.map(({ id, title, description }) => {
+                      return {
+                        value: id,
+                        dropdownDisplay: (
+                          <>
+                            <strong>{title}</strong>
+                            <EuiText size="xs" color="subdued">
+                              <p>{description}</p>
+                            </EuiText>
+                          </>
+                        ),
+                        inputDisplay: title,
+                      };
+                    })}
+                    valueOfSelected={state?.fittingFunction || 'None'}
+                    onChange={(value) => setState({ ...state, fittingFunction: value })}
+                    itemLayoutAlign="top"
+                    hasDividers
+                  />
+                </EuiFormRow>
+              ) : null}
             </ToolbarPopover>
           </TooltipWrapper>
           <LegendSettingsPopover
@@ -354,7 +448,12 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
 }
 const idPrefix = htmlIdGenerator()();
 
-export function DimensionEditor(props: VisualizationDimensionEditorProps<State>) {
+export function DimensionEditor(
+  props: VisualizationDimensionEditorProps<State> & {
+    formatFactory: FormatFactory;
+    paletteService: PaletteRegistry;
+  }
+) {
   const { state, setState, layerId, accessor } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
@@ -363,6 +462,20 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
     (layer.yConfig &&
       layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
     'auto';
+
+  if (props.groupId === 'breakdown') {
+    return (
+      <>
+        <PalettePicker
+          palettes={props.frame.availablePalettes}
+          activePalette={layer.palette}
+          setPalette={(newPalette) => {
+            setState(updateLayer(state, { ...layer, palette: newPalette }, index));
+          }}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -451,12 +564,37 @@ const ColorPicker = ({
   setState,
   layerId,
   accessor,
-}: VisualizationDimensionEditorProps<State>) => {
+  frame,
+  formatFactory,
+  paletteService,
+}: VisualizationDimensionEditorProps<State> & {
+  formatFactory: FormatFactory;
+  paletteService: PaletteRegistry;
+}) => {
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
   const disabled = !!layer.splitAccessor;
 
-  const [color, setColor] = useState(getSeriesColor(layer, accessor));
+  const overwriteColor = getSeriesColor(layer, accessor);
+  const currentColor = useMemo(() => {
+    if (overwriteColor || !frame.activeData) return overwriteColor;
+
+    const colorAssignments = getColorAssignments(
+      state.layers,
+      { tables: frame.activeData },
+      formatFactory
+    );
+    const mappedAccessors = getAccessorColorConfig(
+      colorAssignments,
+      frame,
+      layer,
+      [accessor],
+      paletteService
+    );
+    return mappedAccessors[0].color;
+  }, [overwriteColor, frame, paletteService, state.layers, accessor, formatFactory, layer]);
+
+  const [color, setColor] = useState(currentColor);
 
   const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
     setColor(text);
@@ -491,9 +629,9 @@ const ColorPicker = ({
     <EuiColorPicker
       data-test-subj="indexPattern-dimension-colorPicker"
       compressed
-      isClearable
+      isClearable={Boolean(overwriteColor)}
       onChange={handleColor}
-      color={disabled ? '' : color}
+      color={disabled ? '' : color || currentColor}
       disabled={disabled}
       placeholder={i18n.translate('xpack.lens.xyChart.seriesColor.auto', {
         defaultMessage: 'Auto',

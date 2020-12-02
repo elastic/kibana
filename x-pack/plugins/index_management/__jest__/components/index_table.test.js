@@ -15,7 +15,7 @@ import { MemoryRouter } from 'react-router-dom';
       Could not load worker ReferenceError: Worker is not defined
           at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
  */
-import * as stubWebWorker from '../../../../test_utils/stub_web_worker'; // eslint-disable-line no-unused-vars
+import { mountWithIntl, stubWebWorker } from '@kbn/test/jest'; // eslint-disable-line no-unused-vars
 
 import { AppWithoutRouter } from '../../public/application/app';
 import { AppContextProvider } from '../../public/application/app_context';
@@ -29,7 +29,6 @@ import { setUiMetricService } from '../../public/application/services/api';
 import { indexManagementStore } from '../../public/application/store';
 import { setExtensionsService } from '../../public/application/store/selectors';
 import { BASE_PATH, API_BASE_PATH } from '../../common/constants';
-import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import { ExtensionsService } from '../../public/services';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';

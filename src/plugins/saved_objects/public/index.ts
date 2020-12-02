@@ -23,6 +23,7 @@ export {
   OnSaveProps,
   SavedObjectSaveModal,
   SavedObjectSaveModalOrigin,
+  OriginSaveModalProps,
   SaveModalState,
   SaveResult,
   showSaveModal,
@@ -30,13 +31,16 @@ export {
 export { getSavedObjectFinder, SavedObjectFinderUi, SavedObjectMetaData } from './finder';
 export {
   SavedObjectLoader,
-  createSavedObjectClass,
+  SavedObjectLoaderFindOptions,
   checkForDuplicateTitle,
   saveWithConfirmation,
   isErrorNonFatal,
+  SavedObjectDecorator,
+  SavedObjectDecoratorFactory,
+  SavedObjectDecoratorConfig,
 } from './saved_object';
-export { SavedObjectSaveOpts, SavedObjectKibanaServices, SavedObject } from './types';
+export { SavedObjectSaveOpts, SavedObject, SavedObjectConfig } from './types';
 export { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
-export { SavedObjectsStart } from './plugin';
+export { SavedObjectsStart, SavedObjectSetup } from './plugin';
 
 export const plugin = () => new SavedObjectsPublicPlugin();

@@ -22,17 +22,7 @@ declare module '*.svg' {
   export default content;
 }
 
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
-}[keyof T];
-
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
-
 declare module 'axios/lib/adapters/xhr';
-
-type Writable<T> = {
-  -readonly [K in keyof T]: T[K];
-};
 
 // Storybook references this module. It's @ts-ignored in the codebase but when
 // built into its dist it strips that out. Add it here to avoid a type checking

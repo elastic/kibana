@@ -30,6 +30,9 @@ You can create two types of filters by interacting with your map:
 * <<maps-spatial-filters, Spatial filters>>
 * <<maps-phrase-filter, Phrase filters>>
 
+[role="screenshot"]
+image::maps/images/create_spatial_filter.png[]
+
 [float]
 [[maps-spatial-filters]]
 ==== Spatial filters
@@ -40,15 +43,13 @@ You can create spatial filters in two ways:
 
 * Click the tool icon image:maps/images/tools_icon.png[], and then draw a polygon or bounding box on the map to define the spatial filter.
 * Click *Filter by geometry* in a <<maps-vector-tooltip-locking, locked tooltip>>, and then use the feature's geometry for the spatial filter.
-+
-[role="screenshot"]
-image::maps/images/create_spatial_filter.png[]
 
 Spatial filters have the following properties:
 
 * *Geometry label* enables you to provide a meaningful name for your spatial filter.
 * *Spatial field* specifies the geo_point or geo_shape field used to determine if a document matches the spatial relation with the specified geometry.
 * *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#_spatial_relations[spatial relation operator] to use at search time. Only available when *Spatial field* is set to geo_shape.
+* *Action* specifies whether to apply the filter to the current view or to a drilldown action. Only available when the map is a panel in a {kibana-ref}/dashboard.html[dashboard] with {kibana-ref}/drilldowns.html[drilldowns].
 
 [float]
 [[maps-phrase-filter]]
@@ -56,9 +57,7 @@ Spatial filters have the following properties:
 
 A phrase filter narrows search results to documents that contain the specified text.
 You can create a phrase filter by clicking the plus icon image:maps/images/gs_plus_icon.png[] in a <<maps-vector-tooltip-locking, locked tooltip>>.
-
-[role="screenshot"]
-image::maps/images/create_phrase_filter.png[]
+If the map is a dashboard panel with drilldowns, you can apply a phrase filter to a drilldown by selecting the drilldown action.
 
 [role="xpack"]
 [[maps-layer-based-filtering]]

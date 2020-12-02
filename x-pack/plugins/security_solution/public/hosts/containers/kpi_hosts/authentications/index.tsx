@@ -19,7 +19,7 @@ import {
 import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { AbortError } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -61,7 +61,6 @@ export const useHostsKpiAuthentications = ({
           defaultIndex: indexNames,
           factoryQueryType: HostsKpiQueries.kpiAuthentications,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -71,9 +70,10 @@ export const useHostsKpiAuthentications = ({
       : null
   );
 
-  const [hostsKpiAuthenticationsResponse, setHostsKpiAuthenticationsResponse] = useState<
-    HostsKpiAuthenticationsArgs
-  >({
+  const [
+    hostsKpiAuthenticationsResponse,
+    setHostsKpiAuthenticationsResponse,
+  ] = useState<HostsKpiAuthenticationsArgs>({
     authenticationsSuccess: 0,
     authenticationsSuccessHistogram: [],
     authenticationsFailure: 0,
@@ -159,7 +159,6 @@ export const useHostsKpiAuthentications = ({
         defaultIndex: indexNames,
         factoryQueryType: HostsKpiQueries.kpiAuthentications,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

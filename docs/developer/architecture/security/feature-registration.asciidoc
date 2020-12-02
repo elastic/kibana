@@ -59,15 +59,6 @@ of features within the management screens.
 |See <<example-3-discover,Example 3>>
 |The set of subfeatures that enables finer access control than the `all` and `read` feature privileges. These options are only available in the Gold subscription level and higher.
 
-|`icon`
-|`string`
-|"discoverApp"
-|An https://elastic.github.io/eui/#/display/icons[EUI Icon] to use for this feature.
-
-|`navLinkId`
-|`string`
-|"sample_app"
-|The ID of the navigation link associated with your feature.
 |===
 
 ==== Privilege definition
@@ -100,8 +91,6 @@ public setup(core, { features }) {
   features.registerKibanaFeature({
     id: 'canvas',
     name: 'Canvas',
-    icon: 'canvasApp',
-    navLinkId: 'canvas',
     category: DEFAULT_APP_CATEGORIES.kibana,
     app: ['canvas', 'kibana'],
     catalogue: ['canvas'],
@@ -160,8 +149,6 @@ public setup(core, { features }) {
     name: i18n.translate('xpack.features.devToolsFeatureName', {
       defaultMessage: 'Dev Tools',
     }),
-    icon: 'devToolsApp',
-    navLinkId: 'dev_tools',
     category: DEFAULT_APP_CATEGORIES.management,
     app: ['kibana'],
     catalogue: ['console', 'searchprofiler', 'grokdebugger'],
@@ -211,7 +198,10 @@ server.route({
 === Example 3: Discover
 
 Discover takes advantage of subfeature privileges to allow fine-grained access control. In this example,
-a single "Create Short URLs" subfeature privilege is defined, which allows users to grant access to this feature without having to grant the `all` privilege to Discover. In other words, you can grant `read` access to Discover, and also grant the ability to create short URLs.
+two subfeature privileges are defined: "Create Short URLs", and "Generate PDF Reports". These allow users to grant access to this feature without having to grant the `all` privilege to Discover. In other words, you can grant `read` access to Discover, and also grant the ability to create short URLs or generate PDF reports.
+
+Notice the "Generate PDF Reports" subfeature privilege has an additional `minimumPrivilege` option. Kibana will only offer this subfeature privilege if the
+license requirement is satisfied.
 
 ["source","javascript"]
 -----------
@@ -223,8 +213,6 @@ public setup(core, { features }) {
         defaultMessage: 'Discover',
       }),
       order: 100,
-      icon: 'discoverApp',
-      navLinkId: 'discover',
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['kibana'],
       catalogue: ['discover'],
@@ -271,6 +259,28 @@ public setup(core, { features }) {
                     read: [],
                   },
                   ui: ['createShortUrl'],
+                },
+              ],
+            },
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'pdf_generate',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.discoverGeneratePDFReportsPrivilegeName',
+                    {
+                      defaultMessage: 'Generate PDF Reports',
+                    }
+                  ),
+                  minimumLicense: 'platinum',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  api: ['generatePDFReports'],
+                  ui: ['generatePDFReports'],
                 },
               ],
             },

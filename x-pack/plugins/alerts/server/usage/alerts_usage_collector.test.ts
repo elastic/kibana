@@ -6,8 +6,8 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { registerAlertsUsageCollector } from './alerts_usage_collector';
-import { taskManagerMock } from '../../../task_manager/server/task_manager.mock';
-const taskManagerStart = taskManagerMock.start();
+import { taskManagerMock } from '../../../task_manager/server/mocks';
+const taskManagerStart = taskManagerMock.createStart();
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -22,12 +22,18 @@ describe('registerAlertsUsageCollector', () => {
   });
 
   it('should call registerCollector', () => {
-    registerAlertsUsageCollector(usageCollectionMock as UsageCollectionSetup, taskManagerStart);
+    registerAlertsUsageCollector(
+      usageCollectionMock as UsageCollectionSetup,
+      new Promise(() => taskManagerStart)
+    );
     expect(usageCollectionMock.registerCollector).toHaveBeenCalledTimes(1);
   });
 
   it('should call makeUsageCollector with type = alerts', () => {
-    registerAlertsUsageCollector(usageCollectionMock as UsageCollectionSetup, taskManagerStart);
+    registerAlertsUsageCollector(
+      usageCollectionMock as UsageCollectionSetup,
+      new Promise(() => taskManagerStart)
+    );
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('alerts');
   });

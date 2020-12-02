@@ -33,11 +33,13 @@ export function initAPIAuthorization(
 
     // we've actually authorized the request
     if (checkPrivilegesResponse.hasAllRequested) {
-      logger.debug(`User authorized for "${request.url.path}"`);
+      logger.debug(`User authorized for "${request.url.pathname}${request.url.search}"`);
       return toolkit.next();
     }
 
-    logger.warn(`User not authorized for "${request.url.path}": responding with 403`);
+    logger.warn(
+      `User not authorized for "${request.url.pathname}${request.url.search}": responding with 403`
+    );
     return response.forbidden();
   });
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonGroup, EuiButtonGroupOption } from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { FilterMode } from '../types';
@@ -13,7 +13,7 @@ import * as i18n from '../translations';
 
 const MY_RECENTLY_REPORTED_ID = 'myRecentlyReported';
 
-const toggleButtonIcons: EuiButtonGroupOption[] = [
+const toggleButtonIcons: EuiButtonGroupOptionProps[] = [
   {
     id: 'recentlyCreated',
     label: i18n.RECENTLY_CREATED_CASES,
@@ -45,7 +45,15 @@ export const Filters = React.memo<{
     [setFilterBy]
   );
 
-  return <EuiButtonGroup options={options} idSelected={filterBy} onChange={onChange} isIconOnly />;
+  return (
+    <EuiButtonGroup
+      options={options}
+      idSelected={filterBy}
+      onChange={onChange}
+      isIconOnly
+      legend={i18n.CASES_FILTER_CONTROL}
+    />
+  );
 });
 
 Filters.displayName = 'Filters';

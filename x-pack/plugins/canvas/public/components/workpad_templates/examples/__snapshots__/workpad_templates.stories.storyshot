@@ -22,7 +22,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
         >
           <input
             aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-            className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
+            className="euiFieldSearch euiFieldSearch--fullWidth"
             defaultValue=""
             onKeyUp={[Function]}
             placeholder="Find template"
@@ -34,7 +34,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
             <span
               className="euiFormControlLayoutCustomIcon"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiFormControlLayoutCustomIcon__icon"
                 data-euiicon-type="search"
@@ -70,7 +70,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
               <span
                 className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
               >
-                <div
+                <span
                   className="euiButtonContent__icon"
                   data-euiicon-type="arrowDown"
                   size="m"
@@ -134,7 +134,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                     <span
                       className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                     >
-                      <div
+                      <span
                         className="euiButtonContent__icon"
                         data-euiicon-type="arrowDown"
                         size="m"
@@ -194,7 +194,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                   >
                     Template name
                   </span>
-                  <div
+                  <span
                     aria-label="Sorted in ascending order"
                     className="euiTableSortIcon"
                     data-euiicon-type="sortUp"
@@ -338,7 +338,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <div
+                      <span
                         color="#666666"
                         data-euiicon-type="dot"
                       />
@@ -359,7 +359,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <div
+                      <span
                         color="#666666"
                         data-euiicon-type="dot"
                       />
@@ -459,7 +459,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <div
+                      <span
                         color="#666666"
                         data-euiicon-type="dot"
                       />
@@ -480,7 +480,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <div
+                      <span
                         color="#666666"
                         data-euiicon-type="dot"
                       />
@@ -519,7 +519,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
           onClick={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="arrowLeft"
@@ -561,7 +561,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
           onClick={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="arrowRight"

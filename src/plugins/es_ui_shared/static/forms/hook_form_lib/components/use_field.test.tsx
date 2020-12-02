@@ -54,11 +54,11 @@ describe('<UseField />', () => {
 
     setup();
 
-    const [{ data }] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-      OnUpdateHandler
-    >;
+    const [{ data }] = onFormData.mock.calls[
+      onFormData.mock.calls.length - 1
+    ] as Parameters<OnUpdateHandler>;
 
-    expect(data.raw).toEqual({
+    expect(data.internal).toEqual({
       name: 'John',
       lastName: 'Snow',
     });
@@ -214,8 +214,8 @@ describe('<UseField />', () => {
       expect(serializer).not.toBeCalled();
       expect(formatter).not.toBeCalled();
 
-      let formData = formHook.getFormData({ unflatten: false });
-      expect(formData.name).toEqual('John-deserialized');
+      const internalFormData = formHook.__getFormData$().value;
+      expect(internalFormData.name).toEqual('John-deserialized');
 
       await act(async () => {
         form.setInputValue('myField', 'Mike');
@@ -224,9 +224,9 @@ describe('<UseField />', () => {
       expect(formatter).toBeCalled(); // Formatters are executed on each value change
       expect(serializer).not.toBeCalled(); // Serializer are executed *only** when outputting the form data
 
-      formData = formHook.getFormData();
+      const outputtedFormData = formHook.getFormData();
       expect(serializer).toBeCalled();
-      expect(formData.name).toEqual('MIKE-serialized');
+      expect(outputtedFormData.name).toEqual('MIKE-serialized');
 
       // Make sure that when we reset the form values, we don't serialize the fields
       serializer.mockReset();

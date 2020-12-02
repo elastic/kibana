@@ -102,11 +102,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     toastNotifications,
   };
 
-  // TODO This should use the actual value of `indices.query.bool.max_clause_count`
-  const maxIndexFields = 1024;
-  const numIndexFields = indexPattern.fields.length;
-  const disabledQuery = numIndexFields > maxIndexFields;
-
   const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, indexPattern.title);
   const copyToClipboardSourceDescription = i18n.translate(
     'xpack.transform.indexPreview.copyClipboardTooltip',
@@ -181,18 +176,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
             label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
               defaultMessage: 'Index pattern',
             })}
-            helpText={
-              disabledQuery
-                ? i18n.translate('xpack.transform.stepDefineForm.indexPatternHelpText', {
-                    defaultMessage:
-                      'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
-                    values: {
-                      maxIndexFields,
-                      numIndexFields,
-                    },
-                  })
-                : ''
-            }
           >
             <span>{indexPattern.title}</span>
           </EuiFormRow>
@@ -214,7 +197,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                 {/* Flex Column #1: Search Bar / Advanced Search Editor */}
                 {searchItems.savedSearch === undefined && (
                   <>
-                    {!disabledQuery && !isAdvancedSourceEditorEnabled && (
+                    {!isAdvancedSourceEditorEnabled && (
                       <SourceSearchBar
                         indexPattern={indexPattern}
                         searchBar={stepDefineForm.searchBar}
