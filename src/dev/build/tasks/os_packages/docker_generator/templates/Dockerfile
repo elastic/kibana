@@ -51,7 +51,7 @@ EXPOSE 5601
 RUN for iter in {1..10}; do \
       {{packageManager}} update --setopt=tsflags=nodocs -y && \
       {{packageManager}} install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils libnss3.so {{#ubi}}findutils{{/ubi}} && \
+        fontconfig freetype shadow-utils nss {{#ubi}}findutils{{/ubi}} && \
       {{packageManager}} clean all && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
       sleep 10; \
     done; \
@@ -60,7 +60,7 @@ RUN for iter in {1..10}; do \
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
   TINI_VERSION='v0.19.0' ; \
-  TINI_BIN='tini-amd64' ; \
+  TINI_BIN='tini-{{architecture}}' ; \
   curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
   curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
   sha256sum -c "${TINI_BIN}.sha256sum" ; \

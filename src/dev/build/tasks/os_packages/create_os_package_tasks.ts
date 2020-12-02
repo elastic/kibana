@@ -47,7 +47,16 @@ export const CreateDockerPackage: Task = {
 
   async run(config, log, build) {
     // Builds Docker targets for default and oss
-    await runDockerGenerator(config, log, build);
+    await runDockerGenerator(config, log, build, false, 'amd64');
+  },
+};
+
+export const CreateDockerARMPackage: Task = {
+  description: 'Creating docker package',
+
+  async run(config, log, build) {
+    // Builds Docker targets for default and oss
+    await runDockerGenerator(config, log, build, false, 'arm64');
   },
 };
 
