@@ -1489,9 +1489,10 @@
     async-retry "^1.2.3"
     strip-ansi "^5.2.0"
 
-"@elastic/good@watson/good#fix-pipeline":
-  version "9.0.1-kibana1"
-  resolved "https://codeload.github.com/watson/good/tar.gz/cd16af871cd4c30d374e6e262610694176bf3220"
+"@elastic/good@^9.0.1-kibana3":
+  version "9.0.1-kibana3"
+  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-9.0.1-kibana3.tgz#a70c2b30cbb4f44d1cf4a464562e0680322eac9b"
+  integrity sha512-UtPKr0TmlkL1abJfO7eEVUTqXWzLKjMkz+65FvxU/Ub9kMAr4No8wHLRfDHFzBkWoDIbDWygwld011WzUnea1Q==
   dependencies:
     "@hapi/hoek" "9.x.x"
     "@hapi/oppsy" "3.x.x"
