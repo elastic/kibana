@@ -15,6 +15,7 @@ export enum SavedObjectType {
   INDEX_PATTERN = 'index-pattern',
   SEARCH = 'search',
   VISUALIZATION = 'visualization',
+  ML_JOB = 'ml-job',
 }
 
 export type MlTestResourcesi = ProvidedType<typeof MachineLearningTestResourcesProvider>;
@@ -70,6 +71,23 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
         }
       }
       log.debug(` > Not found`);
+    },
+
+    async getSavedObjectIdsByType(objectType: SavedObjectType): Promise<string[]> {
+      const savedObjectIds: string[] = [];
+
+      log.debug(`Searching for '${objectType}' ...`);
+      const findResponse = await supertest
+        .get(`/api/saved_objects/_find?type=${objectType}&per_page=10000`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200)
+        .then((res: any) => res.body);
+
+      findResponse.saved_objects.forEach((element: any) => {
+        savedObjectIds.push(element.id);
+      });
+
+      return savedObjectIds;
     },
 
     async getIndexPatternId(title: string): Promise<string | undefined> {
@@ -312,7 +330,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       await this.createSavedSearchIfNeeded(savedSearches.farequoteFilterAndKuery);
     },
 
-    async deleteSavedObjectById(id: string, objectType: SavedObjectType) {
+    async deleteSavedObjectById(id: string, objectType: SavedObjectType, force: boolean = false) {
       log.debug(`Deleting ${objectType} with id '${id}'...`);
 
       if ((await this.savedObjectExistsById(id, objectType)) === false) {
@@ -322,6 +340,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
         await supertest
           .delete(`/api/saved_objects/${objectType}/${id}`)
           .set(COMMON_REQUEST_HEADERS)
+          .query({ force })
           .expect(200);
 
         await this.assertSavedObjectNotExistsById(id, objectType);
@@ -492,6 +511,23 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
 
     async assertDashboardExistById(id: string) {
       await this.assertSavedObjectExistsById(id, SavedObjectType.DASHBOARD);
+    },
+
+    async deleteMlSavedObjectByJobId(
+      jobId: string,
+      jobType: 'anomaly-detector' | 'data-frame-analytics'
+    ) {
+      const savedObjectId = `${jobType}-${jobId}`;
+      await this.deleteSavedObjectById(savedObjectId, SavedObjectType.ML_JOB, true);
+    },
+
+    async cleanMLSavedObjects() {
+      log.debug('Deleting ML saved objects ...');
+      const savedObjectIds = await this.getSavedObjectIdsByType(SavedObjectType.ML_JOB);
+      for (const id of savedObjectIds) {
+        await this.deleteSavedObjectById(id, SavedObjectType.ML_JOB, true);
+      }
+      log.debug('> ML saved objects deleted.');
     },
   };
 }

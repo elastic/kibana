@@ -50,6 +50,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('ml/module_siem_winlogbeat');
       await esArchiver.unload('ml/farequote');
       await esArchiver.unload('ml/bm_classification');
+      await esArchiver.unload('ml/ihp_outlier');
 
       await ml.testResources.resetKibanaTimeZone();
     });
@@ -65,5 +66,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./filters'));
     loadTestFile(require.resolve('./calendars'));
     loadTestFile(require.resolve('./annotations'));
+    loadTestFile(require.resolve('./saved_objects'));
   });
 }
