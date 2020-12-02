@@ -16,6 +16,7 @@ import {
   getColorPalette,
 } from '../../color_palettes';
 import { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION } from '../../../../../common/constants';
+import { GREAT_THAN, UPTO } from '../../../../../common/i18n_getters';
 import {
   isCategoricalStopsInvalid,
   getOtherCategoryLabel,
@@ -335,7 +336,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
 
         let label = '';
         if (!hasNext) {
-          label = `>${percentileLabel}: ${formattedStopValue}`;
+          label = `${GREAT_THAN} ${percentileLabel}: ${formattedStopValue}`;
         } else {
           const nextStopValue = colorStops[i + 2];
           const formattedNextStopValue = this.formatField(dynamicRound(nextStopValue));
@@ -343,11 +344,11 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
           const nextPercentileLabel = `${nextPercentile}${getOrdinalSuffix(nextPercentile)}`;
 
           if (i === 0) {
-            label = `<${nextPercentileLabel}: ${formattedNextStopValue}`;
+            label = `${UPTO} ${nextPercentileLabel}: ${formattedNextStopValue}`;
           } else {
             const begin = `${percentileLabel}: ${formattedStopValue}`;
-            const end = `<${nextPercentileLabel}: ${formattedNextStopValue}`;
-            label = `${begin} - ${end}`;
+            const end = `${nextPercentileLabel}: ${formattedNextStopValue}`;
+            label = `${begin} ${UPTO} ${end}`;
           }
         }
 

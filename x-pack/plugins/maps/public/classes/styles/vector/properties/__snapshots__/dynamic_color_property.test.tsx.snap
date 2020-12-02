@@ -2,13 +2,13 @@
 
 exports[`renderDataMappingPopover Should disable toggle when field is not backed by geojson source 1`] = `
 <OrdinalDataMappingPopover
+  dataMappingFunction="INTERPOLATE"
   fieldMetaOptions={
     Object {
       "isEnabled": true,
     }
   }
   onChange={[Function]}
-  dataMappingFunction="INTERPOLATE"
   styleName="lineColor"
   supportedDataMappingFunctions={
     Array [
@@ -22,13 +22,13 @@ exports[`renderDataMappingPopover Should disable toggle when field is not backed
 
 exports[`renderDataMappingPopover Should enable toggle when field is backed by geojson-source 1`] = `
 <OrdinalDataMappingPopover
+  dataMappingFunction="INTERPOLATE"
   fieldMetaOptions={
     Object {
       "isEnabled": true,
     }
   }
   onChange={[Function]}
-  dataMappingFunction="INTERPOLATE"
   styleName="lineColor"
   supportedDataMappingFunctions={
     Array [
@@ -358,7 +358,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         color="#e5ecf4"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="<50th: 5572_format"
+        label="up to 50th: 5572_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -369,7 +369,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         color="#ccd9ea"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="50th: 5572_format - <75th: 8079_format"
+        label="50th: 5572_format up to 75th: 8079_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -380,7 +380,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         color="#b2c7df"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="75th: 8079_format - <90th: 9607_format"
+        label="75th: 8079_format up to 90th: 9607_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -391,7 +391,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         color="#98b5d5"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="90th: 9607_format - <95th: 10439_format"
+        label="90th: 9607_format up to 95th: 10439_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -402,7 +402,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         color="#7da3ca"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="95th: 10439_format - <99th: 16857_format"
+        label="95th: 10439_format up to 99th: 16857_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -413,7 +413,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         color="#6092c0"
         isLinesOnly={false}
         isPointsOnly={true}
-        label=">99th: 16857_format"
+        label="greater than 99th: 16857_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
