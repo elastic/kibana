@@ -23,12 +23,16 @@ import { SearchExperienceContent } from './search_experience_content';
 
 const DEFAULT_SORT_OPTIONS = [
   {
-    name: 'Recently Uploaded (desc)',
+    name: i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.recentlyUploadedDesc', {
+      defaultMessage: 'Recently Uploaded (desc)',
+    }),
     value: 'id',
     direction: 'desc',
   },
   {
-    name: 'Recently Uploaded (asc)',
+    name: i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.recentlyUploadedDesc', {
+      defaultMessage: 'Recently Uploaded (asc)',
+    }),
     value: 'id',
     direction: 'asc',
   },
