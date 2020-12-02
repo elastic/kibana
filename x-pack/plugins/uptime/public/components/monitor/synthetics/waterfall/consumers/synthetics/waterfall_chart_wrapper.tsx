@@ -6,12 +6,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import {
-  extractItems,
-  getSeriesAndDomain,
-  getSidebarItems,
-  getLegendItems,
-} from './data_formatting';
+import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
 import { SidebarItem, LegendItem, NetworkItems } from './types';
 import {
   WaterfallProvider,
@@ -52,12 +47,9 @@ const renderLegendItem: RenderItem<LegendItem> = (item) => {
   return <EuiHealth color={item.colour}>{item.name}</EuiHealth>;
 };
 
-// TODO: Will be sourced via an API
-const FAKE_ITEMS = extractItems();
-
 export const WaterfallChartWrapper = () => {
   // TODO: Will be sourced via an API
-  const [networkData] = useState<NetworkItems>(FAKE_ITEMS);
+  const [networkData] = useState<NetworkItems>([]);
 
   const { series, domain } = useMemo(() => {
     return getSeriesAndDomain(networkData);

@@ -5,10 +5,6 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import testData from './bmc_test_data.json';
-const TEST_DATA = testData.data.map((item) => {
-  return item._source;
-});
 
 import {
   PayloadTimings,
@@ -116,43 +112,42 @@ export const getTimings = (
 };
 
 // TODO: Switch to real API data, and type data as the payload response (if server response isn't preformatted)
-export const extractItems = (data: any = TEST_DATA): NetworkItems => {
-  return [];
-  // const items = data
-  //   .map((entry: any) => {
-  //     const requestSentTime = microToMillis(entry.synthetics.payload.start);
-  //     const responseReceivedTime = microToMillis(entry.synthetics.payload.end);
-  //     const requestStartTime =
-  //       entry.synthetics.payload.response && entry.synthetics.payload.response.timing
-  //         ? microToMillis(entry.synthetics.payload.response.timing.request_time)
-  //         : null;
+export const extractItems = (data: any): NetworkItems => {
+  const items = data
+    .map((entry: any) => {
+      const requestSentTime = microToMillis(entry.synthetics.payload.start);
+      const responseReceivedTime = microToMillis(entry.synthetics.payload.end);
+      const requestStartTime =
+        entry.synthetics.payload.response && entry.synthetics.payload.response.timing
+          ? microToMillis(entry.synthetics.payload.response.timing.request_time)
+          : null;
 
-  //     return {
-  //       timestamp: entry['@timestamp'],
-  //       method: entry.synthetics.payload.method,
-  //       url: entry.synthetics.payload.url,
-  //       status: entry.synthetics.payload.status,
-  //       mimeType: entry.synthetics.payload?.response?.mime_type,
-  //       requestSentTime,
-  //       responseReceivedTime,
-  //       earliestRequestTime: requestStartTime
-  //         ? Math.min(requestSentTime, requestStartTime)
-  //         : requestSentTime,
-  //       timings:
-  //         entry.synthetics.payload.response && entry.synthetics.payload.response.timing
-  //           ? getTimings(
-  //               entry.synthetics.payload.response.timing,
-  //               requestSentTime,
-  //               responseReceivedTime
-  //             )
-  //           : null,
-  //     };
-  //   })
-  //   .sort((a: any, b: any) => {
-  //     return a.earliestRequestTime - b.earliestRequestTime;
-  //   });
+      return {
+        timestamp: entry['@timestamp'],
+        method: entry.synthetics.payload.method,
+        url: entry.synthetics.payload.url,
+        status: entry.synthetics.payload.status,
+        mimeType: entry.synthetics.payload?.response?.mime_type,
+        requestSentTime,
+        responseReceivedTime,
+        earliestRequestTime: requestStartTime
+          ? Math.min(requestSentTime, requestStartTime)
+          : requestSentTime,
+        timings:
+          entry.synthetics.payload.response && entry.synthetics.payload.response.timing
+            ? getTimings(
+                entry.synthetics.payload.response.timing,
+                requestSentTime,
+                responseReceivedTime
+              )
+            : null,
+      };
+    })
+    .sort((a: any, b: any) => {
+      return a.earliestRequestTime - b.earliestRequestTime;
+    });
 
-  // return items;
+  return items;
 };
 
 const formatValueForDisplay = (value: number, points: number = 3) => {
