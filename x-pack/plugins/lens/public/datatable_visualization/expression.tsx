@@ -56,7 +56,7 @@ export interface DatatableProps {
 type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
   onClickValue: (data: LensFilterEvent['data']) => void;
-  onRowContextMenuClick: (data: LensTableRowContextMenuEvent['data']) => void;
+  onRowContextMenuClick?: (data: LensTableRowContextMenuEvent['data']) => void;
   getType: (name: string) => IAggType;
 
   /**
@@ -347,7 +347,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
     })
     .filter(({ field }) => !!field);
 
-  if (!!props.rowHasRowClickTriggerActions) {
+  if (!!props.rowHasRowClickTriggerActions && !!onRowContextMenuClick) {
     const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions.find((x) => x);
     if (hasAtLeastOneRowClickAction) {
       const actions: EuiTableActionsColumnType<unknown> = {

@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  getEventScope,
-  getMockEventScope,
-  ValueClickTriggerEventScope,
-} from './url_drilldown_scope';
+import { getEventScope, ValueClickTriggerEventScope } from './url_drilldown_scope';
 import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
 
 const createPoint = ({
@@ -80,33 +76,6 @@ describe('VALUE_CLICK_TRIGGER', () => {
         ]
       `);
     });
-
-    test('getMockEventScope()', () => {
-      const mockEventScope = getMockEventScope([
-        'VALUE_CLICK_TRIGGER',
-      ]) as ValueClickTriggerEventScope;
-      expect(mockEventScope.points.length).toBeGreaterThan(3);
-      expect(mockEventScope.points).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "key": "event.points.0.key",
-                  "value": "event.points.0.value",
-                },
-                Object {
-                  "key": "event.points.1.key",
-                  "value": "event.points.1.value",
-                },
-                Object {
-                  "key": "event.points.2.key",
-                  "value": "event.points.2.value",
-                },
-                Object {
-                  "key": "event.points.3.key",
-                  "value": "event.points.3.value",
-                },
-              ]
-          `);
-    });
   });
 
   describe('handles undefined, null or missing values', () => {
@@ -128,14 +97,5 @@ describe('VALUE_CLICK_TRIGGER', () => {
 
       expect(eventScope.value).toBeNull();
     });
-  });
-});
-
-describe('CONTEXT_MENU_TRIGGER', () => {
-  test('getMockEventScope() results in empty scope', () => {
-    const mockEventScope = getMockEventScope([
-      'CONTEXT_MENU_TRIGGER',
-    ]) as ValueClickTriggerEventScope;
-    expect(mockEventScope).toEqual({});
   });
 });
