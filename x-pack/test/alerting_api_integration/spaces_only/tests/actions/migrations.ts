@@ -22,7 +22,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       await esArchiver.unload('actions');
     });
 
-    it('7.10.0 migrates the `casesConfiguration` to be the `incidentConfiguration` in `config` and 7.11.0 removes the `incidentConfiguration` in `config`', async () => {
+    it.only('7.10.0 migrates the `casesConfiguration` to be the `incidentConfiguration` in `config` and 7.11.0 removes the `incidentConfiguration` in `config`', async () => {
       const response = await supertest.get(
         `${getUrlPrefix(``)}/api/actions/action/791a2ab1-784a-46ea-aa68-04c837e5da2d`
       );
@@ -37,7 +37,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
-    it.only('7.11.0 removes the `incidentConfiguration` in `config`', async () => {
+    it('7.11.0 removes the `incidentConfiguration` in `config`', async () => {
       const response = await supertest.get(
         `${getUrlPrefix(``)}/api/actions/action/551a2ab1-784a-46ea-aa68-99g837e5da2d`
       );
