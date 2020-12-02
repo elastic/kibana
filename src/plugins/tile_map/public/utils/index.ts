@@ -18,3 +18,4 @@
  */
 
 export { convertToGeoJson } from './convert_to_geojson';
+export { geoContains } from './decode_geo_hash';

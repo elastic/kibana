@@ -23,7 +23,6 @@ import { MapsLegacyPlugin } from './plugin';
 import * as colorUtil from './map/color_util';
 // @ts-ignore
 import { KibanaMapLayer } from './map/kibana_map_layer';
-import { geoContains } from './map/decode_geo_hash';
 import {
   VectorLayer,
   FileLayerField,
@@ -42,7 +41,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 /** @public */
 export {
-  geoContains,
   colorUtil,
   IServiceSettings,
   KibanaMapLayer,
