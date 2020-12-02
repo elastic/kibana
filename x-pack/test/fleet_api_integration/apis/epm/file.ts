@@ -107,10 +107,26 @@ export default function ({ getService }: FtrProviderContext) {
       it('fetches a .png screenshot image', async function () {
         if (server.enabled) {
           const res = await supertest
-            .get('/api/fleet/epm/packages/apache/0.1.4/img/kibana-apache-new.png')
+            .get('/api/fleet/epm/packages/apache/0.1.4/img/kibana-apache-test.png')
             .set('kbn-xsrf', 'xxx')
             .expect('Content-Type', 'image/png')
             .expect(200);
+          expect(Buffer.isBuffer(res.body)).to.equal(true);
+        } else {
+          warnAndSkipTest(this, log);
+        }
+      });
+      it('fetches the logo', async function () {
+        if (server.enabled) {
+          const res = await supertest
+            .get('/api/fleet/epm/packages/apache/0.1.4/img/logo_apache_test.svg')
+            .set('kbn-xsrf', 'xxx')
+            .expect('Content-Type', 'image/svg+xml')
+            .expect(200);
+          await supertest
+            .get('/api/fleet/epm/packages/apache/0.1.4/img/logo_apache.svg')
+            .set('kbn-xsrf', 'xxx')
+            .expect(404);
           expect(Buffer.isBuffer(res.body)).to.equal(true);
         } else {
           warnAndSkipTest(this, log);
@@ -140,6 +156,19 @@ export default function ({ getService }: FtrProviderContext) {
             .expect('Content-Type', 'text/markdown; charset=utf-8')
             .expect(200);
           expect(res.text).to.equal('# Apache Uploaded Test Integration');
+        } else {
+          warnAndSkipTest(this, log);
+        }
+      });
+
+      it('fetches the logo of a not uploaded (and installed) version from the registry when another version is uploaded (and installed)', async function () {
+        if (server.enabled) {
+          const res = await supertest
+            .get('/api/fleet/epm/packages/apache/0.1.3/img/logo_apache.svg')
+            .set('kbn-xsrf', 'xxx')
+            .expect('Content-Type', 'image/svg+xml')
+            .expect(200);
+          expect(Buffer.isBuffer(res.body)).to.equal(true);
         } else {
           warnAndSkipTest(this, log);
         }

@@ -110,7 +110,7 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
     const savedObject = await getInstallationObject({ savedObjectsClient, pkgName });
     const pkgInstallSource = savedObject?.attributes.install_source;
     // TODO: when package storage is available, remove installSource check and check cache and storage, remove registry call
-    if (pkgInstallSource === 'upload') {
+    if (pkgInstallSource === 'upload' && pkgVersion === savedObject?.attributes.version) {
       const headerContentType = mime.contentType(path.extname(filePath));
       if (!headerContentType) {
         return response.custom({
