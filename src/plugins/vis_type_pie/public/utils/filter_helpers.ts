@@ -33,13 +33,14 @@ export const canFilter = async (event: ClickTriggerEvent | null): Promise<boolea
 
 export const getFilterClickData = (
   clickedLayers: LayerValue[],
-  bucketColumns: BucketColumns[],
+  bucketColumns: Array<Partial<BucketColumns>>,
   visData: Datatable
 ): ValueClickContext['data']['data'] => {
   const data: ValueClickContext['data']['data'] = [];
   const matchingIndex = visData.rows.findIndex((row) =>
     clickedLayers.every((layer, index) => {
       const columnId = bucketColumns[index].id;
+      if (!columnId) return;
       return row[columnId] === layer.groupByRollup;
     })
   );

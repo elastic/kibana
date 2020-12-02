@@ -31,9 +31,6 @@ import {
   Datum,
   LayerValue,
   Partition,
-  PartitionConfig,
-  PartitionLayout,
-  RecursivePartial,
   Position,
   Settings,
   RenderChangeListener,
@@ -51,7 +48,7 @@ import {
   ChartsPluginSetup,
 } from '../../charts/public';
 import { Datatable, DatatableColumn, IInterpreterRenderHandlers } from '../../expressions/public';
-import { PieVisParams, BucketColumns, LabelPositions, ValueFormats } from './types';
+import { PieVisParams, BucketColumns, ValueFormats } from './types';
 import { getFormatService } from './services';
 import {
   getColorPicker,
@@ -61,6 +58,8 @@ import {
   canFilter,
   getFilterClickData,
   getFilterEventData,
+  getConfig,
+  getColumns,
 } from './utils';
 import { LegendToggle } from './temp';
 
@@ -74,8 +73,6 @@ export interface PieComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
   chartsThemeService: ChartsPluginSetup['theme'];
 }
-
-export type PieComponentType = typeof PieComponent;
 
 const PieComponent = (props: PieComponentProps) => {
   const chartTheme = props.chartsThemeService.useChartsTheme();
@@ -91,8 +88,13 @@ const PieComponent = (props: PieComponentProps) => {
     [props]
   );
 
-  const handleFilterClick = useCallback(
-    (clickedLayers: LayerValue[], bucketColumns: BucketColumns[], visData: Datatable): void => {
+  // handles slice click event
+  const handleSliceClick = useCallback(
+    (
+      clickedLayers: LayerValue[],
+      bucketColumns: Array<Partial<BucketColumns>>,
+      visData: Datatable
+    ): void => {
       const data = getFilterClickData(clickedLayers, bucketColumns, visData);
       const event = {
         name: 'filterBucket',
@@ -103,7 +105,8 @@ const PieComponent = (props: PieComponentProps) => {
     [props]
   );
 
-  const getFilterEventDataCallback = useCallback(
+  // handles legend action event data
+  const getLegendActionEventData = useCallback(
     (visData: Datatable) => (series: SeriesIdentifier): ClickTriggerEvent | null => {
       const data = getFilterEventData(visData, series);
 
@@ -118,7 +121,7 @@ const PieComponent = (props: PieComponentProps) => {
     []
   );
 
-  const handleFilterAction = useCallback(
+  const handleLegendAction = useCallback(
     (event: ClickTriggerEvent, negate = false) => {
       props.fireEvent({
         ...event,
@@ -144,7 +147,6 @@ const PieComponent = (props: PieComponentProps) => {
       if ((event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
         return;
       }
-
       const colors = props.uiState?.get('vis.colors') || {};
       if (colors[seriesLabel] === newColor || !newColor) {
         delete colors[seriesLabel];
@@ -167,33 +169,7 @@ const PieComponent = (props: PieComponentProps) => {
     return Number.EPSILON;
   }
 
-  // move it to get_config file
-  const config: RecursivePartial<PartitionConfig> = {
-    partitionLayout: PartitionLayout.sunburst,
-    fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
-    outerSizeRatio: 1,
-    specialFirstInnermostSector: true,
-    clockwiseSectors: false,
-    minFontSize: 10,
-    maxFontSize: 16,
-    linkLabel: {
-      maxCount: 5,
-      fontSize: 11,
-      textColor: chartTheme.axes?.axisTitle?.fill,
-      maxTextLength: visParams.labels.truncate ?? undefined,
-    },
-    sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
-    sectorLineWidth: 1.5,
-    circlePadding: 4,
-    emptySizeRatio: visParams.isDonut ? 0.3 : 0,
-  };
-  if (!visParams.labels.show) {
-    // Force all labels to be linked, then prevent links from showing
-    config.linkLabel = { maxCount: 0, maximumSection: Number.POSITIVE_INFINITY };
-  }
-  if (visParams.labels.position === LabelPositions.INSIDE) {
-    config.linkLabel = { maxCount: 0 };
-  }
+  // formatters
   const metricFieldFormatter = getFormatService().deserialize(visParams.dimensions.metric.format);
   const percentFormatter = getFormatService().deserialize({
     id: 'percent',
@@ -202,39 +178,26 @@ const PieComponent = (props: PieComponentProps) => {
     },
   });
 
-  let layersColumns: Array<Partial<BucketColumns>> = [];
-  const bucketColumns: BucketColumns[] = [];
-  let metricColumn: DatatableColumn;
-  if (visParams.dimensions.buckets) {
-    visParams.dimensions.buckets.forEach((b) => {
-      bucketColumns.push({ ...visData.columns[b.accessor], format: b.format });
-      layersColumns = [...bucketColumns];
-    });
-    const lastBucketId = layersColumns[layersColumns.length - 1].id;
-    const matchingIndex = visData.columns.findIndex((col) => col.id === lastBucketId);
-    metricColumn = visData.columns[matchingIndex + 1];
-  } else {
-    metricColumn = visData.columns[0];
-    layersColumns.push({
-      name: metricColumn.name,
-    });
-  }
-
-  const palette = visParams.palette.name;
-
-  // useCallback
-  const layers = getLayers(
-    layersColumns,
+  const { bucketColumns, metricColumn } = useMemo(() => getColumns(visParams, visData), [
+    visData,
     visParams,
-    props.uiState?.get('vis.colors', {}),
-    visData.rows.length,
-    palette
-  );
+  ]);
 
+  const layers = useMemo(
+    () =>
+      getLayers(
+        bucketColumns,
+        visParams,
+        props.uiState?.get('vis.colors', {}),
+        visData.rows.length,
+        visParams.palette.name
+      ),
+    [bucketColumns, props.uiState, visData.rows.length, visParams]
+  );
+  const config = useMemo(() => getConfig(visParams, chartTheme), [chartTheme, visParams]);
   const tooltip: TooltipProps = {
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
   };
-
   const legendPosition = useMemo(() => visParams.legendPosition ?? Position.Right, [
     visParams.legendPosition,
   ]);
@@ -255,18 +218,18 @@ const PieComponent = (props: PieComponentProps) => {
             legendColorPicker={getColorPicker(
               legendPosition,
               setColor,
-              layersColumns,
+              bucketColumns,
               visParams.palette.name,
               visData.rows
             )}
             tooltip={tooltip}
             onElementClick={(args) => {
-              handleFilterClick(args[0][0] as LayerValue[], bucketColumns, visData);
+              handleSliceClick(args[0][0] as LayerValue[], bucketColumns, visData);
             }}
             legendAction={getLegendActions(
               canFilter,
-              getFilterEventDataCallback(visData),
-              handleFilterAction,
+              getLegendActionEventData(visData),
+              handleLegendAction,
               visParams
             )}
             theme={chartTheme}

@@ -18,12 +18,11 @@
  */
 import React from 'react';
 import { Settings, TooltipType, SeriesIdentifier } from '@elastic/charts';
-import { Datatable } from '../../expressions/public';
 import { chartPluginMock } from '../../charts/public/mocks';
 import { shallow, mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { PieVisParams } from './types';
 import PieComponent, { PieComponentProps } from './pie_component';
+import { createMockPieParams, createMockVisData } from './mocks';
 
 jest.mock('./services', () => ({
   getColorsService: jest.fn().mockReturnValue({
@@ -46,132 +45,8 @@ jest.mock('@elastic/charts', () => {
 });
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
-
-const visParams = ({
-  addLegend: true,
-  addTooltip: true,
-  isDonut: true,
-  labels: {
-    position: 'default',
-    show: true,
-    truncate: 100,
-    values: true,
-    valuesFormat: 'percent',
-  },
-  legendPosition: 'right',
-  nestedLegend: false,
-  palette: {
-    name: 'default',
-    type: 'palette',
-  },
-  type: 'pie',
-  dimensions: {
-    metric: {
-      accessor: 1,
-      format: {
-        id: 'number',
-      },
-      params: {},
-      label: 'Count',
-      aggType: 'count',
-    },
-    buckets: [
-      {
-        accessor: 0,
-        format: {
-          id: 'terms',
-          params: {
-            id: 'string',
-            otherBucketLabel: 'Other',
-            missingBucketLabel: 'Missing',
-          },
-        },
-        params: {},
-        label: 'Carrier: Descending',
-        aggType: 'terms',
-      },
-    ],
-  },
-} as unknown) as PieVisParams;
-
-const visData = {
-  type: 'datatable',
-  rows: [
-    {
-      'col-0-2': 'Logstash Airways',
-      'col-1-1': 709,
-    },
-    {
-      'col-0-2': 'JetBeats',
-      'col-1-1': 692,
-    },
-    {
-      'col-0-2': 'ES-Air',
-      'col-1-1': 662,
-    },
-    {
-      'col-0-2': 'Kibana Airlines',
-      'col-1-1': 647,
-    },
-  ],
-  columns: [
-    {
-      id: 'col-0-2',
-      name: 'Carrier: Descending',
-      meta: {
-        type: 'string',
-        field: 'Carrier',
-        index: 'kibana_sample_data_flights',
-        params: {
-          id: 'terms',
-          params: {
-            id: 'string',
-            otherBucketLabel: 'Other',
-            missingBucketLabel: 'Missing',
-          },
-        },
-        source: 'esaggs',
-        sourceParams: {
-          indexPatternId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-          id: '2',
-          enabled: true,
-          type: 'terms',
-          params: {
-            field: 'Carrier',
-            orderBy: '1',
-            order: 'desc',
-            size: 5,
-            otherBucket: false,
-            otherBucketLabel: 'Other',
-            missingBucket: false,
-            missingBucketLabel: 'Missing',
-          },
-          schema: 'segment',
-        },
-      },
-    },
-    {
-      id: 'col-1-1',
-      name: 'Count',
-      meta: {
-        type: 'number',
-        index: 'kibana_sample_data_flights',
-        params: {
-          id: 'number',
-        },
-        source: 'esaggs',
-        sourceParams: {
-          indexPatternId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-          id: '1',
-          enabled: true,
-          type: 'count',
-          params: {},
-          schema: 'metric',
-        },
-      },
-    },
-  ],
-} as Datatable;
+const visParams = createMockPieParams();
+const visData = createMockVisData();
 
 const mockState = new Map();
 const uiState = {

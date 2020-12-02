@@ -63,7 +63,7 @@ export const getColorPicker = (
     seriesKey: string | number,
     event: BaseSyntheticEvent
   ) => void,
-  layerColumns: Array<Partial<BucketColumns>>,
+  bucketColumns: Array<Partial<BucketColumns>>,
   palette: string,
   data: DatatableRow[]
 ): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
@@ -78,7 +78,7 @@ export const getColorPicker = (
 
   // For the EuiPalette we want the user to be able to change only the colors of the inner layer
   if (palette !== 'kibana_palette') {
-    const enablePicker = isOnInnerLayer(layerColumns[0], data, seriesName);
+    const enablePicker = isOnInnerLayer(bucketColumns[0], data, seriesName);
     if (!enablePicker) return null;
   }
   const hexColor = new Color(color).hex();
@@ -96,8 +96,8 @@ export const getColorPicker = (
         color={hexColor}
         onChange={handlChange}
         label={seriesName}
-        maxDepth={layerColumns.length}
-        layerIndex={getLayerIndex(seriesName, data, layerColumns)}
+        maxDepth={bucketColumns.length}
+        layerIndex={getLayerIndex(seriesName, data, bucketColumns)}
       />
     </EuiWrappingPopover>
   );

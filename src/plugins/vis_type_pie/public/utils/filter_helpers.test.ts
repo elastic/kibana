@@ -16,134 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Datatable } from '../../../expressions/public';
-import { getFilterClickData } from './filter_helpers';
-import { BucketColumns } from '../types';
+import { getFilterClickData, getFilterEventData } from './filter_helpers';
+import { createMockBucketColumns, createMockVisData } from '../mocks';
 
-const bucketColumns = [
-  {
-    id: 'col-0-2',
-    name: 'Carrier: Descending',
-    meta: {
-      type: 'string',
-      field: 'Carrier',
-      index: 'kibana_sample_data_flights',
-      params: {
-        id: 'terms',
-        params: {
-          id: 'string',
-          otherBucketLabel: 'Other',
-          missingBucketLabel: 'Missing',
-        },
-      },
-      source: 'esaggs',
-      sourceParams: {
-        indexPatternId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-        id: '2',
-        enabled: true,
-        type: 'terms',
-        params: {
-          field: 'Carrier',
-          orderBy: '1',
-          order: 'desc',
-          size: 5,
-          otherBucket: false,
-          otherBucketLabel: 'Other',
-          missingBucket: false,
-          missingBucketLabel: 'Missing',
-        },
-        schema: 'segment',
-      },
-    },
-    format: {
-      id: 'terms',
-      params: {
-        id: 'string',
-        otherBucketLabel: 'Other',
-        missingBucketLabel: 'Missing',
-      },
-    },
-  },
-] as BucketColumns[];
-
-const visData = {
-  type: 'datatable',
-  rows: [
-    {
-      'col-0-2': 'Logstash Airways',
-      'col-1-1': 729,
-    },
-    {
-      'col-0-2': 'JetBeats',
-      'col-1-1': 706,
-    },
-    {
-      'col-0-2': 'ES-Air',
-      'col-1-1': 672,
-    },
-    {
-      'col-0-2': 'Kibana Airlines',
-      'col-1-1': 662,
-    },
-  ],
-  columns: [
-    {
-      id: 'col-0-2',
-      name: 'Carrier: Descending',
-      meta: {
-        type: 'string',
-        field: 'Carrier',
-        index: 'kibana_sample_data_flights',
-        params: {
-          id: 'terms',
-          params: {
-            id: 'string',
-            otherBucketLabel: 'Other',
-            missingBucketLabel: 'Missing',
-          },
-        },
-        source: 'esaggs',
-        sourceParams: {
-          indexPatternId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-          id: '2',
-          enabled: true,
-          type: 'terms',
-          params: {
-            field: 'Carrier',
-            orderBy: '1',
-            order: 'desc',
-            size: 5,
-            otherBucket: false,
-            otherBucketLabel: 'Other',
-            missingBucket: false,
-            missingBucketLabel: 'Missing',
-          },
-          schema: 'segment',
-        },
-      },
-    },
-    {
-      id: 'col-1-1',
-      name: 'Count',
-      meta: {
-        type: 'number',
-        index: 'kibana_sample_data_flights',
-        params: {
-          id: 'number',
-        },
-        source: 'esaggs',
-        sourceParams: {
-          indexPatternId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-          id: '1',
-          enabled: true,
-          type: 'count',
-          params: {},
-          schema: 'metric',
-        },
-      },
-    },
-  ],
-} as Datatable;
+const bucketColumns = createMockBucketColumns();
+const visData = createMockVisData();
 
 describe('getFilterClickData', () => {
   it('returns the correct filter data for the specific layer', () => {
@@ -160,7 +37,7 @@ describe('getFilterClickData', () => {
     expect(data[0].column).toEqual(0);
   });
 
-  it('changes if the user clicks on another layer', () => {
+  it('changes the filter if the user clicks on another layer', () => {
     const clickedLayers = [
       {
         groupByRollup: 'ES-Air',
@@ -170,6 +47,30 @@ describe('getFilterClickData', () => {
     const data = getFilterClickData(clickedLayers, bucketColumns, visData);
     expect(data.length).toEqual(clickedLayers.length);
     expect(data[0].value).toEqual('ES-Air');
+    expect(data[0].row).toEqual(4);
+    expect(data[0].column).toEqual(0);
+  });
+});
+
+describe('getFilterEventData', () => {
+  it('returns the correct filter data for the specific series', () => {
+    const series = {
+      key: 'Kibana Airlines',
+      specId: 'pie',
+    };
+    const data = getFilterEventData(visData, series);
+    expect(data[0].value).toEqual('Kibana Airlines');
+    expect(data[0].row).toEqual(6);
+    expect(data[0].column).toEqual(0);
+  });
+
+  it('changes the filter if the user clicks on another series', () => {
+    const series = {
+      key: 'JetBeats',
+      specId: 'pie',
+    };
+    const data = getFilterEventData(visData, series);
+    expect(data[0].value).toEqual('JetBeats');
     expect(data[0].row).toEqual(2);
     expect(data[0].column).toEqual(0);
   });
