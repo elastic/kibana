@@ -39,14 +39,15 @@ export interface MlGenericUrlPageState extends MlIndexBasedSearchState {
 }
 
 export interface DataVisualizerIndexBasedAppState {
-  pageIndex?: number;
-  pageSize?: number;
-  sortField?: string;
-  sortDirection?: string;
-  queryText?: string;
+  pageIndex: number;
+  pageSize: number;
+  sortField: string;
+  sortDirection: string;
+  queryText: string;
   visibleFieldTypes: string[];
   visibleFieldNames: string[];
   samplerShardSize: number;
+  searchQueryLanguage: SearchQueryLanguage;
 }
 export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER

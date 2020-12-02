@@ -57,7 +57,6 @@ import type { OverallStats } from '../../../../common/types/datavisualizer';
 interface DataVisualizerPageState {
   searchQuery: Query['query'];
   searchString: Query['query'];
-  searchQueryLanguage: SearchQueryLanguage;
   overallStats: OverallStats;
   metricConfigs: FieldVisConfig[];
   totalMetricFieldCount: number;
@@ -76,7 +75,6 @@ function getDefaultPageState(): DataVisualizerPageState {
   return {
     searchString: '',
     searchQuery: defaultSearchQuery,
-    searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
     overallStats: {
       totalCount: 0,
       aggregatableExistsFields: [],
@@ -101,6 +99,8 @@ export const getDefaultDataVisualizerListState = (): DataVisualizerIndexBasedApp
   visibleFieldTypes: [],
   visibleFieldNames: [],
   samplerShardSize: 5000,
+  queryText: '',
+  searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
 });
 
 export const Page: FC = () => {
@@ -169,16 +169,34 @@ export const Page: FC = () => {
     queryLanguage: initQueryLanguage,
   } = extractSearchData(currentSavedSearch);
 
-  const [searchString, setSearchString] = useState(
-    dataVisualizerListState.queryText ?? initSearchString
-  );
+  const searchQueryLanguage = dataVisualizerListState.searchQueryLanguage ?? initQueryLanguage;
+  const setSearchQueryLanguage = (queryLanguage: SearchQueryLanguage) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, searchQueryLanguage: queryLanguage });
+  };
+  const samplerShardSize =
+    dataVisualizerListState.samplerShardSize ?? restorableDefaults.samplerShardSize;
+  const setSamplerShardSize = (value: number) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, samplerShardSize: value });
+  };
+
+  const searchString = dataVisualizerListState.queryText ?? initSearchString;
+  const setSearchString = (value: string) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, queryText: value });
+  };
+
+  const visibleFieldTypes =
+    dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;
+  const setVisibleFieldTypes = (values: string[]) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, visibleFieldTypes: values });
+  };
+
+  const visibleFieldNames =
+    dataVisualizerListState.visibleFieldNames ?? restorableDefaults.visibleFieldNames;
+  const setVisibleFieldNames = (values: string[]) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, visibleFieldNames: values });
+  };
+
   const [searchQuery, setSearchQuery] = useState(initSearchQuery);
-  const [searchQueryLanguage, setSearchQueryLanguage] = useState<SearchQueryLanguage>(
-    initQueryLanguage
-  );
-  const [samplerShardSize, setSamplerShardSize] = useState(
-    dataVisualizerListState.samplerShardSize ?? restorableDefaults.samplerShardSize
-  );
 
   // TODO - type overallStats and stats
   const [overallStats, setOverallStats] = useState(defaults.overallStats);
@@ -189,13 +207,6 @@ export const Page: FC = () => {
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [showAllNonMetrics, setShowAllNonMetrics] = useState(defaults.showAllNonMetrics);
-
-  const [visibleFieldTypes, setVisibleFieldTypes] = useState(
-    dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes
-  );
-  const [visibleFieldNames, setVisibleFieldNames] = useState(
-    dataVisualizerListState.visibleFieldNames ?? restorableDefaults.visibleFieldNames
-  );
 
   useEffect(() => {
     const timeUpdateSubscription = merge(
@@ -242,7 +253,7 @@ export const Page: FC = () => {
       return {
         searchQuery: defaults.searchQuery,
         searchString: defaults.searchString,
-        queryLanguage: defaults.searchQueryLanguage,
+        queryLanguage: dataVisualizerListState.searchQueryLanguage,
       };
     }
 
@@ -603,19 +614,6 @@ export const Page: FC = () => {
     return combinedConfigs;
   }, [nonMetricConfigs, metricConfigs, visibleFieldTypes, visibleFieldNames]);
 
-  useEffect(() => {
-    let newPageState = dataVisualizerListState;
-    if (visibleFieldNames && visibleFieldNames.length > 0) {
-      newPageState = { ...dataVisualizerListState, visibleFieldNames };
-    }
-    if (visibleFieldTypes && visibleFieldTypes.length > 0) {
-      newPageState = { ...dataVisualizerListState, visibleFieldTypes };
-    }
-    if (samplerShardSize !== dataVisualizerListState.samplerShardSize) {
-      newPageState = { ...dataVisualizerListState, samplerShardSize };
-    }
-    setDataVisualizerListState(newPageState);
-  }, [visibleFieldNames, visibleFieldTypes, samplerShardSize]);
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
