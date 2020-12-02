@@ -79,10 +79,6 @@ export interface DiscoverSidebarProps {
    */
   useNewFieldsApi?: boolean;
   /**
-   * Callback to execute once the selection to show/hide unmapped fields changes
-   */
-  onShowUnmappedFieldsChange: (value: boolean) => void;
-  /**
    * Metric tracking function
    * @param metricType
    * @param eventName
@@ -102,7 +98,6 @@ export function DiscoverSidebar({
   setIndexPattern,
   trackUiMetric,
   useNewFieldsApi,
-  onShowUnmappedFieldsChange,
 }: DiscoverSidebarProps) {
   const [showFields, setShowFields] = useState(false);
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
@@ -175,8 +170,6 @@ export function DiscoverSidebar({
               onChange={onChangeFieldSearch}
               value={fieldFilterState.name}
               types={fieldTypes}
-              useNewFieldsApi={useNewFieldsApi}
-              onShowUnmappedFieldsChange={onShowUnmappedFieldsChange}
             />
           </form>
         </div>
