@@ -3,7 +3,7 @@
 [[download_csv]]
 === Download CSV
 
-To download the underlying data of the Lens panels on your dashboard, you can use the *Download as CSV* drill down option.
+To download the underlying data of the Lens panels on your dashboard, you can use the *Download as CSV* option.
 
 TIP: The *Download as CSV* option supports multiple CSV file downloads from the same Lens visualization out of the box, if configured: for instance with multiple layers on a bar chart.
 
