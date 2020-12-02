@@ -47,7 +47,7 @@ export interface NumericRollingStrategyConfig {
    *
    * will create `/var/logs/kibana-1.log`, `/var/logs/kibana-2.log`, and so on.
    *
-   * Defaults to '-%i'.
+   * Defaults to `-%i`.
    */
   pattern: string;
   /**
