@@ -14,11 +14,9 @@ const ReadOnlyCallOutComponent = () => {
   const handleCallOut = useCallback(() => setShowCallOut(false), [setShowCallOut]);
 
   return showCallOut ? (
-    <EuiCallOut title={i18n.READ_ONLY_CALLOUT_TITLE} color="warning" iconType="alert">
+    <EuiCallOut title={i18n.READ_ONLY_CALLOUT_TITLE} iconType="iInCircle">
       <p>{i18n.READ_ONLY_CALLOUT_MSG}</p>
-      <EuiButton color="warning" onClick={handleCallOut}>
-        {i18n.DISMISS_CALLOUT}
-      </EuiButton>
+      <EuiButton onClick={handleCallOut}>{i18n.DISMISS_CALLOUT}</EuiButton>
     </EuiCallOut>
   ) : null;
 };

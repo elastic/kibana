@@ -14,11 +14,9 @@ const NoWriteAlertsCallOutComponent = () => {
   const handleCallOut = useCallback(() => setShowCallOut(false), [setShowCallOut]);
 
   return showCallOut ? (
-    <EuiCallOut title={i18n.NO_WRITE_ALERTS_CALLOUT_TITLE} color="warning" iconType="alert">
+    <EuiCallOut title={i18n.NO_WRITE_ALERTS_CALLOUT_TITLE} iconType="iInCircle">
       <p>{i18n.NO_WRITE_ALERTS_CALLOUT_MSG}</p>
-      <EuiButton color="warning" onClick={handleCallOut}>
-        {i18n.DISMISS_CALLOUT}
-      </EuiButton>
+      <EuiButton onClick={handleCallOut}>{i18n.DISMISS_CALLOUT}</EuiButton>
     </EuiCallOut>
   ) : null;
 };
