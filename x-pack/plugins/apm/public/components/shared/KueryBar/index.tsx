@@ -14,9 +14,9 @@ import {
   IIndexPattern,
   QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
 // @ts-expect-error
@@ -65,7 +65,7 @@ export function KueryBar() {
 
   const example = examples[processorEvent || 'defaults'];
 
-  const { indexPattern } = useDynamicIndexPattern(processorEvent);
+  const { indexPattern } = useDynamicIndexPatternFetcher(processorEvent);
 
   const placeholder = i18n.translate('xpack.apm.kueryBar.placeholder', {
     defaultMessage: `Search {event, select,
