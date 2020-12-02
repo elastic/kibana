@@ -175,10 +175,11 @@ export class AttributeService<SavedObjectAttributes extends {
     wrapAttributes(newAttributes: SavedObjectAttributes, useRefType: boolean, input?: ValType | RefType): Promise<Omit<ValType | RefType, 'id'>>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "RowClickContext" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ChartActionContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type ChartActionContext<T extends IEmbeddable = IEmbeddable> = ValueClickContext<T> | RangeSelectContext<T>;
+export type ChartActionContext<T extends IEmbeddable = IEmbeddable> = ValueClickContext<T> | RangeSelectContext<T> | RowClickContext;
 
 // Warning: (ae-missing-release-tag) "Container" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -724,6 +725,11 @@ export interface IEmbeddable<I extends EmbeddableInput = EmbeddableInput, O exte
 // @public (undocumented)
 export const isContextMenuTriggerContext: (context: unknown) => context is EmbeddableContext;
 
+// Warning: (ae-missing-release-tag) "isEmbeddable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isEmbeddable: (x: unknown) => x is IEmbeddable<import("./i_embeddable").EmbeddableInput, import("./i_embeddable").EmbeddableOutput>;
+
 // Warning: (ae-missing-release-tag) "isErrorEmbeddable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -738,6 +744,11 @@ export const isRangeSelectTriggerContext: (context: ChartActionContext) => conte
 //
 // @public (undocumented)
 export function isReferenceOrValueEmbeddable(incoming: unknown): incoming is ReferenceOrValueEmbeddable;
+
+// Warning: (ae-missing-release-tag) "isRowClickTriggerContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isRowClickTriggerContext: (context: ChartActionContext) => context is RowClickContext;
 
 // Warning: (ae-missing-release-tag) "isSavedObjectEmbeddableInput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

@@ -14,6 +14,7 @@ export interface IInterpreterRenderHandlers
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [data](./kibana-plugin-plugins-expressions-server.iinterpreterrenderhandlers.data.md) | <code>unknown</code> |  |
 |  [done](./kibana-plugin-plugins-expressions-server.iinterpreterrenderhandlers.done.md) | <code>() =&gt; void</code> | Done increments the number of rendering successes |
 |  [event](./kibana-plugin-plugins-expressions-server.iinterpreterrenderhandlers.event.md) | <code>(event: any) =&gt; void</code> |  |
 |  [getRenderMode](./kibana-plugin-plugins-expressions-server.iinterpreterrenderhandlers.getrendermode.md) | <code>() =&gt; RenderMode</code> |  |

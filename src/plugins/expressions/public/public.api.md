@@ -542,7 +542,7 @@ export class ExpressionRenderHandler {
     // (undocumented)
     render$: Observable<number>;
     // (undocumented)
-    render: (data: any, uiState?: any) => Promise<void>;
+    render: (value: any, uiState?: any, data?: unknown) => Promise<void>;
     // Warning: (ae-forgotten-export) The symbol "UpdateValue" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -882,6 +882,8 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     customRenderers?: [];
     // (undocumented)
+    data?: unknown;
+    // (undocumented)
     debug?: boolean;
     // (undocumented)
     disableCaching?: boolean;
@@ -909,6 +911,8 @@ export interface IExpressionLoaderParams {
 //
 // @public (undocumented)
 export interface IInterpreterRenderHandlers {
+    // (undocumented)
+    data?: unknown;
     done: () => void;
     // (undocumented)
     event: (event: any) => void;

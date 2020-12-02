@@ -133,6 +133,32 @@ export class IncompatibleActionError extends Error {
 // @public (undocumented)
 export function plugin(initializerContext: PluginInitializerContext): UiActionsPlugin;
 
+// Warning: (ae-missing-release-tag) "ROW_CLICK_TRIGGER" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const ROW_CLICK_TRIGGER = "ROW_CLICK_TRIGGER";
+
+// Warning: (ae-missing-release-tag) "RowClickContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface RowClickContext {
+    // (undocumented)
+    data: {
+        rowIndex: number;
+        table: Datatable;
+        columns?: string[];
+    };
+    // Warning: (ae-forgotten-export) The symbol "IEmbeddable" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    embeddable?: IEmbeddable;
+}
+
+// Warning: (ae-missing-release-tag) "rowClickTrigger" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const rowClickTrigger: Trigger<'ROW_CLICK_TRIGGER'>;
+
 // Warning: (ae-missing-release-tag) "SELECT_RANGE_TRIGGER" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -170,6 +196,8 @@ export interface TriggerContextMapping {
     //
     // (undocumented)
     [APPLY_FILTER_TRIGGER]: ApplyGlobalFilterActionContext;
+    // (undocumented)
+    [ROW_CLICK_TRIGGER]: RowClickContext;
     // Warning: (ae-forgotten-export) The symbol "RangeSelectContext" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -234,14 +262,14 @@ export class UiActionsService {
     //
     // (undocumented)
     protected readonly actions: ActionRegistry;
-    readonly addTriggerAction: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T, action: UiActionsActionDefinition<TriggerContextMapping[T]> | Action<TriggerContextMapping[T], "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel" | "togglePanel" | "replacePanel" | "clonePanel" | "addToFromLibrary" | "unlinkFromLibrary" | "ACTION_LIBRARY_NOTIFICATION">) => void;
+    readonly addTriggerAction: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "ROW_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T, action: UiActionsActionDefinition<TriggerContextMapping[T]> | Action<TriggerContextMapping[T], "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel" | "togglePanel" | "replacePanel" | "clonePanel" | "addToFromLibrary" | "unlinkFromLibrary" | "ACTION_LIBRARY_NOTIFICATION">) => void;
     // (undocumented)
-    readonly attachAction: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T, actionId: string) => void;
+    readonly attachAction: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "ROW_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T, actionId: string) => void;
     readonly clear: () => void;
     // (undocumented)
     readonly detachAction: (triggerId: TriggerId, actionId: string) => void;
     // @deprecated (undocumented)
-    readonly executeTriggerActions: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T, context: TriggerContext<T>) => Promise<void>;
+    readonly executeTriggerActions: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "ROW_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T, context: TriggerContext<T>) => Promise<void>;
     // Warning: (ae-forgotten-export) The symbol "UiActionsExecutionService" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -252,11 +280,11 @@ export class UiActionsService {
     // Warning: (ae-forgotten-export) The symbol "TriggerContract" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    readonly getTrigger: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T) => TriggerContract<T>;
+    readonly getTrigger: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "ROW_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T) => TriggerContract<T>;
     // (undocumented)
-    readonly getTriggerActions: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T) => Action<TriggerContextMapping[T], "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel" | "togglePanel" | "replacePanel" | "clonePanel" | "addToFromLibrary" | "unlinkFromLibrary" | "ACTION_LIBRARY_NOTIFICATION">[];
+    readonly getTriggerActions: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "ROW_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T) => Action<TriggerContextMapping[T], "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel" | "togglePanel" | "replacePanel" | "clonePanel" | "addToFromLibrary" | "unlinkFromLibrary" | "ACTION_LIBRARY_NOTIFICATION">[];
     // (undocumented)
-    readonly getTriggerCompatibleActions: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T, context: TriggerContextMapping[T]) => Promise<Action<TriggerContextMapping[T], "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel" | "togglePanel" | "replacePanel" | "clonePanel" | "addToFromLibrary" | "unlinkFromLibrary" | "ACTION_LIBRARY_NOTIFICATION">[]>;
+    readonly getTriggerCompatibleActions: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "ROW_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T, context: TriggerContextMapping[T]) => Promise<Action<TriggerContextMapping[T], "" | "ACTION_VISUALIZE_FIELD" | "ACTION_VISUALIZE_GEO_FIELD" | "ACTION_VISUALIZE_LENS_FIELD" | "ACTION_GLOBAL_APPLY_FILTER" | "ACTION_SELECT_RANGE" | "ACTION_VALUE_CLICK" | "ACTION_CUSTOMIZE_PANEL" | "ACTION_ADD_PANEL" | "openInspector" | "deletePanel" | "editPanel" | "togglePanel" | "replacePanel" | "clonePanel" | "addToFromLibrary" | "unlinkFromLibrary" | "ACTION_LIBRARY_NOTIFICATION">[]>;
     // (undocumented)
     readonly hasAction: (actionId: string) => boolean;
     // Warning: (ae-forgotten-export) The symbol "ActionContext" needs to be exported by the entry point index.d.ts
@@ -340,6 +368,10 @@ export const visualizeFieldTrigger: Trigger<'VISUALIZE_FIELD_TRIGGER'>;
 // @public (undocumented)
 export const visualizeGeoFieldTrigger: Trigger<'VISUALIZE_GEO_FIELD_TRIGGER'>;
 
+
+// Warnings were encountered during analysis:
+//
+// src/plugins/ui_actions/public/triggers/row_click_trigger.ts:45:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

@@ -726,6 +726,8 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
 //
 // @public (undocumented)
 export interface IInterpreterRenderHandlers {
+    // (undocumented)
+    data?: unknown;
     done: () => void;
     // (undocumented)
     event: (event: any) => void;

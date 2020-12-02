@@ -16,6 +16,7 @@ export interface TriggerContextMapping
 |  --- | --- | --- |
 |  [""](./kibana-plugin-plugins-ui_actions-public.triggercontextmapping.__.md) | <code>TriggerContext</code> |  |
 |  [FILTER\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.triggercontextmapping.filter_trigger.md) | <code>ApplyGlobalFilterActionContext</code> |  |
+|  [ROW\_CLICK\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.triggercontextmapping.row_click_trigger.md) | <code>RowClickContext</code> |  |
 |  [SELECT\_RANGE\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.triggercontextmapping.select_range_trigger.md) | <code>RangeSelectContext</code> |  |
 |  [VALUE\_CLICK\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.triggercontextmapping.value_click_trigger.md) | <code>ValueClickContext</code> |  |
 |  [VISUALIZE\_FIELD\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.triggercontextmapping.visualize_field_trigger.md) | <code>VisualizeFieldContext</code> |  |
