@@ -73,7 +73,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       )}
       <ContextMenuActions
         button={{
-          props: { iconType: 'arrowDown', iconSide: 'right' },
+          props: { iconType: 'arrowDown', iconSide: 'right', color: 'primary', fill: true },
           children: (
             <FormattedMessage
               id="xpack.fleet.agentDetails.actionsButton"

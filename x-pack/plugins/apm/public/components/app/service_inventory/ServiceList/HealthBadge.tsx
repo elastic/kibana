@@ -10,7 +10,7 @@ import {
   getServiceHealthStatusLabel,
   ServiceHealthStatus,
 } from '../../../../../common/service_health_status';
-import { useTheme } from '../../../../hooks/useTheme';
+import { useTheme } from '../../../../hooks/use_theme';
 
 export function HealthBadge({
   healthStatus,

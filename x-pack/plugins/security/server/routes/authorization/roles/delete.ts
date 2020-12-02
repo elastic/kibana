@@ -9,7 +9,7 @@ import { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 
-export function defineDeleteRolesRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
   router.delete(
     {
       path: '/api/security/role/{name}',
@@ -19,7 +19,7 @@ export function defineDeleteRolesRoutes({ router, clusterClient }: RouteDefiniti
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        await clusterClient.asScoped(request).callAsCurrentUser('shield.deleteRole', {
+        await context.core.elasticsearch.client.asCurrentUser.security.deleteRole({
           name: request.params.name,
         });
 
