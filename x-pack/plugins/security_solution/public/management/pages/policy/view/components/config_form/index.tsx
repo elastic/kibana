@@ -58,12 +58,12 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
           <ConfigFormHeading>{TITLES.type}</ConfigFormHeading>
           <EuiText size="m">{type}</EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem>
           <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>
           <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')}</EuiText>
         </EuiFlexItem>
         <EuiShowFor sizes={['m', 'l', 'xl']}>
-          <EuiFlexItem>
+          <EuiFlexItem grow={2}>
             <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>{rightCorner}</EuiFlexItem>
             </EuiFlexGroup>
