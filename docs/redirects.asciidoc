@@ -193,3 +193,106 @@ This page has moved. Refer to <<url_templating-language>>.
 === Variables
 
 This page has moved. Refer to <<url-template-variables>>.
+
+[float]
+[[time-series-visual-builder]]
+=== Time Series Visual Builder
+
+This page was deleted. Please see <<Dashboard>>.
+
+[float]
+[[development-functional-tests]]
+=== Development Functional Tests
+
+This page has been moved. Please see <<Testing>>.
+
+[float]
+[[kibana-keystore-has-moved-from-the-data-folder-to-the-config-folder]]
+=== Kibana Keystore has moved from the Data Folder to the Config Folder
+
+This page has been deleted. Please see <<Breaking Changes in 8.0>>.
+
+[float]
+[[createvis]]
+=== Create Visualization
+
+This page has been deleted. Please see <<Dashboard>>.
+
+[float]
+[[data-table]]
+=== Data Table
+
+This page has been deleted. Please see <<Dashboard>>.
+
+
+[float]
+[[xy-chart]]
+=== Line, Area, and Bar Chart
+
+This page has been deleted. Please see <<Dashboard>>.
+
+[float]
+[[watcher-create-threshold-alert]]
+=== Create Threshold Alert
+
+This page has been moved. Please see <<Watcher>>.
+
+[float]
+[[add-canvas-events]]
+=== Add Canvas Elements
+
+This page has been moved. Please see <<Canvas>>.
+
+[float]
+[[vega-lite-tutorial]]
+=== Vega-Lite Tutorial
+
+This page has been moved. Please see <<Create your first visualization with Vega-Lite>>.
+
+[float]
+[[heatmap-chart]]
+=== Heatmap Chart
+
+This page has been moved. Please see <<Heat map layer>>.
+
+[float]
+[[interface-overview]]
+=== Interface Overview
+
+This page has been moved. Please see <<Dashboard>>.
+
+[float]
+[[time-series-visualizations]]
+=== Featured Visualizations
+
+This page has been moved. Please see <<Dashboard>>.
+
+[float]
+[[timelion-customize]]
+=== Customize and format visualizations
+
+This page has been moved. Please see <<Dashboard>>.
+
+[float]
+[[dashboard-drilldown]]
+=== Dashboard Drilldowns
+
+This page has been moved. Please see <<Create custom dashboard actions>>.
+
+[float]
+[[rpm]]
+=== Install Kibana with RPM
+
+This page has been moved. Please see <<Install Kibana with RPM>>.
+
+[float]
+[[automating-report-generation]]
+=== Automating Report Generation
+
+This page has been moved. Please see <<Automating Report generation>>.
+
+[float]
+[[development-plugin-localization]]
+=== Localization for plugins
+
+This page has been moved. Please see <<Localization for plugins outside the Kibana repo>>.
