@@ -676,4 +676,111 @@ describe('ui settings', () => {
       expect(uiSettings.isOverridden('bar')).toBe(true);
     });
   });
+
+  describe('caching', () => {
+    describe('read operations cache user config', () => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.clearAllTimers();
+      });
+
+      it('get', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(10000);
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('getAll', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.getAll();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.getAll();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(10000);
+        await uiSettings.getAll();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('getUserProvided', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.getUserProvided();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.getUserProvided();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(10000);
+        await uiSettings.getUserProvided();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('write operations invalidate user config cache', () => {
+      it('set', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.set('foo', 'bar');
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('setMany', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.setMany({ foo: 'bar' });
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('remove', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.remove('foo');
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('removeMany', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.removeMany(['foo', 'bar']);
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+    });
+  });
 });
