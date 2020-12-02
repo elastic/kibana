@@ -38,10 +38,6 @@ export default function resilientTest({ getService }: FtrProviderContext) {
           description: 'a description',
           incidentTypes: [1001],
           severityCode: 6,
-          createdAt: '2020-03-13T08:34:53.450Z',
-          createdBy: { fullName: 'Elastic User', username: 'elastic' },
-          updatedAt: null,
-          updatedBy: null,
           externalId: null,
         },
         comments: [
@@ -295,7 +291,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.name]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
@@ -321,7 +317,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.name]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
@@ -336,12 +332,9 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 subActionParams: {
                   incident: {
                     ...mockResilient.params.subActionParams.incident,
-                    savedObjectId: 'success',
                     name: 'success',
-                    createdAt: 'success',
-                    createdBy: { username: 'elastic' },
                   },
-                  comments: [],
+                  comments: [{ comment: 'comment' }],
                 },
               },
             })
@@ -367,8 +360,6 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                   incident: {
                     ...mockResilient.params.subActionParams.incident,
                     name: 'success',
-                    createdAt: 'success',
-                    createdBy: { username: 'elastic' },
                   },
                   comments: [{ commentId: 'success' }],
                 },
@@ -408,7 +399,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             actionId: simulatedActionId,
             data: {
               id: '123',
-              name: '123',
+              title: '123',
               pushedDate: '2020-05-13T17:44:34.472Z',
               url: `${resilientSimulatorURL}/#incidents/123`,
             },

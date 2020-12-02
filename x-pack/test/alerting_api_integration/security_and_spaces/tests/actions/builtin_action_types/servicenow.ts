@@ -15,24 +15,6 @@ import {
   ExternalServiceSimulator,
 } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
-const mapping = [
-  {
-    source: 'title',
-    target: 'short_description',
-    actionType: 'overwrite',
-  },
-  {
-    source: 'description',
-    target: 'description',
-    actionType: 'overwrite',
-  },
-  {
-    source: 'comments',
-    target: 'comments',
-    actionType: 'append',
-  },
-];
-
 // eslint-disable-next-line import/no-default-export
 export default function servicenowTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -42,8 +24,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
   const mockServiceNow = {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
-      incidentConfiguration: { mapping },
-      isCaseOwned: true,
     },
     secrets: {
       password: 'elastic',
@@ -53,15 +33,11 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       subAction: 'pushToService',
       subActionParams: {
         incident: {
-          createdAt: '2020-03-13T08:34:53.450Z',
-          createdBy: { fullName: 'Elastic User', username: 'elastic' },
           description: 'a description',
           externalId: null,
           impact: '1',
           severity: '1',
           short_description: 'a title',
-          updatedAt: '2020-06-17T04:37:45.147Z',
-          updatedBy: { fullName: null, username: 'elastic' },
           urgency: '1',
         },
         comments: [
@@ -289,7 +265,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -312,7 +288,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -325,12 +301,11 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockServiceNow.params,
                 subActionParams: {
-                  ...mockServiceNow.params.subActionParams,
-                  savedObjectId: 'success',
-                  short_description: 'success',
-                  createdAt: 'success',
-                  createdBy: { username: 'elastic' },
-                  comments: [{}],
+                  incident: {
+                    ...mockServiceNow.params.subActionParams.incident,
+                    short_description: 'success',
+                  },
+                  comments: [{ comment: 'boo' }],
                 },
               },
             })
@@ -340,7 +315,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments.0.commentId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]',
               });
             });
         });
@@ -355,9 +330,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 subActionParams: {
                   incident: {
                     ...mockServiceNow.params.subActionParams.incident,
-                    name: 'success',
-                    createdAt: 'success',
-                    createdBy: { username: 'elastic' },
+                    short_description: 'success',
                   },
                   comments: [{ commentId: 'success' }],
                 },
@@ -369,7 +342,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments.0.comment]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]',
               });
             });
         });
@@ -397,7 +370,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionId: simulatedActionId,
             data: {
               id: '123',
-              short_description: 'INC01',
+              title: 'INC01',
               pushedDate: '2020-03-10T12:24:20.000Z',
               url: `${servicenowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
             },

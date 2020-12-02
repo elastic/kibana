@@ -86,12 +86,16 @@ export const ConnectorEditFlyout = ({
   >(none);
   const [isExecutingAction, setIsExecutinAction] = useState<boolean>(false);
   const handleSetTab = useCallback(
-    (newTab) => {
-      setTab(newTab);
-      if (testExecutionResult !== none && newTab !== EditConectorTabs.Test) {
-        setTestExecutionResult(none);
-      }
-    },
+    () =>
+      setTab((prevTab) => {
+        if (prevTab === EditConectorTabs.Configuration) {
+          return EditConectorTabs.Test;
+        }
+        if (testExecutionResult !== none) {
+          setTestExecutionResult(none);
+        }
+        return EditConectorTabs.Configuration;
+      }),
     [testExecutionResult]
   );
 
@@ -232,7 +236,7 @@ export const ConnectorEditFlyout = ({
         </EuiFlexGroup>
         <EuiTabs className="connectorEditFlyoutTabs">
           <EuiTab
-            onClick={() => handleSetTab(EditConectorTabs.Configuration)}
+            onClick={handleSetTab}
             data-test-subj="configureConnectorTab"
             isSelected={EditConectorTabs.Configuration === selectedTab}
           >
@@ -241,7 +245,7 @@ export const ConnectorEditFlyout = ({
             })}
           </EuiTab>
           <EuiTab
-            onClick={() => setTab(EditConectorTabs.Test)}
+            onClick={handleSetTab}
             data-test-subj="testConnectorTab"
             isSelected={EditConectorTabs.Test === selectedTab}
           >

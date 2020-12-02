@@ -27,8 +27,8 @@ export function getMigrations(
 
   const migrationActionsEleven = encryptedSavedObjects.createMigration<RawAction, RawAction>(
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      doc.attributes.config?.hasOwnProperty('isCaseOwned') ||
-      doc.attributes.config?.hasOwnProperty('incidentConfiguration') ||
+      !!doc.attributes.config?.isCaseOwned ||
+      !!doc.attributes.config?.incidentConfiguration ||
       doc.attributes.actionTypeId === '.webhook',
     pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
   );
@@ -79,14 +79,17 @@ function renameCasesConfigurationObject(
 function removeCasesFieldMappings(
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> {
+  console.log('DOES removeCasesFieldMappings HIT????');
   if (
     !doc.attributes.config?.hasOwnProperty('isCaseOwned') &&
     !doc.attributes.config?.hasOwnProperty('incidentConfiguration')
   ) {
+    console.log('HIT???? early');
     return doc;
   }
   const { incidentConfiguration, isCaseOwned, ...restConfiguration } = doc.attributes.config;
 
+  console.log('HIT???? reformatted');
   return {
     ...doc,
     attributes: {

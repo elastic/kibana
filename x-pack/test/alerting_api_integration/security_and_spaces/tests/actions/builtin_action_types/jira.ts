@@ -36,10 +36,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
         incident: {
           summary: 'a title',
           description: 'a description',
-          createdAt: '2020-03-13T08:34:53.450Z',
-          createdBy: { fullName: 'Elastic User', username: 'elastic' },
-          updatedAt: null,
-          updatedBy: null,
           externalId: null,
         },
         comments: [
@@ -293,7 +289,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.summary]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
               });
             });
         });
@@ -319,7 +315,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.summary]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
               });
             });
         });
@@ -335,10 +331,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                   incident: {
                     ...mockJira.params.subActionParams.incident,
                     description: 'success',
-                    savedObjectId: 'success',
                     summary: 'success',
-                    createdAt: 'success',
-                    createdBy: { username: 'elastic' },
                   },
                   comments: [{ comment: 'comment' }],
                 },
@@ -366,8 +359,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                   incident: {
                     ...mockJira.params.subActionParams.incident,
                     summary: 'success',
-                    createdAt: 'success',
-                    createdBy: { username: 'elastic' },
                   },
                   comments: [{ commentId: 'success' }],
                 },
@@ -410,7 +401,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             actionId: simulatedActionId,
             data: {
               id: '123',
-              summary: 'CK-1',
+              title: 'CK-1',
               pushedDate: '2020-04-27T14:17:45.490Z',
               url: `${jiraSimulatorURL}/browse/CK-1`,
             },

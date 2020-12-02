@@ -98,7 +98,6 @@ async function executor(
 
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
-
     data = await api.pushToService({
       externalService,
       params: pushToServiceParams,
