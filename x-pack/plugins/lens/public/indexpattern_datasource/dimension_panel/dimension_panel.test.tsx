@@ -1255,13 +1255,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
       'Counter rate',
       'Cumulative sum',
       'Differences',
+      'Last value',
       'Maximum',
       'Median',
       'Minimum',
       'Moving average',
       'Sum',
       'Unique count',
-      '\u00a0',
     ]);
   });
 

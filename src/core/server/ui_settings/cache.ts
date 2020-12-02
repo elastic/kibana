@@ -16,30 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+const oneSec = 1000;
+const defMaxAge = 5 * oneSec;
+/**
+ * @internal
+ */
+export class Cache<T = Record<string, any>> {
+  private value: T | null;
+  private timer?: NodeJS.Timeout;
 
-import axios from 'axios';
-import { ToolingLog } from '@kbn/dev-utils';
-
-export async function getNodeShasums(log: ToolingLog, nodeVersion: string) {
-  const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v${nodeVersion}/SHASUMS256.txt`;
-
-  log.debug('Downloading shasum values for node version', nodeVersion, 'from', url);
-
-  const { status, data } = await axios.get(url);
-
-  if (status !== 200) {
-    throw new Error(`${url} failed with a ${status} response`);
+  /**
+   * Delete cached value after maxAge ms.
+   */
+  constructor(private readonly maxAge: number = defMaxAge) {
+    this.value = null;
   }
-
-  return data
-    .toString('utf8')
-    .split('\n')
-    .reduce((acc: Record<string, string>, line: string) => {
-      const [sha, platform] = line.split('  ');
-
-      return {
-        ...acc,
-        [platform]: sha,
-      };
-    }, {});
+  get() {
+    return this.value;
+  }
+  set(value: T) {
+    this.del();
+    this.value = value;
+    this.timer = setTimeout(() => this.del(), this.maxAge);
+  }
+  del() {
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
+    this.value = null;
+  }
 }

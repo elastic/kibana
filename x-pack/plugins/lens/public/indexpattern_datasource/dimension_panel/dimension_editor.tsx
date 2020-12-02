@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiListGroupItemProps,
   EuiFormLabel,
+  EuiToolTip,
 } from '@elastic/eui';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { OperationSupportMatrix } from './operation_support';
@@ -143,20 +144,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
           definition.input === 'field' &&
           fieldByOperation[operationType]?.has(selectedColumn.sourceField)) ||
         (selectedColumn && !hasField(selectedColumn) && definition.input === 'none'),
+      disabledStatus:
+        definition.getDisabledStatus &&
+        definition.getDisabledStatus(state.indexPatterns[state.currentIndexPatternId]),
     };
   });
 
-  const selectedColumnSourceField =
-    selectedColumn && 'sourceField' in selectedColumn ? selectedColumn.sourceField : undefined;
-
-  const currentFieldIsInvalid = useMemo(
-    () =>
-      fieldIsInvalid(selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern),
-    [selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern]
-  );
+  const currentFieldIsInvalid = useMemo(() => fieldIsInvalid(selectedColumn, currentIndexPattern), [
+    selectedColumn,
+    currentIndexPattern,
+  ]);
 
   const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
-    ({ operationType, compatibleWithCurrentField }) => {
+    ({ operationType, compatibleWithCurrentField, disabledStatus }) => {
       const isActive = Boolean(
         incompleteOperation === operationType ||
           (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
@@ -170,7 +170,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
       }
 
       let label: EuiListGroupItemProps['label'] = operationPanels[operationType].displayName;
-      if (isActive) {
+      if (disabledStatus) {
+        label = (
+          <EuiToolTip content={disabledStatus} display="block" position="left">
+            <span>{operationPanels[operationType].displayName}</span>
+          </EuiToolTip>
+        );
+      } else if (isActive) {
         label = <strong>{operationPanels[operationType].displayName}</strong>;
       }
 
@@ -180,6 +186,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         color,
         isActive,
         size: 's',
+        isDisabled: !!disabledStatus,
         className: 'lnsIndexPatternDimensionEditor__operation',
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
           compatibleWithCurrentField ? '' : ' incompatible'
@@ -269,7 +276,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
               ? currentIndexPattern.getFieldByName(selectedColumn.sourceField)
               : undefined,
           });
-
           setState(mergeLayer({ state, layerId, newLayer }));
         },
       };
