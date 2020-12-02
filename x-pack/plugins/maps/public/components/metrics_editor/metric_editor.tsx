@@ -12,10 +12,16 @@ import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } fro
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MetricSelect } from './metric_select';
 import { SingleFieldSelect } from '../single_field_select';
-import { AggDescriptor } from '../../../common/descriptor_types';
+import { AggDescriptor, FieldedAggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE } from '../../../common/constants';
 import { getTermsFields } from '../../index_pattern_util';
 import { IFieldType } from '../../../../../../src/plugins/data/public';
+
+export function isMetricInvalid(aggDescriptor: AggDescriptor) {
+  return aggDescriptor.type !== AGG_TYPE.COUNT
+    ? (aggDescriptor as FieldedAggDescriptor).field === undefined
+    : false;
+}
 
 function filterFieldsForAgg(fields: IFieldType[], aggType: AGG_TYPE) {
   if (!fields) {
@@ -94,12 +100,17 @@ export function MetricEditor({
 
   let fieldSelect;
   if (metric.type && metric.type !== AGG_TYPE.COUNT) {
+    const showErrors = metric.field === undefined;
     fieldSelect = (
       <EuiFormRow
         label={i18n.translate('xpack.maps.metricsEditor.selectFieldLabel', {
           defaultMessage: 'Field',
         })}
         display="columnCompressed"
+        isInvalid={showErrors}
+        error={i18n.translate('xpack.maps.metricsEditor.selectFieldError', {
+          defaultMessage: 'Field required for aggregation',
+        })}
       >
         <SingleFieldSelect
           placeholder={i18n.translate('xpack.maps.metricsEditor.selectFieldPlaceholder', {
@@ -109,6 +120,7 @@ export function MetricEditor({
           onChange={onFieldChange}
           fields={filterFieldsForAgg(fields, metric.type)}
           isClearable={false}
+          isInvalid={showErrors}
           compressed
         />
       </EuiFormRow>
