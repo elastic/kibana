@@ -27,8 +27,9 @@ import { ApmAgentConfig } from './types';
 
 const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
   // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
+
   return {
-    active: process.env.ELASTIC_APM_ACTIVE || false,
+    active: process.env.ELASTIC_APM_ACTIVE === 'true' || false,
     environment: process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV || 'development',
 
     serverUrl: 'https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io',
@@ -44,6 +45,9 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
     globalLabels: {},
     centralConfig: false,
     metricsInterval: isDistributable ? '120s' : '30s',
+    transactionSampleRate: process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE
+      ? parseFloat(process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE)
+      : 1.0,
 
     // Can be performance intensive, disabling by default
     breakdownMetrics: isDistributable ? false : true,
