@@ -38,9 +38,9 @@ export interface Plugin {
 export type Plugins = Plugin[];
 
 const getReadmeName = (directory: string) =>
-  Fs.readdirSync(directory).find((name) => (
-    name.toLowerCase() === 'readme.md' ||
-    name.toLowerCase() === 'readme.mdx'));
+  Fs.readdirSync(directory).find(
+    (name) => name.toLowerCase() === 'readme.md' || name.toLowerCase() === 'readme.mdx'
+  );
 
 const getReadmeAsciidocName = (directory: string) =>
   Fs.readdirSync(directory).find((name) => name.toLowerCase() === 'readme.asciidoc');
