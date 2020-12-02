@@ -7,9 +7,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { HttpLogic } from '../http';
-
 import { IIndexingStatus } from '../types';
-
 import { flashAPIErrors } from '../flash_messages';
 
 interface IndexingStatusProps {
