@@ -11,8 +11,8 @@ import styled from 'styled-components';
 import { FieldMappingRowStatic } from './field_mapping_row_static';
 import * as i18n from './translations';
 
-import { connectorsConfiguration } from '../../../common/lib/connectors/config';
 import { CaseConnectorMapping } from '../../containers/configure/types';
+import { connectorsConfiguration } from '../connectors';
 
 const FieldRowWrapper = styled.div`
   margin: 10px 0;

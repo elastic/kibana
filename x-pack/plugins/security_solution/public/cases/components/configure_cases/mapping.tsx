@@ -11,8 +11,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 import * as i18n from './translations';
 
 import { FieldMapping } from './field_mapping';
-import { connectorsConfiguration } from '../../../common/lib/connectors/config';
 import { CaseConnectorMapping } from '../../containers/configure/types';
+import { connectorsConfiguration } from '../connectors';
 
 export interface MappingProps {
   connectorActionTypeId: string;
