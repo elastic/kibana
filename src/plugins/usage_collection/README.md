@@ -140,6 +140,98 @@ export function registerMyPluginUsageCollector(
 }
 ```
 
+## Tracking interactions with incrementCounter
+There are several ways to collect data that can provide insight into how users
+use your plugin or specific features. For tracking user interactions the
+`SavedObjectsRepository` provided by Core provides a useful `incrementCounter`
+method which can be used to increment one or more counter fields in a
+document. Examples of interactions include tracking:
+ - the number of API calls
+ - the number of times users installed and uninstalled the sample datasets 
+
+When using `incrementCounter` for collecting usage data, you need to ensure
+that usage collection happens on a best-effort basis and doesn't
+negatively affect your plugin or users (see the example):
+ - Swallow any exceptions thrown from the incrementCounter method and log
+   a message in development.
+ - Don't block your application on the incrementCounter method (e.g.
+   don't use `await`)
+ - Set the `refresh` option to false to prevent unecessary index refreshes
+   which slows down Elasticsearch performance
+
+
+Note: for brevity the following example does not follow Kibana's conventions
+for structuring your plugin code.
+```ts
+// src/plugins/dashboard/server/plugin.ts
+
+import { PluginInitializerContext, Plugin, CoreStart, CoreSetup } from '../../src/core/server';
+
+export class DashboardPlugin implements Plugin {
+  private readonly logger: Logger;
+  private readonly isDevEnvironment: boolean;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+    this.isDevEnvironment = initializerContext.env.cliArgs.dev;
+  }
+  public setup(core) {
+    // Register a saved object type to store our usage counters
+    core.savedObjects.registerType({
+      // Don't expose this saved object type via the saved objects HTTP API
+      hidden: true,
+      mappings: {
+        // Since we're not querying or aggregating over our counter documents
+        // we don't define any fields.
+        dynamic: false,
+        properties: {},
+      },
+      name: 'dashboard_usage_counters',
+      namespaceType: 'single',
+    });
+  }
+  public start(core) {
+    const repository = core.savedObjects.createInternalRepository(['dashboard_usage_counters']);
+    // Initialize all the counter fields to 0 when our plugin starts
+    // NOTE: Usage collection happens on a best-effort basis, so we don't
+    // `await` the promise returned by `incrementCounter` and we swallow any
+    // exceptions in production.
+    repository
+      .incrementCounter('dashboard_usage_counters', 'dashboard_usage_counters', [
+        'apiCalls',
+        'settingToggled',
+      ], {refresh: false, initialize: true})
+      .catch((e) => (this.isDevEnvironment ? this.logger.error(e) : e));
+
+    const router = core.http.createRouter();
+
+    router.post(
+      {
+        path: `api/v1/dashboard/counters/{counter}`,
+        validate: {
+          params: schema.object({
+            counter: schema.oneOf([schema.literal('apiCalls'), schema.literal('settingToggled')]),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        request.params.id
+
+        // NOTE: Usage collection happens on a best-effort basis, so we don't
+        // `await` the promise returned by `incrementCounter` and we swallow any
+        // exceptions in production.
+        repository
+          .incrementCounter('dashboard_usage_counters', 'dashboard_usage_counters', [
+            counter
+          ], {refresh: false})
+          .catch((e) => (this.isDevEnvironement ? this.logger.error(e) : e));
+    
+        return response.ok();
+      }
+    );
+  }
+}
+
 ## Schema Field
 
 The `schema` field is a proscribed data model assists with detecting changes in usage collector payloads. To define the collector schema add a schema field that specifies every possible field reported when registering the collector. Whenever the `schema` field is set or changed please run `node scripts/telemetry_check.js --fix` to update the stored schema json files.
@@ -200,7 +292,6 @@ export const myCollector = makeUsageCollector<Usage>({
   },
 });
 ```
-
 ## Update the telemetry payload and telemetry cluster field mappings
 
 There is a module in the telemetry service that creates the payload of data that gets sent up to the telemetry cluster.
