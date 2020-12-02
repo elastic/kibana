@@ -39,6 +39,7 @@ interface CreateExecutionHandlerOptions {
 
 interface ExecutionHandlerOptions {
   actionGroup: string;
+  actionSubgroup?: string;
   alertInstanceId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
@@ -59,7 +60,13 @@ export function createExecutionHandler({
   alertParams,
 }: CreateExecutionHandlerOptions) {
   const alertTypeActionGroups = new Set(map(alertType.actionGroups, 'id'));
-  return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
+  return async ({
+    actionGroup,
+    actionSubgroup,
+    context,
+    state,
+    alertInstanceId,
+  }: ExecutionHandlerOptions) => {
     if (!alertTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
       return;
@@ -76,6 +83,7 @@ export function createExecutionHandler({
             tags,
             alertInstanceId,
             alertActionGroup: actionGroup,
+            alertActionSubgroup: actionSubgroup,
             context,
             actionParams: action.params,
             state,

@@ -174,6 +174,134 @@ describe('scheduleActions()', () => {
   });
 });
 
+describe('scheduleActionsWithSubGroup()', () => {
+  test('makes hasScheduledActions() return true', () => {
+    const alertInstance = new AlertInstance({
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    alertInstance
+      .replaceState({ otherField: true })
+      .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
+    expect(alertInstance.hasScheduledActions()).toEqual(true);
+  });
+
+  test('makes isThrottled() return true when throttled and subgroup is the same', () => {
+    const alertInstance = new AlertInstance({
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          subgroup: 'subgroup',
+        },
+      },
+    });
+    alertInstance
+      .replaceState({ otherField: true })
+      .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
+    expect(alertInstance.isThrottled('1m')).toEqual(true);
+  });
+
+  test('makes isThrottled() return true when throttled and last schedule had no subgroup', () => {
+    const alertInstance = new AlertInstance({
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    alertInstance
+      .replaceState({ otherField: true })
+      .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
+    expect(alertInstance.isThrottled('1m')).toEqual(true);
+  });
+
+  test('makes isThrottled() return false when throttled and subgroup is the different', () => {
+    const alertInstance = new AlertInstance({
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          subgroup: 'prev-subgroup',
+        },
+      },
+    });
+    alertInstance
+      .replaceState({ otherField: true })
+      .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
+    expect(alertInstance.isThrottled('1m')).toEqual(false);
+  });
+
+  test('make isThrottled() return false when throttled expired', () => {
+    const alertInstance = new AlertInstance({
+      state: { foo: true },
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    clock.tick(120000);
+    alertInstance
+      .replaceState({ otherField: true })
+      .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
+    expect(alertInstance.isThrottled('1m')).toEqual(false);
+  });
+
+  test('makes getScheduledActionOptions() return given options', () => {
+    const alertInstance = new AlertInstance({ state: { foo: true }, meta: {} });
+    alertInstance
+      .replaceState({ otherField: true })
+      .scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
+    expect(alertInstance.getScheduledActionOptions()).toEqual({
+      actionGroup: 'default',
+      subgroup: 'subgroup',
+      context: { field: true },
+      state: { otherField: true },
+    });
+  });
+
+  test('cannot schdule for execution twice', () => {
+    const alertInstance = new AlertInstance();
+    alertInstance.scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
+    expect(() =>
+      alertInstance.scheduleActionsWithSubGroup('default', 'subgroup', { field: false })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Alert instance execution has already been scheduled, cannot schedule twice"`
+    );
+  });
+
+  test('cannot schdule for execution twice with different subgroups', () => {
+    const alertInstance = new AlertInstance();
+    alertInstance.scheduleActionsWithSubGroup('default', 'subgroup', { field: true });
+    expect(() =>
+      alertInstance.scheduleActionsWithSubGroup('default', 'subgroup', { field: false })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Alert instance execution has already been scheduled, cannot schedule twice"`
+    );
+  });
+
+  test('cannot schdule for execution twice whether there are subgroups', () => {
+    const alertInstance = new AlertInstance();
+    alertInstance.scheduleActions('default', { field: true });
+    expect(() =>
+      alertInstance.scheduleActionsWithSubGroup('default', 'subgroup', { field: false })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Alert instance execution has already been scheduled, cannot schedule twice"`
+    );
+  });
+});
+
 describe('replaceState()', () => {
   test('replaces previous state', () => {
     const alertInstance = new AlertInstance({ state: { foo: true } });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertInstance } from './alert_instance';
+import { PublicAlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertsClient } from './alerts_client';
@@ -58,7 +58,7 @@ export interface AlertServices<
 > extends Services {
   alertInstanceFactory: (
     id: string
-  ) => AlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+  ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
 }
 
 export interface AlertExecutorOptions<

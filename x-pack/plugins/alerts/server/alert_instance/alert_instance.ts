@@ -13,21 +13,32 @@ import {
 
 import { parseDuration } from '../lib';
 
-export type AlertInstances<
+interface ScheduledExecutionOptions<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> {
+  actionGroup: ActionGroupIds;
+  subgroup?: string;
+  context: Context;
+  state: State;
+}
+
+export type PublicAlertInstance<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = string
-> = Record<string, AlertInstance<State, Context, ActionGroupIds>>;
+> = Pick<
+  AlertInstance<State, Context, ActionGroupIds>,
+  'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
+>;
+
 export class AlertInstance<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = string
 > {
-  private scheduledExecutionOptions?: {
-    actionGroup: ActionGroupIds;
-    context: Context;
-    state: State;
-  };
+  private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
   private meta: AlertInstanceMeta;
   private state: State;
 
@@ -45,15 +56,37 @@ export class AlertInstance<
       return false;
     }
     const throttleMills = throttle ? parseDuration(throttle) : 0;
-    const actionGroup = this.scheduledExecutionOptions.actionGroup;
     if (
       this.meta.lastScheduledActions &&
-      this.meta.lastScheduledActions.group === actionGroup &&
+      this.scheduledActionGroupIsUnchanged(
+        this.meta.lastScheduledActions,
+        this.scheduledExecutionOptions
+      ) &&
+      this.scheduledActionSubgroupIsUnchanged(
+        this.meta.lastScheduledActions,
+        this.scheduledExecutionOptions
+      ) &&
       this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now()
     ) {
       return true;
     }
     return false;
+  }
+
+  private scheduledActionGroupIsUnchanged(
+    lastScheduledActions: NonNullable<AlertInstanceMeta['lastScheduledActions']>,
+    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context, ActionGroupIds>
+  ) {
+    return lastScheduledActions.group === scheduledExecutionOptions.actionGroup;
+  }
+
+  private scheduledActionSubgroupIsUnchanged(
+    lastScheduledActions: NonNullable<AlertInstanceMeta['lastScheduledActions']>,
+    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context, ActionGroupIds>
+  ) {
+    return lastScheduledActions.subgroup && scheduledExecutionOptions.subgroup
+      ? lastScheduledActions.subgroup === scheduledExecutionOptions.subgroup
+      : true;
   }
 
   getLastScheduledActions() {
@@ -74,9 +107,7 @@ export class AlertInstance<
   }
 
   scheduleActions(actionGroup: ActionGroupIds, context: Context = {} as Context) {
-    if (this.hasScheduledActions()) {
-      throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
-    }
+    this.ensureHasNoScheduledActions();
     this.scheduledExecutionOptions = {
       actionGroup,
       context,
@@ -85,13 +116,34 @@ export class AlertInstance<
     return this;
   }
 
+  scheduleActionsWithSubGroup(
+    actionGroup: ActionGroupIds,
+    subgroup: string,
+    context: Context = {} as Context
+  ) {
+    this.ensureHasNoScheduledActions();
+    this.scheduledExecutionOptions = {
+      actionGroup,
+      subgroup,
+      context,
+      state: this.state,
+    };
+    return this;
+  }
+
+  private ensureHasNoScheduledActions() {
+    if (this.hasScheduledActions()) {
+      throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
+    }
+  }
+
   replaceState(state: State) {
     this.state = state;
     return this;
   }
 
-  updateLastScheduledActions(group: string) {
-    this.meta.lastScheduledActions = { group, date: new Date() };
+  updateLastScheduledActions(group: string, subgroup?: string) {
+    this.meta.lastScheduledActions = { group, subgroup, date: new Date() };
   }
 
   /**

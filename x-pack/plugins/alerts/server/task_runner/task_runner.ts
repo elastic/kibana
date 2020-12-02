@@ -152,10 +152,15 @@ export class TaskRunner {
     alertInstance: AlertInstance,
     executionHandler: ReturnType<typeof createExecutionHandler>
   ) {
-    const { actionGroup, context, state } = alertInstance.getScheduledActionOptions()!;
-    alertInstance.updateLastScheduledActions(actionGroup);
+    const {
+      actionGroup,
+      subgroup: actionSubgroup,
+      context,
+      state,
+    } = alertInstance.getScheduledActionOptions()!;
+    alertInstance.updateLastScheduledActions(actionGroup, actionSubgroup);
     alertInstance.unscheduleActions();
-    return executionHandler({ actionGroup, context, state, alertInstanceId });
+    return executionHandler({ actionGroup, actionSubgroup, context, state, alertInstanceId });
   }
 
   async executeAlertInstances(
