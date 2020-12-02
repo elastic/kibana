@@ -7,7 +7,7 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { kea, MakeLogicType } from 'kea';
 
-import http from 'shared/http';
+import { HttpLogic } from '../../../../../shared/http';
 
 import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
@@ -259,8 +259,9 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     ],
   }),
   listeners: ({ actions, values }) => ({
-    initializeSchema: () => {
+    initializeSchema: async () => {
       const { isOrganization } = AppLogic.values;
+      const { http } = HttpLogic.values;
       const {
         contentSource: { id: sourceId },
       } = SourceLogic.values;
@@ -269,20 +270,26 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
         ? `/api/workplace_search/org/sources/${sourceId}/schemas`
         : `/api/workplace_search/account/sources/${sourceId}/schemas`;
 
-      return http(route).then(({ data }) => actions.onInitializeSchema({ sourceId, ...data }));
+      try {
+        const response = await http.get(route);
+        actions.onInitializeSchema({ sourceId, ...response });
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
     initializeSchemaFieldErrors: async ({ activeReindexJobId, sourceId }) => {
       const { isOrganization } = AppLogic.values;
-
+      const { http } = HttpLogic.values;
       const route = isOrganization
         ? `/api/workplace_search/org/sources/${sourceId}/reindex_job/${activeReindexJobId}`
         : `/api/workplace_search/account/sources/${sourceId}/reindex_job/${activeReindexJobId}`;
 
       try {
         await actions.initializeSchema();
-        http(route).then(({ data: { fieldCoercionErrors } }) =>
-          actions.onInitializeSchemaFieldErrors({ fieldCoercionErrors })
-        );
+        const response = await http.get(route);
+        actions.onInitializeSchemaFieldErrors({
+          fieldCoercionErrors: response.fieldCoercionErrors,
+        });
       } catch (e) {
         flashAPIErrors({ ...e, message: FIELD_ERRORS_ERROR });
       }
@@ -298,8 +305,9 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       actions.onFieldUpdate({ schema, formUnchanged: isEqual(values.serverSchema, schema) });
     },
     updateFields: () => actions.setServerField(values.activeSchema, UPDATE),
-    setServerField: ({ updatedSchema, operation }) => {
+    setServerField: async ({ updatedSchema, operation }) => {
       const { isOrganization } = AppLogic.values;
+      const { http } = HttpLogic.values;
       const isAdding = operation === ADD;
       const { sourceId } = values;
       const successMessage = isAdding ? 'New field added.' : 'Schema updated.';
@@ -316,28 +324,20 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
 
       actions.resetMostRecentIndexJob(emptyReindexJob);
 
-      http
-        .post(route, updatedSchema)
-        .then(({ data }) => {
-          window.scrollTo(0, 0);
-
-          actions.onSchemaSetSuccess(data);
-          setSuccessMessage(successMessage);
-        })
-        .catch(
-          ({
-            response: {
-              data: { errors },
-            },
-          }) => {
-            window.scrollTo(0, 0);
-            if (isAdding) {
-              actions.onSchemaSetFormErrors(errors);
-            } else {
-              flashAPIErrors(errors);
-            }
-          }
-        );
+      try {
+        const response = await http.post(route, {
+          body: JSON.stringify({ ...updatedSchema }),
+        });
+        actions.onSchemaSetSuccess(response);
+        setSuccessMessage(successMessage);
+      } catch (e) {
+        window.scrollTo(0, 0);
+        if (isAdding) {
+          actions.onSchemaSetFormErrors(e?.message);
+        } else {
+          flashAPIErrors(e);
+        }
+      }
     },
     resetMostRecentIndexJob: () => {
       FlashMessagesLogic.actions.clearFlashMessages();
