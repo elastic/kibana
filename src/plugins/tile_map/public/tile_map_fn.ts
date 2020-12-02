@@ -18,8 +18,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { convertToGeoJson } from '../../maps_legacy/public';
-import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import type { TileMapVisParams } from '../../maps_legacy/public';
+import type { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { convertToGeoJson } from './utils';
 
 interface Arguments {
   visConfig: string | null;
@@ -28,7 +29,7 @@ interface Arguments {
 export interface TileMapVisRenderValue {
   visData: any;
   visType: 'tile_map';
-  visConfig: any;
+  visConfig: TileMapVisParams;
   params: any;
 }
 

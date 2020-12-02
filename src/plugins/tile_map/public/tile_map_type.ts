@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
-import { convertToGeoJson, MapTypes, TileMapVisParams } from '../../maps_legacy/public';
+import { MapTypes, TileMapVisParams } from '../../maps_legacy/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { truncatedColorSchemas } from '../../charts/public';
 
@@ -30,6 +30,7 @@ import { supportsCssFilters } from './css_filters';
 import { TileMapOptionsLazy } from './components';
 import { getDeprecationMessage } from './get_deprecation_message';
 import { TileMapVisualizationDependencies } from './plugin';
+import { convertToGeoJson } from './utils';
 
 export function createTileMapTypeDefinition(
   dependencies: TileMapVisualizationDependencies

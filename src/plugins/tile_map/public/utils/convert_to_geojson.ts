@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import type { Datatable } from '../../../expressions/public';
 import { decodeGeoHash } from './decode_geo_hash';
 import { gridDimensions } from './grid_dimensions';
 
-export function convertToGeoJson(tabifiedResponse, { geohash, geocentroid, metric }) {
+export function convertToGeoJson(tabifiedResponse: Datatable, { geohash, geocentroid, metric }) {
   let features;
   let min = Infinity;
   let max = -Infinity;
@@ -86,9 +87,9 @@ export function convertToGeoJson(tabifiedResponse, { geohash, geocentroid, metri
               geohash: geohashValue,
               geohash_meta: {
                 center: centerLatLng,
-                rectangle: rectangle,
+                rectangle,
               },
-              value: value,
+              value,
             },
           };
         })
@@ -100,14 +101,14 @@ export function convertToGeoJson(tabifiedResponse, { geohash, geocentroid, metri
 
   const featureCollection = {
     type: 'FeatureCollection',
-    features: features,
+    features,
   };
 
   return {
-    featureCollection: featureCollection,
+    featureCollection,
     meta: {
-      min: min,
-      max: max,
+      min,
+      max,
       geohashPrecision: geohash && geohash.params.precision,
       geohashGridDimensionsAtEquator: geohash && gridDimensions(geohash.params.precision),
     },

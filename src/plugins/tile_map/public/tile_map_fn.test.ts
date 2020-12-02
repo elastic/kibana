@@ -20,7 +20,7 @@
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 import { createTileMapFn } from './tile_map_fn';
 
-jest.mock('../../maps_legacy/public', () => ({
+jest.mock('./utils', () => ({
   convertToGeoJson: jest.fn().mockReturnValue({
     featureCollection: {
       type: 'FeatureCollection',
@@ -35,7 +35,7 @@ jest.mock('../../maps_legacy/public', () => ({
   }),
 }));
 
-import { convertToGeoJson } from '../../maps_legacy/public';
+import { convertToGeoJson } from './utils';
 
 describe('interpreter/functions#tilemap', () => {
   const fn = functionWrapper(createTileMapFn());
