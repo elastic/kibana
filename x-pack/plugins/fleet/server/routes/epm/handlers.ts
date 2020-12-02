@@ -114,14 +114,14 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
       const headerContentType = mime.contentType(path.extname(filePath));
       if (!headerContentType) {
         return response.custom({
-          body: 'file type is invalid',
+          body: `unknown content type for file: ${filePath}`,
           statusCode: 400,
         });
       }
       const archiveFile = getArchiveEntry(`${pkgName}-${pkgVersion}/${filePath}`);
       if (!archiveFile) {
         return response.custom({
-          body: 'file does not exist in cache',
+          body: `uploaded package file not found: ${filePath}`,
           statusCode: 404,
         });
       }
