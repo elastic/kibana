@@ -49,7 +49,7 @@ import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 const hotProperty: keyof Phases = 'hot';
 
 export const HotPhase: FunctionComponent = () => {
-  const { license, policy } = useEditPolicyContext();
+  const { license } = useEditPolicyContext();
   const [formData] = useFormData({
     watch: useRolloverPath,
   });
