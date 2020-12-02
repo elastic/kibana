@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiButtonGroup, EuiComboBox } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
@@ -66,7 +66,6 @@ describe('last_value', () => {
               operationType: 'last_value',
               params: {
                 sortField: 'datefield',
-                sortOrder: 'asc',
               },
             },
           },
@@ -90,7 +89,7 @@ describe('last_value', () => {
             field: 'a',
             size: 1,
             sortField: 'datefield',
-            sortOrder: 'asc',
+            sortOrder: 'desc',
           }),
         })
       );
@@ -107,7 +106,6 @@ describe('last_value', () => {
         dataType: 'string',
         params: {
           sortField: 'datefield',
-          sortOrder: 'asc',
         },
       };
       const indexPattern = createMockedIndexPattern();
@@ -120,7 +118,6 @@ describe('last_value', () => {
           sourceField: 'bytes',
           params: expect.objectContaining({
             sortField: 'datefield',
-            sortOrder: 'asc',
           }),
         })
       );
@@ -136,7 +133,6 @@ describe('last_value', () => {
         dataType: 'number',
         params: {
           sortField: 'datefield',
-          sortOrder: 'asc',
         },
       };
       const indexPattern = createMockedIndexPattern();
@@ -233,21 +229,6 @@ describe('last_value', () => {
         layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
       expect(lastValueColumn.dataType).toEqual('boolean');
-    });
-
-    it('should set sortOrder to desc by default', () => {
-      const lastValueColumn = lastValueOperation.buildColumn({
-        indexPattern: createMockedIndexPattern(),
-        field: {
-          aggregatable: true,
-          searchable: true,
-          type: 'boolean',
-          name: 'test',
-          displayName: 'test',
-        },
-        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
-      });
-      expect(lastValueColumn.params.sortOrder).toEqual('desc');
     });
 
     it('should use indexPattern timeFieldName as a default sortField', () => {
@@ -418,69 +399,6 @@ describe('last_value', () => {
         },
       });
     });
-
-    it('should render sortOrder value and options', () => {
-      const setStateSpy = jest.fn();
-      const instance = shallow(
-        <InlineOptions
-          {...defaultProps}
-          state={state}
-          setState={setStateSpy}
-          columnId="col1"
-          currentColumn={state.layers.first.columns.col2 as LastValueIndexPatternColumn}
-          layerId="first"
-        />
-      );
-
-      const select = instance
-        .find('[data-test-subj="lns-indexPattern-lastValue-sortOrder"]')
-        .find(EuiButtonGroup);
-
-      expect(select.prop('idSelected')).toEqual('lns-lastValue-ascending');
-
-      expect(select.prop('options')!.map(({ value }: { value?: string }) => value)).toEqual([
-        'asc',
-        'desc',
-      ]);
-    });
-
-    it('should update state when changing sortOrder', () => {
-      const setStateSpy = jest.fn();
-      const instance = shallow(
-        <InlineOptions
-          {...defaultProps}
-          state={state}
-          setState={setStateSpy}
-          columnId="col1"
-          currentColumn={state.layers.first.columns.col2 as LastValueIndexPatternColumn}
-          layerId="first"
-        />
-      );
-
-      const select = instance
-        .find('[data-test-subj="lns-indexPattern-lastValue-sortOrder"]')
-        .find(EuiButtonGroup);
-
-      select.prop('onChange')!('lns-lastValue-descending');
-      expect(setStateSpy).toHaveBeenCalledWith({
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col2: {
-                ...state.layers.first.columns.col2,
-                params: {
-                  ...(state.layers.first.columns.col2 as LastValueIndexPatternColumn).params,
-                  sortOrder: 'desc',
-                },
-              },
-            },
-          },
-        },
-      });
-    });
   });
 
   describe('getErrorMessage', () => {
@@ -495,7 +413,7 @@ describe('last_value', () => {
             isBucketed: false,
             label: 'Last value of test',
             operationType: 'last_value',
-            params: { sortField: 'timestamp', sortOrder: 'desc' },
+            params: { sortField: 'timestamp' },
             scale: 'ratio',
             sourceField: 'bytes',
           },

@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiButtonGroup, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { OperationDefinition } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
@@ -70,7 +70,6 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
   operationType: 'last_value';
   params: {
     sortField: string;
-    sortOrder: 'asc' | 'desc';
     // last value on numeric fields can be formatted
     format?: {
       id: string;
@@ -149,12 +148,6 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       );
     }
 
-    const sortOrder =
-      (previousColumn?.params &&
-        'sortOrder' in previousColumn.params &&
-        previousColumn?.params?.sortOrder) ||
-      'desc';
-
     return {
       label: ofName(field.displayName),
       dataType: field.type as DataType,
@@ -163,7 +156,6 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
       params: {
-        sortOrder,
         sortField,
       },
     };
@@ -177,7 +169,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       field: column.sourceField,
       aggregate: 'concat',
       size: 1,
-      sortOrder: column.params.sortOrder,
+      sortOrder: 'desc',
       sortField: column.params.sortField,
     },
   }),
@@ -196,22 +188,6 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   paramEditor: ({ state, setState, currentColumn, layerId }) => {
     const currentIndexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
     const dateFields = getDateFields(currentIndexPattern);
-    const sortOrderButtons = [
-      {
-        id: `lns-lastValue-ascending`,
-        label: i18n.translate('xpack.lens.indexPattern.lastValue.sortFieldAscending', {
-          defaultMessage: 'Ascending',
-        }),
-        value: 'asc',
-      },
-      {
-        id: `lns-lastValue-descending`,
-        label: i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
-          defaultMessage: 'Descending',
-        }),
-        value: 'desc',
-      },
-    ];
     const isSortFieldInvalid = !!getInvalidSortFieldMessage(
       currentColumn.params.sortField,
       currentIndexPattern
@@ -273,39 +249,6 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
                   ]
                 : []) as unknown) as EuiComboBoxOptionOption[]
             }
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.lastValue.sortOrder', {
-            defaultMessage: 'Sort order',
-          })}
-          display="columnCompressed"
-          fullWidth
-        >
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.indexPattern.lastValue.sortOrder', {
-              defaultMessage: 'Sort order',
-            })}
-            buttonSize="compressed"
-            data-test-subj="lns-indexPattern-lastValue-sortOrder"
-            name="sortOrder"
-            options={sortOrderButtons}
-            idSelected={
-              sortOrderButtons.find(({ value }) => value === currentColumn.params?.sortOrder)!.id
-            }
-            onChange={(optionId: string) => {
-              const value = sortOrderButtons.find(({ id }) => id === optionId)!.value;
-              setState(
-                updateColumnParam({
-                  state,
-                  layerId,
-                  currentColumn,
-                  paramName: 'sortOrder',
-                  value,
-                })
-              );
-            }}
           />
         </EuiFormRow>
       </>

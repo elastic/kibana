@@ -418,7 +418,6 @@ describe('terms', () => {
           sourceField: 'bytes',
           operationType: 'last_value',
           params: {
-            sortOrder: 'desc',
             sortField: 'time',
           },
         },
