@@ -56,7 +56,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
 describe('ServiceOverview', () => {
   it('renders', () => {
     jest
-      .spyOn(useAnnotationsHooks, 'useAnnotations')
+      .spyOn(useAnnotationsHooks, 'useAnnotationsContext')
       .mockReturnValue({ annotations: [] });
     jest
       .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPatternFetcher')
