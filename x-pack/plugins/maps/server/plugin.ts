@@ -148,7 +148,7 @@ export class MapsPlugin implements Plugin {
     }
 
     let isEnterprisePlus = false;
-    let lastLicenseId: string;
+    let lastLicenseId: string | undefined;
     const emsSettings = new EMSSettings(mapsLegacyConfig, () => isEnterprisePlus);
     licensing.license$.subscribe((license: ILicense) => {
       const enterprise = license.check(APP_ID, 'enterprise');
