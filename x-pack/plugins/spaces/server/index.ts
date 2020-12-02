@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 import { ConfigSchema, spacesConfigDeprecationProvider } from './config';
 import { Plugin } from './plugin';
 
