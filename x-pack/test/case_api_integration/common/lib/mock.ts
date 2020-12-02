@@ -78,4 +78,5 @@ export const findCasesResp: CasesFindResponse = {
   cases: [],
   count_open_cases: 0,
   count_closed_cases: 0,
+  count_in_progress_cases: 0,
 };
