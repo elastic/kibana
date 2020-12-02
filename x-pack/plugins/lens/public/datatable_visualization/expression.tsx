@@ -166,7 +166,7 @@ export const getDatatableRenderer = (dependencies: {
       handlers.event({ name: 'tableRowContextMenuClick', data });
     };
     const uiActions = dependencies.uiActions;
-    const { data } = handlers;
+    const { data, hasCompatibleActions } = handlers;
 
     // An entrly for each table row, whether it has any actions attached to
     // ROW_CLICK_TRIGGER trigger.
@@ -179,14 +179,14 @@ export const getDatatableRenderer = (dependencies: {
           rowHasRowClickTriggerActions = await Promise.all(
             table.rows.map(async (row, rowIndex) => {
               try {
-                const actions = await uiActions.getTriggerCompatibleActions(ROW_CLICK_TRIGGER, {
-                  embeddable,
-                  data: {
-                    rowIndex,
-                    table,
-                  },
+                const hasActions = await hasCompatibleActions({
+                  name: 'tableRowContextMenuClick',
+                  rowIndex,
+                  table,
+                  columns: config.args.columns.columnIds,
                 });
-                return actions.length > 0;
+
+                return hasActions;
               } catch {
                 return false;
               }

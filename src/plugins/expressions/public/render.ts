@@ -29,8 +29,9 @@ import { getRenderersRegistry } from './services';
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 
 export interface ExpressionRenderHandlerParams {
-  onRenderError: RenderErrorHandlerFnType;
-  renderMode: RenderMode;
+  onRenderError?: RenderErrorHandlerFnType;
+  renderMode?: RenderMode;
+  hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
 }
 
 export interface ExpressionRendererEvent {
@@ -59,7 +60,11 @@ export class ExpressionRenderHandler {
 
   constructor(
     element: HTMLElement,
-    { onRenderError, renderMode }: Partial<ExpressionRenderHandlerParams> = {}
+    {
+      onRenderError,
+      renderMode,
+      hasCompatibleActions = async () => false,
+    }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
 
@@ -96,6 +101,7 @@ export class ExpressionRenderHandler {
       getRenderMode: () => {
         return renderMode || 'display';
       },
+      hasCompatibleActions,
     };
   }
 
@@ -153,7 +159,7 @@ export class ExpressionRenderHandler {
 export function render(
   element: HTMLElement,
   data: any,
-  options?: Partial<ExpressionRenderHandlerParams>
+  options?: ExpressionRenderHandlerParams
 ): ExpressionRenderHandler {
   const handler = new ExpressionRenderHandler(element, options);
   handler.render(data);

@@ -76,6 +76,7 @@ export interface LensEmbeddableDeps {
   timefilter: TimefilterContract;
   basePath: IBasePath;
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
+  getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
 }
 
 export class Embeddable
@@ -225,10 +226,30 @@ export class Embeddable
         data={{
           embeddable: this,
         }}
+        hasCompatibleActions={this.hasCompatibleActions}
       />,
       domNode
     );
   }
+
+  private readonly hasCompatibleActions = async (
+    event: ExpressionRendererEvent
+  ): Promise<boolean> => {
+    if (isLensTableRowContextMenuClickEvent(event)) {
+      const { getTriggerCompatibleActions } = this.deps;
+      if (!getTriggerCompatibleActions) {
+        return false;
+      }
+      const actions = await getTriggerCompatibleActions(VIS_EVENT_TO_TRIGGER[event.name], {
+        data: event.data,
+        embeddable: this,
+      });
+
+      return actions.length > 0;
+    }
+
+    return false;
+  };
 
   /**
    * Combines the embeddable context with the saved object context, and replaces

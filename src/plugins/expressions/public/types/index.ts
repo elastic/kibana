@@ -25,6 +25,7 @@ import {
   SerializableState,
   RenderMode,
 } from '../../common';
+import { ExpressionRenderHandlerParams } from '../render';
 
 /**
  * @deprecated
@@ -57,6 +58,7 @@ export interface IExpressionLoaderParams {
   onRenderError?: RenderErrorHandlerFnType;
   searchSessionId?: string;
   renderMode?: RenderMode;
+  hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
 }
 
 export interface ExpressionRenderError extends Error {

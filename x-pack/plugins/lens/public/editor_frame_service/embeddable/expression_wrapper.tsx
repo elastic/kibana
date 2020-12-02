@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
+  ReactExpressionRendererProps,
 } from 'src/plugins/expressions/public';
 import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { RenderMode } from 'src/plugins/expressions';
@@ -25,6 +26,7 @@ export interface ExpressionWrapperProps {
   handleEvent: (event: ExpressionRendererEvent) => void;
   renderMode?: RenderMode;
   data?: unknown;
+  hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
 }
 
 export function ExpressionWrapper({
@@ -36,6 +38,7 @@ export function ExpressionWrapper({
   searchSessionId,
   renderMode,
   data,
+  hasCompatibleActions,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -79,6 +82,7 @@ export function ExpressionWrapper({
               </div>
             )}
             onEvent={handleEvent}
+            hasCompatibleActions={hasCompatibleActions}
           />
         </div>
       )}
