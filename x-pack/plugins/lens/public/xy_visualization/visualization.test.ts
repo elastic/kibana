@@ -558,6 +558,27 @@ describe('xy_visualization', () => {
         const accessorConfig = breakdownConfig!.accessors[0];
         expect(typeof accessorConfig !== 'string' && accessorConfig.palette).toEqual(customColors);
       });
+
+      it('should respect the order of accessors coming from datasource', () => {
+        const colorAssignment = require('./color_assignment');
+        const getAccessorColorConfigSpy = jest.spyOn(colorAssignment, 'getAccessorColorConfig');
+        mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+          { columnId: 'c' },
+          { columnId: 'b' },
+        ]);
+        callConfigForYConfigs({});
+        expect(getAccessorColorConfigSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          {
+            accessors: ['c', 'b'],
+            layerId: 'first',
+            seriesType: 'area',
+            xAccessor: 'a',
+          },
+          expect.anything()
+        );
+      });
     });
   });
 
