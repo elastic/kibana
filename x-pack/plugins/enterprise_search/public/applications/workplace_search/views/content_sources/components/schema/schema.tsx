@@ -70,8 +70,8 @@ export const Schema: React.FC = () => {
     </EuiButtonEmpty>
   );
   const statusPath = isOrganization
-    ? `/api/workplace_search/org/sources/${sourceId}/reindex_job/${activeReindexJobId}`
-    : `/api/workplace_search/account/sources/${sourceId}/reindex_job/${activeReindexJobId}`;
+    ? `/api/workplace_search/org/sources/${sourceId}/reindex_job/${activeReindexJobId}/status`
+    : `/api/workplace_search/account/sources/${sourceId}/reindex_job/${activeReindexJobId}/status`;
 
   return (
     <>
