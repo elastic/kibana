@@ -33,7 +33,7 @@ export const SortingView: React.FC<Props> = ({ onChange, options, value }) => {
   const selectedValue = value && !valuesFromOptions.includes(value) ? undefined : value;
 
   return (
-    <div className="sui-sorting">
+    <div>
       <EuiSelect
         options={options.map(wrapSortingOptionForEuiSelect)}
         value={selectedValue}
