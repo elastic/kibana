@@ -31,8 +31,11 @@ To debug Kea state in-browser, Kea recommends [Redux Devtools](https://kea.js.or
 
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
-```
-yarn test:jest x-pack/plugins/enterprise_search --watch
+Jest tests can be run directly from the `x-pack/plugins/enterprise_search` folder. This also works for any subfolders or subcomponents.
+
+```bash
+yarn test:jest
+yarn test:jest --watch
 ```
 
 ### E2E tests
