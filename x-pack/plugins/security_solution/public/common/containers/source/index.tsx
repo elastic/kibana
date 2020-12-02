@@ -197,10 +197,8 @@ export const useFetchIndex = (
   );
 
   useEffect(() => {
-    if (!isEqual(previousIndexesName.current, indexNames)) {
+    if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
       indexFieldsSearch(indexNames);
-    } else {
-      setLoading(false);
     }
   }, [indexNames, indexFieldsSearch, previousIndexesName]);
 
