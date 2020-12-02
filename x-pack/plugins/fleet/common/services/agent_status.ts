@@ -69,3 +69,7 @@ export function buildKueryForUpgradingAgents() {
 export function buildKueryForUpdatingAgents() {
   return `(${buildKueryForUpgradingAgents()}) or (${buildKueryForEnrollingAgents()}) or (${buildKueryForUnenrollingAgents()})`;
 }
+
+export function buildKueryForInactiveAgents() {
+  return `${AGENT_SAVED_OBJECT_TYPE}.active:false`;
+}

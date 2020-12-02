@@ -8,13 +8,9 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiEmptyPrompt,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiContextMenuItem,
@@ -38,7 +34,7 @@ import {
   useKibanaVersion,
   useStartServices,
 } from '../../../hooks';
-import { SearchBar, ContextMenuActions } from '../../../components';
+import { ContextMenuActions } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
@@ -49,41 +45,9 @@ import {
 } from '../components';
 import { AgentTableHeader } from './components/table_header';
 import { SelectionMode } from './components/bulk_actions';
+import { SearchAndFilterBar } from './components/search_and_filter_bar';
 
 const REFRESH_INTERVAL_MS = 10000;
-
-const statusFilters = [
-  {
-    status: 'healthy',
-    label: i18n.translate('xpack.fleet.agentList.statusHealthyFilterText', {
-      defaultMessage: 'Healthy',
-    }),
-  },
-  {
-    status: 'unhealthy',
-    label: i18n.translate('xpack.fleet.agentList.statusUnhealthyFilterText', {
-      defaultMessage: 'Unhealthy',
-    }),
-  },
-  {
-    status: 'updating',
-    label: i18n.translate('xpack.fleet.agentList.statusUpdatingFilterText', {
-      defaultMessage: 'Updating',
-    }),
-  },
-  {
-    status: 'offline',
-    label: i18n.translate('xpack.fleet.agentList.statusOfflineFilterText', {
-      defaultMessage: 'Offline',
-    }),
-  },
-  {
-    status: 'inactive',
-    label: i18n.translate('xpack.fleet.agentList.statusInactiveFilterText', {
-      defaultMessage: 'Inactive',
-    }),
-  },
-] as Array<{ label: string; status: string }>;
 
 const RowActions = React.memo<{
   agent: Agent;
@@ -186,12 +150,21 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const tableRef = useRef<EuiBasicTable<Agent>>(null);
   const { pagination, pageSizeOptions, setPagination } = usePagination();
 
+  const onSubmitSearch = useCallback(
+    (newKuery: string) => {
+      setSearch(newKuery);
+      setPagination({
+        ...pagination,
+        currentPage: 1,
+      });
+    },
+    [setSearch, pagination, setPagination]
+  );
+
   // Policies state for filtering
-  const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
   const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<string[]>([]);
 
   // Status for filtering
-  const [isStatusFilterOpen, setIsStatutsFilterOpen] = useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
   const isUsingFilter =
@@ -204,18 +177,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedStatus([]);
     setShowUpgradeable(false);
   }, [setSearch, setDraftKuery, setSelectedAgentPolicies, setSelectedStatus, setShowUpgradeable]);
-
-  // Add a agent policy id to current search
-  const addAgentPolicyFilter = (policyId: string) => {
-    setSelectedAgentPolicies([...selectedAgentPolicies, policyId]);
-  };
-
-  // Remove a agent policy id from current search
-  const removeAgentPolicyFilter = (policyId: string) => {
-    setSelectedAgentPolicies(
-      selectedAgentPolicies.filter((agentPolicy) => agentPolicy !== policyId)
-    );
-  };
 
   // Agent enrollment flyout state
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
@@ -248,6 +209,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               return AgentStatusKueryHelper.buildKueryForOfflineAgents();
             case 'updating':
               return AgentStatusKueryHelper.buildKueryForUpdatingAgents();
+            case 'inactive':
+              return AgentStatusKueryHelper.buildKueryForInactiveAgents();
           }
 
           return undefined;
@@ -353,8 +316,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     perPage: 1000,
   });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
+  const agentPolicies = useMemo(
+    () => (agentPoliciesRequest.data ? agentPoliciesRequest.data.items : []),
+    [agentPoliciesRequest]
+  );
   const agentPoliciesIndexedById = useMemo(() => {
     return agentPolicies.reduce((acc, agentPolicy) => {
       acc[agentPolicy.id] = agentPolicy;
@@ -362,7 +327,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       return acc;
     }, {} as { [k: string]: AgentPolicy });
   }, [agentPolicies]);
-  const { isLoading: isAgentPoliciesLoading } = agentPoliciesRequest;
 
   const columns = [
     {
@@ -561,122 +525,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       )}
 
       {/* Search and filter bar */}
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={4}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={6}>
-              <SearchBar
-                value={draftKuery}
-                onChange={(newSearch, submit) => {
-                  setDraftKuery(newSearch);
-                  if (submit) {
-                    setSearch(newSearch);
-                    setPagination({
-                      ...pagination,
-                      currentPage: 1,
-                    });
-                  }
-                }}
-                fieldPrefix={AGENT_SAVED_OBJECT_TYPE}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={2}>
-              <EuiFilterGroup>
-                <EuiPopover
-                  ownFocus
-                  button={
-                    <EuiFilterButton
-                      iconType="arrowDown"
-                      onClick={() => setIsStatutsFilterOpen(!isStatusFilterOpen)}
-                      isSelected={isStatusFilterOpen}
-                      hasActiveFilters={selectedStatus.length > 0}
-                      numActiveFilters={selectedStatus.length}
-                      disabled={isAgentPoliciesLoading}
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.agentList.statusFilterText"
-                        defaultMessage="Status"
-                      />
-                    </EuiFilterButton>
-                  }
-                  isOpen={isStatusFilterOpen}
-                  closePopover={() => setIsStatutsFilterOpen(false)}
-                  panelPaddingSize="none"
-                >
-                  <div className="euiFilterSelect__items">
-                    {statusFilters.map(({ label, status }, idx) => (
-                      <EuiFilterSelectItem
-                        key={idx}
-                        checked={selectedStatus.includes(status) ? 'on' : undefined}
-                        onClick={() => {
-                          if (selectedStatus.includes(status)) {
-                            setSelectedStatus([...selectedStatus.filter((s) => s !== status)]);
-                          } else {
-                            setSelectedStatus([...selectedStatus, status]);
-                          }
-                        }}
-                      >
-                        {label}
-                      </EuiFilterSelectItem>
-                    ))}
-                  </div>
-                </EuiPopover>
-                <EuiPopover
-                  ownFocus
-                  button={
-                    <EuiFilterButton
-                      iconType="arrowDown"
-                      onClick={() => setIsAgentPoliciesFilterOpen(!isAgentPoliciesFilterOpen)}
-                      isSelected={isAgentPoliciesFilterOpen}
-                      hasActiveFilters={selectedAgentPolicies.length > 0}
-                      numActiveFilters={selectedAgentPolicies.length}
-                      numFilters={agentPolicies.length}
-                      disabled={isAgentPoliciesLoading}
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.agentList.policyFilterText"
-                        defaultMessage="Agent policy"
-                      />
-                    </EuiFilterButton>
-                  }
-                  isOpen={isAgentPoliciesFilterOpen}
-                  closePopover={() => setIsAgentPoliciesFilterOpen(false)}
-                  panelPaddingSize="none"
-                >
-                  <div className="euiFilterSelect__items">
-                    {agentPolicies.map((agentPolicy, index) => (
-                      <EuiFilterSelectItem
-                        checked={selectedAgentPolicies.includes(agentPolicy.id) ? 'on' : undefined}
-                        key={index}
-                        onClick={() => {
-                          if (selectedAgentPolicies.includes(agentPolicy.id)) {
-                            removeAgentPolicyFilter(agentPolicy.id);
-                          } else {
-                            addAgentPolicyFilter(agentPolicy.id);
-                          }
-                        }}
-                      >
-                        {agentPolicy.name}
-                      </EuiFilterSelectItem>
-                    ))}
-                  </div>
-                </EuiPopover>
-                <EuiFilterButton
-                  hasActiveFilters={showUpgradeable}
-                  onClick={() => {
-                    setShowUpgradeable(!showUpgradeable);
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.showUpgradeableFilterLabel"
-                    defaultMessage="Upgrade available"
-                  />
-                </EuiFilterButton>
-              </EuiFilterGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <SearchAndFilterBar
+        agentPolicies={agentPolicies}
+        draftKuery={draftKuery}
+        onDraftKueryChange={setDraftKuery}
+        onSubmitSearch={onSubmitSearch}
+        selectedAgentPolicies={selectedAgentPolicies}
+        onSelectedAgentPoliciesChange={setSelectedAgentPolicies}
+        selectedStatus={selectedStatus}
+        onSelectedStatusChange={setSelectedStatus}
+        showUpgradeable={showUpgradeable}
+        onShowUpgradeableChange={setShowUpgradeable}
+      />
       <EuiSpacer size="m" />
 
       {/* Agent total, bulk actions and status bar */}
