@@ -25,7 +25,6 @@ import {
 import { AppLogic } from 'workplace_search/App/AppLogic';
 import { Loading, ViewContentHeader } from 'workplace_search/components';
 
-import FlashMessages from 'shared/components/FlashMessages';
 import IndexingStatus from 'shared/components/IndexingStatus';
 import { SchemaAddFieldModal } from 'shared/components/Schema';
 
@@ -51,7 +50,6 @@ export const Schema: React.FC = () => {
     addFieldFormErrors,
     mostRecentIndexJob,
     formUnchanged,
-    flashMessages,
     dataLoading,
   } = useValues(SchemaLogic);
 
@@ -82,7 +80,6 @@ export const Schema: React.FC = () => {
         description="Add new fields or change the types of existing ones"
       />
       <div>
-        {!!flashMessages && <FlashMessages {...flashMessages} />}
         {(isActive || hasErrors) && (
           <IndexingStatus
             itemId={sourceId}
