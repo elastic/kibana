@@ -19,7 +19,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceDependencyItem } from '../../../../../server/lib/services/get_service_dependencies';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { ServiceMapLink } from '../../../shared/Links/apm/ServiceMapLink';
@@ -32,6 +32,7 @@ import { px, unit } from '../../../../style/variables';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ServiceOverviewLink } from '../../../shared/Links/apm/service_overview_link';
 import { SpanIcon } from '../../../shared/span_icon';
+import { ServiceOverviewTableContainer } from '../service_overview_table';
 
 interface Props {
   serviceName: string;
@@ -100,21 +101,21 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       sortable: true,
     },
     {
-      field: 'traffic_value',
+      field: 'throughput_value',
       name: i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableColumnTraffic',
+        'xpack.apm.serviceOverview.dependenciesTableColumnThroughput',
         {
           defaultMessage: 'Traffic',
         }
       ),
       width: px(unit * 10),
-      render: (_, { traffic }) => {
+      render: (_, { throughput }) => {
         return (
           <SparkPlotWithValueLabel
             compact
             color="euiColorVis0"
-            series={traffic.timeseries ?? undefined}
-            valueLabel={asTransactionRate(traffic.value)}
+            series={throughput.timeseries ?? undefined}
+            valueLabel={asTransactionRate(throughput.value)}
           />
         );
       },
@@ -182,11 +183,12 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
     });
   }, [start, end, serviceName, environment]);
 
+  // need top-level sortable fields for the managed table
   const items = data.map((item) => ({
     ...item,
     error_rate_value: item.error_rate.value,
     latency_value: item.latency.value,
-    traffic_value: item.traffic.value,
+    throughput_value: item.throughput.value,
     impact_value: item.impact,
   }));
 
@@ -220,17 +222,24 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       </EuiFlexItem>
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
-          <EuiInMemoryTable
-            columns={columns}
-            items={items}
-            allowNeutralSort={false}
-            sorting={{
-              sort: {
-                direction: 'desc',
-                field: 'impact_value',
-              },
-            }}
-          />
+          <ServiceOverviewTableContainer
+            isEmptyAndLoading={
+              items.length === 0 && status === FETCH_STATUS.LOADING
+            }
+          >
+            <EuiInMemoryTable
+              columns={columns}
+              items={items}
+              allowNeutralSort={false}
+              loading={status === FETCH_STATUS.LOADING}
+              sorting={{
+                sort: {
+                  direction: 'desc',
+                  field: 'impact_value',
+                },
+              }}
+            />
+          </ServiceOverviewTableContainer>
         </TableFetchWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>

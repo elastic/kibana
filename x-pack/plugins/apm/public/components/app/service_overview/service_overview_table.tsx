@@ -21,7 +21,7 @@ const tableHeight = 298;
  *
  * Hide the empty message when we don't yet have any items and are still loading.
  */
-const ServiceOverviewTableContainer = styled.div<{
+export const ServiceOverviewTableContainer = styled.div<{
   isEmptyAndLoading: boolean;
 }>`
   height: ${tableHeight}px;

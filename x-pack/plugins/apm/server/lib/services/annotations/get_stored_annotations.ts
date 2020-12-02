@@ -28,34 +28,36 @@ export async function getStoredAnnotations({
   annotationsClient: ScopedAnnotationsClient;
   logger: Logger;
 }): Promise<Annotation[]> {
-  try {
-    const response: ESSearchResponse<ESAnnotation, any> = (await apiCaller(
-      'search',
-      {
-        index: annotationsClient.index,
-        body: {
-          size: 50,
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: setup.start,
-                      lt: setup.end,
-                    },
-                  },
-                },
-                { term: { 'annotation.type': 'deployment' } },
-                { term: { tags: 'apm' } },
-                { term: { [SERVICE_NAME]: serviceName } },
-                ...getEnvironmentUiFilterES(environment),
-              ],
+  const body = {
+    size: 50,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: setup.start,
+                lt: setup.end,
+              },
             },
           },
-        },
-      }
-    )) as any;
+          { term: { 'annotation.type': 'deployment' } },
+          { term: { tags: 'apm' } },
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...getEnvironmentUiFilterES(environment),
+        ],
+      },
+    },
+  };
+
+  try {
+    const response: ESSearchResponse<
+      ESAnnotation,
+      { body: typeof body }
+    > = (await apiCaller('search', {
+      index: annotationsClient.index,
+      body,
+    })) as any;
 
     return response.hits.hits.map((hit) => {
       return {
