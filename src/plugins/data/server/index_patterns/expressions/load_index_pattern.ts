@@ -27,8 +27,19 @@ import {
 } from '../../../common/index_patterns/expressions';
 import { DataPluginStartDependencies, DataPluginStart } from '../../plugin';
 
-/** @internal */
-export function createIndexPatternLoad({
+/**
+ * Returns the expression function definition. Any stateful dependencies are accessed
+ * at runtime via the `getStartDependencies` param, which provides the specific services
+ * needed for this function to run.
+ *
+ * This function is an implementation detail of this module, and is exported separately
+ * only for testing purposes.
+ *
+ * @param getStartDependencies - async function that resolves with IndexPatternLoadStartDependencies
+ *
+ * @internal
+ */
+export function getFunctionDefinition({
   getStartDependencies,
 }: {
   getStartDependencies: (req: KibanaRequest) => Promise<IndexPatternLoadStartDependencies>;
@@ -55,13 +66,26 @@ export function createIndexPatternLoad({
   });
 }
 
-/** @internal */
+/**
+ * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
+ * needed for this function, and wraps them behind a `getStartDependencies` function that
+ * is then called at runtime.
+ *
+ * We do this so that we can be explicit about exactly which dependencies the function
+ * requires, without cluttering up the top-level `plugin.ts` with this logic. It also
+ * makes testing the expression function a bit easier since `getStartDependencies` is
+ * the only thing you should need to mock.
+ *
+ * @param getStartServices - core's StartServicesAccessor for this plugin
+ *
+ * @internal
+ */
 export function getIndexPatternLoad({
   getStartServices,
 }: {
   getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>;
 }) {
-  return createIndexPatternLoad({
+  return getFunctionDefinition({
     getStartDependencies: async (request: KibanaRequest) => {
       const [{ elasticsearch, savedObjects }, , { indexPatterns }] = await getStartServices();
       return {

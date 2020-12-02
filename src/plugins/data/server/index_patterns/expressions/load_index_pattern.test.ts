@@ -18,7 +18,7 @@
  */
 
 import { IndexPatternLoadStartDependencies } from '../../../common/index_patterns/expressions';
-import { createIndexPatternLoad } from './load_index_pattern';
+import { getFunctionDefinition } from './load_index_pattern';
 
 describe('indexPattern expression function', () => {
   let getStartDependencies: () => Promise<IndexPatternLoadStartDependencies>;
@@ -36,7 +36,7 @@ describe('indexPattern expression function', () => {
   });
 
   test('returns serialized index pattern', async () => {
-    const indexPatternDefinition = createIndexPatternLoad({ getStartDependencies });
+    const indexPatternDefinition = getFunctionDefinition({ getStartDependencies });
     const result = await indexPatternDefinition().fn(null, { id: '1' }, {
       kibanaRequest: {},
     } as any);
