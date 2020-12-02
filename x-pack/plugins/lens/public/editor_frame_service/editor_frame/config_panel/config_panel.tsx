@@ -88,7 +88,7 @@ function LayerPanels(
   const layerIds = activeVisualization.getLayerIds(visualizationState);
 
   return (
-    <EuiForm className="lnsConfigPanel">
+    <EuiForm className="lnsConfigPanel" tabIndex={-1}>
       {layerIds.map((layerId, index) => (
         <LayerPanel
           {...props}
