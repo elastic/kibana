@@ -17,16 +17,30 @@
  * under the License.
  */
 
+import { statSync } from 'fs';
+
 /**
  * Context shared between the rolling file manager, policy and strategy.
  */
 export class RollingFileContext {
+  constructor(public readonly filePath: string) {}
   /**
    * The size of the currently opened file.
    */
-  public currentFileSize: number;
+  public currentFileSize: number = 0;
   /**
    * The time the currently opened file was created.
    */
-  public currentFileTime: number;
+  public currentFileTime: number = 0;
+
+  public refreshFileInfo() {
+    try {
+      const { birthtime, size } = statSync(this.filePath);
+      this.currentFileTime = birthtime.getTime();
+      this.currentFileSize = size;
+    } catch (e) {
+      this.currentFileTime = Date.now();
+      this.currentFileSize = 0;
+    }
+  }
 }

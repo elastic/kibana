@@ -19,14 +19,13 @@
 
 import { basename, dirname, join } from 'path';
 import { schema } from '@kbn/config-schema';
-import { readdir, unlink, rename } from './fs';
-import { RollingStrategy } from './strategy';
-import { RollingFileContext } from '../rolling_file_context';
+import { readdir, unlink, rename } from '../fs';
+import { RollingStrategy } from '../strategy';
+import { RollingFileContext } from '../../rolling_file_context';
 import { getNumericMatcher, getNumericFileName } from './numeric_pattern_matcher';
 
-// TODO: rename to `numeric` & create `date`
-export interface DefaultRollingStrategyConfig {
-  kind: 'default';
+export interface NumericRollingStrategyConfig {
+  kind: 'numeric';
   /**
    * The suffix pattern to apply when renaming a file. The suffix will be applied
    * after the `appender.path` file name, but before the file extension.
@@ -59,24 +58,48 @@ export interface DefaultRollingStrategyConfig {
 // %d{MM-dd-yyyy}
 // %i
 
-export const defaultRollingStrategyConfigSchema = schema.object({
-  kind: schema.literal('default'),
+export const numericRollingStrategyConfigSchema = schema.object({
+  kind: schema.literal('numeric'),
   pattern: schema.string({ defaultValue: '-%i' }), // TODO: validate
   max: schema.number({ min: 1, defaultValue: 7 }),
 });
 
-export class DefaultRollingStrategy implements RollingStrategy {
+/**
+ * A rolling strategy that will suffix the file with a given pattern when rolling,
+ * and will only retains a fixed amount of rolled file.
+ *
+ * @example
+ * ```yaml
+ * logging:
+ *   appenders:
+ *     rolling-file:
+ *       kind: rolling-file
+ *       path: /kibana.log
+ *       strategy:
+ *         type: numeric
+ *         pattern: "-%i"
+ *         max: 2
+ * ```
+ * - During the first rollover kibana.log is renamed to kibana-1.log. A new kibana.log file is created and starts
+ *   being written to.
+ * - During the second rollover kibana-1.log is renamed to kibana-2.log and kibana.log is renamed to kibana-1.log.
+ *   A new kibana.log file is created and starts being written to.
+ * - During the third and subsequent rollovers, kibana-2.log is deleted, kibana-1.log is renamed to kibana-2.log and
+ *   kibana.log is renamed to kibana-1.log. A new kibana.log file is created and starts being written to.
+ *
+ * See {@link NumericRollingStrategyConfig} for more details.
+ */
+export class NumericRollingStrategy implements RollingStrategy {
   constructor(
-    private readonly filepath: string,
-    private readonly config: DefaultRollingStrategyConfig,
-    context: RollingFileContext
+    private readonly config: NumericRollingStrategyConfig,
+    private readonly context: RollingFileContext
   ) {}
 
   async rollout() {
     // console.log('***** performing rolling');
 
-    const logFileBaseName = basename(this.filepath);
-    const logFileFolder = dirname(this.filepath);
+    const logFileBaseName = basename(this.context.filePath);
+    const logFileFolder = dirname(this.context.filePath);
 
     const matcher = getNumericMatcher(logFileBaseName, this.config.pattern);
     const dirContent = await readdir(logFileFolder);
@@ -108,6 +131,6 @@ export class DefaultRollingStrategy implements RollingStrategy {
 
     const currentFileNewName = getNumericFileName(logFileBaseName, this.config.pattern, 1);
     // console.log('*** will roll ', logFileBaseName, currentFileNewName);
-    await rename(this.filepath, join(logFileFolder, currentFileNewName));
+    await rename(this.context.filePath, join(logFileFolder, currentFileNewName));
   }
 }

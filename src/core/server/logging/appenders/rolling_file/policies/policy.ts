@@ -24,7 +24,7 @@ import { LogRecord } from '@kbn/logging';
  */
 export interface TriggeringPolicy {
   /**
-   * Determines whether a rollover should occur.
+   * Determines whether a rollover should occur before logging given record.
    **/
   isTriggeringEvent(record: LogRecord): boolean;
 }

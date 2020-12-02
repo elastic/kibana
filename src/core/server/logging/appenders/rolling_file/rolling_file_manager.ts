@@ -17,9 +17,12 @@
  * under the License.
  */
 
-import { createWriteStream, WriteStream, statSync } from 'fs';
+import { createWriteStream, WriteStream } from 'fs';
 import { RollingFileContext } from './rolling_file_context';
 
+/**
+ * Delegate of the {@link RollingFileAppender} used to manage the log file access
+ */
 export class RollingFileManager {
   private readonly filePath;
   private outputStream?: WriteStream;
@@ -40,19 +43,8 @@ export class RollingFileManager {
         encoding: 'utf8',
         flags: 'a',
       });
-      // TODO: should move elsewhere?
-      this.refreshInitialTime();
     }
     return this.outputStream!;
-  }
-
-  private refreshInitialTime() {
-    try {
-      const { birthtime, size } = statSync(this.filePath);
-      this.context.initialTime = birthtime.getTime();
-    } catch (e) {
-      this.context.initialTime = Date.now();
-    }
   }
 
   public async closeStream() {

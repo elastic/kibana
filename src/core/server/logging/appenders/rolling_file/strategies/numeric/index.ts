@@ -17,23 +17,8 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { RollingStrategy } from './strategy';
-import {
+export {
   NumericRollingStrategy,
   NumericRollingStrategyConfig,
   numericRollingStrategyConfigSchema,
-} from './numeric';
-import { RollingFileContext } from '../rolling_file_context';
-
-export { RollingStrategy } from './strategy';
-export type RollingStrategyConfig = NumericRollingStrategyConfig;
-
-export const rollingStrategyConfigSchema = schema.oneOf([numericRollingStrategyConfigSchema]);
-
-export const createRollingStrategy = (
-  config: RollingStrategyConfig,
-  context: RollingFileContext
-): RollingStrategy => {
-  return new NumericRollingStrategy(config, context);
-};
+} from './numeric_strategy';

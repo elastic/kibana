@@ -17,6 +17,12 @@
  * under the License.
  */
 
+/**
+ * A strategy to perform the log file rollout.
+ */
 export interface RollingStrategy {
+  /**
+   * Performs the rollout
+   */
   rollout(): Promise<void>;
 }

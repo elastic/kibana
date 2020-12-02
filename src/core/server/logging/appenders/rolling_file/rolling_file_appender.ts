@@ -71,22 +71,22 @@ export class RollingFileAppender implements DisposableAppender {
   });
 
   private isRolling = false;
-  private layout: Layout;
-  private context: RollingFileContext;
-  private fileManager: RollingFileManager;
-  private policy: TriggeringPolicy;
-  private strategy: RollingStrategy;
-  private buffer: BufferAppender;
+  private readonly layout: Layout;
+  private readonly context: RollingFileContext;
+  private readonly fileManager: RollingFileManager;
+  private readonly policy: TriggeringPolicy;
+  private readonly strategy: RollingStrategy;
+  private readonly buffer: BufferAppender;
 
   /**
    * Creates FileAppender instance with specified layout and file path.
    */
   constructor(config: RollingFileAppenderConfig) {
-    this.context = new RollingFileContext();
+    this.context = new RollingFileContext(config.path);
     this.fileManager = new RollingFileManager(config.path, this.context);
     this.layout = Layouts.create(config.layout);
-    this.policy = createTriggeringPolicy(config.policy, this.context); // TODO: rename to TriggeringPolicy
-    this.strategy = createRollingStrategy(config.path, config.strategy, this.context);
+    this.policy = createTriggeringPolicy(config.policy, this.context);
+    this.strategy = createRollingStrategy(config.strategy, this.context);
     this.buffer = new BufferAppender();
   }
 
