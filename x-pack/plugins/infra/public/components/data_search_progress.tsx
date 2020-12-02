@@ -40,6 +40,6 @@ export const DataSearchProgress: React.FC<{
   );
 };
 
-const cancelButtonLabel = i18n.translate('xpack.infra.dataSearchProgress.cancelButtonLabel', {
+const cancelButtonLabel = i18n.translate('xpack.infra.dataSearch.cancelButtonLabel', {
   defaultMessage: 'Cancel request',
 });

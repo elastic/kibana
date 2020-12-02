@@ -5,8 +5,6 @@
  */
 
 import {
-  EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -23,6 +21,7 @@ import React, { useEffect } from 'react';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
+import { DataSearchErrorCallout } from '../../data_search_error_callout';
 import { DataSearchProgress } from '../../data_search_progress';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 import { LogEntryFieldsTable } from './log_entry_fields_table';
@@ -97,7 +96,7 @@ export const LogEntryFlyout = ({
       </EuiFlyoutHeader>
       {isRequestRunning ? (
         <CenteredEuiFlyoutBody>
-          <div style={{ width: 400 }}>
+          <div style={{ width: '75%' }}>
             <DataSearchProgress
               label={loadingProgressMessage}
               maxValue={logEntryRequestTotal}
@@ -107,24 +106,28 @@ export const LogEntryFlyout = ({
           </div>
         </CenteredEuiFlyoutBody>
       ) : logEntry ? (
-        <EuiFlyoutBody>
+        <EuiFlyoutBody
+          banner={
+            (logEntryErrors?.length ?? 0) > 0 ? (
+              <DataSearchErrorCallout
+                title={loadingErrorCalloutTitle}
+                errors={logEntryErrors ?? []}
+                onRetry={fetchLogEntry}
+              />
+            ) : undefined
+          }
+        >
           <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />
         </EuiFlyoutBody>
       ) : (
         <CenteredEuiFlyoutBody>
-          <EuiCallOut
-            style={{ width: '61.8%' /* golden ratio */ }}
-            color="danger"
-            iconType="alert"
-            title={loadingErrorCalloutTitle}
-          >
-            {logEntryErrors?.map((error) => (
-              <p>{error.message}</p>
-            ))}
-            <EuiButton color="danger" size="s" onClick={fetchLogEntry}>
-              {loadingErrorRetryButtonLabel}
-            </EuiButton>
-          </EuiCallOut>
+          <div style={{ width: '75%' }}>
+            <DataSearchErrorCallout
+              title={loadingErrorCalloutTitle}
+              errors={logEntryErrors ?? []}
+              onRetry={fetchLogEntry}
+            />
+          </div>
         </CenteredEuiFlyoutBody>
       )}
     </EuiFlyout>
@@ -132,18 +135,11 @@ export const LogEntryFlyout = ({
 };
 
 const loadingProgressMessage = i18n.translate('xpack.infra.logFlyout.loadingMessage', {
-  defaultMessage: 'Loading log entry',
+  defaultMessage: 'Searching log entry in shards',
 });
 
 const loadingErrorCalloutTitle = i18n.translate('xpack.infra.logFlyout.loadingErrorCalloutTitle', {
-  defaultMessage: 'Failed to load the log entry',
+  defaultMessage: 'Error while searching the log entry',
 });
-
-const loadingErrorRetryButtonLabel = i18n.translate(
-  'xpack.infra.logFlyout.loadingErrorRetryButtonLabel',
-  {
-    defaultMessage: 'Retry',
-  }
-);
 
 const noop = () => {};

@@ -11,7 +11,7 @@ import { EuiThemeProvider } from '../../../observability/public';
 import { DataSearchProgress } from './data_search_progress';
 
 export default {
-  title: 'infra/utilityComponents/DataSearchProgress',
+  title: 'infra/dataSearch/DataSearchProgress',
   decorators: [
     (WrappedStory) => (
       <EuiThemeProvider>
