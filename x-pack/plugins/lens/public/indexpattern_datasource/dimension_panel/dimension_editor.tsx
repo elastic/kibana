@@ -28,6 +28,7 @@ import {
   updateColumnParam,
   resetIncomplete,
   FieldBasedIndexPatternColumn,
+  OperationType,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
@@ -36,6 +37,7 @@ import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternLayer } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
+import { ReferenceEditor } from './reference_editor';
 import { TimeScaling } from './time_scaling';
 
 const operationPanels = getOperationDisplay();
@@ -183,9 +185,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
         onClick() {
-          if (operationDefinitionMap[operationType].input === 'none') {
+          if (
+            operationDefinitionMap[operationType].input === 'none' ||
+            operationDefinitionMap[operationType].input === 'fullReference'
+          ) {
+            // Clear invalid state because we are reseting to a valid column
             if (selectedColumn?.operationType === operationType) {
-              // Clear invalid state because we are reseting to a valid column
               if (incompleteInfo) {
                 setState(
                   mergeLayer({
@@ -293,6 +298,34 @@ export function DimensionEditor(props: DimensionEditorProps) {
       </div>
       <EuiSpacer size="s" />
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+        {!incompleteInfo &&
+        selectedColumn &&
+        'references' in selectedColumn &&
+        selectedOperationDefinition?.input === 'fullReference' ? (
+          <>
+            {selectedColumn.references.map((referenceId, index) => {
+              const validation = selectedOperationDefinition.requiredReferences[index];
+
+              return (
+                <ReferenceEditor
+                  key={index}
+                  layer={state.layers[layerId]}
+                  parentColumnId={columnId}
+                  columnId={referenceId}
+                  updateLayer={(newLayer) => {
+                    setState(mergeLayer({ state, layerId, newLayer }));
+                  }}
+                  validation={validation}
+                  currentIndexPattern={currentIndexPattern}
+                  existingFields={state.existingFields}
+                  selectionStyle={selectedOperationDefinition.selectionStyle}
+                />
+              );
+            })}
+            <EuiSpacer size="s" />
+          </>
+        ) : null}
+
         {!selectedColumn ||
         selectedOperationDefinition?.input === 'field' ||
         (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field') ? (
@@ -447,11 +480,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
 }
 function getErrorMessage(
   selectedColumn: IndexPatternColumn | undefined,
-  incompatibleSelectedOperationType: boolean,
+  incompleteOperation: boolean,
   input: 'none' | 'field' | 'fullReference' | undefined,
   fieldInvalid: boolean
 ) {
-  if (selectedColumn && incompatibleSelectedOperationType) {
+  if (selectedColumn && incompleteOperation) {
     if (input === 'field') {
       return i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
         defaultMessage: 'To use this function, select a different field.',

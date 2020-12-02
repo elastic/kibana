@@ -17,6 +17,7 @@ import {
   operationDefinitionMap,
   IndexPatternColumn,
   OperationType,
+  getExistingColumnGroups,
 } from './operations';
 import { hasField, hasInvalidFields } from './utils';
 import {
@@ -221,7 +222,7 @@ function getExistingLayerSuggestionsForField(
         );
       }
 
-      const [, metrics] = separateBucketColumns(layer);
+      const [, metrics, references] = getExistingColumnGroups(layer);
       if (metrics.length === 1) {
         const layerWithReplacedMetric = replaceColumn({
           layer,
@@ -377,7 +378,7 @@ export function getDatasourceSuggestionsFromCurrentState(
       .filter(([_id, layer]) => layer.columnOrder.length && layer.indexPatternId)
       .map(([layerId, layer]) => {
         const indexPattern = state.indexPatterns[layer.indexPatternId];
-        const [buckets, metrics] = separateBucketColumns(layer);
+        const [buckets, metrics, references] = getExistingColumnGroups(layer);
         const timeDimension = layer.columnOrder.find(
           (columnId) =>
             layer.columns[columnId].isBucketed && layer.columns[columnId].dataType === 'date'
@@ -570,7 +571,11 @@ function createSuggestionWithDefaultDateHistogram(
 function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layerId: string) {
   const layer = state.layers[layerId];
 
-  const [availableBucketedColumns, availableMetricColumns] = separateBucketColumns(layer);
+  const [
+    availableBucketedColumns,
+    availableMetricColumns,
+    availableReferenceColumns,
+  ] = getExistingColumnGroups(layer);
 
   return _.flatten(
     availableBucketedColumns.map((_col, index) => {
@@ -622,8 +627,4 @@ function getMetricSuggestionTitle(layer: IndexPatternLayer, onlyMetric: boolean)
     description:
       'Title of a suggested chart containing only a single numerical metric calculated over all available data',
   });
-}
-
-function separateBucketColumns(layer: IndexPatternLayer) {
-  return partition(layer.columnOrder, (columnId) => layer.columns[columnId].isBucketed);
 }

@@ -370,8 +370,8 @@ export function getIndexPatternDatasource({
 
       const layerErrors = Object.values(state.layers).flatMap((layer) =>
         (getErrorMessages(layer) ?? []).map((message) => ({
-          shortMessage: message,
-          longMessage: '',
+          shortMessage: '', // Not displayed currently
+          longMessage: message,
         }))
       );
 

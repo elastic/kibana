@@ -1940,6 +1940,12 @@ describe('IndexPattern Data Source suggestions', () => {
       const suggestions = getDatasourceSuggestionsFromCurrentState(state);
       expect(suggestions).toEqual([]);
     });
+
+    describe('references', () => {
+      it('does not simplify a reference based operation to an invalid state', () => {
+        throw new Error('todo: write all the tests for references');
+      });
+    });
   });
 });
 

@@ -12,7 +12,7 @@ import { OperationDefinition } from '..';
 
 const ofName = (name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {
-    defaultMessage: 'Cumulative sum rate of {name}',
+    defaultMessage: 'Cumulative sum of {name}',
     values: {
       name:
         name ??
@@ -54,15 +54,16 @@ export const cumulativeSumOperation: OperationDefinition<
     };
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label);
+    const ref = columns[column.references[0]];
+    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
   },
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
-    const metric = layer.columns[referenceIds[0]];
+    const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(metric?.label),
+      label: ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined),
       dataType: 'number',
       operationType: 'cumulative_sum',
       isBucketed: false,

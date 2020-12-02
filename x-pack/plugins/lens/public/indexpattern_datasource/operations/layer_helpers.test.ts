@@ -190,6 +190,44 @@ describe('state_helpers', () => {
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2'] }));
     });
 
+    it('should insert a metric after buckets, but before references', () => {
+      const layer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'Date histogram of timestamp',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            sourceField: 'timestamp',
+            params: {
+              interval: 'h',
+            },
+          },
+          col3: {
+            label: 'Reference',
+            dataType: 'number',
+            isBucketed: false,
+
+            operationType: 'cumulative_sum',
+            references: ['col2'],
+          },
+        },
+      };
+      expect(
+        insertNewColumn({
+          layer,
+          indexPattern,
+          columnId: 'col2',
+          op: 'count',
+          field: documentField,
+        })
+      ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
+    });
+
     it('should insert new buckets at the end of previous buckets', () => {
       const layer: IndexPatternLayer = {
         indexPatternId: '1',

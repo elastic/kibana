@@ -50,7 +50,7 @@ export const movingAverageOperation: OperationDefinition<
   type: 'moving_average',
   priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.movingAverage', {
-    defaultMessage: 'Moving Average',
+    defaultMessage: 'Moving average',
   }),
   input: 'fullReference',
   selectionStyle: 'full',

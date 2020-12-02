@@ -59,15 +59,19 @@ export const derivativeOperation: OperationDefinition<
     };
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label, column.timeScale);
+    const ref = columns[column.references[0]];
+    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined, column.timeScale);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'derivative');
   },
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
-    const metric = layer.columns[referenceIds[0]];
+    const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(metric?.label, previousColumn?.timeScale),
+      label: ofName(
+        ref && 'sourceField' in ref ? ref.sourceField : undefined,
+        previousColumn?.timeScale
+      ),
       dataType: 'number',
       operationType: 'derivative',
       isBucketed: false,

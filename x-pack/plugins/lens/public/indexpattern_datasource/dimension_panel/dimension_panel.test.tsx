@@ -1068,6 +1068,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   it('should support selecting the operation before the field', () => {
+    setState.mockImplementation((newState) => {
+      wrapper.setProps({ state: newState });
+    });
+
     wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} columnId={'col2'} />);
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
@@ -1100,15 +1104,15 @@ describe('IndexPatternDimensionEditorPanel', () => {
       layers: {
         first: {
           ...state.layers.first,
+          columnOrder: ['col1', 'col2'],
           columns: {
             ...state.layers.first.columns,
             col2: expect.objectContaining({
-              sourceField: 'bytes',
               operationType: 'avg',
-              // Other parts of this don't matter for this test
+              sourceField: 'bytes',
             }),
           },
-          columnOrder: ['col1', 'col2'],
+          incompleteColumns: {},
         },
       },
     });
@@ -1178,9 +1182,15 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   it('should indicate compatible fields when selecting the operation first', () => {
+    setState.mockImplementation((newState) => {
+      wrapper.setProps({ state: newState });
+    });
+
     wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} columnId={'col2'} />);
 
-    wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+    act(() => {
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+    });
 
     const options = wrapper
       .find(EuiComboBox)
@@ -1242,9 +1252,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
       'Average',
       'Count',
+      'Counter rate',
+      'Cumulative sum',
+      'Differences',
       'Maximum',
       'Median',
       'Minimum',
+      'Moving average',
       'Sum',
       'Unique count',
       '\u00a0',

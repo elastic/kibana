@@ -982,8 +982,8 @@ describe('IndexPattern Data Source', () => {
         currentIndexPatternId: '1',
       };
       expect(indexPatternDatasource.getErrorMessages(state)).toEqual([
-        { shortMessage: 'error 1', longMessage: '' },
-        { shortMessage: 'error 2', longMessage: '' },
+        { longMessage: 'error 1', shortMessage: '' },
+        { longMessage: 'error 2', shortMessage: '' },
       ]);
       expect(getErrorMessages).toHaveBeenCalledTimes(1);
     });

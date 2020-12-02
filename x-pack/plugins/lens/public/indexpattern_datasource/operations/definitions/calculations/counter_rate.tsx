@@ -60,7 +60,8 @@ export const counterRateOperation: OperationDefinition<
     };
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label, column.timeScale);
+    const ref = columns[column.references[0]];
+    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined, column.timeScale);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
@@ -69,7 +70,7 @@ export const counterRateOperation: OperationDefinition<
     const metric = layer.columns[referenceIds[0]];
     const timeScale = previousColumn?.timeScale || DEFAULT_TIME_SCALE;
     return {
-      label: ofName(metric?.label, timeScale),
+      label: ofName(metric && 'sourceField' in metric ? metric.sourceField : undefined, timeScale),
       dataType: 'number',
       operationType: 'counter_rate',
       isBucketed: false,
