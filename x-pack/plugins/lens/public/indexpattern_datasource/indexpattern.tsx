@@ -46,7 +46,7 @@ import {
   normalizeOperationDataType,
 } from './utils';
 import { LayerPanel } from './layerpanel';
-import { IndexPatternColumn, getErrorMessages } from './operations';
+import { IndexPatternColumn, getErrorMessages, IncompleteColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -318,6 +318,20 @@ export function getIndexPatternDatasource({
 
     canHandleDrop,
     onDrop,
+
+    // Reset the temporary invalid state when closing the editor
+    updateStateOnCloseDimension: ({ state, layerId, columnId }) => {
+      const layer = { ...state.layers[layerId] };
+      const newIncomplete: Record<string, IncompleteColumn> = {
+        ...(state.layers[layerId].incompleteColumns || {}),
+      };
+      delete newIncomplete[columnId];
+      return mergeLayer({
+        state,
+        layerId,
+        newLayer: { ...layer, incompleteColumns: newIncomplete },
+      });
+    },
 
     getPublicAPI({ state, layerId }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = indexPatternDatasource.uniqueLabels(state);
