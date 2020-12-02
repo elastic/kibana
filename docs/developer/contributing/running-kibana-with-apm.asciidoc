@@ -37,7 +37,7 @@ elastic.apm.metricsInterval: '120s'
 ----------
 
 7. Start Kibana with APM active using:
-** `ELASTIC_APM_ACTIVE=true yarn start`
+** `yarn start`
 8. After Kibana starts up, navigate to the APM app, where you should see some transactions.
 9. You can now continue doing what you want to in Kibana (e.g. install sample data sets, issue queries in dashboards, build new visualizations etc).
 10. Once you're finished, you can stop Kibana normally, then stop the {es} and APM servers in the apm-integration-testing clone with the following script:
