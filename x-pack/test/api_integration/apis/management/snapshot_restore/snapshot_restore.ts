@@ -15,9 +15,13 @@ const REPO_NAME = 'test_repo';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const { createRepository, createPolicy, deletePolicy, cleanupPolicies } = registerEsHelpers(
-    getService
-  );
+  const {
+    createRepository,
+    createPolicy,
+    deletePolicy,
+    cleanupPolicies,
+    getPolicy,
+  } = registerEsHelpers(getService);
 
   describe('Snapshot Lifecycle Management', function () {
     before(async () => {
@@ -79,6 +83,27 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql({
           acknowledged: true,
         });
+
+        const policyFromEs = await getPolicy(POLICY_NAME);
+        expect(policyFromEs[POLICY_NAME]).to.be.ok();
+        expect(policyFromEs[POLICY_NAME].policy).to.eql({
+          name: 'my_snapshot',
+          schedule: '0 30 1 * * ?',
+          repository: REPO_NAME,
+          config: {
+            indices: ['my_index'],
+            ignore_unavailable: true,
+            partial: false,
+            metadata: {
+              meta: 'my_meta',
+            },
+          },
+          retention: {
+            expire_after: '1d',
+            max_count: 10,
+            min_count: 5,
+          },
+        });
       });
 
       it('should create a policy with only required fields', async () => {
@@ -97,6 +122,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).to.eql({
           acknowledged: true,
+        });
+
+        const policyFromEs = await getPolicy(REQUIRED_FIELDS_POLICY_NAME);
+        expect(policyFromEs[REQUIRED_FIELDS_POLICY_NAME]).to.be.ok();
+        expect(policyFromEs[REQUIRED_FIELDS_POLICY_NAME].policy).to.eql({
+          name: 'my_snapshot',
+          repository: REPO_NAME,
+          schedule: '0 30 1 * * ?',
         });
       });
     });
@@ -151,6 +184,27 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql({
           acknowledged: true,
         });
+
+        const policyFromEs = await getPolicy(POLICY_NAME);
+        expect(policyFromEs[POLICY_NAME]).to.be.ok();
+        expect(policyFromEs[POLICY_NAME].policy).to.eql({
+          name: 'my_snapshot',
+          schedule: '0 0 0 ? * 7',
+          repository: REPO_NAME,
+          config: {
+            indices: ['my_index'],
+            ignore_unavailable: true,
+            partial: false,
+            metadata: {
+              meta: 'my_meta',
+            },
+          },
+          retention: {
+            expire_after: '1d',
+            max_count: 10,
+            min_count: 5,
+          },
+        });
       });
 
       it('should allow optional fields to be removed', async () => {
@@ -165,6 +219,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).to.eql({
           acknowledged: true,
+        });
+
+        const policyFromEs = await getPolicy(POLICY_NAME);
+        expect(policyFromEs[POLICY_NAME]).to.be.ok();
+        expect(policyFromEs[POLICY_NAME].policy).to.eql({
+          name: 'my_snapshot',
+          schedule: '0 30 1 * * ?',
+          repository: REPO_NAME,
         });
       });
     });

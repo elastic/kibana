@@ -60,6 +60,13 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
     });
   };
 
+  const getPolicy = (policyName: string) => {
+    return es.sr.policy({
+      name: policyName,
+      human: true,
+    });
+  };
+
   const deletePolicy = (policyName: string) => es.sr.deletePolicy({ name: policyName });
 
   const cleanupPolicies = () =>
@@ -77,5 +84,6 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
     createPolicy,
     deletePolicy,
     cleanupPolicies,
+    getPolicy,
   };
 };
