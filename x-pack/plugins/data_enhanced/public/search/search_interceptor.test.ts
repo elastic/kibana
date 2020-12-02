@@ -9,9 +9,10 @@ import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
-import { SearchTimeoutError } from 'src/plugins/data/public';
+import { ISessionService, SearchTimeoutError, SessionState } from 'src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { bfetchPluginMock } from '../../../../../src/plugins/bfetch/public/mocks';
+import { BehaviorSubject } from 'rxjs';
 
 const timeTravel = (msToRun = 0) => {
   jest.advanceTimersByTime(msToRun);
@@ -43,11 +44,18 @@ function mockFetchImplementation(responses: any[]) {
 
 describe('EnhancedSearchInterceptor', () => {
   let mockUsageCollector: any;
+  let sessionService: jest.Mocked<ISessionService>;
+  let sessionState$: BehaviorSubject<SessionState>;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    sessionState$ = new BehaviorSubject<SessionState>(SessionState.None);
     const dataPluginMockStart = dataPluginMock.createStartContract();
+    sessionService = {
+      ...(dataPluginMockStart.search.session as jest.Mocked<ISessionService>),
+      state$: sessionState$,
+    };
     fetchMock = jest.fn();
 
     mockCoreSetup.uiSettings.get.mockImplementation((name: string) => {
@@ -87,7 +95,7 @@ describe('EnhancedSearchInterceptor', () => {
       http: mockCoreSetup.http,
       uiSettings: mockCoreSetup.uiSettings,
       usageCollector: mockUsageCollector,
-      session: dataPluginMockStart.search.session,
+      session: sessionService,
     });
   });
 
@@ -144,6 +152,7 @@ describe('EnhancedSearchInterceptor', () => {
           },
         },
       ];
+
       mockFetchImplementation(responses);
 
       const response = searchInterceptor.search({}, { pollInterval: 0 });
@@ -361,6 +370,54 @@ describe('EnhancedSearchInterceptor', () => {
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalled();
     });
+
+    test('should NOT DELETE a running SAVED async search on abort', async () => {
+      const sessionId = 'sessionId';
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: true,
+            id: 1,
+          },
+        },
+        {
+          time: 300,
+          value: {
+            isPartial: false,
+            isRunning: false,
+            id: 1,
+          },
+        },
+      ];
+      mockFetchImplementation(responses);
+
+      const abortController = new AbortController();
+      setTimeout(() => abortController.abort(), 250);
+
+      const response = searchInterceptor.search(
+        {},
+        { abortSignal: abortController.signal, pollInterval: 0, sessionId }
+      );
+      response.subscribe({ next, error });
+
+      await timeTravel(10);
+
+      expect(next).toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+
+      sessionState$.next(SessionState.BackgroundLoading);
+
+      await timeTravel(240);
+
+      expect(error).toHaveBeenCalled();
+      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+    });
   });
 
   describe('cancelPending', () => {
@@ -393,6 +450,110 @@ describe('EnhancedSearchInterceptor', () => {
       const areAllRequestsAborted = fetchMock.mock.calls.every(([_, signal]) => signal?.aborted);
       expect(areAllRequestsAborted).toBe(true);
       expect(mockUsageCollector.trackQueriesCancelled).toBeCalledTimes(1);
+    });
+  });
+
+  describe('session', () => {
+    beforeEach(() => {
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: true,
+            id: 1,
+          },
+        },
+        {
+          time: 300,
+          value: {
+            isPartial: false,
+            isRunning: false,
+            id: 1,
+          },
+        },
+      ];
+
+      mockFetchImplementation(responses);
+    });
+
+    test('should track searches', async () => {
+      const sessionId = 'sessionId';
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const response = searchInterceptor.search({}, { pollInterval: 0, sessionId });
+      response.subscribe({ next, error });
+      await timeTravel(10);
+      expect(sessionService.trackSearch).toBeCalledTimes(1);
+      expect(untrack).not.toBeCalled();
+      await timeTravel(300);
+      expect(sessionService.trackSearch).toBeCalledTimes(1);
+      expect(untrack).toBeCalledTimes(1);
+    });
+
+    test('session service should be able to cancel search', async () => {
+      const sessionId = 'sessionId';
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const response = searchInterceptor.search({}, { pollInterval: 0, sessionId });
+      response.subscribe({ next, error });
+      await timeTravel(10);
+      expect(sessionService.trackSearch).toBeCalledTimes(1);
+
+      const abort = sessionService.trackSearch.mock.calls[0][0].abort;
+      expect(abort).toBeInstanceOf(Function);
+
+      abort();
+
+      await timeTravel(10);
+
+      expect(error).toHaveBeenCalled();
+      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
+    });
+
+    test("don't track non current session searches", async () => {
+      const sessionId = 'sessionId';
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const response1 = searchInterceptor.search(
+        {},
+        { pollInterval: 0, sessionId: 'something different' }
+      );
+      response1.subscribe({ next, error });
+
+      const response2 = searchInterceptor.search({}, { pollInterval: 0, sessionId: undefined });
+      response2.subscribe({ next, error });
+
+      await timeTravel(10);
+      expect(sessionService.trackSearch).toBeCalledTimes(0);
+    });
+
+    test("don't track if no current session", async () => {
+      sessionService.getSessionId.mockImplementation(() => undefined);
+
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const response1 = searchInterceptor.search(
+        {},
+        { pollInterval: 0, sessionId: 'something different' }
+      );
+      response1.subscribe({ next, error });
+
+      const response2 = searchInterceptor.search({}, { pollInterval: 0, sessionId: undefined });
+      response2.subscribe({ next, error });
+
+      await timeTravel(10);
+      expect(sessionService.trackSearch).toBeCalledTimes(0);
     });
   });
 });

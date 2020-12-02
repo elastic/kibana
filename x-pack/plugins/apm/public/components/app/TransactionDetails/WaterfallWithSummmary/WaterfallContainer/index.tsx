@@ -6,7 +6,7 @@
 
 import { Location } from 'history';
 import React from 'react';
-import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
+import { IUrlParams } from '../../../../../context/url_params_context/types';
 import { ServiceLegends } from './ServiceLegends';
 import { IWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 import { Waterfall } from './Waterfall';
