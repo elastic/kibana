@@ -52,7 +52,6 @@ Object {
         "min": null,
       },
     },
-    "visType": "tile_map",
   },
 }
 `;

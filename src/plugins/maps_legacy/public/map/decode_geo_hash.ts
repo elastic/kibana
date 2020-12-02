@@ -36,32 +36,3 @@ function geohashCells(precision: number, axis: number) {
   }
   return cells;
 }
-
-interface GeoBoundingBoxCoordinate {
-  lat: number;
-  lon: number;
-}
-
-interface GeoBoundingBox {
-  top_left: GeoBoundingBoxCoordinate;
-  bottom_right: GeoBoundingBoxCoordinate;
-}
-
-export function geoContains(collar?: GeoBoundingBox, bounds?: GeoBoundingBox) {
-  if (!bounds || !collar) return false;
-  // test if bounds top_left is outside collar
-  if (bounds.top_left.lat > collar.top_left.lat || bounds.top_left.lon < collar.top_left.lon) {
-    return false;
-  }
-
-  // test if bounds bottom_right is outside collar
-  if (
-    bounds.bottom_right.lat < collar.bottom_right.lat ||
-    bounds.bottom_right.lon > collar.bottom_right.lon
-  ) {
-    return false;
-  }
-
-  // both corners are inside collar so collar contains bounds
-  return true;
-}

@@ -30,7 +30,6 @@ export interface TileMapVisRenderValue {
   visData: TileMapVisData;
   visType: 'tile_map';
   visConfig: TileMapVisConfig;
-  params: any;
 }
 
 export type TileMapExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -69,14 +68,11 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'tile_map_vis',
       value: {
         visData: convertedData,
         visType: 'tile_map',
         visConfig,
-        params: {
-          listenOnChange: true,
-        },
       },
     };
   },

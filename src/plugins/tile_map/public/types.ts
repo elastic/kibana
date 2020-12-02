@@ -28,7 +28,7 @@ export interface Feature {
     coordinates: [number, number];
   };
   properties: {
-    geohash: any;
+    geohash: string;
     geohash_meta: {
       center: [number, number];
       rectangle: Array<[number, number]>;

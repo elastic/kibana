@@ -35,7 +35,6 @@ import { toExpressionAst } from './to_ast';
 export function createTileMapTypeDefinition(
   dependencies: TileMapVisualizationDependencies
 ): BaseVisTypeOptions<TileMapVisParams> {
-  const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
   const { uiSettings, getServiceSettings } = dependencies;
 
   return {
@@ -62,7 +61,6 @@ export function createTileMapTypeDefinition(
         wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
       },
     },
-    visualization: CoordinateMapsVisualization,
     toExpressionAst,
     editorConfig: {
       collections: {

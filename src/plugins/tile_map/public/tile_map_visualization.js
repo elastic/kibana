@@ -19,12 +19,9 @@
 
 import { get, round } from 'lodash';
 import { getFormatService, getQueryService, getKibanaLegacy } from './services';
-import {
-  geoContains,
-  mapTooltipProvider,
-  lazyLoadMapsLegacyModules,
-} from '../../maps_legacy/public';
+import { mapTooltipProvider, lazyLoadMapsLegacyModules } from '../../maps_legacy/public';
 import { tooltipFormatter } from './tooltip_formatter';
+import { geoContains } from './utils';
 
 function scaleBounds(bounds) {
   const scale = 0.5; // scale bounds by 50%
@@ -57,9 +54,10 @@ export const createTileMapVisualization = (dependencies) => {
   const { getZoomPrecision, getPrecision, BaseMapsVisualization } = dependencies;
 
   return class CoordinateMapsVisualization extends BaseMapsVisualization {
-    constructor(element, vis) {
+    constructor(element, vis, handlers) {
       super(element, vis);
 
+      this.handlers = handlers;
       this._geohashLayer = null;
       this._tooltipFormatter = mapTooltipProvider(element, tooltipFormatter);
     }
@@ -87,7 +85,7 @@ export const createTileMapVisualization = (dependencies) => {
         ? zoomPrecision[this.vis.getUiState().get('mapZoom')]
         : getPrecision(geohashAgg.sourceParams.params.precision);
 
-      this.vis.eventsSubject.next(updateVarsObject);
+      this.handlers.event(updateVarsObject);
     };
 
     async render(esResponse, visParams) {

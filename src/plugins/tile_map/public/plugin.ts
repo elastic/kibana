@@ -39,6 +39,7 @@ import { SharePluginStart } from '../../share/public';
 
 import { createTileMapFn } from './tile_map_fn';
 import { createTileMapTypeDefinition } from './tile_map_type';
+import { getTileMapRenderer } from './tile_map_renderer';
 
 export interface TileMapConfigType {
   tilemap: any;
@@ -95,6 +96,7 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
     };
 
     expressions.registerFunction(createTileMapFn);
+    expressions.registerRenderer(getTileMapRenderer(visualizationDependencies));
 
     visualizations.createBaseVisualization(createTileMapTypeDefinition(visualizationDependencies));
 
