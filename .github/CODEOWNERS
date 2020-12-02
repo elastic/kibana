@@ -187,6 +187,9 @@
 /x-pack/test/saved_object_tagging/ @elastic/kibana-core
 /packages/kbn-config-schema/ @elastic/kibana-core
 /packages/kbn-std/ @elastic/kibana-core
+/packages/kbn-config/ @elastic/kibana-core
+/packages/kbn-logging/ @elastic/kibana-core
+/packages/kbn-legacy-logging/ @elastic/kibana-core
 /src/legacy/server/config/ @elastic/kibana-core
 /src/legacy/server/http/ @elastic/kibana-core
 /src/legacy/server/logging/ @elastic/kibana-core
@@ -259,8 +262,31 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 
 # Enterprise Search
 # Shared
-/x-pack/plugins/enterprise_search/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/* @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/common/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/public/* @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/public/applications/* @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/public/applications/enterprise_search/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/public/applications/shared/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/public/applications/__mocks__/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/server/* @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/server/lib/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/server/__mocks__/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/server/collectors/enterprise_search/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/server/collectors/lib/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/server/routes/enterprise_search/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search/server/saved_objects/enterprise_search/ @elastic/enterprise-search-frontend
 /x-pack/test/functional_enterprise_search/ @elastic/enterprise-search-frontend
+# App Search
+/x-pack/plugins/enterprise_search/public/applications/app_search/ @elastic/app-search-frontend
+/x-pack/plugins/enterprise_search/server/routes/app_search/ @elastic/app-search-frontend
+/x-pack/plugins/enterprise_search/server/collectors/app_search/ @elastic/app-search-frontend
+/x-pack/plugins/enterprise_search/server/saved_objects/app_search/ @elastic/app-search-frontend
+# Workplace Search
+/x-pack/plugins/enterprise_search/public/applications/workplace_search/ @elastic/workplace-search-frontend
+/x-pack/plugins/enterprise_search/server/routes/workplace_search/ @elastic/workplace-search-frontend
+/x-pack/plugins/enterprise_search/server/collectors/workplace_search/ @elastic/workplace-search-frontend
+/x-pack/plugins/enterprise_search/server/saved_objects/workplace_search/ @elastic/workplace-search-frontend
 
 # Elasticsearch UI
 /src/plugins/dev_tools/ @elastic/es-ui

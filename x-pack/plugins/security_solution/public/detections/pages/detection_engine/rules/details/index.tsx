@@ -110,16 +110,19 @@ const getRuleDetailsTabs = (rule: Rule | null) => {
       id: RuleDetailTabs.alerts,
       name: detectionI18n.ALERT,
       disabled: false,
+      dataTestSubj: 'alertsTab',
     },
     {
       id: RuleDetailTabs.exceptions,
       name: i18n.EXCEPTIONS_TAB,
       disabled: !canUseExceptions,
+      dataTestSubj: 'exceptionsTab',
     },
     {
       id: RuleDetailTabs.failures,
       name: i18n.FAILURE_HISTORY_TAB,
       disabled: false,
+      dataTestSubj: 'failureHistoryTab',
     },
   ];
 };
@@ -263,6 +266,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
             isSelected={tab.id === ruleDetailTab}
             disabled={tab.disabled}
             key={tab.id}
+            data-test-subj={tab.dataTestSubj}
           >
             {tab.name}
           </EuiTab>
@@ -271,18 +275,33 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     ),
     [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
   );
-  const ruleError = useMemo(
-    () =>
+  const ruleError = useMemo(() => {
+    if (
       rule?.status === 'failed' &&
       ruleDetailTab === RuleDetailTabs.alerts &&
-      rule?.last_failure_at != null ? (
+      rule?.last_failure_at != null
+    ) {
+      return (
         <RuleStatusFailedCallOut
           message={rule?.last_failure_message ?? ''}
           date={rule?.last_failure_at}
         />
-      ) : null,
-    [rule, ruleDetailTab]
-  );
+      );
+    } else if (
+      rule?.status === 'partial failure' &&
+      ruleDetailTab === RuleDetailTabs.alerts &&
+      rule?.last_success_at != null
+    ) {
+      return (
+        <RuleStatusFailedCallOut
+          message={rule?.last_success_message ?? ''}
+          date={rule?.last_success_at}
+          color="warning"
+        />
+      );
+    }
+    return null;
+  }, [rule, ruleDetailTab]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
