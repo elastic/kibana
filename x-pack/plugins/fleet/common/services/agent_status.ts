@@ -62,6 +62,10 @@ export function buildKueryForOfflineAgents() {
   }s AND not (${buildKueryForErrorAgents()})`;
 }
 
-export function buildKueryForUpdatingAgents() {
+export function buildKueryForUpgradingAgents() {
   return `${AGENT_SAVED_OBJECT_TYPE}.upgrade_started_at:*`;
+}
+
+export function buildKueryForUpdatingAgents() {
+  return `(${buildKueryForUpgradingAgents()}) or (${buildKueryForEnrollingAgents()}) or (${buildKueryForUnenrollingAgents()})`;
 }
