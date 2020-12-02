@@ -10,7 +10,7 @@ import React from 'react';
 import { KibanaLink } from '../../shared/Links/KibanaLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ErrorStatePrompt } from '../../shared/ErrorStatePrompt';
 
 interface Props {

@@ -9,12 +9,12 @@ import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
 import { ML_ERRORS } from '../../../../../common/anomaly_detection';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { LicensePrompt } from '../../../shared/LicensePrompt';
-import { useLicense } from '../../../../hooks/useLicense';
+import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/anomaly-detection/jobs'>;
@@ -27,7 +27,7 @@ const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
 export function AnomalyDetection() {
   const plugin = useApmPluginContext();
   const canGetJobs = !!plugin.core.application.capabilities.ml?.canGetJobs;
-  const license = useLicense();
+  const license = useLicenseContext();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
 
   const [viewAddEnvironments, setViewAddEnvironments] = useState(false);
