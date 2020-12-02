@@ -29,7 +29,7 @@ The easiest and recommended way of running Kibana with the APM agent locally is 
 elastic.apm.active: true
 elastic.apm.serverUrl: 'http://127.0.0.1:8200'
 # elastic.apm.secretToken: ... <-- might be required in prod/cloud
-# optional metrics to adjust performance 
+# optional metrics to tune the performance of APM agents
 elastic.apm.centralConfig: false
 elastic.apm.breakdownMetrics: false
 elastic.apm.transactionSampleRate: 0.1
