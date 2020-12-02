@@ -9,6 +9,7 @@ import {
   NewResolverTree,
   SafeEndpointEvent,
   SafeResolverEvent,
+  ResolverSchema,
 } from '../../../../common/endpoint/types';
 import { FetchedNodeData, TreeFetcherParameters } from '../../types';
 
@@ -19,6 +20,14 @@ interface ServerReturnedResolverData {
      * The result of fetching data
      */
     result: NewResolverTree;
+    /**
+     * The current data source (i.e. endpoint, winlogbeat, etc...)
+     */
+    dataSource: string;
+    /**
+     * The Resolver Schema for the current data source
+     */
+    schema: ResolverSchema;
     /**
      * The database parameters that was used to fetch the resolver tree
      */

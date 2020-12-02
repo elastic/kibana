@@ -87,6 +87,8 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
          */
         lastResponse: {
           result: action.payload.result,
+          dataSource: action.payload.dataSource,
+          schema: action.payload.schema,
           parameters: action.payload.parameters,
           successful: true,
         },

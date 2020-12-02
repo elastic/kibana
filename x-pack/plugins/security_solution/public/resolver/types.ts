@@ -337,6 +337,14 @@ export interface DataState {
            * The NewResolverTree parsed from the response.
            */
           readonly result: NewResolverTree;
+          /**
+           * The current data source (i.e. endpoint, winlogbeat, etc...)
+           */
+          readonly dataSource: string;
+          /**
+           * The Resolver Schema for the current data source
+           */
+          readonly schema: ResolverSchema;
         }
       | {
           /**

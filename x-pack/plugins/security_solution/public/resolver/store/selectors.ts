@@ -393,6 +393,14 @@ export const isNodeDataLoading = composeSelectors(
 );
 
 /**
+ * Returns the schema for the current resolver tree. Currently, only used in the graph controls panel.
+ */
+export const resolverTreeSourceAndSchema = composeSelectors(
+  dataStateSelector,
+  dataSelectors.resolverTreeSourceAndSchema
+);
+
+/**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.
  */

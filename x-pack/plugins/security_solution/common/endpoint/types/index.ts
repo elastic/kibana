@@ -129,7 +129,7 @@ export interface ResolverNode {
 }
 
 export interface NewResolverTree {
-  originId: string | null;
+  originId: string;
   nodes: ResolverNode[];
 }
 

@@ -26,19 +26,21 @@ import { ResolverAction } from '../store/actions';
 import { useColors } from './use_colors';
 import { StyledDescriptionList } from './panels/styles';
 import { CubeForProcess } from './panels/cube_for_process';
+import { GeneratedText } from './generated_text';
 
 interface StyledGraphControls {
   graphControlsBackground: string;
   graphControlsIconColor: string;
+  graphControlsBorderColor: string;
 }
 
-// TODO: 1. Create StyledCubeForProcess with proper cube size (~2.5em) 2. Update descriptionList widths for Legend 3. Confirm all text is properly translated
+// TODO: 3. Confirm all text is properly translated 4. Make sure background is right 5. Align icon and text
 
 const StyledGraphControls = styled.div<StyledGraphControls>`
   position: absolute;
   top: 5px;
   right: 5px;
-  background-color: ${(props) => props.graphControlsBackground};
+  background-color: transparent;
   color: ${(props) => props.graphControlsIconColor};
 
   & .graph-controls__wrapper {
@@ -56,7 +58,8 @@ const StyledGraphControls = styled.div<StyledGraphControls>`
   }
 
   & .graph-controls__popover_buttons {
-    border: 1px solid #c2c3c6;
+    background-color: ${(props) => props.graphControlsBackground};
+    border: 1px solid ${(props) => props.graphControlsBorderColor};
     border-radius: 4px;
     width: 40px;
     height: 40px;
@@ -92,6 +95,7 @@ const StyledGraphControls = styled.div<StyledGraphControls>`
 /**
  * Controls for zooming, panning, and centering in Resolver
  */
+
 export const GraphControls = React.memo(
   ({
     className,
@@ -161,39 +165,87 @@ export const GraphControls = React.memo(
       });
     }, [dispatch, timestamp]);
 
+    const sourceAndSchema = useSelector(selectors.resolverTreeSourceAndSchema);
+
     const schemaListItems = [
       {
         title: 'SOURCE',
-        description: 'Endpoint',
+        description: <GeneratedText>{sourceAndSchema?.dataSource ?? 'Unknown'}</GeneratedText>,
       },
       {
         title: 'ID',
-        description: 'process.entity_id',
+        description: <GeneratedText>{sourceAndSchema?.schema.id ?? 'Unknown'}</GeneratedText>,
       },
       {
         title: 'EDGE',
-        description: 'process.parent.entity_id',
+        description: <GeneratedText>{sourceAndSchema?.schema.parent ?? 'Unknown'}</GeneratedText>,
       },
     ];
 
     const legendListItems = [
       {
-        title: <CubeForProcess data-test-subj="resolver:node-detail:title-icon" state="running" />,
-        description: 'Running Process',
+        title: (
+          <CubeForProcess
+            size="2.5em"
+            data-test-subj="resolver:node-detail:title-icon"
+            state="running"
+          />
+        ),
+        description: (
+          <GeneratedText>
+            {i18n.translate('xpack.securitySolution.resolver.graphControls.runningProcessCube', {
+              defaultMessage: 'Running Process',
+            })}
+          </GeneratedText>
+        ),
       },
       {
         title: (
-          <CubeForProcess data-test-subj="resolver:node-detail:title-icon" state="terminated" />
+          <CubeForProcess
+            size="2.5em"
+            data-test-subj="resolver:node-detail:title-icon"
+            state="terminated"
+          />
         ),
-        description: 'Terminated Process',
+        description: (
+          <GeneratedText>
+            {i18n.translate('xpack.securitySolution.resolver.graphControls.terminatedProcessCube', {
+              defaultMessage: 'Terminated Process',
+            })}
+          </GeneratedText>
+        ),
       },
       {
-        title: <CubeForProcess data-test-subj="resolver:node-detail:title-icon" state="loading" />,
-        description: 'Currently Loading',
+        title: (
+          <CubeForProcess
+            size="2.5em"
+            data-test-subj="resolver:node-detail:title-icon"
+            state="loading"
+          />
+        ),
+        description: (
+          <GeneratedText>
+            {i18n.translate('xpack.securitySolution.resolver.graphControls.currentlyLoadingCube', {
+              defaultMessage: 'Loading Process',
+            })}
+          </GeneratedText>
+        ),
       },
       {
-        title: <CubeForProcess data-test-subj="resolver:node-detail:title-icon" state="error" />,
-        description: 'Error',
+        title: (
+          <CubeForProcess
+            size="2.5em"
+            data-test-subj="resolver:node-detail:title-icon"
+            state="error"
+          />
+        ),
+        description: (
+          <GeneratedText>
+            {i18n.translate('xpack.securitySolution.resolver.graphControls.errorCube', {
+              defaultMessage: 'Error',
+            })}
+          </GeneratedText>
+        ),
       },
     ];
 
@@ -202,12 +254,15 @@ export const GraphControls = React.memo(
         className={className}
         graphControlsBackground={colorMap.graphControlsBackground}
         graphControlsIconColor={colorMap.graphControls}
+        graphControlsBorderColor={colorMap.graphControlsBorderColor}
         data-test-subj="resolver:graph-controls"
       >
         <div className="graph-controls__wrapper">
           <div className="graph-controls__column">
             <EuiPopover
               ownFocus
+              onScroll={closePopover}
+              repositionOnScroll={false}
               onClick={() => setActivePopover('schemaInfo')}
               button={
                 <EuiButtonIcon
@@ -238,19 +293,22 @@ export const GraphControls = React.memo(
               </EuiPopoverTitle>
               <div style={{ width: '256px' }}>
                 <StyledDescriptionList
-                  data-test-subj="resolver:source-schema-info"
+                  data-test-subj="resolver:schema-info"
                   type="column"
                   align="left"
                   titleProps={
                     {
-                      'data-test-subj': 'resolver:source-schema-info:title',
-                      className: 'desc-title',
+                      'data-test-subj': 'resolver:schema-info:title',
+                      className: 'schema-info-desc-title',
+                      style: { width: '30%' },
                       // Casting this to allow data attribute
                     } as HTMLAttributes<HTMLElement>
                   }
                   descriptionProps={
                     {
-                      'data-test-subj': 'resolver:source-schema-info:description',
+                      'data-test-subj': 'resolver:schema-info:description',
+                      className: 'schema-info-description',
+                      style: { width: '70%' },
                     } as HTMLAttributes<HTMLElement>
                   }
                   compressed
@@ -269,6 +327,8 @@ export const GraphControls = React.memo(
                   iconType="node"
                 />
               }
+              onScroll={closePopover}
+              repositionOnScroll={false}
               onClick={() => setActivePopover('nodesLegend')}
               isOpen={activePopover === 'nodesLegend'}
               closePopover={closePopover}
@@ -287,13 +347,16 @@ export const GraphControls = React.memo(
                   titleProps={
                     {
                       'data-test-subj': 'resolver:graph-controls:legend:title',
-                      className: 'desc-title',
+                      className: 'legend-desc-title',
+                      style: { width: '20%' },
                       // Casting this to allow data attribute
                     } as HTMLAttributes<HTMLElement>
                   }
                   descriptionProps={
                     {
                       'data-test-subj': 'resolver:graph-controls:legend:description',
+                      className: 'legend-description',
+                      style: { width: '80%', lineHeight: '2em' }, // lineHeight to align center vertically
                     } as HTMLAttributes<HTMLElement>
                   }
                   compressed

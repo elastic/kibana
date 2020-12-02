@@ -29,6 +29,7 @@ import {
   NewResolverTree,
   ResolverNode,
   EventStats,
+  ResolverSchema,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
 import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
@@ -83,6 +84,20 @@ export function resolverRequestedDescendants(state: DataState): number | undefin
 const resolverTreeResponse = (state: DataState): NewResolverTree | undefined => {
   return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
 };
+
+/**
+ * If we received a NewResolverTree, return the schema associated with that tree, otherwise return undefined.
+ * As of writing, this is only used for the info popover in the graph_controls panel
+ */
+export function resolverTreeSourceAndSchema(
+  state: DataState
+): { schema: ResolverSchema; dataSource: string } | undefined {
+  if (state.tree?.lastResponse?.successful) {
+    const { schema, dataSource } = state.tree?.lastResponse;
+    return { schema, dataSource };
+  }
+  return undefined;
+}
 
 /**
  * the node ID of the node representing the databaseDocumentID.
