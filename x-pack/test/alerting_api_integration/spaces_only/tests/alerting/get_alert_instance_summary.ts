@@ -216,7 +216,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
 
       await alertUtils.muteInstance(createdAlert.id, 'instanceC');
       await alertUtils.muteInstance(createdAlert.id, 'instanceD');
-      await waitForEvents(createdAlert.id, ['new-instance', 'resolved-instance']);
+      await waitForEvents(createdAlert.id, ['new-instance', 'recovered-instance']);
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`
       );

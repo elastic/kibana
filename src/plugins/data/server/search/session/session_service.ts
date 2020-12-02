@@ -64,20 +64,34 @@ export class BackgroundSessionService {
     sessionId: string,
     {
       name,
+      appId,
       created = new Date().toISOString(),
       expires = new Date(Date.now() + DEFAULT_EXPIRATION).toISOString(),
       status = BackgroundSessionStatus.IN_PROGRESS,
+      urlGeneratorId,
       initialState = {},
       restoreState = {},
     }: Partial<BackgroundSessionSavedObjectAttributes>,
     { savedObjectsClient }: BackgroundSessionDependencies
   ) => {
     if (!name) throw new Error('Name is required');
+    if (!appId) throw new Error('AppId is required');
+    if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
 
     // Get the mapping of request hash/search ID for this session
     const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
     const idMapping = Object.fromEntries(searchMap.entries());
-    const attributes = { name, created, expires, status, initialState, restoreState, idMapping };
+    const attributes = {
+      name,
+      created,
+      expires,
+      status,
+      initialState,
+      restoreState,
+      idMapping,
+      urlGeneratorId,
+      appId,
+    };
     const session = await savedObjectsClient.create<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       attributes,
