@@ -1,6 +1,6 @@
 # Palette Service
 
-The `palette` service offers a collection of palettes which can be used to consistently assign colors to various parts of charts. All palettes implement a uniform interface, allowing a consumer to implement it in a generic way and exposing a palette picker to the user to switch palettes
+The `palette` service offers a collection of palettes which implement a uniform interface for assigning colors to charts. The service provides methods for switching palettes
 easily. It's used by the x-pack plugins `canvas` and `lens`.
 
 Each palette is allowed to store some state as well which has to be handled by the consumer.
