@@ -130,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicy.inputs).to.eql([
           {
             id: policyInfo.packagePolicy.id,
-            revision: 3,
+            revision: 2,
             data_stream: { namespace: 'default' },
             name: 'Protect East Coast',
             meta: {
