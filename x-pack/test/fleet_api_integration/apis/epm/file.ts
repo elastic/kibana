@@ -6,6 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { warnAndSkipTest } from '../../helpers';
 
@@ -19,11 +20,12 @@ export default function ({ getService }: FtrProviderContext) {
     describe('it gets files from registry', () => {
       it('fetches a .png screenshot image', async function () {
         if (server.enabled) {
-          await supertest
+          const res = await supertest
             .get('/api/fleet/epm/packages/filetest/0.1.0/img/screenshots/metricbeat_dashboard.png')
             .set('kbn-xsrf', 'xxx')
             .expect('Content-Type', 'image/png')
             .expect(200);
+          expect(Buffer.isBuffer(res.body)).to.equal(true);
         } else {
           warnAndSkipTest(this, log);
         }
@@ -31,11 +33,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('fetches an .svg icon image', async function () {
         if (server.enabled) {
-          await supertest
+          const res = await supertest
             .get('/api/fleet/epm/packages/filetest/0.1.0/img/logo.svg')
             .set('kbn-xsrf', 'xxx')
             .expect('Content-Type', 'image/svg+xml')
             .expect(200);
+          expect(Buffer.isBuffer(res.body)).to.equal(true);
         } else {
           warnAndSkipTest(this, log);
         }
@@ -43,13 +46,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('fetches a .json kibana visualization file', async function () {
         if (server.enabled) {
-          await supertest
+          const res = await supertest
             .get(
               '/api/fleet/epm/packages/filetest/0.1.0/kibana/visualization/sample_visualization.json'
             )
             .set('kbn-xsrf', 'xxx')
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
+          expect(typeof res.body).to.equal('object');
         } else {
           warnAndSkipTest(this, log);
         }
@@ -57,11 +61,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('fetches a .json kibana dashboard file', async function () {
         if (server.enabled) {
-          await supertest
+          const res = await supertest
             .get('/api/fleet/epm/packages/filetest/0.1.0/kibana/dashboard/sample_dashboard.json')
             .set('kbn-xsrf', 'xxx')
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
+          expect(typeof res.body).to.equal('object');
         } else {
           warnAndSkipTest(this, log);
         }
@@ -69,11 +74,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('fetches a .json search file', async function () {
         if (server.enabled) {
-          await supertest
+          const res = await supertest
             .get('/api/fleet/epm/packages/filetest/0.1.0/kibana/search/sample_search.json')
             .set('kbn-xsrf', 'xxx')
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
+          expect(typeof res.body).to.equal('object');
         } else {
           warnAndSkipTest(this, log);
         }
@@ -100,11 +106,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
       it('fetches a .png screenshot image', async function () {
         if (server.enabled) {
-          await supertest
+          const res = await supertest
             .get('/api/fleet/epm/packages/apache/0.1.4/img/kibana-apache-new.png')
             .set('kbn-xsrf', 'xxx')
             .expect('Content-Type', 'image/png')
             .expect(200);
+          expect(Buffer.isBuffer(res.body)).to.equal(true);
         } else {
           warnAndSkipTest(this, log);
         }
@@ -112,13 +119,27 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('fetches a .json kibana dashboard file', async function () {
         if (server.enabled) {
-          await supertest
+          const res = await supertest
             .get(
               '/api/fleet/epm/packages/apache/0.1.4/kibana/dashboard/apache-Logs-Apache-Dashboard-ecs-new.json'
             )
             .set('kbn-xsrf', 'xxx')
             .expect('Content-Type', 'application/json; charset=utf-8')
             .expect(200);
+          expect(typeof res.body).to.equal('object');
+        } else {
+          warnAndSkipTest(this, log);
+        }
+      });
+
+      it('fetches a README file', async function () {
+        if (server.enabled) {
+          const res = await supertest
+            .get('/api/fleet/epm/packages/apache/0.1.4/docs/README.md')
+            .set('kbn-xsrf', 'xxx')
+            .expect('Content-Type', 'text/markdown; charset=utf-8')
+            .expect(200);
+          expect(res.text).to.equal('# Apache Uploaded Test Integration');
         } else {
           warnAndSkipTest(this, log);
         }
