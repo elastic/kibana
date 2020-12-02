@@ -157,5 +157,123 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+    describe('when agents are connected with cloned endpoints', () => {
+      describe('with endpoint integration installed with malware enabled', () => {
+        before(async () => {
+          await telemetryTestResources.getArchiveSetCheckIn(
+            'cloned_endpoint_installed',
+            'cloned_endpoint_test',
+            0
+          );
+          await esArchiver.load('endpoint/telemetry/cloned_endpoint_test');
+          await telemetryTestResources.deleteArchive('cloned_endpoint_test');
+        });
+        it('reports all endpoints and policies', async () => {
+          const endpointTelemetry = await telemetryTestResources.getEndpointTelemetry();
+          expect(endpointTelemetry).to.eql({
+            total_installed: 6,
+            active_within_last_24_hours: 6,
+            os: [
+              {
+                full_name: 'Ubuntu bionic(18.04.1 LTS (Bionic Beaver))',
+                platform: 'ubuntu',
+                version: '18.04.1 LTS (Bionic Beaver)',
+                count: 2,
+              },
+              {
+                full_name: 'Mac OS X(10.14.1)',
+                platform: 'darwin',
+                version: '10.14.1',
+                count: 2,
+              },
+              {
+                full_name: 'Windows 10 Pro(10.0)',
+                platform: 'windows',
+                version: '10.0',
+                count: 2,
+              },
+            ],
+            policies: {
+              malware: {
+                active: 4,
+                inactive: 0,
+                failure: 0,
+              },
+            },
+          });
+        });
+      });
+      describe('with endpoint integration installed on half the endpoints with malware enabled', () => {
+        before(async () => {
+          await telemetryTestResources.getArchiveSetCheckIn(
+            'cloned_endpoint_different_states',
+            'cloned_endpoint_test',
+            0
+          );
+          await esArchiver.load('endpoint/telemetry/cloned_endpoint_test');
+          await telemetryTestResources.deleteArchive('cloned_endpoint_test');
+        });
+        it('reports all endpoints and policies', async () => {
+          const endpointTelemetry = await telemetryTestResources.getEndpointTelemetry();
+          expect(endpointTelemetry).to.eql({
+            total_installed: 3,
+            active_within_last_24_hours: 3,
+            os: [
+              {
+                full_name: 'Mac OS X(10.14.1)',
+                platform: 'darwin',
+                version: '10.14.1',
+                count: 1,
+              },
+              {
+                full_name: 'Ubuntu bionic(18.04.1 LTS (Bionic Beaver))',
+                platform: 'ubuntu',
+                version: '18.04.1 LTS (Bionic Beaver)',
+                count: 1,
+              },
+              {
+                full_name: 'Windows 10 Pro(10.0)',
+                platform: 'windows',
+                version: '10.0',
+                count: 1,
+              },
+            ],
+            policies: {
+              malware: {
+                active: 2,
+                inactive: 0,
+                failure: 0,
+              },
+            },
+          });
+        });
+      });
+      describe('with endpoint integration uninstalled', () => {
+        before(async () => {
+          await telemetryTestResources.getArchiveSetCheckIn(
+            'cloned_endpoint_uninstalled',
+            'cloned_endpoint_test',
+            0
+          );
+          await esArchiver.load('endpoint/telemetry/cloned_endpoint_test');
+          await telemetryTestResources.deleteArchive('cloned_endpoint_test');
+        });
+        it('reports all endpoints and policies', async () => {
+          const endpointTelemetry = await telemetryTestResources.getEndpointTelemetry();
+          expect(endpointTelemetry).to.eql({
+            total_installed: 0,
+            active_within_last_24_hours: 0,
+            os: [],
+            policies: {
+              malware: {
+                active: 0,
+                inactive: 0,
+                failure: 0,
+              },
+            },
+          });
+        });
+      });
+    });
   });
 }
