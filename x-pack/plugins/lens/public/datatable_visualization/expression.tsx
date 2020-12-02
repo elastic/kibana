@@ -37,6 +37,15 @@ import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 
+export const LENS_EDIT_SORT_ACTION = 'sort';
+
+export interface LensSortActionData {
+  columnId: string | undefined;
+  direction: 'asc' | 'desc' | 'none';
+}
+
+type LensSortAction = LensEditEvent<typeof LENS_EDIT_SORT_ACTION>;
+
 export interface DatatableColumns {
   columnIds: string[];
   sortBy: string;
@@ -57,7 +66,7 @@ export interface DatatableProps {
 type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
   onClickValue: (data: LensFilterEvent['data']) => void;
-  onEditAction?: (data: LensEditEvent['data']) => void;
+  onEditAction?: (data: LensSortAction['data']) => void;
   getType: (name: string) => IAggType;
 };
 
@@ -159,7 +168,7 @@ export const getDatatableRenderer = (dependencies: {
       handlers.event({ name: 'filter', data });
     };
 
-    const onEditAction = (data: LensEditEvent['data']) => {
+    const onEditAction = (data: LensSortAction['data']) => {
       if (handlers.getRenderMode() === 'edit') {
         handlers.event({ name: 'edit', data });
       }
@@ -183,8 +192,8 @@ export const getDatatableRenderer = (dependencies: {
   },
 });
 
-function getNextOrderValue(currentValue: LensEditEvent['data']['direction']) {
-  const states: Array<LensEditEvent['data']['direction']> = ['asc', 'desc', 'none'];
+function getNextOrderValue(currentValue: LensSortAction['data']['direction']) {
+  const states: Array<LensSortAction['data']['direction']> = ['asc', 'desc', 'none'];
   const newStateIndex = (1 + states.findIndex((state) => state === currentValue)) % states.length;
   return states[newStateIndex];
 }
@@ -256,7 +265,13 @@ export function DatatableComponent(props: DatatableRenderProps) {
   let sortedRows = rows;
 
   if (sortBy && sortDirection !== 'none') {
-    sortedRows = orderBy(rows, [sortBy], sortDirection as Direction);
+    // Sort on raw values for these types, while use the formatted value for the rest
+    const sortingCriteria = ['number', 'date'].includes(
+      columnsReverseLookup[sortBy]?.meta?.type || ''
+    )
+      ? sortBy
+      : (row: Record<string, unknown>) => formatters[sortBy]?.convert(row[sortBy]);
+    sortedRows = orderBy(rows, [sortingCriteria], sortDirection as Direction);
   }
 
   return (
@@ -283,7 +298,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
             const isNewColumn = sortBy !== event.sort.field;
             // unfortunately the neutral state is not propagated and we need to manually handle it
             const nextDirection = getNextOrderValue(
-              (isNewColumn ? 'none' : sortDirection) as LensEditEvent['data']['direction']
+              (isNewColumn ? 'none' : sortDirection) as LensSortAction['data']['direction']
             );
             return onEditAction({
               action: 'sort',

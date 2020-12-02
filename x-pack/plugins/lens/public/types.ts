@@ -25,6 +25,7 @@ import {
   VALUE_CLICK_TRIGGER,
   VisualizeFieldContext,
 } from '../../../../src/plugins/ui_actions/public';
+import { LensSortActionData, LENS_EDIT_SORT_ACTION } from './datatable_visualization/expression';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -605,15 +606,21 @@ export interface LensBrushEvent {
   data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
 }
 
-export interface LensSortActionData {
-  action: 'sort';
-  columnId: string | undefined;
-  direction: 'asc' | 'desc' | 'none';
+// Use same technique as TriggerContext
+interface LensEditContextMapping {
+  [LENS_EDIT_SORT_ACTION]: LensSortActionData;
 }
+type LensEditSupportedActions = keyof LensEditContextMapping;
 
-export interface LensEditEvent {
+export type LensEditPayload<T extends LensEditSupportedActions> = {
+  action: T;
+} & LensEditContextMapping[T];
+
+type EditPayloadContext<T> = T extends LensEditSupportedActions ? LensEditPayload<T> : never;
+
+export interface LensEditEvent<T> {
   name: 'edit';
-  data: LensSortActionData;
+  data: EditPayloadContext<T>;
 }
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
@@ -624,7 +631,9 @@ export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensB
   return event.name === 'brush';
 }
 
-export function isLensEditEvent(event: ExpressionRendererEvent): event is LensEditEvent {
+export function isLensEditEvent<T extends LensEditSupportedActions>(
+  event: ExpressionRendererEvent
+): event is LensEditEvent<T> {
   return event.name === 'edit';
 }
 
@@ -634,5 +643,7 @@ export function isLensEditEvent(event: ExpressionRendererEvent): event is LensEd
  * used, dispatched events will be handled correctly.
  */
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
-  event: (event: LensFilterEvent | LensBrushEvent | LensEditEvent) => void;
+  event: (
+    event: LensFilterEvent | LensBrushEvent | LensEditEvent<LensEditSupportedActions>
+  ) => void;
 }
