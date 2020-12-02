@@ -191,13 +191,13 @@ export function dataAccessLayerFactory(
     },
 
     /**
-     *
+     * Retrieves a resolver graph given an ID, schema, timerange, and indices to use when search.
      *
      * @param {string} dataId - Id of the data for what will be the origin node in the graph
      * @param {*} schema - schema detailing what the id and parent fields should be
-     * @param {*} timerange
-     * @param {string[]} indices
-     * @returns {Promise<ResolverNode[]>}
+     * @param {*} timerange - date range in time to search for the nodes in the graph
+     * @param {string[]} indices - specific indices to use for searching for the nodes in the graph
+     * @returns {Promise<ResolverNode[]>} the nodes in the graph
      */
     async resolverTree({
       dataId,

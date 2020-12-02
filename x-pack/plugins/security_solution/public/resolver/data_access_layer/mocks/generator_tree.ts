@@ -18,6 +18,9 @@ import {
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { generateTree } from '../../mocks/generator';
 
+/**
+ * Return structure for the mock DAL returned by this file.
+ */
 export interface Metadata {
   /**
    * The `_id` of the document being analyzed.
@@ -27,6 +30,12 @@ export interface Metadata {
   tree: NewResolverTree;
 }
 
+/**
+ * Creates a DAL based on a resolver generator tree.
+ *
+ * @param treeOptions options for generating a resolver tree, these are passed to the resolver generator
+ * @param dalOverrides a DAL to override the functions in this mock, this allows extra functionality to be specified in the tests
+ */
 export function generateTreeWithDAL(
   treeOptions?: TreeOptions,
   dalOverrides?: DataAccessLayer
@@ -65,7 +74,7 @@ export function generateTreeWithDAL(
     },
 
     /**
-     * If called with an "after" cursor, return the 2nd page, else return the first.
+     * Returns the related events for a specific ID and category.
      */
     async eventsWithEntityIDAndCategory({
       entityID,
@@ -94,7 +103,7 @@ export function generateTreeWithDAL(
     },
 
     /**
-     * Any of the origin's related events by event.id
+     * Always returns null.
      */
     async event({
       nodeID,
@@ -114,6 +123,9 @@ export function generateTreeWithDAL(
       return null;
     },
 
+    /**
+     * Returns the lifecycle events for a set of nodes.
+     */
     async nodeData({
       ids,
       timerange,
@@ -137,7 +149,7 @@ export function generateTreeWithDAL(
     },
 
     /**
-     * Fetch a ResolverTree for a entityID
+     * Fetches the generated resolver graph.
      */
     async resolverTree({
       dataId,
@@ -158,7 +170,7 @@ export function generateTreeWithDAL(
     },
 
     /**
-     * Get entities matching a document.
+     * Returns a schema matching the generated graph and the origin's ID.
      */
     async entities(): Promise<ResolverEntityIndex> {
       return [

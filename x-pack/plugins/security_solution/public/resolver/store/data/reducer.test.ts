@@ -9,7 +9,7 @@ import { dataReducer } from './reducer';
 import * as selectors from './selectors';
 import { DataState } from '../../types';
 import { DataAction } from './action';
-import { generateTreeWithDAL, Metadata } from '../../data_access_layer/mocks/using_generator';
+import { generateTreeWithDAL, Metadata } from '../../data_access_layer/mocks/generator_tree';
 import { NewResolverTree } from '../../../../common/endpoint/types';
 
 /**

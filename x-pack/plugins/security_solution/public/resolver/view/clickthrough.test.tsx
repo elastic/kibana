@@ -12,7 +12,7 @@ import '../test_utilities/extend_jest';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { urlSearch } from '../test_utilities/url_search';
 import { Vector2, AABB, Timerange, DataAccessLayer } from '../types';
-import { generateTreeWithDAL } from '../data_access_layer/mocks/using_generator';
+import { generateTreeWithDAL } from '../data_access_layer/mocks/generator_tree';
 import { ReactWrapper } from 'enzyme';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
 

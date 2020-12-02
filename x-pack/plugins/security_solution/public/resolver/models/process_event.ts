@@ -21,9 +21,9 @@ export function isGraphableProcess(passedEvent: SafeResolverEvent) {
 }
 
 /**
- *
+ * Returns true if the process was terminated.
  */
-export function isTerminatedProcess(passedEvent: SafeResolverEvent) {
+export function isTerminatedProcess(passedEvent: SafeResolverEvent): boolean {
   return eventType(passedEvent) === 'processTerminated';
 }
 

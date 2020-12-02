@@ -11,13 +11,13 @@ import {
   ResolverNode,
   SafeResolverEvent,
 } from '../../../common/endpoint/types';
+import { EventOptions } from '../../../common/endpoint/types/generator';
 import {
   EndpointDocGenerator,
   Tree,
   TreeNode,
   TreeOptions,
   Event,
-  EventOptions,
 } from '../../../common/endpoint/generate_data';
 import * as eventModel from '../../../common/endpoint/models/event';
 

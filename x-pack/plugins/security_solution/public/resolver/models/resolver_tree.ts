@@ -18,7 +18,6 @@ import * as nodeModel from '../../../common/endpoint/models/node';
 /**
  * This returns a map of nodeIds to the associated stats provided by the datasource.
  */
-
 export function nodeStats(tree: NewResolverTree): Map<ResolverNode['id'], EventStats> {
   const stats = new Map();
 
@@ -38,6 +37,8 @@ export function nodeStats(tree: NewResolverTree): Map<ResolverNode['id'], EventS
 /**
  * This returns the 'LifecycleNodes' of the tree. These nodes have
  * the entityID and stats for a process. Used by `relatedEventsStats`.
+ *
+ * @deprecated use indexed_process_tree instead
  */
 function lifecycleNodes(tree: ResolverTree): ResolverLifecycleNode[] {
   return [tree, ...tree.children.childNodes, ...tree.ancestry.ancestors];
@@ -45,6 +46,8 @@ function lifecycleNodes(tree: ResolverTree): ResolverLifecycleNode[] {
 
 /**
  * All the process events
+ *
+ * @deprecated use nodeData instead
  */
 export function lifecycleEvents(tree: ResolverTree) {
   const events: SafeResolverEvent[] = [...tree.lifecycle];
@@ -59,6 +62,8 @@ export function lifecycleEvents(tree: ResolverTree) {
 
 /**
  * This returns a map of entity_ids to stats for the related events and alerts.
+ *
+ * @deprecated use indexed_process_tree instead
  */
 export function relatedEventsStats(tree: ResolverTree): Map<string, ResolverNodeStats> {
   const nodeRelatedEventStats: Map<string, ResolverNodeStats> = new Map();

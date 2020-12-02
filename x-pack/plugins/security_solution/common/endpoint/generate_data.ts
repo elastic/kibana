@@ -31,6 +31,7 @@ import {
 import { EsAssetReference, KibanaAssetReference } from '../../../fleet/common/types/models';
 import { agentPolicyStatuses } from '../../../fleet/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
+import { EventOptions } from './types/generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
 /**
@@ -43,24 +44,6 @@ export type Event = AlertEvent | SafeEndpointEvent;
  * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
  */
 export const ANCESTRY_LIMIT: number = 2;
-
-/**
- * The configuration options for generating an event.
- */
-export interface EventOptions {
-  timestamp?: number;
-  entityID?: string;
-  parentEntityID?: string;
-  eventType?: string | string[];
-  eventCategory?: string | string[];
-  processName?: string;
-  ancestry?: string[];
-  ancestryArrayLimit?: number;
-  pid?: number;
-  parentPid?: number;
-  extensions?: object;
-  eventsDataStream?: DataStream;
-}
 
 const Windows: OSFields[] = [
   {

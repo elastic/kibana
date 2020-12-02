@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { FetchedNodeData, IDToNodeInfo, NodeData } from '../types';
 
 /**
@@ -13,13 +14,12 @@ import { FetchedNodeData, IDToNodeInfo, NodeData } from '../types';
  * @param requestedNodes a set of IDs that are being requested
  */
 export function setRequestedNodes(
-  storedNodeInfo: IDToNodeInfo | undefined,
+  storedNodeInfo: IDToNodeInfo = new Map<string, NodeData>(),
   requestedNodes: Set<string>
 ): IDToNodeInfo {
-  const originalData = storedNodeInfo ?? [];
   const requestedNodesArray = Array.from(requestedNodes);
   return new Map<string, NodeData>([
-    ...originalData,
+    ...storedNodeInfo,
     ...requestedNodesArray.map((id: string): [string, NodeData] => [
       id,
       { events: [], status: 'loading' },
@@ -34,13 +34,12 @@ export function setRequestedNodes(
  * @param errorNodes a set of IDs we requested from the backend that returned a failure
  */
 export function setErrorNodes(
-  storedNodeInfo: IDToNodeInfo | undefined,
+  storedNodeInfo: IDToNodeInfo = new Map<string, NodeData>(),
   errorNodes: Set<string>
 ): IDToNodeInfo {
-  const originalData = storedNodeInfo ?? [];
   const errorNodesArray = Array.from(errorNodes);
   return new Map<string, NodeData>([
-    ...originalData,
+    ...storedNodeInfo,
     ...errorNodesArray.map((id: string): [string, NodeData] => [
       id,
       { events: [], status: 'error' },
@@ -55,11 +54,10 @@ export function setErrorNodes(
  * @param nodeID the ID to remove from state to mark it to be reloaded in the middleware.
  */
 export function setReloadedNodes(
-  storedNodeInfo: IDToNodeInfo | undefined,
+  storedNodeInfo: IDToNodeInfo = new Map<string, NodeData>(),
   nodeID: string
 ): IDToNodeInfo {
-  const originalData = storedNodeInfo ?? [];
-  const newData = new Map<string, NodeData>([...originalData]);
+  const newData = new Map<string, NodeData>([...storedNodeInfo]);
   newData.delete(nodeID);
   return newData;
 }
@@ -75,7 +73,7 @@ export function setReloadedNodes(
  * @param reachedLimit a flag indicating whether the server returned the same number of events we requested
  */
 export function updateWithReceivedNodes({
-  storedNodeInfo,
+  storedNodeInfo = new Map<string, NodeData>(),
   receivedNodes,
   requestedNodes,
   reachedLimit,
@@ -85,7 +83,7 @@ export function updateWithReceivedNodes({
   requestedNodes: Set<string>;
   reachedLimit: boolean;
 }): IDToNodeInfo {
-  const copiedMap = new Map<string, NodeData>([...(storedNodeInfo ?? [])]);
+  const copiedMap = new Map<string, NodeData>([...storedNodeInfo]);
 
   for (const id of requestedNodes.values()) {
     // If the server returned the same number of events that we requested it's possible
@@ -141,7 +139,7 @@ export function idsNotInBase(
  * @param data node data for a specific node ID
  * @returns the first event or undefined if the node data passed in was undefined
  */
-export function firstEvent(data: NodeData | undefined) {
+export function firstEvent(data: NodeData | undefined): SafeResolverEvent | undefined {
   return !data || data.status === 'loading' || data.status === 'error' || data.events.length <= 0
     ? undefined
     : data.events[0];

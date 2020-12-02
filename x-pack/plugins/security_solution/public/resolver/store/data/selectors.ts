@@ -32,14 +32,13 @@ import {
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
 import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
-import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout'; // TODO replace with indexed
+import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
 import * as aabbModel from '../../models/aabb';
 import * as vector2 from '../../models/vector2';
 
 /**
  * Was a request made for graph data
  */
-
 export function isTreeLoading(state: DataState): boolean {
   return state.tree?.pendingRequestParameters !== undefined;
 }
@@ -65,14 +64,14 @@ export function resolverComponentInstanceID(state: DataState): string {
  * The number of requested ancestors from the server. If zero ancestors were requested
  * then the server would still return the origin node.
  */
-export function resolverRequestedAncestors(state: DataState): number | undefined {
+function resolverRequestedAncestors(state: DataState): number | undefined {
   return state.tree?.lastResponse?.parameters.requestedAncestors;
 }
 
 /**
  * The number of requested descendants from the server.
  */
-export function resolverRequestedDescendants(state: DataState): number | undefined {
+function resolverRequestedDescendants(state: DataState): number | undefined {
   return state.tree?.lastResponse?.parameters.requestedAncestors;
 }
 
@@ -164,7 +163,7 @@ export const graphableNodes = createSelector(resolverTreeResponse, function (tre
   }
 });
 
-export const tree = createSelector(graphableNodes, originID, function indexedProcessTree(
+const tree = createSelector(graphableNodes, originID, function indexedProcessTree(
   // eslint-disable-next-line @typescript-eslint/no-shadow
   graphableNodes,
   originId
@@ -516,6 +515,11 @@ function isAABBType(value: unknown): value is AABB {
   return castValue.maximum !== undefined && castValue.minimum !== undefined;
 }
 
+/**
+ * This is needed to avoid the TS error that is caused by using aabbModel.isEqual directly. Ideally we could
+ * just pass that function instead of having to check the type of the parameters. It might be worth doing a PR to
+ * the reselect library to correct the type.
+ */
 function aaBBEqualityCheck<T>(a: T, b: T, index: number): boolean {
   if (isAABBType(a) && isAABBType(b)) {
     return aabbModel.isEqual(a, b);

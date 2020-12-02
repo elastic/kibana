@@ -7,6 +7,12 @@ import { ResolverNode } from '../types';
 import { firstNonNullValue } from './ecs_safety_helpers';
 
 /**
+ * These functions interact with the generic resolver node structure that does not define a specific format for the data
+ * returned by Elasticsearch. These functions are similar to the events.ts model's function except that they do not
+ * assume that the data will conform to a structure like an Endpoint or LegacyEndgame event.
+ */
+
+/**
  * @description - Extract the first non null value from the nodeId depending on the datasource. Returns
  * undefined if the field was never set.
  */
