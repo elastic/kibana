@@ -10,13 +10,13 @@ import { kea, MakeLogicType } from 'kea';
 import http from 'shared/http';
 import routes from 'workplace_search/routes';
 
-import { TEXT } from 'shared/constants/fieldTypes';
-import { ADD, UPDATE } from 'shared/constants/operations';
-import { IIndexJob, IFlashMessagesProps, TOperation } from 'shared/types';
+import { TEXT } from '../../../../../shared/constants/field_types';
+import { ADD, UPDATE } from '../../../../../shared/constants/operations';
+import { IndexJob, IFlashMessagesProps, TOperation } from '../../../../../shared/types';
+import { OptionValue } from '../../../../types';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { SourceLogic } from 'workplace_search/ContentSources/SourceLogic';
-import { IObject, OptionValue } from 'workplace_search/types';
+import { AppLogic } from '../../../../app_logic';
+import { SourceLogic } from '../../source_logic';
 
 interface SchemaActions {
   setFlashMessages(flashMessages: IFlashMessagesProps): { flashMessages: IFlashMessagesProps };
@@ -34,11 +34,11 @@ interface SchemaActions {
     schema,
     formUnchanged,
   }: {
-    schema: IObject;
+    schema: object;
     formUnchanged: boolean;
-  }): { schema: IObject; formUnchanged: boolean };
+  }): { schema: object; formUnchanged: boolean };
   onIndexingComplete(numDocumentsWithErrors: number): number;
-  resetMostRecentIndexJob(emptyReindexJob: IIndexJob): IIndexJob;
+  resetMostRecentIndexJob(emptyReindexJob: IndexJob): IndexJob;
   showFieldSuccess(successMessage: string): string;
   setFieldName(rawFieldName: string): string;
   setFilterValue(filterValue: string): string;
@@ -57,21 +57,21 @@ interface SchemaActions {
     newFieldType: string
   ): { fieldName: string; newFieldType: string };
   setServerField(
-    updatedSchema: IObject,
+    updatedSchema: object,
     operation: TOperation
-  ): { updatedSchema: IObject; operation: TOperation };
+  ): { updatedSchema: object; operation: TOperation };
 }
 
 interface SchemaValues {
   sourceId: string;
-  activeSchema: IObject;
-  serverSchema: IObject;
+  activeSchema: object;
+  serverSchema: object;
   filterValue: string;
-  filteredSchemaFields: IObject;
+  filteredSchemaFields: object;
   dataTypeOptions: OptionValue[];
   showAddFieldModal: boolean;
   addFieldFormErrors: string[] | null;
-  mostRecentIndexJob: IIndexJob;
+  mostRecentIndexJob: IndexJob;
   fieldCoercionErrors: FieldCoercionErrors;
   flashMessages: IFlashMessagesProps;
   newFieldType: string;
@@ -81,8 +81,8 @@ interface SchemaValues {
 }
 
 interface SchemaResponseProps {
-  schema: IObject;
-  mostRecentIndexJob: IIndexJob;
+  schema: object;
+  mostRecentIndexJob: IndexJob;
 }
 
 export interface SchemaInitialData extends SchemaResponseProps {
@@ -125,12 +125,12 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     onSchemaSetError: (errorProps: SchemaSetProps) => errorProps,
     onSchemaSetFormErrors: (errors: string[]) => errors,
     updateNewFieldType: (newFieldType: string) => newFieldType,
-    onFieldUpdate: ({ schema, formUnchanged }: { schema: IObject; formUnchanged: boolean }) => ({
+    onFieldUpdate: ({ schema, formUnchanged }: { schema: object; formUnchanged: boolean }) => ({
       schema,
       formUnchanged,
     }),
     onIndexingComplete: (numDocumentsWithErrors: number) => numDocumentsWithErrors,
-    resetMostRecentIndexJob: (emptyReindexJob: IIndexJob) => emptyReindexJob,
+    resetMostRecentIndexJob: (emptyReindexJob: IndexJob) => emptyReindexJob,
     showFieldSuccess: (successMessage: string) => successMessage,
     setFieldName: (rawFieldName: string) => rawFieldName,
     setFilterValue: (filterValue: string) => filterValue,
@@ -148,7 +148,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       newFieldType,
     }),
     updateFields: () => true,
-    setServerField: (updatedSchema: IObject, operation: TOperation) => ({
+    setServerField: (updatedSchema: object, operation: TOperation) => ({
       updatedSchema,
       operation,
     }),
@@ -177,7 +177,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       },
     ],
     mostRecentIndexJob: [
-      {} as IIndexJob,
+      {} as IndexJob,
       {
         onInitializeSchema: (_, { mostRecentIndexJob }) => mostRecentIndexJob,
         resetMostRecentIndexJob: (_, emptyReindexJob) => emptyReindexJob,

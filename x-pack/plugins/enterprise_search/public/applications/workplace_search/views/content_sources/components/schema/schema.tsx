@@ -19,15 +19,17 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { Loading, ViewContentHeader } from 'workplace_search/components';
 import { getReindexJobRoute } from '../../../../routes';
+import { AppLogic } from '../../../../app_logic';
 
-import IndexingStatus from 'shared/components/IndexingStatus';
-import { SchemaAddFieldModal } from 'shared/components/Schema';
+import { Loading } from '../../../../../shared/loading';
+import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 
-import { SchemaFieldsTable } from './SchemaFieldsTable';
-import { SchemaLogic } from './SchemaLogic';
+import { SchemaAddFieldModal } from '../../../../../shared/schema/schema_add_field_modal';
+import { IndexingStatus } from '../../../../../shared/indexing_status';
+
+import { SchemaFieldsTable } from './schema_fields_table';
+import { SchemaLogic } from './schema_logic';
 
 export const Schema: React.FC = () => {
   const {

@@ -11,9 +11,9 @@ import { useActions, useValues } from 'kea';
 
 import { EuiSpacer } from '@elastic/eui';
 
-import SchemaErrorsAccordion from 'shared/components/Schema/SchemaErrorsAccordion';
-import { ViewContentHeader } from 'workplace_search/components';
-import { SchemaLogic } from './SchemaLogic';
+import { SchemaErrorsAccordion } from '../../../../../shared/schema/schema_errors_accordion';
+import { ViewContentHeader } from '../../../../components/shared/view_content_header';
+import { SchemaLogic } from './schema_logic';
 
 export const SchemaChangeErrors: React.FC = () => {
   const { activeReindexJobId, sourceId } = useParams() as {

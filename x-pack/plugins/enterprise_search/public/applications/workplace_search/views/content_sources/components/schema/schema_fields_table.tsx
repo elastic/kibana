@@ -19,8 +19,8 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 
-import { SchemaExistingField } from 'shared/components/Schema';
-import { SchemaLogic } from './SchemaLogic';
+import { SchemaExistingField } from '../../../../../shared/schema/schema_existing_field';
+import { SchemaLogic } from './schema_logic';
 
 export const SchemaFieldsTable: React.FC = () => {
   const { updateExistingFieldType } = useActions(SchemaLogic);
