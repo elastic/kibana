@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
-import { unfollowLeaderIndex } from '../store/actions';
-import { arrify } from '../../../common/services/utils';
+import { unfollowLeaderIndex } from '../../store/actions';
+import { arrify } from '../../../../common/services/utils';
 
 class FollowerIndexUnfollowProviderUi extends PureComponent {
   static propTypes = {
