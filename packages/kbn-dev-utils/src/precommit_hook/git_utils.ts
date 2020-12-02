@@ -39,20 +39,11 @@ export async function isCorrectGitVersionInstalled() {
     })
   ).stdout.trim();
 
-  const gitVersionMatches = rawGitVersionStr.match(/[0-9]+(\.[0-9]+)+/);
-  const gitVersion =
-    gitVersionMatches && gitVersionMatches.length > 0 ? gitVersionMatches[0] : false;
-
-  if (!gitVersion) {
+  const match = rawGitVersionStr.match(/[0-9]+(\.[0-9]+)+/);
+  if (!match) {
     return false;
   }
 
-  const correctGitVersionMatches = gitVersion.match(/([0-9]+)\.([0-9]+)/);
-  if (!correctGitVersionMatches || correctGitVersionMatches.length < 3) {
-    return false;
-  }
-
-  const versionMajor = Number(correctGitVersionMatches[1]);
-  const versionMinor = Number(correctGitVersionMatches[2]);
-  return versionMajor >= 2 && versionMinor >= 5;
+  const [major, minor] = match[0].split('.').map((n) => parseInt(n, 10));
+  return major > 2 || (major === 2 && minor >= 5);
 }
