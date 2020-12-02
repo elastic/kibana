@@ -1124,10 +1124,10 @@ describe('SAMLAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(provider.logout(request, null)).resolves.toEqual(
-        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
       );
       await expect(provider.logout(request, { somethingElse: 'x' } as any)).resolves.toEqual(
-        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
       );
 
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
@@ -1187,7 +1187,7 @@ describe('SAMLAuthenticationProvider', () => {
           refreshToken,
           realm: 'test-realm',
         })
-      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut));
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request)));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
@@ -1208,7 +1208,7 @@ describe('SAMLAuthenticationProvider', () => {
           refreshToken,
           realm: 'test-realm',
         })
-      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut));
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request)));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
@@ -1231,7 +1231,7 @@ describe('SAMLAuthenticationProvider', () => {
           refreshToken,
           realm: 'test-realm',
         })
-      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut));
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request)));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlLogout', {
@@ -1250,7 +1250,7 @@ describe('SAMLAuthenticationProvider', () => {
           refreshToken: 'x-saml-refresh-token',
           realm: 'test-realm',
         })
-      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut));
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request)));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.samlInvalidate', {
@@ -1264,7 +1264,7 @@ describe('SAMLAuthenticationProvider', () => {
       mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: null });
 
       await expect(provider.logout(request)).resolves.toEqual(
-        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
       );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
@@ -1282,7 +1282,7 @@ describe('SAMLAuthenticationProvider', () => {
       mockOptions.client.callAsInternalUser.mockResolvedValue({ redirect: undefined });
 
       await expect(provider.logout(request)).resolves.toEqual(
-        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
       );
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
@@ -1298,7 +1298,7 @@ describe('SAMLAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ query: { SAMLResponse: 'xxx yyy' } });
 
       await expect(provider.logout(request)).resolves.toEqual(
-        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
       );
 
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
