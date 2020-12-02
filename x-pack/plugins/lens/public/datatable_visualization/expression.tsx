@@ -35,8 +35,6 @@ import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
-import { UiActionsStart, ROW_CLICK_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
-import { IEmbeddable, isEmbeddable } from '../../../../../src/plugins/embeddable/public';
 
 export interface DatatableColumns {
   columnIds: string[];
@@ -141,7 +139,6 @@ export const datatableColumns: ExpressionFunctionDefinition<
 };
 
 export const getDatatableRenderer = (dependencies: {
-  uiActions: UiActionsStart;
   formatFactory: Promise<FormatFactory>;
   getType: Promise<(name: string) => IAggType>;
 }): ExpressionRenderDefinition<DatatableProps> => ({
@@ -165,34 +162,30 @@ export const getDatatableRenderer = (dependencies: {
     const onRowContextMenuClick = (data: LensTableRowContextMenuEvent['data']) => {
       handlers.event({ name: 'tableRowContextMenuClick', data });
     };
-    const uiActions = dependencies.uiActions;
-    const { data, hasCompatibleActions } = handlers;
+    const { hasCompatibleActions } = handlers;
 
-    // An entrly for each table row, whether it has any actions attached to
+    // An entry for each table row, whether it has any actions attached to
     // ROW_CLICK_TRIGGER trigger.
     let rowHasRowClickTriggerActions: boolean[] = [];
-    if (data && typeof data === 'object') {
-      const embeddable = (data as { embeddable?: IEmbeddable }).embeddable;
-      if (isEmbeddable(embeddable)) {
-        const table = Object.values(config.data.tables)[0];
-        if (!!table) {
-          rowHasRowClickTriggerActions = await Promise.all(
-            table.rows.map(async (row, rowIndex) => {
-              try {
-                const hasActions = await hasCompatibleActions({
-                  name: 'tableRowContextMenuClick',
-                  rowIndex,
-                  table,
-                  columns: config.args.columns.columnIds,
-                });
+    if (hasCompatibleActions) {
+      const table = Object.values(config.data.tables)[0];
+      if (!!table) {
+        rowHasRowClickTriggerActions = await Promise.all(
+          table.rows.map(async (row, rowIndex) => {
+            try {
+              const hasActions = await hasCompatibleActions({
+                name: 'tableRowContextMenuClick',
+                rowIndex,
+                table,
+                columns: config.args.columns.columnIds,
+              });
 
-                return hasActions;
-              } catch {
-                return false;
-              }
-            })
-          );
-        }
+              return hasActions;
+            } catch {
+              return false;
+            }
+          })
+        );
       }
     }
 

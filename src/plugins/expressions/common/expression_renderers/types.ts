@@ -85,5 +85,4 @@ export interface IInterpreterRenderHandlers {
   hasCompatibleActions: (event: any) => Promise<boolean>;
   getRenderMode: () => RenderMode;
   uiState?: PersistedState;
-  data?: unknown;
 }

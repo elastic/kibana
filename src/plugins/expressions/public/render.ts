@@ -105,7 +105,7 @@ export class ExpressionRenderHandler {
     };
   }
 
-  render = async (value: any, uiState: any = {}, data: unknown = undefined) => {
+  render = async (value: any, uiState: any = {}) => {
     if (!value || typeof value !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
@@ -131,7 +131,6 @@ export class ExpressionRenderHandler {
         .render(this.element, value.value, {
           ...this.handlers,
           uiState,
-          data,
         } as any);
     } catch (e) {
       return this.handleRenderError(e);

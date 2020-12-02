@@ -7,11 +7,9 @@
 import { CoreSetup } from 'kibana/public';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
 interface DatatableVisualizationPluginStartPlugins {
-  uiActions: UiActionsStart;
   data: DataPublicPluginStart;
 }
 export interface DatatableVisualizationPluginSetupPlugins {
@@ -28,16 +26,17 @@ export class DatatableVisualization {
     { expressions, formatFactory, editorFrame }: DatatableVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const [
-        { datatable, datatableColumns, getDatatableRenderer, datatableVisualization },
-        [, { uiActions }],
-      ] = await Promise.all([import('../async_services'), core.getStartServices()]);
+      const {
+        datatable,
+        datatableColumns,
+        getDatatableRenderer,
+        datatableVisualization,
+      } = await import('../async_services');
 
       expressions.registerFunction(() => datatableColumns);
       expressions.registerFunction(() => datatable);
       expressions.registerRenderer(() =>
         getDatatableRenderer({
-          uiActions,
           formatFactory,
           getType: core
             .getStartServices()

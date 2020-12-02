@@ -223,9 +223,6 @@ export class Embeddable
         searchSessionId={this.input.searchSessionId}
         handleEvent={this.handleEvent}
         renderMode={input.renderMode}
-        data={{
-          embeddable: this,
-        }}
         hasCompatibleActions={this.hasCompatibleActions}
       />,
       domNode

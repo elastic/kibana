@@ -25,7 +25,6 @@ export interface ExpressionWrapperProps {
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
   renderMode?: RenderMode;
-  data?: unknown;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
 }
 
@@ -37,7 +36,6 @@ export function ExpressionWrapper({
   handleEvent,
   searchSessionId,
   renderMode,
-  data,
   hasCompatibleActions,
 }: ExpressionWrapperProps) {
   return (
@@ -66,7 +64,6 @@ export function ExpressionWrapper({
             searchContext={searchContext}
             searchSessionId={searchSessionId}
             renderMode={renderMode}
-            data={data}
             renderError={(errorMessage, error) => (
               <div data-test-subj="expression-renderer-error">
                 <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
