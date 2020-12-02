@@ -6,7 +6,10 @@
 
 import { lazy } from 'react';
 import { CoreStart } from 'kibana/public';
-import { PackagePolicyEditExtensionComponent } from '../../../../../../../fleet/public';
+import {
+  PackagePolicyEditExtensionComponent,
+  PackagePolicyEditExtensionComponentProps,
+} from '../../../../../../../fleet/public';
 import { StartPlugins } from '../../../../../types';
 
 export const getLazyEndpointPolicyEditExtension = (
@@ -20,7 +23,7 @@ export const getLazyEndpointPolicyEditExtension = (
     ]);
 
     return {
-      default: withSecurityContext({
+      default: withSecurityContext<PackagePolicyEditExtensionComponentProps>({
         coreStart,
         depsStart,
         WrappedComponent: EndpointPolicyEditExtension,

@@ -20,10 +20,10 @@ declare global {
 }
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-interface WithSecurityContextProps {
+interface WithSecurityContextProps<P extends {}> {
   coreStart: CoreStart;
   depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
-  WrappedComponent: ComponentType<unknown>;
+  WrappedComponent: ComponentType<P>;
 }
 
 /**
@@ -35,19 +35,17 @@ interface WithSecurityContextProps {
  * @param depsStart
  * @param WrappedComponent
  */
-export const withSecurityContext = ({
+export const withSecurityContext = <P extends {}>({
   coreStart,
   depsStart,
   WrappedComponent,
-}: WithSecurityContextProps) => {
-  // FIXME:PT add proper type to return value
+}: WithSecurityContextProps<P>): ComponentType<P> => {
   let store: ReturnType<typeof createStore>; // created on first render
 
   return memo((props) => {
     if (!store) {
       // Most of the code here was copied form
       // x-pack/plugins/security_solution/public/management/index.ts
-
       store = createStore(
         combineReducers({
           management: managementReducer,
