@@ -20,7 +20,7 @@ import { EngineLogic } from '../../engine';
 import { DOCS_PREFIX } from '../../../routes';
 
 const Pagination: React.FC<{ 'aria-label': string }> = ({ 'aria-label': ariaLabel }) => (
-  <EuiFlexGroup alignItems="center" className="documents-search-experience__paging-info">
+  <EuiFlexGroup alignItems="center" className="documentsSearchExperience__pagingInfo">
     <EuiFlexItem>
       <Paging view={PagingView} aria-label={ariaLabel} />
     </EuiFlexItem>

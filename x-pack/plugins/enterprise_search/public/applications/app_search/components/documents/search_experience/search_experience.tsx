@@ -59,7 +59,7 @@ export const SearchExperience: React.FC = () => {
   };
 
   return (
-    <div className="documents-search-experience">
+    <div className="documentsSearchExperience">
       <SearchProvider config={searchProviderConfig}>
         <SearchBox
           searchAsYouType={true}
@@ -82,14 +82,14 @@ export const SearchExperience: React.FC = () => {
         />
         <EuiSpacer size="xl" />
         <EuiFlexGroup direction="row">
-          <EuiFlexItem className="documents-search-experience__sidebar">
+          <EuiFlexItem className="documentsSearchExperience__sidebar">
             <Sorting
-              className="documents-search-experience__sorting"
+              className="documentsSearchExperience__sorting"
               sortOptions={sortingOptions}
               view={SortingView}
             />
           </EuiFlexItem>
-          <EuiFlexItem className="documents-search-experience__content">
+          <EuiFlexItem className="documentsSearchExperience__content">
             <SearchExperienceContent />
           </EuiFlexItem>
         </EuiFlexGroup>
