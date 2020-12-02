@@ -151,20 +151,32 @@ export async function getClustersFromRequest(
           'production'
         );
         if (prodLicenseInfo.clusterAlerts.enabled) {
-          cluster.alerts = {
-            list: await fetchStatus(
-              alertsClient,
-              req.server.plugins.monitoring.info,
-              undefined,
-              cluster.cluster_uuid,
-              start,
-              end,
-              []
-            ),
-            alertsMeta: {
-              enabled: true,
-            },
-          };
+          try {
+            cluster.alerts = {
+              list: await fetchStatus(
+                alertsClient,
+                req.server.plugins.monitoring.info,
+                undefined,
+                cluster.cluster_uuid,
+                start,
+                end,
+                []
+              ),
+              alertsMeta: {
+                enabled: true,
+              },
+            };
+          } catch (err) {
+            req.logger.warn(
+              `Unable to fetch alert status because '${err.message}'. Alerts may not properly show up in the UI.`
+            );
+            cluster.alerts = {
+              list: {},
+              alertsMeta: {
+                enabled: true,
+              },
+            };
+          }
           continue;
         }
 

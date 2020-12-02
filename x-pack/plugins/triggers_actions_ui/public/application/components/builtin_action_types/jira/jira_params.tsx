@@ -29,6 +29,7 @@ import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
 import { extractActionVariable } from '../extract_action_variable';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
@@ -51,7 +52,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const [prioritiesSelectOptions, setPrioritiesSelectOptions] = useState<EuiSelectOption[]>([]);
 
   const isActionBeingConfiguredByAnAlert = messageVariables
-    ? isSome(extractActionVariable(messageVariables, 'alertId'))
+    ? isSome(extractActionVariable(messageVariables, AlertProvidedActionVariables.alertId))
     : false;
 
   useEffect(() => {
@@ -144,7 +145,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
       editAction('subAction', 'pushToService', index);
     }
     if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
-      editSubActionProperty('savedObjectId', '{{alertId}}');
+      editSubActionProperty('savedObjectId', `${AlertProvidedActionVariables.alertId}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
