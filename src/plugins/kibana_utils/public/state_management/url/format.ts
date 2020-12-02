@@ -27,6 +27,9 @@ export function replaceUrlQuery(
   queryReplacer: (query: ParsedQuery) => ParsedQuery
 ) {
   const url = parseUrl(rawUrl);
+  // @ts-expect-error `queryReplacer` expects key/value pairs with values of type `string | string[] | null`,
+  // however `@types/node` says that `url.query` has values of type `string | string[] | undefined`.
+  // After investigating this, it seems that no matter what the values will be of type `string | string[]`
   const newQuery = queryReplacer(url.query || {});
   const searchQueryString = stringify(urlUtils.encodeQuery(newQuery), {
     sort: false,
@@ -45,6 +48,9 @@ export function replaceUrlHashQuery(
 ) {
   const url = parseUrl(rawUrl);
   const hash = parseUrlHash(rawUrl);
+  // @ts-expect-error `queryReplacer` expects key/value pairs with values of type `string | string[] | null`,
+  // however `@types/node` says that `url.query` has values of type `string | string[] | undefined`.
+  // After investigating this, it seems that no matter what the values will be of type `string | string[]`
   const newQuery = queryReplacer(hash?.query || {});
   const searchQueryString = stringify(urlUtils.encodeQuery(newQuery), {
     sort: false,
