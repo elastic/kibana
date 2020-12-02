@@ -167,7 +167,7 @@ const TabComponent = (props: TabProps) => {
     base.rows = base.rows.map((b, rowIdx) => {
       const newRow = { ...b };
       otherSeries.forEach((o, idx) => {
-        newRow[`metric_${idx + 1}`] = o.rows[rowIdx].metric_0 as number;
+        newRow[`metric_${idx + 1}`] = o.rows[rowIdx].metric_0;
       });
       return newRow;
     });
