@@ -6,7 +6,7 @@
 
 import './dimension_editor.scss';
 import _ from 'lodash';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { OperationSupportMatrix } from './operation_support';
-import { IndexPatternColumn, OperationType } from '../indexpattern';
+import { IndexPatternColumn } from '../indexpattern';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -26,6 +26,8 @@ import {
   replaceColumn,
   deleteColumn,
   updateColumnParam,
+  resetIncomplete,
+  FieldBasedIndexPatternColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
@@ -34,6 +36,7 @@ import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternLayer } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
+import { TimeScaling } from './time_scaling';
 
 const operationPanels = getOperationDisplay();
 
@@ -43,14 +46,30 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   currentIndexPattern: IndexPattern;
 }
 
+/**
+ * This component shows a debounced input for the label of a dimension. It will update on root state changes
+ * if no debounced changes are in flight because the user is currently typing into the input.
+ */
 const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
   const [inputValue, setInputValue] = useState(value);
+  const unflushedChanges = useRef(false);
+
+  const onChangeDebounced = useMemo(() => {
+    const callback = _.debounce((val: string) => {
+      onChange(val);
+      unflushedChanges.current = false;
+    }, 256);
+    return (val: string) => {
+      unflushedChanges.current = true;
+      callback(val);
+    };
+  }, [onChange]);
 
   useEffect(() => {
-    setInputValue(value);
-  }, [value, setInputValue]);
-
-  const onChangeDebounced = useMemo(() => _.debounce(onChange, 256), [onChange]);
+    if (!unflushedChanges.current && value !== inputValue) {
+      setInputValue(value);
+    }
+  }, [value, inputValue]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = String(e.target.value);
@@ -89,13 +108,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
     hideGrouping,
   } = props;
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
-  const [
-    incompatibleSelectedOperationType,
-    setInvalidOperationType,
-  ] = useState<OperationType | null>(null);
 
   const selectedOperationDefinition =
     selectedColumn && operationDefinitionMap[selectedColumn.operationType];
+
+  const incompleteInfo = (state.layers[layerId].incompleteColumns ?? {})[columnId];
+  const incompleteOperation = incompleteInfo?.operationType;
+  const incompleteField = incompleteInfo?.sourceField ?? null;
 
   const ParamEditor = selectedOperationDefinition?.paramEditor;
 
@@ -121,7 +140,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           hasField(selectedColumn) &&
           definition.input === 'field' &&
           fieldByOperation[operationType]?.has(selectedColumn.sourceField)) ||
-        (selectedColumn && !hasField(selectedColumn) && definition.input !== 'field'),
+        (selectedColumn && !hasField(selectedColumn) && definition.input === 'none'),
     };
   });
 
@@ -137,10 +156,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
     ({ operationType, compatibleWithCurrentField }) => {
       const isActive = Boolean(
-        incompatibleSelectedOperationType === operationType ||
-          (!incompatibleSelectedOperationType &&
-            selectedColumn &&
-            selectedColumn.operationType === operationType)
+        incompleteOperation === operationType ||
+          (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
       );
 
       let color: EuiListGroupItemProps['color'] = 'primary';
@@ -167,9 +184,17 @@ export function DimensionEditor(props: DimensionEditorProps) {
         }`,
         onClick() {
           if (operationDefinitionMap[operationType].input === 'none') {
-            // Clear invalid state because we are creating a valid column
-            setInvalidOperationType(null);
             if (selectedColumn?.operationType === operationType) {
+              // Clear invalid state because we are reseting to a valid column
+              if (incompleteInfo) {
+                setState(
+                  mergeLayer({
+                    state,
+                    layerId,
+                    newLayer: resetIncomplete(state.layers[layerId], columnId),
+                  })
+                );
+              }
               return;
             }
             const newLayer = insertOrReplaceColumn({
@@ -199,15 +224,34 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 })
               );
             } else {
-              setInvalidOperationType(operationType);
+              setState(
+                mergeLayer({
+                  state,
+                  layerId,
+                  newLayer: insertOrReplaceColumn({
+                    layer: props.state.layers[props.layerId],
+                    indexPattern: currentIndexPattern,
+                    columnId,
+                    op: operationType,
+                    field: undefined,
+                  }),
+                })
+              );
             }
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           }
 
-          setInvalidOperationType(null);
-
           if (selectedColumn.operationType === operationType) {
+            if (incompleteInfo) {
+              setState(
+                mergeLayer({
+                  state,
+                  layerId,
+                  newLayer: resetIncomplete(state.layers[layerId], columnId),
+                })
+              );
+            }
             return;
           }
 
@@ -251,18 +295,17 @@ export function DimensionEditor(props: DimensionEditorProps) {
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
         {!selectedColumn ||
         selectedOperationDefinition?.input === 'field' ||
-        (incompatibleSelectedOperationType &&
-          operationDefinitionMap[incompatibleSelectedOperationType].input === 'field') ? (
+        (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field') ? (
           <EuiFormRow
             data-test-subj="indexPattern-field-selection-row"
             label={i18n.translate('xpack.lens.indexPattern.chooseField', {
               defaultMessage: 'Select a field',
             })}
             fullWidth
-            isInvalid={Boolean(incompatibleSelectedOperationType || currentFieldIsInvalid)}
+            isInvalid={Boolean(incompleteOperation || currentFieldIsInvalid)}
             error={getErrorMessage(
               selectedColumn,
-              Boolean(incompatibleSelectedOperationType),
+              Boolean(incompleteOperation),
               selectedOperationDefinition?.input,
               currentFieldIsInvalid
             )}
@@ -272,11 +315,17 @@ export function DimensionEditor(props: DimensionEditorProps) {
               currentIndexPattern={currentIndexPattern}
               existingFields={state.existingFields}
               operationSupportMatrix={operationSupportMatrix}
-              selectedColumnOperationType={selectedColumn && selectedColumn.operationType}
-              selectedColumnSourceField={
-                selectedColumn && hasField(selectedColumn) ? selectedColumn.sourceField : undefined
+              selectedOperationType={
+                // Allows operation to be selected before creating a valid column
+                selectedColumn ? selectedColumn.operationType : incompleteOperation
               }
-              incompatibleSelectedOperationType={incompatibleSelectedOperationType}
+              selectedField={
+                // Allows field to be selected
+                incompleteField
+                  ? incompleteField
+                  : (selectedColumn as FieldBasedIndexPatternColumn)?.sourceField
+              }
+              incompleteOperation={incompleteOperation}
               onDeleteColumn={() => {
                 setState(
                   mergeLayer({
@@ -287,79 +336,59 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 );
               }}
               onChoose={(choice) => {
-                let newLayer: IndexPatternLayer;
-                if (
-                  !incompatibleSelectedOperationType &&
-                  selectedColumn &&
-                  'field' in choice &&
-                  choice.operationType === selectedColumn.operationType
-                ) {
-                  // Replaces just the field
-                  newLayer = replaceColumn({
-                    layer: state.layers[layerId],
-                    columnId,
-                    indexPattern: currentIndexPattern,
-                    op: choice.operationType,
-                    field: currentIndexPattern.getFieldByName(choice.field)!,
-                  });
-                } else {
-                  // Finds a new operation
-                  const compatibleOperations =
-                    ('field' in choice && operationSupportMatrix.operationByField[choice.field]) ||
-                    new Set();
-                  let operation;
-                  if (compatibleOperations.size > 0) {
-                    operation =
-                      incompatibleSelectedOperationType &&
-                      compatibleOperations.has(incompatibleSelectedOperationType)
-                        ? incompatibleSelectedOperationType
-                        : compatibleOperations.values().next().value;
-                  } else if ('field' in choice) {
-                    operation = choice.operationType;
-                  }
-                  newLayer = insertOrReplaceColumn({
-                    layer: state.layers[layerId],
-                    columnId,
-                    field: currentIndexPattern.getFieldByName(choice.field),
-                    indexPattern: currentIndexPattern,
-                    op: operation as OperationType,
-                  });
-                }
-
-                setState(mergeLayer({ state, layerId, newLayer }));
-                setInvalidOperationType(null);
+                setState(
+                  mergeLayer({
+                    state,
+                    layerId,
+                    newLayer: insertOrReplaceColumn({
+                      layer: state.layers[layerId],
+                      columnId,
+                      indexPattern: currentIndexPattern,
+                      op: choice.operationType,
+                      field: currentIndexPattern.getFieldByName(choice.field),
+                    }),
+                  })
+                );
               }}
             />
           </EuiFormRow>
         ) : null}
 
-        {!currentFieldIsInvalid &&
-          !incompatibleSelectedOperationType &&
-          selectedColumn &&
-          ParamEditor && (
-            <>
-              <ParamEditor
-                state={state}
-                setState={setState}
-                columnId={columnId}
-                currentColumn={state.layers[layerId].columns[columnId]}
-                storage={props.storage}
-                uiSettings={props.uiSettings}
-                savedObjectsClient={props.savedObjectsClient}
-                layerId={layerId}
-                http={props.http}
-                dateRange={props.dateRange}
-                data={props.data}
-              />
-            </>
-          )}
+        {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && (
+          <TimeScaling
+            selectedColumn={selectedColumn}
+            columnId={columnId}
+            layer={state.layers[layerId]}
+            updateLayer={(newLayer: IndexPatternLayer) =>
+              setState(mergeLayer({ layerId, state, newLayer }))
+            }
+          />
+        )}
+
+        {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && ParamEditor && (
+          <>
+            <ParamEditor
+              state={state}
+              setState={setState}
+              columnId={columnId}
+              currentColumn={state.layers[layerId].columns[columnId]}
+              storage={props.storage}
+              uiSettings={props.uiSettings}
+              savedObjectsClient={props.savedObjectsClient}
+              layerId={layerId}
+              http={props.http}
+              dateRange={props.dateRange}
+              data={props.data}
+            />
+          </>
+        )}
       </div>
 
       <EuiSpacer size="s" />
 
       {!currentFieldIsInvalid && (
         <div className="lnsIndexPatternDimensionEditor__section">
-          {!incompatibleSelectedOperationType && selectedColumn && (
+          {!incompleteInfo && selectedColumn && (
             <LabelInput
               value={selectedColumn.label}
               onChange={(value) => {
@@ -383,7 +412,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             />
           )}
 
-          {!incompatibleSelectedOperationType && !hideGrouping && (
+          {!incompleteInfo && !hideGrouping && (
             <BucketNestingEditor
               layer={state.layers[props.layerId]}
               columnId={props.columnId}

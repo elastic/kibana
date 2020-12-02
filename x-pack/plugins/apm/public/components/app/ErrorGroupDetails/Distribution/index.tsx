@@ -20,7 +20,7 @@ import d3 from 'd3';
 import React from 'react';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
-import { useTheme } from '../../../../hooks/useTheme';
+import { useTheme } from '../../../../hooks/use_theme';
 
 type ErrorDistributionAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/errors/distribution'>;
 
@@ -90,7 +90,12 @@ export function ErrorDistribution({ distribution, title }: Props) {
             showOverlappingTicks
             tickFormat={xFormatter}
           />
-          <Axis id="y-axis" position={Position.Left} ticks={2} showGridLines />
+          <Axis
+            id="y-axis"
+            position={Position.Left}
+            ticks={2}
+            gridLine={{ visible: true }}
+          />
           <HistogramBarSeries
             minBarHeight={2}
             id="errorOccurrences"

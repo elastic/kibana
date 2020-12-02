@@ -46,6 +46,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   history,
 }) => {
   const { isDeepLink } = extractQueryParams(search);
+  const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
   const {
     core: { getUrlForApp },
@@ -241,8 +242,8 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
         <DataStreamTable
           filters={
-            isDeepLink && dataStreamName !== undefined
-              ? `name="${attemptToURIDecode(dataStreamName)}"`
+            isDeepLink && decodedDataStreamName !== undefined
+              ? `name="${decodedDataStreamName}"`
               : ''
           }
           dataStreams={filteredDataStreams}
@@ -262,9 +263,9 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         If the user has been deep-linked, they'll expect to see the detail panel because it reflects
         the URL state, even if there are no data streams or if there was an error loading them.
       */}
-      {dataStreamName && (
+      {decodedDataStreamName && (
         <DataStreamDetailPanel
-          dataStreamName={attemptToURIDecode(dataStreamName)!}
+          dataStreamName={decodedDataStreamName}
           onClose={(shouldReload?: boolean) => {
             history.push(`/${Section.DataStreams}`);
 

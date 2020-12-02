@@ -46,7 +46,7 @@ import {
   normalizeOperationDataType,
 } from './utils';
 import { LayerPanel } from './layerpanel';
-import { IndexPatternColumn, getErrorMessages } from './operations';
+import { IndexPatternColumn, getErrorMessages, IncompleteColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -78,6 +78,7 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
 export * from './rename_columns';
 export * from './format_column';
 export * from './time_scale';
+export * from './counter_rate';
 export * from './suffix_formatter';
 
 export function getIndexPatternDatasource({
@@ -317,6 +318,20 @@ export function getIndexPatternDatasource({
 
     canHandleDrop,
     onDrop,
+
+    // Reset the temporary invalid state when closing the editor
+    updateStateOnCloseDimension: ({ state, layerId, columnId }) => {
+      const layer = { ...state.layers[layerId] };
+      const newIncomplete: Record<string, IncompleteColumn> = {
+        ...(state.layers[layerId].incompleteColumns || {}),
+      };
+      delete newIncomplete[columnId];
+      return mergeLayer({
+        state,
+        layerId,
+        newLayer: { ...layer, incompleteColumns: newIncomplete },
+      });
+    },
 
     getPublicAPI({ state, layerId }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = indexPatternDatasource.uniqueLabels(state);

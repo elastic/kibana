@@ -27,3 +27,7 @@ Truncated color mappings in `value`/`text` form
 ## Theme
 
 See Theme service [docs](public/services/theme/README.md)
+
+## Palettes
+
+See palette service [docs](public/services/palettes/README.md)
