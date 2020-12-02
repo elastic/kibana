@@ -44,10 +44,7 @@ export function SkipBottomButton({ onClick }: SkipBottomButtonProps) {
       data-test-subj="discoverSkipTableButton"
       position="absolute"
     >
-      <FormattedMessage
-        id="discover.skipToBottomButtonLabel"
-        defaultMessage="Skip to end of table"
-      />
+      <FormattedMessage id="discover.skipToBottomButtonLabel" defaultMessage="Go to end of table" />
     </EuiSkipLink>
   );
 }

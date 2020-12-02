@@ -110,7 +110,7 @@ export function TimechartHeader({
       <EuiFlexItem grow={false} className="eui-hideFor--m">
         <EuiToolTip
           content={i18n.translate('discover.howToChangeTheTimeTooltip', {
-            defaultMessage: 'To change the time, use the global time filter above',
+            defaultMessage: 'To change the time, use the global time filter.',
           })}
           delay="long"
         >
