@@ -45,6 +45,7 @@ const testWriter = new ToolingLogCollectingWriter();
 log.setWriters([testWriter]);
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(Config));
+expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 
 const nodeVersion = Fs.readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
 expect.addSnapshotSerializer(
@@ -100,6 +101,7 @@ it('checks shasums for each downloaded node build', async () => {
     [MockFunction] {
       "calls": Array [
         Array [
+          <ToolingLog>,
           "<node version>",
         ],
       ],

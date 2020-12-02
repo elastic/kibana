@@ -9,9 +9,9 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { License } from '../../../../../../licensing/common/license';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
-import { LicenseContext } from '../../../../context/LicenseContext';
-import * as hooks from '../../../../hooks/useFetcher';
+import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { LicenseContext } from '../../../../context/license/license_context';
+import * as hooks from '../../../../hooks/use_fetcher';
 import * as apmApi from '../../../../services/rest/createCallApmApi';
 import {
   expectTextsInDocument,
