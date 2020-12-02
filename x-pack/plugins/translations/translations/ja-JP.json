@@ -9341,7 +9341,6 @@
     "xpack.infra.logEntryItemView.logEntryActionsMenuToolTip": "行のアクションを表示",
     "xpack.infra.logFlyout.fieldColumnLabel": "フィールド",
     "xpack.infra.logFlyout.filterAriaLabel": "フィルター",
-    "xpack.infra.logFlyout.flyoutTitle": "ログイベントドキュメントの詳細",
     "xpack.infra.logFlyout.loadingMessage": "イベントを読み込み中",
     "xpack.infra.logFlyout.setFilterTooltip": "フィルターでイベントを表示",
     "xpack.infra.logFlyout.valueColumnLabel": "値",

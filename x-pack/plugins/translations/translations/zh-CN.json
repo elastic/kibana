@@ -9350,7 +9350,6 @@
     "xpack.infra.logEntryItemView.logEntryActionsMenuToolTip": "查看适用于以下行的操作：",
     "xpack.infra.logFlyout.fieldColumnLabel": "字段",
     "xpack.infra.logFlyout.filterAriaLabel": "筛选",
-    "xpack.infra.logFlyout.flyoutTitle": "日志事件文档详情",
     "xpack.infra.logFlyout.loadingMessage": "正在加载事件",
     "xpack.infra.logFlyout.setFilterTooltip": "使用筛选查看事件",
     "xpack.infra.logFlyout.valueColumnLabel": "值",
