@@ -119,7 +119,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     );
 
     const formBody = hasColumns ? (
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>{formBodyContent}</EuiFlexItem>
         <EuiFlexItem>
           {typeof this.props.rightOptions === 'function'
