@@ -54,7 +54,6 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
         'aria-controls': 'forcemergeContent',
         label: i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
         initialValue: initialToggleValue,
-        id: `${phase}-forceMergeToggle`,
       }}
     >
       <EuiSpacer />
