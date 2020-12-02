@@ -19,22 +19,29 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { BackgroundSessionViewState } from '../connected_background_session_indicator';
+
 import './background_session_indicator.scss';
+import { SessionState } from '../../../../../../../src/plugins/data/public/';
 
 export interface BackgroundSessionIndicatorProps {
-  state: BackgroundSessionViewState;
+  state: SessionState;
   onContinueInBackground?: () => void;
   onCancel?: () => void;
-  onViewBackgroundSessions?: () => void;
+  viewBackgroundSessionsLink?: string;
   onSaveResults?: () => void;
   onRefresh?: () => void;
+  disabled?: boolean;
+  disabledReasonText?: string;
 }
 
 type ActionButtonProps = BackgroundSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
 
 const CancelButton = ({ onCancel = () => {}, buttonProps = {} }: ActionButtonProps) => (
-  <EuiButtonEmpty onClick={onCancel} {...buttonProps}>
+  <EuiButtonEmpty
+    onClick={onCancel}
+    data-test-subj={'backgroundSessionIndicatorCancelBtn'}
+    {...buttonProps}
+  >
     <FormattedMessage
       id="xpack.data.backgroundSessionIndicator.cancelButtonText"
       defaultMessage="Cancel"
@@ -46,7 +53,11 @@ const ContinueInBackgroundButton = ({
   onContinueInBackground = () => {},
   buttonProps = {},
 }: ActionButtonProps) => (
-  <EuiButtonEmpty onClick={onContinueInBackground} {...buttonProps}>
+  <EuiButtonEmpty
+    onClick={onContinueInBackground}
+    data-test-subj={'backgroundSessionIndicatorContinueInBackgroundBtn'}
+    {...buttonProps}
+  >
     <FormattedMessage
       id="xpack.data.backgroundSessionIndicator.continueInBackgroundButtonText"
       defaultMessage="Continue in background"
@@ -55,11 +66,14 @@ const ContinueInBackgroundButton = ({
 );
 
 const ViewBackgroundSessionsButton = ({
-  onViewBackgroundSessions = () => {},
+  viewBackgroundSessionsLink = 'management',
   buttonProps = {},
 }: ActionButtonProps) => (
-  // TODO: make this a link
-  <EuiButtonEmpty onClick={onViewBackgroundSessions} {...buttonProps}>
+  <EuiButtonEmpty
+    href={viewBackgroundSessionsLink}
+    data-test-subj={'backgroundSessionIndicatorViewBackgroundSessionsLink'}
+    {...buttonProps}
+  >
     <FormattedMessage
       id="xpack.data.backgroundSessionIndicator.viewBackgroundSessionsLinkText"
       defaultMessage="View background sessions"
@@ -68,7 +82,11 @@ const ViewBackgroundSessionsButton = ({
 );
 
 const RefreshButton = ({ onRefresh = () => {}, buttonProps = {} }: ActionButtonProps) => (
-  <EuiButtonEmpty onClick={onRefresh} {...buttonProps}>
+  <EuiButtonEmpty
+    onClick={onRefresh}
+    data-test-subj={'backgroundSessionIndicatorRefreshBtn'}
+    {...buttonProps}
+  >
     <FormattedMessage
       id="xpack.data.backgroundSessionIndicator.refreshButtonText"
       defaultMessage="Refresh"
@@ -77,7 +95,11 @@ const RefreshButton = ({ onRefresh = () => {}, buttonProps = {} }: ActionButtonP
 );
 
 const SaveButton = ({ onSaveResults = () => {}, buttonProps = {} }: ActionButtonProps) => (
-  <EuiButtonEmpty onClick={onSaveResults} {...buttonProps}>
+  <EuiButtonEmpty
+    onClick={onSaveResults}
+    data-test-subj={'backgroundSessionIndicatorSaveBtn'}
+    {...buttonProps}
+  >
     <FormattedMessage
       id="xpack.data.backgroundSessionIndicator.saveButtonText"
       defaultMessage="Save"
@@ -86,16 +108,19 @@ const SaveButton = ({ onSaveResults = () => {}, buttonProps = {} }: ActionButton
 );
 
 const backgroundSessionIndicatorViewStateToProps: {
-  [state in BackgroundSessionViewState]: {
-    button: Pick<EuiButtonIconProps, 'color' | 'iconType' | 'aria-label'> & { tooltipText: string };
+  [state in SessionState]: {
+    button: Pick<EuiButtonIconProps, 'color' | 'iconType' | 'aria-label'> & {
+      tooltipText: string;
+    };
     popover: {
       text: string;
       primaryAction?: React.ComponentType<ActionButtonProps>;
       secondaryAction?: React.ComponentType<ActionButtonProps>;
     };
-  };
+  } | null;
 } = {
-  [BackgroundSessionViewState.Loading]: {
+  [SessionState.None]: null,
+  [SessionState.Loading]: {
     button: {
       color: 'subdued',
       iconType: 'clock',
@@ -116,7 +141,7 @@ const backgroundSessionIndicatorViewStateToProps: {
       secondaryAction: ContinueInBackgroundButton,
     },
   },
-  [BackgroundSessionViewState.Completed]: {
+  [SessionState.Completed]: {
     button: {
       color: 'subdued',
       iconType: 'checkInCircleFilled',
@@ -141,7 +166,7 @@ const backgroundSessionIndicatorViewStateToProps: {
       secondaryAction: ViewBackgroundSessionsButton,
     },
   },
-  [BackgroundSessionViewState.BackgroundLoading]: {
+  [SessionState.BackgroundLoading]: {
     button: {
       iconType: EuiLoadingSpinner,
       'aria-label': i18n.translate(
@@ -165,7 +190,7 @@ const backgroundSessionIndicatorViewStateToProps: {
       secondaryAction: ViewBackgroundSessionsButton,
     },
   },
-  [BackgroundSessionViewState.BackgroundCompleted]: {
+  [SessionState.BackgroundCompleted]: {
     button: {
       color: 'success',
       iconType: 'checkInCircleFilled',
@@ -192,7 +217,7 @@ const backgroundSessionIndicatorViewStateToProps: {
       primaryAction: ViewBackgroundSessionsButton,
     },
   },
-  [BackgroundSessionViewState.Restored]: {
+  [SessionState.Restored]: {
     button: {
       color: 'warning',
       iconType: 'refresh',
@@ -217,6 +242,25 @@ const backgroundSessionIndicatorViewStateToProps: {
       secondaryAction: ViewBackgroundSessionsButton,
     },
   },
+  [SessionState.Canceled]: {
+    button: {
+      color: 'subdued',
+      iconType: 'refresh',
+      'aria-label': i18n.translate('xpack.data.backgroundSessionIndicator.canceledIconAriaLabel', {
+        defaultMessage: 'Canceled',
+      }),
+      tooltipText: i18n.translate('xpack.data.backgroundSessionIndicator.canceledTooltipText', {
+        defaultMessage: 'Search was canceled',
+      }),
+    },
+    popover: {
+      text: i18n.translate('xpack.data.backgroundSessionIndicator.canceledText', {
+        defaultMessage: 'Search was canceled',
+      }),
+      primaryAction: RefreshButton,
+      secondaryAction: ViewBackgroundSessionsButton,
+    },
+  },
 };
 
 const VerticalDivider: React.FC = () => (
@@ -228,7 +272,9 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const { button, popover } = backgroundSessionIndicatorViewStateToProps[props.state];
+  if (!backgroundSessionIndicatorViewStateToProps[props.state]) return null;
+
+  const { button, popover } = backgroundSessionIndicatorViewStateToProps[props.state]!;
 
   return (
     <EuiPopover
@@ -239,13 +285,15 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
       panelPaddingSize={'s'}
       className="backgroundSessionIndicator"
       data-test-subj={'backgroundSessionIndicator'}
+      data-state={props.state}
       button={
-        <EuiToolTip content={button.tooltipText}>
+        <EuiToolTip content={props.disabled ? props.disabledReasonText : button.tooltipText}>
           <EuiButtonIcon
             color={button.color}
             aria-label={button['aria-label']}
             iconType={button.iconType}
             onClick={onButtonClick}
+            disabled={props.disabled}
           />
         </EuiToolTip>
       }
@@ -255,6 +303,7 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
         alignItems={'center'}
         gutterSize={'s'}
         className="backgroundSessionIndicator__popoverContainer"
+        data-test-subj={'backgroundSessionIndicatorPopoverContainer'}
       >
         <EuiFlexItem grow={true}>
           <EuiText size="s" color={'subdued'}>
