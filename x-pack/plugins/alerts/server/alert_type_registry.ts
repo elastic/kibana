@@ -6,7 +6,6 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-// import { Required } from 'utility-types';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
@@ -202,7 +201,7 @@ function augmentActionGroupsWithReserved<
     );
   } else if (intersectingReservedActionGroups.length > 0) {
     throw new Error(
-      i18n.translate('xpack.alerts.alertTypeRegistry.register.reservedActionGroupUsageError', {
+      i18n.translate('xpack.alerts.alertTypeRegistry.register.recoveryActionGroupUsageError', {
         defaultMessage:
           'Alert type [id="{id}"] cannot be registered. Action groups [{actionGroups}] are reserved by the framework.',
         values: {
