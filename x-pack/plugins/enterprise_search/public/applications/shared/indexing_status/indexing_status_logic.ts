@@ -56,9 +56,11 @@ export const IndexingStatusLogic = kea<MakeLogicType<IndexingStatusValues, Index
   },
   listeners: ({ actions }) => ({
     fetchIndexingStatus: ({ statusPath, onComplete }: IndexingStatusProps) => {
+      const { http } = HttpLogic.values;
+
       pollingInterval = window.setInterval(async () => {
         try {
-          const response = (await HttpLogic.values.http.get(statusPath)) as IIndexingStatus;
+          const response: IIndexingStatus = await http.get(statusPath);
           if (response.percentageComplete >= 100) {
             clearInterval(pollingInterval);
             onComplete(response.numDocumentsWithErrors);
