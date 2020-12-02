@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ADD, UPDATE } from './constants/operations';
+
 export type SchemaTypes = 'text' | 'number' | 'geolocation' | 'date';
 
 export interface Schema {
@@ -27,8 +29,16 @@ export interface SchemaConflicts {
   [key: string]: SchemaConflictFieldTypes;
 }
 
+
 export interface IIndexingStatus {
   percentageComplete: number;
   numDocumentsWithErrors: number;
   activeReindexJobId: number;
 }
+
+export interface IndexJob extends IIndexingStatus {
+  isActive?: boolean;
+  hasErrors?: boolean;
+}
+
+export type TOperation = typeof ADD | typeof UPDATE;
