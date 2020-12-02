@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { captureBodyRt } from '../runtime_types/capture_body_rt';
+import { logLevelRt } from '../runtime_types/log_level_rt';
 import { RawSettingDefinition } from './types';
 
 export const generalSettings: RawSettingDefinition[] = [
@@ -91,6 +92,7 @@ export const generalSettings: RawSettingDefinition[] = [
   // LOG_LEVEL
   {
     key: 'log_level',
+    validation: logLevelRt,
     type: 'select',
     defaultValue: 'info',
     label: i18n.translate('xpack.apm.agentConfig.logLevel.label', {
