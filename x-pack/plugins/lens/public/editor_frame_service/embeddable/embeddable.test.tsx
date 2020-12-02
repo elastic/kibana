@@ -205,12 +205,18 @@ describe('embeddable', () => {
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
     embeddable.updateInput({
       timeRange,
       query,
       filters,
       searchSessionId: 'searchSessionId',
     });
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });
