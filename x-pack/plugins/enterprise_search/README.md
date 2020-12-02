@@ -38,6 +38,16 @@ yarn test:jest
 yarn test:jest --watch
 ```
 
+Unfortunately coverage collection does not work as automatically, and requires using our handy jest.sh script if you want to run tests on a specific folder and only get coverage numbers for that folder:
+
+```bash
+# Running the jest.sh script from the `x-pack/plugins/enterprise_search` folder (vs. kibana root)
+# will save you time and allow you to Tab to complete folder dir names
+sh jest.sh {YOUR_COMPONENT_DIR}
+sh jest.sh public/applications/shared/kibana
+sh jest.sh server/routes/app_search
+```
+
 ### E2E tests
 
 See [our functional test runner README](../../test/functional_enterprise_search).
