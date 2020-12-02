@@ -26,5 +26,14 @@ storiesOf('components/BackgroundSessionIndicator', module).add('default', () => 
     <div>
       <BackgroundSessionIndicator state={SessionState.Restored} />
     </div>
+    <div>
+      <BackgroundSessionIndicator
+        state={SessionState.Completed}
+        disabled={true}
+        disabledReasonText={
+          'Send to background capability is unavailable when auto-refresh is enabled'
+        }
+      />
+    </div>
   </>
 ));
