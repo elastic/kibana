@@ -58,5 +58,5 @@ export async function getTimeOfLastEvent({
   };
 
   const response = await callWithRequest(req, 'search', params);
-  return response.hits?.hits.length ? response.hits?.hits[0]._source.timestamp : null;
+  return response.hits?.hits.length ? response.hits?.hits[0]._source.timestamp : undefined;
 }
