@@ -553,8 +553,6 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
       },
     },
     async (context, request, response) => {
-      console.log('Load index settings');
-
       const { query } = request;
 
       if (!query.indexPatternTitle) {
