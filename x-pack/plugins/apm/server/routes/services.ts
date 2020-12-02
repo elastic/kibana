@@ -21,6 +21,7 @@ import { getServiceErrorGroups } from '../lib/services/get_service_error_groups'
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getThroughput } from '../lib/services/get_throughput';
+import { getServiceDetails } from '../lib/services/get_service_details';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -42,6 +43,18 @@ export const servicesRoute = createRoute({
     });
 
     return services;
+  },
+});
+
+export const serviceDetailsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}',
+  params: t.type({ path: t.type({ serviceName: t.string }), query: rangeRt }),
+  options: { tags: ['access:apm'] },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+
+    return getServiceDetails({ serviceName, setup });
   },
 });
 

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { ApmHeader } from '../../shared/ApmHeader';
+import { ServiceNameHeader } from '../../shared/ApmHeader/service_name_header';
 import { ServiceDetailTabs } from './service_detail_tabs';
 
 interface Props extends RouteComponentProps<{ serviceName: string }> {
@@ -20,9 +20,7 @@ export function ServiceDetails({ match, tab }: Props) {
   return (
     <div>
       <ApmHeader>
-        <EuiTitle>
-          <h1>{serviceName}</h1>
-        </EuiTitle>
+        <ServiceNameHeader serviceName={serviceName} />
       </ApmHeader>
       <ServiceDetailTabs serviceName={serviceName} tab={tab} />
     </div>
