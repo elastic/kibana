@@ -186,6 +186,10 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
           hasErrors: numDocumentsWithErrors > 0,
           isActive: false,
         }),
+        updateFields: (state) => ({
+          ...state,
+          percentageComplete: 0,
+        }),
       },
     ],
     newFieldType: [
