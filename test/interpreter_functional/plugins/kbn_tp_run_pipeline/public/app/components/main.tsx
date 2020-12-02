@@ -24,7 +24,7 @@ import {
   IInterpreterRenderHandlers,
   ExpressionValue,
   TablesAdapter,
-} from 'src/plugins/expressions';
+} from '../../../../../../../src/plugins/expressions/public';
 import { RequestAdapter } from '../../../../../../../src/plugins/inspector/public';
 import { Adapters, ExpressionRenderHandler } from '../../types';
 import { getExpressions } from '../../services';

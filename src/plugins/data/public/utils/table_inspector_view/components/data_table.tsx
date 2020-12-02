@@ -176,20 +176,21 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
     }
 
     const columns = data.columns.map((dataColumn: any, index: number) => {
-      const fieldFormatter = fieldFormats.deserialize(dataColumn.meta.params);
+      const formatParams = { id: 'string', ...dataColumn.meta.params };
+      const fieldFormatter = fieldFormats.deserialize(formatParams);
       const filterable = isFilterable(dataColumn);
       return {
         name: dataColumn.name,
-        id: dataColumn.id,
-        field: dataColumn.field,
+        field: dataColumn.id,
         sortable: true,
-        render: (row: any) => {
-          const formattedValue = fieldFormatter.convert(row[dataColumn.id]);
+        render: (value: any) => {
+          const formattedValue = fieldFormatter.convert(value);
+          const rowIndex = data.rows.findIndex((row) => row[dataColumn.id] === value) || 0;
 
           return DataTableFormat.renderCell({
             table: data,
             columnIndex: index,
-            rowIndex: row.__rowIndex,
+            rowIndex,
             formattedValue,
             uiActions,
             isFilterable: filterable,
