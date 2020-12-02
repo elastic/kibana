@@ -8,7 +8,6 @@ import { cloneDeep, isEqual } from 'lodash';
 import { kea, MakeLogicType } from 'kea';
 
 import http from 'shared/http';
-import routes from 'workplace_search/routes';
 
 import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
@@ -265,9 +264,10 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       const {
         contentSource: { id: sourceId },
       } = SourceLogic.values;
+
       const route = isOrganization
-        ? routes.fritoPieOrganizationContentSourceSchemasPath(sourceId)
-        : routes.fritoPieAccountContentSourceSchemasPath(sourceId);
+        ? `/api/workplace_search/org/sources/${sourceId}/schemas`
+        : `/api/workplace_search/account/sources/${sourceId}/schemas`;
 
       return http(route).then(({ data }) => actions.onInitializeSchema({ sourceId, ...data }));
     },
@@ -275,8 +275,8 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       const { isOrganization } = AppLogic.values;
 
       const route = isOrganization
-        ? routes.fritoPieOrganizationContentSourceReindexJobPath(sourceId, activeReindexJobId)
-        : routes.fritoPieAccountContentSourceReindexJobPath(sourceId, activeReindexJobId);
+        ? `/api/workplace_search/org/sources/${sourceId}/reindex_job/${activeReindexJobId}`
+        : `/api/workplace_search/account/sources/${sourceId}/reindex_job/${activeReindexJobId}`;
 
       try {
         await actions.initializeSchema();
@@ -304,8 +304,8 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       const { sourceId } = values;
       const successMessage = isAdding ? 'New field added.' : 'Schema updated.';
       const route = isOrganization
-        ? routes.fritoPieOrganizationContentSourceSchemasPath(sourceId)
-        : routes.fritoPieAccountContentSourceSchemasPath(sourceId);
+        ? `/api/workplace_search/org/sources/${sourceId}/schemas`
+        : `/api/workplace_search/account/sources/${sourceId}/schemas`;
 
       const emptyReindexJob = {
         percentageComplete: 100,
