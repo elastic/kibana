@@ -19,8 +19,8 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceDependencyItem } from '../../../../../server/lib/services/get_service_dependencies';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { ServiceMapLink } from '../../../shared/Links/apm/ServiceMapLink';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';

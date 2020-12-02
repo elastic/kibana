@@ -14,15 +14,15 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import * as apmApi from '../../../../../services/rest/createCallApmApi';
 import { License } from '../../../../../../../licensing/common/license';
-import * as hooks from '../../../../../hooks/useFetcher';
-import { LicenseContext } from '../../../../../context/LicenseContext';
+import * as hooks from '../../../../../hooks/use_fetcher';
+import { LicenseContext } from '../../../../../context/license/license_context';
 import { CustomLinkOverview } from '.';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
 import * as saveCustomLink from './CreateEditCustomLinkFlyout/saveCustomLink';
-import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 
 const data = [
   {

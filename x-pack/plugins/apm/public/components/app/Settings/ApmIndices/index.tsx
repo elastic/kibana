@@ -19,10 +19,10 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { clearCache } from '../../../../services/rest/callApi';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const APM_INDEX_LABELS = [
   {
