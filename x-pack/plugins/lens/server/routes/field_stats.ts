@@ -12,10 +12,11 @@ import { CoreSetup } from 'src/core/server';
 import { IFieldType } from 'src/plugins/data/common';
 import { ESSearchResponse } from '../../../../typings/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
+import { PluginStartContract } from '../plugin';
 
 const SHARD_SIZE = 5000;
 
-export async function initFieldsRoute(setup: CoreSetup) {
+export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
   const router = setup.http.createRouter();
   router.post(
     {
