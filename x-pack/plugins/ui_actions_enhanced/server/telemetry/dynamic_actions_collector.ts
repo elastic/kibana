@@ -7,16 +7,19 @@
 import { DynamicActionsState } from '../../common';
 import { getMetricKey } from './get_metric_key';
 
-export const dynamicActionsCollector = (state: DynamicActionsState): Record<string, any> => {
-  const stats: Record<string, any> = {};
+export const dynamicActionsCollector = (
+  state: DynamicActionsState,
+  stats: Record<string, any>
+): Record<string, any> => {
+  const countMetricKey = getMetricKey('count');
 
-  stats[getMetricKey('count')] = state.events.length;
+  stats[countMetricKey] = state.events.length + (stats[countMetricKey] || 0);
 
   for (const event of state.events) {
     const factoryId = event.action.factoryId;
-    const factoryCountMetric = getMetricKey(`actions.${factoryId}.count`);
+    const actionCountMetric = getMetricKey(`actions.${factoryId}.count`);
 
-    stats[factoryCountMetric] = 1 + (stats[factoryCountMetric] || 0);
+    stats[actionCountMetric] = 1 + (stats[actionCountMetric] || 0);
 
     for (const trigger of event.triggers) {
       const triggerCountMetric = getMetricKey(`triggers.${trigger}.count`);

@@ -18,10 +18,8 @@ export const dynamicActionEnhancement = (
     id: 'dynamicActions',
     telemetry: (serializableState: SerializableState, stats: Record<string, any>) => {
       const state = serializableState as DynamicActionsState;
-      const dynamicActionsStats = dynamicActionsCollector(state);
-      const dynamicActionFactoriesStats = dynamicActionFactoriesCollector(getActionFactory, state);
-
-      Object.assign(stats, dynamicActionsStats, dynamicActionFactoriesStats);
+      stats = dynamicActionsCollector(state, stats);
+      stats = dynamicActionFactoriesCollector(getActionFactory, state, stats);
 
       return stats;
     },
