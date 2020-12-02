@@ -35,6 +35,7 @@ export const XYAxis: FC<XYAxisPros> = ({
   ticks,
   domain,
   style,
+  integersOnly,
 }) => (
   <Axis
     id={`${id}__axis`}
@@ -44,6 +45,7 @@ export const XYAxis: FC<XYAxisPros> = ({
     style={style}
     domain={domain}
     position={position}
+    integersOnly={integersOnly}
     showGridLines={grid?.show}
     tickFormat={ticks?.formatter}
     labelFormat={ticks?.labelFormatter}

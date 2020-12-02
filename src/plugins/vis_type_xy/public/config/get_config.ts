@@ -61,6 +61,7 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
   );
   const tooltip = getTooltip(aspects, params);
   const yAxes = params.valueAxes.map((a) =>
+    // uses first y aspect in array for formatting axis
     getAxis<YScaleType>(a, params.grid, aspects.y[0], params.seriesParams)
   );
   const enableHistogramMode =

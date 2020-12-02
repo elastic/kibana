@@ -93,6 +93,7 @@ export interface AxisConfig<S extends XScaleType | YScaleType> {
   domain?: YDomainRange;
   title?: string;
   grid?: AxisGrid;
+  integersOnly: boolean;
 }
 
 export interface LegendOptions {

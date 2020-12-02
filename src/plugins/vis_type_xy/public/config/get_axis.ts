@@ -88,6 +88,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
     scale,
     style: getAxisStyle(ticks, title, fallbackRotation),
     domain: getAxisDomain(scale, isCategoryAxis),
+    integersOnly: aggType === 'count',
   };
 }
 
