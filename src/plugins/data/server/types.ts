@@ -32,7 +32,7 @@ export interface IndexPatternsRequestHandlerContext {
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    indexPatterns?: IndexPatternsRequestHandlerContext;
+    indexPatterns?: Partial<IndexPatternsRequestHandlerContext>;
   }
 }
 

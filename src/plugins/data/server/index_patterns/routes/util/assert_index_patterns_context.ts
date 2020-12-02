@@ -21,7 +21,7 @@ import { RequestHandler, RequestHandlerContext, RouteMethod } from '../../../../
 import { IndexPatternsRouteContext, IndexPatternsRequestHandler } from '../../../types';
 
 const isTagsRouteContext = (context: RequestHandlerContext): context is IndexPatternsRouteContext =>
-  !!context.indexPatterns;
+  !!context.indexPatterns && !!context.indexPatterns.indexPatterns;
 
 /**
  * This higher order request handler makes sure that `ctx.indexPatterns`

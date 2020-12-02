@@ -98,7 +98,9 @@ export class DataServerPlugin
     this.indexPatterns.setup(core);
     core.http.registerRouteHandlerContext(
       'indexPatterns',
-      async (context, req, res): Promise<IndexPatternsRequestHandlerContext> => {
+      async (context, req): Promise<Partial<IndexPatternsRequestHandlerContext>> => {
+        if (!req.auth.isAuthenticated) return {};
+
         const savedObjectsClient = context.core.savedObjects.client;
         const elasticsearchClient = context.core.elasticsearch.client.asCurrentUser;
         const indexPatterns = await this.indexPatterns.createIndexPatternsService(
