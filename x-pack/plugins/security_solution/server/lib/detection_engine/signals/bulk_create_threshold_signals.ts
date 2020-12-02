@@ -5,7 +5,7 @@
  */
 
 import uuidv5 from 'uuid/v5';
-import { reduce, get, isEmpty } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
 import set from 'set-value';
 
 import {
@@ -17,7 +17,7 @@ import { AlertServices } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
-import { SignalSearchResponse, SignalSourceHit, ThresholdAggregationBucket } from './types';
+import { SignalSearchResponse, ThresholdAggregationBucket } from './types';
 import { BuildRuleMessage } from './rule_messages';
 
 // used to generate constant Threshold Signals ID when run with the same params
@@ -47,81 +47,6 @@ interface BulkCreateThresholdSignalsParams {
   startedAt: Date;
   buildRuleMessage: BuildRuleMessage;
 }
-
-interface FilterObject {
-  bool?: {
-    filter?: FilterObject | FilterObject[];
-    should?: Array<Record<string, Record<string, string>>>;
-  };
-}
-
-const injectFirstMatch = (
-  hit: SignalSourceHit,
-  match: object | Record<string, string>
-): Record<string, string> | undefined => {
-  if (match != null) {
-    for (const key of Object.keys(match)) {
-      return { [key]: get(key, hit._source) } as Record<string, string>;
-    }
-  }
-};
-
-const getNestedQueryFilters = (
-  hit: SignalSourceHit,
-  filtersObj: FilterObject
-): Record<string, string> => {
-  if (Array.isArray(filtersObj.bool?.filter)) {
-    return reduce(
-      (acc, filterItem) => {
-        const nestedFilter = getNestedQueryFilters(hit, filterItem);
-
-        if (nestedFilter) {
-          return { ...acc, ...nestedFilter };
-        }
-
-        return acc;
-      },
-      {},
-      filtersObj.bool?.filter
-    );
-  } else {
-    return (
-      (filtersObj.bool?.should &&
-        filtersObj.bool?.should[0] &&
-        (injectFirstMatch(hit, filtersObj.bool.should[0].match) ||
-          injectFirstMatch(hit, filtersObj.bool.should[0].match_phrase))) ??
-      {}
-    );
-  }
-};
-
-export const getThresholdSignalQueryFields = (hit: SignalSourceHit, filter: unknown) => {
-  const filters = get('bool.filter', filter);
-
-  return reduce(
-    (acc, item) => {
-      if (item.match_phrase) {
-        return { ...acc, ...injectFirstMatch(hit, item.match_phrase) };
-      }
-
-      if (item.bool?.should && (item.bool.should[0].match || item.bool.should[0].match_phrase)) {
-        return {
-          ...acc,
-          ...(injectFirstMatch(hit, item.bool.should[0].match) ||
-            injectFirstMatch(hit, item.bool.should[0].match_phrase)),
-        };
-      }
-
-      if (item.bool?.filter) {
-        return { ...acc, ...getNestedQueryFilters(hit, item) };
-      }
-
-      return acc;
-    },
-    {},
-    filters
-  );
-};
 
 const getTransformedHits = (
   results: SignalSearchResponse,
@@ -153,7 +78,6 @@ const getTransformedHits = (
         count: totalResults,
         value: ruleId,
       },
-      ...getThresholdSignalQueryFields(hit, filter),
     };
 
     return [
@@ -183,10 +107,7 @@ const getTransformedHits = (
             count: docCount,
             value: get(threshold.field, hit._source),
           },
-          ...getThresholdSignalQueryFields(hit, filter),
         };
-
-        set(source, threshold.field, key);
 
         return {
           _index: inputIndex,

@@ -52,27 +52,32 @@ export const getThresholdBucketFilters = async ({
     buildRuleMessage,
   });
 
-  const filters: ESFilter[] = [];
-  searchResult.aggregations.threshold.buckets.forEach((bucket: ThresholdQueryBucket) => {
-    filters.push({
-      bool: {
-        must: [
-          {
-            term: {
-              [bucketByField ?? 'signal.rule.rule_id']: bucket.key,
-            },
-          },
-          {
-            range: {
-              [timestampOverride ?? '@timestamp']: {
-                lte: bucket.lastSignalTimestamp.value_as_string,
+  const filters = searchResult.aggregations.threshold.buckets.reduce(
+    (acc: ESFilter[], bucket: ThresholdQueryBucket): ESFilter[] => {
+      return [
+        ...acc,
+        {
+          bool: {
+            filter: [
+              {
+                term: {
+                  [bucketByField || 'signal.rule.rule_id']: bucket.key,
+                },
               },
-            },
+              {
+                range: {
+                  [timestampOverride ?? '@timestamp']: {
+                    lte: bucket.lastSignalTimestamp.value_as_string,
+                  },
+                },
+              },
+            ],
           },
-        ],
-      },
-    });
-  });
+        } as ESFilter,
+      ];
+    },
+    [] as ESFilter[]
+  );
 
   return {
     filters: [
