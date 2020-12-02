@@ -18,9 +18,9 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
-import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
-import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
-import { useTheme } from '../../../../../hooks/useTheme';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
+import { useTheme } from '../../../../../hooks/use_theme';
 import { px, units } from '../../../../../style/variables';
 import {
   createAgentConfigurationHref,
