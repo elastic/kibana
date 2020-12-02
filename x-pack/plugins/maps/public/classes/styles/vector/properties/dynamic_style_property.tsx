@@ -242,7 +242,7 @@ export class DynamicStyleProperty<T>
     }
 
     if (this.isOrdinal()) {
-      return this.getStepFunction() === STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX
+      return this.getStepFunction() === STEP_FUNCTION.INTERPOLATE
         ? this._field.getExtendedStatsFieldMetaRequest()
         : this._field.getPercentilesFieldMetaRequest(
             this.getFieldMetaOptions().percentiles !== undefined
@@ -276,7 +276,7 @@ export class DynamicStyleProperty<T>
   getStepFunction() {
     return 'stepFunction' in this._options
       ? (this._options as T & { stepFunction: STEP_FUNCTION }).stepFunction
-      : STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX;
+      : STEP_FUNCTION.INTERPOLATE;
   }
 
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]) {
@@ -394,7 +394,7 @@ export class DynamicStyleProperty<T>
   }
 
   _getSupportedStepFunctions(): STEP_FUNCTION[] {
-    return [STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX];
+    return [STEP_FUNCTION.INTERPOLATE];
   }
 
   renderDataMappingPopover(onChange: (updatedOptions: Partial<T>) => void) {

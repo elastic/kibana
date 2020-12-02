@@ -29,8 +29,8 @@ import {
 } from '../../../../../../common/constants';
 import { PercentilesForm } from './percentiles_form';
 
-const easingTitle = i18n.translate('xpack.maps.styles.ordinalDataMapping.easingTitle', {
-  defaultMessage: `Ease between min and max`,
+const interpolateTitle = i18n.translate('xpack.maps.styles.ordinalDataMapping.interpolateTitle', {
+  defaultMessage: `Interpolate between min and max`,
 });
 
 const percentilesTitle = i18n.translate('xpack.maps.styles.ordinalDataMapping.percentilesTitle', {
@@ -39,15 +39,15 @@ const percentilesTitle = i18n.translate('xpack.maps.styles.ordinalDataMapping.pe
 
 const STEP_FUNCTION_OPTIONS = [
   {
-    value: STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX,
-    inputDisplay: easingTitle,
+    value: STEP_FUNCTION.INTERPOLATE,
+    inputDisplay: interpolateTitle,
     dropdownDisplay: (
       <Fragment>
-        <strong>{easingTitle}</strong>
+        <strong>{interpolateTitle}</strong>
         <EuiText size="s" color="subdued">
           <p className="euiTextColor--subdued">
             <FormattedMessage
-              id="xpack.maps.styles.ordinalDataMapping.easingDescription"
+              id="xpack.maps.styles.ordinalDataMapping.interpolateDescription"
               defaultMessage="Fit values from the data domain to the style on a linear scale"
             />
           </p>

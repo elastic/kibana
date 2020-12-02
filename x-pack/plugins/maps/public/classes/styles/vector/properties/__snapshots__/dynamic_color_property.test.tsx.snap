@@ -8,11 +8,11 @@ exports[`renderDataMappingPopover Should disable toggle when field is not backed
     }
   }
   onChange={[Function]}
-  stepFunction="EASING"
+  stepFunction="INTERPOLATE"
   styleName="lineColor"
   supportedStepFunctions={
     Array [
-      "EASING",
+      "INTERPOLATE",
       "PERCENTILES",
     ]
   }
@@ -28,11 +28,11 @@ exports[`renderDataMappingPopover Should enable toggle when field is backed by g
     }
   }
   onChange={[Function]}
-  stepFunction="EASING"
+  stepFunction="INTERPOLATE"
   styleName="lineColor"
   supportedStepFunctions={
     Array [
-      "EASING",
+      "INTERPOLATE",
       "PERCENTILES",
     ]
   }
@@ -185,7 +185,7 @@ exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with 
 </div>
 `;
 
-exports[`renderLegendDetailRow ordinal Should render easing bands 1`] = `
+exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"
@@ -421,7 +421,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
 </div>
 `;
 
-exports[`renderLegendDetailRow ordinal Should render single band when easing range is 0 1`] = `
+exports[`renderLegendDetailRow ordinal Should render single band when interpolate range is 0 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"

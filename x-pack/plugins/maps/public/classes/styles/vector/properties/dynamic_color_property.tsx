@@ -130,7 +130,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getSupportedStepFunctions(): STEP_FUNCTION[] {
-    return [STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX, STEP_FUNCTION.PERCENTILES];
+    return [STEP_FUNCTION.INTERPOLATE, STEP_FUNCTION.PERCENTILES];
   }
 
   _getMbColor() {

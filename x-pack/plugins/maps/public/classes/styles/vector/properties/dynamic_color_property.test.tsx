@@ -47,7 +47,7 @@ const fieldMetaOptions = { isEnabled: true };
 
 describe('renderLegendDetailRow', () => {
   describe('ordinal', () => {
-    test('Should render easing bands', async () => {
+    test('Should render interpolate bands', async () => {
       const colorStyle = makeProperty({
         color: 'Blues',
         type: undefined,
@@ -66,7 +66,7 @@ describe('renderLegendDetailRow', () => {
       expect(component).toMatchSnapshot();
     });
 
-    test('Should render single band when easing range is 0', async () => {
+    test('Should render single band when interpolate range is 0', async () => {
       const colorStyle = makeProperty({
         color: 'Blues',
         type: undefined,
