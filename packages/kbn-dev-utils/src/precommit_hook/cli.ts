@@ -33,10 +33,9 @@ run(
   async ({ log }) => {
     try {
       if (!(await isCorrectGitVersionInstalled())) {
-        log.warning(
+        throw new Error(
           `We could not detect a git version in the required range. Please install a git version >= 2.5. Skipping Kibana pre-commit git hook installation.`
         );
-        return;
       }
 
       const gitDir = await getGitDir();
