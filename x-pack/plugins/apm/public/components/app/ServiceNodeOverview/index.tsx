@@ -21,8 +21,8 @@ import {
   asInteger,
   asPercent,
 } from '../../../../common/utils/formatters';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { px, truncate, unit } from '../../../style/variables';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';

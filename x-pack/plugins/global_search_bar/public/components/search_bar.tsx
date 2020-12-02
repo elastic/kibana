@@ -83,7 +83,7 @@ const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewi
   };
 
   if (type === 'application') {
-    option.meta = [{ text: meta?.categoryLabel as string }];
+    option.meta = [{ text: (meta?.categoryLabel as string) ?? '' }];
   } else {
     option.meta = [{ text: cleanMeta(type) }];
   }
