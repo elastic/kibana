@@ -8,10 +8,9 @@ import { convertToGeoJson } from './convert_to_geojson';
 
 const esResponse = {
   aggregations: {
-    entitySplit: {
-      buckets: [
-        {
-          key: 'ios',
+    tracks: {
+      buckets: {
+        ios: {
           doc_count: 1,
           path: {
             type: 'Feature',
@@ -27,8 +26,7 @@ const esResponse = {
             },
           },
         },
-        {
-          key: 'osx',
+        osx: {
           doc_count: 1,
           path: {
             type: 'Feature',
@@ -44,7 +42,7 @@ const esResponse = {
             },
           },
         },
-      ],
+      },
     },
   },
 };

@@ -14,20 +14,23 @@ export function convertToGeoJson(esResponse: any, entitySplitFieldName: string) 
   const features: Feature[] = [];
   let numTrimmedTracks = 0;
 
-  const buckets = _.get(esResponse, 'aggregations.entitySplit.buckets', []);
-  buckets.forEach((bucket: any) => {
+  const buckets = _.get(esResponse, 'aggregations.tracks.buckets', {});
+  const entityKeys = Object.keys(buckets);
+  for (let i = 0; i < entityKeys.length; i++) {
+    const entityKey = entityKeys[i];
+    const bucket = buckets[entityKey];
     const feature = bucket.path as Feature;
     if (!feature.properties!.complete) {
       numTrimmedTracks++;
     }
-    feature.id = bucket.key;
+    feature.id = entityKey;
     feature.properties = {
-      [entitySplitFieldName]: bucket.key,
+      [entitySplitFieldName]: entityKey,
       ...feature.properties,
       ...extractPropertiesFromBucket(bucket, KEYS_TO_IGNORE),
     };
     features.push(feature);
-  });
+  }
 
   return {
     featureCollection: {
