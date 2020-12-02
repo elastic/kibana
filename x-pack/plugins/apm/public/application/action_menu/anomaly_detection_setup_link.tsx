@@ -16,9 +16,9 @@ import {
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import { getAPMHref } from '../../components/shared/Links/apm/APMLink';
-import { useApmPluginContext } from '../../context/apm_plugin_context/use_apm_plugin_context';
+import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
-import { useLicense } from '../../context/license_context/use_license';
+import { useLicenseContext } from '../../context/license/use_license_context';
 import { useUrlParams } from '../../context/url_params_context/use_url_params';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { units } from '../../style/variables';
@@ -32,7 +32,7 @@ export function AnomalyDetectionSetupLink() {
   const environment = uiFilters.environment;
   const { core } = useApmPluginContext();
   const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
-  const license = useLicense();
+  const license = useLicenseContext();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
   const { basePath } = core.http;
 

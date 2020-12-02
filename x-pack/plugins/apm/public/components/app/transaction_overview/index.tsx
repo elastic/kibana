@@ -37,7 +37,7 @@ import { Correlations } from '../Correlations';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
 import { UserExperienceCallout } from './user_experience_callout';
-import { useApmService } from '../../../context/apm_service/use_apm_service';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 function getRedirectLocation({
   location,
@@ -68,7 +68,7 @@ interface TransactionOverviewProps {
 export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { transactionType, transactionTypes } = useApmService();
+  const { transactionType, transactionTypes } = useApmServiceContext();
 
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));

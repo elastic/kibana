@@ -20,7 +20,7 @@ import { AgentConfigurationCreateEdit } from './index';
 import {
   ApmPluginContext,
   ApmPluginContextValue,
-} from '../../../../../context/apm_plugin_context/apm_plugin_context';
+} from '../../../../../context/apm_plugin/apm_plugin_context';
 import { EuiThemeProvider } from '../../../../../../../observability/public';
 
 storiesOf(

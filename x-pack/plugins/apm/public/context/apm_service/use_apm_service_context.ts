@@ -5,14 +5,8 @@
  */
 
 import { useContext } from 'react';
-import { AnnotationsContext } from './annotations_context';
+import { APMServiceContext } from './apm_service_context';
 
-export function useAnnotations() {
-  const context = useContext(AnnotationsContext);
-
-  if (!context) {
-    throw new Error('Missing Annotations context provider');
-  }
-
-  return context;
+export function useApmServiceContext() {
+  return useContext(APMServiceContext);
 }

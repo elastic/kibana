@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
 import { Router } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin_context/mock_apm_plugin_context';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import {
   UrlParamsContext,
   useUiFilters,

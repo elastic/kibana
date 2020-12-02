@@ -25,8 +25,8 @@ import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPat
 import {
   ApmPluginContext,
   ApmPluginContextValue,
-} from '../context/apm_plugin_context/apm_plugin_context';
-import { LicenseProvider } from '../context/license_context/license_context';
+} from '../context/apm_plugin/apm_plugin_context';
+import { LicenseProvider } from '../context/license/license_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ApmPluginSetupDeps } from '../plugin';

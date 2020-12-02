@@ -5,8 +5,8 @@
  */
 
 import { useContext } from 'react';
-import { APMServiceContext } from './apm_service_context';
+import { LicenseContext } from './license_context';
 
-export function useApmService() {
-  return useContext(APMServiceContext);
+export function useLicenseContext() {
+  return useContext(LicenseContext);
 }

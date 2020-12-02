@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
-import { useApmService } from '../context/apm_service/use_apm_service';
+import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useFetcher } from './use_fetcher';
 
 const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
@@ -21,7 +21,7 @@ export function useServiceMetricChartsFetcher({
   serviceNodeName: string | undefined;
 }) {
   const { urlParams, uiFilters } = useUrlParams();
-  const { agentName } = useApmService();
+  const { agentName } = useApmServiceContext();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end } = urlParams;
   const { data = INITIAL_DATA, error, status } = useFetcher(

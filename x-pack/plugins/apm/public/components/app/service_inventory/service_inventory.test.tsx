@@ -13,11 +13,11 @@ import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import { ServiceInventory } from '.';
 import { EuiThemeProvider } from '../../../../../observability/public';
-import { ApmPluginContextValue } from '../../../context/apm_plugin_context/apm_plugin_context';
+import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../../../context/apm_plugin_context/mock_apm_plugin_context';
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import * as useLocalUIFilters from '../../../hooks/useLocalUIFilters';
 import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';

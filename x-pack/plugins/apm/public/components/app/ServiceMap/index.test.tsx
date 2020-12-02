@@ -11,8 +11,8 @@ import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { License } from '../../../../../licensing/common/license';
 import { EuiThemeProvider } from '../../../../../observability/public';
 import { FETCH_STATUS } from '../../../../../observability/public/hooks/use_fetcher';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin_context/mock_apm_plugin_context';
-import { LicenseContext } from '../../../context/license_context/license_context';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { LicenseContext } from '../../../context/license/license_context';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
 import { ServiceMap } from './';
 

@@ -7,8 +7,8 @@
 import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import { delay } from '../utils/testHelpers';
 import { FetcherResult, useFetcher } from './use_fetcher';
-import { MockApmPluginContextWrapper } from '../context/apm_plugin_context/mock_apm_plugin_context';
-import { ApmPluginContextValue } from '../context/apm_plugin_context/apm_plugin_context';
+import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
+import { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 
 // Wrap the hook with a provider so it can useApmPluginContext
 const wrapper = MockApmPluginContextWrapper;

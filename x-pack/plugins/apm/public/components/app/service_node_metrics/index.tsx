@@ -26,7 +26,7 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric_charts_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmService } from '../../../context/apm_service/use_apm_service';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { px, truncate, unit } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
@@ -58,7 +58,7 @@ type ServiceNodeMetricsProps = RouteComponentProps<{
 export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
   const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, serviceNodeName } = match.params;
-  const { agentName } = useApmService();
+  const { agentName } = useApmServiceContext();
   const { data } = useServiceMetricChartsFetcher({ serviceNodeName });
   const { start, end } = urlParams;
 

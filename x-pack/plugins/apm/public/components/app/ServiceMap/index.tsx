@@ -14,7 +14,7 @@ import {
   SERVICE_MAP_TIMEOUT_ERROR,
 } from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useLicense } from '../../../context/license_context/use_license';
+import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
@@ -70,7 +70,7 @@ export function ServiceMap({
   serviceName,
 }: PropsWithChildren<ServiceMapProps>) {
   const theme = useTheme();
-  const license = useLicense();
+  const license = useLicenseContext();
   const { urlParams } = useUrlParams();
 
   const { data = { elements: [] }, status, error } = useFetcher(() => {

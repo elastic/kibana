@@ -10,7 +10,7 @@ import { CoreStart } from 'kibana/public';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin_context/mock_apm_plugin_context';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
 import { IUrlParams } from '../../../context/url_params_context/types';

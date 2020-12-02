@@ -17,7 +17,7 @@ import url from 'url';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
-import { useApmPluginContext } from '../../../context/apm_plugin_context/use_apm_plugin_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';

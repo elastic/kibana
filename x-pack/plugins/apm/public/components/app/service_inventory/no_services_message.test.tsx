@@ -6,7 +6,7 @@
 
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin_context/mock_apm_plugin_context';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { NoServicesMessage } from './no_services_message';
 

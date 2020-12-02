@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ML_ERRORS } from '../../../../../common/anomaly_detection';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { useApmPluginContext } from '../../../../context/apm_plugin_context/use_apm_plugin_context';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { createJobs } from './create_jobs';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 

@@ -14,7 +14,7 @@ import {
   IIndexPattern,
   QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
-import { useApmPluginContext } from '../../../context/apm_plugin_context/use_apm_plugin_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';

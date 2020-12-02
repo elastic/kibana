@@ -8,7 +8,7 @@ import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { useApmPluginContext } from '../../../context/apm_plugin_context/use_apm_plugin_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';

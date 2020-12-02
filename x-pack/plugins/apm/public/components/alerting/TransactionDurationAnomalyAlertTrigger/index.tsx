@@ -23,7 +23,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { useApmService } from '../../../context/apm_service/use_apm_service';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 interface Params {
   windowSize: number;
@@ -47,7 +47,7 @@ interface Props {
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
-  const { transactionTypes } = useApmService();
+  const { transactionTypes } = useApmServiceContext();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end, transactionType } = urlParams;
   const { environmentOptions } = useEnvironmentsFetcher({

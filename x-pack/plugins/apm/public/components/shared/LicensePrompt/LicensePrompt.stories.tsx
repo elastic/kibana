@@ -9,7 +9,7 @@ import { LicensePrompt } from '.';
 import {
   ApmPluginContext,
   ApmPluginContextValue,
-} from '../../../context/apm_plugin_context/apm_plugin_context';
+} from '../../../context/apm_plugin/apm_plugin_context';
 
 const contextMock = ({
   core: { http: { basePath: { prepend: () => {} } } },

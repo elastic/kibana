@@ -5,13 +5,13 @@
  */
 
 import { useContext } from 'react';
-import { ChartPointerEventContext } from './chart_pointer_event_context';
+import { AnnotationsContext } from './annotations_context';
 
-export function useChartPointerEvent() {
-  const context = useContext(ChartPointerEventContext);
+export function useAnnotationsContext() {
+  const context = useContext(AnnotationsContext);
 
   if (!context) {
-    throw new Error('Missing ChartPointerEventContext provider');
+    throw new Error('Missing Annotations context provider');
   }
 
   return context;

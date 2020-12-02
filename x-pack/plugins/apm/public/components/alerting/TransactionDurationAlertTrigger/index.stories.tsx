@@ -8,11 +8,11 @@ import { cloneDeep, merge } from 'lodash';
 import React, { ComponentType } from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import { TransactionDurationAlertTrigger } from '.';
-import { ApmPluginContextValue } from '../../../context/apm_plugin_context/apm_plugin_context';
+import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../../../context/apm_plugin_context/mock_apm_plugin_context';
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 
 export default {

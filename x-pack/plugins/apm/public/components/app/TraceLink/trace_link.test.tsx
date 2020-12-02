@@ -8,11 +8,11 @@ import { shallow } from 'enzyme';
 import React, { ReactNode } from 'react';
 import { MemoryRouter, RouteComponentProps } from 'react-router-dom';
 import { TraceLink } from './';
-import { ApmPluginContextValue } from '../../../context/apm_plugin_context/apm_plugin_context';
+import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../../../context/apm_plugin_context/mock_apm_plugin_context';
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
 import * as hooks from '../../../hooks/use_fetcher';
 import * as urlParamsHooks from '../../../context/url_params_context/use_url_params';
 

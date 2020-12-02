@@ -21,7 +21,7 @@ import {
   TransactionTypeField,
   IsAboveField,
 } from '../fields';
-import { useApmService } from '../../../context/apm_service/use_apm_service';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 interface AlertParams {
   windowSize: number;
@@ -63,7 +63,7 @@ interface Props {
 export function TransactionDurationAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
-  const { transactionTypes } = useApmService();
+  const { transactionTypes } = useApmServiceContext();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end, transactionType } = urlParams;
   const { environmentOptions } = useEnvironmentsFetcher({
