@@ -9,8 +9,8 @@ import React, { memo, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MalwareProtections } from './policy_forms/protections/malware';
 import { LinuxEvents, MacEvents, WindowsEvents } from './policy_forms/events';
-import { AntivirusRegistrationForm } from './policy_forms/antivirus_registration';
 import { AdvancedPolicyForms } from './policy_advanced';
+import { AntivirusRegistrationForm } from './components/antivirus_registration_form';
 
 export const PolicyDetailsForm = memo(() => {
   const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
