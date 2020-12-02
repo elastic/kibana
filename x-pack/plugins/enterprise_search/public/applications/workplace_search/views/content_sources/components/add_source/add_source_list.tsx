@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect, useState, ChangeEvent } from 'react';
-import noSharedSourcesIcon from 'workplace_search/components/assets/shareCircle.svg';
 
 import { useActions, useValues } from 'kea';
 
@@ -18,6 +17,7 @@ import {
   EuiPanel,
   EuiEmptyPrompt,
 } from '@elastic/eui';
+import noSharedSourcesIcon from '../../../../assets/share_circle.svg';
 
 import { AppLogic } from '../../../../app_logic';
 import { ContentSection } from '../../../../components/shared/content_section';

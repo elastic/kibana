@@ -19,7 +19,7 @@ import { AgentPolicy, PackageInfo, UpdatePackagePolicy } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
-  useCore,
+  useStartServices,
   useConfig,
   sendUpdatePackagePolicy,
   sendGetAgentStatus,
@@ -47,7 +47,7 @@ import { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest
 import { PackagePolicyEditExtensionComponentProps } from '../../../types';
 
 export const EditPackagePolicyPage: React.FunctionComponent = () => {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
@@ -244,6 +244,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
             packagePolicyName: packagePolicy.name,
           },
         }),
+        'data-test-subj': 'policyUpdateSuccessToast',
         text:
           agentCount && agentPolicy
             ? i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationMessage', {
@@ -305,20 +306,23 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
             validationResults={validationResults!}
           />
 
-          <StepConfigurePackagePolicy
-            from={'edit'}
-            packageInfo={packageInfo}
-            packagePolicy={packagePolicy}
-            packagePolicyId={packagePolicyId}
-            updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
-            submitAttempted={formState === 'INVALID'}
-          />
+          {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
+          {!ExtensionView && (
+            <StepConfigurePackagePolicy
+              from={'edit'}
+              packageInfo={packageInfo}
+              packagePolicy={packagePolicy}
+              packagePolicyId={packagePolicyId}
+              updatePackagePolicy={updatePackagePolicy}
+              validationResults={validationResults!}
+              submitAttempted={formState === 'INVALID'}
+            />
+          )}
 
-          {packagePolicy.policy_id &&
+          {ExtensionView &&
+            packagePolicy.policy_id &&
             packagePolicy.package?.name &&
-            originalPackagePolicy &&
-            ExtensionView && (
+            originalPackagePolicy && (
               <ExtensionWrapper>
                 <ExtensionView
                   policy={originalPackagePolicy}
@@ -403,6 +407,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
                       iconType="save"
                       color="primary"
                       fill
+                      data-test-subj="saveIntegration"
                     >
                       <FormattedMessage
                         id="xpack.fleet.editPackagePolicy.saveButton"

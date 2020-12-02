@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentPolicy } from '../../../../types';
 import {
   useGetOneEnrollmentAPIKey,
-  useCore,
+  useStartServices,
   useGetSettings,
   useLink,
   useFleetStatus,
@@ -26,7 +26,7 @@ interface Props {
 
 export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
   const { getHref } = useLink();
-  const core = useCore();
+  const core = useStartServices();
   const fleetStatus = useFleetStatus();
 
   const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();

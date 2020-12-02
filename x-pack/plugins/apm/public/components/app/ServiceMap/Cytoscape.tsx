@@ -16,7 +16,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useTheme } from '../../../hooks/useTheme';
+import { useTheme } from '../../../hooks/use_theme';
 import { getCytoscapeOptions } from './cytoscape_options';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 

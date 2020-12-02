@@ -21,8 +21,8 @@ import {
   asInteger,
   asPercent,
 } from '../../../../common/utils/formatters';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { px, truncate, unit } from '../../../style/variables';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
@@ -45,7 +45,9 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
   const { uiFilters, urlParams } = useUrlParams();
   const { start, end } = urlParams;
 
-  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
+  const localFiltersConfig: React.ComponentProps<
+    typeof LocalUIFilters
+  > = useMemo(
     () => ({
       filterNames: ['host', 'containerId', 'podName'],
       params: {
@@ -128,7 +130,7 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
       }),
       field: 'cpu',
       sortable: true,
-      render: (value: number | null) => asPercent(value || 0, 1),
+      render: (value: number | null) => asPercent(value, 1),
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.heapMemoryColumnLabel', {

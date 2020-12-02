@@ -23,7 +23,13 @@ import {
 import { DEFAULT_META } from '../../../shared/constants';
 import { AppLogic } from '../../app_logic';
 import { NOT_FOUND_PATH } from '../../routes';
-import { ContentSourceFullData, CustomSource, Meta } from '../../types';
+import {
+  ContentSourceFullData,
+  CustomSource,
+  Meta,
+  DocumentSummaryItem,
+  SourceContentItem,
+} from '../../types';
 
 export interface SourceActions {
   onInitializeSource(contentSource: ContentSourceFullData): ContentSourceFullData;
@@ -32,7 +38,7 @@ export interface SourceActions {
   setSourceConnectData(sourceConnectData: SourceConnectData): SourceConnectData;
   setSearchResults(searchResultsResponse: SearchResultsResponse): SearchResultsResponse;
   initializeFederatedSummary(sourceId: string): { sourceId: string };
-  onUpdateSummary(summary: object[]): object[];
+  onUpdateSummary(summary: DocumentSummaryItem[]): DocumentSummaryItem[];
   setContentFilterValue(contentFilterValue: string): string;
   setActivePage(activePage: number): number;
   setClientIdValue(clientIdValue: string): string;
@@ -108,7 +114,7 @@ interface SourceValues {
   dataLoading: boolean;
   sectionLoading: boolean;
   buttonLoading: boolean;
-  contentItems: object[];
+  contentItems: SourceContentItem[];
   contentMeta: Meta;
   contentFilterValue: string;
   customSourceNameValue: string;
@@ -129,7 +135,7 @@ interface SourceValues {
 }
 
 interface SearchResultsResponse {
-  results: object[];
+  results: SourceContentItem[];
   meta: Meta;
 }
 
@@ -140,6 +146,7 @@ interface PreContentSourceResponse {
 }
 
 export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
+  path: ['enterprise_search', 'workplace_search', 'source_logic'],
   actions: {
     onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
     onUpdateSourceName: (name: string) => name,
@@ -595,7 +602,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       try {
         const response = await HttpLogic.values.http.post(route, {
-          body: JSON.stringify({ params }),
+          body: JSON.stringify({ ...params }),
         });
         actions.setCustomSourceData(response);
         successCallback();

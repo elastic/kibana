@@ -14,7 +14,8 @@
     "dashboard",
     "charts",
     "uiActions",
-    "embeddable"
+    "embeddable",
+    "share"
   ],
   "optionalPlugins": ["usageCollection", "taskManager", "globalSearch", "savedObjectsTagging"],
   "configPath": ["xpack", "lens"],

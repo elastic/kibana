@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { INITIAL_LOCATION, MAX_ZOOM, MIN_ZOOM } from '../../common/constants';
 import { MapSettings } from './map';
 
 export function getDefaultMapSettings(): MapSettings {
   return {
     autoFitToDataBounds: false,
+    backgroundColor: euiThemeVars.euiColorEmptyShade,
     initialLocation: INITIAL_LOCATION.LAST_SAVED_LOCATION,
     fixedLocation: { lat: 0, lon: 0, zoom: 2 },
     browserLocation: { zoom: 2 },

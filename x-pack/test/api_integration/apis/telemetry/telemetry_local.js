@@ -45,18 +45,19 @@ export default function ({ getService }) {
     });
 
     it('should pull local stats and validate data types', async () => {
-      const timestamp = '2018-07-23T22:13:00Z';
-
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timestamp, unencrypted: true })
+        .send({ unencrypted: true })
         .expect(200);
 
       expect(body.length).to.be(1);
       const stats = body[0];
 
       expect(stats.collection).to.be('local');
+      expect(stats.collectionSource).to.be('local_xpack');
+
+      // License should exist in X-Pack
       expect(stats.license.issuer).to.be.a('string');
       expect(stats.license.status).to.be('active');
 
@@ -102,12 +103,10 @@ export default function ({ getService }) {
     });
 
     it('should pull local stats and validate fields', async () => {
-      const timestamp = '2018-07-23T22:13:00Z';
-
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timestamp, unencrypted: true })
+        .send({ unencrypted: true })
         .expect(200);
 
       const stats = body[0];

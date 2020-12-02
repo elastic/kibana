@@ -19,5 +19,8 @@
 
 import { ID } from './constants';
 import { lexerRules } from './lexer_rules';
+import { getSuggestionProvider } from './language';
 
-export const PainlessLang = { ID, lexerRules };
+export const PainlessLang = { ID, getSuggestionProvider, lexerRules };
+
+export { PainlessContext } from './types';

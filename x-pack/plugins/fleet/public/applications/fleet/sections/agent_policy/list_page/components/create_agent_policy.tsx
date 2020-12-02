@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { dataTypes } from '../../../../../../../common';
 import { NewAgentPolicy, AgentPolicy } from '../../../../types';
-import { useCapabilities, useCore, sendCreateAgentPolicy } from '../../../../hooks';
+import { useCapabilities, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 
 const FlyoutWithHigherZIndex = styled(EuiFlyout)`
@@ -38,7 +38,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   onClose,
   ...restOfProps
 }) => {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const hasWriteCapabilites = useCapabilities().write;
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>({
     name: '',

@@ -52,6 +52,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.packagePolicy.name
         );
       });
+
+      it('and the show advanced settings button is clicked', async () => {
+        await testSubjects.missingOrFail('advancedPolicyPanel');
+
+        let advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
+        await advancedPolicyButton.click();
+
+        await testSubjects.existOrFail('advancedPolicyPanel');
+
+        advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
+        await advancedPolicyButton.click();
+        await testSubjects.missingOrFail('advancedPolicyPanel');
+      });
     });
 
     describe('and the save button is clicked', () => {
@@ -98,7 +111,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyLinuxEvent_file'),
           pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyMacEvent_file'),
         ]);
+
+        const advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
+        await advancedPolicyButton.click();
+
+        const advancedPolicyField = await pageObjects.policy.findAdvancedPolicyField();
+        await advancedPolicyField.clearValue();
+        await advancedPolicyField.click();
+        await advancedPolicyField.type('true');
         await pageObjects.policy.confirmAndSave();
+
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
@@ -191,6 +213,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               linux: {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
+                advanced: { agent: { connection_delay: 'true' } },
               },
               mac: {
                 events: { file: false, network: true, process: true },
@@ -226,7 +249,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
               },
             },
-            streams: [],
             type: 'endpoint',
             use_output: 'default',
           },
@@ -259,33 +281,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await actionsButton.click();
         const menuPanel = await testSubjects.find('endpointActionsMenuPanel');
         const actionItems = await menuPanel.findAllByTagName<'button'>('button');
-        const expectedItems = ['Edit Policy', 'Edit Trusted Applications'];
+        const expectedItems = ['Edit Trusted Applications'];
 
         for (const action of actionItems) {
           const buttonText = await action.getVisibleText();
           expect(buttonText).to.be(expectedItems.find((item) => item === buttonText));
         }
-      });
-
-      it('should navigate to Policy Details when the edit security policy action is clicked', async () => {
-        await pageObjects.ingestManagerCreatePackagePolicy.selectEndpointAction('policy');
-        await pageObjects.policy.ensureIsOnDetailsPage();
-      });
-
-      it('should allow the user to navigate, edit, save Policy Details and be redirected back to ingest', async () => {
-        await pageObjects.ingestManagerCreatePackagePolicy.selectEndpointAction('policy');
-        await pageObjects.policy.ensureIsOnDetailsPage();
-        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-        await pageObjects.policy.confirmAndSave();
-
-        await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await pageObjects.ingestManagerCreatePackagePolicy.ensureOnEditPageOrFail();
-      });
-
-      it('should navigate back to Ingest Policy Edit package page on click of cancel button', async () => {
-        await pageObjects.ingestManagerCreatePackagePolicy.selectEndpointAction('policy');
-        await (await pageObjects.policy.findCancelButton()).click();
-        await pageObjects.ingestManagerCreatePackagePolicy.ensureOnEditPageOrFail();
       });
 
       it('should navigate to Trusted Apps', async () => {
@@ -298,6 +299,53 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const backButton = await pageObjects.trustedApps.findTrustedAppsListPageBackButton();
         await backButton.click();
         await pageObjects.ingestManagerCreatePackagePolicy.ensureOnEditPageOrFail();
+      });
+
+      it('should show the endpoint policy form', async () => {
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+      });
+
+      it('should allow updates to policy items', async () => {
+        const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
+        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
+          winDnsEventingCheckbox
+        );
+        expect(await winDnsEventingCheckbox.isSelected()).to.be(true);
+        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
+        expect(await winDnsEventingCheckbox.isSelected()).to.be(false);
+      });
+
+      it('should preserve updates done from the Fleet form', async () => {
+        await pageObjects.ingestManagerCreatePackagePolicy.setPackagePolicyDescription(
+          'protect everything'
+        );
+
+        const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
+        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
+          winDnsEventingCheckbox
+        );
+        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
+
+        expect(
+          await pageObjects.ingestManagerCreatePackagePolicy.getPackagePolicyDescriptionValue()
+        ).to.be('protect everything');
+      });
+
+      it('should include updated endpoint data when saved', async () => {
+        const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
+        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
+          winDnsEventingCheckbox
+        );
+        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
+        const wasSelected = await winDnsEventingCheckbox.isSelected();
+        await (await pageObjects.ingestManagerCreatePackagePolicy.findSaveButton(true)).click();
+        await pageObjects.ingestManagerCreatePackagePolicy.waitForSaveSuccessNotification(true);
+
+        await pageObjects.ingestManagerCreatePackagePolicy.navigateToAgentPolicyEditPackagePolicy(
+          policyInfo.agentPolicy.id,
+          policyInfo.packagePolicy.id
+        );
+        expect(await testSubjects.isSelected('policyWindowsEvent_dns')).to.be(wasSelected);
       });
     });
   });

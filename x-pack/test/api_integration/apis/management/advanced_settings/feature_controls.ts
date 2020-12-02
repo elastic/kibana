@@ -13,6 +13,27 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const supertest: SuperTest<any> = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');
+  const deployment = getService('deployment');
+
+  async function expectTelemetryResponse(result: any, expectSuccess: boolean) {
+    if ((await deployment.isCloud()) === true) {
+      // Cloud deployments don't allow to change the opt-in status
+      expectTelemetryCloud400(result);
+    } else {
+      if (expectSuccess === true) {
+        expectResponse(result);
+      } else {
+        expect403(result);
+      }
+    }
+  }
+
+  const expectTelemetryCloud400 = (result: any) => {
+    expect(result.error).to.be(undefined);
+    expect(result.response).not.to.be(undefined);
+    expect(result.response).to.have.property('statusCode', 400);
+    expect(result.response.body.message).to.be('{"error":"Not allowed to change Opt-in Status."}');
+  };
 
   const expect403 = (result: any) => {
     expect(result.error).to.be(undefined);
@@ -21,16 +42,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   };
 
   const expectResponse = (result: any) => {
-    if (result.response && result.response.statusCode === 400) {
-      // expect a change of telemetry settings to fail in cloud environment
-      expect(result.response.body.message).to.be(
-        '{"error":"Not allowed to change Opt-in Status."}'
-      );
-    } else {
-      expect(result.error).to.be(undefined);
-      expect(result.response).not.to.be(undefined);
-      expect(result.response).to.have.property('statusCode', 200);
-    }
+    expect(result.error).to.be(undefined);
+    expect(result.response).not.to.be(undefined);
+    expect(result.response).to.have.property('statusCode', 200);
   };
 
   async function saveAdvancedSetting(username: string, password: string, spaceId?: string) {
@@ -83,7 +97,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expectResponse(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password);
-        expectResponse(telemetryResult);
+        expectTelemetryResponse(telemetryResult, true);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -115,7 +129,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expect403(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password);
-        expect403(telemetryResult);
+        expectTelemetryResponse(telemetryResult, false);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -189,7 +203,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expectResponse(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password, space1Id);
-        expectResponse(telemetryResult);
+        expectTelemetryResponse(telemetryResult, true);
       });
 
       it(`user_1 can only save telemetry in space_2`, async () => {
@@ -197,7 +211,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expect403(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password, space2Id);
-        expectResponse(telemetryResult);
+        expectTelemetryResponse(telemetryResult, true);
       });
 
       it(`user_1 can't save either settings or telemetry in space_3`, async () => {
@@ -205,7 +219,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         expect403(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password, space3Id);
-        expect403(telemetryResult);
+        expectTelemetryResponse(telemetryResult, false);
       });
     });
   });

@@ -8,16 +8,15 @@ import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 
-import { CommentRequest, CommentType } from '../../../../../case/common/api';
+import { CommentType } from '../../../../../case/common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
 import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
-import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { Form, useForm, UseField, useFormData } from '../../../shared_imports';
 
 import * as i18n from './translations';
-import { schema } from './schema';
-import { useTimelineClick } from '../../../common/utils/timeline/use_timeline_click';
+import { schema, AddCommentFormSchema } from './schema';
+import { useInsertTimeline } from '../use_insert_timeline';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -25,9 +24,8 @@ const MySpinner = styled(EuiLoadingSpinner)`
   left: 50%;
 `;
 
-const initialCommentValue: CommentRequest = {
+const initialCommentValue: AddCommentFormSchema = {
   comment: '',
-  type: CommentType.user,
 };
 
 export interface AddCommentRefObject {
@@ -47,7 +45,7 @@ export const AddComment = React.memo(
     ({ caseId, disabled, showLoading = true, onCommentPosted, onCommentSaving }, ref) => {
       const { isLoading, postComment } = usePostComment(caseId);
 
-      const { form } = useForm<CommentRequest>({
+      const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
         options: { stripEmptyFields: false },
         schema,
@@ -56,12 +54,6 @@ export const AddComment = React.memo(
       const fieldName = 'comment';
       const { setFieldValue, reset, submit } = form;
       const [{ comment }] = useFormData<{ comment: string }>({ form, watch: [fieldName] });
-
-      const onCommentChange = useCallback((newValue) => setFieldValue(fieldName, newValue), [
-        setFieldValue,
-      ]);
-
-      const { handleCursorChange } = useInsertTimeline(comment, onCommentChange);
 
       const addQuote = useCallback(
         (quote) => {
@@ -74,7 +66,12 @@ export const AddComment = React.memo(
         addQuote,
       }));
 
-      const handleTimelineClick = useTimelineClick();
+      const onTimelineAttached = useCallback(
+        (newValue: string) => setFieldValue(fieldName, newValue),
+        [setFieldValue]
+      );
+
+      useInsertTimeline(comment ?? '', onTimelineAttached);
 
       const onSubmit = useCallback(async () => {
         const { isValid, data } = await submit();
@@ -99,8 +96,6 @@ export const AddComment = React.memo(
                 isDisabled: isLoading,
                 dataTestSubj: 'add-comment',
                 placeholder: i18n.ADD_COMMENT_HELP_TEXT,
-                onCursorPositionUpdate: handleCursorChange,
-                onClickTimeline: handleTimelineClick,
                 bottomRightContent: (
                   <EuiButton
                     data-test-subj="submit-comment"
