@@ -294,7 +294,7 @@ describe('cors', () => {
       ).toThrow();
     });
 
-    it('can be configures as "*" wildcard', () => {
+    it('can be configured as "*" wildcard', () => {
       expect(config.schema.validate({ cors: { origin: '*' } }).cors.origin).toBe('*');
     });
   });
