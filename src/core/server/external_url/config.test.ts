@@ -20,6 +20,18 @@
 import { config } from './config';
 
 describe('externalUrl config', () => {
+  it('provides a default policy allowing all external urls', () => {
+    expect(config.schema.validate({})).toMatchInlineSnapshot(`
+      Object {
+        "policy": Array [
+          Object {
+            "allow": true,
+          },
+        ],
+      }
+    `);
+  });
+
   it('allows an empty policy', () => {
     expect(config.schema.validate({ policy: [] })).toMatchInlineSnapshot(`
       Object {
@@ -96,8 +108,8 @@ describe('externalUrl config', () => {
     `);
   });
 
-  it('requires either a host or protocol', () => {
-    expect(() =>
+  it('allows a policy without a host or protocol', () => {
+    expect(
       config.schema.validate({
         policy: [
           {
@@ -105,9 +117,15 @@ describe('externalUrl config', () => {
           },
         ],
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[policy.0]: policy must include a 'host', 'protocol', or both."`
-    );
+    ).toMatchInlineSnapshot(`
+      Object {
+        "policy": Array [
+          Object {
+            "allow": true,
+          },
+        ],
+      }
+    `);
   });
 
   describe('protocols', () => {

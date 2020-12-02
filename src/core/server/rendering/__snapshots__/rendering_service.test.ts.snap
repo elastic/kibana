@@ -27,8 +27,6 @@ Object {
     "policy": Array [
       Object {
         "allow": true,
-        "host": "*",
-        "protocol": "*",
       },
     ],
   },
@@ -79,8 +77,6 @@ Object {
     "policy": Array [
       Object {
         "allow": true,
-        "host": "*",
-        "protocol": "*",
       },
     ],
   },
@@ -131,8 +127,6 @@ Object {
     "policy": Array [
       Object {
         "allow": true,
-        "host": "*",
-        "protocol": "*",
       },
     ],
   },
@@ -187,8 +181,6 @@ Object {
     "policy": Array [
       Object {
         "allow": true,
-        "host": "*",
-        "protocol": "*",
       },
     ],
   },
@@ -239,8 +231,6 @@ Object {
     "policy": Array [
       Object {
         "allow": true,
-        "host": "*",
-        "protocol": "*",
       },
     ],
   },

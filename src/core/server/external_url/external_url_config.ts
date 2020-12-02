@@ -44,7 +44,7 @@ export interface IExternalUrlPolicy {
 
   /**
    * Optional host describing the external destination.
-   * May be combined with `protocol`. Required if `protocol` is not defined.
+   * May be combined with `protocol`.
    *
    * @example
    * ```ts
@@ -57,7 +57,7 @@ export interface IExternalUrlPolicy {
 
   /**
    * Optional protocol describing the external destination.
-   * May be combined with `host`. Required if `host` is not defined.
+   * May be combined with `host`.
    *
    * @example
    * ```ts
@@ -74,17 +74,14 @@ export interface IExternalUrlPolicy {
  * @public
  */
 export class ExternalUrlConfig implements IExternalUrlConfig {
-  static readonly DEFAULT = new ExternalUrlConfig();
+  static readonly DEFAULT = new ExternalUrlConfig(DEFAULT_CONFIG);
 
   public readonly policy: IExternalUrlPolicy[];
-
   /**
    * Returns the default External Url configuration when passed with no config
    * @internal
    */
-  constructor(rawConfig: Partial<IExternalUrlConfig> = {}) {
-    const source = { ...DEFAULT_CONFIG, ...rawConfig };
-
-    this.policy = source.policy;
+  constructor(rawConfig: IExternalUrlConfig) {
+    this.policy = rawConfig.policy;
   }
 }

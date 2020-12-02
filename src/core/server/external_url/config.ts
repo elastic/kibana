@@ -41,20 +41,11 @@ const protocolSchema = schema.string({
   },
 });
 
-const policySchema = schema.object(
-  {
-    allow: allowSchema,
-    protocol: schema.maybe(protocolSchema),
-    host: schema.maybe(hostSchema),
-  },
-  {
-    validate: ({ protocol, host }) => {
-      if (!host && !protocol) {
-        throw new Error(`policy must include a 'host', 'protocol', or both.`);
-      }
-    },
-  }
-);
+const policySchema = schema.object({
+  allow: allowSchema,
+  protocol: schema.maybe(protocolSchema),
+  host: schema.maybe(hostSchema),
+});
 
 export const config = {
   path: 'externalUrl',
@@ -63,8 +54,6 @@ export const config = {
       defaultValue: [
         {
           allow: true,
-          protocol: '*',
-          host: '*',
         },
       ],
     }),

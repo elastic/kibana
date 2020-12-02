@@ -45,6 +45,32 @@ const setupService = ({
   };
 };
 
+const internalRequestScenarios = [
+  {
+    description: 'without any policies',
+    allowExternal: false,
+    policy: [],
+  },
+  {
+    description: 'with an unrestricted policy',
+    allowExternal: true,
+    policy: [
+      {
+        allow: true,
+      },
+    ],
+  },
+  {
+    description: 'with a fully restricted policy',
+    allowExternal: false,
+    policy: [
+      {
+        allow: false,
+      },
+    ],
+  },
+];
+
 describe('External Url Service', () => {
   describe('#validateUrl', () => {
     describe('internal requests with a server base path', () => {
@@ -53,46 +79,79 @@ describe('External Url Service', () => {
       const kibanaRoot = `${serverRoot}${serverBasePath}`;
       const location = new URL(`${kibanaRoot}/app/management?q=1&bar=false#some-hash`);
 
-      it('allows relative URLs that start with the server base path', () => {
-        const { setup } = setupService({ location, serverBasePath, policy: [] });
-        const urlCandidate = `/some/path?foo=bar`;
-        const result = setup.validateUrl(`${serverBasePath}${urlCandidate}`);
+      internalRequestScenarios.forEach(({ description, policy, allowExternal }) => {
+        describe(description, () => {
+          it('allows relative URLs that start with the server base path', () => {
+            const { setup } = setupService({ location, serverBasePath, policy });
+            const urlCandidate = `/some/path?foo=bar`;
+            const result = setup.validateUrl(`${serverBasePath}${urlCandidate}`);
 
-        expect(result).toBeInstanceOf(URL);
-        expect(result?.toString()).toEqual(`${kibanaRoot}${urlCandidate}`);
-      });
+            expect(result).toBeInstanceOf(URL);
+            expect(result?.toString()).toEqual(`${kibanaRoot}${urlCandidate}`);
+          });
 
-      it('allows absolute URLs to Kibana that start with the server base path', () => {
-        const { setup } = setupService({ location, serverBasePath, policy: [] });
-        const urlCandidate = `${kibanaRoot}/some/path?foo=bar`;
-        const result = setup.validateUrl(urlCandidate);
+          it('allows absolute URLs to Kibana that start with the server base path', () => {
+            const { setup } = setupService({ location, serverBasePath, policy });
+            const urlCandidate = `${kibanaRoot}/some/path?foo=bar`;
+            const result = setup.validateUrl(urlCandidate);
 
-        expect(result).toBeInstanceOf(URL);
-        expect(result?.toString()).toEqual(`${kibanaRoot}/some/path?foo=bar`);
-      });
+            expect(result).toBeInstanceOf(URL);
+            expect(result?.toString()).toEqual(`${kibanaRoot}/some/path?foo=bar`);
+          });
 
-      it('disallows relative URLs that do not start with the server base path', () => {
-        const { setup } = setupService({ location, serverBasePath, policy: [] });
-        const urlCandidate = `/some/path?foo=bar`;
-        const result = setup.validateUrl(urlCandidate);
+          if (allowExternal) {
+            it('allows absolute URLs to Kibana that do not start with the server base path', () => {
+              const { setup } = setupService({ location, serverBasePath, policy });
+              const urlCandidate = `${serverRoot}/some/path?foo=bar`;
+              const result = setup.validateUrl(urlCandidate);
 
-        expect(result).toBeNull();
-      });
+              expect(result).toBeInstanceOf(URL);
+              expect(result?.toString()).toEqual(`${serverRoot}/some/path?foo=bar`);
+            });
 
-      it('disallows absolute URLs to Kibana that do not start with the server base path', () => {
-        const { setup } = setupService({ location, serverBasePath, policy: [] });
-        const urlCandidate = `${serverRoot}/some/path?foo=bar`;
-        const result = setup.validateUrl(urlCandidate);
+            it('allows relative URLs that attempt to bypass the server base path', () => {
+              const { setup } = setupService({ location, serverBasePath, policy });
+              const urlCandidate = `/some/../../path?foo=bar`;
+              const result = setup.validateUrl(`${serverBasePath}${urlCandidate}`);
 
-        expect(result).toBeNull();
-      });
+              expect(result).toBeInstanceOf(URL);
+              expect(result?.toString()).toEqual(`${serverRoot}/path?foo=bar`);
+            });
 
-      it('disallows relative URLs that attempt to bypass the server base path', () => {
-        const { setup } = setupService({ location, serverBasePath, policy: [] });
-        const urlCandidate = `/some/../../path?foo=bar`;
-        const result = setup.validateUrl(`${serverBasePath}${urlCandidate}`);
+            it('allows relative URLs that do not start with the server base path', () => {
+              const { setup } = setupService({ location, serverBasePath, policy });
+              const urlCandidate = `/some/path?foo=bar`;
+              const result = setup.validateUrl(urlCandidate);
 
-        expect(result).toBeNull();
+              expect(result).toBeInstanceOf(URL);
+              expect(result?.toString()).toEqual(`${serverRoot}/some/path?foo=bar`);
+            });
+          } else {
+            it('disallows absolute URLs to Kibana that do not start with the server base path', () => {
+              const { setup } = setupService({ location, serverBasePath, policy });
+              const urlCandidate = `${serverRoot}/some/path?foo=bar`;
+              const result = setup.validateUrl(urlCandidate);
+
+              expect(result).toBeNull();
+            });
+
+            it('disallows relative URLs that attempt to bypass the server base path', () => {
+              const { setup } = setupService({ location, serverBasePath, policy });
+              const urlCandidate = `/some/../../path?foo=bar`;
+              const result = setup.validateUrl(`${serverBasePath}${urlCandidate}`);
+
+              expect(result).toBeNull();
+            });
+
+            it('disallows relative URLs that do not start with the server base path', () => {
+              const { setup } = setupService({ location, serverBasePath, policy });
+              const urlCandidate = `/some/path?foo=bar`;
+              const result = setup.validateUrl(urlCandidate);
+
+              expect(result).toBeNull();
+            });
+          }
+        });
       });
 
       describe('handles protocol resolution bypass', () => {
@@ -132,22 +191,26 @@ describe('External Url Service', () => {
       const kibanaRoot = `${serverRoot}${serverBasePath}`;
       const location = new URL(`${kibanaRoot}/app/management?q=1&bar=false#some-hash`);
 
-      it('allows relative URLs', () => {
-        const { setup } = setupService({ location, serverBasePath, policy: [] });
-        const urlCandidate = `/some/path?foo=bar`;
-        const result = setup.validateUrl(`${serverBasePath}${urlCandidate}`);
+      internalRequestScenarios.forEach(({ description, policy }) => {
+        describe(description, () => {
+          it('allows relative URLs', () => {
+            const { setup } = setupService({ location, serverBasePath, policy });
+            const urlCandidate = `/some/path?foo=bar`;
+            const result = setup.validateUrl(`${serverBasePath}${urlCandidate}`);
 
-        expect(result).toBeInstanceOf(URL);
-        expect(result?.toString()).toEqual(`${kibanaRoot}${urlCandidate}`);
-      });
+            expect(result).toBeInstanceOf(URL);
+            expect(result?.toString()).toEqual(`${kibanaRoot}${urlCandidate}`);
+          });
 
-      it('allows absolute URLs to Kibana', () => {
-        const { setup } = setupService({ location, serverBasePath, policy: [] });
-        const urlCandidate = `${kibanaRoot}/some/path?foo=bar`;
-        const result = setup.validateUrl(urlCandidate);
+          it('allows absolute URLs to Kibana', () => {
+            const { setup } = setupService({ location, serverBasePath, policy });
+            const urlCandidate = `${kibanaRoot}/some/path?foo=bar`;
+            const result = setup.validateUrl(urlCandidate);
 
-        expect(result).toBeInstanceOf(URL);
-        expect(result?.toString()).toEqual(`${kibanaRoot}/some/path?foo=bar`);
+            expect(result).toBeInstanceOf(URL);
+            expect(result?.toString()).toEqual(`${kibanaRoot}/some/path?foo=bar`);
+          });
+        });
       });
 
       describe('handles protocol resolution bypass', () => {
@@ -191,6 +254,39 @@ describe('External Url Service', () => {
         const result = setup.validateUrl(urlCandidate);
 
         expect(result).toBeNull();
+      });
+
+      it('does not allow external urls with a fully restricted policy', () => {
+        const { setup } = setupService({
+          location,
+          serverBasePath,
+          policy: [
+            {
+              allow: false,
+            },
+          ],
+        });
+        const urlCandidate = `https://www.google.com/foo?bar=baz`;
+        const result = setup.validateUrl(urlCandidate);
+
+        expect(result).toBeNull();
+      });
+
+      it('allows external urls with an unrestricted policy', () => {
+        const { setup } = setupService({
+          location,
+          serverBasePath,
+          policy: [
+            {
+              allow: true,
+            },
+          ],
+        });
+        const urlCandidate = `https://www.google.com/foo?bar=baz`;
+        const result = setup.validateUrl(urlCandidate);
+
+        expect(result).toBeInstanceOf(URL);
+        expect(result?.toString()).toEqual(urlCandidate);
       });
 
       it('allows external urls with a matching host and protocol in the allow list', () => {
