@@ -20,11 +20,13 @@ yarn test:mocha
 == Jest
 Jest tests are stored in the same directory as source code files with the `.test.{js,mjs,ts,tsx}` suffix.
 
-*Running Jest Unit Tests*
+Each plugin and package contains it's own `jest.config.js` file to define its root, and any overrides 
+to the jest-preset provided by `@kbn/test`. When working on a single plugin or package, you will find 
+it's more efficient to supply the Jest configuration file when running.
 
 ["source","shell"]
 -----------
-yarn test:jest
+yarn jest --config src/plugins/discover/jest.config.js
 -----------
 
 [discrete]
