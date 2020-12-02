@@ -8,9 +8,9 @@ import { schema } from '@kbn/config-schema';
 import { RouteDefinitionParams } from '../..';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import { transformElasticsearchRoleToRole } from './model';
+import { ElasticsearchRole, transformElasticsearchRoleToRole } from './model';
 
-export function defineGetRolesRoutes({ router, authz, clusterClient }: RouteDefinitionParams) {
+export function defineGetRolesRoutes({ router, authz }: RouteDefinitionParams) {
   router.get(
     {
       path: '/api/security/role/{name}',
@@ -20,9 +20,11 @@ export function defineGetRolesRoutes({ router, authz, clusterClient }: RouteDefi
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const elasticsearchRoles = await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('shield.getRole', { name: request.params.name });
+        const {
+          body: elasticsearchRoles,
+        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole<
+          Record<string, ElasticsearchRole>
+        >({ name: request.params.name });
 
         const elasticsearchRole = elasticsearchRoles[request.params.name];
         if (elasticsearchRole) {

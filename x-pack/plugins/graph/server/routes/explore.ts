@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
-import { get } from 'lodash';
 import { LicenseState, verifyApiAccess } from '../lib/license_state';
+
+interface ErrorResponse {
+  error?: {
+    root_cause?: Array<{ type: string; reason: string }>;
+  };
+}
 
 export function registerExploreRoute({
   router,
@@ -31,11 +37,7 @@ export function registerExploreRoute({
       async (
         {
           core: {
-            elasticsearch: {
-              legacy: {
-                client: { callAsCurrentUser: callCluster },
-              },
-            },
+            elasticsearch: { client: esClient },
           },
         },
         request,
@@ -46,32 +48,31 @@ export function registerExploreRoute({
         try {
           return response.ok({
             body: {
-              resp: await callCluster('transport.request', {
-                path: '/' + encodeURIComponent(request.body.index) + '/_graph/explore',
-                body: request.body.query,
-                method: 'POST',
-                query: {},
-              }),
+              resp: (
+                await esClient.asCurrentUser.transport.request({
+                  path: '/' + encodeURIComponent(request.body.index) + '/_graph/explore',
+                  body: request.body.query,
+                  method: 'POST',
+                })
+              ).body,
             },
           });
         } catch (error) {
-          // Extract known reasons for bad choice of field
-          const relevantCause = get(
-            error,
-            'body.error.root_cause',
-            [] as Array<{ type: string; reason: string }>
-          ).find((cause: { type: string; reason: string }) => {
-            return (
-              cause.reason.includes('Fielddata is disabled on text fields') ||
-              cause.reason.includes('No support for examining floating point') ||
-              cause.reason.includes('Sample diversifying key must be a single valued-field') ||
-              cause.reason.includes('Failed to parse query') ||
-              cause.type === 'parsing_exception'
-            );
-          });
+          if (error instanceof errors.ResponseError) {
+            const errorBody: ErrorResponse = error.body;
+            const relevantCause = (errorBody.error?.root_cause ?? []).find((cause) => {
+              return (
+                cause.reason.includes('Fielddata is disabled on text fields') ||
+                cause.reason.includes('No support for examining floating point') ||
+                cause.reason.includes('Sample diversifying key must be a single valued-field') ||
+                cause.reason.includes('Failed to parse query') ||
+                cause.type === 'parsing_exception'
+              );
+            });
 
-          if (relevantCause) {
-            throw Boom.badRequest(relevantCause.reason);
+            if (relevantCause) {
+              throw Boom.badRequest(relevantCause.reason);
+            }
           }
 
           return response.internalError({

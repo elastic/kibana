@@ -30,13 +30,11 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
-  ESLicense,
   StatsCollectionConfig,
   StatsGetter,
   StatsGetterConfig,
   StatsCollectionContext,
   ClusterDetails,
   ClusterDetailsGetter,
-  LicenseGetter,
   UsageStatsPayload,
 } from './types';

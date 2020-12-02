@@ -5,15 +5,12 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
+import { kibanaResponseFactory } from '../../../../../../../src/core/server';
 import { LicenseCheck } from '../../../../../licensing/server';
 import { GLOBAL_RESOURCE } from '../../../../common/constants';
 import { definePutRolesRoutes } from './put';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-} from '../../../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../../index.mock';
 import { KibanaFeature } from '../../../../../features/server';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
@@ -47,35 +44,43 @@ const privilegeMap = {
 interface TestOptions {
   name: string;
   licenseCheckResult?: LicenseCheck;
-  apiResponses?: Array<() => Promise<unknown>>;
+  apiResponses?: {
+    get: () => Promise<unknown>;
+    put: () => Promise<unknown>;
+  };
   payload?: Record<string, any>;
   asserts: {
     statusCode: number;
     result?: Record<string, any>;
-    apiArguments?: unknown[][];
+    apiArguments?: { get: unknown[]; put: unknown[] };
     recordSubFeaturePrivilegeUsage?: boolean;
   };
 }
 
 const putRoleTest = (
   description: string,
-  {
-    name,
-    payload,
-    licenseCheckResult = { state: 'valid' },
-    apiResponses = [],
-    asserts,
-  }: TestOptions
+  { name, payload, licenseCheckResult = { state: 'valid' }, apiResponses, asserts }: TestOptions
 ) => {
   test(description, async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.authz.applicationName = application;
     mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
 
-    const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
-    for (const apiResponse of apiResponses) {
-      mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
+    const mockContext = {
+      core: coreMock.createRequestHandlerContext(),
+      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
+    };
+
+    if (apiResponses?.get) {
+      mockContext.core.elasticsearch.client.asCurrentUser.security.getRole.mockImplementationOnce(
+        (async () => ({ body: await apiResponses?.get() })) as any
+      );
+    }
+
+    if (apiResponses?.put) {
+      mockContext.core.elasticsearch.client.asCurrentUser.security.putRole.mockImplementationOnce(
+        (async () => ({ body: await apiResponses?.put() })) as any
+      );
     }
 
     mockRouteDefinitionParams.getFeatureUsageService.mockReturnValue(
@@ -131,21 +136,20 @@ const putRoleTest = (
       body: payload !== undefined ? (validate as any).body.validate(payload) : undefined,
       headers,
     });
-    const mockContext = ({
-      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-    } as unknown) as RequestHandlerContext;
 
     const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
     expect(response.status).toBe(asserts.statusCode);
     expect(response.payload).toEqual(asserts.result);
 
-    if (Array.isArray(asserts.apiArguments)) {
-      for (const apiArguments of asserts.apiArguments) {
-        expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
-        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(...apiArguments);
-      }
-    } else {
-      expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
+    if (asserts.apiArguments?.get) {
+      expect(
+        mockContext.core.elasticsearch.client.asCurrentUser.security.getRole
+      ).toHaveBeenCalledWith(...asserts.apiArguments?.get);
+    }
+    if (asserts.apiArguments?.put) {
+      expect(
+        mockContext.core.elasticsearch.client.asCurrentUser.security.putRole
+      ).toHaveBeenCalledWith(...asserts.apiArguments?.put);
     }
     expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
 
@@ -208,12 +212,11 @@ describe('PUT role', () => {
     putRoleTest(`creates empty role`, {
       name: 'foo-role',
       payload: {},
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -224,7 +227,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -239,12 +242,11 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -261,7 +263,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -279,12 +281,11 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -301,7 +302,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -317,12 +318,11 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -339,7 +339,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -383,12 +383,11 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -426,7 +425,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -473,8 +472,8 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [
-        async () => ({
+      apiResponses: {
+        get: async () => ({
           'foo-role': {
             metadata: {
               bar: 'old-metadata',
@@ -504,13 +503,12 @@ describe('PUT role', () => {
             ],
           },
         }),
-        async () => {},
-      ],
+        put: async () => {},
+      },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -548,7 +546,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -577,8 +575,8 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [
-        async () => ({
+      apiResponses: {
+        get: async () => ({
           'foo-role': {
             metadata: {
               bar: 'old-metadata',
@@ -613,13 +611,12 @@ describe('PUT role', () => {
             ],
           },
         }),
-        async () => {},
-      ],
+        put: async () => {},
+      },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -652,7 +649,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -670,13 +667,12 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
         recordSubFeaturePrivilegeUsage: true,
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -694,7 +690,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -712,13 +708,12 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
         recordSubFeaturePrivilegeUsage: false,
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -736,7 +731,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -754,13 +749,12 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
         recordSubFeaturePrivilegeUsage: false,
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -778,7 +772,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },

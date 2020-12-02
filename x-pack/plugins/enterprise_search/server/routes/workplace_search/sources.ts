@@ -339,6 +339,89 @@ export function registerAccountSourceDisplaySettingsConfig({
   );
 }
 
+export function registerAccountSourceSchemasRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/account/sources/{id}/schemas',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/sources/${request.params.id}/schemas`,
+      })(context, request, response);
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/workplace_search/account/sources/{id}/schemas',
+      validate: {
+        body: schema.object({}),
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/sources/${request.params.id}/schemas`,
+        body: request.body,
+      })(context, request, response);
+    }
+  );
+}
+
+export function registerAccountSourceReindexJobRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/account/sources/{source_id}/reindex_job/{job_id}',
+      validate: {
+        params: schema.object({
+          source_id: schema.string(),
+          job_id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/sources/${request.params.source_id}/reindex_job/${request.params.job_id}`,
+      })(context, request, response);
+    }
+  );
+}
+
+export function registerAccountSourceReindexJobStatusRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/account/sources/{source_id}/reindex_job/{job_id}/status',
+      validate: {
+        params: schema.object({
+          source_id: schema.string(),
+          job_id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/sources/${request.params.source_id}/reindex_job/${request.params.job_id}/status`,
+      })(context, request, response);
+    }
+  );
+}
+
 export function registerOrgSourcesRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -638,6 +721,89 @@ export function registerOrgSourceDisplaySettingsConfig({
   );
 }
 
+export function registerOrgSourceSchemasRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/org/sources/{id}/schemas',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/org/sources/${request.params.id}/schemas`,
+      })(context, request, response);
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/workplace_search/org/sources/{id}/schemas',
+      validate: {
+        body: schema.object({}),
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/org/sources/${request.params.id}/schemas`,
+        body: request.body,
+      })(context, request, response);
+    }
+  );
+}
+
+export function registerOrgSourceReindexJobRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/org/sources/{source_id}/reindex_job/{job_id}',
+      validate: {
+        params: schema.object({
+          source_id: schema.string(),
+          job_id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/org/sources/${request.params.source_id}/reindex_job/${request.params.job_id}`,
+      })(context, request, response);
+    }
+  );
+}
+
+export function registerOrgSourceReindexJobStatusRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/org/sources/{source_id}/reindex_job/{job_id}/status',
+      validate: {
+        params: schema.object({
+          source_id: schema.string(),
+          job_id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/org/sources/${request.params.source_id}/reindex_job/${request.params.job_id}/status`,
+      })(context, request, response);
+    }
+  );
+}
+
 export function registerOrgSourceOauthConfigurationsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -741,6 +907,9 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountPrepareSourcesRoute(dependencies);
   registerAccountSourceSearchableRoute(dependencies);
   registerAccountSourceDisplaySettingsConfig(dependencies);
+  registerAccountSourceSchemasRoute(dependencies);
+  registerAccountSourceReindexJobRoute(dependencies);
+  registerAccountSourceReindexJobStatusRoute(dependencies);
   registerOrgSourcesRoute(dependencies);
   registerOrgSourcesStatusRoute(dependencies);
   registerOrgSourceRoute(dependencies);
@@ -753,6 +922,9 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgPrepareSourcesRoute(dependencies);
   registerOrgSourceSearchableRoute(dependencies);
   registerOrgSourceDisplaySettingsConfig(dependencies);
+  registerOrgSourceSchemasRoute(dependencies);
+  registerOrgSourceReindexJobRoute(dependencies);
+  registerOrgSourceReindexJobStatusRoute(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);
 };

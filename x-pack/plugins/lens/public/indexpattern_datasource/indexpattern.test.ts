@@ -407,6 +407,86 @@ describe('IndexPattern Data Source', () => {
       expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
+    it('should add time_scale and format function if time scale is set and supported', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2', 'col3'],
+            columns: {
+              col1: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+                timeScale: 'h',
+              },
+              col2: {
+                label: 'Average of bytes',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'bytes',
+                operationType: 'avg',
+                timeScale: 'h',
+              },
+              col3: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'auto',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const timeScaleCalls = ast.chain.filter((fn) => fn.function === 'lens_time_scale');
+      const formatCalls = ast.chain.filter((fn) => fn.function === 'lens_format_column');
+      expect(timeScaleCalls).toHaveLength(1);
+      expect(timeScaleCalls[0].arguments).toMatchInlineSnapshot(`
+        Object {
+          "dateColumnId": Array [
+            "col3",
+          ],
+          "inputColumnId": Array [
+            "col1",
+          ],
+          "outputColumnId": Array [
+            "col1",
+          ],
+          "targetUnit": Array [
+            "h",
+          ],
+        }
+      `);
+      expect(formatCalls[0]).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Object {
+            "columnId": Array [
+              "col1",
+            ],
+            "format": Array [
+              "",
+            ],
+            "parentFormat": Array [
+              "{\\"id\\":\\"suffix\\",\\"params\\":{\\"unit\\":\\"h\\"}}",
+            ],
+          },
+          "function": "lens_format_column",
+          "type": "function",
+        }
+      `);
+    });
+
     it('should rename the output from esaggs when using flat query', () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
@@ -906,6 +986,46 @@ describe('IndexPattern Data Source', () => {
         { shortMessage: 'error 2', longMessage: '' },
       ]);
       expect(getErrorMessages).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('#updateStateOnCloseDimension', () => {
+    it('should clear the incomplete column', () => {
+      const state = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+            incompleteColumns: {
+              col1: { operationType: 'avg' as const },
+              col2: { operationType: 'sum' as const },
+            },
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(
+        indexPatternDatasource.updateStateOnCloseDimension!({
+          state,
+          layerId: 'first',
+          columnId: 'col1',
+        })
+      ).toEqual({
+        ...state,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+            incompleteColumns: { col2: { operationType: 'sum' } },
+          },
+        },
+      });
     });
   });
 });

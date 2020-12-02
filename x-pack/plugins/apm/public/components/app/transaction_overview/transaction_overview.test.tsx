@@ -10,11 +10,13 @@ import { CoreStart } from 'kibana/public';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
-import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
-import { UrlParamsProvider } from '../../../context/UrlParamsContext';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import * as useFetcherHook from '../../../hooks/useFetcher';
-import * as useServiceTransactionTypesHook from '../../../hooks/useServiceTransactionTypes';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
+import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
+import { IUrlParams } from '../../../context/url_params_context/types';
+import * as useFetcherHook from '../../../hooks/use_fetcher';
+import * as useServiceTransactionTypesHook from '../../../context/apm_service/use_service_transaction_types_fetcher';
+import * as useServiceAgentNameHook from '../../../context/apm_service/use_service_agent_name_fetcher';
 import {
   disableConsoleWarning,
   renderWithTheme,
@@ -37,18 +39,24 @@ function setup({
   urlParams: IUrlParams;
   serviceTransactionTypes: string[];
 }) {
-  const defaultLocation = {
+  history.replace({
     pathname: '/services/foo/transactions',
     search: fromQuery(urlParams),
-  } as any;
-
-  history.replace({
-    ...defaultLocation,
   });
 
+  // mock transaction types
   jest
-    .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypes')
+    .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher')
     .mockReturnValue(serviceTransactionTypes);
+
+  // mock agent
+  jest
+    .spyOn(useServiceAgentNameHook, 'useServiceAgentNameFetcher')
+    .mockReturnValue({
+      agentName: 'nodejs',
+      error: undefined,
+      status: useFetcherHook.FETCH_STATUS.SUCCESS,
+    });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
@@ -57,7 +65,9 @@ function setup({
       <MockApmPluginContextWrapper>
         <Router history={history}>
           <UrlParamsProvider>
-            <TransactionOverview serviceName="opbeans-python" />
+            <ApmServiceContextProvider>
+              <TransactionOverview serviceName="opbeans-python" />
+            </ApmServiceContextProvider>
           </UrlParamsProvider>
         </Router>
       </MockApmPluginContextWrapper>
@@ -80,7 +90,7 @@ describe('TransactionOverview', () => {
     jest.clearAllMocks();
   });
 
-  describe('when no transaction type is given', () => {
+  describe('when no transaction type is given in urlParams', () => {
     it('should redirect to first type', () => {
       setup({
         serviceTransactionTypes: ['firstType', 'secondType'],
