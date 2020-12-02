@@ -42,7 +42,7 @@ const fields = [
   { id: '@timestamp' },
   {
     id: SIGNAL_RULE_NAME_FIELD_NAME,
-    linkField: 'signal.rule.name',
+    linkField: 'signal.rule.id',
     label: ALERTS_HEADERS_RULE,
   },
   { id: 'signal.rule.severity', label: ALERTS_HEADERS_SEVERITY },
@@ -113,27 +113,29 @@ export const SummaryViewComponent: React.FC<{
 }> = ({ data, eventId, timelineId, browserFields }) => {
   const [note, setNote] = useState<string | null>(null);
 
-  const ruleIdField = data.find((d) => d.field === 'signal.rule.id');
+  const ruleIdField = useMemo(() => data.find((d) => d.field === 'signal.rule.id'), [data]);
   const ruleId = getOr(null, 'values.0', ruleIdField);
   const { rule: maybeRule } = useRuleAsync(ruleId);
   const summaryList = useMemo(() => {
     return data != null
       ? fields.reduce<Summary>((acc, item) => {
-          const field = data.find((d) => d.field === item.id || d.field === item.linkField);
+          const field = data.find((d) => d.field === item.id);
           if (!field) {
             return acc;
           }
-
-          const fieldValue = getOr(null, 'values.0', field);
+          const linkValueField =
+            item.linkField != null && data.find((d) => d.field === item.linkField);
+          const linkValue = getOr(null, 'values.0', linkValueField);
+          const value = getOr(null, 'values.0', field);
           const category = field.category;
           const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
           const description = getDescription({
             contextId: timelineId,
             eventId,
             fieldName: item.id,
-            value: fieldValue,
+            value,
             fieldType: item.fieldType ?? fieldType,
-            linkValue: item.id === SIGNAL_RULE_NAME_FIELD_NAME ? ruleId : undefined,
+            linkValue: linkValue ?? undefined,
           });
 
           return [
@@ -145,7 +147,7 @@ export const SummaryViewComponent: React.FC<{
           ];
         }, [])
       : [];
-  }, [browserFields, data, eventId, timelineId, ruleId]);
+  }, [browserFields, data, eventId, timelineId]);
 
   useEffect(() => {
     if (maybeRule != null && maybeRule.note != null) {

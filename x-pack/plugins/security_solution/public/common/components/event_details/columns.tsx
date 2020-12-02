@@ -58,6 +58,7 @@ export const getColumns = ({
   onUpdateColumns,
   contextId,
   toggleColumn,
+  getLinkValue,
 }: {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
@@ -65,6 +66,7 @@ export const getColumns = ({
   onUpdateColumns: OnUpdateColumns;
   contextId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
+  getLinkValue: (field: string) => string | null;
 }) => [
   {
     field: 'field',
@@ -194,6 +196,7 @@ export const getColumns = ({
                   fieldName={data.field}
                   fieldType={data.type}
                   value={value}
+                  linkValue={getLinkValue(data.field)}
                 />
               )}
             </EuiFlexItem>

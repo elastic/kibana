@@ -7,10 +7,9 @@
 import { EuiLink, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-
 import { get } from 'lodash/fp';
+
 import { BrowserFields } from '../../containers/source';
-import { EventKind } from '../../../../common/ecs/event';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
@@ -50,11 +49,14 @@ Details.displayName = 'Details';
 
 export const EventDetails = React.memo<Props>(
   ({ browserFields, columnHeaders, data, id, onUpdateColumns, timelineId, toggleColumn }) => {
-    const eventKindData = useMemo(() => (data || []).find((item) => item.field === 'event.kind'), [
-      data,
-    ]);
-    const eventKind = get('values.0', eventKindData);
-    const [view, setView] = useState<View>(EventsViewType.tableView);
+    const ruleIdField = useMemo(
+      () => (data ?? []).find((item) => item.field === 'signal.rule.id'),
+      [data]
+    );
+    const isSignal = get('values.0', ruleIdField);
+    const [view, setView] = useState(
+      isSignal ? EventsViewType.summaryView : EventsViewType.tableView
+    );
     const handleTabClick = useCallback((e) => setView(e.id), [setView]);
 
     const alerts = useMemo(
@@ -76,7 +78,7 @@ export const EventDetails = React.memo<Props>(
     );
     const tabs: EuiTabbedContentTab[] = useMemo(
       () => [
-        ...(eventKind !== EventKind.event ? alerts : []),
+        ...(isSignal ? alerts : []),
         {
           id: EventsViewType.tableView,
           name: i18n.TABLE,
@@ -107,21 +109,23 @@ export const EventDetails = React.memo<Props>(
         timelineId,
         toggleColumn,
         alerts,
-        eventKind,
+        isSignal,
       ]
     );
 
     useEffect(() => {
-      if (data != null && eventKind !== EventKind.event) {
+      if (data != null && isSignal) {
         setView(EventsViewType.summaryView);
       }
-    }, [data, eventKind]);
+    }, [data, isSignal]);
 
     const selectedTab = useMemo(() => tabs.find((tab) => tab.id === view), [tabs, view]);
 
     return (
       <Details data-test-subj="eventDetails">
-        <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={handleTabClick} />
+        {tabs && (
+          <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={handleTabClick} />
+        )}
       </Details>
     );
   }

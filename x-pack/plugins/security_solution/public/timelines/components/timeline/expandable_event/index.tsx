@@ -27,7 +27,6 @@ import { getColumnHeaders } from '../body/column_headers/helpers';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import * as i18n from './translations';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
-import { EventKind } from '../../../../../common/ecs/event';
 
 const ExpandableDetails = styled.div`
   .euiAccordion__button {
@@ -71,11 +70,11 @@ export const ExpandableEvent = React.memo<Props>(
       skip: !event.eventId,
     });
 
-    const eventKindData = useMemo(
-      () => (detailsData || []).find((item) => item.field === 'event.kind'),
+    const ruleIdField = useMemo(
+      () => (detailsData ?? []).find((item) => item.field === 'signal.rule.id'),
       [detailsData]
     );
-    const eventKind = get('values.0', eventKindData);
+    const isSignal = get('values.0', ruleIdField);
 
     const onUpdateColumns = useCallback(
       (columns) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
@@ -116,7 +115,7 @@ export const ExpandableEvent = React.memo<Props>(
     return (
       <>
         <EuiFlyoutHeader hasBorder>
-          <ExpandableEventTitle isAlert={eventKind !== EventKind.event} />
+          <ExpandableEventTitle isAlert={isSignal} />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <ExpandableDetails>

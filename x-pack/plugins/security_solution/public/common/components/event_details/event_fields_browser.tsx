@@ -6,8 +6,9 @@
 
 import { sortBy } from 'lodash';
 import { EuiInMemoryTable } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
+import { getOr } from 'lodash/fp';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
@@ -29,6 +30,15 @@ interface Props {
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
   ({ browserFields, columnHeaders, data, eventId, onUpdateColumns, timelineId, toggleColumn }) => {
+    const getLinkValue = useCallback(
+      (field: string) => {
+        const ruleIdField = (data ?? []).find((d) => d.field === 'signal.rule.id');
+        const ruleId = getOr(null, 'values.0', ruleIdField);
+        return field === 'signal.rule.name' ? ruleId : null;
+      },
+      [data]
+    );
+
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const items = useMemo(
       () =>
@@ -48,8 +58,17 @@ export const EventFieldsBrowser = React.memo<Props>(
           onUpdateColumns,
           contextId: timelineId,
           toggleColumn,
+          getLinkValue,
         }),
-      [browserFields, columnHeaders, eventId, onUpdateColumns, timelineId, toggleColumn]
+      [
+        browserFields,
+        columnHeaders,
+        eventId,
+        onUpdateColumns,
+        timelineId,
+        toggleColumn,
+        getLinkValue,
+      ]
     );
 
     return (
