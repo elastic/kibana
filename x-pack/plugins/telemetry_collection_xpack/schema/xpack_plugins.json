@@ -3382,40 +3382,40 @@
         "count": {
           "type": "long"
         },
-        "[apiCalls.copySavedObjects.total]": {
+        "apiCalls.copySavedObjects.total": {
           "type": "long"
         },
-        "[apiCalls.copySavedObjects.kibanaRequest.yes]": {
+        "apiCalls.copySavedObjects.kibanaRequest.yes": {
           "type": "long"
         },
-        "[apiCalls.copySavedObjects.kibanaRequest.no]": {
+        "apiCalls.copySavedObjects.kibanaRequest.no": {
           "type": "long"
         },
-        "[apiCalls.copySavedObjects.createNewCopiesEnabled.yes]": {
+        "apiCalls.copySavedObjects.createNewCopiesEnabled.yes": {
           "type": "long"
         },
-        "[apiCalls.copySavedObjects.createNewCopiesEnabled.no]": {
+        "apiCalls.copySavedObjects.createNewCopiesEnabled.no": {
           "type": "long"
         },
-        "[apiCalls.copySavedObjects.overwriteEnabled.yes]": {
+        "apiCalls.copySavedObjects.overwriteEnabled.yes": {
           "type": "long"
         },
-        "[apiCalls.copySavedObjects.overwriteEnabled.no]": {
+        "apiCalls.copySavedObjects.overwriteEnabled.no": {
           "type": "long"
         },
-        "[apiCalls.resolveCopySavedObjectsErrors.total]": {
+        "apiCalls.resolveCopySavedObjectsErrors.total": {
           "type": "long"
         },
-        "[apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes]": {
+        "apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes": {
           "type": "long"
         },
-        "[apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no]": {
+        "apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no": {
           "type": "long"
         },
-        "[apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes]": {
+        "apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes": {
           "type": "long"
         },
-        "[apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no]": {
+        "apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no": {
           "type": "long"
         }
       }

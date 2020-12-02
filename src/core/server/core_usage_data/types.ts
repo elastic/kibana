@@ -27,23 +27,23 @@ import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from '..';
  * includes point-in-time configuration information.
  * */
 export interface CoreUsageStats {
-  ['apiCalls.savedObjectsImport.total']?: number;
-  ['apiCalls.savedObjectsImport.kibanaRequest.yes']?: number;
-  ['apiCalls.savedObjectsImport.kibanaRequest.no']?: number;
-  ['apiCalls.savedObjectsImport.createNewCopiesEnabled.yes']?: number;
-  ['apiCalls.savedObjectsImport.createNewCopiesEnabled.no']?: number;
-  ['apiCalls.savedObjectsImport.overwriteEnabled.yes']?: number;
-  ['apiCalls.savedObjectsImport.overwriteEnabled.no']?: number;
-  ['apiCalls.savedObjectsResolveImportErrors.total']?: number;
-  ['apiCalls.savedObjectsResolveImportErrors.kibanaRequest.yes']?: number;
-  ['apiCalls.savedObjectsResolveImportErrors.kibanaRequest.no']?: number;
-  ['apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes']?: number;
-  ['apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no']?: number;
-  ['apiCalls.savedObjectsExport.total']?: number;
-  ['apiCalls.savedObjectsExport.kibanaRequest.yes']?: number;
-  ['apiCalls.savedObjectsExport.kibanaRequest.no']?: number;
-  ['apiCalls.savedObjectsExport.allTypesSelected.yes']?: number;
-  ['apiCalls.savedObjectsExport.allTypesSelected.no']?: number;
+  'apiCalls.savedObjectsImport.total'?: number;
+  'apiCalls.savedObjectsImport.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsImport.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsImport.createNewCopiesEnabled.yes'?: number;
+  'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'?: number;
+  'apiCalls.savedObjectsImport.overwriteEnabled.yes'?: number;
+  'apiCalls.savedObjectsImport.overwriteEnabled.no'?: number;
+  'apiCalls.savedObjectsResolveImportErrors.total'?: number;
+  'apiCalls.savedObjectsResolveImportErrors.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsResolveImportErrors.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes'?: number;
+  'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no'?: number;
+  'apiCalls.savedObjectsExport.total'?: number;
+  'apiCalls.savedObjectsExport.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsExport.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsExport.allTypesSelected.yes'?: number;
+  'apiCalls.savedObjectsExport.allTypesSelected.no'?: number;
 }
 
 /**
