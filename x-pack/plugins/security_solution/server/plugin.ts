@@ -377,7 +377,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       core.savedObjects,
       this.logger
     );
-    this.policyWatcher.start();
+    this.policyWatcher.start(licenseService);
     return {};
   }
 

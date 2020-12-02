@@ -19,8 +19,7 @@ import {
   isEndpointPolicyValidForLicense,
   unsetPolicyFeaturesAboveLicenseLevel,
 } from '../../../../common/license/policy_config';
-import { isAtLeast } from '../../../../common/license/license';
-import { licenseService } from '../../../lib/license/license';
+import { isAtLeast, LicenseService } from '../../../../common/license/license';
 
 export class PolicyWatcher {
   private logger: Logger;
@@ -56,7 +55,7 @@ export class PolicyWatcher {
     return soStart.getScopedClient(fakeRequest, { excludedWrappers: ['security'] });
   }
 
-  public start() {
+  public start(licenseService: LicenseService) {
     this.subscription = licenseService.getLicenseInformation$()?.subscribe(this.watch.bind(this));
   }
 
