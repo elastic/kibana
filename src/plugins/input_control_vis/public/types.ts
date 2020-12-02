@@ -17,12 +17,11 @@
  * under the License.
  */
 
-export {
-  DATA_TELEMETRY_ID,
-  DataTelemetryIndex,
-  DataTelemetryPayload,
-  buildDataTelemetryPayload,
-} from './get_data_telemetry';
-export { getLocalStats, TelemetryLocalStats } from './get_local_stats';
-export { getClusterUuids } from './get_cluster_stats';
-export { registerCollection } from './register_collection';
+import { ControlParams } from './editor_utils';
+
+export interface InputControlVisParams {
+  controls: ControlParams[];
+  pinFilters: boolean;
+  updateFiltersOnChange: boolean;
+  useTimeFilter: boolean;
+}

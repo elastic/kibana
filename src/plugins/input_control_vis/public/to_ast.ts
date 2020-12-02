@@ -17,12 +17,20 @@
  * under the License.
  */
 
-export {
-  DATA_TELEMETRY_ID,
-  DataTelemetryIndex,
-  DataTelemetryPayload,
-  buildDataTelemetryPayload,
-} from './get_data_telemetry';
-export { getLocalStats, TelemetryLocalStats } from './get_local_stats';
-export { getClusterUuids } from './get_cluster_stats';
-export { registerCollection } from './register_collection';
+import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import { Vis } from '../../visualizations/public';
+import { InputControlExpressionFunctionDefinition } from './input_control_fn';
+import { InputControlVisParams } from './types';
+
+export const toExpressionAst = (vis: Vis<InputControlVisParams>) => {
+  const inputControl = buildExpressionFunction<InputControlExpressionFunctionDefinition>(
+    'input_control_vis',
+    {
+      visConfig: JSON.stringify(vis.params),
+    }
+  );
+
+  const ast = buildExpression([inputControl]);
+
+  return ast.toAst();
+};

@@ -150,6 +150,7 @@ const providersConfigSchema = schema.object(
       },
       {
         credentials: schema.oneOf([
+          schema.literal('elasticsearch_anonymous_user'),
           schema.object({
             username: schema.string(),
             password: schema.string(),

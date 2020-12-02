@@ -17,12 +17,18 @@
  * under the License.
  */
 
-export {
-  DATA_TELEMETRY_ID,
-  DataTelemetryIndex,
-  DataTelemetryPayload,
-  buildDataTelemetryPayload,
-} from './get_data_telemetry';
-export { getLocalStats, TelemetryLocalStats } from './get_local_stats';
-export { getClusterUuids } from './get_cluster_stats';
-export { registerCollection } from './register_collection';
+import React, { lazy } from 'react';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { InputControlVisDependencies } from '../../plugin';
+import { InputControlVisParams } from '../../types';
+
+const ControlsTab = lazy(() => import('./controls_tab'));
+const OptionsTab = lazy(() => import('./options_tab'));
+
+export const getControlsTab = (deps: InputControlVisDependencies) => (
+  props: VisOptionsProps<InputControlVisParams>
+) => <ControlsTab {...props} deps={deps} />;
+
+export const OptionsTabLazy = (props: VisOptionsProps<InputControlVisParams>) => (
+  <OptionsTab {...props} />
+);
