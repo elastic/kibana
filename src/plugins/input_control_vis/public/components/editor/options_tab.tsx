@@ -24,20 +24,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSwitchEvent } from '@elastic/eui';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { InputControlVisParams } from '../../types';
 
-interface OptionsTabParams {
-  updateFiltersOnChange: boolean;
-  useTimeFilter: boolean;
-  pinFilters: boolean;
-}
-type OptionsTabInjectedProps = Pick<
-  VisOptionsProps<OptionsTabParams>,
-  'vis' | 'setValue' | 'stateParams'
->;
+export type OptionsTabProps = VisOptionsProps<InputControlVisParams>;
 
-export type OptionsTabProps = OptionsTabInjectedProps;
-
-export class OptionsTab extends PureComponent<OptionsTabProps> {
+class OptionsTab extends PureComponent<OptionsTabProps> {
   handleUpdateFiltersChange = (event: EuiSwitchEvent) => {
     this.props.setValue('updateFiltersOnChange', event.target.checked);
   };
@@ -98,3 +89,6 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
     );
   }
 }
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { OptionsTab as default };

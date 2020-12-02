@@ -18,7 +18,7 @@ exactRoute?: boolean;
 ```ts
 core.application.register({
   id: 'my_app',
-  title: 'My App'
+  title: 'My App',
   exactRoute: true,
   mount: () => { ... },
 })
