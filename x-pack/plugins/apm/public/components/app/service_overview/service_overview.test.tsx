@@ -8,17 +8,17 @@ import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from 'src/core/public';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
-import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
+import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../../../context/ApmPluginContext/MockApmPluginContext';
-import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/MockUrlParamsContextProvider';
-import * as useDynamicIndexPatternHooks from '../../../hooks/useDynamicIndexPattern';
-import * as useFetcherHooks from '../../../hooks/useFetcher';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import * as useAnnotationsHooks from '../../../hooks/use_annotations';
-import * as useTransactionBreakdownHooks from '../../../hooks/use_transaction_breakdown';
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
+import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
+import * as useFetcherHooks from '../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import * as useAnnotationsHooks from '../../../context/annotations/use_annotations_context';
+import * as useTransactionBreakdownHooks from '../../shared/charts/transaction_breakdown_chart/use_transaction_breakdown';
 import { renderWithTheme } from '../../../utils/testHelpers';
 import { ServiceOverview } from './';
 
@@ -56,10 +56,10 @@ function Wrapper({ children }: { children?: ReactNode }) {
 describe('ServiceOverview', () => {
   it('renders', () => {
     jest
-      .spyOn(useAnnotationsHooks, 'useAnnotations')
+      .spyOn(useAnnotationsHooks, 'useAnnotationsContext')
       .mockReturnValue({ annotations: [] });
     jest
-      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPattern')
+      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPatternFetcher')
       .mockReturnValue({
         indexPattern: undefined,
         status: FETCH_STATUS.SUCCESS,
@@ -72,6 +72,7 @@ describe('ServiceOverview', () => {
           sort: { direction: 'desc', field: 'test field' },
         },
         totalItemCount: 0,
+        throughput: [],
       },
       refetch: () => {},
       status: FETCH_STATUS.SUCCESS,
