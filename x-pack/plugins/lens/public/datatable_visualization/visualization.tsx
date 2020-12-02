@@ -200,6 +200,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
             }
           : l
       ),
+      sorting: prevState.sorting?.columnId === columnId ? undefined : prevState.sorting,
     };
   },
 

@@ -306,6 +306,41 @@ describe('Datatable Visualization', () => {
         ],
       });
     });
+
+    it('should handle correctly the sorting state on removing dimension', () => {
+      const layer = { layerId: 'layer1', columns: ['b', 'c'] };
+      expect(
+        datatableVisualization.removeDimension({
+          prevState: { layers: [layer], sorting: { columnId: 'b', direction: 'asc' } },
+          layerId: 'layer1',
+          columnId: 'b',
+        })
+      ).toEqual({
+        sorting: undefined,
+        layers: [
+          {
+            layerId: 'layer1',
+            columns: ['c'],
+          },
+        ],
+      });
+
+      expect(
+        datatableVisualization.removeDimension({
+          prevState: { layers: [layer], sorting: { columnId: 'c', direction: 'asc' } },
+          layerId: 'layer1',
+          columnId: 'b',
+        })
+      ).toEqual({
+        sorting: { columnId: 'c', direction: 'asc' },
+        layers: [
+          {
+            layerId: 'layer1',
+            columns: ['c'],
+          },
+        ],
+      });
+    });
   });
 
   describe('#setDimension', () => {
