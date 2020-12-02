@@ -21,7 +21,7 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
-import { mapTo, filter, take } from 'rxjs/operators';
+import { mapTo, filter, take, tap, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 import { CliArgs } from '../../core/server/config';
 import { LegacyConfig } from '../../core/server/legacy';
@@ -126,6 +126,9 @@ export class CliDevMode {
       ignore: ignorePaths,
     });
 
+    const proxyTargetHost = `${this.basePathProxy?.host}:${options.basePathProxy?.targetPort}`;
+    const publicHost = `${this.basePathProxy?.host}:${options.basePathProxy?.port}`;
+
     this.devServer = new DevServer({
       log: this.log,
       watcher: this.watcher,
@@ -142,6 +145,9 @@ export class CliDevMode {
             ]
           : []),
       ],
+      mapLogLine(line) {
+        return line.split(proxyTargetHost).join(publicHost);
+      },
     });
 
     this.optimizer = new Optimizer({
@@ -168,10 +174,40 @@ export class CliDevMode {
     this.subscription = new Rx.Subscription();
 
     if (basePathProxy) {
-      const delay$ = firstAllTrue(this.devServer.isReady$(), this.optimizer.isReady$());
+      const serverReady$ = new Rx.BehaviorSubject<boolean>(false);
+      const optimizerReady$ = new Rx.BehaviorSubject<boolean>(false);
+      const userWaiting$ = new Rx.BehaviorSubject<boolean>(false);
+      this.subscription.add(
+        Rx.merge(
+          this.devServer.isReady$().pipe(tap(serverReady$)),
+          this.optimizer.isReady$().pipe(tap(optimizerReady$)),
+          userWaiting$.pipe(
+            distinctUntilChanged(),
+            switchMap((waiting) =>
+              !waiting
+                ? Rx.EMPTY
+                : Rx.timer(1000).pipe(
+                    tap(() => {
+                      this.log.warn(
+                        'please hold',
+                        !optimizerReady$.getValue()
+                          ? 'optimizer is still bundling so requests have been paused'
+                          : 'server is not ready so requests have been paused'
+                      );
+                    })
+                  )
+            )
+          )
+        ).subscribe(this.observer('readiness checks'))
+      );
 
       basePathProxy.start({
-        delayUntil: () => delay$,
+        delayUntil: () => {
+          userWaiting$.next(true);
+          return firstAllTrue(serverReady$, optimizerReady$).pipe(
+            tap(() => userWaiting$.next(false))
+          );
+        },
         shouldRedirectFromOldBasePath,
       });
 
