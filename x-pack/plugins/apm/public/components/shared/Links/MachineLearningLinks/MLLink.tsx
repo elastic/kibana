@@ -6,9 +6,9 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useMlHref, ML_PAGES } from '../../../../../../ml/public';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 interface MlRisonData {
   ml?: {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CasePostRequest } from '../../../../../case/common/api';
+import { CasePostRequest, ConnectorTypeFields } from '../../../../../case/common/api';
 import { FIELD_TYPES, fieldValidators, FormSchema } from '../../../shared_imports';
 import * as i18n from '../../translations';
 
@@ -18,7 +18,10 @@ export const schemaTags = {
   labelAppend: OptionalFieldLabel,
 };
 
-export type FormProps = Omit<CasePostRequest, 'connector'> & { connectorId: string };
+export type FormProps = Omit<CasePostRequest, 'connector'> & {
+  connectorId: string;
+  fields: ConnectorTypeFields['fields'];
+};
 
 export const schema: FormSchema<FormProps> = {
   title: {

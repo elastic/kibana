@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { VerticalGridLines, XYPlot } from 'react-vis';
-import { useTheme } from '../../../../hooks/useTheme';
+import { useTheme } from '../../../../hooks/use_theme';
 import { Mark } from '../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks';
 import { PlotValues } from './plotUtils';
 
