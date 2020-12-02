@@ -18,8 +18,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TileMapVisParams } from '../../maps_legacy/public';
+
 import type { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { TileMapVisConfig, TileMapVisData } from './types';
 import { convertToGeoJson } from './utils';
 
 interface Arguments {
@@ -27,9 +28,9 @@ interface Arguments {
 }
 
 export interface TileMapVisRenderValue {
-  visData: any;
+  visData: TileMapVisData;
   visType: 'tile_map';
-  visConfig: TileMapVisParams;
+  visConfig: TileMapVisConfig;
   params: any;
 }
 
@@ -64,10 +65,6 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
       metric,
       geocentroid,
     });
-
-    if (geohash && geohash.accessor) {
-      convertedData.meta.geohash = context.columns[geohash.accessor].meta;
-    }
 
     return {
       type: 'render',

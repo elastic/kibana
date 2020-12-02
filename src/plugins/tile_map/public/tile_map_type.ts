@@ -30,7 +30,7 @@ import { supportsCssFilters } from './css_filters';
 import { TileMapOptionsLazy } from './components';
 import { getDeprecationMessage } from './get_deprecation_message';
 import { TileMapVisualizationDependencies } from './plugin';
-import { convertToGeoJson } from './utils';
+import { toExpressionAst } from './to_ast';
 
 export function createTileMapTypeDefinition(
   dependencies: TileMapVisualizationDependencies
@@ -63,7 +63,7 @@ export function createTileMapTypeDefinition(
       },
     },
     visualization: CoordinateMapsVisualization,
-    responseHandler: convertToGeoJson,
+    toExpressionAst,
     editorConfig: {
       collections: {
         colorSchemas: truncatedColorSchemas,

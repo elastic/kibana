@@ -18,11 +18,15 @@
  */
 
 import type { Datatable } from '../../../expressions/public';
+import type { Feature, TileMapVisDimensions, TileMapVisData } from '../types';
 import { decodeGeoHash } from './decode_geo_hash';
 import { gridDimensions } from './grid_dimensions';
 
-export function convertToGeoJson(tabifiedResponse: Datatable, { geohash, geocentroid, metric }) {
-  let features;
+export function convertToGeoJson(
+  tabifiedResponse: Datatable,
+  { geohash, geocentroid, metric }: TileMapVisDimensions
+): TileMapVisData {
+  let features: Feature[];
   let min = Infinity;
   let max = -Infinity;
 
@@ -59,7 +63,7 @@ export function convertToGeoJson(tabifiedResponse: Datatable, { geohash, geocent
 
           const centerLatLng = [geohashLocation.latitude[2], geohashLocation.longitude[2]];
 
-          if (geohash.params.useGeocentroid) {
+          if (geohash?.params.useGeocentroid) {
             // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
             pointCoordinates[0] = clampGrid(
               pointCoordinates[0],
@@ -93,29 +97,35 @@ export function convertToGeoJson(tabifiedResponse: Datatable, { geohash, geocent
             },
           };
         })
-        .filter((row) => row);
+        .filter((row): row is Feature => !!row);
     }
   } else {
     features = [];
   }
 
-  const featureCollection = {
-    type: 'FeatureCollection',
-    features,
-  };
-
-  return {
-    featureCollection,
+  const convertedData: TileMapVisData = {
+    featureCollection: {
+      type: 'FeatureCollection',
+      features,
+    },
     meta: {
       min,
       max,
-      geohashPrecision: geohash && geohash.params.precision,
-      geohashGridDimensionsAtEquator: geohash && gridDimensions(geohash.params.precision),
+      geohashPrecision: geohash?.params.precision,
+      geohashGridDimensionsAtEquator: geohash?.params.precision
+        ? gridDimensions(geohash.params.precision)
+        : undefined,
     },
   };
+
+  if (geohash && geohash.accessor) {
+    convertedData.meta.geohash = tabifiedResponse.columns[geohash.accessor].meta;
+  }
+
+  return convertedData;
 }
 
-function clampGrid(val, min, max) {
+function clampGrid(val: number, min: number, max: number) {
   if (val > max) val = max;
   else if (val < min) val = min;
   return val;
