@@ -82,9 +82,13 @@ beforeEach(() => {
 
 describe('dynamicActionFactoriesCollector', () => {
   test('returns empty stats when there are not dynamic actions', () => {
-    const stats = dynamicActionFactoriesCollector(getActionFactory, {
-      events: [],
-    });
+    const stats = dynamicActionFactoriesCollector(
+      getActionFactory,
+      {
+        events: [],
+      },
+      {}
+    );
 
     expect(stats).toEqual({});
   });
@@ -93,7 +97,7 @@ describe('dynamicActionFactoriesCollector', () => {
     const currentState = {
       events: [state.events[0]],
     };
-    dynamicActionFactoriesCollector(getActionFactory, currentState);
+    dynamicActionFactoriesCollector(getActionFactory, currentState, {});
 
     const spy1 = (factories.FACTORY_ID_1.telemetry as unknown) as jest.SpyInstance;
     const spy2 = (factories.FACTORY_ID_2.telemetry as unknown) as jest.SpyInstance;
@@ -106,30 +110,15 @@ describe('dynamicActionFactoriesCollector', () => {
     expect(!!spy1.mock.calls[0][1]).toBe(true);
   });
 
-  test('returns namespaced stats received from factory', () => {
+  test('returns stats received from factory', () => {
     const currentState = {
       events: [state.events[0]],
     };
-    const stats = dynamicActionFactoriesCollector(getActionFactory, currentState);
+    const stats = dynamicActionFactoriesCollector(getActionFactory, currentState, {});
 
     expect(stats).toEqual({
-      'dynamicActions.factories.FACTORY_ID_1.myStat_1': 1,
-      'dynamicActions.factories.FACTORY_ID_1.myStat_2': 123,
-    });
-  });
-
-  test('aggregates stats from all factories', () => {
-    const currentState = {
-      events: [state.events[0], state.events[1], state.events[2]],
-    };
-    const stats = dynamicActionFactoriesCollector(getActionFactory, currentState);
-
-    expect(stats).toEqual({
-      'dynamicActions.factories.FACTORY_ID_1.myStat_1': 1,
-      'dynamicActions.factories.FACTORY_ID_1.myStat_2': 123,
-
-      'dynamicActions.factories.FACTORY_ID_3.myStat_1': 2,
-      'dynamicActions.factories.FACTORY_ID_3.stringStat': 'abc',
+      myStat_1: 1,
+      myStat_2: 123,
     });
   });
 });

@@ -64,8 +64,5 @@ dynamicActions.action_triggers.URL_DRILLDOWN_VALUE_CLICK_TRIGGER.count
 
 ### Factory metrics
 
-Each dynamic action factory (drilldown type) can report its own stats, which are reported in the following way:
-
-```
-dynamicActions.factories.<factory_id>.<state>
-```
+Each dynamic action factory (drilldown type) can report its own stats, which is
+done using the `.telemetry()` method on dynamic action factories.

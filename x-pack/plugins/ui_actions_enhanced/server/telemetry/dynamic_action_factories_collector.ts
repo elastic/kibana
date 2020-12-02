@@ -6,26 +6,17 @@
 
 import { DynamicActionsState } from '../../common';
 import { ActionFactory } from '../types';
-import { getMetricKey } from './get_metric_key';
 
 export const dynamicActionFactoriesCollector = (
   getActionFactory: (id: string) => undefined | ActionFactory,
-  state: DynamicActionsState
+  state: DynamicActionsState,
+  stats: Record<string, any>
 ): Record<string, any> => {
-  const stats: Record<string, any> = {};
-
   for (const event of state.events) {
     const factory = getActionFactory(event.action.factoryId);
 
     if (factory) {
-      let factoryStats: Record<string, any> = {};
-
-      factoryStats = factory.telemetry(event, factoryStats);
-      for (const [stat, value] of Object.entries(factoryStats)) {
-        const key = getMetricKey(`factories.${factory.id}.${stat}`);
-
-        stats[key] = value;
-      }
+      stats = factory.telemetry(event, stats);
     }
   }
 
