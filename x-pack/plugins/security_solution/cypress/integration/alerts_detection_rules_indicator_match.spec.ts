@@ -65,6 +65,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { removeSignalsIndex } from '../tasks/api_calls';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -99,6 +100,7 @@ describe('Detection rules, Indicator Match', () => {
   afterEach(() => {
     esArchiverUnload('threat_indicator');
     esArchiverUnload('threat_data');
+    removeSignalsIndex();
     deleteRule();
   });
 

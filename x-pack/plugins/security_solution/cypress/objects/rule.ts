@@ -285,7 +285,7 @@ export const newThreatIndicatorRule: ThreatIndicatorRule = {
   lookBack,
   indicatorIndexPattern: ['threat-indicator-*'],
   indicatorMapping: 'agent.id',
-  indicatorIndexField: 'agent.id',
+  indicatorIndexField: 'agent.threat',
 };
 
 export const severitiesOverride = ['Low', 'Medium', 'High', 'Critical'];
