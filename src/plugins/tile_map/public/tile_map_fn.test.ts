@@ -78,14 +78,14 @@ describe('interpreter/functions#tilemap', () => {
     jest.clearAllMocks();
   });
 
-  it('returns an object with the correct structure', () => {
-    const actual = fn(context, { visConfig: JSON.stringify(visConfig) });
+  it('returns an object with the correct structure', async () => {
+    const actual = await fn(context, { visConfig: JSON.stringify(visConfig) });
     expect(actual).toMatchSnapshot();
   });
 
-  it('calls response handler with correct values', () => {
+  it('calls response handler with correct values', async () => {
     const { geohash, metric, geocentroid } = visConfig.dimensions;
-    fn(context, { visConfig: JSON.stringify(visConfig) });
+    await fn(context, { visConfig: JSON.stringify(visConfig) });
     expect(convertToGeoJson).toHaveBeenCalledTimes(1);
     expect(convertToGeoJson).toHaveBeenCalledWith(context, {
       geohash,
