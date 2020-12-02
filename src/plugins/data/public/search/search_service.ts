@@ -28,7 +28,6 @@ import {
   kibanaContext,
   kibanaContextFunction,
   ISearchGeneric,
-  ISessionService,
   SearchSourceDependencies,
   SearchSourceService,
 } from '../../common/search';
@@ -40,7 +39,7 @@ import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
-import { SessionService } from './session_service';
+import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { ConfigSchema } from '../../config';
 import {
   SHARD_DELAY_AGG_NAME,
@@ -67,6 +66,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
   private sessionService!: ISessionService;
+  private sessionsClient!: ISessionsClient;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -76,7 +76,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
-    this.sessionService = new SessionService(this.initializerContext, getStartServices);
+    this.sessionsClient = new SessionsClient({ http });
+    this.sessionService = new SessionService(
+      this.initializerContext,
+      getStartServices,
+      this.sessionsClient
+    );
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -115,6 +120,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
       session: this.sessionService,
+      sessionsClient: this.sessionsClient,
     };
   }
 
@@ -146,6 +152,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.searchInterceptor.showError(e);
       },
       session: this.sessionService,
+      sessionsClient: this.sessionsClient,
       searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
     };
   }

@@ -13,6 +13,6 @@ export const getStatusColor = (status: RuleStatusType | string | null) =>
     ? 'success'
     : status === 'failed'
     ? 'danger'
-    : status === 'executing' || status === 'going to run'
+    : status === 'executing' || status === 'going to run' || status === 'partial failure'
     ? 'warning'
     : 'subdued';
