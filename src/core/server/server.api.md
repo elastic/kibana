@@ -538,39 +538,39 @@ export interface CoreUsageDataStart {
 // @internal
 export interface CoreUsageStats {
     // (undocumented)
-    ['apiCalls.savedObjectsExport.allTypesSelected.no']?: number;
+    'apiCalls.savedObjectsExport.allTypesSelected.no'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsExport.allTypesSelected.yes']?: number;
+    'apiCalls.savedObjectsExport.allTypesSelected.yes'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsExport.kibanaRequest.no']?: number;
+    'apiCalls.savedObjectsExport.kibanaRequest.no'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsExport.kibanaRequest.yes']?: number;
+    'apiCalls.savedObjectsExport.kibanaRequest.yes'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsExport.total']?: number;
+    'apiCalls.savedObjectsExport.total'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsImport.createNewCopiesEnabled.no']?: number;
+    'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsImport.createNewCopiesEnabled.yes']?: number;
+    'apiCalls.savedObjectsImport.createNewCopiesEnabled.yes'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsImport.kibanaRequest.no']?: number;
+    'apiCalls.savedObjectsImport.kibanaRequest.no'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsImport.kibanaRequest.yes']?: number;
+    'apiCalls.savedObjectsImport.kibanaRequest.yes'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsImport.overwriteEnabled.no']?: number;
+    'apiCalls.savedObjectsImport.overwriteEnabled.no'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsImport.overwriteEnabled.yes']?: number;
+    'apiCalls.savedObjectsImport.overwriteEnabled.yes'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsImport.total']?: number;
+    'apiCalls.savedObjectsImport.total'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no']?: number;
+    'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes']?: number;
+    'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsResolveImportErrors.kibanaRequest.no']?: number;
+    'apiCalls.savedObjectsResolveImportErrors.kibanaRequest.no'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsResolveImportErrors.kibanaRequest.yes']?: number;
+    'apiCalls.savedObjectsResolveImportErrors.kibanaRequest.yes'?: number;
     // (undocumented)
-    ['apiCalls.savedObjectsResolveImportErrors.total']?: number;
+    'apiCalls.savedObjectsResolveImportErrors.total'?: number;
 }
 
 // @public (undocumented)
