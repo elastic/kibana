@@ -12,23 +12,12 @@ import { EuiButton } from '@elastic/eui';
 import { DocumentCreationButton } from './document_creation_button';
 
 describe('DocumentCreationButton', () => {
-  const actions = {
-    openDocumentCreation: jest.fn(),
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockActions(actions);
   });
 
   it('should render', () => {
     const wrapper = shallow(<DocumentCreationButton />);
     expect(wrapper.find(EuiButton).length).toEqual(1);
-  });
-
-  it('should call openDocumentCreation on click', () => {
-    const wrapper = shallow(<DocumentCreationButton />);
-    wrapper.find(EuiButton).simulate('click');
-    expect(actions.openDocumentCreation).toHaveBeenCalled();
   });
 });

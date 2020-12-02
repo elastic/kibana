@@ -8,20 +8,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButton } from '@elastic/eui';
-import { useActions } from 'kea';
-
-import { DocumentsLogic } from './documents_logic';
 
 export const DocumentCreationButton: React.FC = () => {
-  const { openDocumentCreation } = useActions(DocumentsLogic);
-
   return (
-    <EuiButton
-      fill={true}
-      color="primary"
-      onClick={openDocumentCreation}
-      data-test-subj="IndexDocumentsButton"
-    >
+    <EuiButton fill={true} color="primary" data-test-subj="IndexDocumentsButton">
       {i18n.translate('xpack.enterpriseSearch.appSearch.documents.indexDocuments', {
         defaultMessage: 'Index documents',
       })}
