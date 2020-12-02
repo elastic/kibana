@@ -117,17 +117,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         expect(actual).toMatchSnapshot();
       });
     });
-
-    it('handles tile_map function', () => {
-      const params = { metric: {} };
-      const schemas = {
-        ...schemasDef,
-        segment: [1, 2],
-        geo_centroid: [3, 4],
-      };
-      const actual = buildPipelineVisFunction.tile_map(params, schemas, uiState);
-      expect(actual).toMatchSnapshot();
-    });
   });
 
   describe('buildPipeline', () => {
