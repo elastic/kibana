@@ -12,7 +12,7 @@ import routes from 'workplace_search/routes';
 
 import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
-import { IndexJob, TOperation } from '../../../../../shared/types';
+import { IndexJob, TOperation, Schema, SchemaTypes } from '../../../../../shared/types';
 import { OptionValue } from '../../../../types';
 
 import {
@@ -31,20 +31,23 @@ interface SchemaActions {
   ): SchemaChangeErrorsProps;
   onSchemaSetSuccess(schemaProps: SchemaResponseProps): SchemaResponseProps;
   onSchemaSetFormErrors(errors: string[]): string[];
-  updateNewFieldType(newFieldType: string): string;
+  updateNewFieldType(newFieldType: SchemaTypes): SchemaTypes;
   onFieldUpdate({
     schema,
     formUnchanged,
   }: {
-    schema: object;
+    schema: Schema;
     formUnchanged: boolean;
-  }): { schema: object; formUnchanged: boolean };
+  }): { schema: Schema; formUnchanged: boolean };
   onIndexingComplete(numDocumentsWithErrors: number): number;
   resetMostRecentIndexJob(emptyReindexJob: IndexJob): IndexJob;
   showFieldSuccess(successMessage: string): string;
   setFieldName(rawFieldName: string): string;
   setFilterValue(filterValue: string): string;
-  addNewField(fieldName: string, newFieldType: string): { fieldName: string; newFieldType: string };
+  addNewField(
+    fieldName: string,
+    newFieldType: SchemaTypes
+  ): { fieldName: string; newFieldType: SchemaTypes };
   updateFields(): void;
   openAddFieldModal(): void;
   closeAddFieldModal(): void;
@@ -56,20 +59,20 @@ interface SchemaActions {
   ): { activeReindexJobId: string; sourceId: string };
   updateExistingFieldType(
     fieldName: string,
-    newFieldType: string
-  ): { fieldName: string; newFieldType: string };
+    newFieldType: SchemaTypes
+  ): { fieldName: string; newFieldType: SchemaTypes };
   setServerField(
-    updatedSchema: object,
+    updatedSchema: Schema,
     operation: TOperation
-  ): { updatedSchema: object; operation: TOperation };
+  ): { updatedSchema: Schema; operation: TOperation };
 }
 
 interface SchemaValues {
   sourceId: string;
-  activeSchema: object;
-  serverSchema: object;
+  activeSchema: Schema;
+  serverSchema: Schema;
   filterValue: string;
-  filteredSchemaFields: object;
+  filteredSchemaFields: Schema;
   dataTypeOptions: OptionValue[];
   showAddFieldModal: boolean;
   addFieldFormErrors: string[] | null;
@@ -82,7 +85,7 @@ interface SchemaValues {
 }
 
 interface SchemaResponseProps {
-  schema: object;
+  schema: Schema;
   mostRecentIndexJob: IndexJob;
 }
 
@@ -120,7 +123,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     onSchemaSetSuccess: (schemaProps: SchemaResponseProps) => schemaProps,
     onSchemaSetFormErrors: (errors: string[]) => errors,
     updateNewFieldType: (newFieldType: string) => newFieldType,
-    onFieldUpdate: ({ schema, formUnchanged }: { schema: object; formUnchanged: boolean }) => ({
+    onFieldUpdate: ({ schema, formUnchanged }: { schema: Schema; formUnchanged: boolean }) => ({
       schema,
       formUnchanged,
     }),
@@ -137,13 +140,13 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       activeReindexJobId,
       sourceId,
     }),
-    addNewField: (fieldName: string, newFieldType: string) => ({ fieldName, newFieldType }),
+    addNewField: (fieldName: string, newFieldType: SchemaTypes) => ({ fieldName, newFieldType }),
     updateExistingFieldType: (fieldName: string, newFieldType: string) => ({
       fieldName,
       newFieldType,
     }),
     updateFields: () => true,
-    setServerField: (updatedSchema: object, operation: TOperation) => ({
+    setServerField: (updatedSchema: Schema, operation: TOperation) => ({
       updatedSchema,
       operation,
     }),
@@ -248,7 +251,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     filteredSchemaFields: [
       () => [selectors.activeSchema, selectors.filterValue],
       (activeSchema, filterValue) => {
-        const filteredSchema = {};
+        const filteredSchema = {} as Schema;
         Object.keys(activeSchema)
           .filter((x) => x.includes(filterValue))
           .forEach((k) => (filteredSchema[k] = activeSchema[k]));
