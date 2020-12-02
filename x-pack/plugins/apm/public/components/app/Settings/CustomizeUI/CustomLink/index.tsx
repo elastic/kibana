@@ -17,8 +17,8 @@ import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { INVALID_LICENSE } from '../../../../../../common/custom_link';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
-import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
-import { useLicense } from '../../../../../hooks/useLicense';
+import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
+import { useLicenseContext } from '../../../../../context/license/use_license_context';
 import { LicensePrompt } from '../../../../shared/LicensePrompt';
 import { CreateCustomLinkButton } from './CreateCustomLinkButton';
 import { CreateEditCustomLinkFlyout } from './CreateEditCustomLinkFlyout';
@@ -26,7 +26,7 @@ import { CustomLinkTable } from './CustomLinkTable';
 import { EmptyPrompt } from './EmptyPrompt';
 
 export function CustomLinkOverview() {
-  const license = useLicense();
+  const license = useLicenseContext();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('gold');
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);

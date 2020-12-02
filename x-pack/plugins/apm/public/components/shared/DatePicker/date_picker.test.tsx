@@ -10,12 +10,12 @@ import { mount } from 'enzyme';
 import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
 import { Router } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import {
   UrlParamsContext,
   useUiFilters,
-} from '../../../context/UrlParamsContext';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
+} from '../../../context/url_params_context/url_params_context';
+import { IUrlParams } from '../../../context/url_params_context/types';
 import { DatePicker } from './';
 
 const history = createMemoryHistory();

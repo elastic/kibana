@@ -22,10 +22,7 @@ export interface AllCasesModalProps {
   onRowClick: (id?: string) => void;
 }
 
-const AllCasesModalComponent: React.FC<AllCasesModalProps> = ({
-  onCloseCaseModal,
-  onRowClick,
-}: AllCasesModalProps) => {
+const AllCasesModalComponent: React.FC<AllCasesModalProps> = ({ onCloseCaseModal, onRowClick }) => {
   const userPermissions = useGetUserSavedObjectPermissions();
   const userCanCrud = userPermissions?.crud ?? false;
   return (

@@ -8,7 +8,7 @@ import React, { ReactNode } from 'react';
 import { inRange } from 'lodash';
 import { XAxis, XYPlot } from 'react-vis';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { useTheme } from '../../../../hooks/useTheme';
+import { useTheme } from '../../../../hooks/use_theme';
 import { px } from '../../../../style/variables';
 import { Mark } from './';
 import { LastTickValue } from './LastTickValue';

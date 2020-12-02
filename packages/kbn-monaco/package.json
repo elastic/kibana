@@ -11,5 +11,8 @@
   "devDependencies": {
     "@kbn/babel-preset": "link:../kbn-babel-preset",
     "@kbn/dev-utils": "link:../kbn-dev-utils"
+  },
+  "dependencies": {
+    "@kbn/i18n": "link:../kbn-i18n"
   }
 }
