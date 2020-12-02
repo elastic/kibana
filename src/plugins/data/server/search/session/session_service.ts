@@ -196,8 +196,8 @@ export class BackgroundSessionService {
     if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
 
     // Get the mapping of request hash/search ID for this session
-    const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
-    const idMapping = Object.fromEntries(searchMap.entries());
+    const searchMap = this.sessionSearchMap.get(sessionId);
+    const idMapping = searchMap ? Object.fromEntries(searchMap.ids.entries()) : {};
     const attributes = {
       name,
       created,
