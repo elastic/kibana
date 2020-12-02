@@ -17,9 +17,20 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { InputControlVisPlugin as Plugin } from './plugin';
+import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import { Vis } from '../../visualizations/public';
+import { InputControlExpressionFunctionDefinition } from './input_control_fn';
+import { InputControlVisParams } from './types';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+export const toExpressionAst = (vis: Vis<InputControlVisParams>) => {
+  const inputControl = buildExpressionFunction<InputControlExpressionFunctionDefinition>(
+    'input_control_vis',
+    {
+      visConfig: JSON.stringify(vis.params),
+    }
+  );
+
+  const ast = buildExpression([inputControl]);
+
+  return ast.toAst();
+};

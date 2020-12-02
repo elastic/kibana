@@ -17,9 +17,18 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { InputControlVisPlugin as Plugin } from './plugin';
+import React, { lazy } from 'react';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { InputControlVisDependencies } from '../../plugin';
+import { InputControlVisParams } from '../../types';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+const ControlsTab = lazy(() => import('./controls_tab'));
+const OptionsTab = lazy(() => import('./options_tab'));
+
+export const getControlsTab = (deps: InputControlVisDependencies) => (
+  props: VisOptionsProps<InputControlVisParams>
+) => <ControlsTab {...props} deps={deps} />;
+
+export const OptionsTabLazy = (props: VisOptionsProps<InputControlVisParams>) => (
+  <OptionsTab {...props} />
+);

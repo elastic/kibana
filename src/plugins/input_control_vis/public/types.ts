@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { InputControlVisPlugin as Plugin } from './plugin';
+import { ControlParams } from './editor_utils';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
+export interface InputControlVisParams {
+  controls: ControlParams[];
+  pinFilters: boolean;
+  updateFiltersOnChange: boolean;
+  useTimeFilter: boolean;
 }
