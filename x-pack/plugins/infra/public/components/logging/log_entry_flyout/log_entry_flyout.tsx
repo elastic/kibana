@@ -13,6 +13,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiInMemoryTable,
+  EuiSpacer,
+  EuiTextColor,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -135,11 +137,28 @@ export const LogEntryFlyout = ({
             <EuiTitle size="s">
               <h3 id="flyoutTitle">
                 <FormattedMessage
-                  defaultMessage="Log event document details"
+                  defaultMessage="Details for log entry {logEntryId}"
                   id="xpack.infra.logFlyout.flyoutTitle"
+                  values={{
+                    logEntryId: flyoutItem ? <code>{flyoutItem.id}</code> : '',
+                  }}
                 />
               </h3>
             </EuiTitle>
+            {flyoutItem ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.infra.logFlyout.flyoutSubTitle"
+                    defaultMessage="From index {indexName}"
+                    values={{
+                      indexName: <code>{flyoutItem.index}</code>,
+                    }}
+                  />
+                </EuiTextColor>
+              </>
+            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {flyoutItem !== null ? <LogEntryActionsMenu logEntry={flyoutItem} /> : null}
