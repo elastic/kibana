@@ -5,7 +5,7 @@
  */
 
 import yaml from 'js-yaml';
-import { uniq } from 'lodash';
+import { pick, uniq } from 'lodash';
 import {
   ArchivePackage,
   RegistryPolicyTemplate,
@@ -20,6 +20,42 @@ import { pkgToPkgKey } from '../registry';
 
 const MANIFESTS: Record<string, Buffer> = {};
 const MANIFEST_NAME = 'manifest.yml';
+
+// not sure these are 100% correct but they do the job here
+// keeping them local until others need them
+type OptionalPropertyOf<T extends object> = Exclude<
+  {
+    [K in keyof T]: T extends Record<K, T[K]> ? never : K;
+  }[keyof T],
+  undefined
+>;
+type RequiredPropertyOf<T extends object> = Exclude<keyof T, OptionalPropertyOf<T>>;
+
+type RequiredPackageProp = RequiredPropertyOf<ArchivePackage>;
+type OptionalPackageProp = OptionalPropertyOf<ArchivePackage>;
+// pro: guarantee only supplying known values. these keys must be in ArchivePackage. no typos or new values
+// pro: any values added to these lists will be passed through by default
+// pro & con: values do need to be shadowed / repeated from ArchivePackage, but perhaps we want to limit values
+const requiredArchivePackageProps: readonly RequiredPackageProp[] = [
+  'name',
+  'version',
+  'description',
+  'type',
+  'categories',
+  'format_version',
+] as const;
+
+const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
+  'title',
+  'release',
+  'readme',
+  'screenshots',
+  'icons',
+  'assets',
+  'internal',
+  'data_streams',
+  'policy_templates',
+] as const;
 
 // TODO: everything below performs verification of manifest.yml files, and hence duplicates functionality already implemented in the
 // package registry. At some point this should probably be replaced (or enhanced) with verification based on
@@ -58,43 +94,43 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
   }
 
   // ... which must be valid YAML
-  let manifest;
+  let manifest: ArchivePackage;
   try {
     manifest = yaml.load(manifestBuffer.toString());
   } catch (error) {
     throw new PackageInvalidArchiveError(`Could not parse top-level package manifest: ${error}.`);
   }
 
+  // must have mandatory fields
+  const reqGiven = pick(manifest, requiredArchivePackageProps);
+  const requiredKeysMatch =
+    Object.keys(reqGiven).toString() === requiredArchivePackageProps.toString();
+  if (!requiredKeysMatch) {
+    const list = requiredArchivePackageProps.join(', ');
+    throw new PackageInvalidArchiveError(
+      `Invalid top-level package manifest: one or more fields missing of ${list}`
+    );
+  }
+
+  // at least have all required properties
+  // get optional values and combine into one object for the remaining operations
+  const optGiven = pick(manifest, optionalArchivePackageProps);
+  const parsed: ArchivePackage = { ...reqGiven, ...optGiven };
+
   // Package name and version from the manifest must match those from the toplevel directory
-  const pkgKey = pkgToPkgKey({ name: manifest.name, version: manifest.version });
+  const pkgKey = pkgToPkgKey({ name: parsed.name, version: parsed.version });
   if (toplevelDir !== pkgKey) {
     throw new PackageInvalidArchiveError(
-      `Name ${manifest.name} and version ${manifest.version} do not match top-level directory ${toplevelDir}`
+      `Name ${parsed.name} and version ${parsed.version} do not match top-level directory ${toplevelDir}`
     );
   }
 
-  const { name, version, description, type, categories, format_version: formatVersion } = manifest;
-  // check for mandatory fields
-  if (!(name && version && description && type && categories && formatVersion)) {
-    throw new PackageInvalidArchiveError(
-      'Invalid top-level package manifest: one or more fields missing of name, version, description, type, categories, format_version'
-    );
-  }
+  parsed.data_streams = parseAndVerifyDataStreams(paths, parsed.name, parsed.version);
+  parsed.policy_templates = parseAndVerifyPolicyTemplates(manifest);
 
-  const dataStreams = parseAndVerifyDataStreams(paths, name, version);
-  const policyTemplates = parseAndVerifyPolicyTemplates(manifest);
-
-  return {
-    name,
-    version,
-    description,
-    type,
-    categories,
-    format_version: formatVersion,
-    data_streams: dataStreams,
-    policy_templates: policyTemplates,
-  };
+  return parsed;
 }
+
 function parseAndVerifyDataStreams(
   paths: string[],
   pkgName: string,

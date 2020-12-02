@@ -8,9 +8,9 @@ import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { EnvironmentFilter } from '../../../shared/EnvironmentFilter';
 import { ServiceNameFilter } from '../URLFilter/ServiceNameFilter';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { RUM_AGENT_NAMES } from '../../../../../common/agent_name';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { UserPercentile } from '../UserPercentile';
 
 export function MainFilters() {
