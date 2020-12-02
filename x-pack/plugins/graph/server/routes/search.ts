@@ -31,11 +31,7 @@ export function registerSearchRoute({
         {
           core: {
             uiSettings: { client: uiSettings },
-            elasticsearch: {
-              legacy: {
-                client: { callAsCurrentUser: callCluster },
-              },
-            },
+            elasticsearch: { client: esClient },
           },
         },
         request,
@@ -47,12 +43,14 @@ export function registerSearchRoute({
         try {
           return response.ok({
             body: {
-              resp: await callCluster('search', {
-                index: request.body.index,
-                body: request.body.body,
-                rest_total_hits_as_int: true,
-                ignore_throttled: !includeFrozen,
-              }),
+              resp: (
+                await esClient.asCurrentUser.search({
+                  index: request.body.index,
+                  body: request.body.body,
+                  track_total_hits: true,
+                  ignore_throttled: !includeFrozen,
+                })
+              ).body,
             },
           });
         } catch (error) {

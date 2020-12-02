@@ -186,16 +186,9 @@ export const FleetAppContext: React.FC<{
   /** For testing purposes only */
   routerHistory?: History<any>;
 }> = memo(
-  ({
-    children,
-    startServices,
-    config,
-    history,
-    kibanaVersion,
-    extensions,
-    routerHistory = createHashHistory(),
-  }) => {
+  ({ children, startServices, config, history, kibanaVersion, extensions, routerHistory }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+    const [routerHistoryInstance] = useState(routerHistory || createHashHistory());
 
     return (
       <startServices.i18n.Context>
@@ -207,7 +200,7 @@ export const FleetAppContext: React.FC<{
                   <UIExtensionsContext.Provider value={extensions}>
                     <FleetStatusProvider>
                       <IntraAppStateProvider kibanaScopedHistory={history}>
-                        <Router history={routerHistory}>
+                        <Router history={routerHistoryInstance}>
                           <PackageInstallProvider notifications={startServices.notifications}>
                             {children}
                           </PackageInstallProvider>
