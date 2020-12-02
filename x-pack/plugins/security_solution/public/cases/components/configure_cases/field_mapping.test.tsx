@@ -7,8 +7,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { connectorsConfiguration } from '../../../common/lib/connectors/config';
-import { createDefaultMapping } from '../../../common/lib/connectors/utils';
+import { connectorsConfiguration, createDefaultMapping } from '../connectors';
 
 import { FieldMapping, FieldMappingProps } from './field_mapping';
 import { mapping } from './__mock__';
