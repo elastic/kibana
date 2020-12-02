@@ -28,6 +28,7 @@ import {
   AlertExecutionStatuses,
   AlertExecutionStatusErrorReasons,
   AlertsHealth,
+  ValidActionGroupIds,
 } from '../common';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -92,7 +93,7 @@ export interface AlertType<
   State extends AlertTypeState = AlertTypeState,
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = string
+  ActionGroupIds extends ValidActionGroupIds = ValidActionGroupIds
 > {
   id: string;
   name: string;

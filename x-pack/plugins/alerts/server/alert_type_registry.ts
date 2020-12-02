@@ -20,7 +20,7 @@ import {
   AlertInstanceContext,
   ActionGroup,
 } from './types';
-import { getBuiltinActionGroups } from '../common';
+import { getBuiltinActionGroups, BuiltInActionGroupIds } from '../common';
 
 interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
@@ -73,8 +73,9 @@ export class AlertTypeRegistry {
     Params extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext
-  >(alertType: AlertType<Params, State, InstanceState, InstanceContext>) {
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+    ActionGroupIds extends string = string
+  >(alertType: AlertType<Params, State, InstanceState, InstanceContext, ActionGroupIds>) {
     if (this.has(alertType.id)) {
       throw new Error(
         i18n.translate('xpack.alerts.alertTypeRegistry.register.duplicateAlertTypeError', {
@@ -87,13 +88,30 @@ export class AlertTypeRegistry {
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
     validateActionGroups(alertType.id, alertType.actionGroups);
-    alertType.actionGroups = [...alertType.actionGroups, ..._.cloneDeep(getBuiltinActionGroups())];
-    this.alertTypes.set(alertIdSchema.validate(alertType.id), { ...alertType } as AlertType);
+
+    const alertTypeWithBuiltIns = {
+      ...alertType,
+      actionGroups: [
+        ...alertType.actionGroups,
+        ..._.cloneDeep(getBuiltinActionGroups<ActionGroupIds>()),
+      ],
+    } as AlertType<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds | BuiltInActionGroupIds
+    >;
+
+    this.alertTypes.set(
+      alertIdSchema.validate(alertType.id),
+      (alertTypeWithBuiltIns as unknown) as AlertType
+    );
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
         createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create({ ...alertType } as AlertType, context),
+          this.taskRunnerFactory.create((alertTypeWithBuiltIns as unknown) as AlertType, context),
       },
     });
   }
@@ -102,8 +120,9 @@ export class AlertTypeRegistry {
     Params extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext
-  >(id: string): AlertType<Params, State, InstanceState, InstanceContext> {
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+    ActionGroupIds extends string = string
+  >(id: string): AlertType<Params, State, InstanceState, InstanceContext, ActionGroupIds> {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.alerts.alertTypeRegistry.get.missingAlertTypeError', {
@@ -114,7 +133,18 @@ export class AlertTypeRegistry {
         })
       );
     }
-    return this.alertTypes.get(id)! as AlertType<Params, State, InstanceState, InstanceContext>;
+    // this `as unknown` is needed because the Map type can't handle different elements of the same type
+    // whose Generic params are different, which is how we store these alert types
+    // In this case we trust the caller to tell `get` what they expect, but we can't type check this so
+    // if could cause a runtime error. It's up to AlertType Implementers to make sure they're calling with
+    // the right typing
+    return (this.alertTypes.get(id)! as unknown) as AlertType<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds
+    >;
   }
 
   public list(): Set<RegistryAlertType> {
