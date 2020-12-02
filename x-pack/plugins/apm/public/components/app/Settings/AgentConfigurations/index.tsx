@@ -16,8 +16,8 @@ import { isEmpty } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../../observability/public';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentConfigurationLinks';
 import { AgentConfigurationList } from './List';
 

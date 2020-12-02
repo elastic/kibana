@@ -122,7 +122,7 @@ describe('getAlertInstanceSummary()', () => {
       .addActiveInstance('instance-previously-active', 'action group B')
       .advanceTime(10000)
       .addExecute()
-      .addResolvedInstance('instance-previously-active')
+      .addRecoveredInstance('instance-previously-active')
       .addActiveInstance('instance-currently-active', 'action group A')
       .getEvents();
     const eventsResult = {

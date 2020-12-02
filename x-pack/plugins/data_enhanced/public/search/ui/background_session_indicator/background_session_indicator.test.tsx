@@ -100,3 +100,13 @@ test('Canceled state', async () => {
 
   expect(onRefresh).toBeCalled();
 });
+
+test('Disabled state', async () => {
+  render(
+    <Container>
+      <BackgroundSessionIndicator state={SessionState.Loading} disabled={true} />
+    </Container>
+  );
+
+  expect(screen.getByTestId('backgroundSessionIndicator').querySelector('button')).toBeDisabled();
+});
