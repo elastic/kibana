@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { HttpSetup, DocLinksStart, ToastsSetup } from 'kibana/public';
+import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ActionGroup, AlertActionParam } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
@@ -43,22 +43,17 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
   errors: IErrorObject;
-  docLinks: DocLinksStart;
-  http?: HttpSetup;
   readOnly: boolean;
   consumer?: string;
 }
 
 export interface ActionParamsProps<TParams> {
-  actionParams: TParams;
+  actionParams: Partial<TParams>;
   index: number;
   editAction: (key: string, value: AlertActionParam, index: number) => void;
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
-  docLinks: DocLinksStart;
-  http: HttpSetup;
-  toastNotifications: ToastsSetup;
   actionConnector?: ActionConnector;
 }
 

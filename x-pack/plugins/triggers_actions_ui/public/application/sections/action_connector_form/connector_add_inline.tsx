@@ -22,6 +22,7 @@ import {
 import { AlertAction, ActionTypeIndex } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
+import { useKibana } from '../../../common/lib/kibana';
 
 type AddConnectorInFormProps = {
   actionTypesIndex: ActionTypeIndex;
@@ -30,7 +31,7 @@ type AddConnectorInFormProps = {
   onAddConnector: () => void;
   onDeleteConnector: () => void;
   emptyActionsIds: string[];
-} & Pick<ActionAccordionFormProps, 'actionTypeRegistry' | 'defaultActionGroupId' | 'capabilities'>;
+} & Pick<ActionAccordionFormProps, 'actionTypeRegistry' | 'defaultActionGroupId'>;
 
 export const AddConnectorInline = ({
   actionTypesIndex,
@@ -41,8 +42,10 @@ export const AddConnectorInline = ({
   actionTypeRegistry,
   emptyActionsIds,
   defaultActionGroupId,
-  capabilities,
 }: AddConnectorInFormProps) => {
+  const {
+    application: { capabilities },
+  } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
 
   const actionTypeName = actionTypesIndex
