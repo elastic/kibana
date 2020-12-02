@@ -28,7 +28,12 @@ const StatusComponent: React.FC<Props> = ({ type, withArrow = false, onClick = n
   );
 
   return (
-    <EuiBadge {...props} iconOnClick={onClick} iconOnClickAriaLabel={i18n.STATUS_ICON_ARIA}>
+    <EuiBadge
+      {...props}
+      iconOnClick={onClick}
+      iconOnClickAriaLabel={i18n.STATUS_ICON_ARIA}
+      data-test-subj={`status-badge-${type}`}
+    >
       {statuses[type].label}
     </EuiBadge>
   );

@@ -54,6 +54,7 @@ describe('POST cases', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.id).toEqual('mock-it');
+    expect(response.payload.status).toEqual('open');
     expect(response.payload.created_by.username).toEqual('awesome');
     expect(response.payload.connector).toEqual({
       id: 'none',

@@ -129,6 +129,56 @@ describe('PATCH cases', () => {
     ]);
   });
 
+  it(`Change case to in-progress`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'patch',
+      body: {
+        cases: [
+          {
+            id: 'mock-id-1',
+            status: CaseStatuses['in-progress'],
+            version: 'WzAsMV0=',
+          },
+        ],
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual([
+      {
+        closed_at: null,
+        closed_by: null,
+        comments: [],
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+        created_at: '2019-11-25T21:54:48.952Z',
+        created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
+        description: 'This is a brand new case of a bad meanie defacing data',
+        id: 'mock-id-1',
+        external_service: null,
+        status: CaseStatuses['in-progress'],
+        tags: ['defacement'],
+        title: 'Super Bad Security Issue',
+        totalComment: 0,
+        updated_at: '2019-11-25T21:54:48.952Z',
+        updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
+        version: 'WzE3LDFd',
+      },
+    ]);
+  });
+
   it(`Patches a case without a connector.id`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases',

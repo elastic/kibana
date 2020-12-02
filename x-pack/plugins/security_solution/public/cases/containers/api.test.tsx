@@ -162,6 +162,7 @@ describe('Case Configuration API', () => {
           reporters,
           tags: ['"coke"', '"pepsi"'],
           search: 'hello',
+          status: CaseStatuses.open,
         },
         signal: abortCtrl.signal,
       });
@@ -187,6 +188,7 @@ describe('Case Configuration API', () => {
           reporters,
           tags: ['"("', '"\\"double\\""'],
           search: 'hello',
+          status: CaseStatuses.open,
         },
         signal: abortCtrl.signal,
       });

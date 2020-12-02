@@ -56,7 +56,7 @@ describe('User action tree helpers', () => {
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`);
   });
 
-  it('label title generated for update status to open', () => {
+  it.skip('label title generated for update status to open', () => {
     const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.open };
     const result: string | JSX.Element = getLabelTitle({
       action,
@@ -66,7 +66,7 @@ describe('User action tree helpers', () => {
     expect(result).toEqual(`${i18n.REOPEN_CASE.toLowerCase()} ${i18n.CASE}`);
   });
 
-  it('label title generated for update status to closed', () => {
+  it.skip('label title generated for update status to closed', () => {
     const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.closed };
     const result: string | JSX.Element = getLabelTitle({
       action,

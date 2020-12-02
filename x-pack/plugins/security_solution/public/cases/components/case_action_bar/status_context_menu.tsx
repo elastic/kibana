@@ -39,6 +39,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({ currentStatus, onStatusCh
       key={status}
       icon={status === currentStatus ? 'check' : 'empty'}
       onClick={onContextMenuItemClick(status)}
+      data-test-subj={`case-view-status-dropdown-${status}`}
     >
       <Status type={status} />
     </EuiContextMenuItem>
@@ -52,6 +53,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({ currentStatus, onStatusCh
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         anchorPosition="downLeft"
+        data-test-subj="case-view-status-dropdown"
       >
         <EuiContextMenuPanel items={panelItems} />
       </EuiPopover>

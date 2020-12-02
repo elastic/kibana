@@ -24,13 +24,19 @@ const StatusFilterComponent: React.FC<Props> = ({ stats, selectedStatus, onStatu
         <EuiFlexItem grow={false}>
           <Status type={status} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{`(${stats[status]})`}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>
       </EuiFlexGroup>
     ),
+    'data-test-subj': `case-status-filter-${status}`,
   }));
 
   return (
-    <EuiSuperSelect options={options} valueOfSelected={selectedStatus} onChange={onStatusChanged} />
+    <EuiSuperSelect
+      options={options}
+      valueOfSelected={selectedStatus}
+      onChange={onStatusChanged}
+      data-test-subj="case-status-filter"
+    />
   );
 };
 

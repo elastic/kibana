@@ -30,6 +30,7 @@ const props = {
   initial: DEFAULT_FILTER_OPTIONS,
   setFilterRefetch,
 };
+
 describe('CasesTableFilters ', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -43,18 +44,14 @@ describe('CasesTableFilters ', () => {
     });
   });
 
-  it('should render the initial case count', () => {
+  it('should render the case status filter dropdown', () => {
     const wrapper = mount(
       <TestProviders>
         <CasesTableFilters {...props} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="open-case-count"]`).last().text()).toEqual(
-      'Open cases (99)'
-    );
-    expect(wrapper.find(`[data-test-subj="closed-case-count"]`).last().text()).toEqual(
-      'Closed cases (1234)'
-    );
+
+    expect(wrapper.find(`[data-test-subj="case-status-filter"]`).first().exists()).toBeTruthy();
   });
 
   it('should call onFilterChange when selected tags change', () => {
@@ -99,14 +96,15 @@ describe('CasesTableFilters ', () => {
     expect(onFilterChanged).toBeCalledWith({ search: 'My search' });
   });
 
-  it('should call onFilterChange when status toggled', () => {
+  it('should call onFilterChange when changing status', () => {
     const wrapper = mount(
       <TestProviders>
         <CasesTableFilters {...props} />
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="closed-case-count"]`).last().simulate('click');
 
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+    wrapper.find('button[data-test-subj="case-status-filter-closed"]').simulate('click');
     expect(onFilterChanged).toBeCalledWith({ status: CaseStatuses.closed });
   });
 

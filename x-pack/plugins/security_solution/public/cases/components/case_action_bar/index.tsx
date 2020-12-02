@@ -56,7 +56,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       <EuiFlexItem grow={false}>
         <MyDescriptionList compressed>
           <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="case-view-status">
               <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 <StatusContextMenu
