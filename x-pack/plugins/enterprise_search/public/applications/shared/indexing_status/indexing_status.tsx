@@ -41,7 +41,7 @@ export const IndexingStatus: React.FC<IIndexingStatusProps> = ({
   }, []);
 
   return (
-    <div className="c-stui-indexing-status-wrapper">
+    <>
       {percentageComplete < 100 && (
         <EuiPanel paddingSize="l" hasShadow={true}>
           <IndexingStatusContent percentageComplete={percentageComplete} />
@@ -53,6 +53,6 @@ export const IndexingStatus: React.FC<IIndexingStatusProps> = ({
           <IndexingStatusErrors viewLinkPath={viewLinkPath} />
         </>
       )}
-    </div>
+    </>
   );
 };
