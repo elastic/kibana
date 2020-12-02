@@ -19,7 +19,7 @@
 
 import { basename, dirname, join } from 'path';
 import { schema } from '@kbn/config-schema';
-import { readdir, unlink, rename } from '../fs';
+import { readdir, unlink, rename, exists } from '../fs';
 import { RollingStrategy } from '../strategy';
 import { RollingFileContext } from '../../rolling_file_context';
 import { getNumericMatcher, getNumericFileName } from './pattern_matcher';
@@ -72,7 +72,7 @@ export const numericRollingStrategyConfigSchema = schema.object({
 
 /**
  * A rolling strategy that will suffix the file with a given pattern when rolling,
- * and will only retains a fixed amount of rolled file.
+ * and will only retain a fixed amount of rolled files.
  *
  * @example
  * ```yaml
@@ -96,19 +96,29 @@ export const numericRollingStrategyConfigSchema = schema.object({
  * See {@link NumericRollingStrategyConfig} for more details.
  */
 export class NumericRollingStrategy implements RollingStrategy {
+  private readonly logFilePath;
+  private readonly logFileBaseName;
+  private readonly logFileFolder;
+
   constructor(
     private readonly config: NumericRollingStrategyConfig,
     private readonly context: RollingFileContext
-  ) {}
+  ) {
+    this.logFilePath = this.context.filePath;
+    this.logFileBaseName = basename(this.context.filePath);
+    this.logFileFolder = dirname(this.context.filePath);
+  }
 
   async rollout() {
-    // console.log('***** performing rolling');
+    // in case of time-interval triggering policy, we can have an entire
+    // interval without any log event. In that case, the log file is not even
+    // present, and we should not perform the rollout
+    if (!(await exists(this.logFilePath))) {
+      return;
+    }
 
-    const logFileBaseName = basename(this.context.filePath);
-    const logFileFolder = dirname(this.context.filePath);
-
-    const matcher = getNumericMatcher(logFileBaseName, this.config.pattern);
-    const dirContent = await readdir(logFileFolder);
+    const matcher = getNumericMatcher(this.logFileBaseName, this.config.pattern);
+    const dirContent = await readdir(this.logFileFolder);
 
     const orderedFiles = dirContent
       .map((fileName) => ({
@@ -123,21 +133,17 @@ export class NumericRollingStrategy implements RollingStrategy {
     const filesToDelete = orderedFiles.slice(filesToRoll.length, orderedFiles.length);
 
     for (const fileToDelete of filesToDelete) {
-      // console.log('*** will delete ', fileToDelete);
-
-      await unlink(join(logFileFolder, fileToDelete));
+      await unlink(join(this.logFileFolder, fileToDelete));
     }
 
     for (let i = filesToRoll.length - 1; i >= 0; i--) {
       const oldFileName = filesToRoll[i];
-      const newFileName = getNumericFileName(logFileBaseName, this.config.pattern, i + 2);
-      // console.log('*** will roll ', oldFileName, newFileName);
-      await rename(join(logFileFolder, oldFileName), join(logFileFolder, newFileName));
+      const newFileName = getNumericFileName(this.logFileBaseName, this.config.pattern, i + 2);
+      await rename(join(this.logFileFolder, oldFileName), join(this.logFileFolder, newFileName));
     }
 
-    const currentFileNewName = getNumericFileName(logFileBaseName, this.config.pattern, 1);
-    // console.log('*** will roll ', logFileBaseName, currentFileNewName);
-    await rename(this.context.filePath, join(logFileFolder, currentFileNewName));
+    const currentFileNewName = getNumericFileName(this.logFileBaseName, this.config.pattern, 1);
+    await rename(this.context.filePath, join(this.logFileFolder, currentFileNewName));
 
     // updates the context file info to mirror the new size and date
     this.context.refreshFileInfo();

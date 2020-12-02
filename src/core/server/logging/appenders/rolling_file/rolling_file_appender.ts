@@ -146,7 +146,6 @@ export class RollingFileAppender implements DisposableAppender {
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log('Error while rolling file: ', e);
-      throw e;
     } finally {
       this.flushBuffer();
     }
@@ -154,11 +153,11 @@ export class RollingFileAppender implements DisposableAppender {
 
   private flushBuffer() {
     const pendingLogs = this.buffer.flush();
-    // in some extreme rare scenario, `dispose` can be called during a rollover
+    // in some extreme scenarios, `dispose` can be called during a rollover
     // where the internal buffered logs would trigger another rollover
     // (rollover started, logs keep coming and got buffered, dispose is called, rollover ends and we then flush)
     // this would cause a second rollover that would not be awaited
-    // for, and could result in a race with the newly created appender
+    // and could result in a race with the newly created appender
     // that would also be performing a rollover.
     // so if we are disposed, we just flush the buffer directly to the file instead to avoid loosing the entries.
     for (const log of pendingLogs) {

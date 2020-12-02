@@ -23,3 +23,4 @@ import { promisify } from 'util';
 export const readdir = promisify(Fs.readdir);
 export const unlink = promisify(Fs.unlink);
 export const rename = promisify(Fs.rename);
+export const exists = promisify(Fs.exists);
