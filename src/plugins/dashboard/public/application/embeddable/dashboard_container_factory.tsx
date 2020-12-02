@@ -27,7 +27,7 @@ import {
   EmbeddableFactoryDefinition,
   ErrorEmbeddable,
   Container,
-} from '../../embeddable_plugin';
+} from '../../../../embeddable/public';
 import { DashboardContainer, DashboardContainerInput } from './dashboard_container';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 

@@ -29,7 +29,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { IUiSettingsClient, HttpStart } from 'kibana/public';
-import * as constants from './dashboard_empty_screen_constants';
+import { emptyScreenStrings as constants } from '../dashboard_strings';
 
 export interface DashboardEmptyScreenProps {
   showLinkToVisualize: boolean;
@@ -136,7 +136,7 @@ export function DashboardEmptyScreen({
   );
   const viewMode = page(constants.fillDashboardTitle, true);
   const editMode = (
-    <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget">
+    <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget testClass">
       {enterViewModeParagraph}
       <EuiSpacer size="l" />
       {linkToVisualizeParagraph}

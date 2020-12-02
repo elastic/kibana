@@ -612,7 +612,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
     >
       <PseudoLocaleWrapper>
         <div
-          className="dshEmptyWidget"
+          className="dshEmptyWidget testClass"
           data-test-subj="emptyDashboardWidget"
         >
           <EuiText

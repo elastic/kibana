@@ -6,7 +6,7 @@
 
 import { dashboardServiceProvider } from './dashboard_service';
 import { savedObjectsServiceMock } from '../../../../../../src/core/public/mocks';
-import { SavedObjectDashboard } from '../../../../../../src/plugins/dashboard/public/saved_dashboards';
+import { DashboardSavedObject } from '../../../../../../src/plugins/dashboard/public/saved_dashboards';
 import {
   DashboardUrlGenerator,
   SavedDashboardPanel,
@@ -91,7 +91,7 @@ describe('DashboardService', () => {
         kibanaSavedObjectMeta: {
           searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
         },
-      } as unknown) as SavedObjectDashboard,
+      } as unknown) as DashboardSavedObject,
       [{ title: 'Test title', type: 'test-panel', embeddableConfig: { testConfig: '' } }]
     );
     // assert

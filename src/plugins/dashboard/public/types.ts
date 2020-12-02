@@ -19,8 +19,7 @@
 
 import { Query, Filter } from 'src/plugins/data/public';
 import { SavedObject as SavedObjectType, SavedObjectAttributes } from 'src/core/public';
-
-import { ViewMode } from './embeddable_plugin';
+import { ViewMode } from '../../embeddable/public';
 
 import { SavedDashboardPanel } from '../common/types';
 export { SavedDashboardPanel };

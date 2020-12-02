@@ -18,8 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters } from 'kibana/public';
-import { ViewMode } from '../../embeddable_plugin';
+import { ViewMode } from '../../../../embeddable/public';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../../types';
 
@@ -32,8 +31,7 @@ import { NavAction } from '../../types';
 export function getTopNavConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
-  hideWriteControls: boolean,
-  onAppLeave?: AppMountParameters['onAppLeave']
+  hideWriteControls: boolean
 ) {
   switch (dashboardMode) {
     case ViewMode.VIEW:
@@ -185,9 +183,9 @@ function getCreateNewConfig(action: NavAction) {
   };
 }
 
-/**
- * @returns {kbnTopNavConfig}
- */
+// /**
+//  * @returns {kbnTopNavConfig}
+//  */
 function getShareConfig(action: NavAction | undefined) {
   return {
     id: 'share',
@@ -198,7 +196,7 @@ function getShareConfig(action: NavAction | undefined) {
       defaultMessage: 'Share Dashboard',
     }),
     testId: 'shareTopNavButton',
-    run: action,
+    run: action ?? (() => {}),
     // disable the Share button if no action specified
     disableButton: !action,
   };

@@ -24,7 +24,7 @@ import { RefreshInterval, TimeRange, Query, Filter } from 'src/plugins/data/publ
 import { CoreStart } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import uuid from 'uuid';
-import { UiActionsStart } from '../../ui_actions_plugin';
+import { UiActionsStart } from '../../../../ui_actions/public';
 import {
   Container,
   ContainerInput,
@@ -34,7 +34,7 @@ import {
   IEmbeddable,
   EmbeddableStart,
   PanelState,
-} from '../../embeddable_plugin';
+} from '../../../../embeddable/public';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
@@ -47,23 +47,24 @@ import {
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import { EmbeddableStateTransfer, EmbeddableOutput } from '../../../../embeddable/public';
+import { DashboardCapabilities } from '../types';
 
 export interface DashboardContainerInput extends ContainerInput {
-  viewMode: ViewMode;
-  filters: Filter[];
-  query: Query;
-  timeRange: TimeRange;
+  dashboardCapabilities?: DashboardCapabilities;
   refreshConfig?: RefreshInterval;
-  expandedPanelId?: string;
-  useMargins: boolean;
-  title: string;
-  description?: string;
   isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;
+  expandedPanelId?: string;
+  timeRange: TimeRange;
+  description?: string;
+  useMargins: boolean;
+  viewMode: ViewMode;
+  filters: Filter[];
+  title: string;
+  query: Query;
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
   };
-  isEmptyState?: boolean;
 }
 
 interface IndexSignature {
@@ -95,12 +96,28 @@ export interface DashboardContainerOptions {
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerOptions>;
 export type DashboardReactContext = KibanaReactContext<DashboardContainerOptions>;
 
+const defaultCapabilities = {
+  show: false,
+  createNew: false,
+  saveQuery: false,
+  createShortUrl: false,
+  hideWriteControls: true,
+  showWriteControls: false,
+  mapsCapabilities: { save: false },
+  visualizeCapabilities: { save: false },
+};
+
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
-  public renderEmpty?: undefined | (() => React.ReactNode);
-
   private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
+
+  public renderEmptyScreen?: () => React.ReactNode;
+  public skipWarningOnAppLeave?: boolean;
+
+  public getPanelCount = () => {
+    return Object.keys(this.getInput().panels).length;
+  };
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -110,6 +127,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   ) {
     super(
       {
+        dashboardCapabilities: defaultCapabilities,
         ...initialInput,
       },
       { embeddableLoaded: {} },
@@ -240,11 +258,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.options}>
-          <DashboardViewport
-            renderEmpty={this.renderEmpty}
-            container={this}
-            PanelComponent={this.embeddablePanel}
-          />
+          <DashboardViewport container={this} PanelComponent={this.embeddablePanel} />
         </KibanaContextProvider>
       </I18nProvider>,
       dom

@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '../embeddable_plugin';
+import { ViewMode } from '../../../embeddable/public';
 
 /**
  * @param title {string} the current title of the dashboard
@@ -56,3 +56,152 @@ export function getDashboardTitle(
 
   return displayTitle;
 }
+
+export const shareModalStrings = {
+  topMenuCheckbox: () =>
+    i18n.translate('dashboard.embedUrlParamExtension.topMenu', {
+      defaultMessage: 'Top menu',
+    }),
+  queryCheckbox: () =>
+    i18n.translate('dashboard.embedUrlParamExtension.query', {
+      defaultMessage: 'Query',
+    }),
+  timeFilterCheckbox: () =>
+    i18n.translate('dashboard.embedUrlParamExtension.timeFilter', {
+      defaultMessage: 'Time filter',
+    }),
+  filterBarCheckbox: () =>
+    i18n.translate('dashboard.embedUrlParamExtension.filterBar', {
+      defaultMessage: 'Filter bar',
+    }),
+  checkboxLegend: () =>
+    i18n.translate('dashboard.embedUrlParamExtension.include', {
+      defaultMessage: 'Include',
+    }),
+};
+
+export const dashboardBreadcrumb = i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
+  defaultMessage: 'Dashboard',
+});
+
+export const dashboardPageTitle = i18n.translate('dashboard.dashboardPageTitle', {
+  defaultMessage: 'Dashboards',
+});
+
+export const dashboard60Warning = i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
+  defaultMessage: 'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
+});
+
+export const dashboardListingTable = {
+  entityName: i18n.translate('dashboard.listing.table.entityName', {
+    defaultMessage: 'dashboard',
+  }),
+  entityNamePlural: i18n.translate('dashboard.listing.table.entityNamePlural', {
+    defaultMessage: 'dashboards',
+  }),
+  tableListTitle: i18n.translate('dashboard.listing.dashboardsTitle', {
+    defaultMessage: 'Dashboards',
+  }),
+  tableCaption: i18n.translate('dashboard.listing.dashboardsTitle', {
+    defaultMessage: 'Dashboards',
+  }),
+  titleColumnName: i18n.translate('dashboard.listing.table.titleColumnName', {
+    defaultMessage: 'Title',
+  }),
+  descriptionColumnName: i18n.translate('dashboard.listing.table.descriptionColumnName', {
+    defaultMessage: 'Description',
+  }),
+};
+
+export const dashboardReadonlyBadge = {
+  text: i18n.translate('dashboard.badge.readOnly.text', {
+    defaultMessage: 'Read only',
+  }),
+  tooltip: i18n.translate('dashboard.badge.readOnly.tooltip', {
+    defaultMessage: 'Unable to save dashboards',
+  }),
+};
+
+export const leaveConfirmStrings = {
+  leaveTitle: i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesTitle', {
+    defaultMessage: 'Unsaved changes',
+  }),
+  leaveSubtitle: i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesSubtitle', {
+    defaultMessage: 'Leave Dashboard with unsaved work?',
+  }),
+  discardTitle: i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesTitle', {
+    defaultMessage: 'Discard changes to dashboard?',
+  }),
+  discardSubtitle: i18n.translate(
+    'dashboard.changeViewModeConfirmModal.discardChangesDescription',
+    {
+      defaultMessage: `Once you discard your changes, there's no getting them back.`,
+    }
+  ),
+  confirmButtonText: i18n.translate('dashboard.changeViewModeConfirmModal.confirmButtonLabel', {
+    defaultMessage: 'Discard changes',
+  }),
+  cancelButtonText: i18n.translate('dashboard.changeViewModeConfirmModal.cancelButtonLabel', {
+    defaultMessage: 'Continue editing',
+  }),
+};
+
+// Empty Screen
+export const emptyScreenStrings = {
+  // Readonly Mode
+  emptyDashboardTitle: i18n.translate('dashboard.emptyDashboardTitle', {
+    defaultMessage: 'This dashboard is empty.',
+  }),
+  emptyDashboardAdditionalPrivilege: i18n.translate('dashboard.emptyDashboardAdditionalPrivilege', {
+    defaultMessage: 'You need additional privileges to edit this dashboard.',
+  }),
+
+  // View Mode
+  fillDashboardTitle: i18n.translate('dashboard.fillDashboardTitle', {
+    defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
+  }),
+  howToStartWorkingOnNewDashboardDescription1: i18n.translate(
+    'dashboard.howToStartWorkingOnNewDashboardDescription1',
+    {
+      defaultMessage: 'Click',
+    }
+  ),
+  howToStartWorkingOnNewDashboardDescription2: i18n.translate(
+    'dashboard.howToStartWorkingOnNewDashboardDescription2',
+    {
+      defaultMessage: 'in the menu bar above to start adding panels.',
+    }
+  ),
+  howToStartWorkingOnNewDashboardEditLinkText: i18n.translate(
+    'dashboard.howToStartWorkingOnNewDashboardEditLinkText',
+    {
+      defaultMessage: 'Edit',
+    }
+  ),
+  howToStartWorkingOnNewDashboardEditLinkAriaLabel: i18n.translate(
+    'dashboard.howToStartWorkingOnNewDashboardEditLinkAriaLabel',
+    {
+      defaultMessage: 'Edit dashboard',
+    }
+  ),
+
+  // Edit Mode
+  addExistingVisualizationLinkText: i18n.translate('dashboard.addExistingVisualizationLinkText', {
+    defaultMessage: 'Add an existing',
+  }),
+  addExistingVisualizationLinkAriaLabel: i18n.translate('dashboard.addVisualizationLinkAriaLabel', {
+    defaultMessage: 'Add an existing visualization',
+  }),
+  addNewVisualizationDescription: i18n.translate('dashboard.addNewVisualizationText', {
+    defaultMessage: 'or new object to this dashboard',
+  }),
+  createNewVisualizationButton: i18n.translate('dashboard.createNewVisualizationButton', {
+    defaultMessage: 'Create new',
+  }),
+  createNewVisualizationButtonAriaLabel: i18n.translate(
+    'dashboard.createNewVisualizationButtonAriaLabel',
+    {
+      defaultMessage: 'Create new visualization button',
+    }
+  ),
+};

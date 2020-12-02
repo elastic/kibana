@@ -19,9 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
-import { IEmbeddable, ViewMode, EmbeddableStart } from '../../embeddable_plugin';
+import { IEmbeddable, ViewMode, EmbeddableStart } from '../../../../embeddable/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
+import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
 
 export const ACTION_REPLACE_PANEL = 'replacePanel';

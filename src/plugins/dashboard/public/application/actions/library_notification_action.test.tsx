@@ -16,21 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isErrorEmbeddable, ReferenceOrValueEmbeddable } from '../../embeddable_plugin';
+
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
+
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { LibraryNotificationAction, UnlinkFromLibraryAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { ErrorEmbeddable, IContainer, ViewMode } from '../../../../embeddable/public';
+import {
+  ErrorEmbeddable,
+  IContainer,
+  isErrorEmbeddable,
+  ReferenceOrValueEmbeddable,
+  ViewMode,
+} from '../../../../embeddable/public';
+import {
+  ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
+  ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
+  CONTACT_CARD_EMBEDDABLE,
+} from '../../../../embeddable/public/lib/test_samples';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(

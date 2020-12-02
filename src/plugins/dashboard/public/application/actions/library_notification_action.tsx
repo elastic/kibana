@@ -24,8 +24,8 @@ import {
   ViewMode,
   isReferenceOrValueEmbeddable,
   isErrorEmbeddable,
-} from '../../embeddable_plugin';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
+} from '../../../../embeddable/public';
+import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
 import { reactToUiComponent } from '../../../../kibana_react/public';
 import { UnlinkFromLibraryAction } from '.';
 import { LibraryNotificationPopover } from './library_notification_popover';

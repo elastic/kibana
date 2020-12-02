@@ -18,8 +18,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable } from '../../embeddable_plugin';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
+import { IEmbeddable } from '../../../../embeddable/public';
+import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
 import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,

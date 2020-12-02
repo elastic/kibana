@@ -23,19 +23,18 @@ import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 
 import type { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
 import { SavedObjectSaveModal } from '../../../../saved_objects/public';
-
-export interface SaveOptions {
-  newTitle: string;
-  newDescription: string;
-  newTags?: string[];
-  newCopyOnSave: boolean;
-  newTimeRestore: boolean;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
-}
+import { DashboardSaveOptions } from '../types';
 
 interface Props {
-  onSave: (options: SaveOptions) => void;
+  onSave: ({
+    newTitle,
+    newDescription,
+    newCopyOnSave,
+    newTags,
+    newTimeRestore,
+    isTitleDuplicateConfirmed,
+    onTitleDuplicate,
+  }: DashboardSaveOptions) => void;
   onClose: () => void;
   title: string;
   description: string;

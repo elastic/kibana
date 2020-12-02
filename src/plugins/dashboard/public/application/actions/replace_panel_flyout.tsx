@@ -29,7 +29,7 @@ import {
   IContainer,
   IEmbeddable,
   SavedObjectEmbeddableInput,
-} from '../../embeddable_plugin';
+} from '../../../../embeddable/public';
 
 interface Props {
   container: IContainer;

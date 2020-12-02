@@ -28,7 +28,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import type { SavedObjectTagDecoratorTypeGuard } from 'src/plugins/saved_objects_tagging_oss/public';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
-import { ViewMode } from '../embeddable_plugin';
+import { ViewMode } from '../../../../plugins/embeddable/public';
 import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
 import { FilterUtils } from './lib/filter_utils';
 import {
@@ -45,7 +45,7 @@ import {
   ReduxLikeStateContainer,
   syncState,
 } from '../../../kibana_utils/public';
-import { SavedObjectDashboard } from '../saved_dashboards';
+import { DashboardSavedObject } from '../saved_dashboards';
 import { DashboardContainer } from './embeddable';
 import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/embeddable_saved_object_converters';
 
@@ -56,7 +56,7 @@ import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/
  * versa. They should be as decoupled as possible so updating the store won't affect bwc of urls.
  */
 export class DashboardStateManager {
-  public savedDashboard: SavedObjectDashboard;
+  public savedDashboard: DashboardSavedObject;
   public lastSavedDashboardFilters: {
     timeTo?: string | Moment;
     timeFrom?: string | Moment;
@@ -105,7 +105,7 @@ export class DashboardStateManager {
     usageCollection,
     hasTaggingCapabilities,
   }: {
-    savedDashboard: SavedObjectDashboard;
+    savedDashboard: DashboardSavedObject;
     hideWriteControls: boolean;
     kibanaVersion: string;
     kbnUrlStateStorage: IKbnUrlStateStorage;

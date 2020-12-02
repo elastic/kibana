@@ -1,22 +1,170 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`after fetch hideWriteControls 1`] = `
-<I18nProvider>
+exports[`after fetch When given a title that matches multiple dashboards, filter on the title 1`] = `
+<DashboardListing
+  kbnUrlStateStorage={
+    Object {
+      "cancel": [Function],
+      "change$": [Function],
+      "flush": [Function],
+      "get": [Function],
+      "set": [Function],
+    }
+  }
+  redirectTo={[MockFunction]}
+  title="search by title"
+>
   <TableListView
-    createItem={null}
-    deleteItems={null}
-    editItem={null}
+    createItem={[Function]}
+    deleteItems={[Function]}
+    editItem={[Function]}
+    entityName="dashboard"
+    entityNamePlural="dashboards"
+    findItems={[Function]}
+    headingId="dashboardListingHeading"
+    initialFilter="\\"search by title\\""
+    initialPageSize={20}
+    listingLimit={100}
+    noItemsFragment={
+      <div>
+        <EuiEmptyPrompt
+          actions={
+            <EuiButton
+              data-test-subj="createDashboardPromptButton"
+              fill={true}
+              iconType="plusInCircle"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Create new dashboard"
+                id="dashboard.listing.createNewDashboard.createButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          }
+          body={
+            <React.Fragment>
+              <p>
+                <FormattedMessage
+                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  values={Object {}}
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  values={
+                    Object {
+                      "sampleDataInstallLink": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <FormattedMessage
+                          defaultMessage="Install some sample data"
+                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                          values={Object {}}
+                        />
+                      </EuiLink>,
+                    }
+                  }
+                />
+              </p>
+            </React.Fragment>
+          }
+          iconType="dashboardApp"
+          title={
+            <h1
+              id="dashboardListingHeading"
+            >
+              <FormattedMessage
+                defaultMessage="Create your first dashboard"
+                id="dashboard.listing.createNewDashboard.title"
+                values={Object {}}
+              />
+            </h1>
+          }
+        />
+      </div>
+    }
+    rowHeader="title"
+    searchFilters={Array []}
+    tableCaption="Dashboards"
+    tableColumns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "field": "description",
+          "name": "Description",
+          "render": [Function],
+          "sortable": true,
+        },
+      ]
+    }
+    tableListTitle="Dashboards"
+    toastNotifications={
+      Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      }
+    }
+  >
+    <EuiPage
+      className="itemListing__page"
+      data-test-subj="dashboardLandingPage"
+      restrictWidth={true}
+    >
+      <div
+        className="euiPage euiPage--restrictWidth-default itemListing__page"
+        data-test-subj="dashboardLandingPage"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
+          />
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </TableListView>
+</DashboardListing>
+`;
+
+exports[`after fetch hideWriteControls 1`] = `
+<DashboardListing
+  kbnUrlStateStorage={
+    Object {
+      "cancel": [Function],
+      "change$": [Function],
+      "flush": [Function],
+      "get": [Function],
+      "set": [Function],
+    }
+  }
+  redirectTo={[MockFunction]}
+>
+  <TableListView
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={10}
-    listingLimit={1}
+    initialPageSize={20}
+    listingLimit={100}
     noItemsFragment={
       <div>
         <EuiEmptyPrompt
-          iconType="visualizeApp"
+          iconType="dashboardApp"
           title={
             <h1
               id="dashboardListingHeading"
@@ -43,26 +191,61 @@ exports[`after fetch hideWriteControls 1`] = `
           "sortable": true,
         },
         Object {
-          "dataType": "string",
           "field": "description",
           "name": "Description",
+          "render": [Function],
           "sortable": true,
         },
       ]
     }
     tableListTitle="Dashboards"
-    toastNotifications={Object {}}
-    uiSettings={
+    toastNotifications={
       Object {
-        "get": [MockFunction],
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
       }
     }
-  />
-</I18nProvider>
+  >
+    <EuiPage
+      className="itemListing__page"
+      data-test-subj="dashboardLandingPage"
+      restrictWidth={true}
+    >
+      <div
+        className="euiPage euiPage--restrictWidth-default itemListing__page"
+        data-test-subj="dashboardLandingPage"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
+          />
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </TableListView>
+</DashboardListing>
 `;
 
 exports[`after fetch initialFilter 1`] = `
-<I18nProvider>
+<DashboardListing
+  initialFilter="testFilter"
+  kbnUrlStateStorage={
+    Object {
+      "cancel": [Function],
+      "change$": [Function],
+      "flush": [Function],
+      "get": [Function],
+      "set": [Function],
+    }
+  }
+  redirectTo={[MockFunction]}
+>
   <TableListView
     createItem={[Function]}
     deleteItems={[Function]}
@@ -71,9 +254,9 @@ exports[`after fetch initialFilter 1`] = `
     entityNamePlural="dashboards"
     findItems={[Function]}
     headingId="dashboardListingHeading"
-    initialFilter="my dashboard"
-    initialPageSize={10}
-    listingLimit={1000}
+    initialFilter="testFilter"
+    initialPageSize={20}
+    listingLimit={100}
     noItemsFragment={
       <div>
         <EuiEmptyPrompt
@@ -148,26 +331,199 @@ exports[`after fetch initialFilter 1`] = `
           "sortable": true,
         },
         Object {
-          "dataType": "string",
           "field": "description",
           "name": "Description",
+          "render": [Function],
           "sortable": true,
         },
       ]
     }
     tableListTitle="Dashboards"
-    toastNotifications={Object {}}
-    uiSettings={
+    toastNotifications={
       Object {
-        "get": [MockFunction],
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
       }
     }
-  />
-</I18nProvider>
+  >
+    <EuiPage
+      className="itemListing__page"
+      data-test-subj="dashboardLandingPage"
+      restrictWidth={true}
+    >
+      <div
+        className="euiPage euiPage--restrictWidth-default itemListing__page"
+        data-test-subj="dashboardLandingPage"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
+          />
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </TableListView>
+</DashboardListing>
+`;
+
+exports[`after fetch renders all table rows 1`] = `
+<DashboardListing
+  kbnUrlStateStorage={
+    Object {
+      "cancel": [Function],
+      "change$": [Function],
+      "flush": [Function],
+      "get": [Function],
+      "set": [Function],
+    }
+  }
+  redirectTo={[MockFunction]}
+>
+  <TableListView
+    createItem={[Function]}
+    deleteItems={[Function]}
+    editItem={[Function]}
+    entityName="dashboard"
+    entityNamePlural="dashboards"
+    findItems={[Function]}
+    headingId="dashboardListingHeading"
+    initialFilter=""
+    initialPageSize={20}
+    listingLimit={100}
+    noItemsFragment={
+      <div>
+        <EuiEmptyPrompt
+          actions={
+            <EuiButton
+              data-test-subj="createDashboardPromptButton"
+              fill={true}
+              iconType="plusInCircle"
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Create new dashboard"
+                id="dashboard.listing.createNewDashboard.createButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>
+          }
+          body={
+            <React.Fragment>
+              <p>
+                <FormattedMessage
+                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  values={Object {}}
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  values={
+                    Object {
+                      "sampleDataInstallLink": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <FormattedMessage
+                          defaultMessage="Install some sample data"
+                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                          values={Object {}}
+                        />
+                      </EuiLink>,
+                    }
+                  }
+                />
+              </p>
+            </React.Fragment>
+          }
+          iconType="dashboardApp"
+          title={
+            <h1
+              id="dashboardListingHeading"
+            >
+              <FormattedMessage
+                defaultMessage="Create your first dashboard"
+                id="dashboard.listing.createNewDashboard.title"
+                values={Object {}}
+              />
+            </h1>
+          }
+        />
+      </div>
+    }
+    rowHeader="title"
+    searchFilters={Array []}
+    tableCaption="Dashboards"
+    tableColumns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "field": "description",
+          "name": "Description",
+          "render": [Function],
+          "sortable": true,
+        },
+      ]
+    }
+    tableListTitle="Dashboards"
+    toastNotifications={
+      Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      }
+    }
+  >
+    <EuiPage
+      className="itemListing__page"
+      data-test-subj="dashboardLandingPage"
+      restrictWidth={true}
+    >
+      <div
+        className="euiPage euiPage--restrictWidth-default itemListing__page"
+        data-test-subj="dashboardLandingPage"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
+          />
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </TableListView>
+</DashboardListing>
 `;
 
 exports[`after fetch renders call to action when no dashboards exist 1`] = `
-<I18nProvider>
+<DashboardListing
+  kbnUrlStateStorage={
+    Object {
+      "cancel": [Function],
+      "change$": [Function],
+      "flush": [Function],
+      "get": [Function],
+      "set": [Function],
+    }
+  }
+  redirectTo={[MockFunction]}
+>
   <TableListView
     createItem={[Function]}
     deleteItems={[Function]}
@@ -177,8 +533,8 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={10}
-    listingLimit={1}
+    initialPageSize={20}
+    listingLimit={100}
     noItemsFragment={
       <div>
         <EuiEmptyPrompt
@@ -253,131 +609,60 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
           "sortable": true,
         },
         Object {
-          "dataType": "string",
           "field": "description",
           "name": "Description",
-          "sortable": true,
-        },
-      ]
-    }
-    tableListTitle="Dashboards"
-    toastNotifications={Object {}}
-    uiSettings={
-      Object {
-        "get": [MockFunction],
-      }
-    }
-  />
-</I18nProvider>
-`;
-
-exports[`after fetch renders table rows 1`] = `
-<I18nProvider>
-  <TableListView
-    createItem={[Function]}
-    deleteItems={[Function]}
-    editItem={[Function]}
-    entityName="dashboard"
-    entityNamePlural="dashboards"
-    findItems={[Function]}
-    headingId="dashboardListingHeading"
-    initialFilter=""
-    initialPageSize={10}
-    listingLimit={1000}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          actions={
-            <EuiButton
-              data-test-subj="createDashboardPromptButton"
-              fill={true}
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Create new dashboard"
-                id="dashboard.listing.createNewDashboard.createButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  values={Object {}}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  values={
-                    Object {
-                      "sampleDataInstallLink": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="Install some sample data"
-                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Create your first dashboard"
-                id="dashboard.listing.createNewDashboard.title"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
-    rowHeader="title"
-    searchFilters={Array []}
-    tableCaption="Dashboards"
-    tableColumns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
           "render": [Function],
           "sortable": true,
         },
-        Object {
-          "dataType": "string",
-          "field": "description",
-          "name": "Description",
-          "sortable": true,
-        },
       ]
     }
     tableListTitle="Dashboards"
-    toastNotifications={Object {}}
-    uiSettings={
+    toastNotifications={
       Object {
-        "get": [MockFunction],
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
       }
     }
-  />
-</I18nProvider>
+  >
+    <EuiPage
+      className="itemListing__page"
+      data-test-subj="dashboardLandingPage"
+      restrictWidth={true}
+    >
+      <div
+        className="euiPage euiPage--restrictWidth-default itemListing__page"
+        data-test-subj="dashboardLandingPage"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
+          />
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </TableListView>
+</DashboardListing>
 `;
 
 exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
-<I18nProvider>
+<DashboardListing
+  kbnUrlStateStorage={
+    Object {
+      "cancel": [Function],
+      "change$": [Function],
+      "flush": [Function],
+      "get": [Function],
+      "set": [Function],
+    }
+  }
+  redirectTo={[MockFunction]}
+>
   <TableListView
     createItem={[Function]}
     deleteItems={[Function]}
@@ -387,7 +672,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={10}
+    initialPageSize={20}
     listingLimit={1}
     noItemsFragment={
       <div>
@@ -463,124 +748,43 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
           "sortable": true,
         },
         Object {
-          "dataType": "string",
           "field": "description",
           "name": "Description",
-          "sortable": true,
-        },
-      ]
-    }
-    tableListTitle="Dashboards"
-    toastNotifications={Object {}}
-    uiSettings={
-      Object {
-        "get": [MockFunction],
-      }
-    }
-  />
-</I18nProvider>
-`;
-
-exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
-<I18nProvider>
-  <TableListView
-    createItem={[Function]}
-    deleteItems={[Function]}
-    editItem={[Function]}
-    entityName="dashboard"
-    entityNamePlural="dashboards"
-    findItems={[Function]}
-    headingId="dashboardListingHeading"
-    initialFilter=""
-    listingLimit={1000}
-    noItemsFragment={
-      <div>
-        <EuiEmptyPrompt
-          actions={
-            <EuiButton
-              data-test-subj="createDashboardPromptButton"
-              fill={true}
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Create new dashboard"
-                id="dashboard.listing.createNewDashboard.createButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                  values={Object {}}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                  values={
-                    Object {
-                      "sampleDataInstallLink": <EuiLink
-                        onClick={[Function]}
-                      >
-                        <FormattedMessage
-                          defaultMessage="Install some sample data"
-                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                          values={Object {}}
-                        />
-                      </EuiLink>,
-                    }
-                  }
-                />
-              </p>
-            </React.Fragment>
-          }
-          iconType="dashboardApp"
-          title={
-            <h1
-              id="dashboardListingHeading"
-            >
-              <FormattedMessage
-                defaultMessage="Create your first dashboard"
-                id="dashboard.listing.createNewDashboard.title"
-                values={Object {}}
-              />
-            </h1>
-          }
-        />
-      </div>
-    }
-    rowHeader="title"
-    searchFilters={Array []}
-    tableCaption="Dashboards"
-    tableColumns={
-      Array [
-        Object {
-          "field": "title",
-          "name": "Title",
           "render": [Function],
           "sortable": true,
         },
-        Object {
-          "dataType": "string",
-          "field": "description",
-          "name": "Description",
-          "sortable": true,
-        },
       ]
     }
     tableListTitle="Dashboards"
-    toastNotifications={Object {}}
-    uiSettings={
+    toastNotifications={
       Object {
-        "get": [MockFunction],
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
       }
     }
-  />
-</I18nProvider>
+  >
+    <EuiPage
+      className="itemListing__page"
+      data-test-subj="dashboardLandingPage"
+      restrictWidth={true}
+    >
+      <div
+        className="euiPage euiPage--restrictWidth-default itemListing__page"
+        data-test-subj="dashboardLandingPage"
+      >
+        <EuiPageBody>
+          <main
+            className="euiPageBody"
+          />
+        </EuiPageBody>
+      </div>
+    </EuiPage>
+  </TableListView>
+</DashboardListing>
 `;
