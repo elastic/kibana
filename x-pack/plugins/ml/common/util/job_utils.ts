@@ -53,22 +53,6 @@ export function isTimeSeriesViewJob(job: CombinedJob): boolean {
   return getSingleMetricViewerJobErrorMessage(job) === undefined;
 }
 
-// Returns a flag to indicate whether the job is suitable for viewing
-// in the Time Series dashboard.
-export function isTimeSeriesViewableJob(job: CombinedJob): boolean {
-  // only allow jobs with at least one detector whose function corresponds to
-  // an ES aggregation which can be viewed in the single metric view and which
-  // doesn't use a scripted field which can be very difficult or impossible to
-  // invert to a reverse search, or when model plot has been enabled.
-  for (let i = 0; i < job.analysis_config.detectors.length; i++) {
-    if (isTimeSeriesViewDetector(job, i)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 // Returns a flag to indicate whether the detector at the index in the specified job
 // is suitable for viewing in the Time Series dashboard.
 export function isTimeSeriesViewDetector(job: CombinedJob, detectorIndex: number): boolean {
@@ -173,7 +157,16 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
 // if the result is undefined, that means the single metric job should be viewable
 export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
   let errorMessage;
-  if (!isTimeSeriesViewableJob(job)) {
+
+  // only allow jobs with at least one detector whose function corresponds to
+  // an ES aggregation which can be viewed in the single metric view and which
+  // doesn't use a scripted field which can be very difficult or impossible to
+  // invert to a reverse search, or when model plot has been enabled.
+  const isChartableTimeSeriesViewJob = job.analysis_config.detectors.some((detector, idx) =>
+    isTimeSeriesViewDetector(job, idx)
+  );
+
+  if (isChartableTimeSeriesViewJob === false) {
     errorMessage = i18n.translate('xpack.ml.timeSeriesJob.notViewableTimeSeriesJobMessage', {
       defaultMessage: 'not a viewable time series job',
     });
@@ -197,18 +190,6 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
             defaultMessage:
               'there are nested terms aggregations in the datafeed and model plot is disabled',
           });
-        }
-
-        // if aggregation interval is different from bucket span
-        const datetimeBucket = aggs[aggBucketsName].date_histogram;
-        if (datetimeBucket?.fixed_interval !== job.analysis_config?.bucket_span) {
-          errorMessage = i18n.translate(
-            'xpack.ml.timeSeriesJob.varyingBucketSpanAggregationInterval',
-            {
-              defaultMessage:
-                'the datafeed has aggregation fields and the aggregation interval is not the same as the bucket span',
-            }
-          );
         }
       }
     }
