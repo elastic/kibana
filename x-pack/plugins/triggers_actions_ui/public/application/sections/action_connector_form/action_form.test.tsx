@@ -66,7 +66,7 @@ describe('action_form', () => {
   };
 
   const disabledByActionType = {
-    id: 'disabled-by-action-type',
+    id: '.jira',
     iconClass: 'test',
     selectMessage: 'test',
     validateConnector: (): ValidationResult => {
@@ -127,7 +127,7 @@ describe('action_form', () => {
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('action_form in alert', () => {
-    async function setup(customActions?: AlertAction[]) {
+    async function setup(customActions?: AlertAction[], customRecoveredActionGroup?: string) {
       const actionTypeRegistry = actionTypeRegistryMock.create();
 
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
@@ -176,7 +176,7 @@ describe('action_form', () => {
         },
         {
           secrets: {},
-          id: 'test5',
+          id: '.jira',
           actionTypeId: disabledByActionType.id,
           name: 'Connector with disabled action group',
           config: {},
@@ -247,12 +247,18 @@ describe('action_form', () => {
             context: [{ name: 'contextVar', description: 'context var1' }],
           }}
           defaultActionGroupId={'default'}
+          recoveredActionGroupId={
+            customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered'
+          }
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;
           }}
           actionGroups={[
             { id: 'default', name: 'Default', defaultActionMessage },
-            { id: 'recovered', name: 'Recovered' },
+            {
+              id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
+              name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
+            },
           ]}
           setActionGroupIdByIndex={(group: string, index: number) => {
             initialAlert.actions[index].group = group;
@@ -305,13 +311,12 @@ describe('action_form', () => {
               minimumLicenseRequired: 'gold',
             },
             {
-              id: 'disabled-by-action-type',
+              id: '.jira',
               name: 'Disabled by action type',
               enabled: true,
               enabledInConfig: true,
               enabledInLicense: true,
               minimumLicenseRequired: 'basic',
-              disabledActionGroups: ['resolved'],
             },
             {
               id: actionTypeWithoutParams.id,
@@ -392,17 +397,15 @@ describe('action_form', () => {
     it('renders disabled action groups for selected action type', async () => {
       const wrapper = await setup([
         {
-          group: RecoveredActionGroup.id,
+          group: 'recovered',
           id: 'test',
-          actionTypeId: actionType.id,
+          actionTypeId: disabledByActionType.id,
           params: {
             message: '',
           },
         },
       ]);
-      const actionOption = wrapper.find(
-        `[data-test-subj="disabled-by-action-type-ActionTypeSelectOption"]`
-      );
+      const actionOption = wrapper.find(`[data-test-subj=".jira-ActionTypeSelectOption"]`);
       actionOption.first().simulate('click');
       const actionGroupsSelect = wrapper.find(
         `[data-test-subj="addNewActionConnectorActionGroup-1"]`
@@ -418,52 +421,48 @@ describe('action_form', () => {
           Object {
             "data-test-subj": "addNewActionConnectorActionGroup-1-option-recovered",
             "disabled": true,
-            "inputDisplay": "Resolved (Not Currently Supported)",
+            "inputDisplay": "Recovered (Not Currently Supported)",
             "value": "recovered",
           },
         ]
       `);
     });
 
-    it('renders selected Recovered action group', async () => {
-      const wrapper = await setup([
-        {
-          group: RecoveredActionGroup.id,
-          id: 'test',
-          actionTypeId: actionType.id,
-          params: {
-            message: '',
+    it('renders disabled action groups for custom recovered action groups', async () => {
+      const wrapper = await setup(
+        [
+          {
+            group: 'iHaveRecovered',
+            id: 'test',
+            actionTypeId: disabledByActionType.id,
+            params: {
+              message: '',
+            },
           },
-        },
-      ]);
-      const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+        ],
+        'iHaveRecovered'
       );
+      const actionOption = wrapper.find(`[data-test-subj=".jira-ActionTypeSelectOption"]`);
       actionOption.first().simulate('click');
       const actionGroupsSelect = wrapper.find(
-        `[data-test-subj="addNewActionConnectorActionGroup-0"]`
+        `[data-test-subj="addNewActionConnectorActionGroup-1"]`
       );
       expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
         Array [
           Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-default",
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-default",
             "disabled": false,
             "inputDisplay": "Default",
             "value": "default",
           },
           Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-recovered",
-            "disabled": false,
-            "inputDisplay": "Recovered",
-            "value": "recovered",
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-iHaveRecovered",
+            "disabled": true,
+            "inputDisplay": "I feel better (Not Currently Supported)",
+            "value": "iHaveRecovered",
           },
         ]
       `);
-
-      expect(actionGroupsSelect.first().find(EuiScreenReaderOnly).text()).toEqual(
-        'Select an option: Recovered, is selected'
-      );
-      expect(actionGroupsSelect.first().find('button').first().text()).toEqual('Recovered');
     });
 
     it('renders available connectors for the selected action type', async () => {
