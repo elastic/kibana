@@ -20,16 +20,33 @@ export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
   const migrationActionsTen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      !!doc.attributes.config?.casesConfiguration || doc.attributes.actionTypeId === '.email',
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => {
+      console.log('getMigrations 10', {
+        doc,
+        keys: Object.keys(doc.attributes.config),
+        ternary: !!doc.attributes.config?.casesConfiguration,
+      });
+      return (
+        !!doc.attributes.config?.casesConfiguration || doc.attributes.actionTypeId === '.email'
+      );
+    },
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
 
   const migrationActionsEleven = encryptedSavedObjects.createMigration<RawAction, RawAction>(
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      !!doc.attributes.config?.isCaseOwned ||
-      !!doc.attributes.config?.incidentConfiguration ||
-      doc.attributes.actionTypeId === '.webhook',
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => {
+      console.log('getMigrations 11', {
+        doc,
+        keys: Object.keys(doc.attributes.config),
+        ternary:
+          !!doc.attributes.config?.isCaseOwned || !!doc.attributes.config?.incidentConfiguration,
+      });
+      return (
+        !!doc.attributes.config?.isCaseOwned ||
+        !!doc.attributes.config?.incidentConfiguration ||
+        doc.attributes.actionTypeId === '.webhook'
+      );
+    },
     pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
   );
 
@@ -59,11 +76,20 @@ function executeMigrationWithErrorHandling(
 function renameCasesConfigurationObject(
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> {
+  console.log('DOES renameCasesConfigurationObject BIT????');
   if (!doc.attributes.config?.casesConfiguration) {
+    console.log('BIT???? early', Object.keys(doc.attributes.config));
     return doc;
   }
   const { casesConfiguration, ...restConfiguration } = doc.attributes.config;
 
+  console.log('BIT???? reformatted', {
+    newKeys: Object.keys({
+      ...restConfiguration,
+      incidentConfiguration: casesConfiguration,
+    }),
+    config: casesConfiguration,
+  });
   return {
     ...doc,
     attributes: {
@@ -84,12 +110,12 @@ function removeCasesFieldMappings(
     !doc.attributes.config?.hasOwnProperty('isCaseOwned') &&
     !doc.attributes.config?.hasOwnProperty('incidentConfiguration')
   ) {
-    console.log('HIT???? early');
+    console.log('HIT???? early', Object.keys(doc.attributes.config));
     return doc;
   }
   const { incidentConfiguration, isCaseOwned, ...restConfiguration } = doc.attributes.config;
 
-  console.log('HIT???? reformatted');
+  console.log('HIT???? reformatted', Object.keys(restConfiguration));
   return {
     ...doc,
     attributes: {
