@@ -33,6 +33,8 @@ describe('BackgroundSessionService', () => {
     type: BACKGROUND_SESSION_TYPE,
     attributes: {
       name: 'my_name',
+      appId: 'my_app_id',
+      urlGeneratorId: 'my_url_generator_id',
       idMapping: {},
     },
     references: [],
@@ -121,6 +123,8 @@ describe('BackgroundSessionService', () => {
       const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
       const isStored = false;
       const name = 'my saved background search session';
+      const appId = 'my_app_id';
+      const urlGeneratorId = 'my_url_generator_id';
       const created = new Date().toISOString();
       const expires = new Date().toISOString();
 
@@ -133,7 +137,11 @@ describe('BackgroundSessionService', () => {
 
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
 
-      await service.save(sessionId, { name, created, expires }, { savedObjectsClient });
+      await service.save(
+        sessionId,
+        { name, created, expires, appId, urlGeneratorId },
+        { savedObjectsClient }
+      );
 
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
         BACKGROUND_SESSION_TYPE,
@@ -145,6 +153,8 @@ describe('BackgroundSessionService', () => {
           restoreState: {},
           status: BackgroundSessionStatus.IN_PROGRESS,
           idMapping: { [requestHash]: searchId },
+          appId,
+          urlGeneratorId,
         },
         { id: sessionId }
       );
@@ -215,6 +225,8 @@ describe('BackgroundSessionService', () => {
         type: BACKGROUND_SESSION_TYPE,
         attributes: {
           name: 'my_name',
+          appId: 'my_app_id',
+          urlGeneratorId: 'my_url_generator_id',
           idMapping: { [requestHash]: searchId },
         },
         references: [],

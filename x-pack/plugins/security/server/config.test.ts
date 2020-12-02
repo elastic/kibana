@@ -902,8 +902,9 @@ describe('config schema', () => {
           "[authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
-           - [credentials.0.password]: expected value of type [string] but got [undefined]
-           - [credentials.1.apiKey]: expected at least one defined value but got [undefined]"
+           - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
+           - [credentials.1.password]: expected value of type [string] but got [undefined]
+           - [credentials.2.apiKey]: expected at least one defined value but got [undefined]"
         `);
 
         expect(() =>
@@ -918,8 +919,9 @@ describe('config schema', () => {
           "[authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
-           - [credentials.0.username]: expected value of type [string] but got [undefined]
-           - [credentials.1.apiKey]: expected at least one defined value but got [undefined]"
+           - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
+           - [credentials.1.username]: expected value of type [string] but got [undefined]
+           - [credentials.2.apiKey]: expected at least one defined value but got [undefined]"
         `);
       });
 
@@ -973,8 +975,9 @@ describe('config schema', () => {
           "[authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
-           - [credentials.0.username]: expected value of type [string] but got [undefined]
-           - [credentials.1.apiKey]: types that failed validation:
+           - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
+           - [credentials.1.username]: expected value of type [string] but got [undefined]
+           - [credentials.2.apiKey]: types that failed validation:
             - [credentials.apiKey.0.key]: expected value of type [string] but got [undefined]
             - [credentials.apiKey.1]: expected value of type [string] but got [Object]"
         `);
@@ -993,8 +996,9 @@ describe('config schema', () => {
           "[authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
-           - [credentials.0.username]: expected value of type [string] but got [undefined]
-           - [credentials.1.apiKey]: types that failed validation:
+           - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
+           - [credentials.1.username]: expected value of type [string] but got [undefined]
+           - [credentials.2.apiKey]: types that failed validation:
             - [credentials.apiKey.0.id]: expected value of type [string] but got [undefined]
             - [credentials.apiKey.1]: expected value of type [string] but got [Object]"
         `);
@@ -1058,6 +1062,40 @@ describe('config schema', () => {
                     "key": "some-key",
                   },
                 },
+                "description": "Continue as Guest",
+                "enabled": true,
+                "hint": "For anonymous users",
+                "icon": "globe",
+                "order": 0,
+                "session": Object {
+                  "idleTimeout": null,
+                },
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+
+      it('can be successfully validated with `elasticsearch_anonymous_user` credentials', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                anonymous: {
+                  anonymous1: {
+                    order: 0,
+                    credentials: 'elasticsearch_anonymous_user',
+                  },
+                },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "anonymous": Object {
+              "anonymous1": Object {
+                "credentials": "elasticsearch_anonymous_user",
                 "description": "Continue as Guest",
                 "enabled": true,
                 "hint": "For anonymous users",

@@ -6,7 +6,6 @@
 <titleabbrev>Create an alert</titleabbrev>
 ++++
 
-beta::[]
 
 The APM app integrates with Kibana's {kibana-ref}/alerting-getting-started.html[alerting and actions] feature.
 It provides a set of built-in **actions** and APM specific threshold **alerts** for you to use

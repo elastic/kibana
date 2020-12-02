@@ -1,0 +1,527 @@
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agents:5460518c-10c7-4c25-b2ec-3f63eafb7d47", 
+  "source": {
+   "type": "fleet-agents", 
+   "references": [], 
+   "updated_at": "2020-09-24T16:30:38.636Z", 
+   "fleet-agents": {
+    "config_id": "6d9d3630-fe80-11ea-82b3-5be7a91e28b6", 
+    "default_api_key": "MngOEjmt4OWFSCvya8AWgDF9p0nPqiCZLpNrqntWdjcGl+vPcbVs+un3ilKC3GQKtKP6KLtMziLR/60teHpAJ0Ls1f+mbCP1PjjAfFL1ZBnGHsvkR099iRJ9q4rCxzmZtifGZQ/s2+t99DRUe8GkJhIj3VR1uN/EKPXmXDWZo0f+bTUDT7vGZVY=", 
+    "current_error_events": "[]", 
+    "config_revision": 1, 
+    "enrolled_at": "2020-09-24T16:11:58.866Z", 
+    "default_api_key_id": "ieriwHQBXUUrssdI83FW", 
+    "last_checkin": "2020-09-24T16:29:07.071Z", 
+    "active": true, 
+    "user_provided_metadata": {}, 
+    "access_api_key_id": "E-riwHQBXUUrssdIvHEw", 
+    "packages": [
+     "system"
+    ], 
+    "type": "PERMANENT", 
+    "local_metadata": {
+     "host": {
+      "name": "mainqa-atlcolo-10-0-7-116.eng.endgames.local", 
+      "ip": [
+       "127.0.0.1/8", 
+       "::1/128", 
+       "fe80::1/64", 
+       "fe80::4de:9ad6:320f:79f5/64", 
+       "fdbb:cb5c:fb4:68:1ca7:3a67:de43:950c/64", 
+       "10.0.7.116/22", 
+       "fdbb:cb5c:fb4:68:1cfe:7be7:f700:8810/64", 
+       "fdbb:cb5c:fb4:68:257d:7303:389d:f335/64", 
+       "fdbb:cb5c:fb4:68:7470:3bec:14b5:2caf/64", 
+       "fdbb:cb5c:fb4:68:9c5f:eab7:8345:f711/64", 
+       "fdbb:cb5c:fb4:68:dc96:8bac:67e0:99dd/64", 
+       "fdbb:cb5c:fb4:68:60c6:73b6:1540:602/64", 
+       "fdbb:cb5c:fb4:68:144:6a1b:1aae:a57d/64"
+      ], 
+      "hostname": "mainqa-atlcolo-10-0-7-116.eng.endgames.local", 
+      "mac": [
+       "00:50:56:b1:7e:49"
+      ], 
+      "architecture": "x86_64", 
+      "id": "4231B1A9-25CB-4157-CF54-6BCD11C742E0"
+     }, 
+     "os": {
+      "kernel": "18.2.0", 
+      "full": "Mac OS X(10.14.1)", 
+      "name": "Mac OS X", 
+      "family": "darwin", 
+      "platform": "darwin", 
+      "version": "10.14.1"
+     }, 
+     "elastic": {
+      "agent": {
+       "version": "7.9.2", 
+       "id": "5460518c-10c7-4c25-b2ec-3f63eafb7d47"
+      }
+     }
+    }
+   }
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agents:ac0ab6c1-2317-478c-93d9-c514d845302d", 
+  "source": {
+   "type": "fleet-agents", 
+   "references": [], 
+   "updated_at": "2020-09-24T16:30:37.974Z", 
+   "fleet-agents": {
+    "config_id": "6d9d3630-fe80-11ea-82b3-5be7a91e28b6", 
+    "default_api_key": "UnSz8pAKTP/0DENATzn13Yo0jcdbWq70IiBJcDY+DF5M063+El91o+448KVaMHj3rCSrULfJboBf1Ao80UKU5WKz4CYJ3ZVjHm39/f8rXMZSah5lQAkl9Ak2v5wUCFd4KTEwUUEmnUKKSQGC53cBhnvoyPdzfNjt1ml96lZFZbxXt/VyU3u8vhQ=", 
+    "current_error_events": "[]", 
+    "config_revision": 1, 
+    "enrolled_at": "2020-09-24T16:11:30.880Z", 
+    "default_api_key_id": "Va7iwHQBEiA0_DvkcN-4", 
+    "last_checkin": "2020-09-24T16:30:37.072Z", 
+    "active": true, 
+    "user_provided_metadata": {}, 
+    "access_api_key_id": "Sq7iwHQBEiA0_DvkT98X", 
+    "packages": [
+     "system"
+    ], 
+    "type": "PERMANENT", 
+    "local_metadata": {
+     "host": {
+      "name": "JCHU-WIN10-1", 
+      "ip": [
+       "fdbb:cb5c:fb4:68:6ca6:5ea3:ae36:af51/64", 
+       "fdbb:cb5c:fb4:68:6c9d:def9:bb8a:6695/128", 
+       "fe80::6ca6:5ea3:ae36:af51/64", 
+       "10.0.7.235/22", 
+       "::1/128", 
+       "127.0.0.1/8"
+      ], 
+      "hostname": "JCHU-WIN10-1", 
+      "mac": [
+       "00:50:56:b1:65:cb"
+      ], 
+      "architecture": "x86_64", 
+      "id": "4143c277-074e-47a9-b37d-37f94b508705"
+     }, 
+     "os": {
+      "kernel": "10.0.18362.1082 (WinBuild.160101.0800)", 
+      "full": "Windows 10 Pro(10.0)", 
+      "name": "Windows 10 Pro", 
+      "family": "windows", 
+      "platform": "windows", 
+      "version": "10.0"
+     }, 
+     "elastic": {
+      "agent": {
+       "version": "7.9.2", 
+       "id": "ac0ab6c1-2317-478c-93d9-c514d845302d"
+      }
+     }
+    }
+   }
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agents:c216aea0-58ba-40a3-b6fe-afa2f5457835", 
+  "source": {
+   "type": "fleet-agents", 
+   "references": [], 
+   "updated_at": "2020-09-24T16:30:37.142Z", 
+   "fleet-agents": {
+    "config_id": "6d9d3630-fe80-11ea-82b3-5be7a91e28b6", 
+    "default_api_key": "tSCsI7HPfRVIcw3Yx3xUAl20Hfe9AdEIs/4IBBH9ZO1gxnMMjRkVb/hxhfcdg6dkW+RIc6Pc9Jz7rUvybq8fY0r/pTKGXTFr46dC2+E9jfb7rs/PmYhG2V0/Ei2p+ZQypAIp8mtknSHkX+l74N7niVXKreneLrt99e4ZWIyeuwNwr0HcGjoMEqM=", 
+    "current_error_events": "[]", 
+    "config_revision": 1, 
+    "enrolled_at": "2020-09-24T16:11:59.088Z", 
+    "default_api_key_id": "SK7jwHQBEiA0_DvkNuIq", 
+    "last_checkin": "2020-09-24T16:30:37.072Z", 
+    "active": true, 
+    "user_provided_metadata": {}, 
+    "access_api_key_id": "OeriwHQBXUUrssdIvXGr", 
+    "packages": [
+     "system"
+    ], 
+    "type": "PERMANENT", 
+    "local_metadata": {
+     "host": {
+      "name": "mainqa-atlcolo-10-0-6-176.eng.endgames.local", 
+      "ip": [
+       "127.0.0.1/8", 
+       "::1/128", 
+       "10.0.6.176/22", 
+       "fdbb:cb5c:fb4:68:250:56ff:feb1:3363/64", 
+       "fe80::250:56ff:feb1:3363/64"
+      ], 
+      "hostname": "mainqa-atlcolo-10-0-6-176.eng.endgames.local", 
+      "mac": [
+       "00:50:56:b1:33:63"
+      ], 
+      "architecture": "x86_64", 
+      "id": "739e447fc6963034621b714c584eccc1"
+     }, 
+     "os": {
+      "kernel": "4.15.0-118-generic", 
+      "full": "Ubuntu bionic(18.04.1 LTS (Bionic Beaver))", 
+      "name": "Ubuntu", 
+      "family": "debian", 
+      "platform": "ubuntu", 
+      "version": "18.04.1 LTS (Bionic Beaver)"
+     }, 
+     "elastic": {
+      "agent": {
+       "version": "7.9.2", 
+       "id": "c216aea0-58ba-40a3-b6fe-afa2f5457835"
+      }
+     }
+    }
+   }
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agents:b1c968f1-a8cf-4bc4-ac81-110c8ffdbde5", 
+  "source": {
+   "type": "fleet-agents", 
+   "references": [], 
+   "updated_at": "2020-09-24T16:30:37.072Z", 
+   "fleet-agents": {
+    "config_id": "6d9d3630-fe80-11ea-82b3-5be7a91e28b6", 
+    "default_api_key": "sdv6996k+S1BiZ/12K3Wi6rb8Lsoh/+shwzKNqujwcmhdbeQ92ygLoO+tudJaJOnL129WT+hhanEf6OgH5PpQBezc03hl9v2AI+BlU+hssfce5OfgFRGLYg8S+ryNHwFhK6EJeN1aivoie+YholNpcpt2l/t+lQpevMI4QYGaMfUzofuivs5JM4=", 
+    "current_error_events": "[]", 
+    "config_revision": 1, 
+    "enrolled_at": "2020-09-24T16:11:54.037Z", 
+    "default_api_key_id": "lq7iwHQBEiA0_Dvk8-Fb", 
+    "last_checkin": "2020-09-24T16:30:37.072Z", 
+    "active": true, 
+    "user_provided_metadata": {}, 
+    "access_api_key_id": "geriwHQBXUUrssdIqXB2", 
+    "packages": [
+     "system"
+    ], 
+    "type": "PERMANENT", 
+    "local_metadata": {
+     "host": {
+      "name": "mainqa-atlcolo-10-0-7-195.eng.endgames.local", 
+      "ip": [
+       "127.0.0.1/8", 
+       "::1/128", 
+       "fe80::1/64", 
+       "fe80::107d:2365:5a7c:8da/64", 
+       "fdbb:cb5c:fb4:68:1ca7:3a67:de43:950c/64", 
+       "10.0.7.195/22", 
+       "fdbb:cb5c:fb4:68:d4ef:63a5:8ffc:f933/64", 
+       "fdbb:cb5c:fb4:68:b082:8681:cf85:27d0/64", 
+       "fdbb:cb5c:fb4:68:7c3d:13f3:5339:be7b/64", 
+       "fdbb:cb5c:fb4:68:19a4:2a63:cc88:6e59/64", 
+       "fdbb:cb5c:fb4:68:494a:3867:57b8:4027/64", 
+       "fdbb:cb5c:fb4:68:1c88:41e:6ce1:4be7/64", 
+       "fdbb:cb5c:fb4:68:114:b84:8faf:b12b/64"
+      ], 
+      "hostname": "mainqa-atlcolo-10-0-7-195.eng.endgames.local", 
+      "mac": [
+       "00:50:56:b1:e4:06"
+      ], 
+      "architecture": "x86_64", 
+      "id": "4231B1A9-25CB-4157-CF54-6BCD11C742E0"
+     }, 
+     "os": {
+      "kernel": "18.2.0", 
+      "full": "Mac OS X(10.14.1)", 
+      "name": "Mac OS X", 
+      "family": "darwin", 
+      "platform": "darwin", 
+      "version": "10.14.1"
+     }, 
+     "elastic": {
+      "agent": {
+       "version": "7.9.2", 
+       "id": "b1c968f1-a8cf-4bc4-ac81-110c8ffdbde5"
+      }
+     }
+    }
+   }
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agents:296c368b-35d3-4241-905f-75a24f52ec13", 
+  "source": {
+   "type": "fleet-agents", 
+   "references": [], 
+   "updated_at": "2020-09-24T16:30:37.072Z", 
+   "fleet-agents": {
+    "config_id": "6d9d3630-fe80-11ea-82b3-5be7a91e28b6", 
+    "default_api_key": "PEF8+bfiv21Yn5yj8I2/vIaQWMrUQK4PeBBwXsrvmVTsbuFejXM0IQtYVKXShBJAoY9CUEKPCRR4rIIdXWZc51i1ZneLoFw+yBw8BsSwhHfbQXvAVQowH7UqKHp0CiA5J9uGSgmw3Q55a4dv4IHih+sBKji7Qf2durs5gCWUJExrRCpMiU3OHSg=", 
+    "current_error_events": "[]", 
+    "config_revision": 1, 
+    "enrolled_at": "2020-09-24T16:11:56.620Z", 
+    "default_api_key_id": "xOrjwHQBXUUrssdIDnHH", 
+    "last_checkin": "2020-09-24T16:30:37.072Z", 
+    "active": true, 
+    "user_provided_metadata": {}, 
+    "access_api_key_id": "S67iwHQBEiA0_Dvks-Cm", 
+    "packages": [
+     "system"
+    ], 
+    "type": "PERMANENT", 
+    "local_metadata": {
+     "host": {
+      "name": "mainqa-atlcolo-10-0-7-158.eng.endgames.local", 
+      "ip": [
+       "127.0.0.1/8", 
+       "::1/128", 
+       "10.0.7.158/22", 
+       "fdbb:cb5c:fb4:68:250:56ff:feb1:371f/64", 
+       "fe80::250:56ff:feb1:371f/64"
+      ], 
+      "hostname": "mainqa-atlcolo-10-0-7-158.eng.endgames.local", 
+      "mac": [
+       "00:50:56:b1:37:1f"
+      ], 
+      "architecture": "x86_64", 
+      "id": "739e447fc6963034621b714c584eccc1"
+     }, 
+     "os": {
+      "kernel": "4.15.0-38-generic", 
+      "full": "Ubuntu bionic(18.04.1 LTS (Bionic Beaver))", 
+      "name": "Ubuntu", 
+      "family": "debian", 
+      "platform": "ubuntu", 
+      "version": "18.04.1 LTS (Bionic Beaver)"
+     }, 
+     "elastic": {
+      "agent": {
+       "version": "7.9.2", 
+       "id": "296c368b-35d3-4241-905f-75a24f52ec13"
+      }
+     }
+    }
+   }
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agents:2d187287-658a-4cb6-84d8-d66d1b9a6299", 
+  "source": {
+   "type": "fleet-agents", 
+   "references": [], 
+   "updated_at": "2020-09-24T16:30:37.072Z", 
+   "fleet-agents": {
+    "config_id": "6d9d3630-fe80-11ea-82b3-5be7a91e28b6", 
+    "default_api_key": "fpQcy/QWSbafzl6avELe9goTtyojPwQX3id1pe+BBqDarSCB3k5QwWLQP2SXEl2rwJdywUrBz3gMySKi80RYWJFUoWHiipfaE/jXJRqJxZZvhBe8fdSP7YPkdIdLQl/3ktIWqAzjjS1CErqMb5K4HTZIp5FswDQB40SbDkQKPECl9o8pBhLjH/A=", 
+    "current_error_events": "[]", 
+    "config_revision": 1, 
+    "enrolled_at": "2020-09-24T16:11:28.949Z", 
+    "default_api_key_id": "aeriwHQBXUUrssdIdXAX", 
+    "last_checkin": "2020-09-24T16:30:37.072Z", 
+    "active": true, 
+    "user_provided_metadata": {}, 
+    "access_api_key_id": "Sa7iwHQBEiA0_DvkR99k", 
+    "packages": [
+     "system"
+    ], 
+    "type": "PERMANENT", 
+    "local_metadata": {
+     "host": {
+      "name": "JCHU-WIN10-2", 
+      "ip": [
+       "fdbb:cb5c:fb4:68:dda8:b7a:3e20:9ca0/64", 
+       "fdbb:cb5c:fb4:68:e922:9626:5193:ef68/128", 
+       "fe80::dda8:b7a:3e20:9ca0/64", 
+       "10.0.6.96/22", 
+       "::1/128", 
+       "127.0.0.1/8"
+      ], 
+      "hostname": "JCHU-WIN10-2", 
+      "mac": [
+       "00:50:56:b1:26:07"
+      ], 
+      "architecture": "x86_64", 
+      "id": "4143c277-074e-47a9-b37d-37f94b508705"
+     }, 
+     "os": {
+      "kernel": "10.0.18362.1082 (WinBuild.160101.0800)", 
+      "full": "Windows 10 Pro(10.0)", 
+      "name": "Windows 10 Pro", 
+      "family": "windows", 
+      "platform": "windows", 
+      "version": "10.0"
+     }, 
+     "elastic": {
+      "agent": {
+       "version": "7.9.2", 
+       "id": "2d187287-658a-4cb6-84d8-d66d1b9a6299"
+      }
+     }
+    }
+   }
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agent-events:81e5aa90-fe81-11ea-ac23-9bd6426c270f", 
+  "source": {
+   "references": [], 
+   "fleet-agent-events": {
+    "config_id": "81188c00-fe80-11ea-82b3-5be7a91e28b6", 
+    "timestamp": "2020-09-24T12:17:40.138333-04:00", 
+    "subtype": "RUNNING", 
+    "agent_id": "b1c968f1-a8cf-4bc4-ac81-110c8ffdbde5", 
+    "message": "Application: endpoint-security--7.9.2[b1c968f1-a8cf-4bc4-ac81-110c8ffdbde5]: State changed to RUNNING: ", 
+    "type": "STATE", 
+    "payload": "{\"endpoint-security\":{\"@timestamp\":\"2020-09-24T16:17:40.134985503Z\",\"Endpoint\":{\"configuration\":{\"inputs\":[{\"id\":\"8f802370-fe80-11ea-82b3-5be7a91e28b6\",\"policy\":{\"linux\":{\"events\":{\"file\":true,\"network\":true,\"process\":true},\"logging\":{\"file\":\"info\"}},\"mac\":{\"events\":{\"file\":true,\"network\":true,\"process\":true},\"logging\":{\"file\":\"info\"},\"malware\":{\"mode\":\"prevent\"}},\"windows\":{\"events\":{\"dll_and_driver_load\":true,\"dns\":true,\"file\":true,\"network\":true,\"process\":true,\"registry\":true,\"security\":true},\"logging\":{\"file\":\"info\"},\"malware\":{\"mode\":\"prevent\"}}}}]},\"metrics\":{\"cpu\":{\"endpoint\":{\"histogram\":{\"counts\":[55,0,2,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],\"values\":[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]},\"latest\":10.21008368,\"mean\":1.91476589372881}},\"memory\":{\"endpoint\":{\"private\":{\"latest\":71143424,\"mean\":53719456}}},\"threads\":[{\"cpu\":{\"mean\":0},\"name\":\"Cron\"},{\"cpu\":{\"mean\":0},\"name\":\"File Cache\"},{\"cpu\":{\"mean\":0},\"name\":\"FileLogThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingMaintenance\"},{\"cpu\":{\"mean\":0},\"name\":\"BulkConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"ArtifactManifestDownload\"},{\"cpu\":{\"mean\":0},\"name\":\"PerformanceMonitorWorkerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"MetadataThread\"},{\"cpu\":{\"mean\":0},\"name\":\"EventsQueueThread\"},{\"cpu\":{\"mean\":0},\"name\":\"FileScoreAsyncEventThread\"},{\"cpu\":{\"mean\":0},\"name\":\"QuarantineManagerWorkerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DelayedAlertEnrichment\"},{\"cpu\":{\"mean\":0},\"name\":\"grpcConnectionManagerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelPortConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelAsyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelAsyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelAsyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelAsyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":3.08880308880309},\"name\":\"checkinAPIThread\"},{\"cpu\":{\"mean\":0},\"name\":\"actionsAPIThread\"},{\"cpu\":{\"mean\":0},\"name\":\"stateReportThread\"},{\"cpu\":{\"mean\":0},\"name\":\"EventsPidMonitorThread\"},{\"cpu\":{\"mean\":0},\"name\":\"EventsDelayEventThread\"}],\"uptime\":{\"endpoint\":302,\"system\":1901758}},\"policy\":{\"applied\":{\"actions\":[{\"message\":\"Successfully read Elasticsearch configuration\",\"name\":\"read_elasticsearch_config\",\"status\":\"success\"},{\"message\":\"Successfully read events configuration\",\"name\":\"read_events_config\",\"status\":\"success\"},{\"message\":\"Successfully read malware prevent configuration\",\"name\":\"read_malware_config\",\"status\":\"success\"},{\"message\":\"Succesfully read kernel configuration\",\"name\":\"read_kernel_config\",\"status\":\"success\"},{\"message\":\"Successfully read logging configuration\",\"name\":\"read_logging_config\",\"status\":\"success\"},{\"message\":\"Successfully parsed configuration\",\"name\":\"load_config\",\"status\":\"success\"},{\"message\":\"Successfully downloaded user artifacts\",\"name\":\"download_user_artifacts\",\"status\":\"success\"},{\"message\":\"Global artifacts are available for use\",\"name\":\"download_global_artifacts\",\"status\":\"success\"},{\"message\":\"Successfully configured logging\",\"name\":\"configure_logging\",\"status\":\"success\"},{\"message\":\"Successfully read Elasticsearch configuration\",\"name\":\"configure_elasticsearch_connection\",\"status\":\"success\"},{\"message\":\"Successfully connected to kernel extension\",\"name\":\"connect_kernel\",\"status\":\"success\"},{\"message\":\"File write event reporting is enabled\",\"name\":\"detect_file_write_events\",\"status\":\"success\"},{\"message\":\"Process event reporting is enabled\",\"name\":\"detect_process_events\",\"status\":\"success\"},{\"message\":\"Network event reporting is enabled\",\"name\":\"detect_network_events\",\"status\":\"success\"},{\"message\":\"Full Disk Access is enabled\",\"name\":\"full_disk_access\",\"status\":\"success\"},{\"message\":\"Successfully configured kernel extension\",\"name\":\"configure_kernel\",\"status\":\"success\"},{\"message\":\"Successfully loaded malware model\",\"name\":\"load_malware_model\",\"status\":\"success\"},{\"message\":\"Successfully configured malware prevention/detection\",\"name\":\"configure_malware\",\"status\":\"success\"},{\"message\":\"Success enabling file events; current state is enabled\",\"name\":\"configure_file_events\",\"status\":\"success\"},{\"message\":\"Success enabling network events; current state is enabled\",\"name\":\"configure_network_events\",\"status\":\"success\"},{\"message\":\"Success enabling process events; current state is enabled\",\"name\":\"configure_process_events\",\"status\":\"success\"},{\"message\":\"Successfully connected to Agent\",\"name\":\"agent_connectivity\",\"status\":\"success\"},{\"message\":\"Successfully executed all workflows\",\"name\":\"workflow\",\"status\":\"success\"}],\"artifacts\":{\"global\":{\"identifiers\":[{\"name\":\"endpointmacho-v1-blocklist\",\"sha256\":\"da7ca0eaffd840e612acdc064700b3549dc64768d7d127977cc86d9bdaac22ee\"},{\"name\":\"endpointmacho-v1-exceptionlist\",\"sha256\":\"a6d93374c05e88447a3f2aafe0061efc10ff28d324d701436c103194a7594b51\"},{\"name\":\"endpointmacho-v1-model\",\"sha256\":\"213e0b5dcad10504eac23a7056b2e87d1b694da19832366eae8eb85057945c4f\"},{\"name\":\"global-exceptionlist-macos\",\"sha256\":\"4abf799e6b79f0ee66a2e0b3293a92c2a122a083274cbea9d1b2c83bf57ffce7\"}],\"version\":\"1.0.0\"},\"user\":{\"identifiers\":[{\"name\":\"endpoint-exceptionlist-macos-v1\",\"sha256\":\"d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658\"}],\"version\":\"1.0.0\"}},\"id\":\"8f802370-fe80-11ea-82b3-5be7a91e28b6\",\"response\":{\"configurations\":{\"events\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"workflow\",\"read_events_config\",\"detect_process_events\",\"detect_file_write_events\",\"detect_network_events\",\"configure_file_events\",\"configure_network_events\",\"configure_process_events\",\"read_kernel_config\",\"configure_kernel\",\"connect_kernel\",\"full_disk_access\"],\"status\":\"success\"},\"logging\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"read_logging_config\",\"configure_logging\",\"workflow\"],\"status\":\"success\"},\"malware\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"workflow\",\"download_global_artifacts\",\"download_user_artifacts\",\"configure_malware\",\"read_malware_config\",\"load_malware_model\",\"read_kernel_config\",\"configure_kernel\",\"detect_process_events\",\"detect_file_write_events\",\"connect_kernel\",\"full_disk_access\"],\"status\":\"success\"},\"streaming\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"read_elasticsearch_config\",\"configure_elasticsearch_connection\",\"workflow\"],\"status\":\"success\"}}},\"status\":\"success\"}}},\"agent\":{\"id\":\"49f4e779-287a-4fa8-80e6-247b54c554f1\",\"version\":\"7.9.2\"},\"ecs\":{\"version\":\"1.5.0\"},\"event\":{\"action\":\"elastic_endpoint_telemetry\"},\"host\":{\"architecture\":\"x86_64\",\"id\":\"7d59b1a5-afa1-6531-07ea-691602558230\",\"os\":{\"Ext\":{\"variant\":\"macOS\"},\"full\":\"macOS 10.14.1\",\"name\":\"macOS\",\"version\":\"10.14.1\"}}}}"
+   }, 
+   "updated_at": "2020-09-24T16:17:57.177Z", 
+   "type": "fleet-agent-events"
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agent-events:8e652110-fe81-11ea-ac23-9bd6426c270f", 
+  "source": {
+   "references": [], 
+   "fleet-agent-events": {
+    "config_id": "81188c00-fe80-11ea-82b3-5be7a91e28b6", 
+    "timestamp": "2020-09-24T12:17:43.499165-04:00", 
+    "subtype": "RUNNING", 
+    "agent_id": "5460518c-10c7-4c25-b2ec-3f63eafb7d47", 
+    "message": "Application: endpoint-security--7.9.2[5460518c-10c7-4c25-b2ec-3f63eafb7d47]: State changed to RUNNING: ", 
+    "type": "STATE", 
+    "payload": "{\"endpoint-security\":{\"@timestamp\":\"2020-09-24T16:17:43.495361445Z\",\"Endpoint\":{\"configuration\":{\"inputs\":[{\"id\":\"8f802370-fe80-11ea-82b3-5be7a91e28b6\",\"policy\":{\"linux\":{\"events\":{\"file\":true,\"network\":true,\"process\":true},\"logging\":{\"file\":\"info\"}},\"mac\":{\"events\":{\"file\":true,\"network\":true,\"process\":true},\"logging\":{\"file\":\"info\"},\"malware\":{\"mode\":\"prevent\"}},\"windows\":{\"events\":{\"dll_and_driver_load\":true,\"dns\":true,\"file\":true,\"network\":true,\"process\":true,\"registry\":true,\"security\":true},\"logging\":{\"file\":\"info\"},\"malware\":{\"mode\":\"prevent\"}}}}]},\"metrics\":{\"cpu\":{\"endpoint\":{\"histogram\":{\"counts\":[44,4,0,2,2,4,1,2,0,0,0,0,0,0,0,0,0,0,0,0],\"values\":[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]},\"latest\":25.33265565,\"mean\":6.21698140807909}},\"memory\":{\"endpoint\":{\"private\":{\"latest\":58376192,\"mean\":46094231}}},\"threads\":[{\"cpu\":{\"mean\":0},\"name\":\"Cron\"},{\"cpu\":{\"mean\":0},\"name\":\"File Cache\"},{\"cpu\":{\"mean\":0},\"name\":\"FileLogThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingMaintenance\"},{\"cpu\":{\"mean\":0.32258064516129},\"name\":\"BulkConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingConsumerThread\"},{\"cpu\":{\"mean\":0.323624595469256},\"name\":\"ArtifactManifestDownload\"},{\"cpu\":{\"mean\":0},\"name\":\"PerformanceMonitorWorkerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"MetadataThread\"},{\"cpu\":{\"mean\":0.664451827242525},\"name\":\"EventsQueueThread\"},{\"cpu\":{\"mean\":0},\"name\":\"FileScoreAsyncEventThread\"},{\"cpu\":{\"mean\":0},\"name\":\"QuarantineManagerWorkerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DelayedAlertEnrichment\"},{\"cpu\":{\"mean\":0},\"name\":\"grpcConnectionManagerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelPortConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelAsyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelAsyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelAsyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelAsyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":9.55882352941176},\"name\":\"checkinAPIThread\"},{\"cpu\":{\"mean\":0},\"name\":\"actionsAPIThread\"},{\"cpu\":{\"mean\":0},\"name\":\"stateReportThread\"},{\"cpu\":{\"mean\":0},\"name\":\"EventsPidMonitorThread\"},{\"cpu\":{\"mean\":0},\"name\":\"EventsDelayEventThread\"}],\"uptime\":{\"endpoint\":308,\"system\":3807934}},\"policy\":{\"applied\":{\"actions\":[{\"message\":\"Successfully read Elasticsearch configuration\",\"name\":\"read_elasticsearch_config\",\"status\":\"success\"},{\"message\":\"Successfully read events configuration\",\"name\":\"read_events_config\",\"status\":\"success\"},{\"message\":\"Successfully read malware prevent configuration\",\"name\":\"read_malware_config\",\"status\":\"success\"},{\"message\":\"Succesfully read kernel configuration\",\"name\":\"read_kernel_config\",\"status\":\"success\"},{\"message\":\"Successfully read logging configuration\",\"name\":\"read_logging_config\",\"status\":\"success\"},{\"message\":\"Successfully parsed configuration\",\"name\":\"load_config\",\"status\":\"success\"},{\"message\":\"Successfully downloaded user artifacts\",\"name\":\"download_user_artifacts\",\"status\":\"success\"},{\"message\":\"Global artifacts are available for use\",\"name\":\"download_global_artifacts\",\"status\":\"success\"},{\"message\":\"Successfully configured logging\",\"name\":\"configure_logging\",\"status\":\"success\"},{\"message\":\"Successfully read Elasticsearch configuration\",\"name\":\"configure_elasticsearch_connection\",\"status\":\"success\"},{\"message\":\"Successfully connected to kernel extension\",\"name\":\"connect_kernel\",\"status\":\"success\"},{\"message\":\"File write event reporting is enabled\",\"name\":\"detect_file_write_events\",\"status\":\"success\"},{\"message\":\"Process event reporting is enabled\",\"name\":\"detect_process_events\",\"status\":\"success\"},{\"message\":\"Network event reporting is enabled\",\"name\":\"detect_network_events\",\"status\":\"success\"},{\"message\":\"Full Disk Access is enabled\",\"name\":\"full_disk_access\",\"status\":\"success\"},{\"message\":\"Successfully configured kernel extension\",\"name\":\"configure_kernel\",\"status\":\"success\"},{\"message\":\"Successfully loaded malware model\",\"name\":\"load_malware_model\",\"status\":\"success\"},{\"message\":\"Successfully configured malware prevention/detection\",\"name\":\"configure_malware\",\"status\":\"success\"},{\"message\":\"Success enabling file events; current state is enabled\",\"name\":\"configure_file_events\",\"status\":\"success\"},{\"message\":\"Success enabling network events; current state is enabled\",\"name\":\"configure_network_events\",\"status\":\"success\"},{\"message\":\"Success enabling process events; current state is enabled\",\"name\":\"configure_process_events\",\"status\":\"success\"},{\"message\":\"Successfully connected to Agent\",\"name\":\"agent_connectivity\",\"status\":\"success\"},{\"message\":\"Successfully executed all workflows\",\"name\":\"workflow\",\"status\":\"success\"}],\"artifacts\":{\"global\":{\"identifiers\":[{\"name\":\"endpointmacho-v1-blocklist\",\"sha256\":\"da7ca0eaffd840e612acdc064700b3549dc64768d7d127977cc86d9bdaac22ee\"},{\"name\":\"endpointmacho-v1-exceptionlist\",\"sha256\":\"a6d93374c05e88447a3f2aafe0061efc10ff28d324d701436c103194a7594b51\"},{\"name\":\"endpointmacho-v1-model\",\"sha256\":\"213e0b5dcad10504eac23a7056b2e87d1b694da19832366eae8eb85057945c4f\"},{\"name\":\"global-exceptionlist-macos\",\"sha256\":\"4abf799e6b79f0ee66a2e0b3293a92c2a122a083274cbea9d1b2c83bf57ffce7\"}],\"version\":\"1.0.0\"},\"user\":{\"identifiers\":[{\"name\":\"endpoint-exceptionlist-macos-v1\",\"sha256\":\"d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658\"}],\"version\":\"1.0.0\"}},\"id\":\"8f802370-fe80-11ea-82b3-5be7a91e28b6\",\"response\":{\"configurations\":{\"events\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"workflow\",\"read_events_config\",\"detect_process_events\",\"detect_file_write_events\",\"detect_network_events\",\"configure_file_events\",\"configure_network_events\",\"configure_process_events\",\"read_kernel_config\",\"configure_kernel\",\"connect_kernel\",\"full_disk_access\"],\"status\":\"success\"},\"logging\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"read_logging_config\",\"configure_logging\",\"workflow\"],\"status\":\"success\"},\"malware\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"workflow\",\"download_global_artifacts\",\"download_user_artifacts\",\"configure_malware\",\"read_malware_config\",\"load_malware_model\",\"read_kernel_config\",\"configure_kernel\",\"detect_process_events\",\"detect_file_write_events\",\"connect_kernel\",\"full_disk_access\"],\"status\":\"success\"},\"streaming\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"read_elasticsearch_config\",\"configure_elasticsearch_connection\",\"workflow\"],\"status\":\"success\"}}},\"status\":\"success\"}}},\"agent\":{\"id\":\"b364a499-8e64-4d91-9770-6911c5d6964b\",\"version\":\"7.9.2\"},\"ecs\":{\"version\":\"1.5.0\"},\"event\":{\"action\":\"elastic_endpoint_telemetry\"},\"host\":{\"architecture\":\"x86_64\",\"id\":\"ec5403f8-6708-0d58-7aff-b2137b48b816\",\"os\":{\"Ext\":{\"variant\":\"macOS\"},\"full\":\"macOS 10.14.1\",\"name\":\"macOS\",\"version\":\"10.14.1\"}}}}"
+   }, 
+   "updated_at": "2020-09-24T16:18:18.145Z", 
+   "type": "fleet-agent-events"
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agent-events:82b7eeb0-fe81-11ea-ac23-9bd6426c270f", 
+  "source": {
+   "references": [], 
+   "fleet-agent-events": {
+    "config_id": "81188c00-fe80-11ea-82b3-5be7a91e28b6", 
+    "timestamp": "2020-09-24T12:17:13.3157023-04:00", 
+    "subtype": "RUNNING", 
+    "agent_id": "ac0ab6c1-2317-478c-93d9-c514d845302d", 
+    "message": "Application: endpoint-security--7.9.2[ac0ab6c1-2317-478c-93d9-c514d845302d]: State changed to RUNNING: ", 
+    "type": "STATE", 
+    "payload": "{\"endpoint-security\":{\"@timestamp\":\"2020-09-24T16:17:13.13714300Z\",\"Endpoint\":{\"configuration\":{\"inputs\":[{\"id\":\"8f802370-fe80-11ea-82b3-5be7a91e28b6\",\"policy\":{\"linux\":{\"events\":{\"file\":true,\"network\":true,\"process\":true},\"logging\":{\"file\":\"info\"}},\"mac\":{\"events\":{\"file\":true,\"network\":true,\"process\":true},\"logging\":{\"file\":\"info\"},\"malware\":{\"mode\":\"prevent\"}},\"windows\":{\"events\":{\"dll_and_driver_load\":true,\"dns\":true,\"file\":true,\"network\":true,\"process\":true,\"registry\":true,\"security\":true},\"logging\":{\"file\":\"info\"},\"malware\":{\"mode\":\"prevent\"}}}}]},\"metrics\":{\"cpu\":{\"endpoint\":{\"histogram\":{\"counts\":[53,1,0,1,0,0,2,1,0,3,0,0,0,0,0,0,0,0,0,0],\"values\":[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]},\"latest\":49.0526570938275,\"mean\":4.53577832211642}},\"memory\":{\"endpoint\":{\"private\":{\"latest\":285802496,\"mean\":95647240}}},\"threads\":[{\"cpu\":{\"mean\":0},\"name\":\"Cron\"},{\"cpu\":{\"mean\":0},\"name\":\"File Cache\"},{\"cpu\":{\"mean\":0},\"name\":\"FileLogThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingMaintenance\"},{\"cpu\":{\"mean\":0},\"name\":\"BulkConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingConsumerThread\"},{\"cpu\":{\"mean\":1.30293159609121},\"name\":\"ArtifactManifestDownload\"},{\"cpu\":{\"mean\":0},\"name\":\"PerformanceMonitorWorkerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"MetadataThread\"},{\"cpu\":{\"mean\":0},\"name\":\"EventsQueueThread\"},{\"cpu\":{\"mean\":0},\"name\":\"FileScoreAsyncEventThread\"},{\"cpu\":{\"mean\":0},\"name\":\"QuarantineManagerWorkerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DelayedAlertEnrichment\"},{\"cpu\":{\"mean\":0},\"name\":\"grpcConnectionManagerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelAsyncMessageQueueConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelAsyncMessageQueueConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncQueueConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelPortConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelPortConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelPortConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelPortConsumerThread\"},{\"cpu\":{\"mean\":3.18021201413428},\"name\":\"checkinAPIThread\"},{\"cpu\":{\"mean\":0},\"name\":\"actionsAPIThread\"},{\"cpu\":{\"mean\":0},\"name\":\"stateReportThread\"}],\"uptime\":{\"endpoint\":306,\"system\":3625}},\"policy\":{\"applied\":{\"actions\":[{\"message\":\"Successfully read Elasticsearch configuration\",\"name\":\"read_elasticsearch_config\",\"status\":\"success\"},{\"message\":\"Successfully read events configuration\",\"name\":\"read_events_config\",\"status\":\"success\"},{\"message\":\"Successfully read malware prevent configuration\",\"name\":\"read_malware_config\",\"status\":\"success\"},{\"message\":\"Succesfully read kernel configuration\",\"name\":\"read_kernel_config\",\"status\":\"success\"},{\"message\":\"Successfully read logging configuration\",\"name\":\"read_logging_config\",\"status\":\"success\"},{\"message\":\"Successfully parsed configuration\",\"name\":\"load_config\",\"status\":\"success\"},{\"message\":\"Successfully downloaded user artifacts\",\"name\":\"download_user_artifacts\",\"status\":\"success\"},{\"message\":\"Global artifacts are available for use\",\"name\":\"download_global_artifacts\",\"status\":\"success\"},{\"message\":\"Successfully configured logging\",\"name\":\"configure_logging\",\"status\":\"success\"},{\"message\":\"Successfully read Elasticsearch configuration\",\"name\":\"configure_elasticsearch_connection\",\"status\":\"success\"},{\"message\":\"Successfully connected to driver\",\"name\":\"connect_kernel\",\"status\":\"success\"},{\"message\":\"Successfully started process event reporting\",\"name\":\"detect_process_events\",\"status\":\"success\"},{\"message\":\"Successfuly started sync image load event reporting\",\"name\":\"detect_sync_image_load_events\",\"status\":\"success\"},{\"message\":\"Successfuly started async image load event reporting\",\"name\":\"detect_async_image_load_events\",\"status\":\"success\"},{\"message\":\"Successfully started file write event reporting\",\"name\":\"detect_file_write_events\",\"status\":\"success\"},{\"message\":\"Successfully stopped file open event reporting\",\"name\":\"detect_file_open_events\",\"status\":\"success\"},{\"message\":\"Successfully started network event reporting\",\"name\":\"detect_network_events\",\"status\":\"success\"},{\"message\":\"Successfully started registry event reporting\",\"name\":\"detect_registry_events\",\"status\":\"success\"},{\"message\":\"Successfully configured kernel\",\"name\":\"configure_kernel\",\"status\":\"success\"},{\"message\":\"Successfully loaded malware model\",\"name\":\"load_malware_model\",\"status\":\"success\"},{\"message\":\"Successfully configured malware prevention/detection\",\"name\":\"configure_malware\",\"status\":\"success\"},{\"message\":\"Success enabling file events; current state is enabled\",\"name\":\"configure_file_events\",\"status\":\"success\"},{\"message\":\"Success enabling network events; current state is enabled\",\"name\":\"configure_network_events\",\"status\":\"success\"},{\"message\":\"Success enabling process events; current state is enabled\",\"name\":\"configure_process_events\",\"status\":\"success\"},{\"message\":\"Success enabling imageload events; current state is enabled\",\"name\":\"configure_imageload_events\",\"status\":\"success\"},{\"message\":\"Success enabling dns events; current state is enabled\",\"name\":\"configure_dns_events\",\"status\":\"success\"},{\"message\":\"Success enabling registry events; current state is enabled\",\"name\":\"configure_registry_events\",\"status\":\"success\"},{\"message\":\"Success enabling security events; current state is enabled\",\"name\":\"configure_security_events\",\"status\":\"success\"},{\"message\":\"Successfully connected to Agent\",\"name\":\"agent_connectivity\",\"status\":\"success\"},{\"message\":\"Successfully executed all workflows\",\"name\":\"workflow\",\"status\":\"success\"}],\"artifacts\":{\"global\":{\"identifiers\":[{\"name\":\"endpointpe-v4-blocklist\",\"sha256\":\"7fdb1b867fd4d2da37870d493e1c67630f59355eab061f91e705f4cc83dd6b9b\"},{\"name\":\"endpointpe-v4-exceptionlist\",\"sha256\":\"e21f3ba186d1563b66bb58b7ff9a362c07448e8f4dec00b2f861bf935cb15d77\"},{\"name\":\"endpointpe-v4-model\",\"sha256\":\"463709447352d429297355247266f641179331171342b3bc3e9c8f6b4b2faed2\"},{\"name\":\"global-exceptionlist-windows\",\"sha256\":\"824859b0c6749cc31951d92a73bbdddfcfe9f38abfe432087934d4dab9766ce8\"}],\"version\":\"1.0.0\"},\"user\":{\"identifiers\":[{\"name\":\"endpoint-exceptionlist-windows-v1\",\"sha256\":\"d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658\"}],\"version\":\"1.0.0\"}},\"id\":\"8f802370-fe80-11ea-82b3-5be7a91e28b6\",\"response\":{\"configurations\":{\"events\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"workflow\",\"read_events_config\",\"detect_process_events\",\"detect_file_write_events\",\"detect_network_events\",\"configure_file_events\",\"configure_network_events\",\"configure_process_events\",\"read_kernel_config\",\"configure_kernel\",\"connect_kernel\",\"detect_file_open_events\",\"detect_async_image_load_events\",\"detect_registry_events\",\"configure_imageload_events\",\"configure_dns_events\",\"configure_security_events\",\"configure_registry_events\"],\"status\":\"success\"},\"logging\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"read_logging_config\",\"configure_logging\",\"workflow\"],\"status\":\"success\"},\"malware\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"workflow\",\"download_global_artifacts\",\"download_user_artifacts\",\"configure_malware\",\"read_malware_config\",\"load_malware_model\",\"read_kernel_config\",\"configure_kernel\",\"detect_process_events\",\"detect_file_write_events\",\"connect_kernel\",\"detect_file_open_events\",\"detect_sync_image_load_events\"],\"status\":\"success\"},\"streaming\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"read_elasticsearch_config\",\"configure_elasticsearch_connection\",\"workflow\"],\"status\":\"success\"}}},\"status\":\"success\"}}},\"agent\":{\"id\":\"6474b1bd-96bc-4bde-a770-0e6a7a5bf8c4\",\"version\":\"7.9.2\"},\"ecs\":{\"version\":\"1.5.0\"},\"event\":{\"action\":\"elastic_endpoint_telemetry\"},\"host\":{\"architecture\":\"x86_64\",\"id\":\"c85e6c40-d4a1-db21-7458-2565a6b857f3\",\"os\":{\"Ext\":{\"variant\":\"Windows 10 Pro\"},\"full\":\"Windows 10 Pro 1903 (10.0.18362.1082)\",\"name\":\"Windows\",\"version\":\"1903 (10.0.18362.1082)\"}}}}"
+   }, 
+   "updated_at": "2020-09-24T16:17:58.555Z", 
+   "type": "fleet-agent-events"
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agent-events:80a6c1f0-fe81-11ea-ac23-9bd6426c270f", 
+  "source": {
+   "references": [], 
+   "fleet-agent-events": {
+    "config_id": "81188c00-fe80-11ea-82b3-5be7a91e28b6", 
+    "timestamp": "2020-09-24T12:17:54.930717796-04:00", 
+    "subtype": "RUNNING", 
+    "agent_id": "c216aea0-58ba-40a3-b6fe-afa2f5457835", 
+    "message": "Application: endpoint-security--7.9.2[c216aea0-58ba-40a3-b6fe-afa2f5457835]: State changed to RUNNING: ", 
+    "type": "STATE", 
+    "payload": "{\"endpoint-security\":{\"@timestamp\":\"2020-09-24T16:17:54.929290223Z\",\"Endpoint\":{\"configuration\":{\"inputs\":[{\"id\":\"8f802370-fe80-11ea-82b3-5be7a91e28b6\",\"policy\":{\"linux\":{\"events\":{\"file\":true,\"network\":true,\"process\":true},\"logging\":{\"file\":\"info\"}},\"mac\":{\"events\":{\"file\":true,\"network\":true,\"process\":true},\"logging\":{\"file\":\"info\"},\"malware\":{\"mode\":\"prevent\"}},\"windows\":{\"events\":{\"dll_and_driver_load\":true,\"dns\":true,\"file\":true,\"network\":true,\"process\":true,\"registry\":true,\"security\":true},\"logging\":{\"file\":\"info\"},\"malware\":{\"mode\":\"prevent\"}}}}]},\"metrics\":{\"cpu\":{\"endpoint\":{\"histogram\":{\"counts\":[57,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1],\"values\":[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]},\"latest\":3,\"mean\":3.49666666666667}},\"memory\":{\"endpoint\":{\"private\":{\"latest\":49778688,\"mean\":31986824}}},\"threads\":[{\"cpu\":{\"mean\":0},\"name\":\"File Cache\"},{\"cpu\":{\"mean\":0},\"name\":\"FileLogThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingMaintenance\"},{\"cpu\":{\"mean\":0},\"name\":\"BulkConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"ArtifactManifestDownload\"},{\"cpu\":{\"mean\":0},\"name\":\"PerformanceMonitorWorkerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"MetadataThread\"},{\"cpu\":{\"mean\":0},\"name\":\"EventsQueueThread\"},{\"cpu\":{\"mean\":0},\"name\":\"grpcConnectionManagerThread\"},{\"cpu\":{\"mean\":2.12765957446809},\"name\":\"checkinAPIThread\"},{\"cpu\":{\"mean\":0},\"name\":\"actionsAPIThread\"},{\"cpu\":{\"mean\":0},\"name\":\"stateReportThread\"},{\"cpu\":{\"mean\":0.72992700729927},\"name\":\"EventsLoopThread\"}],\"uptime\":{\"endpoint\":300,\"system\":3863}},\"policy\":{\"applied\":{\"actions\":[{\"message\":\"Successfully read Elasticsearch configuration\",\"name\":\"read_elasticsearch_config\",\"status\":\"success\"},{\"message\":\"Successfully read events configuration\",\"name\":\"read_events_config\",\"status\":\"success\"},{\"message\":\"Successfully read logging configuration\",\"name\":\"read_logging_config\",\"status\":\"success\"},{\"message\":\"Successfully parsed configuration\",\"name\":\"load_config\",\"status\":\"success\"},{\"message\":\"Successfully configured logging\",\"name\":\"configure_logging\",\"status\":\"success\"},{\"message\":\"Successfully read Elasticsearch configuration\",\"name\":\"configure_elasticsearch_connection\",\"status\":\"success\"},{\"message\":\"Success enabling process events; current state is enabled\",\"name\":\"detect_process_events\",\"status\":\"success\"},{\"message\":\"Success enabling network events; current state is enabled\",\"name\":\"detect_network_events\",\"status\":\"success\"},{\"message\":\"Success enabling file events; current state is enabled\",\"name\":\"detect_file_write_events\",\"status\":\"success\"},{\"message\":\"Success enabling file events; current state is enabled\",\"name\":\"configure_file_events\",\"status\":\"success\"},{\"message\":\"Success enabling network events; current state is enabled\",\"name\":\"configure_network_events\",\"status\":\"success\"},{\"message\":\"Success enabling process events; current state is enabled\",\"name\":\"configure_process_events\",\"status\":\"success\"},{\"message\":\"Successfully connected to Agent\",\"name\":\"agent_connectivity\",\"status\":\"success\"},{\"message\":\"Successfully executed all workflows\",\"name\":\"workflow\",\"status\":\"success\"}],\"artifacts\":{\"global\":{\"identifiers\":[],\"version\":\"1.0.0\"}},\"id\":\"8f802370-fe80-11ea-82b3-5be7a91e28b6\",\"response\":{\"configurations\":{\"events\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"workflow\",\"read_events_config\",\"detect_process_events\",\"detect_file_write_events\",\"detect_network_events\",\"configure_file_events\",\"configure_network_events\",\"configure_process_events\"],\"status\":\"success\"},\"logging\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"read_logging_config\",\"configure_logging\",\"workflow\"],\"status\":\"success\"},\"streaming\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"read_elasticsearch_config\",\"configure_elasticsearch_connection\",\"workflow\"],\"status\":\"success\"}}},\"status\":\"success\"}}},\"agent\":{\"id\":\"a15f0431-6835-41c4-a7ee-21a70d41cf5b\",\"version\":\"7.9.2\"},\"ecs\":{\"version\":\"1.5.0\"},\"event\":{\"action\":\"elastic_endpoint_telemetry\"},\"host\":{\"architecture\":\"x86_64\",\"id\":\"20ccfdfa-323f-e33e-f2ef-3528edb1afea\",\"os\":{\"Ext\":{\"variant\":\"Ubuntu\"},\"full\":\"Ubuntu 18.04.1\",\"name\":\"Linux\",\"version\":\"18.04.1\"}}}}"
+   }, 
+   "updated_at": "2020-09-24T16:17:55.087Z", 
+   "type": "fleet-agent-events"
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agent-events:7bdc8fb0-fe81-11ea-ac23-9bd6426c270f", 
+  "source": {
+   "references": [], 
+   "fleet-agent-events": {
+    "config_id": "81188c00-fe80-11ea-82b3-5be7a91e28b6", 
+    "timestamp": "2020-09-24T12:17:45.675453579-04:00", 
+    "subtype": "RUNNING", 
+    "agent_id": "296c368b-35d3-4241-905f-75a24f52ec13", 
+    "message": "Application: endpoint-security--7.9.2[296c368b-35d3-4241-905f-75a24f52ec13]: State changed to RUNNING: ", 
+    "type": "STATE", 
+    "payload": "{\"endpoint-security\":{\"@timestamp\":\"2020-09-24T16:17:45.674010613Z\",\"Endpoint\":{\"configuration\":{\"inputs\":[{\"id\":\"8f802370-fe80-11ea-82b3-5be7a91e28b6\",\"policy\":{\"linux\":{\"events\":{\"file\":true,\"network\":true,\"process\":true},\"logging\":{\"file\":\"info\"}},\"mac\":{\"events\":{\"file\":true,\"network\":true,\"process\":true},\"logging\":{\"file\":\"info\"},\"malware\":{\"mode\":\"prevent\"}},\"windows\":{\"events\":{\"dll_and_driver_load\":true,\"dns\":true,\"file\":true,\"network\":true,\"process\":true,\"registry\":true,\"security\":true},\"logging\":{\"file\":\"info\"},\"malware\":{\"mode\":\"prevent\"}}}}]},\"metrics\":{\"cpu\":{\"endpoint\":{\"histogram\":{\"counts\":[57,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],\"values\":[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]},\"latest\":2.8,\"mean\":3.17}},\"memory\":{\"endpoint\":{\"private\":{\"latest\":49278976,\"mean\":31884356}}},\"threads\":[{\"cpu\":{\"mean\":0},\"name\":\"File Cache\"},{\"cpu\":{\"mean\":0},\"name\":\"FileLogThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingMaintenance\"},{\"cpu\":{\"mean\":0},\"name\":\"BulkConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"ArtifactManifestDownload\"},{\"cpu\":{\"mean\":0},\"name\":\"PerformanceMonitorWorkerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"MetadataThread\"},{\"cpu\":{\"mean\":0},\"name\":\"EventsQueueThread\"},{\"cpu\":{\"mean\":0},\"name\":\"grpcConnectionManagerThread\"},{\"cpu\":{\"mean\":2.12765957446809},\"name\":\"checkinAPIThread\"},{\"cpu\":{\"mean\":0},\"name\":\"actionsAPIThread\"},{\"cpu\":{\"mean\":0},\"name\":\"stateReportThread\"},{\"cpu\":{\"mean\":0.72992700729927},\"name\":\"EventsLoopThread\"}],\"uptime\":{\"endpoint\":300,\"system\":5000305}},\"policy\":{\"applied\":{\"actions\":[{\"message\":\"Successfully read Elasticsearch configuration\",\"name\":\"read_elasticsearch_config\",\"status\":\"success\"},{\"message\":\"Successfully read events configuration\",\"name\":\"read_events_config\",\"status\":\"success\"},{\"message\":\"Successfully read logging configuration\",\"name\":\"read_logging_config\",\"status\":\"success\"},{\"message\":\"Successfully parsed configuration\",\"name\":\"load_config\",\"status\":\"success\"},{\"message\":\"Successfully configured logging\",\"name\":\"configure_logging\",\"status\":\"success\"},{\"message\":\"Successfully read Elasticsearch configuration\",\"name\":\"configure_elasticsearch_connection\",\"status\":\"success\"},{\"message\":\"Success enabling process events; current state is enabled\",\"name\":\"detect_process_events\",\"status\":\"success\"},{\"message\":\"Success enabling network events; current state is enabled\",\"name\":\"detect_network_events\",\"status\":\"success\"},{\"message\":\"Success enabling file events; current state is enabled\",\"name\":\"detect_file_write_events\",\"status\":\"success\"},{\"message\":\"Success enabling file events; current state is enabled\",\"name\":\"configure_file_events\",\"status\":\"success\"},{\"message\":\"Success enabling network events; current state is enabled\",\"name\":\"configure_network_events\",\"status\":\"success\"},{\"message\":\"Success enabling process events; current state is enabled\",\"name\":\"configure_process_events\",\"status\":\"success\"},{\"message\":\"Successfully connected to Agent\",\"name\":\"agent_connectivity\",\"status\":\"success\"},{\"message\":\"Successfully executed all workflows\",\"name\":\"workflow\",\"status\":\"success\"}],\"artifacts\":{\"global\":{\"identifiers\":[],\"version\":\"1.0.0\"}},\"id\":\"8f802370-fe80-11ea-82b3-5be7a91e28b6\",\"response\":{\"configurations\":{\"events\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"workflow\",\"read_events_config\",\"detect_process_events\",\"detect_file_write_events\",\"detect_network_events\",\"configure_file_events\",\"configure_network_events\",\"configure_process_events\"],\"status\":\"success\"},\"logging\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"read_logging_config\",\"configure_logging\",\"workflow\"],\"status\":\"success\"},\"streaming\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"read_elasticsearch_config\",\"configure_elasticsearch_connection\",\"workflow\"],\"status\":\"success\"}}},\"status\":\"success\"}}},\"agent\":{\"id\":\"6f0cb2fc-3e46-4435-8892-d9f7e71b23fd\",\"version\":\"7.9.2\"},\"ecs\":{\"version\":\"1.5.0\"},\"event\":{\"action\":\"elastic_endpoint_telemetry\"},\"host\":{\"architecture\":\"x86_64\",\"id\":\"e9909692-0e35-fd30-e3a3-e2e7253bb5c7\",\"os\":{\"Ext\":{\"variant\":\"Ubuntu\"},\"full\":\"Ubuntu 18.04.1\",\"name\":\"Linux\",\"version\":\"18.04.1\"}}}}"
+   }, 
+   "updated_at": "2020-09-24T16:17:47.051Z", 
+   "type": "fleet-agent-events"
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agent-events:7cbf9cb1-fe81-11ea-ac23-9bd6426c270f", 
+  "source": {
+   "references": [], 
+   "fleet-agent-events": {
+    "config_id": "81188c00-fe80-11ea-82b3-5be7a91e28b6", 
+    "timestamp": "2020-09-24T12:17:15.400204-04:00", 
+    "subtype": "RUNNING", 
+    "agent_id": "2d187287-658a-4cb6-84d8-d66d1b9a6299", 
+    "message": "Application: endpoint-security--7.9.2[2d187287-658a-4cb6-84d8-d66d1b9a6299]: State changed to RUNNING: ", 
+    "type": "STATE", 
+    "payload": "{\"endpoint-security\":{\"@timestamp\":\"2020-09-24T16:17:15.96990100Z\",\"Endpoint\":{\"configuration\":{\"inputs\":[{\"id\":\"8f802370-fe80-11ea-82b3-5be7a91e28b6\",\"policy\":{\"linux\":{\"events\":{\"file\":true,\"network\":true,\"process\":true},\"logging\":{\"file\":\"info\"}},\"mac\":{\"events\":{\"file\":true,\"network\":true,\"process\":true},\"logging\":{\"file\":\"info\"},\"malware\":{\"mode\":\"prevent\"}},\"windows\":{\"events\":{\"dll_and_driver_load\":true,\"dns\":true,\"file\":true,\"network\":true,\"process\":true,\"registry\":true,\"security\":true},\"logging\":{\"file\":\"info\"},\"malware\":{\"mode\":\"prevent\"}}}}]},\"metrics\":{\"cpu\":{\"endpoint\":{\"histogram\":{\"counts\":[46,2,2,2,4,2,0,0,0,2,0,0,0,0,1,0,0,0,0,0],\"values\":[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]},\"latest\":48.3070275492921,\"mean\":6.43134047264261}},\"memory\":{\"endpoint\":{\"private\":{\"latest\":228757504,\"mean\":94594836}}},\"threads\":[{\"cpu\":{\"mean\":0},\"name\":\"Cron\"},{\"cpu\":{\"mean\":0},\"name\":\"File Cache\"},{\"cpu\":{\"mean\":0},\"name\":\"FileLogThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingMaintenance\"},{\"cpu\":{\"mean\":0},\"name\":\"BulkConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DocumentLoggingConsumerThread\"},{\"cpu\":{\"mean\":1.30293159609121},\"name\":\"ArtifactManifestDownload\"},{\"cpu\":{\"mean\":0},\"name\":\"PerformanceMonitorWorkerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"MetadataThread\"},{\"cpu\":{\"mean\":0},\"name\":\"EventsQueueThread\"},{\"cpu\":{\"mean\":0},\"name\":\"FileScoreAsyncEventThread\"},{\"cpu\":{\"mean\":0},\"name\":\"QuarantineManagerWorkerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"DelayedAlertEnrichment\"},{\"cpu\":{\"mean\":0},\"name\":\"grpcConnectionManagerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":1.9672131147541},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":2.62295081967213},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncMessageThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelAsyncMessageQueueConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelAsyncMessageQueueConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelSyncQueueConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelPortConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelPortConsumerThread\"},{\"cpu\":{\"mean\":0},\"name\":\"KernelPortConsumerThread\"},{\"cpu\":{\"mean\":0.655737704918033},\"name\":\"KernelPortConsumerThread\"},{\"cpu\":{\"mean\":2.11267605633803},\"name\":\"checkinAPIThread\"},{\"cpu\":{\"mean\":0},\"name\":\"actionsAPIThread\"},{\"cpu\":{\"mean\":0},\"name\":\"stateReportThread\"}],\"uptime\":{\"endpoint\":307,\"system\":3654}},\"policy\":{\"applied\":{\"actions\":[{\"message\":\"Successfully read Elasticsearch configuration\",\"name\":\"read_elasticsearch_config\",\"status\":\"success\"},{\"message\":\"Successfully read events configuration\",\"name\":\"read_events_config\",\"status\":\"success\"},{\"message\":\"Successfully read malware prevent configuration\",\"name\":\"read_malware_config\",\"status\":\"success\"},{\"message\":\"Succesfully read kernel configuration\",\"name\":\"read_kernel_config\",\"status\":\"success\"},{\"message\":\"Successfully read logging configuration\",\"name\":\"read_logging_config\",\"status\":\"success\"},{\"message\":\"Successfully parsed configuration\",\"name\":\"load_config\",\"status\":\"success\"},{\"message\":\"Successfully downloaded user artifacts\",\"name\":\"download_user_artifacts\",\"status\":\"success\"},{\"message\":\"Global artifacts are available for use\",\"name\":\"download_global_artifacts\",\"status\":\"success\"},{\"message\":\"Successfully configured logging\",\"name\":\"configure_logging\",\"status\":\"success\"},{\"message\":\"Successfully read Elasticsearch configuration\",\"name\":\"configure_elasticsearch_connection\",\"status\":\"success\"},{\"message\":\"Successfully connected to driver\",\"name\":\"connect_kernel\",\"status\":\"success\"},{\"message\":\"Successfully started process event reporting\",\"name\":\"detect_process_events\",\"status\":\"success\"},{\"message\":\"Successfuly started sync image load event reporting\",\"name\":\"detect_sync_image_load_events\",\"status\":\"success\"},{\"message\":\"Successfuly started async image load event reporting\",\"name\":\"detect_async_image_load_events\",\"status\":\"success\"},{\"message\":\"Successfully started file write event reporting\",\"name\":\"detect_file_write_events\",\"status\":\"success\"},{\"message\":\"Successfully stopped file open event reporting\",\"name\":\"detect_file_open_events\",\"status\":\"success\"},{\"message\":\"Successfully started network event reporting\",\"name\":\"detect_network_events\",\"status\":\"success\"},{\"message\":\"Successfully started registry event reporting\",\"name\":\"detect_registry_events\",\"status\":\"success\"},{\"message\":\"Successfully configured kernel\",\"name\":\"configure_kernel\",\"status\":\"success\"},{\"message\":\"Successfully loaded malware model\",\"name\":\"load_malware_model\",\"status\":\"success\"},{\"message\":\"Successfully configured malware prevention/detection\",\"name\":\"configure_malware\",\"status\":\"success\"},{\"message\":\"Success enabling file events; current state is enabled\",\"name\":\"configure_file_events\",\"status\":\"success\"},{\"message\":\"Success enabling network events; current state is enabled\",\"name\":\"configure_network_events\",\"status\":\"success\"},{\"message\":\"Success enabling process events; current state is enabled\",\"name\":\"configure_process_events\",\"status\":\"success\"},{\"message\":\"Success enabling imageload events; current state is enabled\",\"name\":\"configure_imageload_events\",\"status\":\"success\"},{\"message\":\"Success enabling dns events; current state is enabled\",\"name\":\"configure_dns_events\",\"status\":\"success\"},{\"message\":\"Success enabling registry events; current state is enabled\",\"name\":\"configure_registry_events\",\"status\":\"success\"},{\"message\":\"Success enabling security events; current state is enabled\",\"name\":\"configure_security_events\",\"status\":\"success\"},{\"message\":\"Successfully connected to Agent\",\"name\":\"agent_connectivity\",\"status\":\"success\"},{\"message\":\"Successfully executed all workflows\",\"name\":\"workflow\",\"status\":\"success\"}],\"artifacts\":{\"global\":{\"identifiers\":[{\"name\":\"endpointpe-v4-blocklist\",\"sha256\":\"7fdb1b867fd4d2da37870d493e1c67630f59355eab061f91e705f4cc83dd6b9b\"},{\"name\":\"endpointpe-v4-exceptionlist\",\"sha256\":\"e21f3ba186d1563b66bb58b7ff9a362c07448e8f4dec00b2f861bf935cb15d77\"},{\"name\":\"endpointpe-v4-model\",\"sha256\":\"463709447352d429297355247266f641179331171342b3bc3e9c8f6b4b2faed2\"},{\"name\":\"global-exceptionlist-windows\",\"sha256\":\"824859b0c6749cc31951d92a73bbdddfcfe9f38abfe432087934d4dab9766ce8\"}],\"version\":\"1.0.0\"},\"user\":{\"identifiers\":[{\"name\":\"endpoint-exceptionlist-windows-v1\",\"sha256\":\"d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658\"}],\"version\":\"1.0.0\"}},\"id\":\"8f802370-fe80-11ea-82b3-5be7a91e28b6\",\"response\":{\"configurations\":{\"events\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"workflow\",\"read_events_config\",\"detect_process_events\",\"detect_file_write_events\",\"detect_network_events\",\"configure_file_events\",\"configure_network_events\",\"configure_process_events\",\"read_kernel_config\",\"configure_kernel\",\"connect_kernel\",\"detect_file_open_events\",\"detect_async_image_load_events\",\"detect_registry_events\",\"configure_imageload_events\",\"configure_dns_events\",\"configure_security_events\",\"configure_registry_events\"],\"status\":\"success\"},\"logging\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"read_logging_config\",\"configure_logging\",\"workflow\"],\"status\":\"success\"},\"malware\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"workflow\",\"download_global_artifacts\",\"download_user_artifacts\",\"configure_malware\",\"read_malware_config\",\"load_malware_model\",\"read_kernel_config\",\"configure_kernel\",\"detect_process_events\",\"detect_file_write_events\",\"connect_kernel\",\"detect_file_open_events\",\"detect_sync_image_load_events\"],\"status\":\"success\"},\"streaming\":{\"concerned_actions\":[\"agent_connectivity\",\"load_config\",\"read_elasticsearch_config\",\"configure_elasticsearch_connection\",\"workflow\"],\"status\":\"success\"}}},\"status\":\"success\"}}},\"agent\":{\"id\":\"21d182a2-5a08-41bb-b601-5d2b4aba4ecd\",\"version\":\"7.9.2\"},\"ecs\":{\"version\":\"1.5.0\"},\"event\":{\"action\":\"elastic_endpoint_telemetry\"},\"host\":{\"architecture\":\"x86_64\",\"id\":\"327d0e20-483e-95af-f4e4-7b065606e1aa\",\"os\":{\"Ext\":{\"variant\":\"Windows 10 Pro\"},\"full\":\"Windows 10 Pro 1903 (10.0.18362.1082)\",\"name\":\"Windows\",\"version\":\"1903 (10.0.18362.1082)\"}}}}"
+   }, 
+   "updated_at": "2020-09-24T16:17:48.539Z", 
+   "type": "fleet-agent-events"
+  }
+ }
+}
