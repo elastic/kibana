@@ -36,7 +36,7 @@ import { AgentsSummary } from './agents_summary';
 import { VerticalDivider } from './vertical_divider';
 import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
 import { MalwareProtections } from './policy_forms/protections/malware';
-import { AntivirusRegistrationForm } from './policy_forms/antivirus_registration';
+import { AntivirusRegistrationForm } from './components/antivirus_registration_form';
 import { useToasts } from '../../../../common/lib/kibana';
 import { AppAction } from '../../../../common/store/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
