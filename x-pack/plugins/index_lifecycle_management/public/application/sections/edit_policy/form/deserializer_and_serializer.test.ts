@@ -92,6 +92,16 @@ const originalPolicy: SerializedPolicy = {
   },
 };
 
+const originalMinimalPolicy: SerializedPolicy = {
+  name: 'minimalPolicy',
+  phases: {
+    hot: { min_age: '0ms', actions: {} },
+    warm: { min_age: '1d', actions: {} },
+    cold: { min_age: '2d', actions: {} },
+    delete: { min_age: '3d', actions: {} },
+  },
+};
+
 describe('deserializer and serializer', () => {
   let policy: SerializedPolicy;
   let serializer: ReturnType<typeof createSerializer>;
@@ -197,5 +207,29 @@ describe('deserializer and serializer', () => {
     const result = serializer(formInternal);
 
     expect(result.phases.warm!.min_age).toBeUndefined();
+  });
+
+  it('correctly serializes a minimal policy', () => {
+    policy = cloneDeep(originalMinimalPolicy);
+    const formInternalPolicy = cloneDeep(originalMinimalPolicy);
+    serializer = createSerializer(policy);
+    formInternal = deserializer(formInternalPolicy);
+
+    // simulate no fields being configured in the UI. Note, we are not disabling these phases,
+    // just not setting in field values in them so the object is not built up in the internal form.
+    delete (formInternal.phases.hot as any).actions;
+    delete (formInternal.phases.warm as any).actions;
+    delete (formInternal.phases.cold as any).actions;
+    delete (formInternal.phases.delete as any).actions;
+
+    expect(serializer(formInternal)).toEqual({
+      name: 'minimalPolicy',
+      phases: {
+        hot: { min_age: '0ms', actions: {} },
+        warm: { min_age: '1d', actions: {} },
+        cold: { min_age: '2d', actions: {} },
+        delete: { min_age: '3d', actions: {} },
+      },
+    });
   });
 });
