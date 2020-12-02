@@ -14,13 +14,6 @@ import { IndexPatternField } from './types';
 import { FieldItemSharedProps, FieldsAccordion } from './fields_accordion';
 const PAGINATION_SIZE = 50;
 
-export interface FieldsGroup {
-  specialFields: IndexPatternField[];
-  availableFields: IndexPatternField[];
-  emptyFields: IndexPatternField[];
-  metaFields: IndexPatternField[];
-}
-
 export type FieldGroups = Record<
   string,
   {
