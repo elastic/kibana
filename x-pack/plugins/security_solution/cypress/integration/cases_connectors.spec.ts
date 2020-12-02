@@ -17,7 +17,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { CASES_URL } from '../urls/navigation';
 
-describe('Cases connectors', () => {
+describe.skip('Cases connectors', () => {
   before(() => {
     cy.intercept('POST', '/api/actions/action').as('createConnector');
     cy.intercept('POST', '/api/cases/configure').as('saveConnector');
