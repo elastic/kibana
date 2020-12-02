@@ -175,13 +175,13 @@ describe('FieldEditor', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should display and update a customName correctly', async () => {
+  it('should display and update a custom label correctly', async () => {
     let testField = ({
       name: 'test',
       format: new Format(),
       lang: undefined,
       type: 'string',
-      customName: 'Test',
+      customLabel: 'Test',
     } as unknown) as IndexPatternField;
     fieldList.push(testField);
     indexPattern.fields.getByName = (name) => {
@@ -219,14 +219,14 @@ describe('FieldEditor', () => {
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
-    const input = findTestSubject(component, 'editorFieldCustomName');
+    const input = findTestSubject(component, 'editorFieldCustomLabel');
     expect(input.props().value).toBe('Test');
     input.simulate('change', { target: { value: 'new Test' } });
     const saveBtn = findTestSubject(component, 'fieldSaveButton');
 
     await saveBtn.simulate('click');
     await new Promise((resolve) => process.nextTick(resolve));
-    expect(testField.customName).toEqual('new Test');
+    expect(testField.customLabel).toEqual('new Test');
   });
 
   it('should show deprecated lang warning', async () => {

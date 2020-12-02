@@ -98,7 +98,7 @@ export function IngestManagerCreatePackagePolicy({
      * Navigates to the Ingest Agent configuration Edit Package Policy page
      */
     async navigateToAgentPolicyEditPackagePolicy(agentPolicyId: string, packagePolicyId: string) {
-      await pageObjects.common.navigateToApp('ingestManager', {
+      await pageObjects.common.navigateToApp('fleet', {
         hash: `/policies/${agentPolicyId}/edit-integration/${packagePolicyId}`,
       });
       await this.ensureOnEditPageOrFail();

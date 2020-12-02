@@ -36,6 +36,7 @@ import {
 } from './services';
 import { DataPublicPluginStart } from '../../data/public';
 import { ChartsPluginSetup } from '../../charts/public';
+import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
 
 /** @internal */
 export interface MetricsPluginSetupDependencies {
@@ -62,9 +63,14 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
     { expressions, visualizations, charts }: MetricsPluginSetupDependencies
   ) {
     expressions.registerFunction(createMetricsFn);
+    expressions.registerRenderer(
+      getTimeseriesVisRenderer({
+        uiSettings: core.uiSettings,
+      })
+    );
     setUISettings(core.uiSettings);
     setChartsSetup(charts);
-    visualizations.createReactVisualization(metricsVisDefinition);
+    visualizations.createBaseVisualization(metricsVisDefinition);
   }
 
   public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {

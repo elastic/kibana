@@ -134,6 +134,7 @@ export const useModelMemoryEstimator = (
   // Update model memory estimation payload on the job creator updates
   useEffect(() => {
     modelMemoryEstimator.update({
+      datafeedConfig: jobCreator.datafeedConfig,
       analysisConfig: jobCreator.jobConfig.analysis_config,
       indexPattern: jobCreator.indexPatternTitle,
       query: jobCreator.datafeedConfig.query,

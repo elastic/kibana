@@ -33,16 +33,33 @@ import { UpgradeWarning } from '../../../components/upgrade';
 import { AnalyticsNavigationBar } from './components/analytics_navigation_bar';
 import { ModelsList } from './components/models_management';
 import { JobMap } from '../job_map';
+import { usePageUrlState } from '../../../util/url_state';
+import { ListingPageUrlState } from '../../../../../common/types/common';
+import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+
+export const getDefaultDFAListState = (): ListingPageUrlState => ({
+  pageIndex: 0,
+  pageSize: 10,
+  sortField: DataFrameAnalyticsListColumn.id,
+  sortDirection: 'asc',
+});
 
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [globalState] = useUrlState('_g');
+
+  const [dfaPageState, setDfaPageState] = usePageUrlState(
+    ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+    getDefaultDFAListState()
+  );
 
   useRefreshInterval(setBlockRefresh);
 
   const location = useLocation();
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
   const mapJobId = globalState?.ml?.jobId;
+  const mapModelId = globalState?.ml?.modelId;
 
   return (
     <Fragment>
@@ -90,10 +107,20 @@ export const Page: FC = () => {
           <UpgradeWarning />
 
           <EuiPageContent>
-            <AnalyticsNavigationBar selectedTabId={selectedTabId} jobId={mapJobId} />
-            {selectedTabId === 'map' && mapJobId && <JobMap analyticsId={mapJobId} />}
+            <AnalyticsNavigationBar
+              selectedTabId={selectedTabId}
+              jobId={mapJobId}
+              modelId={mapModelId}
+            />
+            {selectedTabId === 'map' && (mapJobId || mapModelId) && (
+              <JobMap analyticsId={mapJobId} modelId={mapModelId} />
+            )}
             {selectedTabId === 'data_frame_analytics' && (
-              <DataFrameAnalyticsList blockRefresh={blockRefresh} />
+              <DataFrameAnalyticsList
+                blockRefresh={blockRefresh}
+                pageState={dfaPageState}
+                updatePageState={setDfaPageState}
+              />
             )}
             {selectedTabId === 'models' && <ModelsList />}
           </EuiPageContent>

@@ -10,10 +10,17 @@ import { FormatFactory } from '../types';
 import { TimeScaleUnit } from './time_scale';
 
 const unitSuffixes: Record<TimeScaleUnit, string> = {
-  s: i18n.translate('xpack.lens.fieldFormats.suffix.s', { defaultMessage: '/h' }),
+  s: i18n.translate('xpack.lens.fieldFormats.suffix.s', { defaultMessage: '/s' }),
   m: i18n.translate('xpack.lens.fieldFormats.suffix.m', { defaultMessage: '/m' }),
   h: i18n.translate('xpack.lens.fieldFormats.suffix.h', { defaultMessage: '/h' }),
   d: i18n.translate('xpack.lens.fieldFormats.suffix.d', { defaultMessage: '/d' }),
+};
+
+export const unitSuffixesLong: Record<TimeScaleUnit, string> = {
+  s: i18n.translate('xpack.lens.fieldFormats.longSuffix.s', { defaultMessage: 'per second' }),
+  m: i18n.translate('xpack.lens.fieldFormats.longSuffix.m', { defaultMessage: 'per minute' }),
+  h: i18n.translate('xpack.lens.fieldFormats.longSuffix.h', { defaultMessage: 'per hour' }),
+  d: i18n.translate('xpack.lens.fieldFormats.longSuffix.d', { defaultMessage: 'per day' }),
 };
 
 export function getSuffixFormatter(formatFactory: FormatFactory) {

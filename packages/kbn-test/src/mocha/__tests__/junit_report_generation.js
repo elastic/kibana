@@ -67,6 +67,7 @@ describe('dev/mocha/junit report generation', () => {
     expect(testsuite).to.eql({
       $: {
         failures: '2',
+        name: 'test',
         skipped: '1',
         tests: '4',
         time: testsuite.$.time,

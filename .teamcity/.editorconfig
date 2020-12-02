@@ -1,0 +1,4 @@
+[*.{kt,kts}]
+disabled_rules=no-wildcard-imports
+indent_size=2
+kotlin_imports_layout=idea

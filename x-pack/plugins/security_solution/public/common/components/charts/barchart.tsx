@@ -47,6 +47,9 @@ const checkIfAnyValidSeriesExist = (
   !checkIfAllValuesAreZero(data) &&
   data.some(checkIfAllTheDataInTheSeriesAreValid);
 
+const yAccessors = ['y'];
+const splitSeriesAccessors = ['g'];
+
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = ({
   data,
@@ -86,9 +89,9 @@ export const BarChartBaseComponent = ({
             xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
             yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
             xAccessor="x"
-            yAccessors={['y']}
+            yAccessors={yAccessors}
             timeZone={timeZone}
-            splitSeriesAccessors={['g']}
+            splitSeriesAccessors={splitSeriesAccessors}
             data={series.value!}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             color={series.color ? series.color : undefined}

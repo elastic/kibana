@@ -14,17 +14,17 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { px, truncate, unit } from '../../../../style/variables';
 import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
+import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { ServiceOverviewTable } from '../service_overview_table';
 import { TableLinkFlexItem } from '../table_link_flex_item';
-import { FetchWrapper } from './fetch_wrapper';
 
 interface Props {
   serviceName: string;
@@ -135,8 +135,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 },
               }
             )}
-            start={parseFloat(start!)}
-            end={parseFloat(end!)}
           />
         );
       },
@@ -159,7 +157,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     }
 
     return callApmApi({
-      pathname: '/api/apm/services/{serviceName}/error_groups',
+      endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
       params: {
         path: { serviceName },
         query: {
@@ -225,7 +223,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <FetchWrapper status={status}>
+        <TableFetchWrapper status={status}>
           <ServiceOverviewTable
             columns={columns}
             items={items}
@@ -261,7 +259,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               },
             }}
           />
-        </FetchWrapper>
+        </TableFetchWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

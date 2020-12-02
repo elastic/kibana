@@ -16,9 +16,11 @@ import { map } from 'rxjs/operators';
 import { each, get } from 'lodash';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
-import { JobId } from '../../../../common/types/anomaly_detection_jobs';
+import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
 import { CriteriaField } from './index';
+import { findAggField } from '../../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
 import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 
 interface ResultResponse {
@@ -69,8 +71,12 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       timeFieldName: string,
       earliestMs: number,
       latestMs: number,
-      intervalMs: number
+      intervalMs: number,
+      datafeedConfig?: Datafeed
     ): Observable<MetricData> {
+      const scriptFields = datafeedConfig?.script_fields;
+      const aggFields = getDatafeedAggregations(datafeedConfig);
+
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, entity fields,
       // plus any additional supplied query.
@@ -151,15 +157,35 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         body.aggs.byTime.aggs = {};
 
         const metricAgg: any = {
-          [metricFunction]: {
-            field: metricFieldName,
-          },
+          [metricFunction]: {},
         };
+        if (scriptFields !== undefined && scriptFields[metricFieldName] !== undefined) {
+          metricAgg[metricFunction].script = scriptFields[metricFieldName].script;
+        } else {
+          metricAgg[metricFunction].field = metricFieldName;
+        }
 
         if (metricFunction === 'percentiles') {
           metricAgg[metricFunction].percents = [ML_MEDIAN_PERCENTS];
         }
-        body.aggs.byTime.aggs.metric = metricAgg;
+
+        // when the field is an aggregation field, because the field doesn't actually exist in the indices
+        // we need to pass all the sub aggs from the original datafeed config
+        // so that we can access the aggregated field
+        if (typeof aggFields === 'object' && Object.keys(aggFields).length > 0) {
+          // first item under aggregations can be any name, not necessarily 'buckets'
+          const accessor = Object.keys(aggFields)[0];
+          const tempAggs = { ...(aggFields[accessor].aggs ?? aggFields[accessor].aggregations) };
+          const foundValue = findAggField(tempAggs, metricFieldName);
+
+          if (foundValue !== undefined) {
+            tempAggs.metric = foundValue;
+            delete tempAggs[metricFieldName];
+          }
+          body.aggs.byTime.aggs = tempAggs;
+        } else {
+          body.aggs.byTime.aggs.metric = metricAgg;
+        }
       }
 
       return mlApiServices.esSearch$({ index, body }).pipe(

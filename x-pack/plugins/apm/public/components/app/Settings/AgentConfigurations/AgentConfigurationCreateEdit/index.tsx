@@ -14,7 +14,7 @@ import {
   AgentConfiguration,
   AgentConfigurationIntake,
 } from '../../../../../../common/agent_configuration/configuration_types';
-import { FetcherResult } from '../../../../../hooks/useFetcher';
+import { FetcherResult } from '../../../../../hooks/use_fetcher';
 import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 import { ServicePage } from './ServicePage/ServicePage';
 import { SettingsPage } from './SettingsPage/SettingsPage';
@@ -81,7 +81,6 @@ export function AgentConfigurationCreateEdit({
       ..._newConfig,
       settings: existingConfig?.settings || {},
     }));
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [existingConfig]);
 
   // update newConfig when existingConfig has loaded

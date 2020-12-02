@@ -19,10 +19,10 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { clearCache } from '../../../../services/rest/callApi';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const APM_INDEX_LABELS = [
   {
@@ -72,8 +72,7 @@ async function saveApmIndices({
   apmIndices: Record<string, string>;
 }) {
   await callApmApi({
-    method: 'POST',
-    pathname: '/api/apm/settings/apm-indices/save',
+    endpoint: 'POST /api/apm/settings/apm-indices/save',
     params: {
       body: apmIndices,
     },
@@ -94,7 +93,7 @@ export function ApmIndices() {
   const { data = INITIAL_STATE, status, refetch } = useFetcher(
     (_callApmApi) =>
       _callApmApi({
-        pathname: `/api/apm/settings/apm-index-settings`,
+        endpoint: `GET /api/apm/settings/apm-index-settings`,
       }),
     []
   );

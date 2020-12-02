@@ -53,17 +53,17 @@ export default function ({ getService }) {
     });
 
     it('should pull local stats and validate data types', async () => {
-      const timestamp = '2018-07-23T22:13:00Z';
-
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timestamp, unencrypted: true })
+        .send({ unencrypted: true })
         .expect(200);
 
       expect(body.length).to.be(1);
       const stats = body[0];
       expect(stats.collection).to.be('local');
+      expect(stats.collectionSource).to.be('local');
+      expect(stats.license).to.be.undefined; // OSS cannot get the license
       expect(stats.stack_stats.kibana.count).to.be.a('number');
       expect(stats.stack_stats.kibana.indices).to.be.a('number');
       expect(stats.stack_stats.kibana.os.platforms[0].platform).to.be.a('string');
@@ -95,12 +95,10 @@ export default function ({ getService }) {
     });
 
     it('should pull local stats and validate fields', async () => {
-      const timestamp = '2018-07-23T22:13:00Z';
-
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timestamp, unencrypted: true })
+        .send({ unencrypted: true })
         .expect(200);
 
       const stats = body[0];
@@ -150,8 +148,6 @@ export default function ({ getService }) {
     });
 
     describe('application usage limits', () => {
-      const timestamp = '2018-07-23T22:13:00Z';
-
       function createSavedObject() {
         return supertest
           .post('/api/saved_objects/application_usage_transactional')
@@ -182,7 +178,7 @@ export default function ({ getService }) {
           const { body } = await supertest
             .post('/api/telemetry/v2/clusters/_stats')
             .set('kbn-xsrf', 'xxx')
-            .send({ timestamp, unencrypted: true })
+            .send({ unencrypted: true })
             .expect(200);
 
           expect(body.length).to.be(1);
@@ -233,7 +229,7 @@ export default function ({ getService }) {
           const { body } = await supertest
             .post('/api/telemetry/v2/clusters/_stats')
             .set('kbn-xsrf', 'xxx')
-            .send({ timestamp, unencrypted: true })
+            .send({ unencrypted: true })
             .expect(200);
 
           expect(body.length).to.be(1);

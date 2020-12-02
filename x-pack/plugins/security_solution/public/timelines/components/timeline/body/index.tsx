@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 
 import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { Note } from '../../../../common/lib/note';
-import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -29,9 +29,8 @@ import { Events } from './events';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
-import { GraphOverlay } from '../../graph_overlay';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
-import { TimelineEventsType, TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineEventsType, TimelineId } from '../../../../../common/types/timeline';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -64,7 +63,6 @@ export interface BodyProps {
   showCheckboxes: boolean;
   sort: Sort;
   timelineId: string;
-  timelineType: TimelineType;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   updateNote: UpdateNote;
 }
@@ -84,7 +82,6 @@ export const Body = React.memo<BodyProps>(
     columnHeaders,
     columnRenderers,
     data,
-    docValueFields,
     eventIdToNoteIds,
     getNotesByIds,
     graphEventId,
@@ -109,10 +106,8 @@ export const Body = React.memo<BodyProps>(
     sort,
     toggleColumn,
     timelineId,
-    timelineType,
     updateNote,
   }) => {
-    const containerElementRef = useRef<HTMLDivElement>(null);
     const actionsColumnWidth = useMemo(
       () =>
         getActionsColumnWidth(
@@ -133,18 +128,9 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        {graphEventId && (
-          <GraphOverlay
-            graphEventId={graphEventId}
-            isEventViewer={isEventViewer}
-            timelineId={timelineId}
-            timelineType={timelineType}
-          />
-        )}
         <TimelineBody
           data-test-subj="timeline-body"
           data-timeline-id={timelineId}
-          ref={containerElementRef}
           visible={show && !graphEventId}
         >
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
@@ -167,14 +153,12 @@ export const Body = React.memo<BodyProps>(
             />
 
             <Events
-              containerElementRef={containerElementRef.current!}
               actionsColumnWidth={actionsColumnWidth}
               addNoteToEvent={addNoteToEvent}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
               data={data}
-              docValueFields={docValueFields}
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
               id={timelineId}
@@ -183,7 +167,6 @@ export const Body = React.memo<BodyProps>(
               onColumnResized={onColumnResized}
               onPinEvent={onPinEvent}
               onRowSelected={onRowSelected}
-              onUpdateColumns={onUpdateColumns}
               onUnPinEvent={onUnPinEvent}
               pinnedEventIds={pinnedEventIds}
               refetch={refetch}
@@ -201,4 +184,5 @@ export const Body = React.memo<BodyProps>(
     );
   }
 );
+
 Body.displayName = 'Body';

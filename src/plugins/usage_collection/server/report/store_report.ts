@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ISavedObjectsRepository, SavedObject } from 'kibana/server';
+import { ISavedObjectsRepository, SavedObject } from 'src/core/server';
 import { ReportSchemaType } from './schema';
 
 export async function storeReport(
@@ -50,7 +50,7 @@ export async function storeReport(
       const savedObjectId = `${appName}:${eventName}`;
       return {
         saved_objects: [
-          await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count'),
+          await internalRepository.incrementCounter('ui-metric', savedObjectId, ['count']),
         ],
       };
     }),

@@ -298,12 +298,12 @@ describe('edit policy', () => {
             phases: {
               hot: {
                 actions: {
+                  rollover: {
+                    max_age: '30d',
+                    max_size: '50gb',
+                  },
                   set_priority: {
                     priority: 100,
-                  },
-                  rollover: {
-                    max_size: '50gb',
-                    max_age: '30d',
                   },
                 },
                 min_age: '0ms',
