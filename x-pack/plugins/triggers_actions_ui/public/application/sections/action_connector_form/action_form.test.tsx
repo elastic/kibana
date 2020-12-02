@@ -10,9 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, Alert, AlertAction } from '../../../types';
 import ActionForm from './action_form';
-import { RecoveredActionGroup } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
-import { EuiScreenReaderOnly } from '@elastic/eui';
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -236,6 +234,7 @@ describe('action_form', () => {
         mutedInstanceIds: [],
       } as unknown) as Alert;
 
+      const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
       const wrapper = mountWithIntl(
         <ActionForm
           actions={initialAlert.actions}
@@ -252,19 +251,18 @@ describe('action_form', () => {
             initialAlert.actions[index].id = id;
           }}
           actionGroups={[
-            { id: 'default', name: 'Default' },
+            { id: 'default', name: 'Default', defaultActionMessage },
             { id: 'recovered', name: 'Recovered' },
           ]}
           setActionGroupIdByIndex={(group: string, index: number) => {
             initialAlert.actions[index].group = group;
           }}
-          setAlertProperty={(_updatedActions: AlertAction[]) => {}}
+          setActions={(_updatedActions: AlertAction[]) => {}}
           setActionParamsProperty={(key: string, value: any, index: number) =>
             (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
           }
           actionTypeRegistry={actionTypeRegistry}
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
           actionTypes={[
             {
               id: actionType.id,
