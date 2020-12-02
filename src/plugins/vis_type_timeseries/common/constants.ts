@@ -22,4 +22,5 @@ export const INDEXES_SEPARATOR = ',';
 export const AUTO_INTERVAL = 'auto';
 export const ROUTES = {
   VIS_DATA: '/api/metrics/vis/data',
+  FIELDS: '/api/metrics/fields',
 };
