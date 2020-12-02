@@ -14,19 +14,15 @@ import { AlertForm } from './alert_form';
 import { coreMock } from 'src/core/public/mocks';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
-jest.mock('../../../common/lib/kibana');
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 jest.mock('../../lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
 }));
+jest.mock('../../../common/lib/kibana');
 
 describe('alert_form', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   const alertType = {
     id: 'my-alert-type',
     iconClass: 'test',
@@ -67,12 +63,12 @@ describe('alert_form', () => {
     alertParamsExpression: () => <Fragment />,
     requiresAppContext: true,
   };
+  const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('alert_form create alert', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
       const mocks = coreMock.createSetup();
       const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
       const alertTypes = [
@@ -195,7 +191,6 @@ describe('alert_form', () => {
 
     async function setup() {
       const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
-      const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
       loadAlertTypes.mockResolvedValue([
         {

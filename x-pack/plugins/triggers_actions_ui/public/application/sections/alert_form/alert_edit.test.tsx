@@ -43,7 +43,8 @@ describe('alert_edit', () => {
       },
     };
 
-    mockedCoreSetup.http.get.mockResolvedValue({
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.http.get = jest.fn().mockResolvedValue({
       isSufficientlySecure: true,
       hasPermanentEncryptionKey: true,
     });
@@ -147,15 +148,17 @@ describe('alert_edit', () => {
   });
 
   it('displays a toast message on save for server errors', async () => {
-    mockedCoreSetup.http.get.mockResolvedValue([]);
+    useKibanaMock().services.http.get = jest.fn().mockResolvedValue([]);
     await setup();
     const err = new Error() as any;
     err.body = {};
     err.body.message = 'Fail message';
-    mockedCoreSetup.http.put.mockRejectedValue(err);
+    useKibanaMock().services.http.put = jest.fn().mockRejectedValue(err);
     await act(async () => {
       wrapper.find('[data-test-subj="saveEditedAlertButton"]').first().simulate('click');
     });
-    expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith('Fail message');
+    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
+      'Fail message'
+    );
   });
 });

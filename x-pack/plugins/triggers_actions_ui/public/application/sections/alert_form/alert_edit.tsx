@@ -128,7 +128,7 @@ export const AlertEdit = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <HealthContextProvider>
-          <HealthCheck docLinks={docLinks} http={http} inFlyout={true} waitForCheck={true}>
+          <HealthCheck inFlyout={true} waitForCheck={true}>
             <EuiFlyoutBody>
               {hasActionsDisabled && (
                 <Fragment>

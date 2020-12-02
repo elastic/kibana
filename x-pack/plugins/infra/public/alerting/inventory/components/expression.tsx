@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertPreview } from '../../common';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
@@ -66,6 +65,7 @@ import {
 } from '../../../../common/http_api/snapshot_api';
 
 import { validateMetricThreshold } from './validation';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -108,13 +108,13 @@ export const defaultExpression = {
 } as InventoryMetricConditions;
 
 export const Expressions: React.FC<Props> = (props) => {
-  const { http, notifications } = useKibana().services;
+  const { http, notifications } = useKibanaContextForPlugin().services;
   const { setAlertParams, alertParams, errors, alertInterval, alertThrottle, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
-    fetch: http!.fetch,
-    toastWarning: notifications!.toasts.addWarning,
+    fetch: http.fetch,
+    toastWarning: notifications.toasts.addWarning,
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit>('m');

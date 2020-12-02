@@ -5,10 +5,8 @@
  */
 
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { alertTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/alert_type_registry.mock';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { AlertContextMeta } from '../types';
+// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
+import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 import React from 'react';
 import { Expressions } from './expression';
@@ -20,6 +18,12 @@ jest.mock('../../../containers/source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
+  }),
+}));
+
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibanaContextForPlugin: () => ({
+    services: mockCoreMock.createStart(),
   }),
 }));
 
@@ -35,15 +39,6 @@ describe('Expression', () => {
       filterQueryText: '',
       sourceId: 'default',
     };
-
-    const mocks = coreMock.createSetup();
-    const startMocks = coreMock.createStart();
-    const [
-      {
-        application: { capabilities },
-      },
-    ] = await mocks.getStartServices();
-
     const wrapper = mountWithIntl(
       <Expressions
         alertInterval="1m"

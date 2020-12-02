@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { AlertPreview } from '../../common';
 import {
   Comparator,
@@ -42,6 +41,7 @@ import { ExpressionRow } from './expression_row';
 import { MetricExpression, AlertParams, AlertContextMeta } from '../types';
 import { ExpressionChart } from './expression_chart';
 import { validateMetricThreshold } from './validation';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -66,12 +66,12 @@ export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, alertInterval, alertThrottle, metadata } = props;
-  const { http, notifications } = useKibana().services;
+  const { http, notifications } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
-    fetch: http!.fetch,
-    toastWarning: notifications!.toasts.addWarning,
+    fetch: http.fetch,
+    toastWarning: notifications.toasts.addWarning,
   });
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);

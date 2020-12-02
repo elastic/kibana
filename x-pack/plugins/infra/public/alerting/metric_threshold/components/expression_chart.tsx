@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import {
   Comparator,
@@ -37,6 +36,7 @@ import { createFormatterForMetric } from '../../../pages/metrics/metrics_explore
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 interface Props {
   expression: MetricExpression;
@@ -73,7 +73,7 @@ export const ExpressionChart: React.FC<Props> = ({
     groupBy
   );
 
-  const { uiSettings } = useKibana().services;
+  const { uiSettings } = useKibanaContextForPlugin().services;
 
   const metric = {
     field: expression.metric,
