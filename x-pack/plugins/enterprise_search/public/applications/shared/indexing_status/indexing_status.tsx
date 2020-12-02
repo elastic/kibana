@@ -16,25 +16,22 @@ import { IndexingStatusLogic } from './indexing_status_logic';
 
 import { IIndexingStatus } from '../types';
 
-export interface IIndexingStatusProps extends IIndexingStatus {
+export interface IIndexingStatusProps {
   viewLinkPath: string;
   itemId: string;
+  statusPath: string;
   getItemDetailPath?(itemId: string): string;
-  getStatusPath(itemId: string, activeReindexJobId: number): string;
   onComplete(numDocumentsWithErrors: number): void;
   setGlobalIndexingStatus?(activeReindexJob: IIndexingStatus): void;
 }
 
 export const IndexingStatus: React.FC<IIndexingStatusProps> = ({
-  itemId,
-  activeReindexJobId,
   viewLinkPath,
-  getStatusPath,
+  statusPath,
   onComplete,
 }) => {
   const { percentageComplete, numDocumentsWithErrors } = useValues(IndexingStatusLogic);
   const { fetchIndexingStatus } = useActions(IndexingStatusLogic);
-  const statusPath = getStatusPath(itemId, activeReindexJobId);
 
   useEffect(() => {
     fetchIndexingStatus({ statusPath, onComplete });

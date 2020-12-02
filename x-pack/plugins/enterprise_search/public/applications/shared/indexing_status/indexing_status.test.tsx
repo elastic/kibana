@@ -20,7 +20,6 @@ import { IndexingStatus } from './indexing_status';
 
 describe('IndexingStatus', () => {
   const getItemDetailPath = jest.fn();
-  const getStatusPath = jest.fn();
   const onComplete = jest.fn();
   const setGlobalIndexingStatus = jest.fn();
   const fetchIndexingStatus = jest.fn();
@@ -30,9 +29,9 @@ describe('IndexingStatus', () => {
     numDocumentsWithErrors: 1,
     activeReindexJobId: 12,
     viewLinkPath: '/path',
+    statusPath: '/other_path',
     itemId: '1',
     getItemDetailPath,
-    getStatusPath,
     onComplete,
     setGlobalIndexingStatus,
   };
@@ -58,7 +57,7 @@ describe('IndexingStatus', () => {
       percentageComplete: 100,
       numDocumentsWithErrors: 1,
     });
-    const wrapper = shallow(<IndexingStatus {...props} percentageComplete={100} />);
+    const wrapper = shallow(<IndexingStatus {...props} />);
 
     expect(wrapper.find(IndexingStatusErrors)).toHaveLength(1);
   });
