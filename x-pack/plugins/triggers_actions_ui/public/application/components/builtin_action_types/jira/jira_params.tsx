@@ -198,7 +198,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           />
         </EuiFormRow>
         <EuiHorizontalRule />
-        {hasParent && parent && (
+        {hasParent && (
           <>
             <EuiFlexGroup>
               <EuiFlexItem>
