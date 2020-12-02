@@ -21,8 +21,6 @@ import { flashAPIErrors } from '../flash_messages';
 import { IndexingStatusLogic } from './indexing_status_logic';
 
 describe('IndexingStatusLogic', () => {
-  jest.useFakeTimers();
-
   let unmount: any;
 
   const mockStatusResponse = {
@@ -58,6 +56,7 @@ describe('IndexingStatusLogic', () => {
   });
 
   describe('fetchIndexingStatus', () => {
+    jest.useFakeTimers();
     const statusPath = '/api/workplace_search/path/123';
     const onComplete = jest.fn();
     const TIMEOUT = 3000;
@@ -86,8 +85,9 @@ describe('IndexingStatusLogic', () => {
       try {
         await promise;
       } catch {
-        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
+        // Do nothing
       }
+      expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
 
     it('handles indexing complete state', async () => {
