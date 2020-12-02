@@ -110,7 +110,7 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'critical', value: 'critical' },
       { text: 'off', value: 'off' },
     ],
-    includeAgents: ['dotnet', 'ruby', 'java'],
+    includeAgents: ['dotnet', 'ruby', 'java', 'python'],
   },
 
   // Recording

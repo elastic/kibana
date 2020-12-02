@@ -111,6 +111,7 @@ describe('filterByAgent', () => {
         'api_request_time',
         'capture_body',
         'capture_headers',
+        'log_level',
         'recording',
         'span_frames_min_duration',
         'transaction_max_spans',
