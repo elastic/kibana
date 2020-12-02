@@ -14,6 +14,29 @@ import { isAntivirusRegistrationEnabled } from '../../../store/policy_details/se
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { ConfigForm } from '../../components/config_form';
 
+const TRANSLATIONS: Readonly<{ [K in 'title' | 'description' | 'label']: string }> = {
+  title: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.type',
+    {
+      defaultMessage: 'Register as anti-virus',
+    }
+  ),
+  description: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.explanation',
+    {
+      defaultMessage:
+        'Toggle on to register Elastic as an official Anti-Virus solution for Windows OS. ' +
+        'This will also disable Windows Defender.',
+    }
+  ),
+  label: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.toggle',
+    {
+      defaultMessage: 'Register as anti-virus',
+    }
+  ),
+};
+
 export const AntivirusRegistrationForm = memo(() => {
   const antivirusRegistrationEnabled = usePolicyDetailsSelector(isAntivirusRegistrationEnabled);
   const dispatch = useDispatch();
@@ -30,31 +53,11 @@ export const AntivirusRegistrationForm = memo(() => {
   );
 
   return (
-    <ConfigForm
-      type={i18n.translate(
-        'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.type',
-        {
-          defaultMessage: 'Register as anti-virus',
-        }
-      )}
-      supportedOss={[OperatingSystem.WINDOWS]}
-    >
-      <EuiText size="s">
-        {i18n.translate(
-          'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.explanation',
-          {
-            defaultMessage: 'Switch the toggle to on to register Elastic anti-virus',
-          }
-        )}
-      </EuiText>
+    <ConfigForm type={TRANSLATIONS.title} supportedOss={[OperatingSystem.WINDOWS]}>
+      <EuiText size="s">{TRANSLATIONS.description}</EuiText>
       <EuiSpacer size="s" />
       <EuiSwitch
-        label={i18n.translate(
-          'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.toggle',
-          {
-            defaultMessage: 'Register as anti-virus',
-          }
-        )}
+        label={TRANSLATIONS.label}
         checked={antivirusRegistrationEnabled}
         onChange={handleSwitchChange}
       />
