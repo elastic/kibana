@@ -1404,13 +1404,12 @@
   version "0.0.0"
   uid ""
 
-"@elastic/elasticsearch@7.10.0-rc.1":
-  version "7.10.0-rc.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.10.0-rc.1.tgz#c23fc5cbfdb40cf2ce6f9cd796b75940e8c9dc8a"
-  integrity sha512-STaBlEwYbT8yT3HJ+mbO1kx+Kb7Ft7Q0xG5GxZbqbAJ7PZvgGgJWwN7jUg4oKJHbTfxV3lPvFa+PaUK2TqGuYg==
+"@elastic/elasticsearch@7.10.0":
+  version "7.10.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.10.0.tgz#da105a9c1f14146f9f2cab4e7026cb7949121b8d"
+  integrity sha512-vXtMAQf5/DwqeryQgRriMtnFppJNLc/R7/R0D8E+wG5/kGM5i7mg+Hi7TM4NZEuXgtzZ2a/Nf7aR0vLyrxOK/w==
   dependencies:
     debug "^4.1.1"
-    decompress-response "^4.2.0"
     hpagent "^0.1.1"
     ms "^2.1.1"
     pump "^3.0.0"
@@ -11186,13 +11185,6 @@ decompress-response@^3.3.0:
   integrity sha1-gKTdMjdIOEv6JICDYirt7Jgq3/M=
   dependencies:
     mimic-response "^1.0.0"
-
-decompress-response@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/decompress-response/-/decompress-response-4.2.0.tgz#805ca9d1d3cdf17a03951475ad6cdc93115cec3f"
-  integrity sha512-MHebOkORCgLW1ramLri5vzfR4r7HgXXrVkVr/eaPVRCtYWFUp9hNAuqsBxhpABbpqd7zY2IrjxXfTuaVrW0Z2A==
-  dependencies:
-    mimic-response "^2.0.0"
 
 decompress-response@^5.0.0:
   version "5.0.0"

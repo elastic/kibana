@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, ILegacyClusterClient } from 'src/core/server';
+import { ElasticsearchClient, Logger } from 'src/core/server';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
@@ -34,24 +34,18 @@ interface XPackUsageResponse {
 
 const INCOMPATIBLE_REALMS = ['file', 'native'];
 
-export function defineRoleMappingFeatureCheckRoute({
-  router,
-  clusterClient,
-  logger,
-}: RouteDefinitionParams) {
+export function defineRoleMappingFeatureCheckRoute({ router, logger }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/_check_role_mapping_features',
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const { has_all_requested: canManageRoleMappings } = await clusterClient
-        .asScoped(request)
-        .callAsCurrentUser('shield.hasPrivileges', {
-          body: {
-            cluster: ['manage_security'],
-          },
-        });
+      const {
+        body: { has_all_requested: canManageRoleMappings },
+      } = await context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges<{
+        has_all_requested: boolean;
+      }>({ body: { cluster: ['manage_security'] } });
 
       if (!canManageRoleMappings) {
         return response.ok({
@@ -61,7 +55,10 @@ export function defineRoleMappingFeatureCheckRoute({
         });
       }
 
-      const enabledFeatures = await getEnabledRoleMappingsFeatures(clusterClient, logger);
+      const enabledFeatures = await getEnabledRoleMappingsFeatures(
+        context.core.elasticsearch.client.asInternalUser,
+        logger
+      );
 
       return response.ok({
         body: {
@@ -73,13 +70,12 @@ export function defineRoleMappingFeatureCheckRoute({
   );
 }
 
-async function getEnabledRoleMappingsFeatures(clusterClient: ILegacyClusterClient, logger: Logger) {
+async function getEnabledRoleMappingsFeatures(esClient: ElasticsearchClient, logger: Logger) {
   logger.debug(`Retrieving role mappings features`);
 
-  const nodeScriptSettingsPromise: Promise<NodeSettingsResponse> = clusterClient
-    .callAsInternalUser('nodes.info', {
-      filterPath: 'nodes.*.settings.script',
-    })
+  const nodeScriptSettingsPromise = esClient.nodes
+    .info<NodeSettingsResponse>({ filter_path: 'nodes.*.settings.script' })
+    .then(({ body }) => body)
     .catch((error) => {
       // fall back to assuming that node settings are unset/at their default values.
       // this will allow the role mappings UI to permit both role template script types,
@@ -88,13 +84,11 @@ async function getEnabledRoleMappingsFeatures(clusterClient: ILegacyClusterClien
       return {};
     });
 
-  const xpackUsagePromise: Promise<XPackUsageResponse> = clusterClient
-    // `transport.request` is potentially unsafe when combined with untrusted user input.
-    // Do not augment with such input.
-    .callAsInternalUser('transport.request', {
-      method: 'GET',
-      path: '/_xpack/usage',
-    })
+  // `transport.request` is potentially unsafe when combined with untrusted user input.
+  // Do not augment with such input.
+  const xpackUsagePromise = esClient.transport
+    .request({ method: 'GET', path: '/_xpack/usage' })
+    .then(({ body }) => body as XPackUsageResponse)
     .catch((error) => {
       // fall back to no external realms configured.
       // this will cause a warning in the UI about no compatible realms being enabled, but will otherwise allow
