@@ -55,8 +55,10 @@ export function updateSearchSource(
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
   if (useNewFieldsApi && (columns.length === 0 || columns.includes('fields'))) {
+    searchSource.removeField('fieldsFromSource');
     searchSource.setField('fields', ['*']);
   } else {
+    searchSource.removeField('fields');
     searchSource.setField('fieldsFromSource', ['*']);
   }
   return searchSource;
