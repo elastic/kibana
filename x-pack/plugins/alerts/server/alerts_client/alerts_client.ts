@@ -50,7 +50,7 @@ import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
-import { alertRuleEvent, AlertRuleAction } from './audit_events';
+import { alertAuditEvent, AlertAuditAction } from './audit_events';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -227,8 +227,8 @@ export class AlertsClient {
       );
     } catch (error) {
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.CREATE,
+        alertAuditEvent({
+          action: AlertAuditAction.CREATE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -270,8 +270,8 @@ export class AlertsClient {
     };
 
     this.auditLogger?.log(
-      alertRuleEvent({
-        action: AlertRuleAction.CREATE,
+      alertAuditEvent({
+        action: AlertAuditAction.CREATE,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'alert', id },
       })
@@ -335,8 +335,8 @@ export class AlertsClient {
       );
     } catch (error) {
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.GET,
+        alertAuditEvent({
+          action: AlertAuditAction.GET,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -344,8 +344,8 @@ export class AlertsClient {
       throw error;
     }
     this.auditLogger?.log(
-      alertRuleEvent({
-        action: AlertRuleAction.GET,
+      alertAuditEvent({
+        action: AlertAuditAction.GET,
         savedObject: { type: 'alert', id },
       })
     );
@@ -422,8 +422,8 @@ export class AlertsClient {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter();
     } catch (error) {
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.FIND,
+        alertAuditEvent({
+          action: AlertAuditAction.FIND,
           error,
         })
       );
@@ -455,8 +455,8 @@ export class AlertsClient {
         ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
       } catch (error) {
         this.auditLogger?.log(
-          alertRuleEvent({
-            action: AlertRuleAction.FIND,
+          alertAuditEvent({
+            action: AlertAuditAction.FIND,
             savedObject: { type: 'alert', id },
             error,
           })
@@ -472,8 +472,8 @@ export class AlertsClient {
 
     authorizedData.forEach(({ id }) =>
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.FIND,
+        alertAuditEvent({
+          action: AlertAuditAction.FIND,
           savedObject: { type: 'alert', id },
         })
       )
@@ -560,8 +560,8 @@ export class AlertsClient {
       );
     } catch (error) {
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.DELETE,
+        alertAuditEvent({
+          action: AlertAuditAction.DELETE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -570,8 +570,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertRuleEvent({
-        action: AlertRuleAction.DELETE,
+      alertAuditEvent({
+        action: AlertAuditAction.DELETE,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'alert', id },
       })
@@ -627,8 +627,8 @@ export class AlertsClient {
       );
     } catch (error) {
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.UPDATE,
+        alertAuditEvent({
+          action: AlertAuditAction.UPDATE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -637,8 +637,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertRuleEvent({
-        action: AlertRuleAction.UPDATE,
+      alertAuditEvent({
+        action: AlertAuditAction.UPDATE,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'alert', id },
       })
@@ -791,8 +791,8 @@ export class AlertsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.UPDATE_API_KEY,
+        alertAuditEvent({
+          action: AlertAuditAction.UPDATE_API_KEY,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -812,8 +812,8 @@ export class AlertsClient {
     });
 
     this.auditLogger?.log(
-      alertRuleEvent({
-        action: AlertRuleAction.UPDATE_API_KEY,
+      alertAuditEvent({
+        action: AlertAuditAction.UPDATE_API_KEY,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'alert', id },
       })
@@ -885,8 +885,8 @@ export class AlertsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.ENABLE,
+        alertAuditEvent({
+          action: AlertAuditAction.ENABLE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -895,8 +895,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertRuleEvent({
-        action: AlertRuleAction.ENABLE,
+      alertAuditEvent({
+        action: AlertAuditAction.ENABLE,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'alert', id },
       })
@@ -984,8 +984,8 @@ export class AlertsClient {
       );
     } catch (error) {
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.DISABLE,
+        alertAuditEvent({
+          action: AlertAuditAction.DISABLE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -994,8 +994,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertRuleEvent({
-        action: AlertRuleAction.DISABLE,
+      alertAuditEvent({
+        action: AlertAuditAction.DISABLE,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'alert', id },
       })
@@ -1058,8 +1058,8 @@ export class AlertsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.MUTE,
+        alertAuditEvent({
+          action: AlertAuditAction.MUTE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -1068,8 +1068,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertRuleEvent({
-        action: AlertRuleAction.MUTE,
+      alertAuditEvent({
+        action: AlertAuditAction.MUTE,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'alert', id },
       })
@@ -1117,8 +1117,8 @@ export class AlertsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.UNMUTE,
+        alertAuditEvent({
+          action: AlertAuditAction.UNMUTE,
           savedObject: { type: 'alert', id },
           error,
         })
@@ -1127,8 +1127,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertRuleEvent({
-        action: AlertRuleAction.UNMUTE,
+      alertAuditEvent({
+        action: AlertAuditAction.UNMUTE,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'alert', id },
       })
@@ -1176,8 +1176,8 @@ export class AlertsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.MUTE_INSTANCE,
+        alertAuditEvent({
+          action: AlertAuditAction.MUTE_INSTANCE,
           savedObject: { type: 'alert', id: alertId },
           error,
         })
@@ -1186,8 +1186,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertRuleEvent({
-        action: AlertRuleAction.MUTE_INSTANCE,
+      alertAuditEvent({
+        action: AlertAuditAction.MUTE_INSTANCE,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'alert', id: alertId },
       })
@@ -1240,8 +1240,8 @@ export class AlertsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        alertRuleEvent({
-          action: AlertRuleAction.UNMUTE_INSTANCE,
+        alertAuditEvent({
+          action: AlertAuditAction.UNMUTE_INSTANCE,
           savedObject: { type: 'alert', id: alertId },
           error,
         })
@@ -1250,8 +1250,8 @@ export class AlertsClient {
     }
 
     this.auditLogger?.log(
-      alertRuleEvent({
-        action: AlertRuleAction.UNMUTE_INSTANCE,
+      alertAuditEvent({
+        action: AlertAuditAction.UNMUTE_INSTANCE,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'alert', id: alertId },
       })

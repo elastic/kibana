@@ -37,7 +37,7 @@ import {
   getAuthorizationModeBySource,
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
-import { connectorEvent, ConnectorAction } from './lib/audit_events';
+import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -124,8 +124,8 @@ export class ActionsClient {
       await this.authorization.ensureAuthorized('create', actionTypeId);
     } catch (error) {
       this.auditLogger?.log(
-        connectorEvent({
-          action: ConnectorAction.CREATE,
+        connectorAuditEvent({
+          action: ConnectorAuditAction.CREATE,
           savedObject: { type: 'action', id },
           error,
         })
@@ -140,8 +140,8 @@ export class ActionsClient {
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     this.auditLogger?.log(
-      connectorEvent({
-        action: ConnectorAction.CREATE,
+      connectorAuditEvent({
+        action: ConnectorAuditAction.CREATE,
         savedObject: { type: 'action', id },
         outcome: EventOutcome.UNKNOWN,
       })
@@ -190,8 +190,8 @@ export class ActionsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        connectorEvent({
-          action: ConnectorAction.UPDATE,
+        connectorAuditEvent({
+          action: ConnectorAuditAction.UPDATE,
           savedObject: { type: 'action', id },
           error,
         })
@@ -212,8 +212,8 @@ export class ActionsClient {
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     this.auditLogger?.log(
-      connectorEvent({
-        action: ConnectorAction.UPDATE,
+      connectorAuditEvent({
+        action: ConnectorAuditAction.UPDATE,
         savedObject: { type: 'action', id },
         outcome: EventOutcome.UNKNOWN,
       })
@@ -256,8 +256,8 @@ export class ActionsClient {
       await this.authorization.ensureAuthorized('get');
     } catch (error) {
       this.auditLogger?.log(
-        connectorEvent({
-          action: ConnectorAction.GET,
+        connectorAuditEvent({
+          action: ConnectorAuditAction.GET,
           savedObject: { type: 'action', id },
           error,
         })
@@ -270,8 +270,8 @@ export class ActionsClient {
     );
     if (preconfiguredActionsList !== undefined) {
       this.auditLogger?.log(
-        connectorEvent({
-          action: ConnectorAction.GET,
+        connectorAuditEvent({
+          action: ConnectorAuditAction.GET,
           savedObject: { type: 'action', id },
         })
       );
@@ -287,8 +287,8 @@ export class ActionsClient {
     const result = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
 
     this.auditLogger?.log(
-      connectorEvent({
-        action: ConnectorAction.GET,
+      connectorAuditEvent({
+        action: ConnectorAuditAction.GET,
         savedObject: { type: 'action', id },
       })
     );
@@ -310,8 +310,8 @@ export class ActionsClient {
       await this.authorization.ensureAuthorized('get');
     } catch (error) {
       this.auditLogger?.log(
-        connectorEvent({
-          action: ConnectorAction.FIND,
+        connectorAuditEvent({
+          action: ConnectorAuditAction.FIND,
           error,
         })
       );
@@ -327,8 +327,8 @@ export class ActionsClient {
 
     savedObjectsActions.forEach(({ id }) =>
       this.auditLogger?.log(
-        connectorEvent({
-          action: ConnectorAction.FIND,
+        connectorAuditEvent({
+          action: ConnectorAuditAction.FIND,
           savedObject: { type: 'action', id },
         })
       )
@@ -359,8 +359,8 @@ export class ActionsClient {
     } catch (error) {
       ids.forEach((id) =>
         this.auditLogger?.log(
-          connectorEvent({
-            action: ConnectorAction.GET,
+          connectorAuditEvent({
+            action: ConnectorAuditAction.GET,
             savedObject: { type: 'action', id },
             error,
           })
@@ -394,8 +394,8 @@ export class ActionsClient {
 
     ids.forEach((id) =>
       this.auditLogger?.log(
-        connectorEvent({
-          action: ConnectorAction.GET,
+        connectorAuditEvent({
+          action: ConnectorAuditAction.GET,
           savedObject: { type: 'action', id },
         })
       )
@@ -435,8 +435,8 @@ export class ActionsClient {
       }
     } catch (error) {
       this.auditLogger?.log(
-        connectorEvent({
-          action: ConnectorAction.DELETE,
+        connectorAuditEvent({
+          action: ConnectorAuditAction.DELETE,
           savedObject: { type: 'action', id },
           error,
         })
@@ -445,8 +445,8 @@ export class ActionsClient {
     }
 
     this.auditLogger?.log(
-      connectorEvent({
-        action: ConnectorAction.DELETE,
+      connectorAuditEvent({
+        action: ConnectorAuditAction.DELETE,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'action', id },
       })

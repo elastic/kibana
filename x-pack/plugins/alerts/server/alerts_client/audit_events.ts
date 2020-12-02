@@ -6,7 +6,7 @@
 
 import { AuditEvent, EventOutcome, EventCategory, EventType } from '../../../security/server';
 
-export enum AlertRuleAction {
+export enum AlertAuditAction {
   CREATE = 'alert_create',
   GET = 'alert_get',
   UPDATE = 'alert_update',
@@ -23,7 +23,7 @@ export enum AlertRuleAction {
 
 type VerbsTuple = [string, string, string];
 
-const eventVerbs: Record<AlertRuleAction, VerbsTuple> = {
+const eventVerbs: Record<AlertAuditAction, VerbsTuple> = {
   alert_create: ['create', 'creating', 'created'],
   alert_get: ['access', 'accessing', 'accessed'],
   alert_update: ['update', 'updating', 'updated'],
@@ -38,7 +38,7 @@ const eventVerbs: Record<AlertRuleAction, VerbsTuple> = {
   alert_instance_unmute: ['unmute instance of', 'unmuting instance of', 'unmuted instance of'],
 };
 
-const eventTypes: Record<AlertRuleAction, EventType> = {
+const eventTypes: Record<AlertAuditAction, EventType> = {
   alert_create: EventType.CREATION,
   alert_get: EventType.ACCESS,
   alert_update: EventType.CHANGE,
@@ -53,19 +53,19 @@ const eventTypes: Record<AlertRuleAction, EventType> = {
   alert_instance_unmute: EventType.CHANGE,
 };
 
-export interface AlertRuleEventParams {
-  action: AlertRuleAction;
+export interface AlertAuditEventParams {
+  action: AlertAuditAction;
   outcome?: EventOutcome;
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   error?: Error;
 }
 
-export function alertRuleEvent({
+export function alertAuditEvent({
   action,
   savedObject,
   outcome,
   error,
-}: AlertRuleEventParams): AuditEvent {
+}: AlertAuditEventParams): AuditEvent {
   const doc = savedObject ? `alert [id=${savedObject.id}]` : 'an alert';
   const [present, progressive, past] = eventVerbs[action];
   const message = error

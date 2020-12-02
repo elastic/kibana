@@ -5,13 +5,13 @@
  */
 
 import { EventOutcome } from '../../../security/server/audit';
-import { AlertRuleAction, alertRuleEvent } from './audit_events';
+import { AlertAuditAction, alertAuditEvent } from './audit_events';
 
-describe('#alertRuleEvent', () => {
+describe('#alertAuditEvent', () => {
   test('creates event with `unknown` outcome', () => {
     expect(
-      alertRuleEvent({
-        action: AlertRuleAction.CREATE,
+      alertAuditEvent({
+        action: AlertAuditAction.CREATE,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'alert', id: 'ALERT_ID' },
       })
@@ -37,8 +37,8 @@ describe('#alertRuleEvent', () => {
 
   test('creates event with `success` outcome', () => {
     expect(
-      alertRuleEvent({
-        action: AlertRuleAction.CREATE,
+      alertAuditEvent({
+        action: AlertAuditAction.CREATE,
         savedObject: { type: 'alert', id: 'ALERT_ID' },
       })
     ).toMatchInlineSnapshot(`
@@ -63,8 +63,8 @@ describe('#alertRuleEvent', () => {
 
   test('creates event with `failure` outcome', () => {
     expect(
-      alertRuleEvent({
-        action: AlertRuleAction.CREATE,
+      alertAuditEvent({
+        action: AlertAuditAction.CREATE,
         savedObject: { type: 'alert', id: 'ALERT_ID' },
         error: new Error('ERROR_MESSAGE'),
       })

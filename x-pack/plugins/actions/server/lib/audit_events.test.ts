@@ -5,13 +5,13 @@
  */
 
 import { EventOutcome } from '../../../security/server/audit';
-import { ConnectorAction, connectorEvent } from './audit_events';
+import { ConnectorAuditAction, connectorAuditEvent } from './audit_events';
 
-describe('#connectorEvent', () => {
+describe('#connectorAuditEvent', () => {
   test('creates event with `unknown` outcome', () => {
     expect(
-      connectorEvent({
-        action: ConnectorAction.CREATE,
+      connectorAuditEvent({
+        action: ConnectorAuditAction.CREATE,
         outcome: EventOutcome.UNKNOWN,
         savedObject: { type: 'action', id: 'ACTION_ID' },
       })
@@ -37,8 +37,8 @@ describe('#connectorEvent', () => {
 
   test('creates event with `success` outcome', () => {
     expect(
-      connectorEvent({
-        action: ConnectorAction.CREATE,
+      connectorAuditEvent({
+        action: ConnectorAuditAction.CREATE,
         savedObject: { type: 'action', id: 'ACTION_ID' },
       })
     ).toMatchInlineSnapshot(`
@@ -63,8 +63,8 @@ describe('#connectorEvent', () => {
 
   test('creates event with `failure` outcome', () => {
     expect(
-      connectorEvent({
-        action: ConnectorAction.CREATE,
+      connectorAuditEvent({
+        action: ConnectorAuditAction.CREATE,
         savedObject: { type: 'action', id: 'ACTION_ID' },
         error: new Error('ERROR_MESSAGE'),
       })

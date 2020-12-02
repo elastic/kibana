@@ -6,7 +6,7 @@
 
 import { AuditEvent, EventOutcome, EventCategory, EventType } from '../../../security/server';
 
-export enum ConnectorAction {
+export enum ConnectorAuditAction {
   CREATE = 'connector_create',
   GET = 'connector_get',
   UPDATE = 'connector_update',
@@ -17,7 +17,7 @@ export enum ConnectorAction {
 
 type VerbsTuple = [string, string, string];
 
-const eventVerbs: Record<ConnectorAction, VerbsTuple> = {
+const eventVerbs: Record<ConnectorAuditAction, VerbsTuple> = {
   connector_create: ['create', 'creating', 'created'],
   connector_get: ['access', 'accessing', 'accessed'],
   connector_update: ['update', 'updating', 'updated'],
@@ -26,7 +26,7 @@ const eventVerbs: Record<ConnectorAction, VerbsTuple> = {
   connector_execute: ['execute', 'executing', 'executed'],
 };
 
-const eventTypes: Record<ConnectorAction, EventType | undefined> = {
+const eventTypes: Record<ConnectorAuditAction, EventType | undefined> = {
   connector_create: EventType.CREATION,
   connector_get: EventType.ACCESS,
   connector_update: EventType.CHANGE,
@@ -35,19 +35,19 @@ const eventTypes: Record<ConnectorAction, EventType | undefined> = {
   connector_execute: undefined,
 };
 
-export interface ConnectorEventParams {
-  action: ConnectorAction;
+export interface ConnectorAuditEventParams {
+  action: ConnectorAuditAction;
   outcome?: EventOutcome;
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   error?: Error;
 }
 
-export function connectorEvent({
+export function connectorAuditEvent({
   action,
   savedObject,
   outcome,
   error,
-}: ConnectorEventParams): AuditEvent {
+}: ConnectorAuditEventParams): AuditEvent {
   const doc = savedObject ? `connector [id=${savedObject.id}]` : 'a connector';
   const [present, progressive, past] = eventVerbs[action];
   const message = error
