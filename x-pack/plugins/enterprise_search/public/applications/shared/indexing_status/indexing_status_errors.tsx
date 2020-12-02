@@ -26,7 +26,7 @@ export const IndexingStatusErrors: React.FC<IIndexingStatusErrorsProps> = ({ vie
     <p>{INDEXING_STATUS_HAS_ERRORS_TITLE}</p>
 
     <EuiLinkTo to={viewLinkPath}>
-      <EuiButton color="danger" fill={true} size="s" data-test-subj="ViewErrorsButton">
+      <EuiButton color="danger" fill size="s" data-test-subj="ViewErrorsButton">
         {INDEXING_STATUS_HAS_ERRORS_BUTTON}
       </EuiButton>
     </EuiLinkTo>
