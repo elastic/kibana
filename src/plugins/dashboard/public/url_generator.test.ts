@@ -142,6 +142,39 @@ describe('dashboard url generator', () => {
     );
   });
 
+  test('savedQuery', async () => {
+    const generator = createDashboardUrlGenerator(() =>
+      Promise.resolve({
+        appBasePath: APP_BASE_PATH,
+        useHashedUrl: false,
+        savedDashboardLoader: createMockDashboardLoader(),
+      })
+    );
+    const url = await generator.createUrl!({
+      savedQuery: '__savedQueryId__',
+    });
+    expect(url).toMatchInlineSnapshot(
+      `"xyz/app/dashboards#/create?_a=(savedQuery:__savedQueryId__)&_g=()"`
+    );
+    expect(url).toContain('__savedQueryId__');
+  });
+
+  test('panels', async () => {
+    const generator = createDashboardUrlGenerator(() =>
+      Promise.resolve({
+        appBasePath: APP_BASE_PATH,
+        useHashedUrl: false,
+        savedDashboardLoader: createMockDashboardLoader(),
+      })
+    );
+    const url = await generator.createUrl!({
+      panels: [{ fakePanelContent: 'fakePanelContent' } as any],
+    });
+    expect(url).toMatchInlineSnapshot(
+      `"xyz/app/dashboards#/create?_a=(panels:!((fakePanelContent:fakePanelContent)))&_g=()"`
+    );
+  });
+
   test('if no useHash setting is given, uses the one was start services', async () => {
     const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
