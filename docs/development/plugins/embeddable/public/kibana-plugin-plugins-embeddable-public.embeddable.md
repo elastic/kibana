@@ -44,8 +44,9 @@ export declare abstract class Embeddable<TEmbeddableInput extends EmbeddableInpu
 |  [getOutput$()](./kibana-plugin-plugins-embeddable-public.embeddable.getoutput_.md) |  |  |
 |  [getRoot()](./kibana-plugin-plugins-embeddable-public.embeddable.getroot.md) |  | Returns the top most parent embeddable, or itself if this embeddable is not within a parent. |
 |  [getTitle()](./kibana-plugin-plugins-embeddable-public.embeddable.gettitle.md) |  |  |
+|  [getUpdated$()](./kibana-plugin-plugins-embeddable-public.embeddable.getupdated_.md) |  | Merges input$ and output$ streams and denounces emit till next macro-task Could be useful to batch reactions to input$ and output$ updates that happen separately but synchronously In case corresponding state change triggered <code>reload</code> this stream is guarantied to emit later which allows to skip any state handling in case <code>reload</code> already handled it |
 |  [onFatalError(e)](./kibana-plugin-plugins-embeddable-public.embeddable.onfatalerror.md) |  |  |
-|  [reload()](./kibana-plugin-plugins-embeddable-public.embeddable.reload.md) |  | Reload will be called when there is a request to refresh the data or view, even if the input data did not change. |
+|  [reload()](./kibana-plugin-plugins-embeddable-public.embeddable.reload.md) |  | Reload will be called when there is a request to refresh the data or view, even if the input data did not change.<!-- -->In case if input data did change and reload is requested input$ and output$ would still emit before <code>reload</code> is called<!-- -->The order would be as follows: input$ output$ reload() \-\-\-- updated$ |
 |  [render(el)](./kibana-plugin-plugins-embeddable-public.embeddable.render.md) |  |  |
 |  [supportedTriggers()](./kibana-plugin-plugins-embeddable-public.embeddable.supportedtriggers.md) |  |  |
 |  [updateInput(changes)](./kibana-plugin-plugins-embeddable-public.embeddable.updateinput.md) |  |  |

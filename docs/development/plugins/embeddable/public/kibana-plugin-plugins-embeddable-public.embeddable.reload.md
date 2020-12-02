@@ -6,6 +6,10 @@
 
 Reload will be called when there is a request to refresh the data or view, even if the input data did not change.
 
+In case if input data did change and reload is requested input$ and output$ would still emit before `reload` is called
+
+The order would be as follows: input$ output$ reload() \-\-\-- updated$
+
 <b>Signature:</b>
 
 ```typescript

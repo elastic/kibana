@@ -19,7 +19,6 @@
 import './search_embeddable.scss';
 import angular from 'angular';
 import _ from 'lodash';
-import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../../ui_actions/public';

@@ -19,7 +19,6 @@
 
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
-import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {

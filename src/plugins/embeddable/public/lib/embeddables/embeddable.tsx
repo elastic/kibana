@@ -19,16 +19,8 @@
 
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
-import { asapScheduler, merge, scheduled } from 'rxjs';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  map,
-  mapTo,
-  mergeAll,
-  skip,
-  tap,
-} from 'rxjs/operators';
+import { merge } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, mapTo, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
