@@ -14,7 +14,6 @@ import { ActionGroupId, GEO_CONTAINMENT_ID, GeoContainmentParams } from './alert
 interface LatestEntityLocation {
   location: number[];
   shapeLocationId: string;
-  entityName: string;
   dateInShape: string | null;
   docId: string;
 }
@@ -24,13 +23,11 @@ export function transformResults(
   results: SearchResponse<unknown> | undefined,
   dateField: string,
   geoField: string
-): Map<string, EntityLocation> {
+): Map<string, LatestEntityLocation> {
   if (!results) {
-    return [];
+    return new Map();
   }
-  // For the latest of all results, get most recent
   const buckets = _.get(results, 'aggregations.shapes.buckets', {});
-  // @ts-expect-error
   const arrResults = _.flatMap(buckets, (bucket: unknown, bucketKey: string) => {
     const subBuckets = _.get(bucket, 'entitySplit.buckets', []);
     return _.map(subBuckets, (subBucket) => {
@@ -45,7 +42,7 @@ export function transformResults(
             .map((coordString) => +coordString)
             .reverse()
             .value()
-        : null;
+        : [];
       const dateInShape = _.get(
         subBucket,
         `entityHits.hits.hits[0].fields["${dateField}"][0]`,
@@ -64,13 +61,19 @@ export function transformResults(
   });
   const orderedResults = _.orderBy(arrResults, ['entityName', 'dateInShape'], ['asc', 'desc'])
     // Get unique
-    .reduce((accu: Map<string, EntityLocation>, el: LatestEntityLocation) => {
-      const { entityName, ...locationData } = el;
-      if (!accu.has(entityName)) {
-        accu.set(entityName, locationData);
-      }
-      return accu;
-    }, new Map());
+    .reduce(
+      (
+        accu: Map<string, LatestEntityLocation>,
+        el: LatestEntityLocation & { entityName: string }
+      ) => {
+        const { entityName, ...locationData } = el;
+        if (!accu.has(entityName)) {
+          accu.set(entityName, locationData);
+        }
+        return accu;
+      },
+      new Map()
+    );
   return orderedResults;
 }
 
@@ -144,7 +147,7 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       currentIntervalResults = await executeEsQuery(currIntervalStartTime, currIntervalEndTime);
     }
 
-    const currLocationMap: Map<string, EntityLocation> = transformResults(
+    const currLocationMap: Map<string, LatestEntityLocation> = transformResults(
       currentIntervalResults,
       params.dateField,
       params.geoField

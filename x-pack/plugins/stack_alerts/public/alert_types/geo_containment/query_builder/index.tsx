@@ -67,7 +67,6 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
     boundaryIndexQuery,
     boundaryGeoField,
     boundaryNameField,
-    delayOffsetWithUnits,
   } = alertParams;
 
   const [indexPattern, _setIndexPattern] = useState<IIndexPattern>({
@@ -137,7 +136,6 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
         boundaryIndexId: boundaryIndexId ?? DEFAULT_VALUES.BOUNDARY_INDEX_ID,
         boundaryGeoField: boundaryGeoField ?? DEFAULT_VALUES.BOUNDARY_GEO_FIELD,
         boundaryNameField: boundaryNameField ?? DEFAULT_VALUES.BOUNDARY_NAME_FIELD,
-        delayOffsetWithUnits: delayOffsetWithUnits ?? DEFAULT_VALUES.DELAY_OFFSET_WITH_UNITS,
       });
       if (!alertsContext.dataIndexPatterns) {
         return;
@@ -149,9 +147,6 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
       if (boundaryIndexId) {
         const _boundaryIndexPattern = await alertsContext.dataIndexPatterns.get(boundaryIndexId);
         setBoundaryIndexPattern(_boundaryIndexPattern);
-      }
-      if (delayOffsetWithUnits) {
-        setDelayOffset(+delayOffsetWithUnits.replace(/\D/g, ''));
       }
     };
     initToDefaultParams();
