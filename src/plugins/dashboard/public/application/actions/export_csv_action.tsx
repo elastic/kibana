@@ -99,8 +99,14 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
           // skip empty datatables
           if (datatable) {
             const postFix = datatables.length > 1 ? `-${i + 1}` : '';
+            const untitledFilename = i18n.translate(
+              'dashboard.actions.downloadOptionsUnsavedFilename',
+              {
+                defaultMessage: 'unsaved',
+              }
+            );
 
-            memo[`${context!.embeddable!.getTitle()!}${postFix}.csv`] = {
+            memo[`${context!.embeddable!.getTitle() || untitledFilename}${postFix}.csv`] = {
               content: exporters.datatableToCSV(datatable, {
                 csvSeparator: this.params.core.uiSettings.get('csv:separator', ','),
                 quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),
