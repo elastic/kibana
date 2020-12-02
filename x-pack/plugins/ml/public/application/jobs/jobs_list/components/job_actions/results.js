@@ -69,7 +69,7 @@ export function ResultLinks({ jobs }) {
             aria-label={openJobsInSingleMetricViewerText}
             className="results-button"
             isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
-            data-test-subj="mlOpenJobsInSingleMetricViewerFromManagementButton"
+            data-test-subj="mlOpenJobsInSingleMetricViewerButton"
           />
         </EuiToolTip>
       )}
@@ -77,10 +77,10 @@ export function ResultLinks({ jobs }) {
         <EuiButtonIcon
           href={anomalyExplorerLink}
           iconType="visTable"
-          aria-label={openJobsInSingleMetricViewerText}
+          aria-label={openJobsInAnomalyExplorerText}
           className="results-button"
           isDisabled={jobActionsDisabled === true}
-          data-test-subj="mlOpenJobsInSingleMetricViewerFromManagementButton"
+          data-test-subj="mlOpenJobsInAnomalyExplorerButton"
         />
       </EuiToolTip>
       <div className="actions-border" />
