@@ -170,7 +170,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       let label: EuiListGroupItemProps['label'] = operationPanels[operationType].displayName;
       if (disabledStatus) {
         label = (
-          <EuiToolTip position="top" content={disabledStatus}>
+          <EuiToolTip content={disabledStatus} display="block" position="left">
             <span>{operationPanels[operationType].displayName}</span>
           </EuiToolTip>
         );

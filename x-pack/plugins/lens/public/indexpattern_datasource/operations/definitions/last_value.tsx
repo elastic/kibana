@@ -199,12 +199,16 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     const sortOrderButtons = [
       {
         id: `lns-lastValue-ascending`,
-        label: 'Ascending',
+        label: i18n.translate('xpack.lens.indexPattern.lastValue.sortFieldAscending', {
+          defaultMessage: 'Ascending',
+        }),
         value: 'asc',
       },
       {
         id: `lns-lastValue-descending`,
-        label: 'Descending',
+        label: i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
+          defaultMessage: 'Descending',
+        }),
         value: 'desc',
       },
     ];
