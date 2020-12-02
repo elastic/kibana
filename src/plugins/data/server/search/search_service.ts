@@ -65,6 +65,7 @@ import {
   searchSourceRequiredUiSettings,
   SearchSourceService,
 } from '../../common/search';
+import { getEsaggs } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
@@ -195,6 +196,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerUsageCollector(usageCollection, this.initializerContext);
     }
 
+    expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
     expressions.registerFunction(kibana);
     expressions.registerFunction(kibanaContextFunction);
     expressions.registerType(kibanaContext);
