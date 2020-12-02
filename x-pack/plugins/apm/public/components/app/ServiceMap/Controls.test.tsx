@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import React, { ReactNode } from 'react';
 import { ThemeContext } from 'styled-components';
-import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { Controls } from './Controls';
 import { CytoscapeContext } from './Cytoscape';
 

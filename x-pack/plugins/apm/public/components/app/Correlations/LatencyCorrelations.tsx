@@ -19,8 +19,8 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import {
   APIReturnType,
   callApmApi,

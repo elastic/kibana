@@ -14,12 +14,7 @@ import {
 } from '../../authentication';
 import { RouteDefinitionParams } from '..';
 
-export function defineChangeUserPasswordRoutes({
-  authc,
-  session,
-  router,
-  clusterClient,
-}: RouteDefinitionParams) {
+export function defineChangeUserPasswordRoutes({ authc, session, router }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/security/users/{username}/password',
@@ -43,28 +38,26 @@ export function defineChangeUserPasswordRoutes({
       // If user is changing their own password they should provide a proof of knowledge their
       // current password via sending it in `Authorization: Basic base64(username:current password)`
       // HTTP header no matter how they logged in to Kibana.
-      const scopedClusterClient = clusterClient.asScoped(
-        isUserChangingOwnPassword
-          ? {
-              headers: {
-                ...request.headers,
-                authorization: new HTTPAuthorizationHeader(
-                  'Basic',
-                  new BasicHTTPAuthorizationHeaderCredentials(
-                    username,
-                    currentPassword || ''
-                  ).toString()
-                ).toString(),
-              },
-            }
-          : request
-      );
+      const options = isUserChangingOwnPassword
+        ? {
+            headers: {
+              ...request.headers,
+              authorization: new HTTPAuthorizationHeader(
+                'Basic',
+                new BasicHTTPAuthorizationHeaderCredentials(
+                  username,
+                  currentPassword || ''
+                ).toString()
+              ).toString(),
+            },
+          }
+        : undefined;
 
       try {
-        await scopedClusterClient.callAsCurrentUser('shield.changePassword', {
-          username,
-          body: { password: newPassword },
-        });
+        await context.core.elasticsearch.client.asCurrentUser.security.changePassword(
+          { username, body: { password: newPassword } },
+          options
+        );
       } catch (error) {
         // This may happen only if user's credentials are rejected meaning that current password
         // isn't correct.

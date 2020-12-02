@@ -37,6 +37,8 @@ describe('TokenAuthenticationProvider', () => {
   let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
     mockOptions = mockAuthenticationProviderOptions({ name: 'token' });
+    mockOptions.urls.loggedOut.mockReturnValue('/some-logged-out-page');
+
     provider = new TokenAuthenticationProvider(mockOptions);
   });
 
@@ -347,11 +349,9 @@ describe('TokenAuthenticationProvider', () => {
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
     });
 
-    it('redirects to login view if state is `null`.', async () => {
-      const request = httpServerMock.createKibanaRequest();
-
-      await expect(provider.logout(request, null)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
+    it('redirects to the logged out URL if state is `null`.', async () => {
+      await expect(provider.logout(httpServerMock.createKibanaRequest(), null)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/some-logged-out-page')
       );
 
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
@@ -372,28 +372,14 @@ describe('TokenAuthenticationProvider', () => {
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);
     });
 
-    it('redirects to /login if tokens are invalidated successfully', async () => {
+    it('redirects to the logged out URL if tokens are invalidated successfully.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
       await expect(provider.logout(request, tokenPair)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
-      );
-
-      expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
-      expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);
-    });
-
-    it('redirects to /login with optional search parameters if tokens are invalidated successfully', async () => {
-      const request = httpServerMock.createKibanaRequest({ query: { yep: 'nope' } });
-      const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
-
-      mockOptions.tokens.invalidate.mockResolvedValue(undefined);
-
-      await expect(provider.logout(request, tokenPair)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/login?yep=nope')
+        DeauthenticationResult.redirectTo('/some-logged-out-page')
       );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
