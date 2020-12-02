@@ -4,17 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiHorizontalRule, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
-
-import type { SearchResponse7 } from '../../../../../../../common/types/es_client';
-
-import { getProcessedFields } from '../../../../../components/data_grid';
-
-import { ml } from '../../../../../services/ml_api_service';
+import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import { DataFrameAnalyticsListRow } from '../../../analytics_management/components/analytics_list/common';
 import { ScatterplotMatrix } from '../outlier_exploration/scatterplot_matrix';
@@ -71,73 +65,19 @@ const getSplomSectionHeaderItems = (
 };
 
 interface ExpandableSectionSplomProps {
-  jobId: string;
+  fields: string[];
+  index: string;
+  resultsField?: string;
 }
 
-export const ExpandableSectionSplom: FC<ExpandableSectionSplomProps> = ({ jobId }) => {
-  const [splom, setSplom] = useState<object | undefined>();
-
-  const fetchStats = async (options: { didCancel: boolean }) => {
-    const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
-
-    const jobConfig = analyticsConfigs.data_frame_analytics[0];
-
-    if (jobConfig === undefined) {
-      return;
-    }
-
-    const analyzedFields = jobConfig.analyzed_fields.includes;
-    try {
-      const resp: SearchResponse7 = await ml.esSearch({
-        index: jobConfig.dest.index,
-        body: {
-          fields: [...analyzedFields, 'ml.outlier_score'],
-          _source: false,
-          query: { match_all: {} },
-          from: 0,
-          size: 1000,
-        },
-      });
-
-      if (!options.didCancel) {
-        // setSplom(newExpandedRowItem);
-        const items = resp.hits.hits.map((d) =>
-          getProcessedFields(d.fields, (key: string) =>
-            key.startsWith(`${jobConfig.dest.results_field}.feature_importance`)
-          )
-        );
-
-        setSplom({ columns: analyzedFields, items });
-      }
-    } catch (e) {
-      // silent catch
-    }
-  };
-
-  useEffect(() => {
-    const options = { didCancel: false };
-    fetchStats(options);
-    return () => {
-      options.didCancel = true;
-    };
-  }, [jobId]);
-
-  if (splom === undefined) {
-    return null;
-  }
-
+export const ExpandableSectionSplom: FC<ExpandableSectionSplomProps> = (props) => {
   const splomSectionHeaderItems = undefined; // getSplomSectionHeaderItems(splom);
   const splomSectionContent = (
     <>
       <EuiHorizontalRule size="full" margin="none" />
-      {splom === undefined && (
-        <EuiText textAlign="center">
-          <EuiSpacer size="l" />
-          <EuiLoadingSpinner size="l" />
-          <EuiSpacer size="l" />
-        </EuiText>
-      )}
-      {splom !== undefined && <ScatterplotMatrix {...splom} />}
+      <div style={{ padding: '16px' }}>
+        <ScatterplotMatrix {...props} />
+      </div>
     </>
   );
 
@@ -145,6 +85,7 @@ export const ExpandableSectionSplom: FC<ExpandableSectionSplomProps> = ({ jobId 
     <>
       <ExpandableSection
         dataTestId="splom"
+        urlStateKey="splom"
         content={splomSectionContent}
         headerItems={splomSectionHeaderItems}
         isExpanded={true}

@@ -126,7 +126,13 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           </>
         )}
       {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
-      {typeof jobConfig?.id === 'string' && <ExpandableSectionSplom jobId={jobConfig?.id} />}
+      {typeof jobConfig?.id === 'string' && (
+        <ExpandableSectionSplom
+          fields={jobConfig?.analyzed_fields.includes}
+          index={jobConfig?.dest.index}
+          resultsField={jobConfig?.dest.results_field}
+        />
+      )}
       {showLegacyFeatureInfluenceFormatCallout && (
         <>
           <EuiCallOut

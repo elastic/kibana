@@ -42,7 +42,6 @@
       "x": {"type": "quantitative", "field": {"repeat": "column" } },
       "y": {"type": "quantitative", "field": {"repeat": "row" } }
     },
-    "height": 100,
     "selection": {
       "mlOutlierScoreThreshold": {
         "type": "single",
@@ -58,6 +57,7 @@
       }
     },
     "transform": [],
-    "width": 100
+    "width": 150,
+    "height": 150
   }
 }

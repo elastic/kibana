@@ -49,6 +49,8 @@ import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/sea
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
+import { ScatterplotMatrix } from '../../../analytics_exploration/components/outlier_exploration/scatterplot_matrix';
+
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
   {
@@ -443,6 +445,20 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />
+      {includes.length >= 2 && (
+        <>
+          <EuiFormRow
+            data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrix"
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.scatterplotMatrixLabel', {
+              defaultMessage: 'Scatterplot matrix',
+            })}
+            fullWidth
+          >
+            <Fragment />
+          </EuiFormRow>
+          <ScatterplotMatrix fields={includes} index={currentIndexPattern.title} />
+        </>
+      )}
       {isJobTypeWithDepVar && (
         <EuiFormRow
           fullWidth
