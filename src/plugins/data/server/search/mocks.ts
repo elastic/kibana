@@ -50,13 +50,7 @@ export function createSearchRequestHandlerContext(): jest.Mocked<RequestHandlerC
       search: jest.fn(),
       cancel: jest.fn(),
       session: {
-        save: jest.fn(),
-        get: jest.fn(),
-        find: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
-        trackId: jest.fn(),
-        getId: jest.fn(),
+        search: jest.fn(),
       },
     },
   };

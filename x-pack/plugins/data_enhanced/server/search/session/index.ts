@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './types';
-export * from './poll_search';
-export * from './session';
+export * from './session_service';
