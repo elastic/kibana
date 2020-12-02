@@ -162,6 +162,9 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
         return relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ?? null;
       },
 
+      /**
+       * Returns a static array of events. Ignores request parameters.
+       */
       async nodeData({
         ids,
         timerange,

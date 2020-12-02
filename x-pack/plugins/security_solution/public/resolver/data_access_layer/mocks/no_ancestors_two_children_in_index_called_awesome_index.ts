@@ -127,6 +127,9 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         });
       },
 
+      /**
+       * Creates a fake event for each of the ids requested
+       */
       async nodeData({
         ids,
         timerange,
