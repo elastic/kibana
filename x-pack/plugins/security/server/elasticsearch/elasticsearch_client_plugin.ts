@@ -197,63 +197,6 @@ export function elasticsearchClientPlugin(Client: any, config: unknown, componen
   });
 
   /**
-   * Creates an API key in Elasticsearch for the current user.
-   *
-   * @param {string} name A name for this API key
-   * @param {object} role_descriptors Role descriptors for this API key, if not
-   * provided then permissions of authenticated user are applied.
-   * @param {string} [expiration] Optional expiration for the API key being generated. If expiration
-   * is not provided then the API keys do not expire.
-   *
-   * @returns {{id: string, name: string, api_key: string, expiration?: number}}
-   */
-  shield.createAPIKey = ca({
-    method: 'POST',
-    needBody: true,
-    url: {
-      fmt: '/_security/api_key',
-    },
-  });
-
-  /**
-   * Grants an API key in Elasticsearch for the current user.
-   *
-   * @param {string} type The type of grant, either "password" or "access_token"
-   * @param {string} username Required when using the "password" type
-   * @param {string} password Required when using the "password" type
-   * @param {string} access_token Required when using the "access_token" type
-   *
-   * @returns {{api_key: string}}
-   */
-  shield.grantAPIKey = ca({
-    method: 'POST',
-    needBody: true,
-    url: {
-      fmt: '/_security/api_key/grant',
-    },
-  });
-
-  /**
-   * Invalidates an API key in Elasticsearch.
-   *
-   * @param {string} [id] An API key id.
-   * @param {string} [name] An API key name.
-   * @param {string} [realm_name] The name of an authentication realm.
-   * @param {string} [username] The username of a user.
-   *
-   * NOTE: While all parameters are optional, at least one of them is required.
-   *
-   * @returns {{invalidated_api_keys: string[], previously_invalidated_api_keys: string[], error_count: number, error_details?: object[]}}
-   */
-  shield.invalidateAPIKey = ca({
-    method: 'DELETE',
-    needBody: true,
-    url: {
-      fmt: '/_security/api_key',
-    },
-  });
-
-  /**
    * Gets an access token in exchange to the certificate chain for the target subject distinguished name.
    *
    * @param {string[]} x509_certificate_chain An ordered array of base64-encoded (Section 4 of RFC4648 - not

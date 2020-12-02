@@ -6,20 +6,20 @@
 
 import { first } from 'rxjs/operators';
 import { Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import { CoreSetup } from 'src/core/server';
+import type { CoreSetup, CoreStart } from 'src/core/server';
 
-import { SecurityPluginSetup } from '../../security/server';
-import { SpacesServiceSetup } from '../../spaces/server';
+import type { SecurityPluginStart } from '../../security/server';
+import type { SpacesServiceStart } from '../../spaces/server';
 
 import { ConfigType } from './config';
 import { initRoutes } from './routes/init_routes';
 import { ListClient } from './services/lists/list_client';
-import {
+import type {
   ContextProvider,
   ContextProviderReturn,
   ListPluginSetup,
   ListsPluginStart,
-  PluginsSetup,
+  PluginsStart,
 } from './types';
 import { createConfig$ } from './create_config';
 import { getSpaceId } from './get_space_id';
@@ -28,27 +28,25 @@ import { initSavedObjects } from './saved_objects';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
 
 export class ListPlugin
-  implements Plugin<Promise<ListPluginSetup>, ListsPluginStart, PluginsSetup> {
+  implements Plugin<Promise<ListPluginSetup>, ListsPluginStart, {}, PluginsStart> {
   private readonly logger: Logger;
-  private spaces: SpacesServiceSetup | undefined | null;
+  private spaces: SpacesServiceStart | undefined | null;
   private config: ConfigType | undefined | null;
-  private security: SecurityPluginSetup | undefined | null;
+  private security: SecurityPluginStart | undefined | null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<ListPluginSetup> {
+  public async setup(core: CoreSetup): Promise<ListPluginSetup> {
     const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
-    this.spaces = plugins.spaces?.spacesService;
     this.config = config;
-    this.security = plugins.security;
 
     initSavedObjects(core.savedObjects);
 
     core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
     const router = core.http.createRouter();
-    initRoutes(router, config, plugins.security);
+    initRoutes(router, config);
 
     return {
       getExceptionListClient: (savedObjectsClient, user): ExceptionListClient => {
@@ -68,8 +66,10 @@ export class ListPlugin
     };
   }
 
-  public start(): void {
+  public start(core: CoreStart, plugins: PluginsStart): void {
     this.logger.debug('Starting plugin');
+    this.security = plugins.security;
+    this.spaces = plugins.spaces?.spacesService;
   }
 
   public stop(): void {

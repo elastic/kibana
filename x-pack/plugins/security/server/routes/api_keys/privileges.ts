@@ -8,7 +8,10 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
-export function defineCheckPrivilegesRoutes({ router, authc }: RouteDefinitionParams) {
+export function defineCheckPrivilegesRoutes({
+  router,
+  getAuthenticationService,
+}: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/api_key/privileges',
@@ -37,7 +40,7 @@ export function defineCheckPrivilegesRoutes({ router, authc }: RouteDefinitionPa
           }>({
             body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
           }),
-          authc.areAPIKeysEnabled(),
+          getAuthenticationService().apiKeys.areAPIKeysEnabled(),
         ]);
 
         const isAdmin = manageSecurity || manageApiKey;

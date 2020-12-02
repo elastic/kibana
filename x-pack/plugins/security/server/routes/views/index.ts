@@ -16,8 +16,7 @@ import { RouteDefinitionParams } from '..';
 export function defineViewRoutes(params: RouteDefinitionParams) {
   if (
     params.config.authc.selector.enabled ||
-    params.authc.isProviderTypeEnabled('basic') ||
-    params.authc.isProviderTypeEnabled('token')
+    params.config.authc.sortedProviders.some(({ type }) => type === 'basic' || type === 'token')
   ) {
     defineLoginRoutes(params);
   }
