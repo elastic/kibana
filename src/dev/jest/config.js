@@ -35,7 +35,6 @@ export default {
     '<rootDir>/src/legacy/utils',
     '<rootDir>/src/setup_node_env',
     '<rootDir>/packages',
-    '<rootDir>/src/test_utils',
     '<rootDir>/test/functional/services/remote',
     '<rootDir>/src/dev/code_coverage/ingest_coverage',
   ],

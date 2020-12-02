@@ -11,18 +11,34 @@ export default function ({ getPageObjects, getService }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const security = getService('security');
 
   describe('tooltip filter actions', () => {
+    before(async () => {
+      await security.testUser.setRoles([
+        'test_logstash_reader',
+        'global_maps_all',
+        'geoshape_data_reader',
+        'global_dashboard_all',
+        'meta_for_geoshape_data_reader',
+        'global_discover_read',
+      ]);
+    });
     async function loadDashboardAndOpenTooltip() {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
+
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('dash for tooltip filter action test');
 
       await PageObjects.maps.lockTooltipAtPosition(200, -200);
     }
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
 
     describe('apply filter to current view', () => {
       before(async () => {

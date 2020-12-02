@@ -18,10 +18,8 @@
  */
 import Http from 'http';
 import Url from 'url';
+import { getUrl } from '@kbn/test';
 import { FtrProviderContext } from '../../services/types';
-
-// @ts-ignore
-import getUrl from '../../../../src/test_utils/get_url';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const oneSec = 1_000;
