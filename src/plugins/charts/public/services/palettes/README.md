@@ -9,7 +9,7 @@ Palettes are integrated with the expression as well using the `system_palette` a
 
 ## Using the palette service
 
-To consume the palette service, use `charts.palettes.getPalettes` to lazily load the async bundle implementing existing palettes. This should not happen as part of the `setup` or `start` phases of a consuming plugin, but only if it's certain palettes will actually be required.
+To consume the palette service, use `charts.palettes.getPalettes` to lazily load the async bundle implementing existing palettes. This is recommended to be called in the renderer, not as part of the `setup` or `start` phases of a plugin.
 
 All palette definitions can be loaded using `paletteService.getAll()`. If the id of the palette is known, it can be fetched using `paleteService.get(id)`.
 
