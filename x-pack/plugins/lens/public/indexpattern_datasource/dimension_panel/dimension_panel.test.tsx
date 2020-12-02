@@ -1242,12 +1242,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
       'Average',
       'Count',
+      'Last value',
       'Maximum',
       'Median',
       'Minimum',
       'Sum',
       'Unique count',
-      '\u00a0',
     ]);
   });
 
