@@ -30,7 +30,7 @@ import {
 import { Color, colorTransformer } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
-import { MetricExpression, AlertContextMeta } from '../types';
+import { MetricExpression } from '../types';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { getChartTheme } from '../../../pages/metrics/metrics_explorer/components/helpers/get_chart_theme';
 import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';

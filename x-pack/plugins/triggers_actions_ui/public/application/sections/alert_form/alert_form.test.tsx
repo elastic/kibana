@@ -13,6 +13,8 @@ import { ValidationResult, Alert } from '../../../types';
 import { AlertForm } from './alert_form';
 import { coreMock } from 'src/core/public/mocks';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { useKibana } from '../../../common/lib/kibana';
+jest.mock('../../../common/lib/kibana');
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -25,7 +27,6 @@ describe('alert_form', () => {
     jest.resetAllMocks();
   });
 
-  let deps: any;
   const alertType = {
     id: 'my-alert-type',
     iconClass: 'test',
@@ -71,6 +72,7 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
+      const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
       const mocks = coreMock.createSetup();
       const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
       const alertTypes = [
@@ -97,14 +99,14 @@ describe('alert_form', () => {
           application: { capabilities },
         },
       ] = await mocks.getStartServices();
-      deps = {
-        toastNotifications: mocks.notifications.toasts,
-        http: mocks.http,
-        uiSettings: mocks.uiSettings,
-        actionTypeRegistry,
-        alertTypeRegistry,
-        docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
-        capabilities,
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useKibanaMock().services.application.capabilities = {
+        ...capabilities,
+        alerts: {
+          show: true,
+          save: true,
+          delete: true,
+        },
       };
       alertTypeRegistry.list.mockReturnValue([alertType, alertTypeNonEditable]);
       alertTypeRegistry.has.mockReturnValue(true);
@@ -131,8 +133,8 @@ describe('alert_form', () => {
           dispatch={() => {}}
           errors={{ name: [], interval: [] }}
           operation="create"
-          actionTypeRegistry={deps!.actionTypeRegistry}
-          alertTypeRegistry={deps!.alertTypeRegistry}
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
         />
       );
 
@@ -193,6 +195,8 @@ describe('alert_form', () => {
 
     async function setup() {
       const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
+      const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
       loadAlertTypes.mockResolvedValue([
         {
           id: 'other-consumer-producer-alert-type',
@@ -233,14 +237,14 @@ describe('alert_form', () => {
           application: { capabilities },
         },
       ] = await mocks.getStartServices();
-      deps = {
-        toastNotifications: mocks.notifications.toasts,
-        http: mocks.http,
-        uiSettings: mocks.uiSettings,
-        actionTypeRegistry,
-        alertTypeRegistry,
-        docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
-        capabilities,
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useKibanaMock().services.application.capabilities = {
+        ...capabilities,
+        alerts: {
+          show: true,
+          save: true,
+          delete: true,
+        },
       };
       alertTypeRegistry.list.mockReturnValue([
         {
@@ -290,8 +294,8 @@ describe('alert_form', () => {
           dispatch={() => {}}
           errors={{ name: [], interval: [] }}
           operation="create"
-          actionTypeRegistry={deps!.actionTypeRegistry}
-          alertTypeRegistry={deps!.alertTypeRegistry}
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
         />
       );
 
@@ -324,14 +328,6 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      const mockes = coreMock.createSetup();
-      deps = {
-        toastNotifications: mockes.notifications.toasts,
-        http: mockes.http,
-        uiSettings: mockes.uiSettings,
-        actionTypeRegistry,
-        alertTypeRegistry,
-      };
       alertTypeRegistry.list.mockReturnValue([alertType]);
       alertTypeRegistry.get.mockReturnValue(alertType);
       alertTypeRegistry.has.mockReturnValue(true);
@@ -360,8 +356,8 @@ describe('alert_form', () => {
           dispatch={() => {}}
           errors={{ name: [], interval: [] }}
           operation="create"
-          actionTypeRegistry={deps!.actionTypeRegistry}
-          alertTypeRegistry={deps!.alertTypeRegistry}
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
         />
       );
 

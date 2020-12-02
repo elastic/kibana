@@ -12,11 +12,13 @@ import { ValidationResult, Alert } from '../../../types';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import AlertEdit from './alert_edit';
+import { useKibana } from '../../../common/lib/kibana';
+jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('alert_edit', () => {
-  let deps: any;
   let wrapper: ReactWrapper<any>;
   let mockedCoreSetup: ReturnType<typeof coreMock.createSetup>;
 
@@ -30,14 +32,15 @@ describe('alert_edit', () => {
         application: { capabilities },
       },
     ] = await mockedCoreSetup.getStartServices();
-    deps = {
-      toastNotifications: mockedCoreSetup.notifications.toasts,
-      http: mockedCoreSetup.http,
-      uiSettings: mockedCoreSetup.uiSettings,
-      actionTypeRegistry,
-      alertTypeRegistry,
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
-      capabilities,
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      alerts: {
+        show: true,
+        save: true,
+        delete: true,
+        execute: true,
+      },
     };
 
     mockedCoreSetup.http.get.mockResolvedValue({
@@ -126,8 +129,8 @@ describe('alert_edit', () => {
         reloadAlerts={() => {
           return new Promise<void>(() => {});
         }}
-        actionTypeRegistry={deps!.actionTypeRegistry}
-        alertTypeRegistry={deps!.alertTypeRegistry}
+        actionTypeRegistry={actionTypeRegistry}
+        alertTypeRegistry={alertTypeRegistry}
       />
     );
     // Wait for active space to resolve before requesting the component to update

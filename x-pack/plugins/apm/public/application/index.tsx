@@ -70,7 +70,7 @@ export function ApmAppRoot({
   apmPluginContextValue: ApmPluginContextValue;
   startDeps: ApmPluginStartDeps;
 }) {
-  const { appMountParameters, core, plugins } = apmPluginContextValue;
+  const { appMountParameters, core } = apmPluginContextValue;
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
 

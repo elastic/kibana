@@ -13,18 +13,19 @@ import AlertAdd from './alert_add';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { Alert, ValidationResult } from '../../../types';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
-import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { useKibana } from '../../../common/lib/kibana';
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
-  health: jest.fn((async) => ({ isSufficientlySecure: true, hasPermanentEncryptionKey: true })),
+  health: jest.fn(() => ({ isSufficientlySecure: true, hasPermanentEncryptionKey: true })),
 }));
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 export const TestExpression: React.FunctionComponent<any> = () => {
   return (
@@ -39,7 +40,6 @@ export const TestExpression: React.FunctionComponent<any> = () => {
 };
 
 describe('alert_add', () => {
-  let deps: any;
   let wrapper: ReactWrapper<any>;
 
   async function setup(initialValues?: Partial<Alert>) {
@@ -74,15 +74,14 @@ describe('alert_add', () => {
         application: { capabilities },
       },
     ] = await mocks.getStartServices();
-    deps = {
-      toastNotifications: mocks.notifications.toasts,
-      http: mocks.http,
-      uiSettings: mocks.uiSettings,
-      data: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      actionTypeRegistry,
-      alertTypeRegistry,
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      alerts: {
+        show: true,
+        save: true,
+        delete: true,
+      },
     };
 
     mocks.http.get.mockResolvedValue({
@@ -134,8 +133,8 @@ describe('alert_add', () => {
         reloadAlerts={() => {
           return new Promise<void>(() => {});
         }}
-        actionTypeRegistry={deps.actionTypeRegistry}
-        alertTypeRegistry={deps.alertTypeRegistry}
+        actionTypeRegistry={actionTypeRegistry}
+        alertTypeRegistry={alertTypeRegistry}
         metadata={{ test: 'some value', fields: ['test'] }}
       />
     );
