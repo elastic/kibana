@@ -7,7 +7,8 @@
 import './frame_layout.scss';
 
 import React from 'react';
-import { EuiPage, EuiPageSideBar, EuiPageBody } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export interface FrameLayoutProps {
   dataPanel: React.ReactNode;
@@ -19,16 +20,46 @@ export interface FrameLayoutProps {
 export function FrameLayout(props: FrameLayoutProps) {
   return (
     <EuiPage className="lnsFrameLayout">
-      <div className="lnsFrameLayout__pageContent">
-        <EuiPageSideBar className="lnsFrameLayout__sidebar">{props.dataPanel}</EuiPageSideBar>
-        <EuiPageBody className="lnsFrameLayout__pageBody" restrictWidth={false}>
+      <EuiPageBody
+        restrictWidth={false}
+        className="lnsFrameLayout__pageContent"
+        aria-labelledby="lns_ChartTitle"
+      >
+        <section className="lnsFrameLayout__sidebar" aria-labelledby="dataPanelId">
+          <EuiScreenReaderOnly>
+            <h2 id="dataPanelId">
+              {i18n.translate('xpack.lens.section.dataPanelLabel', {
+                defaultMessage: 'Data panel',
+              })}
+            </h2>
+          </EuiScreenReaderOnly>
+          {props.dataPanel}
+        </section>
+        <section className="lnsFrameLayout__pageBody" aria-labelledby="workspaceId">
+          <EuiScreenReaderOnly>
+            <h2 id="workspaceId">
+              {i18n.translate('xpack.lens.section.workspaceLabel', {
+                defaultMessage: 'Visualization workspace',
+              })}
+            </h2>
+          </EuiScreenReaderOnly>
           {props.workspacePanel}
           {props.suggestionsPanel}
-        </EuiPageBody>
-        <EuiPageSideBar className="lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right">
+        </section>
+        <section
+          className="lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right"
+          aria-labelledby="configPanel"
+        >
+          <EuiScreenReaderOnly>
+            <h2 id="configPanel">
+              {i18n.translate('xpack.lens.section.configPanelLabel', {
+                defaultMessage: 'Config panel',
+              })}
+            </h2>
+          </EuiScreenReaderOnly>
           {props.configPanel}
-        </EuiPageSideBar>
-      </div>
+        </section>
+      </EuiPageBody>
     </EuiPage>
   );
 }

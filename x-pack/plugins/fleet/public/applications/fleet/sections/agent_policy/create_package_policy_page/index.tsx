@@ -78,7 +78,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const [isLoadingSecondStep, setIsLoadingSecondStep] = useState<boolean>(false);
 
   // Retrieve agent count
-  const agentPolicyId = useMemo(() => agentPolicy?.id, [agentPolicy?.id]);
+  const agentPolicyId = agentPolicy?.id;
   useEffect(() => {
     const getAgentCount = async () => {
       const { data } = await sendGetAgentStatus({ policyId: agentPolicyId });
@@ -331,15 +331,20 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
           />
-          <StepConfigurePackagePolicy
-            packageInfo={packageInfo}
-            packagePolicy={packagePolicy}
-            updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
-            submitAttempted={formState === 'INVALID'}
-          />
+
+          {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
+          {!ExtensionView && (
+            <StepConfigurePackagePolicy
+              packageInfo={packageInfo}
+              packagePolicy={packagePolicy}
+              updatePackagePolicy={updatePackagePolicy}
+              validationResults={validationResults!}
+              submitAttempted={formState === 'INVALID'}
+            />
+          )}
+
           {/* If an Agent Policy and a package has been selected, then show UI extension (if any) */}
-          {packagePolicy.policy_id && packagePolicy.package?.name && ExtensionView && (
+          {ExtensionView && packagePolicy.policy_id && packagePolicy.package?.name && (
             <ExtensionWrapper>
               <ExtensionView newPolicy={packagePolicy} onChange={handleExtensionViewOnChange} />
             </ExtensionWrapper>
