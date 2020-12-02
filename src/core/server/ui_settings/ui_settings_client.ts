@@ -150,7 +150,7 @@ export class UiSettingsClient implements IUiSettingsClient {
 
   private async getRaw(): Promise<UiSettingsRaw> {
     const userProvided = await this.getUserProvided();
-    return defaultsDeep(userProvided, this.defaults);
+    return defaultsDeep({}, userProvided, this.defaults);
   }
 
   private validateKey(key: string, value: unknown) {
