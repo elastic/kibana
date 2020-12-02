@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { schema } from '@kbn/config-schema';
 import { getNextRollingTime } from './get_next_rolling_time';
 
@@ -69,12 +69,12 @@ describe('getNextRollingTime', () => {
       expect(formattedRollingTime('2010-10-14 00:00:00:000', '1d', true)).toEqual(
         '2010-10-15 00:00:00:000'
       );
-      expect(formattedRollingTime('2010-01-10 00:00:00:000', '2w', true)).toEqual(
-        '2010-01-24 00:00:00:000'
+      expect(formattedRollingTime('2010-01-03 00:00:00:000', '2w', true)).toEqual(
+        '2010-01-17 00:00:00:000'
       );
     });
 
-    it('increments a higher field when necessary', () => {
+    it('increments a higher unit when necessary', () => {
       expect(formattedRollingTime('2010-10-20 21:00:00:000', '9h', true)).toEqual(
         '2010-10-21 03:00:00:000'
       );

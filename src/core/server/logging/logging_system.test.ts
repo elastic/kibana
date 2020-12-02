@@ -19,6 +19,7 @@
 
 const mockStreamWrite = jest.fn();
 jest.mock('fs', () => ({
+  ...(jest.requireActual('fs') as any),
   constants: {},
   createWriteStream: jest.fn(() => ({ write: mockStreamWrite })),
 }));
@@ -32,16 +33,20 @@ jest.mock('@kbn/legacy-logging', () => ({
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));
 let mockConsoleLog: jest.SpyInstance;
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { createWriteStream } from 'fs';
 const mockCreateWriteStream = (createWriteStream as unknown) as jest.Mock<typeof createWriteStream>;
 
+import { Env } from '../config';
+import { getEnvOptions } from '../config/mocks';
 import { LoggingSystem, config } from '.';
 
 let system: LoggingSystem;
 beforeEach(() => {
   mockConsoleLog = jest.spyOn(global.console, 'log').mockReturnValue(undefined);
   jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
-  system = new LoggingSystem();
+  const env = Env.createDefault(REPO_ROOT, getEnvOptions());
+  system = new LoggingSystem(env);
 });
 
 afterEach(() => {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getNumericMatcher } from './numeric_pattern_matcher';
+import { getNumericMatcher } from './pattern_matcher';
 
 describe('getNumericIndex', () => {
   it('returns the file index when the file matches the pattern', () => {
