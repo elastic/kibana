@@ -19,13 +19,18 @@ interface Props {
 }
 
 export function ContainerDetails({ serviceDetails }: Props) {
-  if (!serviceDetails || !serviceDetails.container || !serviceDetails.host) {
+  if (
+    !serviceDetails ||
+    (!serviceDetails.container && !serviceDetails.kubernetes)
+  ) {
     return null;
   }
 
+  const isKubernetes = !!serviceDetails.kubernetes;
+
   return (
     <IconPopover
-      icon="storage"
+      icon={isKubernetes ? 'logoKubernetes' : 'logoDocker'}
       title={i18n.translate('xpack.apm.serviceNameHeader.container', {
         defaultMessage: 'Container',
       })}
@@ -79,16 +84,24 @@ export function ContainerDetails({ serviceDetails }: Props) {
             />
           </EuiFlexItem>
         )}
-        {/* {serviceDetails.container?.avgNumberInstances && (
-                  <EuiStat
-                    title={serviceDetails.container?.avgNumberInstances}
-                    description={i18n.translate(
-                      'xpack.apm.serviceNameHeader.container.orchestration',
-                      { defaultMessage: 'Orchestration' }
-                    )}
-                    titleSize="xxs"
-                  />
-                )} */}
+        <EuiStat
+          title={
+            isKubernetes
+              ? i18n.translate(
+                  'xpack.apm.serviceNameHeader.container.orchestration.kubernetes',
+                  { defaultMessage: 'Kubernetes' }
+                )
+              : i18n.translate(
+                  'xpack.apm.serviceNameHeader.container.orchestration.docker',
+                  { defaultMessage: 'Docker' }
+                )
+          }
+          description={i18n.translate(
+            'xpack.apm.serviceNameHeader.container.orchestration',
+            { defaultMessage: 'Orchestration' }
+          )}
+          titleSize="xxs"
+        />
       </EuiFlexGroup>
     </IconPopover>
   );

@@ -18,6 +18,15 @@ export type ServiceDetailsApiResponse = APIReturnType<'GET /api/apm/services/{se
 interface Props {
   serviceDetails: ServiceDetailsApiResponse;
 }
+const icons: Record<string, string> = {
+  gcp: 'logoGCP',
+  aws: 'logoAWS',
+  azure: 'logoAzure',
+};
+
+function getIcon(provider: string) {
+  return icons[provider] || 'cloudSunny';
+}
 
 export function CloudDetails({ serviceDetails }: Props) {
   if (!serviceDetails || !serviceDetails.cloud) {
@@ -26,7 +35,7 @@ export function CloudDetails({ serviceDetails }: Props) {
 
   return (
     <IconPopover
-      icon="cloudSunny"
+      icon={getIcon(serviceDetails.cloud.provider)}
       title={i18n.translate('xpack.apm.serviceNameHeader.cloud', {
         defaultMessage: 'Cloud',
       })}

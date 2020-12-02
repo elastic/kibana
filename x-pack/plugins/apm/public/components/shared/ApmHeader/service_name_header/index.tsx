@@ -41,7 +41,7 @@ export function ServiceNameHeader({ serviceName }: Props) {
     !serviceDetails && serviceDetailsStatus === FETCH_STATUS.LOADING;
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle>
           <h1>{serviceName}</h1>
