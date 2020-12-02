@@ -48,14 +48,14 @@ export function ResolverTreeFetcher(
       to,
     };
 
-    let entityIDToFetch: string | null = null;
-    let dataSourceSchema: ResolverSchema | null = null;
-
     if (selectors.treeRequestParametersToAbort(state) && lastRequestAbortController) {
       lastRequestAbortController.abort();
       // calling abort will cause an action to be fired
     } else if (databaseParameters !== null) {
       lastRequestAbortController = new AbortController();
+      let entityIDToFetch: string | undefined;
+      let dataSource: string | undefined;
+      let dataSourceSchema: ResolverSchema | undefined;
       let result: ResolverNode[] | undefined;
       // Inform the state that we've made the request. Without this, the middleware will try to make the request again
       // immediately.
@@ -78,7 +78,7 @@ export function ResolverTreeFetcher(
           });
           return;
         }
-        ({ id: entityIDToFetch, schema: dataSourceSchema } = matchingEntities[0]);
+        ({ id: entityIDToFetch, schema: dataSourceSchema, name: dataSource } = matchingEntities[0]);
 
         result = await dataAccessLayer.resolverTree({
           dataId: entityIDToFetch,
@@ -87,6 +87,25 @@ export function ResolverTreeFetcher(
           indices: databaseParameters.indices ?? [],
           ancestors: numberOfAncestors,
           descendants: numberOfDescendants,
+        });
+
+        const resolverTree: NewResolverTree = {
+          originId: entityIDToFetch,
+          nodes: result,
+        };
+
+        api.dispatch({
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema: dataSourceSchema,
+            parameters: {
+              ...databaseParameters,
+              requestedAncestors: numberOfAncestors,
+              requestedDescendants: numberOfDescendants,
+            },
+          },
         });
       } catch (error) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-AbortError
@@ -101,24 +120,6 @@ export function ResolverTreeFetcher(
             payload: databaseParameters,
           });
         }
-      }
-      if (result !== undefined) {
-        const resolverTree: NewResolverTree = {
-          originId: entityIDToFetch,
-          nodes: result,
-        };
-
-        api.dispatch({
-          type: 'serverReturnedResolverData',
-          payload: {
-            result: resolverTree,
-            parameters: {
-              ...databaseParameters,
-              requestedAncestors: numberOfAncestors,
-              requestedDescendants: numberOfDescendants,
-            },
-          },
-        });
       }
     }
   };

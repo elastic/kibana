@@ -24,6 +24,7 @@ import { NodeDataStatus } from '../../types';
  */
 export const CubeForProcess = memo(function ({
   className,
+  size = '2.15em',
   state,
   isOrigin,
   'data-test-subj': dataTestSubj,
@@ -36,6 +37,8 @@ export const CubeForProcess = memo(function ({
    * 'error' if we were unable to retrieve data associated with the node.
    */
   state: NodeDataStatus;
+  /** The css size (px, em, etc...) for the width and height of the svg cube. Defaults to 2.15em */
+  size?: string;
   isOrigin?: boolean;
   className?: string;
 }) {
@@ -45,8 +48,8 @@ export const CubeForProcess = memo(function ({
   return (
     <StyledSVG
       className={className}
-      width="2.15em"
-      height="2.15em"
+      width={size}
+      height={size}
       viewBox="0 0 34 34"
       data-test-subj={dataTestSubj}
       isOrigin={isOrigin}

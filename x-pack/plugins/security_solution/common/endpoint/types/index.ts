@@ -135,7 +135,7 @@ export interface ResolverNode {
  * to a specific document type. The format of the nodes is defined by the schema used to query for the graph.
  */
 export interface NewResolverTree {
-  originId: string | null;
+  originId: string;
   nodes: ResolverNode[];
 }
 
