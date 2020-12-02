@@ -25,8 +25,12 @@ import { DataVisualizerFieldExpandedRow } from './expanded_row';
 import { DocumentStat } from './components/field_data_column/document_stats';
 import { DistinctValues } from './components/field_data_column/distinct_values';
 import { NumberContentPreview } from './components/field_data_column/number_content_preview';
+import { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
+import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 interface DataVisualizerDataGrid {
   items: FieldVisConfig[];
+  pageState: DataVisualizerIndexBasedAppState;
+  updatePageState: (update: Partial<DataVisualizerIndexBasedAppState>) => void;
 }
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
@@ -44,13 +48,19 @@ function getItemIdToExpandedRowMap(
   }, {} as ItemIdToExpandedRowMap);
 }
 
-export const DataVisualizerDataGrid = ({ items }: DataVisualizerDataGrid) => {
+export const DataVisualizerDataGrid = ({
+  items,
+  pageState,
+  updatePageState,
+}: DataVisualizerDataGrid) => {
   const [showDistributions, toggleShowDistribution] = useState<boolean>(true);
-  const pagination = {
-    initialPageSize: 20,
-    pageSizeOptions: [10, 20],
-  };
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
+  const { onTableChange, pagination, sorting } = useTableSettings<FieldVisConfig>(
+    items,
+    pageState,
+    updatePageState
+  );
+
   function toggleDetails(item: FieldVisConfig) {
     if (item.fieldName === undefined) return;
     const index = expandedRowItemIds.indexOf(item.fieldName);
@@ -132,6 +142,7 @@ export const DataVisualizerDataGrid = ({ items }: DataVisualizerDataGrid) => {
       'data-test-subj': 'mlDataVisualizerGridColumnJobs',
     },
     {
+      field: 'docCount',
       name: (
         <div>
           <EuiIcon type={'document'} style={{ paddingRight: 5 }} />
@@ -140,7 +151,7 @@ export const DataVisualizerDataGrid = ({ items }: DataVisualizerDataGrid) => {
           })}
         </div>
       ),
-      render: (item: FieldVisConfig) => <DocumentStat config={item} />,
+      render: (value: number | undefined, item: FieldVisConfig) => <DocumentStat config={item} />,
       sortable: (item: FieldVisConfig) => item?.stats?.count,
     },
     {
@@ -195,10 +206,11 @@ export const DataVisualizerDataGrid = ({ items }: DataVisualizerDataGrid) => {
         itemId={'fieldName'}
         columns={columns}
         pagination={pagination}
-        sorting={true}
+        sorting={sorting}
         isExpandable={true}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         isSelectable={false}
+        onTableChange={onTableChange}
         data-test-subj={'mlDataVisualizerTable'}
         rowProps={(item) => ({
           'data-test-subj': `mlDataVisualizerRow row-${item.fieldName}`,

@@ -38,6 +38,13 @@ export interface MlGenericUrlPageState extends MlIndexBasedSearchState {
   [key: string]: any;
 }
 
+export interface DataVisualizerIndexBasedAppState {
+  pageIndex?: number;
+  pageSize?: number;
+  sortField?: string;
+  sortDirection?: string;
+  queryText?: string;
+}
 export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB

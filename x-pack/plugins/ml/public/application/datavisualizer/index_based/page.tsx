@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, FC, Fragment, useEffect, useMemo, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
 import {
   EuiFlexGroup,
@@ -44,19 +44,22 @@ import { useTimefilter } from '../../contexts/kibana';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { getToastNotifications } from '../../util/dependency_cache';
-import { useUrlState } from '../../util/url_state';
+import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
 import { SearchPanel } from './components/search_panel';
 import { DataLoader } from './data_loader';
 import { DocumentCountContent } from './components/field_data_card/content_types/document_count_content';
 import { DataVisualizerDataGrid } from '../stats_datagrid';
+import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import type { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
+import type { OverallStats } from '../../../../common/types/datavisualizer';
 interface DataVisualizerPageState {
   searchQuery: Query['query'];
   searchString: Query['query'];
   searchQueryLanguage: SearchQueryLanguage;
   samplerShardSize: number;
-  overallStats: any;
+  overallStats: OverallStats;
   metricConfigs: FieldVisConfig[];
   totalMetricFieldCount: number;
   populatedMetricFieldCount: number;
@@ -104,11 +107,19 @@ function getDefaultPageState(): DataVisualizerPageState {
     visibleFieldNames: [],
   };
 }
-
-export const DataVisualizerContext = createContext<DataVisualizerPageState>(getDefaultPageState());
+export const getDefaultDataVisualizerListState = (): DataVisualizerIndexBasedAppState => ({
+  pageIndex: 0,
+  pageSize: 10,
+  sortField: 'fieldName',
+  sortDirection: 'asc',
+});
 
 export const Page: FC = () => {
   const mlContext = useMlContext();
+  const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(
+    ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
+    getDefaultDataVisualizerListState()
+  );
 
   const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = mlContext;
   const timefilter = useTimefilter({
@@ -168,7 +179,9 @@ export const Page: FC = () => {
     queryLanguage: initQueryLanguage,
   } = extractSearchData(currentSavedSearch);
 
-  const [searchString, setSearchString] = useState(initSearchString);
+  const [searchString, setSearchString] = useState(
+    dataVisualizerListState.queryText ?? initSearchString
+  );
   const [searchQuery, setSearchQuery] = useState(initSearchQuery);
   const [searchQueryLanguage, setSearchQueryLanguage] = useState<SearchQueryLanguage>(
     initQueryLanguage
@@ -745,7 +758,11 @@ export const Page: FC = () => {
                     setVisibleFieldNames={setVisibleFieldNames}
                   />
                   <EuiSpacer size={'s'} />
-                  <DataVisualizerDataGrid items={configs} />
+                  <DataVisualizerDataGrid
+                    items={configs}
+                    pageState={dataVisualizerListState}
+                    updatePageState={setDataVisualizerListState}
+                  />
                 </EuiPanel>
               </EuiFlexItem>
               {showActionsPanel === true && (

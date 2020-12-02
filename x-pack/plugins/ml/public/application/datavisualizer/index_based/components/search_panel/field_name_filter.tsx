@@ -6,12 +6,10 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Option, MultiselectPicker } from '../../../../components/multi_select_picker';
+import type { OverallStats } from '../../../../../../common/types/datavisualizer';
 
-interface OveralStats {
-  [key: string]: any[];
-}
 interface Props {
-  overallStats: OveralStats;
+  overallStats: OverallStats;
   setVisibleFieldNames(q: any): void;
   visibleFieldNames: string[];
 }
