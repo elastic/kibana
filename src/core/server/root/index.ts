@@ -18,7 +18,7 @@
  */
 
 import { ConnectableObservable, Subscription } from 'rxjs';
-import { first, map, publishReplay, switchMap, tap } from 'rxjs/operators';
+import { first, publishReplay, switchMap, concatMap, tap } from 'rxjs/operators';
 
 import { Env, RawConfigurationProvider } from '../config';
 import { Logger, LoggerFactory, LoggingConfigType, LoggingSystem } from '../logging';
@@ -99,7 +99,7 @@ export class Root {
     const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
       switchMap(() => configService.atPath<LoggingConfigType>('logging')),
-      map((config) => this.loggingSystem.upgrade(config)),
+      concatMap((config) => this.loggingSystem.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
       // eslint-disable-next-line no-console
       tap({ error: (err) => console.error('Configuring logger failed:', err) }),

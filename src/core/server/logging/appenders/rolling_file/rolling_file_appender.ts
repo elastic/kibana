@@ -71,6 +71,9 @@ export class RollingFileAppender implements DisposableAppender {
   });
 
   private isRolling = false;
+  private disposed = false;
+  private rollingPromise?: Promise<void>;
+
   private readonly layout: Layout;
   private readonly context: RollingFileContext;
   private readonly fileManager: RollingFileManager;
@@ -100,43 +103,77 @@ export class RollingFileAppender implements DisposableAppender {
     // into the buffer, which will be flushed once rolling is complete
     if (this.isRolling) {
       this.buffer.append(record);
+      return;
     }
-    if (this.needRollover(record)) {
+    if (this.needRollout(record)) {
       this.buffer.append(record);
-      this.performRollover();
-    } else {
-      this.fileManager.write(`${this.layout.format(record)}\n`);
+      this.rollingPromise = this.performRollout();
+      return;
     }
+
+    this._writeToFile(record);
+  }
+
+  private _writeToFile(record: LogRecord) {
+    this.fileManager.write(`${this.layout.format(record)}\n`);
   }
 
   /**
    * Disposes `FileAppender`. Waits for the underlying file stream to be completely flushed and closed.
    */
   public async dispose() {
+    if (this.disposed) {
+      return;
+    }
+    this.disposed = true;
+    if (this.rollingPromise) {
+      await this.rollingPromise;
+    }
     await this.buffer.dispose();
     await this.fileManager.closeStream();
   }
 
-  private async performRollover() {
+  private async performRollout() {
+    if (this.isRolling) {
+      return;
+    }
+    this.isRolling = true;
     try {
-      this.isRolling = true;
       await this.strategy.rollout();
       await this.fileManager.closeStream();
+      this.rollingPromise = undefined;
       this.isRolling = false;
-      const pendingLogs = this.buffer.flush();
-      for (const log of pendingLogs) {
-        this.append(log);
-      }
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log('Error while rolling file: ', e);
+      throw e;
+    } finally {
+      this.flushBuffer();
+    }
+  }
+
+  private flushBuffer() {
+    const pendingLogs = this.buffer.flush();
+    // in some extreme rare scenario, `dispose` can be called during a rollover
+    // where the internal buffered logs would trigger another rollover
+    // (rollover started, logs keep coming and got buffered, dispose is called, rollover ends and we then flush)
+    // this would cause a second rollover that would not be awaited
+    // for, and could result in a race with the newly created appender
+    // that would also be performing a rollover.
+    // so if we are disposed, we just flush the buffer directly to the file instead to avoid loosing the entries.
+    for (const log of pendingLogs) {
+      if (this.disposed) {
+        this._writeToFile(log);
+      } else {
+        this.append(log);
+      }
     }
   }
 
   /**
-   * Checks if the current even should trigger a rollover
+   * Checks if the current even should trigger a rollout
    */
-  private needRollover(record: LogRecord) {
+  private needRollout(record: LogRecord) {
     return this.policy.isTriggeringEvent(record);
   }
 }

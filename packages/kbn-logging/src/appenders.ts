@@ -35,5 +35,5 @@ export interface Appender {
  * @internal
  */
 export interface DisposableAppender extends Appender {
-  dispose: () => void;
+  dispose: () => void | Promise<void>;
 }

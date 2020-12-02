@@ -57,12 +57,16 @@ export interface NumericRollingStrategyConfig {
   max: number;
 }
 
-// %d{MM-dd-yyyy}
-// %i
-
 export const numericRollingStrategyConfigSchema = schema.object({
   kind: schema.literal('numeric'),
-  pattern: schema.string({ defaultValue: '-%i' }), // TODO: validate
+  pattern: schema.string({
+    defaultValue: '-%i',
+    validate: (pattern) => {
+      if (!pattern.includes('%i')) {
+        return `pattern must include '%i'`;
+      }
+    },
+  }),
   max: schema.number({ min: 1, defaultValue: 7 }),
 });
 
@@ -134,5 +138,8 @@ export class NumericRollingStrategy implements RollingStrategy {
     const currentFileNewName = getNumericFileName(logFileBaseName, this.config.pattern, 1);
     // console.log('*** will roll ', logFileBaseName, currentFileNewName);
     await rename(this.context.filePath, join(logFileFolder, currentFileNewName));
+
+    // updates the context file info to mirror the new size and date
+    this.context.refreshFileInfo();
   }
 }
