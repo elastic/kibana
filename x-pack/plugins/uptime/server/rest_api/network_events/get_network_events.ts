@@ -8,31 +8,27 @@ import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 
-export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createNetworkEventsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/journey/{checkGroup}',
+  path: '/api/uptime/network_events',
   validate: {
-    params: schema.object({
+    query: schema.object({
       checkGroup: schema.string(),
+      stepIndex: schema.number(),
     }),
   },
   handler: async ({ uptimeEsClient }, _context, request, response) => {
-    const { checkGroup } = request.params;
-    const result = await libs.requests.getJourneySteps({
-      uptimeEsClient,
-      checkGroup,
-    });
+    const { checkGroup, stepIndex } = request.query;
 
-    const details = await libs.requests.getJourneyDetails({
+    const result = await libs.requests.getNetworkEvents({
       uptimeEsClient,
       checkGroup,
+      stepIndex,
     });
 
     return response.ok({
       body: {
-        checkGroup,
-        steps: result,
-        details,
+        events: result,
       },
     });
   },

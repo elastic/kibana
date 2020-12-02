@@ -10,6 +10,7 @@ import {
   PayloadTimings,
   CalculatedTimings,
   NetworkItems,
+  NetworkItem,
   FriendlyTimingLabels,
   FriendlyMimetypeLabels,
   MimeType,
@@ -19,7 +20,8 @@ import {
   SidebarItems,
   LegendItems,
 } from './types';
-import { WaterfallData } from '../../../waterfall';
+import { WaterfallData } from '../../waterfall';
+import { NetworkEvent } from '../../../../../../common/runtime_types';
 
 const microToMillis = (micro: number): number => (micro === -1 ? -1 : micro * 1000);
 
@@ -29,12 +31,14 @@ const microToMillis = (micro: number): number => (micro === -1 ? -1 : micro * 10
 // https://chromium.googlesource.com/chromium/blink.git/+/master/Source/devtools/front_end/sdk/HAREntry.js#131
 // and
 // https://github.com/cyrus-and/chrome-har-capturer/blob/master/lib/har.js#L195
+// and
+// https://github.com/sitespeedio/chrome-har/blob/4586d2961fe8752982120c3f613b8da42cf3648b/lib/finalizeEntry.js#L7
 // Order of events: request_start = 0, [proxy], [dns], [connect [ssl]], [send], receive_headers_end
 
 export const getTimings = (
-  timings: PayloadTimings,
-  requestSentTime: number,
-  responseReceivedTime: number
+  timings: NetworkEvent['timings'],
+  requestSentTime: NetworkEvent['requestSentTime'],
+  loadEndTime: NetworkEvent['loadEndTime']
 ): CalculatedTimings => {
   if (!timings) return { blocked: -1, dns: -1, connect: -1, send: 0, wait: 0, receive: 0, ssl: -1 };
 
@@ -98,10 +102,11 @@ export const getTimings = (
   const send = timings.send_end - timings.send_start;
 
   // Wait
-  const wait = timings.receive_headers_end - timings.send_end;
+  const waitStart = timings.send_end;
+  const waitEnd = timings.receive_headers_end;
+  const wait = waitEnd - waitStart;
 
-  // Receive
-  const receive = responseReceivedTime - (requestStartTime + timings.receive_headers_end);
+  const receive = loadEndTime - (requestStartTime + timings.receive_headers_end);
 
   // SSL connection is a part of the overall connection time
   if (connect && ssl) {
@@ -111,43 +116,19 @@ export const getTimings = (
   return { blocked, dns, connect, send, wait, receive, ssl };
 };
 
-// TODO: Switch to real API data, and type data as the payload response (if server response isn't preformatted)
-export const extractItems = (data: any): NetworkItems => {
-  const items = data
-    .map((entry: any) => {
-      const requestSentTime = microToMillis(entry.synthetics.payload.start);
-      const responseReceivedTime = microToMillis(entry.synthetics.payload.end);
-      const requestStartTime =
-        entry.synthetics.payload.response && entry.synthetics.payload.response.timing
-          ? microToMillis(entry.synthetics.payload.response.timing.request_time)
-          : null;
-
+export const extractItems = (data: NetworkEvent[]): NetworkItems => {
+  return data
+    .map((entry) => {
       return {
-        timestamp: entry['@timestamp'],
-        method: entry.synthetics.payload.method,
-        url: entry.synthetics.payload.url,
-        status: entry.synthetics.payload.status,
-        mimeType: entry.synthetics.payload?.response?.mime_type,
-        requestSentTime,
-        responseReceivedTime,
-        earliestRequestTime: requestStartTime
-          ? Math.min(requestSentTime, requestStartTime)
-          : requestSentTime,
-        timings:
-          entry.synthetics.payload.response && entry.synthetics.payload.response.timing
-            ? getTimings(
-                entry.synthetics.payload.response.timing,
-                requestSentTime,
-                responseReceivedTime
-              )
-            : null,
+        ...entry,
+        timings: entry.timings
+          ? getTimings(entry.timings, entry.requestSentTime, entry.loadEndTime)
+          : undefined,
       };
     })
-    .sort((a: any, b: any) => {
-      return a.earliestRequestTime - b.earliestRequestTime;
+    .sort((a: NetworkItem, b: NetworkItem) => {
+      return a.requestSentTime - b.requestSentTime;
     });
-
-  return items;
 };
 
 const formatValueForDisplay = (value: number, points: number = 3) => {
@@ -162,29 +143,37 @@ const getColourForMimeType = (mimeType?: string) => {
 export const getSeriesAndDomain = (items: NetworkItems) => {
   // The earliest point in time a request is sent or started. This will become our notion of "0".
   const zeroOffset = items.reduce<number>((acc, item) => {
-    const { earliestRequestTime } = item;
-    return earliestRequestTime < acc ? earliestRequestTime : acc;
+    const { requestSentTime } = item;
+    return requestSentTime < acc ? requestSentTime : acc;
   }, Infinity);
 
   const series = items.reduce<WaterfallData>((acc, item, index) => {
-    const { earliestRequestTime } = item;
+    const { requestSentTime } = item;
 
     // Entries without timings should be handled differently:
     // https://github.com/ChromeDevTools/devtools-frontend/blob/ed2a064ac194bfae4e25c4748a9fa3513b3e9f7d/front_end/network/RequestTimingView.js#L140
-    // If there are no concrete timings just plot one block via start and end
+    // If there are no concrete timings just plot one block via request start and response end
     if (!item.timings || item.timings === null) {
-      const duration = item.responseReceivedTime - item.earliestRequestTime;
+      const duration = item.loadEndTime - item.requestSentTime;
       const colour = getColourForMimeType(item.mimeType);
       return [
         ...acc,
         {
           x: index,
-          y0: item.earliestRequestTime - zeroOffset,
-          y: item.responseReceivedTime - zeroOffset,
+          y0: item.requestSentTime - zeroOffset,
+          // NOTE: The loadEndTime can sometimes be "0"
+          y:
+            item.loadEndTime && item.loadEndTime > 0
+              ? item.loadEndTime - zeroOffset
+              : item.requestSentTime - zeroOffset,
           config: {
             colour,
             tooltipProps: {
-              value: `${formatValueForDisplay(duration)}ms`,
+              // NOTE: The loadEndTime can sometimes be "0"
+              value:
+                item.loadEndTime && item.loadEndTime > 0
+                  ? `${formatValueForDisplay(duration)}ms`
+                  : "Response time couldn't be determined",
               colour,
             },
           },
@@ -192,7 +181,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
       ];
     }
 
-    let currentOffset = earliestRequestTime - zeroOffset;
+    let currentOffset = requestSentTime - zeroOffset;
 
     TIMING_ORDER.forEach((timing) => {
       const value = item.timings![timing];

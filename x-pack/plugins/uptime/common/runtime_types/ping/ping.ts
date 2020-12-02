@@ -241,6 +241,24 @@ export const PingType = t.intersection([
 
 export const SyntheticsJourneyApiResponseType = t.type({
   checkGroup: t.string,
+  details: t.union([
+    t.intersection([
+      t.type({
+        timestamp: t.string,
+      }),
+      t.partial({
+        next: t.type({
+          timestamp: t.string,
+          checkGroup: t.string,
+        }),
+        previous: t.type({
+          timestamp: t.string,
+          checkGroup: t.string,
+        }),
+      }),
+    ]),
+    t.null,
+  ]),
   steps: t.array(PingType),
 });
 

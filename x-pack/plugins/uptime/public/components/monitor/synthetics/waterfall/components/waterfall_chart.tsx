@@ -85,7 +85,7 @@ export const WaterfallChart = ({
   barStyleAccessor,
   renderSidebarItem,
   renderLegendItem,
-  maxHeight = 600,
+  maxHeight = 800,
 }: WaterfallChartProps) => {
   const { data, sidebarItems, legendItems } = useWaterfallContext();
 
@@ -108,7 +108,7 @@ export const WaterfallChart = ({
     <WaterfallChartOuterContainer height={maxHeight}>
       <>
         <WaterfallChartFixedTopContainer>
-          <EuiFlexGroup gutterSize="none">
+          <EuiFlexGroup gutterSize="none" responsive={false}>
             {shouldRenderSidebar && (
               <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
                 <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" />
@@ -149,7 +149,7 @@ export const WaterfallChart = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </WaterfallChartFixedTopContainer>
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="none" responsive={false}>
           {shouldRenderSidebar && (
             <Sidebar items={sidebarItems!} height={generatedHeight} render={renderSidebarItem!} />
           )}
