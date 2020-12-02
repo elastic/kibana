@@ -91,18 +91,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const explorerState = useObservable(explorerService.state$);
 
   const refresh = useRefresh();
-  const disableSingleMetricView = useMemo(() => {
-    if (Array.isArray(jobIds) && jobIds.length === 1) {
-      const selectedJob = jobsWithTimeRange.find((j) => j.job_id === jobIds[0]);
-      if (
-        selectedJob !== undefined &&
-        selectedJob.isNotSingleMetricViewerJobMessage !== undefined
-      ) {
-        return true;
-      }
-    }
-    return false;
-  }, [jobIds, jobsWithTimeRange]);
 
   useEffect(() => {
     if (refresh !== undefined && lastRefresh !== refresh.lastRefresh) {
@@ -281,7 +269,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           severity: tableSeverity.val,
           stoppedPartitions,
           invalidTimeRangeError,
-          disableSingleMetricView,
         }}
       />
     </div>

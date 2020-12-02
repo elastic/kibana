@@ -81,7 +81,6 @@ const ExplorerPage = ({
   queryString,
   filterIconTriggeredQuery,
   updateLanguage,
-  disableSingleMetricView,
 }) => (
   <div data-test-subj="mlPageAnomalyExplorer">
     <NavigationMenu tabId="anomaly_detection" />
@@ -91,10 +90,7 @@ const ExplorerPage = ({
           <EuiPageHeaderSection>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <AnomalyResultsViewSelector
-                  viewId="explorer"
-                  disableSingleMetricView={disableSingleMetricView}
-                />
+                <AnomalyResultsViewSelector viewId="explorer" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiTitle className="eui-textNoWrap">
@@ -226,7 +222,7 @@ export class Explorer extends React.Component {
   updateLanguage = (language) => this.setState({ language });
 
   render() {
-    const { showCharts, severity, stoppedPartitions, disableSingleMetricView } = this.props;
+    const { showCharts, severity, stoppedPartitions } = this.props;
 
     const {
       annotations,
@@ -284,7 +280,6 @@ export class Explorer extends React.Component {
         indexPattern={indexPattern}
         queryString={queryString}
         updateLanguage={this.updateLanguage}
-        disableSingleMetricView={disableSingleMetricView}
       >
         <div className="results-container">
           {noInfluencersConfigured && (
