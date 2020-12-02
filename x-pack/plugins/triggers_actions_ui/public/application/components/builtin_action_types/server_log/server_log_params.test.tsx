@@ -7,14 +7,10 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ServerLogLevelOptions } from '.././types';
 import ServerLogParamsFields from './server_log_params';
-import { DocLinksStart } from 'kibana/public';
-import { coreMock } from 'src/core/public/mocks';
 
 describe('ServerLogParamsFields renders', () => {
-  const mocks = coreMock.createSetup();
-  const editAction = jest.fn();
-
   test('all params fields is rendered', () => {
+    const editAction = jest.fn();
     const actionParams = {
       level: ServerLogLevelOptions.TRACE,
       message: 'test',
@@ -26,9 +22,6 @@ describe('ServerLogParamsFields renders', () => {
         editAction={editAction}
         index={0}
         defaultMessage={'test default message'}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
       />
     );
     expect(editAction).not.toHaveBeenCalled();
@@ -42,23 +35,103 @@ describe('ServerLogParamsFields renders', () => {
   test('level param field is rendered with default value if not selected', () => {
     const actionParams = {
       message: 'test message',
-      level: ServerLogLevelOptions.INFO,
     };
-    const wrapper = mountWithIntl(
+    const editAction = jest.fn();
+
+    mountWithIntl(
       <ServerLogParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
-        editAction={() => {}}
+        editAction={editAction}
         index={0}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
       />
     );
-    expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="loggingLevelSelect"]').first().prop('value')
-    ).toStrictEqual('info');
-    expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();
+
+    expect(editAction).toHaveBeenCalledWith('level', 'info', 0);
+  });
+
+  test('message param field is rendered with default value if not set', () => {
+    const actionParams = {
+      level: ServerLogLevelOptions.TRACE,
+    };
+
+    const editAction = jest.fn();
+
+    mountWithIntl(
+      <ServerLogParamsFields
+        actionParams={actionParams}
+        defaultMessage={'Some default message'}
+        errors={{ message: [] }}
+        editAction={editAction}
+        index={0}
+      />
+    );
+
+    expect(editAction).toHaveBeenCalledWith('message', 'Some default message', 0);
+  });
+
+  test('when the default message changes, so is the underlying message if it was set by the previous default', () => {
+    const actionParams = {
+      level: ServerLogLevelOptions.TRACE,
+    };
+
+    const editAction = jest.fn();
+    const wrapper = mountWithIntl(
+      <ServerLogParamsFields
+        actionParams={actionParams}
+        defaultMessage={'Some default message'}
+        errors={{ message: [] }}
+        editAction={editAction}
+        index={0}
+      />
+    );
+
+    expect(editAction).toHaveBeenCalledWith('message', 'Some default message', 0);
+
+    wrapper.setProps({
+      defaultMessage: 'Some different default message',
+    });
+
+    expect(editAction).toHaveBeenCalledWith('message', 'Some different default message', 0);
+  });
+
+  test('when the default message changes, it doesnt change the underlying message if it wasnt set by a previous default', () => {
+    const actionParams = {
+      level: ServerLogLevelOptions.TRACE,
+    };
+
+    const editAction = jest.fn();
+    const wrapper = mountWithIntl(
+      <ServerLogParamsFields
+        actionParams={actionParams}
+        defaultMessage={'Some default message'}
+        errors={{ message: [] }}
+        editAction={editAction}
+        index={0}
+      />
+    );
+
+    expect(editAction).toHaveBeenCalledWith('message', 'Some default message', 0);
+
+    // simulate value being updated
+    const valueToSimulate = 'some new value';
+    wrapper
+      .find('[data-test-subj="messageTextArea"]')
+      .first()
+      .simulate('change', { target: { value: valueToSimulate } });
+    expect(editAction).toHaveBeenCalledWith('message', valueToSimulate, 0);
+    wrapper.setProps({
+      actionParams: {
+        ...actionParams,
+        message: valueToSimulate,
+      },
+    });
+
+    // simulate default changing
+    wrapper.setProps({
+      defaultMessage: 'Some different default message',
+    });
+
+    expect(editAction).not.toHaveBeenCalledWith('message', 'Some different default message', 0);
   });
 });

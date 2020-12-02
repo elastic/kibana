@@ -27,6 +27,7 @@ const FlexItemWithMaxWidth = styled(EuiFlexItem)`
 `;
 
 export const PackagePolicyInputConfig: React.FunctionComponent<{
+  hasInputStreams: boolean;
   packageInputVars?: RegistryVarsEntry[];
   packagePolicyInput: NewPackagePolicyInput;
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
@@ -34,6 +35,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   forceShowErrors?: boolean;
 }> = memo(
   ({
+    hasInputStreams,
     packageInputVars,
     packagePolicyInput,
     updatePackagePolicyInput,
@@ -82,15 +84,19 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                   />
                 </h4>
               </EuiText>
-              <EuiSpacer size="s" />
-              <EuiText color="subdued" size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsDescription"
-                    defaultMessage="The following settings are applicable to all inputs below."
-                  />
-                </p>
-              </EuiText>
+              {hasInputStreams ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiText color="subdued" size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsDescription"
+                        defaultMessage="The following settings are applicable to all inputs below."
+                      />
+                    </p>
+                  </EuiText>
+                </>
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

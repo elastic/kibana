@@ -1,0 +1,51 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "float_as_string",
+    "source": {
+      "@timestamp": "2020-10-28T05:00:53.000Z",
+      "float": "1.0"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "float_as_string",
+    "source": {
+      "@timestamp": "2020-10-28T05:01:53.000Z",
+      "float": "1.1"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "float_as_string",
+    "source": {
+      "@timestamp": "2020-10-28T05:02:53.000Z",
+      "float": "1.2"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4",
+    "index": "float_as_string",
+    "source": {
+      "@timestamp": "2020-10-28T05:03:53.000Z",
+      "float": "1.3"
+    },
+    "type": "_doc"
+  }
+}

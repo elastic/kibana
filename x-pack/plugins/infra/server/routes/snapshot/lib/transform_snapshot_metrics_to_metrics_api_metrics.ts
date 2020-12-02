@@ -18,7 +18,10 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = (
   return snapshotRequest.metrics.map((metric, index) => {
     const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
     if (SnapshotCustomMetricInputRT.is(metric)) {
-      const customId = `custom_${index}`;
+      const isUniqueId = snapshotRequest.metrics.findIndex((m) =>
+        SnapshotCustomMetricInputRT.is(m) ? m.id === metric.id : false
+      );
+      const customId = isUniqueId ? metric.id : `custom_${index}`;
       if (metric.aggregation === 'rate') {
         return { id: customId, aggregations: networkTraffic(customId, metric.field) };
       }

@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
+import { isUrlDrilldown } from '../../../trigger_actions/trigger_utils';
 
 export class FeatureProperties extends React.Component {
   state = {
@@ -114,21 +115,37 @@ export class FeatureProperties extends React.Component {
   _renderFilterActions(tooltipProperty) {
     const panel = {
       id: 0,
-      items: this.state.actions.map((action) => {
-        const actionContext = this.props.getActionContext();
-        const iconType = action.getIconType(actionContext);
-        const name = action.getDisplayName(actionContext);
-        return {
-          name,
-          icon: iconType ? <EuiIcon type={iconType} /> : null,
-          onClick: async () => {
-            this.props.onCloseTooltip();
-            const filters = await tooltipProperty.getESFilters();
-            this.props.addFilters(filters, action.id);
-          },
-          ['data-test-subj']: `mapFilterActionButton__${name}`,
-        };
-      }),
+      items: this.state.actions
+        .filter((action) => {
+          if (isUrlDrilldown(action)) {
+            return !!this.props.onSingleValueTrigger;
+          }
+          return true;
+        })
+        .map((action) => {
+          const actionContext = this.props.getActionContext();
+          const iconType = action.getIconType(actionContext);
+          const name = action.getDisplayName(actionContext);
+          return {
+            name: name ? name : action.id,
+            icon: iconType ? <EuiIcon type={iconType} /> : null,
+            onClick: async () => {
+              this.props.onCloseTooltip();
+
+              if (isUrlDrilldown(action)) {
+                this.props.onSingleValueTrigger(
+                  action.id,
+                  tooltipProperty.getPropertyKey(),
+                  tooltipProperty.getRawValue()
+                );
+              } else {
+                const filters = await tooltipProperty.getESFilters();
+                this.props.addFilters(filters, action.id);
+              }
+            },
+            ['data-test-subj']: `mapFilterActionButton__${name}`,
+          };
+        }),
     };
 
     return (

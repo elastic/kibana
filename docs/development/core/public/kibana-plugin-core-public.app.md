@@ -27,6 +27,7 @@ export interface App<HistoryLocationState = unknown>
 |  [mount](./kibana-plugin-core-public.app.mount.md) | <code>AppMount&lt;HistoryLocationState&gt; &#124; AppMountDeprecated&lt;HistoryLocationState&gt;</code> | A mount function called when the user navigates to this app's route. May have signature of [AppMount](./kibana-plugin-core-public.appmount.md) or [AppMountDeprecated](./kibana-plugin-core-public.appmountdeprecated.md)<!-- -->. |
 |  [navLinkStatus](./kibana-plugin-core-public.app.navlinkstatus.md) | <code>AppNavLinkStatus</code> | The initial status of the application's navLink. Defaulting to <code>visible</code> if <code>status</code> is <code>accessible</code> and <code>hidden</code> if status is <code>inaccessible</code> See [AppNavLinkStatus](./kibana-plugin-core-public.appnavlinkstatus.md) |
 |  [order](./kibana-plugin-core-public.app.order.md) | <code>number</code> | An ordinal used to sort nav links relative to one another for display. |
+|  [searchDeepLinks](./kibana-plugin-core-public.app.searchdeeplinks.md) | <code>AppSearchDeepLink[]</code> | Array of links that represent secondary in-app locations for the app. |
 |  [status](./kibana-plugin-core-public.app.status.md) | <code>AppStatus</code> | The initial status of the application. Defaulting to <code>accessible</code> |
 |  [title](./kibana-plugin-core-public.app.title.md) | <code>string</code> | The title of the application. |
 |  [tooltip](./kibana-plugin-core-public.app.tooltip.md) | <code>string</code> | A tooltip shown when hovering over app link. |

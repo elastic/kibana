@@ -22,7 +22,6 @@ import { Loading } from '../../../components';
 import { PackagePolicyValidationResults } from './services';
 import { PackagePolicyInputPanel } from './components';
 import { CreatePackagePolicyFrom } from './types';
-import { useUIExtension } from '../../../hooks/use_ui_extension';
 
 const findStreamsForInputType = (
   inputType: string,
@@ -63,12 +62,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   validationResults,
   submitAttempted,
 }) => {
-  const hasUiExtension =
-    useUIExtension(
-      packageInfo.name,
-      from === 'edit' ? 'package-policy-edit' : 'package-policy-create'
-    ) !== undefined;
-
   // Configure inputs (and their streams)
   // Assume packages only export one config template for now
   const renderConfigureInputs = () =>
@@ -112,7 +105,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
           })}
         </EuiFlexGroup>
       </>
-    ) : hasUiExtension ? null : (
+    ) : (
       <EuiEmptyPrompt
         iconType="checkInCircleFilled"
         iconColor="secondary"

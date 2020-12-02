@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { AuthenticationProvider } from '../types';
-import { User } from './user';
+import type { AuthenticationProvider, User } from '.';
 
 const REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE = ['reserved', 'native'];
 
@@ -42,5 +41,8 @@ export interface AuthenticatedUser extends User {
 }
 
 export function canUserChangePassword(user: AuthenticatedUser) {
-  return REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(user.authentication_realm.type);
+  return (
+    REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(user.authentication_realm.type) &&
+    user.authentication_provider.type !== 'anonymous'
+  );
 }

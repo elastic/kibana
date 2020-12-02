@@ -6,31 +6,45 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React, { FunctionComponent, ReactNode } from 'react';
+import { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
 
 interface ColumnProps {
   children?: ReactNode;
   className?: string;
+  columnGrow?: FlexItemGrowSize;
 }
 
-export const LeftColumn: FunctionComponent<ColumnProps> = ({ children, ...rest }) => {
+export const LeftColumn: FunctionComponent<ColumnProps> = ({
+  columnGrow = 2,
+  children,
+  ...rest
+}) => {
   return (
-    <EuiFlexItem grow={2} {...rest}>
+    <EuiFlexItem grow={columnGrow} {...rest}>
       {children}
     </EuiFlexItem>
   );
 };
 
-export const CenterColumn: FunctionComponent<ColumnProps> = ({ children, ...rest }) => {
+export const CenterColumn: FunctionComponent<ColumnProps> = ({
+  columnGrow = 9,
+  children,
+  ...rest
+}) => {
   return (
-    <EuiFlexItem grow={9} {...rest}>
+    <EuiFlexItem grow={columnGrow} {...rest}>
       {children}
     </EuiFlexItem>
   );
 };
 
-export const RightColumn: FunctionComponent<ColumnProps> = ({ children, ...rest }) => {
+export const RightColumn: FunctionComponent<ColumnProps> = ({
+  columnGrow = 3,
+  children,
+  ...rest
+}) => {
   return (
-    <EuiFlexItem grow={3} {...rest}>
+    <EuiFlexItem grow={columnGrow} {...rest}>
       {children}
     </EuiFlexItem>
   );

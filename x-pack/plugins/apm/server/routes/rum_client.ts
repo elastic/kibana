@@ -36,6 +36,7 @@ export const rumClientMetricsRoute = createRoute({
   params: t.type({
     query: uxQueryRt,
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -56,6 +57,7 @@ export const rumPageLoadDistributionRoute = createRoute({
   params: t.type({
     query: t.intersection([uxQueryRt, percentileRangeRt]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -81,6 +83,7 @@ export const rumPageLoadDistBreakdownRoute = createRoute({
       t.type({ breakdown: t.string }),
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -103,6 +106,7 @@ export const rumPageViewsTrendRoute = createRoute({
   params: t.type({
     query: t.intersection([uxQueryRt, t.partial({ breakdowns: t.string })]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -123,6 +127,7 @@ export const rumServicesRoute = createRoute({
   params: t.type({
     query: t.intersection([uiFiltersRt, rangeRt]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -135,6 +140,7 @@ export const rumVisitorsBreakdownRoute = createRoute({
   params: t.type({
     query: uxQueryRt,
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -154,6 +160,7 @@ export const rumWebCoreVitals = createRoute({
   params: t.type({
     query: uxQueryRt,
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -174,6 +181,7 @@ export const rumLongTaskMetrics = createRoute({
   params: t.type({
     query: uxQueryRt,
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -194,6 +202,7 @@ export const rumUrlSearch = createRoute({
   params: t.type({
     query: uxQueryRt,
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -215,6 +224,7 @@ export const rumJSErrors = createRoute({
       t.partial({ urlQuery: t.string }),
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -236,6 +246,7 @@ export const rumHasDataRoute = createRoute({
   params: t.type({
     query: t.intersection([uiFiltersRt, rangeRt]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return await hasRumData({ setup });

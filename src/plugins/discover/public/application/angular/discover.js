@@ -18,41 +18,61 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
-import { Subscription, Subject, merge } from 'rxjs';
+import { merge, Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { getState, splitState } from './discover_state';
+import { createSearchSessionRestorationDataProvider, getState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../inspector/public';
 import {
+  connectToQueryState,
   esFilters,
   indexPatterns as indexPatternsUtils,
-  connectToQueryState,
   syncQueryStateWithUrl,
 } from '../../../../data/public';
-import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
-import { getSortArray, getSortForSearchSource } from './doc_table';
+import { getSortArray } from './doc_table';
 import { createFixedScroll } from './directives/fixed_scroll';
 import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
-import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
 import {
+  getAngularModule,
+  getHeaderActionMenuMounter,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  getHeaderActionMenuMounter,
   getUrlTracker,
-  unhashUrl,
+  redirectWhenMissing,
   subscribeWithScope,
   tabifyAggResponse,
-  getAngularModule,
-  redirectWhenMissing,
 } from '../../kibana_services';
+import {
+  getRootBreadcrumbs,
+  getSavedSearchBreadcrumbs,
+  setBreadcrumbsTitle,
+} from '../helpers/breadcrumbs';
+import { validateTimeRange } from '../helpers/validate_time_range';
+import { popularizeField } from '../helpers/popularize_field';
+import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
+import { addFatalError } from '../../../../kibana_legacy/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
+import { getQueryParams, removeQueryParam } from '../../../../kibana_utils/public';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  MODIFY_COLUMNS_ON_SWITCH,
+  SAMPLE_SIZE_SETTING,
+  SEARCH_ON_PAGE_LOAD_SETTING,
+} from '../../../common';
+import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_pattern';
+import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
+import { updateSearchSource } from '../helpers/update_search_source';
+import { calcFieldCounts } from '../helpers/calc_field_counts';
+
+const services = getServices();
 
 const {
   core,
@@ -61,30 +81,11 @@ const {
   history: getHistory,
   indexPatterns,
   filterManager,
-  share,
   timefilter,
   toastNotifications,
   uiSettings: config,
   trackUiMetric,
 } = getServices();
-
-import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
-import { validateTimeRange } from '../helpers/validate_time_range';
-import { popularizeField } from '../helpers/popularize_field';
-import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
-import { getIndexPatternId } from '../helpers/get_index_pattern_id';
-import { addFatalError } from '../../../../kibana_legacy/public';
-import {
-  DEFAULT_COLUMNS_SETTING,
-  SAMPLE_SIZE_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-  SEARCH_ON_PAGE_LOAD_SETTING,
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  MODIFY_COLUMNS_ON_SWITCH,
-} from '../../../common';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
-import { removeQueryParam, getQueryParams } from '../../../../kibana_utils/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -132,24 +133,7 @@ app.config(($routeProvider) => {
           const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({
-            ip: indexPatterns.getCache().then((indexPatternList) => {
-              /**
-               *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
-               *  the load order of AppState conflicts with the load order of many other things
-               *  so in order to get the name of the index we should use, and to switch to the
-               *  default if necessary, we parse the appState with a temporary State object and
-               *  then destroy it immediatly after we're done
-               *
-               *  @type {State}
-               */
-              const id = getIndexPatternId(index, indexPatternList, config.get('defaultIndex'));
-              return Promise.props({
-                list: indexPatternList,
-                loaded: indexPatterns.get(id),
-                stateVal: index,
-                stateValFound: !!index && id === index,
-              });
-            }),
+            ip: loadIndexPattern(index, data.indexPatterns, config),
             savedSearch: getServices()
               .getSavedSearchById(savedSearchId)
               .then((savedSearch) => {
@@ -204,7 +188,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   let inspectorRequest;
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
-  $scope.indexPattern = resolveIndexPatternLoading();
+  $scope.indexPattern = resolveIndexPattern(
+    $route.current.locals.savedObjects.ip,
+    $scope.searchSource,
+    toastNotifications
+  );
   //used for functional testing
   $scope.fetchCounter = 0;
 
@@ -216,22 +204,30 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   // used for restoring background session
   let isInitialSearch = true;
 
+  // search session requested a data refresh
+  subscriptions.add(
+    data.search.session.onRefresh$.subscribe(() => {
+      refetch$.next();
+    })
+  );
+
+  const state = getState({
+    getStateDefaults,
+    storeInSessionStorage: config.get('state:storeInSessionStorage'),
+    history,
+    toasts: core.notifications.toasts,
+  });
+
   const {
     appStateContainer,
     startSync: startStateSync,
     stopSync: stopStateSync,
     setAppState,
     replaceUrlAppState,
-    isAppStateDirty,
     kbnUrlStateStorage,
     getPreviousAppState,
-    resetInitialAppState,
-  } = getState({
-    defaultAppState: getStateDefaults(),
-    storeInSessionStorage: config.get('state:storeInSessionStorage'),
-    history,
-    toasts: core.notifications.toasts,
-  });
+  } = state;
+
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
     setAppState({ index: $scope.indexPattern.id });
@@ -264,7 +260,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (!_.isEqual(newStatePartial, oldStatePartial)) {
       $scope.$evalAsync(async () => {
         if (oldStatePartial.index !== newStatePartial.index) {
-          //in case of index switch the route has currently to be reloaded, legacy
+          //in case of index pattern switch the route has currently to be reloaded, legacy
+          $route.reload();
           return;
         }
 
@@ -291,6 +288,14 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     }
   });
 
+  data.search.session.setSearchSessionInfoProvider(
+    createSearchSessionRestorationDataProvider({
+      appStateContainer,
+      data,
+      getSavedSearchId: () => savedSearch.id,
+    })
+  );
+
   $scope.setIndexPattern = async (id) => {
     const nextIndexPattern = await indexPatterns.get(id);
     if (nextIndexPattern) {
@@ -301,8 +306,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         $scope.state.sort,
         config.get(MODIFY_COLUMNS_ON_SWITCH)
       );
-      await replaceUrlAppState(nextAppState);
-      $route.reload();
+      await setAppState(nextAppState);
     }
   };
 
@@ -349,145 +353,36 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     unlistenHistoryBasePath();
   });
 
-  const getTopNavLinks = () => {
-    const newSearch = {
-      id: 'new',
-      label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
-        defaultMessage: 'New',
-      }),
-      description: i18n.translate('discover.localMenu.newSearchDescription', {
-        defaultMessage: 'New Search',
-      }),
-      run: function () {
-        $scope.$evalAsync(() => {
-          history.push('/');
-        });
-      },
-      testId: 'discoverNewButton',
-    };
+  const getFieldCounts = async () => {
+    // the field counts aren't set until we have the data back,
+    // so we wait for the fetch to be done before proceeding
+    if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
+      return $scope.fieldCounts;
+    }
 
-    const saveSearch = {
-      id: 'save',
-      label: i18n.translate('discover.localMenu.saveTitle', {
-        defaultMessage: 'Save',
-      }),
-      description: i18n.translate('discover.localMenu.saveSearchDescription', {
-        defaultMessage: 'Save Search',
-      }),
-      testId: 'discoverSaveButton',
-      run: async () => {
-        const onSave = ({
-          newTitle,
-          newCopyOnSave,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        }) => {
-          const currentTitle = savedSearch.title;
-          savedSearch.title = newTitle;
-          savedSearch.copyOnSave = newCopyOnSave;
-          const saveOptions = {
-            confirmOverwrite: false,
-            isTitleDuplicateConfirmed,
-            onTitleDuplicate,
-          };
-          return saveDataSource(saveOptions).then((response) => {
-            // If the save wasn't successful, put the original values back.
-            if (!response.id || response.error) {
-              savedSearch.title = currentTitle;
-            } else {
-              resetInitialAppState();
-            }
-            return response;
-          });
-        };
-
-        const saveModal = (
-          <SavedObjectSaveModal
-            onSave={onSave}
-            onClose={() => {}}
-            title={savedSearch.title}
-            showCopyOnSave={!!savedSearch.id}
-            objectType="search"
-            description={i18n.translate('discover.localMenu.saveSaveSearchDescription', {
-              defaultMessage:
-                'Save your Discover search so you can use it in visualizations and dashboards',
-            })}
-            showDescription={false}
-          />
-        );
-        showSaveModal(saveModal, core.i18n.Context);
-      },
-    };
-
-    const openSearch = {
-      id: 'open',
-      label: i18n.translate('discover.localMenu.openTitle', {
-        defaultMessage: 'Open',
-      }),
-      description: i18n.translate('discover.localMenu.openSavedSearchDescription', {
-        defaultMessage: 'Open Saved Search',
-      }),
-      testId: 'discoverOpenButton',
-      run: () => {
-        showOpenSearchPanel({
-          makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
-          I18nContext: core.i18n.Context,
-        });
-      },
-    };
-
-    const shareSearch = {
-      id: 'share',
-      label: i18n.translate('discover.localMenu.shareTitle', {
-        defaultMessage: 'Share',
-      }),
-      description: i18n.translate('discover.localMenu.shareSearchDescription', {
-        defaultMessage: 'Share Search',
-      }),
-      testId: 'shareTopNavButton',
-      run: async (anchorElement) => {
-        const sharingData = await this.getSharingData();
-        share.toggleShareContextMenu({
-          anchorElement,
-          allowEmbed: false,
-          allowShortUrl: uiCapabilities.discover.createShortUrl,
-          shareableUrl: unhashUrl(window.location.href),
-          objectId: savedSearch.id,
-          objectType: 'search',
-          sharingData: {
-            ...sharingData,
-            title: savedSearch.title,
-          },
-          isDirty: !savedSearch.id || isAppStateDirty(),
-        });
-      },
-    };
-
-    const inspectSearch = {
-      id: 'inspect',
-      label: i18n.translate('discover.localMenu.inspectTitle', {
-        defaultMessage: 'Inspect',
-      }),
-      description: i18n.translate('discover.localMenu.openInspectorForSearchDescription', {
-        defaultMessage: 'Open Inspector for search',
-      }),
-      testId: 'openInspectorButton',
-      run() {
-        getServices().inspector.open(inspectorAdapters, {
-          title: savedSearch.title,
-        });
-      },
-    };
-
-    return [
-      newSearch,
-      ...(uiCapabilities.discover.save ? [saveSearch] : []),
-      openSearch,
-      shareSearch,
-      inspectSearch,
-    ];
+    return await new Promise((resolve) => {
+      const unwatch = $scope.$watch('fetchStatus', (newValue) => {
+        if (newValue === fetchStatuses.COMPLETE) {
+          unwatch();
+          resolve($scope.fieldCounts);
+        }
+      });
+    });
   };
-  $scope.topNavMenu = getTopNavLinks();
+
+  $scope.topNavMenu = getTopNavLinks({
+    getFieldCounts,
+    indexPattern: $scope.indexPattern,
+    inspectorAdapters,
+    navigateTo: (path) => {
+      $scope.$evalAsync(() => {
+        history.push(path);
+      });
+    },
+    savedSearch,
+    services,
+    state,
+  });
 
   $scope.searchSource
     .setField('index', $scope.indexPattern)
@@ -511,96 +406,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-  const discoverBreadcrumbsTitle = i18n.translate('discover.discoverBreadcrumbTitle', {
-    defaultMessage: 'Discover',
-  });
 
-  if (savedSearch.id && savedSearch.title) {
-    chrome.setBreadcrumbs([
-      {
-        text: discoverBreadcrumbsTitle,
-        href: '#/',
-      },
-      { text: savedSearch.title },
-    ]);
-  } else {
-    chrome.setBreadcrumbs([
-      {
-        text: discoverBreadcrumbsTitle,
-      },
-    ]);
-  }
-
-  const getFieldCounts = async () => {
-    // the field counts aren't set until we have the data back,
-    // so we wait for the fetch to be done before proceeding
-    if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
-      return $scope.fieldCounts;
-    }
-
-    return await new Promise((resolve) => {
-      const unwatch = $scope.$watch('fetchStatus', (newValue) => {
-        if (newValue === fetchStatuses.COMPLETE) {
-          unwatch();
-          resolve($scope.fieldCounts);
-        }
-      });
-    });
-  };
-
-  const getSharingDataFields = async (selectedFields, timeFieldName, hideTimeColumn) => {
-    if (selectedFields.length === 1 && selectedFields[0] === '_source') {
-      const fieldCounts = await getFieldCounts();
-      return {
-        searchFields: null,
-        selectFields: _.keys(fieldCounts).sort(),
-      };
-    }
-
-    const fields =
-      timeFieldName && !hideTimeColumn ? [timeFieldName, ...selectedFields] : selectedFields;
-    return {
-      searchFields: fields,
-      selectFields: fields,
-    };
-  };
-
-  this.getSharingData = async () => {
-    const searchSource = $scope.searchSource.createCopy();
-
-    const { searchFields, selectFields } = await getSharingDataFields(
-      $scope.state.columns,
-      $scope.indexPattern.timeFieldName,
-      config.get(DOC_HIDE_TIME_COLUMN_SETTING)
-    );
-    searchSource.setField('fields', searchFields);
-    searchSource.setField(
-      'sort',
-      getSortForSearchSource(
-        $scope.state.sort,
-        $scope.indexPattern,
-        config.get(SORT_DEFAULT_ORDER_SETTING)
-      )
-    );
-    searchSource.setField('highlight', null);
-    searchSource.setField('highlightAll', null);
-    searchSource.setField('aggs', null);
-    searchSource.setField('size', null);
-
-    const body = await searchSource.getSearchRequestBody();
-    return {
-      searchRequest: {
-        index: searchSource.getField('index').title,
-        body,
-      },
-      fields: selectFields,
-      metaFields: $scope.indexPattern.metaFields,
-      conflictedTypesFields: $scope.indexPattern.fields
-        .filter((f) => f.type === 'conflict')
-        .map((f) => f.name),
-      indexPatternId: searchSource.getField('index').id,
-    };
-  };
+  setBreadcrumbsTitle(savedSearch, chrome);
 
   function getStateDefaults() {
     const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
@@ -739,57 +546,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     });
   });
 
-  async function saveDataSource(saveOptions) {
-    await $scope.updateDataSource();
-
-    savedSearch.columns = $scope.state.columns;
-    savedSearch.sort = $scope.state.sort;
-
-    try {
-      const id = await savedSearch.save(saveOptions);
-      $scope.$evalAsync(() => {
-        if (id) {
-          toastNotifications.addSuccess({
-            title: i18n.translate('discover.notifications.savedSearchTitle', {
-              defaultMessage: `Search '{savedSearchTitle}' was saved`,
-              values: {
-                savedSearchTitle: savedSearch.title,
-              },
-            }),
-            'data-test-subj': 'saveSearchSuccess',
-          });
-
-          if (savedSearch.id !== $route.current.params.id) {
-            history.push(`/view/${encodeURIComponent(savedSearch.id)}`);
-          } else {
-            // Update defaults so that "reload saved query" functions correctly
-            setAppState(getStateDefaults());
-            chrome.docTitle.change(savedSearch.lastSavedTitle);
-            chrome.setBreadcrumbs([
-              {
-                text: discoverBreadcrumbsTitle,
-                href: '#/',
-              },
-              { text: savedSearch.title },
-            ]);
-          }
-        }
-      });
-      return { id };
-    } catch (saveError) {
-      toastNotifications.addDanger({
-        title: i18n.translate('discover.notifications.notSavedSearchTitle', {
-          defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
-          values: {
-            savedSearchTitle: savedSearch.title,
-          },
-        }),
-        text: saveError.message,
-      });
-      return { error: saveError };
-    }
-  }
-
   $scope.opts.fetch = $scope.fetch = function () {
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
@@ -907,16 +663,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     $scope.hits = resp.hits.total;
     $scope.rows = resp.hits.hits;
 
-    // if we haven't counted yet, reset the counts
-    const counts = ($scope.fieldCounts = $scope.fieldCounts || {});
-
-    $scope.rows.forEach((hit) => {
-      const fields = Object.keys($scope.indexPattern.flattenHit(hit));
-      fields.forEach((fieldName) => {
-        counts[fieldName] = (counts[fieldName] || 0) + 1;
-      });
-    });
-
+    $scope.fieldCounts = calcFieldCounts(
+      $scope.fieldCounts || {},
+      resp.hits.hits,
+      $scope.indexPattern
+    );
     $scope.fetchStatus = fetchStatuses.COMPLETE;
   }
 
@@ -942,13 +693,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       from: dateMath.parse(from),
       to: dateMath.parse(to, { roundUp: true }),
     };
-  };
-
-  $scope.toMoment = function (datetime) {
-    if (!datetime) {
-      return;
-    }
-    return moment(datetime).format(config.get('dateFormat'));
   };
 
   $scope.resetQuery = function () {
@@ -979,20 +723,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   };
 
   $scope.updateDataSource = () => {
-    const { indexPattern, searchSource } = $scope;
-    searchSource
-      .setField('index', $scope.indexPattern)
-      .setField('size', $scope.opts.sampleSize)
-      .setField(
-        'sort',
-        getSortForSearchSource(
-          $scope.state.sort,
-          indexPattern,
-          config.get(SORT_DEFAULT_ORDER_SETTING)
-        )
-      )
-      .setField('query', data.query.queryString.getQuery() || null)
-      .setField('filter', filterManager.getFilters());
+    updateSearchSource($scope.searchSource, {
+      indexPattern: $scope.indexPattern,
+      services,
+      sort: $scope.state.sort,
+    });
     return Promise.resolve();
   };
 
@@ -1044,11 +779,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     const columns = columnActions.moveColumn($scope.state.columns, columnName, newIndex);
     setAppState({ columns });
   };
-
-  $scope.scrollToTop = function () {
-    $window.scrollTo(0, 0);
-  };
-
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
     if (!getTimeField()) return;
@@ -1083,62 +813,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       if (!$scope.opts.chartAggConfigs) return;
       return $scope.opts.chartAggConfigs.toDsl();
     });
-  }
-
-  function getIndexPatternWarning(index) {
-    return i18n.translate('discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
-      defaultMessage: '{stateVal} is not a configured index pattern ID',
-      values: {
-        stateVal: `"${index}"`,
-      },
-    });
-  }
-
-  function resolveIndexPatternLoading() {
-    const {
-      loaded: loadedIndexPattern,
-      stateVal,
-      stateValFound,
-    } = $route.current.locals.savedObjects.ip;
-
-    const ownIndexPattern = $scope.searchSource.getOwnField('index');
-
-    if (ownIndexPattern && !stateVal) {
-      return ownIndexPattern;
-    }
-
-    if (stateVal && !stateValFound) {
-      const warningTitle = getIndexPatternWarning();
-
-      if (ownIndexPattern) {
-        toastNotifications.addWarning({
-          title: warningTitle,
-          text: i18n.translate('discover.showingSavedIndexPatternWarningDescription', {
-            defaultMessage:
-              'Showing the saved index pattern: "{ownIndexPatternTitle}" ({ownIndexPatternId})',
-            values: {
-              ownIndexPatternTitle: ownIndexPattern.title,
-              ownIndexPatternId: ownIndexPattern.id,
-            },
-          }),
-        });
-        return ownIndexPattern;
-      }
-
-      toastNotifications.addWarning({
-        title: warningTitle,
-        text: i18n.translate('discover.showingDefaultIndexPatternWarningDescription', {
-          defaultMessage:
-            'Showing the default index pattern: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
-          values: {
-            loadedIndexPatternTitle: loadedIndexPattern.title,
-            loadedIndexPatternId: loadedIndexPattern.id,
-          },
-        }),
-      });
-    }
-
-    return loadedIndexPattern;
   }
 
   addHelpMenuToAppChrome(chrome);

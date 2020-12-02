@@ -18,6 +18,7 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
     store_size: storageSize,
     maximum_timestamp: maxTimeStamp,
     _meta,
+    privileges,
   } = dataStreamFromEs;
 
   return {
@@ -37,6 +38,7 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
     storageSize,
     maxTimeStamp,
     _meta,
+    privileges,
   };
 }
 
