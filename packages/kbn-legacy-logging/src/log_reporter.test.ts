@@ -89,23 +89,6 @@ describe('getLogReporter', () => {
     const logfile = `dest-${Date.now()}.log`;
     const dest = path.join(dir, logfile);
 
-    const done = new Promise((resolve) => {
-      const watcher = fs.watch(dir, (eventtype, filename) => {
-        if (filename === logfile) {
-          watcher.close();
-
-          expect(eventtype).toBe('rename'); // file has been created/deleted
-          const lines = stripAnsi(fs.readFileSync(dest, { encoding: 'utf8' }))
-            .trim()
-            .split(os.EOL);
-          expect(lines.length).toBe(1);
-          expect(lines[0]).toMatch(/^log   \[[^\]]*\] \[foo\] hello world$/);
-
-          resolve(true);
-        }
-      });
-    });
-
     const loggerStream = getLogReporter({
       config: {
         json: false,
@@ -117,36 +100,19 @@ describe('getLogReporter', () => {
 
     loggerStream.end({ event: 'log', tags: ['foo'], data: 'hello world' });
 
-    await done;
+    await sleep(500);
+
+    const lines = stripAnsi(fs.readFileSync(dest, { encoding: 'utf8' }))
+      .trim()
+      .split(os.EOL);
+    expect(lines.length).toBe(1);
+    expect(lines[0]).toMatch(/^log   \[[^\]]*\] \[foo\] hello world$/);
   });
 
   it('should log to custom file (as json)', async () => {
     const dir = os.tmpdir();
     const logfile = `dest-${Date.now()}.log`;
     const dest = path.join(dir, logfile);
-
-    const done = new Promise((resolve) => {
-      const watcher = fs.watch(dir, (eventtype, filename) => {
-        if (filename === logfile) {
-          watcher.close();
-
-          expect(eventtype).toBe('rename'); // file has been created/deleted
-          const lines = fs
-            .readFileSync(dest, { encoding: 'utf8' })
-            .trim()
-            .split(os.EOL)
-            .map((data) => JSON.parse(data));
-          expect(lines.length).toBe(1);
-          expect(lines[0]).toMatchObject({
-            type: 'log',
-            tags: ['foo'],
-            message: 'hello world',
-          });
-
-          resolve(true);
-        }
-      });
-    });
 
     const loggerStream = getLogReporter({
       config: {
@@ -159,6 +125,18 @@ describe('getLogReporter', () => {
 
     loggerStream.end({ event: 'log', tags: ['foo'], data: 'hello world' });
 
-    await done;
+    await sleep(500);
+
+    const lines = fs
+      .readFileSync(dest, { encoding: 'utf8' })
+      .trim()
+      .split(os.EOL)
+      .map((data) => JSON.parse(data));
+    expect(lines.length).toBe(1);
+    expect(lines[0]).toMatchObject({
+      type: 'log',
+      tags: ['foo'],
+      message: 'hello world',
+    });
   });
 });
