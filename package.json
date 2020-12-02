@@ -115,7 +115,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.3",
-    "@elastic/elasticsearch": "7.10.0-rc.1",
+    "@elastic/elasticsearch": "7.10.0",
     "@elastic/eui": "29.3.1",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "^2.5.0",
