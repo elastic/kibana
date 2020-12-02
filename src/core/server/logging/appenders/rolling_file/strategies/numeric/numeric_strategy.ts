@@ -30,6 +30,8 @@ export interface NumericRollingStrategyConfig {
    * The suffix pattern to apply when renaming a file. The suffix will be applied
    * after the `appender.path` file name, but before the file extension.
    *
+   * Must include `%i`, as it is the value that will be converted to the file index
+   *
    * @example
    * ```yaml
    * logging:

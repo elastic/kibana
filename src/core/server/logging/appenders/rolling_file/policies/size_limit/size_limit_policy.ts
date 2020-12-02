@@ -33,7 +33,7 @@ export interface SizeLimitTriggeringPolicyConfig {
 
 export const sizeLimitTriggeringPolicyConfigSchema = schema.object({
   kind: schema.literal('size-limit'),
-  size: schema.byteSize({ min: '1b' }),
+  size: schema.byteSize({ min: '1b', defaultValue: '100mb' }),
 });
 
 /**

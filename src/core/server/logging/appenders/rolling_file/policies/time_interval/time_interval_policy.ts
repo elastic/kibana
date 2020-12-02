@@ -40,7 +40,7 @@ export interface TimeIntervalTriggeringPolicyConfig {
   /**
    * Indicates whether the interval should be adjusted to cause the next rollover to occur on the interval boundary.
    *
-   * For example, if the item is hours, the current hour is 3 am and the interval is 4 then
+   * For example, if the interval is `4h` and the current hour is 3 am then
    * the first rollover will occur at 4 am and then next ones will occur at 8 am, noon, 4pm, etc.
    * The default value is true.
    */
