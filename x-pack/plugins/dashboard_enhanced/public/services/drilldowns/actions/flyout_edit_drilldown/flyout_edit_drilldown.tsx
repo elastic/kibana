@@ -5,10 +5,7 @@
  */
 
 import React from 'react';
-import {
-  ActionByType,
-  ROW_CLICK_TRIGGER,
-} from '../../../../../../../../src/plugins/ui_actions/public';
+import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
 import {
   reactToUiComponent,
   toMountPoint,
