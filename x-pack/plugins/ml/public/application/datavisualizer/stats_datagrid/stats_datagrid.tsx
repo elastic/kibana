@@ -53,13 +53,19 @@ export const DataVisualizerDataGrid = ({
   pageState,
   updatePageState,
 }: DataVisualizerDataGrid) => {
-  const [showDistributions, toggleShowDistribution] = useState<boolean>(true);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const { onTableChange, pagination, sorting } = useTableSettings<FieldVisConfig>(
     items,
     pageState,
     updatePageState
   );
+  const showDistributions: boolean = pageState.showDistributions ?? true;
+  const toggleShowDistribution = () => {
+    updatePageState({
+      ...pageState,
+      showDistributions: !showDistributions,
+    });
+  };
 
   function toggleDetails(item: FieldVisConfig) {
     if (item.fieldName === undefined) return;
@@ -177,7 +183,7 @@ export const DataVisualizerDataGrid = ({
           <EuiButtonIcon
             size={'s'}
             iconType={showDistributions ? 'eye' : 'eyeClosed'}
-            onClick={() => toggleShowDistribution(!showDistributions)}
+            onClick={() => toggleShowDistribution()}
             aria-label={i18n.translate(
               'xpack.ml.datavisualizer.dataGrid.showDistributionsAriaLabel',
               {

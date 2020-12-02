@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
-import { JobId } from './anomaly_detection_jobs/job';
+import type {
+  Query,
+  RefreshInterval,
+  TimeRange,
+} from '../../../../../src/plugins/data/common/query';
+import type { JobId } from './anomaly_detection_jobs/job';
 import { ML_PAGES } from '../constants/ml_url_generator';
-import { DataFrameAnalysisConfigType } from './data_frame_analytics';
-import { SearchQueryLanguage } from '../constants/search';
-import { ListingPageUrlState } from './common';
+import type { DataFrameAnalysisConfigType } from './data_frame_analytics';
+import type { SearchQueryLanguage } from '../constants/search';
+import type { ListingPageUrlState } from './common';
 
 type OptionalPageState = object | undefined;
 
@@ -44,10 +48,12 @@ export interface DataVisualizerIndexBasedAppState {
   sortField: string;
   sortDirection: string;
   queryText: string;
+  searchQuery: Query['query'];
+  searchQueryLanguage: SearchQueryLanguage;
   visibleFieldTypes: string[];
   visibleFieldNames: string[];
   samplerShardSize: number;
-  searchQueryLanguage: SearchQueryLanguage;
+  showDistributions: boolean;
 }
 export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER

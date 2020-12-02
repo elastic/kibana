@@ -23,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   IFieldType,
   KBN_FIELD_TYPES,
-  Query,
   esQuery,
   esKuery,
   UI_SETTINGS,
@@ -55,8 +54,6 @@ import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 import type { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
 import type { OverallStats } from '../../../../common/types/datavisualizer';
 interface DataVisualizerPageState {
-  searchQuery: Query['query'];
-  searchString: Query['query'];
   overallStats: OverallStats;
   metricConfigs: FieldVisConfig[];
   totalMetricFieldCount: number;
@@ -73,8 +70,6 @@ const defaultSearchQuery = {
 
 function getDefaultPageState(): DataVisualizerPageState {
   return {
-    searchString: '',
-    searchQuery: defaultSearchQuery,
     overallStats: {
       totalCount: 0,
       aggregatableExistsFields: [],
@@ -100,7 +95,9 @@ export const getDefaultDataVisualizerListState = (): DataVisualizerIndexBasedApp
   visibleFieldNames: [],
   samplerShardSize: 5000,
   queryText: '',
+  searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+  showDistributions: true,
 });
 
 export const Page: FC = () => {
@@ -184,6 +181,12 @@ export const Page: FC = () => {
     setDataVisualizerListState({ ...dataVisualizerListState, queryText: value });
   };
 
+  const searchQuery = dataVisualizerListState.searchQuery ?? initSearchQuery;
+
+  const setSearchQuery = (value: any) => {
+    setDataVisualizerListState({ ...dataVisualizerListState, searchQuery: value });
+  };
+
   const visibleFieldTypes =
     dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;
   const setVisibleFieldTypes = (values: string[]) => {
@@ -195,8 +198,6 @@ export const Page: FC = () => {
   const setVisibleFieldNames = (values: string[]) => {
     setDataVisualizerListState({ ...dataVisualizerListState, visibleFieldNames: values });
   };
-
-  const [searchQuery, setSearchQuery] = useState(initSearchQuery);
 
   // TODO - type overallStats and stats
   const [overallStats, setOverallStats] = useState(defaults.overallStats);
@@ -251,8 +252,8 @@ export const Page: FC = () => {
   function extractSearchData(savedSearch: SavedSearchSavedObject | null) {
     if (!savedSearch) {
       return {
-        searchQuery: defaults.searchQuery,
-        searchString: defaults.searchString,
+        searchQuery: dataVisualizerListState.searchQuery,
+        searchString: dataVisualizerListState.queryText,
         queryLanguage: dataVisualizerListState.searchQueryLanguage,
       };
     }
