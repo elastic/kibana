@@ -13,8 +13,8 @@ export async function getDefaultMetricsCharts(
   serviceName: string
 ) {
   const charts = await Promise.all([
-    getCPUChartData(setup, serviceName),
-    getMemoryChartData(setup, serviceName),
+    getCPUChartData({ setup, serviceName }),
+    getMemoryChartData({ setup, serviceName }),
   ]);
 
   return { charts };

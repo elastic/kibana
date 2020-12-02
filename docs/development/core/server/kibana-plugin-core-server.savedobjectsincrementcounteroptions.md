@@ -15,6 +15,7 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [migrationVersion](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> |  |
-|  [refresh](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.refresh.md) | <code>MutatingOperationRefreshSetting</code> | The Elasticsearch Refresh setting for this operation |
+|  [initialize](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.initialize.md) | <code>boolean</code> | (default=false) If true, sets all the counter fields to 0 if they don't already exist. Existing fields will be left as-is and won't be incremented. |
+|  [migrationVersion](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> | [SavedObjectsMigrationVersion](./kibana-plugin-core-server.savedobjectsmigrationversion.md) |
+|  [refresh](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.refresh.md) | <code>MutatingOperationRefreshSetting</code> | (default='wait\_for') The Elasticsearch refresh setting for this operation. See [MutatingOperationRefreshSetting](./kibana-plugin-core-server.mutatingoperationrefreshsetting.md) |
 

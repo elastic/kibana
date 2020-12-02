@@ -91,7 +91,7 @@ function FieldSelectUi({
 }
 
 FieldSelectUi.defaultProps = {
-  indexPattern: '*',
+  indexPattern: '',
   disabled: false,
   restrict: [],
   placeholder: i18n.translate('visTypeTimeseries.fieldSelect.selectFieldPlaceholder', {
