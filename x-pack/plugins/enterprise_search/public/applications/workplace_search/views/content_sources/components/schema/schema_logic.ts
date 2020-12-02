@@ -12,22 +12,24 @@ import routes from 'workplace_search/routes';
 
 import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
-import { IndexJob, IFlashMessagesProps, TOperation } from '../../../../../shared/types';
+import { IndexJob, TOperation } from '../../../../../shared/types';
 import { OptionValue } from '../../../../types';
+
+import {
+  flashAPIErrors,
+  setSuccessMessage,
+  FlashMessagesLogic,
+} from '../../../../../shared/flash_messages';
 
 import { AppLogic } from '../../../../app_logic';
 import { SourceLogic } from '../../source_logic';
 
 interface SchemaActions {
-  setFlashMessages(flashMessages: IFlashMessagesProps): { flashMessages: IFlashMessagesProps };
   onInitializeSchema(schemaProps: SchemaInitialData): SchemaInitialData;
   onInitializeSchemaFieldErrors(
     fieldCoercionErrorsProps: SchemaChangeErrorsProps
   ): SchemaChangeErrorsProps;
-  onSchemaSetSuccess(
-    schemaProps: SchemaSetProps & SchemaResponseProps
-  ): SchemaSetProps & SchemaResponseProps;
-  onSchemaSetError(errorProps: SchemaSetProps): SchemaSetProps;
+  onSchemaSetSuccess(schemaProps: SchemaResponseProps): SchemaResponseProps;
   onSchemaSetFormErrors(errors: string[]): string[];
   updateNewFieldType(newFieldType: string): string;
   onFieldUpdate({
@@ -73,7 +75,6 @@ interface SchemaValues {
   addFieldFormErrors: string[] | null;
   mostRecentIndexJob: IndexJob;
   fieldCoercionErrors: FieldCoercionErrors;
-  flashMessages: IFlashMessagesProps;
   newFieldType: string;
   rawFieldName: string;
   formUnchanged: boolean;
@@ -87,10 +88,6 @@ interface SchemaResponseProps {
 
 export interface SchemaInitialData extends SchemaResponseProps {
   sourceId: string;
-}
-
-interface SchemaSetProps {
-  flashMessages: IFlashMessagesProps;
 }
 
 interface FieldCoercionError {
@@ -117,12 +114,10 @@ const FIELD_ERRORS_ERROR = 'Oops, we were not able to find any errors for this S
 
 export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
   actions: {
-    setFlashMessages: (flashMessages: IFlashMessagesProps) => ({ flashMessages }),
     onInitializeSchema: (schemaProps: SchemaInitialData) => schemaProps,
     onInitializeSchemaFieldErrors: (fieldCoercionErrorsProps: SchemaChangeErrorsProps) =>
       fieldCoercionErrorsProps,
-    onSchemaSetSuccess: (schemaProps: SchemaSetProps & SchemaResponseProps) => schemaProps,
-    onSchemaSetError: (errorProps: SchemaSetProps) => errorProps,
+    onSchemaSetSuccess: (schemaProps: SchemaResponseProps) => schemaProps,
     onSchemaSetFormErrors: (errors: string[]) => errors,
     updateNewFieldType: (newFieldType: string) => newFieldType,
     onFieldUpdate: ({ schema, formUnchanged }: { schema: object; formUnchanged: boolean }) => ({
@@ -191,16 +186,6 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
         }),
       },
     ],
-    flashMessages: [
-      {},
-      {
-        setFlashMessages: (_, { flashMessages }) => flashMessages,
-        resetMostRecentIndexJob: () => ({}),
-        resetSchemaState: () => ({}),
-        onSchemaSetSuccess: (_, { flashMessages }) => flashMessages,
-        onSchemaSetError: (_, { flashMessages }) => flashMessages,
-      },
-    ],
     newFieldType: [
       TEXT,
       {
@@ -233,7 +218,6 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       false,
       {
         onSchemaSetSuccess: () => false,
-        onSchemaSetError: () => false,
         openAddFieldModal: () => true,
         closeAddFieldModal: () => false,
       },
@@ -296,8 +280,8 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
         http(route).then(({ data: { fieldCoercionErrors } }) =>
           actions.onInitializeSchemaFieldErrors({ fieldCoercionErrors })
         );
-      } catch (error) {
-        actions.setFlashMessages({ error: [FIELD_ERRORS_ERROR] });
+      } catch (e) {
+        flashAPIErrors({ ...e, message: FIELD_ERRORS_ERROR });
       }
     },
     addNewField: ({ fieldName, newFieldType }) => {
@@ -334,10 +318,8 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
         .then(({ data }) => {
           window.scrollTo(0, 0);
 
-          actions.onSchemaSetSuccess({
-            ...data,
-            flashMessages: { success: [successMessage] },
-          });
+          actions.onSchemaSetSuccess(data);
+          setSuccessMessage(successMessage);
         })
         .catch(
           ({
@@ -349,10 +331,16 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
             if (isAdding) {
               actions.onSchemaSetFormErrors(errors);
             } else {
-              actions.onSchemaSetError({ flashMessages: { error: errors } });
+              flashAPIErrors(errors);
             }
           }
         );
+    },
+    resetMostRecentIndexJob: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
+    },
+    resetSchemaState: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
     },
   }),
 });
