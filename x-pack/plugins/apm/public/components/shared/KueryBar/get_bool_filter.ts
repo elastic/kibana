@@ -13,7 +13,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { UIProcessorEvent } from '../../../../common/processor_event';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import { IUrlParams } from '../../../context/url_params_context/types';
 
 export function getBoolFilter({
   groupId,

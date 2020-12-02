@@ -19600,7 +19600,6 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredDescriptionTextField": "説明が必要です。",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredEmailTextField": "電子メールアドレスまたはユーザー名が必要です",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredProjectKeyTextField": "プロジェクトキーが必要です",
-    "xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredTitleTextField": "タイトルが必要です。",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldHelp": "JIRAは、このアクションを、Kibanaの保存されたオブジェクトのIDに関連付けます。",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.savedObjectIdFieldLabel": "オブジェクトID（任意）",
     "xpack.triggersActionsUI.components.builtinActionTypes.jira.searchIssuesComboBoxAriaLabel": "親問題を選択",
