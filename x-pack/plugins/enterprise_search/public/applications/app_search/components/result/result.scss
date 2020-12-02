@@ -1,0 +1,65 @@
+.appSearchResultContainer {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+}
+
+.appSearchResult {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+
+  &__contentWrap {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: $euiSize;
+    display: grid;
+    grid-template-rows: 1fr $euiSize * 1.25 /* 20px */;
+    border-right: 1px solid $euiColorLightShade;
+  }
+
+  &__contentInner {
+    display: grid;
+    grid-gap: 7px;
+    overflow: hidden;
+  }
+
+  &__fieldsetContainer {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__hiddenFieldsIndicator {
+    font-size: $euiSizeM;
+    color: $euiColorDarkShade;
+    align-self: end;
+    padding-top: 0;
+  }
+
+  &__toggleExpandButton {
+    justify-self: stretch;
+    align-self: stretch;
+    display: flex;
+    width: $euiSize * 3.125; // 50px
+
+    &:hover,
+    &:focus,
+    &:focus,
+    &:active {
+      outline: none;
+      background-color: $euiPageBackgroundColor;
+      cursor: pointer;
+    }
+  }
+
+  &__toggleExpandButton {
+    grid-column: 2;
+  }
+
+  &__toggleIcon {
+    align-self: center;
+    margin: auto;
+  }
+}

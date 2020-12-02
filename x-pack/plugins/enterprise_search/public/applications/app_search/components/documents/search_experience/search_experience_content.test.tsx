@@ -43,6 +43,10 @@ describe('SearchExperienceContent', () => {
   it('passes engineName to the result view', () => {
     const props = {
       result: {
+        id: {
+          raw: '1',
+        },
+        _meta: {},
         foo: {
           raw: 'bar',
         },
@@ -51,7 +55,7 @@ describe('SearchExperienceContent', () => {
 
     const wrapper = shallow(<SearchExperienceContent />);
     const resultView: any = wrapper.find(Results).prop('resultView');
-    expect(resultView(props)).toEqual(<ResultView engineName="engine1" {...props} />);
+    expect(resultView(props)).toEqual(<ResultView {...props} />);
   });
 
   it('renders pagination', () => {

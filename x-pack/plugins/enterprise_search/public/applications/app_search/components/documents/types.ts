@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InternalSchemaType } from '../result/types';
+
 export interface FieldDetails {
   name: string;
   value: string | string[];
-  type: string;
+  type: InternalSchemaType;
 }
