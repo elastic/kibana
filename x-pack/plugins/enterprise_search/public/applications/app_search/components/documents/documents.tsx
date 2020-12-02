@@ -18,25 +18,6 @@ import { EngineLogic } from '../engine';
 import { AppLogic } from '../../app_logic';
 import { SearchExperience } from './search_experience';
 
-const MetaEngineCallout: React.FC = () => (
-  <>
-    <EuiCallOut
-      iconType="iInCircle"
-      title={i18n.translate('xpack.enterpriseSearch.appSearch.documents.metaEngineCallout.title', {
-        defaultMessage: 'You are within a Meta Engine.',
-      })}
-    >
-      <p>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.documents.metaEngineCallout', {
-          defaultMessage:
-            'Meta Engines have many Source Engines. Visit your Source Engines to alter their documents.',
-        })}
-      </p>
-    </EuiCallOut>
-    <EuiSpacer />
-  </>
-);
-
 interface Props {
   engineBreadcrumb: string[];
 }
@@ -61,7 +42,28 @@ export const Documents: React.FC<Props> = ({ engineBreadcrumb }) => {
         )}
       </EuiPageHeader>
       <FlashMessages />
-      {isMetaEngine && <MetaEngineCallout />}
+      {isMetaEngine && (
+        <>
+          <EuiCallOut
+            data-test-subj="MetaEnginesCallout"
+            iconType="iInCircle"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documents.metaEngineCallout.title',
+              {
+                defaultMessage: 'You are within a Meta Engine.',
+              }
+            )}
+          >
+            <p>
+              {i18n.translate('xpack.enterpriseSearch.appSearch.documents.metaEngineCallout', {
+                defaultMessage:
+                  'Meta Engines have many Source Engines. Visit your Source Engines to alter their documents.',
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
       <SearchExperience />
     </>
   );

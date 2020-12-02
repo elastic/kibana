@@ -7,7 +7,7 @@ import { setMockValues } from '../../../__mocks__/kea.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiPageHeader, EuiCallOut } from '@elastic/eui';
+import { EuiPageHeader } from '@elastic/eui';
 
 import { DocumentCreationButton } from './document_creation_button';
 import { SearchExperience } from './search_experience';
@@ -26,7 +26,7 @@ describe('Documents', () => {
 
   it('renders', () => {
     const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
-    expect(wrapper.find(EuiPageHeader).length).toEqual(1);
+    expect(wrapper.find(EuiPageHeader).exists()).toBe(true);
   });
 
   it('renders a DocumentCreationButton if the user can manage engine documents', () => {
@@ -36,12 +36,12 @@ describe('Documents', () => {
     });
 
     const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
-    expect(wrapper.find(DocumentCreationButton).length).toEqual(1);
+    expect(wrapper.find(DocumentCreationButton).exists()).toBe(true);
   });
 
   it('renders a SearchExperience', () => {
     const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
-    expect(wrapper.find(SearchExperience).length).toEqual(1);
+    expect(wrapper.find(SearchExperience).exists()).toBe(true);
   });
 
   describe('Meta Engines', () => {
@@ -52,7 +52,7 @@ describe('Documents', () => {
       });
 
       const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
-      expect(wrapper.find('MetaEngineCallout').dive().find(EuiCallOut).length).toEqual(1);
+      expect(wrapper.find('[data-test-subj="MetaEnginesCallout"]').exists()).toBe(true);
     });
 
     it('does not render a Meta Engines message if this is not a meta engine', () => {
@@ -62,7 +62,7 @@ describe('Documents', () => {
       });
 
       const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
-      expect(wrapper.find('MetaEngineCallout').length).toEqual(0);
+      expect(wrapper.find('[data-test-subj="MetaEnginesCallout"]').exists()).toBe(false);
     });
 
     it('does not render a DocumentCreationButton even if the user can manage engine documents', () => {
@@ -73,7 +73,7 @@ describe('Documents', () => {
       });
 
       const wrapper = shallow(<Documents engineBreadcrumb={['test']} />);
-      expect(wrapper.find(DocumentCreationButton).length).toEqual(0);
+      expect(wrapper.find(DocumentCreationButton).exists()).toBe(false);
     });
   });
 });
