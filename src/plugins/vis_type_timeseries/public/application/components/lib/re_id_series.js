@@ -20,7 +20,6 @@
 import uuid from 'uuid';
 import _ from 'lodash';
 
-// TODO: check this one
 export const reIdSeries = (source) => {
   const series = _.cloneDeep(source);
   series.id = uuid.v1();

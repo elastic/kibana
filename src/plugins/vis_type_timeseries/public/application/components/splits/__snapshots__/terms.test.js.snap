@@ -159,7 +159,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         }
         labelType="label"
       >
-        <InjectIntl(MetricSelectUi)
+        <MetricSelect
           additionalOptions={
             Array [
               Object {
@@ -173,6 +173,9 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
             ]
           }
           clearable={false}
+          exclude={Array []}
+          includeSiblings={false}
+          metric={Object {}}
           onChange={[Function]}
           restrict="basic"
           value="_count"

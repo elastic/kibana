@@ -19,14 +19,12 @@
 
 import { TimeFieldObject } from './types';
 
-const isTimefieldHasCustomLabel = (
-  timeField: any
-): timeField is { name: string; label: string } => {
+const isTimefieldObject = (timeField: any): timeField is { name: string; label: string } => {
   return timeField && timeField.name && timeField.label;
 };
 
 export const extractTimefieldName = (timeField: TimeFieldObject) =>
-  isTimefieldHasCustomLabel(timeField) ? timeField.name : timeField;
+  isTimefieldObject(timeField) ? timeField.name : timeField;
 
 export const extractTimefieldLabel = (timeField: TimeFieldObject) =>
-  isTimefieldHasCustomLabel(timeField) ? timeField.label : timeField;
+  isTimefieldObject(timeField) ? timeField.label : timeField;
