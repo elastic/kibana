@@ -34,8 +34,6 @@ interface StyledGraphControls {
   graphControlsBorderColor: string;
 }
 
-// TODO: 3. Confirm all text is properly translated 4. Make sure background is right 5. Align icon and text
-
 const StyledGraphControls = styled.div<StyledGraphControls>`
   position: absolute;
   top: 5px;
