@@ -52,25 +52,31 @@ const EMPTY_EMS_CLIENT = {
   addQueryParams() {},
 };
 
-export function initRoutes(router, licenseUid, emsSettings, kbnVersion, logger) {
+export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger) {
   let emsClient;
-
-  if (emsSettings.isIncludeElasticMapsService()) {
-    emsClient = new EMSClient({
-      language: i18n.getLocale(),
-      appVersion: kbnVersion,
-      appName: EMS_APP_NAME,
-      fileApiUrl: emsSettings.getEMSFileApiUrl(),
-      tileApiUrl: emsSettings.getEMSTileApiUrl(),
-      landingPageUrl: emsSettings.getEMSLandingPageUrl(),
-      fetchFunction: fetch,
-    });
-    emsClient.addQueryParams({ license: licenseUid });
-  } else {
-    emsClient = EMPTY_EMS_CLIENT;
-  }
+  let lastLicenseId;
 
   function getEMSClient() {
+    const currentLicenseId = getLicenseId();
+    if (emsClient && lastLicenseId === currentLicenseId) {
+      return emsClient;
+    }
+
+    lastLicenseId = currentLicenseId;
+    if (emsSettings.isIncludeElasticMapsService()) {
+      emsClient = new EMSClient({
+        language: i18n.getLocale(),
+        appVersion: kbnVersion,
+        appName: EMS_APP_NAME,
+        fileApiUrl: emsSettings.getEMSFileApiUrl(),
+        tileApiUrl: emsSettings.getEMSTileApiUrl(),
+        landingPageUrl: emsSettings.getEMSLandingPageUrl(),
+        fetchFunction: fetch,
+      });
+      emsClient.addQueryParams({ license: currentLicenseId });
+    } else {
+      emsClient = EMPTY_EMS_CLIENT;
+    }
     return emsSettings.isEMSEnabled() ? emsClient : EMPTY_EMS_CLIENT;
   }
 
@@ -547,6 +553,8 @@ export function initRoutes(router, licenseUid, emsSettings, kbnVersion, logger) 
       },
     },
     async (context, request, response) => {
+      console.log('Load index settings');
+
       const { query } = request;
 
       if (!query.indexPatternTitle) {
