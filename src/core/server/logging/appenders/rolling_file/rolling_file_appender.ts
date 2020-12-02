@@ -83,6 +83,7 @@ export class RollingFileAppender implements DisposableAppender {
    */
   constructor(config: RollingFileAppenderConfig) {
     this.context = new RollingFileContext(config.path);
+    this.context.refreshFileInfo();
     this.fileManager = new RollingFileManager(config.path, this.context);
     this.layout = Layouts.create(config.layout);
     this.policy = createTriggeringPolicy(config.policy, this.context);

@@ -22,7 +22,7 @@ import { LogRecord } from '@kbn/logging';
 import { RollingFileContext } from '../../rolling_file_context';
 import { TriggeringPolicy } from '../policy';
 
-export interface SizedLimitTriggeringPolicyConfig {
+export interface SizeLimitTriggeringPolicyConfig {
   kind: 'size-limit';
 
   /**
@@ -31,25 +31,28 @@ export interface SizedLimitTriggeringPolicyConfig {
   size: ByteSizeValue;
 }
 
-export const sizedLimitTriggeringPolicyConfigSchema = schema.object({
+export const sizeLimitTriggeringPolicyConfigSchema = schema.object({
   kind: schema.literal('size-limit'),
   size: schema.byteSize({ min: '1b' }),
 });
 
 /**
- * A triggering policy based on fixed size limit.
+ * A triggering policy based on a fixed size limit.
+ *
+ * Will trigger a rollover when the current log size exceed the
+ * given {@link SizeLimitTriggeringPolicyConfig.size | size}.
  */
-export class SizedLimitTriggeringPolicy implements TriggeringPolicy {
+export class SizeLimitTriggeringPolicy implements TriggeringPolicy {
   private readonly maxFileSize: number;
 
   constructor(
-    config: SizedLimitTriggeringPolicyConfig,
+    config: SizeLimitTriggeringPolicyConfig,
     private readonly context: RollingFileContext
   ) {
     this.maxFileSize = config.size.getValueInBytes();
   }
 
   isTriggeringEvent(record: LogRecord): boolean {
-    return this.context.currentFileSize > this.maxFileSize;
+    return this.context.currentFileSize >= this.maxFileSize;
   }
 }

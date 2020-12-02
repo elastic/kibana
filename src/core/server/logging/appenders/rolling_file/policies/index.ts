@@ -22,9 +22,9 @@ import { assertNever } from '@kbn/std';
 import { TriggeringPolicy } from './policy';
 import { RollingFileContext } from '../rolling_file_context';
 import {
-  sizedLimitTriggeringPolicyConfigSchema,
-  SizedLimitTriggeringPolicyConfig,
-  SizedLimitTriggeringPolicy,
+  sizeLimitTriggeringPolicyConfigSchema,
+  SizeLimitTriggeringPolicyConfig,
+  SizeLimitTriggeringPolicy,
 } from './size_limit';
 import {
   TimeIntervalTriggeringPolicyConfig,
@@ -37,14 +37,14 @@ export { TriggeringPolicy } from './policy';
 /**
  * Any of the existing policy's configuration
  *
- * See {@link SizedLimitTriggeringPolicyConfig} and {@link TimeIntervalTriggeringPolicyConfig}
+ * See {@link SizeLimitTriggeringPolicyConfig} and {@link TimeIntervalTriggeringPolicyConfig}
  */
 export type TriggeringPolicyConfig =
-  | SizedLimitTriggeringPolicyConfig
+  | SizeLimitTriggeringPolicyConfig
   | TimeIntervalTriggeringPolicyConfig;
 
 export const rollingPolicyConfigSchema = schema.oneOf([
-  sizedLimitTriggeringPolicyConfigSchema,
+  sizeLimitTriggeringPolicyConfigSchema,
   timeIntervalTriggeringPolicyConfigSchema,
 ]);
 
@@ -54,7 +54,7 @@ export const createTriggeringPolicy = (
 ): TriggeringPolicy => {
   switch (config.kind) {
     case 'size-limit':
-      return new SizedLimitTriggeringPolicy(config, context);
+      return new SizeLimitTriggeringPolicy(config, context);
     case 'time-interval':
       return new TimeIntervalTriggeringPolicy(config, context);
     default:

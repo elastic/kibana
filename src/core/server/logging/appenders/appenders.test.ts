@@ -19,10 +19,12 @@
 
 import { mockCreateLayout } from './appenders.test.mocks';
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import { LegacyAppender } from '../../legacy/logging/appenders/legacy_appender';
 import { Appenders } from './appenders';
 import { ConsoleAppender } from './console/console_appender';
 import { FileAppender } from './file/file_appender';
+import { RollingFileAppender } from './rolling_file/rolling_file_appender';
 
 beforeEach(() => {
   mockCreateLayout.mockReset();
@@ -83,4 +85,13 @@ test('`create()` creates correct appender.', () => {
   });
 
   expect(legacyAppender).toBeInstanceOf(LegacyAppender);
+
+  const rollingFileAppender = Appenders.create({
+    kind: 'rolling-file',
+    path: 'path',
+    layout: { highlight: true, kind: 'pattern', pattern: '' },
+    strategy: { kind: 'numeric', max: 5, pattern: '%i' },
+    policy: { kind: 'size-limit', size: ByteSizeValue.parse('15b') },
+  });
+  expect(rollingFileAppender).toBeInstanceOf(RollingFileAppender);
 });

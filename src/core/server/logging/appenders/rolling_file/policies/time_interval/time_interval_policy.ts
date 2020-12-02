@@ -23,12 +23,18 @@ import { LogRecord } from '@kbn/logging';
 import { RollingFileContext } from '../../rolling_file_context';
 import { TriggeringPolicy } from '../policy';
 import { getNextRollingTime } from './get_next_rolling_time';
+import { isValidRolloverInterval } from './utils';
 
 export interface TimeIntervalTriggeringPolicyConfig {
   kind: 'time-interval';
 
   /**
    * How often a rollover should occur.
+   *
+   * @remarks
+   * Due to of modulate rolling works, it is required to have an integer value for the highest time unit
+   * of the duration (you can't overflow to a higher unit).
+   * For example, `15m` and `4h` are valid values , but `90m` is not (as it is `1.5h`),.
    */
   interval: Duration;
   /**
@@ -43,7 +49,14 @@ export interface TimeIntervalTriggeringPolicyConfig {
 
 export const timeIntervalTriggeringPolicyConfigSchema = schema.object({
   kind: schema.literal('time-interval'),
-  interval: schema.duration({ defaultValue: '24h' }),
+  interval: schema.duration({
+    defaultValue: '24h',
+    validate: (interval) => {
+      if (!isValidRolloverInterval(interval)) {
+        return 'Interval value cannot overflow to a higher field.';
+      }
+    },
+  }),
   modulate: schema.boolean({ defaultValue: true }),
 });
 
@@ -75,7 +88,6 @@ export class TimeIntervalTriggeringPolicy implements TriggeringPolicy {
         this.config.interval,
         this.config.modulate
       );
-      // TODO: update context.currentFileTime ?
       return true;
     }
     return false;

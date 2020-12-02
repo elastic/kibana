@@ -22,7 +22,7 @@ import { schema } from '@kbn/config-schema';
 import { readdir, unlink, rename } from '../fs';
 import { RollingStrategy } from '../strategy';
 import { RollingFileContext } from '../../rolling_file_context';
-import { getNumericMatcher, getNumericFileName } from './numeric_pattern_matcher';
+import { getNumericMatcher, getNumericFileName } from './pattern_matcher';
 
 export interface NumericRollingStrategyConfig {
   kind: 'numeric';

@@ -17,26 +17,5 @@
  * under the License.
  */
 
-import moment, { Duration } from 'moment-timezone';
-import { getHighestTimeUnit } from './utils';
-
-/**
- * Return the next rollout time, given current time and rollout interval
- */
-export const getNextRollingTime = (
-  currentTime: number,
-  interval: Duration,
-  modulate: boolean
-): number => {
-  if (modulate) {
-    const incrementedUnit = getHighestTimeUnit(interval);
-    const currentMoment = moment(currentTime);
-    const increment =
-      interval.get(incrementedUnit) -
-      (currentMoment.get(incrementedUnit) % interval.get(incrementedUnit));
-    const incrementInMs = moment.duration(increment, incrementedUnit).asMilliseconds();
-    return currentMoment.startOf(incrementedUnit).toDate().getTime() + incrementInMs;
-  } else {
-    return currentTime + interval.asMilliseconds();
-  }
-};
+export const getNextRollingTimeMock = jest.fn();
+jest.doMock('./get_next_rolling_time', () => ({ getNextRollingTime: getNextRollingTimeMock }));

@@ -43,6 +43,8 @@ export class RollingFileManager {
         encoding: 'utf8',
         flags: 'a',
       });
+      // refresh the file meta in case it was not initialized yet.
+      this.context.refreshFileInfo();
     }
     return this.outputStream!;
   }

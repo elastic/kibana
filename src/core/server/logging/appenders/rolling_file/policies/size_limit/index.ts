@@ -18,7 +18,7 @@
  */
 
 export {
-  SizedLimitTriggeringPolicy,
-  SizedLimitTriggeringPolicyConfig,
-  sizedLimitTriggeringPolicyConfigSchema,
+  SizeLimitTriggeringPolicy,
+  SizeLimitTriggeringPolicyConfig,
+  sizeLimitTriggeringPolicyConfigSchema,
 } from './size_limit_policy';
