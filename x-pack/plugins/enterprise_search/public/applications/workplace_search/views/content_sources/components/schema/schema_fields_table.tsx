@@ -66,7 +66,7 @@ export const SchemaFieldsTable: React.FC = () => {
   ) : (
     <p>
       {i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.errors.header.dataType',
+        'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.filter.noResults.message',
         {
           defaultMessage: 'No results found for "{filterValue}".',
           values: { filterValue },
