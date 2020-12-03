@@ -13,7 +13,6 @@ import { TestProviders } from '../../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
-jest.mock('../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
 
