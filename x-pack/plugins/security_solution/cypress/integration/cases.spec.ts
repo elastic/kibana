@@ -38,7 +38,8 @@ import {
 import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../screens/timeline';
 
 import { goToCaseDetails, goToCreateNewCase } from '../tasks/all_cases';
-import { openCaseTimeline } from '../tasks/case_details';
+import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { deleteCase, openCaseTimeline } from '../tasks/case_details';
 import {
   attachTimeline,
   backToCases,
@@ -46,17 +47,21 @@ import {
   fillCasesMandatoryfields,
 } from '../tasks/create_new_case';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { closeTimeline } from '../tasks/timeline';
 
 import { CASES_URL } from '../urls/navigation';
 
 describe('Cases', () => {
-  before(() => {
-    esArchiverLoad('timeline');
+  before(async () => {
+    const createdTimeline = await createTimeline(case1.timeline);
+    // eslint-disable-next-line require-atomic-updates
+    case1.timeline.id = createdTimeline[0];
   });
 
   after(() => {
-    esArchiverUnload('timeline');
+    closeTimeline();
+    deleteTimeline(case1.timeline.id!);
+    deleteCase();
   });
 
   it('Creates a new case with timeline and opens the timeline', () => {

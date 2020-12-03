@@ -5,6 +5,7 @@
  */
 
 import { indexPatterns, newThresholdRule } from '../objects/rule';
+
 import {
   ALERT_RULE_METHOD,
   ALERT_RULE_NAME,
@@ -63,6 +64,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -72,7 +74,6 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
@@ -87,13 +88,15 @@ const expectedMitre = newThresholdRule.mitre
   .join('');
 
 describe('Detection rules, threshold', () => {
-  before(() => {
-    esArchiverLoad('timeline');
+  beforeEach(async () => {
+    const createdTimeline = await createTimeline(newThresholdRule.timeline);
+    // eslint-disable-next-line require-atomic-updates
+    newThresholdRule.timeline.id = createdTimeline[0];
   });
 
-  after(() => {
+  afterEach(() => {
+    deleteTimeline(newThresholdRule.timeline.id!);
     deleteRule();
-    esArchiverUnload('timeline');
   });
 
   it('Creates and activates a new threshold rule', () => {

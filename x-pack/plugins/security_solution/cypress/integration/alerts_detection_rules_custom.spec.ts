@@ -84,6 +84,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import {
   createAndActivateRule,
   fillAboutRule,
@@ -115,14 +116,16 @@ const expectedEditedtags = editedRule.tags.join('');
 const expectedEditedIndexPatterns =
   editedRule.index && editedRule.index.length ? editedRule.index : indexPatterns;
 
-describe('Custom detection rules creation', () => {
-  before(() => {
-    esArchiverLoad('timeline');
+describe('Custom detection rules creation', async () => {
+  before(async () => {
+    const createdTimeline = await createTimeline(newRule.timeline);
+    // eslint-disable-next-line require-atomic-updates
+    newRule.timeline.id = createdTimeline[0];
   });
 
   after(() => {
+    deleteTimeline(newRule.timeline.id!);
     deleteRule();
-    esArchiverUnload('timeline');
   });
 
   it('Creates and activates a new rule', () => {

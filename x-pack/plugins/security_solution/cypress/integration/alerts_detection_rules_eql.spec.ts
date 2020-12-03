@@ -62,6 +62,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -71,7 +72,6 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
@@ -89,13 +89,15 @@ const expectedNumberOfAlerts = 7;
 const expectedNumberOfSequenceAlerts = 1;
 
 describe('Detection rules, EQL', () => {
-  beforeEach(() => {
-    esArchiverLoad('timeline');
+  beforeEach(async () => {
+    const createdTimeline = await createTimeline(eqlRule.timeline);
+    // eslint-disable-next-line require-atomic-updates
+    eqlRule.timeline.id = createdTimeline[0];
   });
 
   afterEach(() => {
+    deleteTimeline(eqlRule.timeline.id!);
     deleteRule();
-    esArchiverUnload('timeline');
   });
 
   it('Creates and activates a new EQL rule', () => {

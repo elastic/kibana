@@ -8,6 +8,7 @@ export interface Timeline {
   title: string;
   description: string;
   query: string;
+  id?: string;
 }
 
 export interface CompleteTimeline extends Timeline {
@@ -21,10 +22,6 @@ export interface TimelineFilter {
   value?: string;
 }
 
-export interface TimelineWithId extends Timeline {
-  id: string;
-}
-
 export const filter: TimelineFilter = {
   field: 'host.name',
   operator: 'exists',
@@ -33,7 +30,27 @@ export const filter: TimelineFilter = {
 export const timeline: CompleteTimeline = {
   title: 'Security Timeline',
   description: 'This is the best timeline',
-  query: 'host.name: * ',
+  query: 'host.name: *',
   notes: 'Yes, the best timeline',
   filter,
+};
+
+export const caseTimeline: Timeline = {
+  title: 'SIEM test',
+  description: 'description',
+  query: 'host.name: *',
+  id: '0162c130-78be-11ea-9718-118a926974a4',
+};
+
+export const expectedExportedTimelineTemplate = (template: string) => {
+  const jsontemplate = JSON.parse(JSON.stringify(template));
+
+  return `{"savedObjectId":"${jsontemplate.savedObjectId}","version":"${jsontemplate.version}","columns":[{"id":"@timestamp"},{"id":"user.name"},{"id":"event.category"},{"id":"event.action"},{"id":"host.name"}],"kqlMode":"filter","kqlQuery":{"filterQuery":{"kuery":{"expression":"${jsontemplate.kqlQuery.filterQuery.kuery.expression}","kind":"kuery"}}},"dateRange":{"start":"${jsontemplate.dateRange.start}","end":"${jsontemplate.dateRange.end}"},"description":"${jsontemplate.description}","title":"${jsontemplate.title}","templateTimelineVersion":1,"timelineType":"template","created":${jsontemplate.created},"createdBy":"elastic","updated":${jsontemplate.updated},"updatedBy":"elastic","eventNotes":[],"globalNotes":[],"pinnedEventIds":[]}
+`;
+};
+
+export const expectedExportedTimeline = (timelineBody: string) => {
+  const jsontimeline = JSON.parse(JSON.stringify(timelineBody));
+
+  return `{"savedObjectId":"${jsontimeline.savedObjectId}","version":"${jsontimeline.version}","columns":[{"id":"@timestamp"},{"id":"user.name"},{"id":"event.category"},{"id":"event.action"},{"id":"host.name"}],"kqlMode":"filter","kqlQuery":{"filterQuery":{"kuery":{"expression":"${jsontimeline.kqlQuery.filterQuery.kuery.expression}","kind":"kuery"}}},"dateRange":{"start":"${jsontimeline.dateRange.start}","end":"${jsontimeline.dateRange.end}"},"description":"${jsontimeline.description}","title":"${jsontimeline.title}","created":${jsontimeline.created},"createdBy":"elastic","updated":${jsontimeline.updated},"updatedBy":"elastic","timelineType":"default","eventNotes":[],"globalNotes":[],"pinnedEventIds":[]}\n`;
 };

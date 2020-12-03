@@ -5,6 +5,7 @@
  */
 
 import { indexPatterns, newOverrideRule, severitiesOverride } from '../objects/rule';
+
 import {
   NUMBER_OF_ALERTS,
   ALERT_RULE_NAME,
@@ -61,12 +62,14 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
+  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import {
   createAndActivateRule,
   fillAboutRuleWithOverrideAndContinue,
@@ -75,7 +78,6 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
@@ -90,12 +92,15 @@ const expectedMitre = newOverrideRule.mitre
   .join('');
 
 describe('Detection rules, override', () => {
-  before(() => {
-    esArchiverLoad('timeline');
+  beforeEach(async () => {
+    const createdTimeline = await createTimeline(newOverrideRule.timeline);
+    // eslint-disable-next-line require-atomic-updates
+    newOverrideRule.timeline.id = createdTimeline[0];
   });
 
-  after(() => {
-    esArchiverUnload('timeline');
+  afterEach(() => {
+    deleteTimeline(newOverrideRule.timeline.id!);
+    deleteRule();
   });
 
   it('Creates and activates a new custom rule with override option', () => {

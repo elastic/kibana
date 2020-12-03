@@ -13,40 +13,45 @@ import {
 } from '../tasks/timeline';
 import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../screens/create_new_case';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
-import { caseTimeline, TIMELINE_CASE_ID } from '../objects/case';
+import { TIMELINE_CASE_ID } from '../objects/case';
+import { caseTimeline, timeline } from '../objects/timeline';
+import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 
 describe('attach timeline to case', () => {
-  beforeEach(() => {
-    loginAndWaitForTimeline(caseTimeline.id);
-  });
   context('without cases created', () => {
-    before(() => {
-      esArchiverLoad('timeline');
+    before(async () => {
+      const createdTimeline = await createTimeline(timeline);
+      // eslint-disable-next-line require-atomic-updates
+      timeline.id = createdTimeline[0];
     });
 
     after(() => {
-      esArchiverUnload('timeline');
+      deleteTimeline(timeline.id!);
     });
 
     it('attach timeline to a new case', () => {
+      loginAndWaitForTimeline(timeline.id!);
       attachTimelineToNewCase();
 
       cy.location('origin').then((origin) => {
         cy.get(DESCRIPTION_INPUT).should(
           'have.text',
-          `[${caseTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${caseTimeline.id}%27,isOpen:!t))`
+          `[${timeline.title}](${origin}/app/security/timelines?timeline=(id:%27${timeline.id}%27,isOpen:!t))`
         );
       });
     });
 
     it('attach timeline to an existing case with no case', () => {
+      loginAndWaitForTimeline(timeline.id!);
       attachTimelineToExistingCase();
       addNewCase();
 
       cy.location('origin').then((origin) => {
         cy.get(DESCRIPTION_INPUT).should(
           'have.text',
-          `[${caseTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${caseTimeline.id}%27,isOpen:!t))`
+          `[${
+            timeline.title
+          }](${origin}/app/security/timelines?timeline=(id:%27${timeline.id!}%27,isOpen:!t))`
         );
       });
     });
@@ -62,13 +67,16 @@ describe('attach timeline to case', () => {
     });
 
     it('attach timeline to an existing case', () => {
+      loginAndWaitForTimeline(caseTimeline.id!);
       attachTimelineToExistingCase();
       selectCase(TIMELINE_CASE_ID);
 
       cy.location('origin').then((origin) => {
         cy.get(ADD_COMMENT_INPUT).should(
           'have.text',
-          `[${caseTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${caseTimeline.id}%27,isOpen:!t))`
+          `[${
+            caseTimeline.title
+          }](${origin}/app/security/timelines?timeline=(id:%27${caseTimeline.id!}%27,isOpen:!t))`
         );
       });
     });

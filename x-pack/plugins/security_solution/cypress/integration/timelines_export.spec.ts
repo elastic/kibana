@@ -5,37 +5,38 @@
  */
 
 import { exportTimeline, waitForTimelinesPanelToBeLoaded } from '../tasks/timelines';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { TIMELINES_URL } from '../urls/navigation';
+import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { expectedExportedTimeline, timeline } from '../objects/timeline';
 
-const EXPECTED_EXPORTED_TIMELINE_PATH = 'cypress/test_files/expected_timelines_export.ndjson';
+let timelineBody = '';
+let timelineId = '';
 
 describe('Export timelines', () => {
-  before(() => {
-    esArchiverLoad('timeline');
+  before(async () => {
     cy.server();
     cy.route('POST', '**api/timeline/_export?file_name=timelines_export.ndjson*').as('export');
+    const newTimeline = await createTimeline(timeline);
+    timelineId = newTimeline[0];
+    timelineBody = newTimeline[1];
   });
 
   after(() => {
-    esArchiverUnload('timeline');
+    deleteTimeline(timelineId);
   });
 
   it('Exports a custom timeline', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
-    cy.readFile(EXPECTED_EXPORTED_TIMELINE_PATH).then(($expectedExportedJson) => {
-      const parsedJson = JSON.parse($expectedExportedJson);
-      const timelineId = parsedJson.savedObjectId;
-      exportTimeline(timelineId);
+    const jsonTimeline = JSON.parse(JSON.stringify(timelineBody));
+    exportTimeline(timelineId);
 
-      cy.wait('@export').then((response) => {
-        cy.wrap(response.status).should('eql', 200);
-        cy.wrap(response.xhr.responseText).should('eql', $expectedExportedJson);
-      });
+    cy.wait('@export').then((response) => {
+      cy.wrap(response.status).should('eql', 200);
+      cy.wrap(response.xhr.responseText).should('eql', expectedExportedTimeline(jsonTimeline));
     });
   });
 });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { machineLearningRule, totalNumberOfPrebuiltRulesInEsArchive } from '../objects/rule';
+import { machineLearningRule } from '../objects/rule';
 
 import {
   CUSTOM_RULES_BTN,
@@ -59,7 +59,6 @@ import {
   fillScheduleRuleAndContinue,
   selectMachineLearningRuleType,
 } from '../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
@@ -72,16 +71,11 @@ const expectedMitre = machineLearningRule.mitre
     return mitre.tactic + mitre.techniques.join('');
   })
   .join('');
-const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
+const expectedNumberOfRules = 1;
 
 describe('Detection rules, machine learning', () => {
-  before(() => {
-    esArchiverLoad('prebuilt_rules_loaded');
-  });
-
   after(() => {
     deleteRule();
-    esArchiverUnload('prebuilt_rules_loaded');
   });
 
   it('Creates and activates a new ml rule', () => {
