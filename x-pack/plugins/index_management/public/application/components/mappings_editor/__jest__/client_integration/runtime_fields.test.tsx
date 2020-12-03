@@ -57,7 +57,7 @@ describe('Mappings editor: runtime fields', () => {
 
         expect(exists('emptyList.learnMoreLink')).toBe(true);
         expect(exists('emptyList.createRuntimeFieldButton')).toBe(true);
-        expect(find('createRuntimeFieldButton').text()).toBe('Create a runtime field');
+        expect(find('createRuntimeFieldButton').text()).toBe('Create runtime field');
 
         expect(exists('runtimeFieldEditor')).toBe(false);
         actions.openRuntimeFieldEditor();
