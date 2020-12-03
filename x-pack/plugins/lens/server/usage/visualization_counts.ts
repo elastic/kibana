@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { LensVisualizationUsage } from './types';
 
 export async function getVisualizationCounts(
-  callCluster: LegacyAPICaller,
+  getEsClient: () => Promise<ElasticsearchClient>,
   kibanaIndex: string
 ): Promise<LensVisualizationUsage> {
-  const results = await callCluster('search', {
+  const esClient = await getEsClient();
+  const { body: results } = await esClient.search({
     index: kibanaIndex,
-    rest_total_hits_as_int: true,
     body: {
       query: {
         bool: {
