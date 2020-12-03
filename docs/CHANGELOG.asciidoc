@@ -265,12 +265,12 @@ without the ability to do anything {kibana-pull}75538[#75538]
 * Excludes cloud alias index from our query {kibana-pull}81551[#81551]
 * Implements server-side sessions. {kib} now stores user session information in a dedicated {es} index.
 By default, expired and invalid sessions are cleaned from the index every hour.
-You configure the cleanup interval with the `xpack.security.session.cleanupInterval` setting.
+You can configure the cleanup interval with the `xpack.security.session.cleanupInterval` setting.
 After the upgrade, all existing sessions are invalid and users must log back in to {kib}.
-It is also no longer possible
+It's also no longer possible
 to host different {kib} tenants on different ports of the same host.
 Although this setup worked in the past, it was discouraged because browsers
-share cookie across all applications hosted using the same host name, ignoring ports.
+share cookies across all applications hosted using the same host name, ignoring ports.
 Cookies are now strictly tied to a particular tenant. {kibana-pull}68117[#68117]
 Uptime::
 * Pings Redirects {kibana-pull}65292[#65292]
