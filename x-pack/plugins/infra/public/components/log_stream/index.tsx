@@ -11,10 +11,11 @@ import { euiStyled } from '../../../../observability/public';
 import { LogEntryCursor } from '../../../common/log_entry';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { LogSourceConfigurationProperties, useLogSource } from '../../containers/logs/log_source';
+import { useLogSource } from '../../containers/logs/log_source';
 import { useLogStream } from '../../containers/logs/log_stream';
 
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
+import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
 
 const PAGE_THRESHOLD = 2;
 
@@ -178,7 +179,7 @@ const LogStreamContent = euiStyled.div<{ height: string }>`
 
 function convertLogColumnDefinitionToLogSourceColumnDefinition(
   columns: LogColumnDefinition[]
-): LogSourceConfigurationProperties['logColumns'] {
+): LogColumnRenderConfiguration[] {
   return columns.map((column) => {
     switch (column.type) {
       case 'timestamp':
