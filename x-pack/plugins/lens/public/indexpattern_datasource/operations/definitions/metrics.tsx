@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
+import { getInvalidFieldMessage } from './helpers';
 import {
   FormattedIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -103,6 +104,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         missing: 0,
       },
     }),
+    getErrorMessage: (layer, columnId, indexPattern) =>
+      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   } as OperationDefinition<T, 'field'>;
 }
 

@@ -19,21 +19,18 @@
 
 import {
   LegacyAPICaller,
+  ElasticsearchClient,
   Logger,
   KibanaRequest,
-  ILegacyClusterClient,
-  IClusterClient,
-  SavedObjectsServiceStart,
   SavedObjectsClientContract,
   ISavedObjectsRepository,
-} from 'kibana/server';
+} from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ElasticsearchClient } from '../../../../src/core/server';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 
 export interface TelemetryCollectionManagerPluginSetup {
-  setCollection: <CustomContext extends Record<string, any>, T extends BasicStatsPayload>(
-    collectionConfig: CollectionConfig<CustomContext, T>
+  setCollectionStrategy: <T extends BasicStatsPayload>(
+    collectionConfig: CollectionStrategyConfig<T>
   ) => void;
   getOptInStats: TelemetryCollectionManagerPlugin['getOptInStats'];
   getStats: TelemetryCollectionManagerPlugin['getStats'];
@@ -41,9 +38,6 @@ export interface TelemetryCollectionManagerPluginSetup {
 }
 
 export interface TelemetryCollectionManagerPluginStart {
-  setCollection: <CustomContext extends Record<string, any>, T extends BasicStatsPayload>(
-    collectionConfig: CollectionConfig<CustomContext, T>
-  ) => void;
   getOptInStats: TelemetryCollectionManagerPlugin['getOptInStats'];
   getStats: TelemetryCollectionManagerPlugin['getStats'];
   areAllCollectorsReady: TelemetryCollectionManagerPlugin['areAllCollectorsReady'];
@@ -91,23 +85,7 @@ export interface BasicStatsPayload {
 }
 
 export interface UsageStatsPayload extends BasicStatsPayload {
-  license?: ESLicense;
   collectionSource: string;
-}
-
-// From https://www.elastic.co/guide/en/elasticsearch/reference/current/get-license.html
-export interface ESLicense {
-  status: string;
-  uid: string;
-  type: string;
-  issue_date: string;
-  issue_date_in_millis: number;
-  expiry_date: string;
-  expirty_date_in_millis: number;
-  max_nodes: number;
-  issued_to: string;
-  issuer: string;
-  start_date_in_millis: number;
 }
 
 export interface StatsCollectionContext {
@@ -116,49 +94,25 @@ export interface StatsCollectionContext {
 }
 
 export type StatsGetterConfig = UnencryptedStatsGetterConfig | EncryptedStatsGetterConfig;
-export type ClusterDetailsGetter<CustomContext extends Record<string, any> = {}> = (
+export type ClusterDetailsGetter = (
   config: StatsCollectionConfig,
-  context: StatsCollectionContext & CustomContext
+  context: StatsCollectionContext
 ) => Promise<ClusterDetails[]>;
-export type StatsGetter<
-  CustomContext extends Record<string, any> = {},
-  T extends BasicStatsPayload = BasicStatsPayload
-> = (
+export type StatsGetter<T extends BasicStatsPayload = BasicStatsPayload> = (
   clustersDetails: ClusterDetails[],
   config: StatsCollectionConfig,
-  context: StatsCollectionContext & CustomContext
+  context: StatsCollectionContext
 ) => Promise<T[]>;
-export type LicenseGetter<CustomContext extends Record<string, any> = {}> = (
-  clustersDetails: ClusterDetails[],
-  config: StatsCollectionConfig,
-  context: StatsCollectionContext & CustomContext
-) => Promise<{ [clusterUuid: string]: ESLicense | undefined }>;
 
-export interface CollectionConfig<
-  CustomContext extends Record<string, any> = {},
-  T extends BasicStatsPayload = BasicStatsPayload
-> {
+export interface CollectionStrategyConfig<T extends BasicStatsPayload = BasicStatsPayload> {
   title: string;
   priority: number;
-  esCluster: ILegacyClusterClient;
-  esClientGetter: () => IClusterClient | undefined; // --> by now we know that the client getter will return the IClusterClient but we assure that through a code check
-  soServiceGetter: () => SavedObjectsServiceStart | undefined; // --> by now we know that the service getter will return the SavedObjectsServiceStart but we assure that through a code check
-  statsGetter: StatsGetter<CustomContext, T>;
-  clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
-  licenseGetter: LicenseGetter<CustomContext>;
-  customContext?: CustomContext;
+  statsGetter: StatsGetter<T>;
+  clusterDetailsGetter: ClusterDetailsGetter;
 }
 
-export interface Collection<
-  CustomContext extends Record<string, any> = {},
-  T extends BasicStatsPayload = BasicStatsPayload
-> {
-  customContext?: CustomContext;
-  statsGetter: StatsGetter<CustomContext, T>;
-  licenseGetter: LicenseGetter<CustomContext>;
-  clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
-  esCluster: ILegacyClusterClient;
-  esClientGetter: () => IClusterClient | undefined; // the collection could still return undefined for the es client getter.
-  soServiceGetter: () => SavedObjectsServiceStart | undefined; // the collection could still return undefined for the Saved Objects Service getter.
+export interface CollectionStrategy<T extends BasicStatsPayload = BasicStatsPayload> {
+  statsGetter: StatsGetter<T>;
+  clusterDetailsGetter: ClusterDetailsGetter;
   title: string;
 }
