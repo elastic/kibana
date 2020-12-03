@@ -254,10 +254,17 @@ export interface NodeEventsInCategoryState {
    */
   dataRequestID?: number;
 
-  /**
-   * Parameters used for a request currently in progress.
-   */
-  pendingRequestParameters?: (PanelViewAndParameters & { dataRequestID?: number }) | null;
+  pendingRequest?: {
+    /**
+     * Parameters used for a request currently in progress.
+     */
+    parameters: PanelViewAndParameters;
+
+    /**
+     * Request ID for any inflight requests
+     */
+    dataRequestID: number;
+  };
 }
 
 /**
@@ -274,7 +281,7 @@ export interface DataState {
   /**
    * A counter used to have resolver fetch updated data.
    */
-  readonly dataRefreshRequestsMade: number;
+  readonly refreshCount: number;
 
   /**
    * Used when the panelView is `eventDetail`.
@@ -282,7 +289,8 @@ export interface DataState {
    */
   readonly currentRelatedEvent: {
     loading: boolean;
-    data: (SafeResolverEvent & { dataRequestID?: number }) | null;
+    data: SafeResolverEvent | null;
+    dataRequestID?: number;
   };
 
   readonly tree?: {

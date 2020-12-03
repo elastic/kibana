@@ -89,11 +89,6 @@ export const treeParametersToFetch = composeSelectors(
   dataSelectors.treeParametersToFetch
 );
 
-export const lastResponseParameters = composeSelectors(
-  dataStateSelector,
-  dataSelectors.lastResponseParameters
-);
-
 export const treeRequestParametersToAbort = composeSelectors(
   dataStateSelector,
   dataSelectors.treeRequestParametersToAbort
@@ -139,10 +134,7 @@ export const isCurrentRelatedEventLoading = composeSelectors(
   dataSelectors.isCurrentRelatedEventLoading
 );
 
-export const dataRefreshRequestsMade = composeSelectors(
-  dataStateSelector,
-  dataSelectors.dataRefreshRequestsMade
-);
+export const refreshCount = composeSelectors(dataStateSelector, dataSelectors.refreshCount);
 
 /**
  * the current related event data for the `event_detail` view
@@ -365,16 +357,14 @@ export const isLoadingMoreNodeEventsInCategory = composeSelectors(
   dataSelectors.isLoadingMoreNodeEventsInCategory
 );
 
-export const currentRelatedEventRequestID = composeSelectors(
+export const eventsInCategoryResultIsStale = composeSelectors(
   dataStateSelector,
-  dataSelectors.currentRelatedEventRequestID
+  dataSelectors.eventsInCategoryResultIsStale
 );
-/**
- * The request id of the most recent response for nodeEventsInCategory panel
- */
-export const currentNodeEventsInCategoryRequestID = composeSelectors(
+
+export const currentRelatedEventIsStale = composeSelectors(
   dataStateSelector,
-  dataSelectors.currentNodeEventsInCategoryRequestID
+  dataSelectors.currentRelatedEventIsStale
 );
 
 /**

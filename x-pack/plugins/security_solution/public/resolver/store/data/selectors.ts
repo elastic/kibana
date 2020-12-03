@@ -64,23 +64,39 @@ const resolverTreeResponse = (state: DataState): ResolverTree | undefined => {
   return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
 };
 
-export function currentRelatedEventRequestID(state: DataState): number | undefined {
-  if (state.currentRelatedEvent?.data) {
-    return state.currentRelatedEvent?.data.dataRequestID;
+function currentRelatedEventRequestID(state: DataState): number | undefined {
+  if (state.currentRelatedEvent) {
+    return state.currentRelatedEvent?.dataRequestID;
   } else {
     return undefined;
   }
 }
 
-export function currentNodeEventsInCategoryRequestID(state: DataState): number | undefined {
-  if (state.nodeEventsInCategory?.pendingRequestParameters) {
-    return state.nodeEventsInCategory.pendingRequestParameters?.dataRequestID;
+function currentNodeEventsInCategoryRequestID(state: DataState): number | undefined {
+  if (state.nodeEventsInCategory?.pendingRequest) {
+    return state.nodeEventsInCategory.pendingRequest?.dataRequestID;
   } else if (state.nodeEventsInCategory) {
     return state.nodeEventsInCategory?.dataRequestID;
   } else {
     return undefined;
   }
 }
+
+export const eventsInCategoryResultIsStale = createSelector(
+  currentNodeEventsInCategoryRequestID,
+  refreshCount,
+  function eventsInCategoryResultIsStale(oldID, newID) {
+    return oldID !== undefined && newID !== undefined && oldID !== newID;
+  }
+);
+
+export const currentRelatedEventIsStale = createSelector(
+  currentRelatedEventRequestID,
+  refreshCount,
+  function currentRelatedEventIsStale(oldID, newID) {
+    return oldID !== undefined && newID !== undefined && oldID !== newID;
+  }
+);
 
 /**
  * the node ID of the node representing the databaseDocumentID.
@@ -203,8 +219,8 @@ export function isCurrentRelatedEventLoading(state: DataState) {
   return state.currentRelatedEvent.loading;
 }
 
-export function dataRefreshRequestsMade(state: DataState) {
-  return state.dataRefreshRequestsMade;
+export function refreshCount(state: DataState) {
+  return state.refreshCount;
 }
 
 /**
@@ -258,14 +274,6 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
     } else {
       return null;
     }
-  } else {
-    return null;
-  }
-}
-
-export function lastResponseParameters(state: DataState): TreeFetcherParameters | null {
-  if (state.tree?.lastResponse) {
-    return state.tree?.lastResponse?.parameters;
   } else {
     return null;
   }
@@ -618,10 +626,12 @@ export const isLoadingNodeEventsInCategory = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
   // eslint-disable-next-line @typescript-eslint/no-shadow
-  function (nodeEventsInCategory, panelViewAndParameters) {
+  function (nodeEventsInCategory, panelViewAndParameters): boolean {
     const { panelView } = panelViewAndParameters;
-    if (panelView === 'nodeEventsInCategory') {
-      return nodeEventsInCategory?.loading;
+    if (panelView === 'nodeEventsInCategory' && nodeEventsInCategory?.loading) {
+      return nodeEventsInCategory.loading;
+    } else {
+      return false;
     }
   }
 );

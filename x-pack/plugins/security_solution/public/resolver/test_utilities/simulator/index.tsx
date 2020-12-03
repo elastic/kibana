@@ -75,6 +75,7 @@ export class Simulator {
     databaseDocumentID,
     indices,
     history,
+    shouldUpdate,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -93,6 +94,7 @@ export class Simulator {
      */
     databaseDocumentID: string;
     history?: HistoryPackageHistoryInterface<never>;
+    shouldUpdate: boolean;
   }) {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
@@ -131,7 +133,7 @@ export class Simulator {
         coreStart={coreStart}
         databaseDocumentID={databaseDocumentID}
         indices={indices}
-        shouldUpdate={false}
+        shouldUpdate={shouldUpdate}
       />
     );
   }
@@ -155,6 +157,13 @@ export class Simulator {
    */
   public set resolverComponentInstanceID(value: string) {
     this.wrapper.setProps({ resolverComponentInstanceID: value });
+  }
+
+  /**
+   * Change the shouldUpdate prop (updates the React component props.)
+   */
+  public set shouldUpdate(value: boolean) {
+    this.wrapper.setProps({ shouldUpdate: value });
   }
 
   /**

@@ -36,7 +36,10 @@ interface AppRequestedResolverData {
 
 interface AppRequestedNodeEventsInCategory {
   readonly type: 'appRequestedNodeEventsInCategory';
-  readonly payload: PanelViewAndParameters & { dataRequestID?: number };
+  readonly payload: {
+    parameters: PanelViewAndParameters;
+    dataRequestID: number;
+  };
 }
 
 interface UserRequestedAdditionalRelatedEvents {
@@ -104,6 +107,8 @@ interface ServerReturnedNodeEventsInCategory {
      * The category that `events` have in common.
      */
     eventCategory: string;
+
+    dataRequestID: number;
   };
 }
 interface AppRequestedCurrentRelatedEventData {
@@ -116,7 +121,7 @@ interface ServerFailedToReturnCurrentRelatedEventData {
 
 interface ServerReturnedCurrentRelatedEventData {
   readonly type: 'serverReturnedCurrentRelatedEventData';
-  readonly payload: SafeResolverEvent & { dataRequestID?: number };
+  readonly payload: { data: SafeResolverEvent; dataRequestID: number };
 }
 
 export type DataAction =

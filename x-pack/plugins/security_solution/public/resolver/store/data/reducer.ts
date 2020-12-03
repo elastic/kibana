@@ -17,27 +17,21 @@ const initialState: DataState = {
     data: null,
   },
   resolverComponentInstanceID: undefined,
-  dataRefreshRequestsMade: 0,
+  refreshCount: 0,
 };
 /* eslint-disable complexity */
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
   if (action.type === 'appReceivedNewExternalProperties') {
-    const requestsMade = state.dataRefreshRequestsMade;
-    let dataRefreshRequestsMade: number;
-    if (action.payload.shouldUpdate) {
-      dataRefreshRequestsMade = requestsMade !== undefined ? requestsMade + 1 : 0;
-    } else {
-      dataRefreshRequestsMade = requestsMade !== undefined ? requestsMade : 0;
-    }
+    const refreshCount = state.refreshCount + (action.payload.shouldUpdate ? 1 : 0);
     const nextState: DataState = {
       ...state,
-      dataRefreshRequestsMade,
+      refreshCount,
       tree: {
         ...state.tree,
         currentParameters: {
           databaseDocumentID: action.payload.databaseDocumentID,
           indices: action.payload.indices,
-          dataRequestID: requestsMade,
+          dataRequestID: refreshCount,
         },
       },
       resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
@@ -131,7 +125,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
           ...state.nodeEventsInCategory,
           events: [],
           loading: true,
-          pendingRequestParameters: action.payload,
+          pendingRequest: action.payload,
         },
       };
       return next;
@@ -159,7 +153,6 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
             nodeEventsInCategory: {
               ...updated,
               loading: false,
-              pendingRequestParameters: null,
             },
           };
           return next;
@@ -174,7 +167,6 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
           nodeEventsInCategory: {
             ...action.payload,
             loading: false,
-            pendingRequestParameters: null,
           },
         };
         return next;
@@ -224,7 +216,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       ...state,
       currentRelatedEvent: {
         loading: false,
-        data: action.payload,
+        ...action.payload,
       },
     };
     return nextState;

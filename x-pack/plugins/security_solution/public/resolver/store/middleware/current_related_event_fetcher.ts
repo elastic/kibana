@@ -34,23 +34,21 @@ export function CurrentRelatedEventFetcher(
 
     const oldParams = last;
     last = newParams;
-    const oldID = selectors.currentRelatedEventRequestID(state);
-    const newID = selectors.dataRefreshRequestsMade(state);
-    const shouldRefetch = oldID !== undefined && newID !== undefined && oldID !== newID;
+    const newID = selectors.refreshCount(state);
+
     // If the panel view params have changed and the current panel view is the `eventDetail`, then fetch the event details for that eventID.
     if (
       (!isEqual(newParams, oldParams) && newParams.panelView === 'eventDetail') ||
-      (shouldRefetch && newParams.panelView === 'eventDetail')
+      (selectors.currentRelatedEventIsStale(state) && newParams.panelView === 'eventDetail')
     ) {
-      const currentEventID = newParams.panelParameters.eventID;
-
       api.dispatch({
         type: 'appRequestedCurrentRelatedEventData',
       });
 
-      let result: (SafeResolverEvent & { dataRequestID?: number }) | null = null;
+      let result: SafeResolverEvent | null = null;
+      let payload: { data: SafeResolverEvent; dataRequestID: number } | null = null;
       try {
-        result = await dataAccessLayer.event(currentEventID);
+        result = await dataAccessLayer.event(newParams.panelParameters.eventID);
       } catch (error) {
         api.dispatch({
           type: 'serverFailedToReturnCurrentRelatedEventData',
@@ -58,10 +56,13 @@ export function CurrentRelatedEventFetcher(
       }
 
       if (result) {
-        result.dataRequestID = state.data.dataRefreshRequestsMade;
+        payload = {
+          data: result,
+          dataRequestID: newID,
+        };
         api.dispatch({
           type: 'serverReturnedCurrentRelatedEventData',
-          payload: result,
+          payload,
         });
       } else {
         api.dispatch({

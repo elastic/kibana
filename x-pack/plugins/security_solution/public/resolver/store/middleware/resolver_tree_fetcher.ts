@@ -37,7 +37,6 @@ export function ResolverTreeFetcher(
       let result: ResolverTree | undefined;
       // Inform the state that we've made the request. Without this, the middleware will try to make the request again
       // immediately.
-      databaseParameters.dataRequestID = state.data.dataRefreshRequestsMade;
       api.dispatch({
         type: 'appRequestedResolverData',
         payload: databaseParameters,
