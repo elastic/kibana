@@ -69,7 +69,7 @@ export class BackgroundSessionService {
 
   private setupMonitoring = (savedObjects: SavedObjectsServiceStart) => {
     // TODO: setup monitoring only if BGS is enabled
-    const internalRepo = savedObjects.createInternalRepository();
+    const internalRepo = savedObjects.createInternalRepository([BACKGROUND_SESSION_TYPE]);
     this.internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
     this.monitorInterval = setInterval(this.monitorMappedIds.bind(this), INMEM_TRACKING_INTERVAL);
   };
@@ -102,10 +102,10 @@ export class BackgroundSessionService {
         moment.duration(curTime.diff(sessionInfo.insertTime)).asSeconds() >
         INMEM_TRACKING_TIMEOUT_SEC
       ) {
-        this.logger.debug(`Deleting expired session ${sessionId}`);
+        this.logger.debug(`clearSessions | Deleting expired session ${sessionId}`);
         this.sessionSearchMap.delete(sessionId);
       } else if (sessionInfo.retryCount >= MAX_UPDATE_RETRIES) {
-        this.logger.warn(`Deleting failed session ${sessionId}`);
+        this.logger.warn(`clearSessions | Deleting failed session ${sessionId}`);
         this.sessionSearchMap.delete(sessionId);
       }
     });
@@ -113,7 +113,7 @@ export class BackgroundSessionService {
 
   private async monitorMappedIds() {
     try {
-      this.logger.debug(`monitorMappedIds. Map contains ${this.sessionSearchMap.size} items`);
+      this.logger.debug(`monitorMappedIds | Map contains ${this.sessionSearchMap.size} items`);
       this.clearSessions();
 
       if (!this.sessionSearchMap.size) return;
@@ -135,7 +135,7 @@ export class BackgroundSessionService {
         }
       });
     } catch (e) {
-      this.logger.error(`Error fetching sessions. ${e}`);
+      this.logger.error(`monitorMappedIds | Error fetching sessions. ${e}`);
     }
   }
 
@@ -144,6 +144,7 @@ export class BackgroundSessionService {
   ) {
     if (!activeMappingObjects.length) return [];
 
+    this.logger.debug(`updateAllSavedObjects | Updating ${activeMappingObjects.length} items`);
     const updatedSessions = activeMappingObjects
       ?.filter((so) => !so.error)
       .map((sessionSavedObject) => {
@@ -195,9 +196,8 @@ export class BackgroundSessionService {
     if (!appId) throw new Error('AppId is required');
     if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
 
-    // Get the mapping of request hash/search ID for this session
-    const searchMap = this.sessionSearchMap.get(sessionId);
-    const idMapping = searchMap ? Object.fromEntries(searchMap.ids.entries()) : {};
+    this.logger.debug(`save. Saving ${sessionId}.`);
+
     const attributes = {
       name,
       created,
@@ -205,7 +205,7 @@ export class BackgroundSessionService {
       status,
       initialState,
       restoreState,
-      idMapping,
+      idMapping: {},
       urlGeneratorId,
       appId,
     };
@@ -214,9 +214,6 @@ export class BackgroundSessionService {
       attributes,
       { id: sessionId }
     );
-
-    // Clear out the entries for this session ID so they don't get saved next time
-    this.sessionSearchMap.delete(sessionId);
 
     return session;
   };
@@ -270,6 +267,7 @@ export class BackgroundSessionService {
     deps: BackgroundSessionDependencies
   ) => {
     if (!sessionId || !searchId) return;
+    this.logger.debug(`trackId | Tracking ${sessionId} sid ${searchId}`);
     const requestHash = createRequestHash(searchRequest.params);
 
     // If there is already a saved object for this session, update it to include this request/ID.
