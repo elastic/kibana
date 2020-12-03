@@ -17,9 +17,9 @@ export interface IExpressionLoaderParams
 |  [context](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.context.md) | <code>ExpressionValue</code> |  |
 |  [customFunctions](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.customfunctions.md) | <code>[]</code> |  |
 |  [customRenderers](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.customrenderers.md) | <code>[]</code> |  |
-|  [data](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.data.md) | <code>unknown</code> |  |
 |  [debug](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.debug.md) | <code>boolean</code> |  |
 |  [disableCaching](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.disablecaching.md) | <code>boolean</code> |  |
+|  [hasCompatibleActions](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.hascompatibleactions.md) | <code>ExpressionRenderHandlerParams['hasCompatibleActions']</code> |  |
 |  [inspectorAdapters](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.inspectoradapters.md) | <code>Adapters</code> |  |
 |  [onRenderError](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.onrendererror.md) | <code>RenderErrorHandlerFnType</code> |  |
 |  [renderMode](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.rendermode.md) | <code>RenderMode</code> |  |

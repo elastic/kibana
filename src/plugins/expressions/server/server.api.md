@@ -726,8 +726,6 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
 //
 // @public (undocumented)
 export interface IInterpreterRenderHandlers {
-    // (undocumented)
-    data?: unknown;
     done: () => void;
     // (undocumented)
     event: (event: any) => void;
@@ -735,6 +733,8 @@ export interface IInterpreterRenderHandlers {
     //
     // (undocumented)
     getRenderMode: () => RenderMode;
+    // (undocumented)
+    hasCompatibleActions?: (event: any) => Promise<boolean>;
     // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)

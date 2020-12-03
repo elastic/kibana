@@ -14,10 +14,10 @@ export interface IInterpreterRenderHandlers
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [data](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.data.md) | <code>unknown</code> |  |
 |  [done](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.done.md) | <code>() =&gt; void</code> | Done increments the number of rendering successes |
 |  [event](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.event.md) | <code>(event: any) =&gt; void</code> |  |
 |  [getRenderMode](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.getrendermode.md) | <code>() =&gt; RenderMode</code> |  |
+|  [hasCompatibleActions](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.hascompatibleactions.md) | <code>(event: any) =&gt; Promise&lt;boolean&gt;</code> |  |
 |  [onDestroy](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.ondestroy.md) | <code>(fn: () =&gt; void) =&gt; void</code> |  |
 |  [reload](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.reload.md) | <code>() =&gt; void</code> |  |
 |  [uiState](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.uistate.md) | <code>PersistedState</code> |  |
