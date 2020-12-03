@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FetchedNodeData } from './../types';
 import { mockEndpointEvent } from './endpoint_event';
 import {
   SafeResolverEvent,
@@ -90,62 +89,6 @@ export function mockTreeWith2AncestorsAndNoChildren({
     originId: originID,
     nodes: [secondAncestorNode, firstAncestorNode, originNode],
   };
-}
-
-export function mockNodeDataWithAllProcessesTerminated({
-  originID,
-  firstAncestorID,
-  secondAncestorID,
-}: {
-  secondAncestorID: string;
-  firstAncestorID: string;
-  originID: string;
-}): Map<string, FetchedNodeData> {
-  const secondAncestor: SafeResolverEvent = mockEndpointEvent({
-    entityID: secondAncestorID,
-    processName: 'a',
-    parentEntityID: 'none',
-    timestamp: 1600863932316,
-  });
-  const firstAncestor: SafeResolverEvent = mockEndpointEvent({
-    entityID: firstAncestorID,
-    processName: 'b',
-    parentEntityID: secondAncestorID,
-    timestamp: 1600863932317,
-  });
-  const originEvent: SafeResolverEvent = mockEndpointEvent({
-    entityID: originID,
-    processName: 'c',
-    parentEntityID: firstAncestorID,
-    timestamp: 1600863932318,
-  });
-  const secondAncestorTermination: SafeResolverEvent = mockEndpointEvent({
-    entityID: secondAncestorID,
-    processName: 'a',
-    parentEntityID: 'none',
-    timestamp: 1600863932316,
-    eventType: 'end',
-  });
-  const firstAncestorTermination: SafeResolverEvent = mockEndpointEvent({
-    entityID: firstAncestorID,
-    processName: 'b',
-    parentEntityID: secondAncestorID,
-    timestamp: 1600863932317,
-    eventType: 'end',
-  });
-  const originEventTermination: SafeResolverEvent = mockEndpointEvent({
-    entityID: originID,
-    processName: 'c',
-    parentEntityID: firstAncestorID,
-    timestamp: 1600863932318,
-    eventType: 'end',
-  });
-
-  return new Map([
-    [originID, { events: [originEvent, originEventTermination], terminated: true }],
-    [firstAncestorID, { events: [firstAncestor, firstAncestorTermination], terminated: true }],
-    [secondAncestorID, { events: [secondAncestor, secondAncestorTermination], terminated: true }],
-  ]);
 }
 
 /**

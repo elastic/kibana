@@ -5,7 +5,7 @@
  */
 
 import * as selectors from './selectors';
-import { DataState } from '../../types';
+import { DataState, FetchedNodeData } from '../../types';
 import { ResolverAction } from '../actions';
 import { dataReducer } from './reducer';
 import { createStore } from 'redux';
@@ -13,11 +13,68 @@ import {
   mockTreeWithNoAncestorsAnd2Children,
   mockTreeWith2AncestorsAndNoChildren,
   mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
-  mockNodeDataWithAllProcessesTerminated,
   mockTreeWithNoProcessEvents,
 } from '../../mocks/resolver_tree';
 import * as nodeModel from '../../../../common/endpoint/models/node';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
+import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import { mockEndpointEvent } from '../../mocks/endpoint_event';
+
+function mockNodeDataWithAllProcessesTerminated({
+  originID,
+  firstAncestorID,
+  secondAncestorID,
+}: {
+  secondAncestorID: string;
+  firstAncestorID: string;
+  originID: string;
+}): Map<string, FetchedNodeData> {
+  const secondAncestor: SafeResolverEvent = mockEndpointEvent({
+    entityID: secondAncestorID,
+    processName: 'a',
+    parentEntityID: 'none',
+    timestamp: 1600863932316,
+  });
+  const firstAncestor: SafeResolverEvent = mockEndpointEvent({
+    entityID: firstAncestorID,
+    processName: 'b',
+    parentEntityID: secondAncestorID,
+    timestamp: 1600863932317,
+  });
+  const originEvent: SafeResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    processName: 'c',
+    parentEntityID: firstAncestorID,
+    timestamp: 1600863932318,
+  });
+  const secondAncestorTermination: SafeResolverEvent = mockEndpointEvent({
+    entityID: secondAncestorID,
+    processName: 'a',
+    parentEntityID: 'none',
+    timestamp: 1600863932316,
+    eventType: 'end',
+  });
+  const firstAncestorTermination: SafeResolverEvent = mockEndpointEvent({
+    entityID: firstAncestorID,
+    processName: 'b',
+    parentEntityID: secondAncestorID,
+    timestamp: 1600863932317,
+    eventType: 'end',
+  });
+  const originEventTermination: SafeResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    processName: 'c',
+    parentEntityID: firstAncestorID,
+    timestamp: 1600863932318,
+    eventType: 'end',
+  });
+
+  return new Map([
+    [originID, { events: [originEvent, originEventTermination], terminated: true }],
+    [firstAncestorID, { events: [firstAncestor, firstAncestorTermination], terminated: true }],
+    [secondAncestorID, { events: [secondAncestor, secondAncestorTermination], terminated: true }],
+  ]);
+}
 
 describe('data state', () => {
   let actions: ResolverAction[] = [];
