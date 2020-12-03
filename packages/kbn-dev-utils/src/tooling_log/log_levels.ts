@@ -17,8 +17,8 @@
  * under the License.
  */
 
-export type LogLevel = 'silent' | 'error' | 'warning' | 'success' | 'info' | 'debug' | 'verbose';
-const LEVELS: LogLevel[] = ['silent', 'error', 'warning', 'success', 'info', 'debug', 'verbose'];
+export type LogLevel = typeof LEVELS[number];
+const LEVELS = ['silent', 'error', 'warning', 'success', 'info', 'debug', 'verbose'] as const;
 
 export function pickLevelFromFlags(
   flags: Record<string, string | boolean | string[] | undefined>,
