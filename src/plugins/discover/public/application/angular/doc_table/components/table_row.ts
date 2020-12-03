@@ -18,20 +18,15 @@
  */
 
 import { find, template } from 'lodash';
-import { stringify } from 'query-string';
 import $ from 'jquery';
-import rison from 'rison-node';
-import '../../doc_viewer';
-
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
-
-import { dispatchRenderComplete, url } from '../../../../../../kibana_utils/public';
+import { dispatchRenderComplete } from '../../../../../../kibana_utils/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
-import { esFilters } from '../../../../../../data/public';
 import { getServices } from '../../../../kibana_services';
+import { getContextUrl } from '../../../helpers/get_context_url';
 
 const TAGS_WITH_WS = />\s+</g;
 
@@ -115,25 +110,12 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       };
 
       $scope.getContextAppHref = () => {
-        const globalFilters: any = getServices().filterManager.getGlobalFilters();
-        const appFilters: any = getServices().filterManager.getAppFilters();
-
-        const hash = stringify(
-          url.encodeQuery({
-            _g: rison.encode({
-              filters: globalFilters || [],
-            }),
-            _a: rison.encode({
-              columns: $scope.columns,
-              filters: (appFilters || []).map(esFilters.disableFilter),
-            }),
-          }),
-          { encode: false, sort: false }
+        return getContextUrl(
+          $scope.row._id,
+          $scope.indexPattern.id,
+          $scope.columns,
+          getServices().filterManager
         );
-
-        return `#/context/${encodeURIComponent($scope.indexPattern.id)}/${encodeURIComponent(
-          $scope.row._id
-        )}?${hash}`;
       };
 
       // create a tr element that lists the value for each *column*

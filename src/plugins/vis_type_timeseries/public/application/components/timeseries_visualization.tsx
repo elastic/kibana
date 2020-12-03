@@ -96,7 +96,6 @@ function TimeseriesVisualization({
   if (VisComponent) {
     return (
       <VisComponent
-        dateFormat={getConfig('dateFormat')}
         getConfig={getConfig}
         model={model}
         visData={visData}

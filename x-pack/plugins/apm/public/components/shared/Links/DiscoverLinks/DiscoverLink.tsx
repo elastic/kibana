@@ -12,7 +12,7 @@ import { useLocation } from 'react-router-dom';
 import rison, { RisonValue } from 'rison-node';
 import url from 'url';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimepickerRisonData } from '../rison_helpers';
 
 interface Props {

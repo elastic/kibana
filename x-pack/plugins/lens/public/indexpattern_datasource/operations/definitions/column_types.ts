@@ -5,11 +5,14 @@
  */
 
 import type { Operation } from '../../../types';
+import { TimeScaleUnit } from '../../time_scale';
+import type { OperationType } from '../definitions';
 
 export interface BaseIndexPatternColumn extends Operation {
   // Private
   operationType: string;
   customLabel?: boolean;
+  timeScale?: TimeScaleUnit;
 }
 
 // Formatting can optionally be added to any column
@@ -37,6 +40,6 @@ export interface ReferenceBasedIndexPatternColumn
 
 // Used to store the temporary invalid state
 export interface IncompleteColumn {
-  operationType?: string;
+  operationType?: OperationType;
   sourceField?: string;
 }
