@@ -29,6 +29,12 @@ import { DimensionContainer } from './dimension_container';
 import { ColorIndicator } from './color_indicator';
 import { PaletteIndicator } from './palette_indicator';
 
+const triggerLinkA11yText = (label: string) =>
+  i18n.translate('xpack.lens.configure.editConfig', {
+    defaultMessage: 'Click to edit configuration for {label} or drag to move',
+    values: { label },
+  });
+
 const initialActiveDimensionState = {
   isNew: false,
 };
@@ -58,7 +64,7 @@ function isSameConfiguration(config1: unknown, config2: unknown) {
 export function LayerPanel(
   props: Exclude<ConfigPanelWrapperProps, 'state' | 'setState'> & {
     layerId: string;
-    dataTestSubj: string;
+    index: number;
     isOnlyLayer: boolean;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
@@ -75,7 +81,7 @@ export function LayerPanel(
     initialActiveDimensionState
   );
 
-  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, dataTestSubj } = props;
+  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, index } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
   useEffect(() => {
@@ -125,7 +131,11 @@ export function LayerPanel(
   const columnLabelMap = layerDatasource.uniqueLabels(layerDatasourceConfigProps.state);
   return (
     <ChildDragDropProvider {...dragDropContext}>
-      <EuiPanel data-test-subj={dataTestSubj} className="lnsLayerPanel" paddingSize="s">
+      <EuiPanel
+        data-test-subj={`lns-layerPanel-${index}`}
+        className="lnsLayerPanel"
+        paddingSize="s"
+      >
         <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
           <EuiFlexItem grow={false} className="lnsLayerPanel__settingsFlexItem">
             <LayerSettings
@@ -180,13 +190,9 @@ export function LayerPanel(
 
         <EuiSpacer size="m" />
 
-        {groups.map((group, index) => {
+        {groups.map((group, groupIndex) => {
           const newId = generateId();
           const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
-
-          const triggerLinkA11yText = i18n.translate('xpack.lens.configure.editConfig', {
-            defaultMessage: 'Click to edit configuration or drag to move',
-          });
 
           return (
             <EuiFormRow
@@ -198,7 +204,7 @@ export function LayerPanel(
               fullWidth
               label={<div className="lnsLayerPanel__groupLabel">{group.groupLabel}</div>}
               labelType="legend"
-              key={index}
+              key={groupIndex}
               isInvalid={isMissing}
               error={
                 isMissing ? (
@@ -327,12 +333,12 @@ export function LayerPanel(
                                 });
                               }
                             }}
-                            aria-label={triggerLinkA11yText}
-                            title={triggerLinkA11yText}
+                            aria-label={triggerLinkA11yText(columnLabelMap[accessor])}
+                            title={triggerLinkA11yText(columnLabelMap[accessor])}
                           >
                             <ColorIndicator accessorConfig={accessorConfig}>
                               <NativeRenderer
-                                render={props.datasourceMap[datasourceId].renderDimensionTrigger}
+                                render={layerDatasource.renderDimensionTrigger}
                                 nativeProps={{
                                   ...layerDatasourceConfigProps,
                                   columnId: accessor,
@@ -351,11 +357,13 @@ export function LayerPanel(
                             aria-label={i18n.translate(
                               'xpack.lens.indexPattern.removeColumnLabel',
                               {
-                                defaultMessage: 'Remove configuration',
+                                defaultMessage: 'Remove configuration from "{groupLabel}"',
+                                values: { groupLabel: group.groupLabel },
                               }
                             )}
                             title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-                              defaultMessage: 'Remove configuration',
+                              defaultMessage: 'Remove configuration from "{groupLabel}"',
+                              values: { groupLabel: group.groupLabel },
                             })}
                             onClick={() => {
                               trackUiEvent('indexpattern_dimension_removed');
@@ -435,6 +443,13 @@ export function LayerPanel(
                           contentProps={{
                             className: 'lnsLayerPanel__triggerTextContent',
                           }}
+                          aria-label={i18n.translate(
+                            'xpack.lens.indexPattern.removeColumnAriaLabel',
+                            {
+                              defaultMessage: 'Drop a field or click to add to {groupLabel}',
+                              values: { groupLabel: group.groupLabel },
+                            }
+                          )}
                           data-test-subj="lns-empty-dimension"
                           onClick={() => {
                             if (activeId) {
@@ -464,12 +479,22 @@ export function LayerPanel(
         <DimensionContainer
           isOpen={!!activeId}
           groupLabel={activeGroup?.groupLabel || ''}
-          handleClose={() => setActiveDimension(initialActiveDimensionState)}
+          handleClose={() => {
+            if (layerDatasource.updateStateOnCloseDimension) {
+              const newState = layerDatasource.updateStateOnCloseDimension({
+                state: layerDatasourceState,
+                layerId,
+                columnId: activeId!,
+              });
+              props.updateDatasource(datasourceId, newState);
+            }
+            setActiveDimension(initialActiveDimensionState);
+          }}
           panel={
             <>
               {activeGroup && activeId && (
                 <NativeRenderer
-                  render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                  render={layerDatasource.renderDimensionEditor}
                   nativeProps={{
                     ...layerDatasourceConfigProps,
                     core: props.core,
@@ -525,6 +550,17 @@ export function LayerPanel(
               iconType="trash"
               color="danger"
               data-test-subj="lnsLayerRemove"
+              aria-label={
+                isOnlyLayer
+                  ? i18n.translate('xpack.lens.resetLayerAriaLabel', {
+                      defaultMessage: 'Reset layer {index}',
+                      values: { index: index + 1 },
+                    })
+                  : i18n.translate('xpack.lens.deleteLayerAriaLabel', {
+                      defaultMessage: `Delete layer {index}`,
+                      values: { index: index + 1 },
+                    })
+              }
               onClick={() => {
                 // If we don't blur the remove / clear button, it remains focused
                 // which is a strange UX in this case. e.target.blur doesn't work
@@ -544,7 +580,7 @@ export function LayerPanel(
                     defaultMessage: 'Reset layer',
                   })
                 : i18n.translate('xpack.lens.deleteLayer', {
-                    defaultMessage: 'Delete layer',
+                    defaultMessage: `Delete layer`,
                   })}
             </EuiButtonEmpty>
           </EuiFlexItem>
