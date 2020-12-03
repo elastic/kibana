@@ -241,11 +241,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
 
   // Request to fetch agents and agent status
-  const currentRequestRef = useRef<any>();
+  const currentRequestRef = useRef<number>(0);
   const fetchData = useCallback(() => {
     async function fetchDataAsync() {
-      const currentRequest = {};
-      currentRequestRef.current = currentRequest;
+      currentRequestRef.current++;
+      const currentRequest = currentRequestRef.current;
 
       try {
         setIsLoading(true);
@@ -568,7 +568,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         loading={isLoading}
         hasActions={true}
         noItemsMessage={
-          isLoading && false ? ( // TODO isInitialRequest
+          isLoading && currentRequestRef.current === 1 ? (
             <FormattedMessage
               id="xpack.fleet.agentList.loadingAgentsMessage"
               defaultMessage="Loading agents…"
