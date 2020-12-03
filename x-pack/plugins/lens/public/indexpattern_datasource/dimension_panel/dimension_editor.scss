@@ -15,6 +15,10 @@
   column-gap: $euiSizeXL;
 }
 
+.lnsIndexPatternDimensionEditor__operation .euiListGroupItem__label {
+  width: 100%;
+}
+
 .lnsIndexPatternDimensionEditor__operation > button {
   padding-top: 0;
   padding-bottom: 0;

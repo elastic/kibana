@@ -24,6 +24,7 @@ export const {
   getOperationResultType,
   operationDefinitionMap,
   operationDefinitions,
+  getInvalidFieldMessage,
 } = actualOperations;
 
 export const {
