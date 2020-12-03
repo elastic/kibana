@@ -29,7 +29,8 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ createField, runtimeFiel
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.mappingsEditor.runtimeFields.emptyPromptDescription"
-            defaultMessage="With runtime fields you can explicitly define a field in the mapping and access it at search time without indexing your data during ingest time."
+            defaultMessage="Define a field in the mapping and evaluate it at search time."
+            
           />
           <br />
           <EuiLink
@@ -55,7 +56,7 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ createField, runtimeFiel
           fill
         >
           {i18n.translate('xpack.idxMgmt.mappingsEditor.runtimeFields.emptyPromptButtonLabel', {
-            defaultMessage: 'Create a runtime field',
+            defaultMessage: 'Create runtime field',
           })}
         </EuiButton>
       }

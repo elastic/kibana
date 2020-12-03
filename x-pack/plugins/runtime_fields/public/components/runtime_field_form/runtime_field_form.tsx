@@ -199,7 +199,7 @@ const RuntimeFieldFormComp = ({
             <div>
               {i18n.translate('xpack.runtimeFields.form.fieldShadowingCalloutDescription', {
                 defaultMessage:
-                  'This field has the same name as one of your concrete fields. This means that its value will override your mapped field.',
+                  'This field shares the name of a mapped field. Values for this field will be returned in search results.',
               })}
             </div>
           </EuiCallOut>
