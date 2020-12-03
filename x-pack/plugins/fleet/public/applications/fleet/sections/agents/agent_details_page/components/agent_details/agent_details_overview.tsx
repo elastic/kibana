@@ -11,10 +11,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion, useLink } from '../../../../../hooks';
@@ -66,14 +66,14 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   </EuiFlexItem>
                   {isAgentUpgradeable(agent, kibanaVersion) ? (
                     <EuiFlexItem grow={false}>
-                      <EuiText color="subdued" size="s" className="eui-textNoWrap">
-                        <EuiIcon size="m" type="alert" color="warning" />
-                        &nbsp;
-                        <FormattedMessage
-                          id="xpack.fleet.agentList.agentUpgradeLabel"
-                          defaultMessage="Upgrade available"
-                        />
-                      </EuiText>
+                      <EuiToolTip
+                        position="right"
+                        content={i18n.translate('xpack.fleet.agentList.agentUpgradeLabel', {
+                          defaultMessage: 'Upgrade available',
+                        })}
+                      >
+                        <EuiIcon type="alert" color="warning" />
+                      </EuiToolTip>
                     </EuiFlexItem>
                   ) : null}
                 </EuiFlexGroup>
@@ -111,7 +111,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             description:
               typeof agent.local_metadata?.elastic?.agent?.log_level === 'string'
                 ? agent.local_metadata.elastic.agent.log_level
-                : '-',
+                : `-`,
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.releaseLabel', {
