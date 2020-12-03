@@ -1381,10 +1381,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@24.0.0":
-  version "24.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-24.0.0.tgz#7b97b00a3dc873f46f764de0f28573e236b76aa7"
-  integrity sha512-ZFIdHcU48Wes7eb1R+48L7xLH4p7D9oSdkoX/iuwt+znD353UhiYK9u+dbrpMXeOMtFYt7dktzVAbouHcJCZPA==
+"@elastic/charts@24.2.0":
+  version "24.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-24.2.0.tgz#c670315b74184c463e6ad4015cf89c196bd5eb58"
+  integrity sha512-zIuHQIgrVdS0j9PLwS0hrshkjQyxwr//oFSXGppzCUUQouG56TE0cCol20v4u/0dZFVmJc6vAotSzz4er5O39Q==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -1539,10 +1539,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.5.0.tgz#8da714827fc278f17546601fdfe55f5c920e2bc5"
   integrity sha512-NVTuy9Wzblp6nOH86CXjWXTajHgJGn5Tk2l59/Z5cWFU14KlE+8/zqPTgZdxYABzBJFE3L7S07kJDMN8sDvTmA==
 
-"@elastic/react-search-ui-views@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui-views/-/react-search-ui-views-1.4.1.tgz#9477654fba9088f9a34181255e059054389e2b01"
-  integrity sha512-QYIwkCyV9kVDLiCVSQYIOjsf5eKAFfmrLrZjyw+R0HVGo171T5cjDNul313WTD3NDAn3XrXWcpSVzM4iVyQUsg==
+"@elastic/react-search-ui-views@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui-views/-/react-search-ui-views-1.5.0.tgz#33988ae71588ad3e64f68c6e278d8262f5d59320"
+  integrity sha512-Ur5Cya+B1em79ZNbPg+KYORuoHDM72LO5lqJeTNrW8WwRTEZi/vL21dOy47VYcSGVnCkttFD2BuyDOTMYFuExQ==
   dependencies:
     "@babel/runtime" "^7.5.4"
     autoprefixer "^9.6.1"
@@ -1550,14 +1550,14 @@
     rc-pagination "^1.20.1"
     react-select "^2.4.4"
 
-"@elastic/react-search-ui@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui/-/react-search-ui-1.4.1.tgz#a81e048530ffd53b6ee094912236ca0d9e59ffc0"
-  integrity sha512-fFK0Mbsb2vXN1WgJaiNBpH8QJT7f0U9U5LLH7PEtRl0G3wKr+gr+Zz8RQZgfmihL86jgxc9yp6ZMnqyrQHc/EQ==
+"@elastic/react-search-ui@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui/-/react-search-ui-1.5.0.tgz#d89304a2d6ad6377fe2a7f9202906f05e9bbc159"
+  integrity sha512-fcfdD9v/87koM1dCsiAhJQz1Fb8Qz4NHEgRqdxZzSsqDaasTeSTRXX6UgbAiDidTa87mvGpT0SxAz8utAATpTQ==
   dependencies:
     "@babel/runtime" "^7.5.4"
-    "@elastic/react-search-ui-views" "1.4.1"
-    "@elastic/search-ui" "1.4.1"
+    "@elastic/react-search-ui-views" "1.5.0"
+    "@elastic/search-ui" "1.5.0"
 
 "@elastic/request-crypto@1.1.4":
   version "1.1.4"
@@ -1572,18 +1572,18 @@
   version "0.0.0"
   uid ""
 
-"@elastic/search-ui-app-search-connector@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@elastic/search-ui-app-search-connector/-/search-ui-app-search-connector-1.4.1.tgz#c3ef33cc6416961eb97a1eb95d6abaf38fb74dbe"
-  integrity sha512-5qODy14Fg1sd/C8XVV3IP6HO7mKYCWgM8TPF2/nlezC5JtDU8BQksVh4Nr2busz4j9l0m/1HKEPNQZHwXBSvbA==
+"@elastic/search-ui-app-search-connector@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/search-ui-app-search-connector/-/search-ui-app-search-connector-1.5.0.tgz#d379132c5015775acfaee5322ec019e9c0559ccc"
+  integrity sha512-lHuXBjaMaN1fsm1taQMR/7gfpAg4XOsvZOi8u1AoufUw9kGr6Xc00Gznj1qTyH0Qebi2aSmY0NBN6pdIEGvvGQ==
   dependencies:
     "@babel/runtime" "^7.5.4"
     "@elastic/app-search-javascript" "^7.3.0"
 
-"@elastic/search-ui@1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.4.1.tgz#29a94de6cb0bff358c7da447232883b354219c96"
-  integrity sha512-cuyTldGazGAm52CvlDjfWU9E4l8VkZyHqqbBMySuU/3MAXJge1cse761U2u5orbH/KCvCBiZLB1z/Cft8YsKYg==
+"@elastic/search-ui@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.5.0.tgz#32ea25f3a4fca10d0c56d535658415b276593f05"
+  integrity sha512-UJzh3UcaAWKLjDIeJlVd0Okg+InLp8bijk+yOvCe4wtbVpTu5NCvAsfxo6mVTNnxS1ik9cRpMOqDT5sw6qyKoQ==
   dependencies:
     "@babel/runtime" "^7.5.4"
     date-fns "^1.30.1"
@@ -9165,9 +9165,9 @@ caniuse-lite@^1.0.30001035, caniuse-lite@^1.0.30001043, caniuse-lite@^1.0.300010
   integrity sha512-kiNKvihW0m36UhAFnl7bOAv0i1K1f6wpfVtTF5O5O82XzgtBnb05V0XeV3oZ968vfg2sRNChsHw8ASH2hDfoYQ==
 
 caniuse-lite@^1.0.30001109:
-  version "1.0.30001159"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001159.tgz#bebde28f893fa9594dadcaa7d6b8e2aa0299df20"
-  integrity sha512-w9Ph56jOsS8RL20K9cLND3u/+5WASWdhC/PPrf+V3/HsM3uHOavWOR1Xzakbv4Puo/srmPHudkmCRWM7Aq+/UA==
+  version "1.0.30001164"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001164.tgz#5bbfd64ca605d43132f13cc7fdabb17c3036bfdc"
+  integrity sha512-G+A/tkf4bu0dSp9+duNiXc7bGds35DioCyC6vgK2m/rjA4Krpy5WeZgZyfH2f0wj2kI6yAWWucyap6oOwmY1mg==
 
 caniuse-lite@^1.0.30001135:
   version "1.0.30001144"
@@ -12117,6 +12117,22 @@ downshift@^3.2.10:
     compute-scroll-into-view "^1.0.9"
     prop-types "^15.7.2"
     react-is "^16.9.0"
+
+dpdm@3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/dpdm/-/dpdm-3.5.0.tgz#414402f21928694bc86cfe8e3583dc8fc97d013e"
+  integrity sha512-bff2gDpYyzmIOMwRp0Bsk0T4e/qgLRCeuGHZYEsJV0LRzuTUkXirCiLcme7Ebu/LVoQ8yAKiody5/1e51tsmFw==
+  dependencies:
+    "@types/fs-extra" "^8.0.0"
+    "@types/glob" "^7.1.1"
+    "@types/yargs" "^13.0.0"
+    chalk "^2.4.2"
+    fs-extra "^8.1.0"
+    glob "^7.1.4"
+    ora "^4.0.3"
+    tslib "^1.10.0"
+    typescript "^3.5.3"
+    yargs "^13.3.0"
 
 dtrace-provider@~0.8:
   version "0.8.8"
@@ -23056,7 +23072,7 @@ raf-schd@^4.0.0, raf-schd@^4.0.2:
   resolved "https://registry.yarnpkg.com/raf-schd/-/raf-schd-4.0.2.tgz#bd44c708188f2e84c810bf55fcea9231bcaed8a0"
   integrity sha512-VhlMZmGy6A6hrkJWHLNTGl5gtgMUm+xfGza6wbwnE914yeQ5Ybm18vgM734RZhMgfw4tacUrWseGZlpUrrakEQ==
 
-raf@^3.1.0, raf@^3.3.0, raf@^3.4.0, raf@^3.4.1:
+raf@^3.1.0, raf@^3.4.0, raf@^3.4.1:
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/raf/-/raf-3.4.1.tgz#0742e99a4a6552f445d73e3ee0328af0ff1ede39"
   integrity sha512-Sq4CW4QhwOHE8ucn6J34MqtZCeWFP2aQSmrlroYgqAV1PjStIhJXxYuTgUIfkEk7zTLjmIjLmU5q+fbD1NnOJA==
