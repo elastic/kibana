@@ -452,7 +452,7 @@ export interface IndexedProcessTree {
   /**
    * The id of the origin or root node provided by the backend
    */
-  originId: string | undefined;
+  originID: string | undefined;
 }
 
 /**

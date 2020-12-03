@@ -54,7 +54,7 @@ export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
   return {
     treeResponse,
     resolverTree: {
-      originId: originID,
+      originID,
       nodes: treeResponse,
     },
     relatedEvents: {
@@ -96,7 +96,7 @@ export function mockTreeWith2AncestorsAndNoChildren({
   });
 
   return {
-    originId: originID,
+    originID,
     nodes: [secondAncestorNode, firstAncestorNode, originNode],
   };
 }
@@ -262,7 +262,7 @@ export function mockTreeWithNoAncestorsAnd2Children({
   return {
     treeResponse,
     resolverTree: {
-      originId: originID,
+      originID,
       nodes: treeResponse,
     },
     relatedEvents: {
@@ -349,14 +349,14 @@ export function mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents
   ];
 
   return {
-    originId: originID,
+    originID,
     nodes: treeResponse,
   };
 }
 
 export function mockTreeWithNoProcessEvents(): NewResolverTree {
   return {
-    originId: 'entityID',
+    originID: 'entityID',
     nodes: [],
   };
 }

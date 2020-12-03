@@ -105,7 +105,7 @@ export function resolverTreeSourceAndSchema(
 export const originID: (state: DataState) => string | undefined = createSelector(
   resolverTreeResponse,
   function (resolverTree?) {
-    return resolverTree?.originId ?? undefined;
+    return resolverTree?.originID ?? undefined;
   }
 );
 
@@ -181,9 +181,9 @@ export const graphableNodes = createSelector(resolverTreeResponse, function (tre
 const tree = createSelector(graphableNodes, originID, function indexedProcessTree(
   // eslint-disable-next-line @typescript-eslint/no-shadow
   graphableNodes,
-  originId
+  currentOriginID
 ) {
-  return indexedProcessTreeModel.factory(graphableNodes, originId);
+  return indexedProcessTreeModel.factory(graphableNodes, currentOriginID);
 });
 
 /**
@@ -314,23 +314,23 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
   originID,
-  function processNodePositionsAndEdgeLineSegments(indexedProcessTree, originId) {
+  function processNodePositionsAndEdgeLineSegments(indexedProcessTree, currentOriginID) {
     // use the isometric taxi layout as a base
     const taxiLayout = isometricTaxiLayoutModel.isometricTaxiLayoutFactory(indexedProcessTree);
-    if (!originId) {
+    if (!currentOriginID) {
       // no data has loaded.
       return taxiLayout;
     }
 
     // find the origin node
-    const originNode = indexedProcessTreeModel.treeNode(indexedProcessTree, originId);
+    const originNode = indexedProcessTreeModel.treeNode(indexedProcessTree, currentOriginID);
     if (originNode === null) {
       // If a tree is returned that has no process events for the origin, this can happen.
       return taxiLayout;
     }
 
     // Find the position of the origin, we'll center the map on it intrinsically
-    const originPosition = isometricTaxiLayoutModel.nodePosition(taxiLayout, originId);
+    const originPosition = isometricTaxiLayoutModel.nodePosition(taxiLayout, currentOriginID);
     // adjust the position of everything so that the origin node is at `(0, 0)`
     if (originPosition === undefined) {
       // not sure how this could happen.
