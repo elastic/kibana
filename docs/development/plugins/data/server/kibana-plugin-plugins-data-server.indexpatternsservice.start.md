@@ -8,7 +8,7 @@
 
 ```typescript
 start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps): {
-        indexPatternsServiceFactory: (savedObjectsClient: SavedObjectsClientContract, elasticsearchClient: ElasticsearchClient) => Promise<IndexPatternsCommonService>;
+        indexPatternsServiceFactory: (savedObjectsClient: Pick<import("src/core/server").SavedObjectsClient, "update" | "find" | "get" | "delete" | "errors" | "create" | "bulkCreate" | "checkConflicts" | "bulkGet" | "addToNamespaces" | "deleteFromNamespaces" | "bulkUpdate" | "removeReferencesTo">, elasticsearchClient: ElasticsearchClient) => Promise<IndexPatternsCommonService>;
     };
 ```
 
@@ -22,6 +22,6 @@ start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps):
 <b>Returns:</b>
 
 `{
-        indexPatternsServiceFactory: (savedObjectsClient: SavedObjectsClientContract, elasticsearchClient: ElasticsearchClient) => Promise<IndexPatternsCommonService>;
+        indexPatternsServiceFactory: (savedObjectsClient: Pick<import("src/core/server").SavedObjectsClient, "update" | "find" | "get" | "delete" | "errors" | "create" | "bulkCreate" | "checkConflicts" | "bulkGet" | "addToNamespaces" | "deleteFromNamespaces" | "bulkUpdate" | "removeReferencesTo">, elasticsearchClient: ElasticsearchClient) => Promise<IndexPatternsCommonService>;
     }`
 

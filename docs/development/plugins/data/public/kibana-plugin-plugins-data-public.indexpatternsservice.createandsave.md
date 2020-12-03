@@ -4,7 +4,7 @@
 
 ## IndexPatternsService.createAndSave() method
 
-Create a new index pattern and save it right away
+Create a new index pattern and save it right away and make the default index pattern.
 
 <b>Signature:</b>
 

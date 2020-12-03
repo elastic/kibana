@@ -31,6 +31,7 @@ import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
 import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { getUiSettings } from './ui_settings';
+import { IndexPatternsRequestHandlerContext } from './types';
 
 export interface DataEnhancements {
   search: SearchEnhancements;
@@ -89,11 +90,29 @@ export class DataServerPlugin
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
     { bfetch, expressions, usageCollection }: DataPluginSetupDependencies
   ) {
-    this.indexPatterns.setup(core);
     this.scriptsService.setup(core);
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
+
+    this.indexPatterns.setup(core);
+    core.http.registerRouteHandlerContext(
+      'indexPatterns',
+      async (context, req): Promise<Partial<IndexPatternsRequestHandlerContext>> => {
+        if (!req.auth.isAuthenticated) return {};
+
+        const savedObjectsClient = context.core.savedObjects.client;
+        const elasticsearchClient = context.core.elasticsearch.client.asCurrentUser;
+        const indexPatterns = await this.indexPatterns.createIndexPatternsService(
+          savedObjectsClient,
+          elasticsearchClient
+        );
+
+        return {
+          indexPatterns,
+        };
+      }
+    );
 
     core.uiSettings.register(getUiSettings());
 

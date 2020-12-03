@@ -9,7 +9,7 @@ Count is used for field popularity
 <b>Signature:</b>
 
 ```typescript
-get count(): number;
+get count(): number | undefined;
 
-set count(count: number);
+set count(count: number | undefined);
 ```

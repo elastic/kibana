@@ -42,7 +42,7 @@ export class IndexPatternField implements IFieldType {
     return this.spec.count || 0;
   }
 
-  public set count(count) {
+  public set count(count: number | undefined) {
     this.spec.count = count;
   }
 
