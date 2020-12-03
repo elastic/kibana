@@ -77,32 +77,44 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
   args: {
     index: {
       types: ['string'],
-      help: '',
+      help: i18n.translate('data.search.functions.esaggs.index.help', {
+        defaultMessage: 'Index pattern retrieved with indexPatternLoad',
+      }),
     },
     metricsAtAllLevels: {
       types: ['boolean'],
       default: false,
-      help: '',
+      help: i18n.translate('data.search.functions.esaggs.metricsAtAllLevels.help', {
+        defaultMessage: 'Whether to include columns with metrics for each bucket level',
+      }),
     },
     partialRows: {
       types: ['boolean'],
       default: false,
-      help: '',
+      help: i18n.translate('data.search.functions.esaggs.partialRows.help', {
+        defaultMessage: 'Whether to return rows that only contain partial data',
+      }),
     },
     includeFormatHints: {
       types: ['boolean'],
       default: false,
-      help: '',
+      help: i18n.translate('data.search.functions.esaggs.includeFormatHints.help', {
+        defaultMessage: 'Whether to include a serialized field format',
+      }),
     },
     aggConfigs: {
       types: ['string'],
       default: '""',
-      help: '',
+      help: i18n.translate('data.search.functions.esaggs.aggConfigs.help', {
+        defaultMessage: 'Stringfied array of aggregation config state',
+      }),
     },
     timeFields: {
       types: ['string'],
-      help: '',
       multi: true,
+      help: i18n.translate('data.search.functions.esaggs.timeFields.help', {
+        defaultMessage: 'Provide time fields to get the resolved time ranges for the query',
+      }),
     },
   },
 });
