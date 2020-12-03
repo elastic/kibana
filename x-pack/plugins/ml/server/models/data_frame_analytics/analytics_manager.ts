@@ -35,8 +35,8 @@ import type { MlClient } from '../../lib/ml_client';
 export class AnalyticsManager {
   private _client: IScopedClusterClient['asInternalUser'];
   private _mlClient: MlClient;
-  public _inferenceModels: TrainedModelConfigResponse[];
-  public _jobStats: DataFrameAnalyticsStats[];
+  private _inferenceModels: TrainedModelConfigResponse[];
+  private _jobStats: DataFrameAnalyticsStats[];
 
   constructor(mlClient: MlClient, client: IScopedClusterClient['asInternalUser']) {
     this._client = client;
@@ -161,7 +161,7 @@ export class AnalyticsManager {
     );
   }
 
-  private findJobStats(analyticsId: string): any {
+  private findJobStats(analyticsId: string): DataFrameAnalyticsStats | undefined {
     return this.jobStats.find((js) => js.id === analyticsId);
   }
 
@@ -308,8 +308,12 @@ export class AnalyticsManager {
         });
 
         details[previousNodeId] = data;
-      } catch (e) {
-        // fail silently if job doesn't exist
+      } catch (error) {
+        if (error.statusCode === 404) {
+          // fail silently if job doesn't exist
+        } else {
+          throw error.body ?? error;
+        }
       }
     }
 

@@ -6,7 +6,7 @@
   height: $euiSizeM;
   width: $euiSizeM;
   background-color: $euiColorGhost;
-  border: 2px solid $euiColorVis2;
+  border: $euiBorderWidthThick solid $euiColorVis2;
   transform: rotate(45deg);
   display: 'inline-block';
 }
@@ -15,7 +15,7 @@
   height: $euiSizeM;
   width: $euiSizeM;
   background-color: $euiColorGhost;
-  border: 2px solid $euiColorVis1;
+  border: $euiBorderWidthThick solid $euiColorVis1;
   display: 'inline-block';
 }
 
@@ -23,7 +23,7 @@
   height: $euiSizeM;
   width: $euiSizeM;
   background-color: $euiColorGhost;
-  border: 2px solid $euiColorVis0;
+  border: $euiBorderWidthThick solid $euiColorVis0;
   border-radius: 50%;
   display: 'inline-block';
 }

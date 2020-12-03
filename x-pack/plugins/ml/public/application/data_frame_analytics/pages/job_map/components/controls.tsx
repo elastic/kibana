@@ -30,7 +30,7 @@ import { CytoscapeContext } from './cytoscape';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
+import { useNotifications, useNavigateToPath } from '../../../../contexts/kibana';
 import { getIndexPatternIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
@@ -43,7 +43,7 @@ interface Props {
   details: any;
   getNodeData: any;
   modelId?: string;
-  updateElements: any;
+  updateElements: (nodeId: string, nodeLabel: string, destIndexNode?: string) => void;
 }
 
 function getListItems(details: object): EuiDescriptionListProps['listItems'] {
@@ -83,9 +83,7 @@ export const Controls: FC<Props> = ({
   const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
   const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
   const { deleteItem, deleteTargetIndex, isModalVisible, openModal } = deleteAction;
-  const {
-    services: { notifications },
-  } = useMlKibana();
+  const { toasts } = useNotifications();
   const navigateToPath = useNavigateToPath();
   const navigateToWizardWithClonedJob = useNavigateToWizardWithClonedJob();
 
@@ -108,7 +106,7 @@ export const Controls: FC<Props> = ({
     if (indexId) {
       await navigateToPath(`/data_frame_analytics/new_job?index=${encodeURIComponent(indexId)}`);
     } else {
-      notifications.toasts.addDanger(
+      toasts.addDanger(
         i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.indexPatternMissingMessage', {
           defaultMessage:
             'To create a job from this index please create an index pattern for {indexTitle}.',
@@ -151,17 +149,20 @@ export const Controls: FC<Props> = ({
   }, [cy, deselect]);
 
   useEffect(() => {
-    // Update elements and close the flyout
-    if (isModalVisible === false && deleteItem === true) {
-      let destIndexNode;
-      if (deleteTargetIndex === true) {
-        const jobDetails = details[nodeId];
-        const destIndex = jobDetails.dest.index;
-        destIndexNode = `${destIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
+    function updateElementsOnClose() {
+      if (isModalVisible === false && deleteItem === true) {
+        let destIndexNode;
+        if (deleteTargetIndex === true) {
+          const jobDetails = details[nodeId];
+          const destIndex = jobDetails.dest.index;
+          destIndexNode = `${destIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
+        }
+        updateElements(nodeId, nodeLabel, destIndexNode);
+        setShowFlyout(false);
       }
-      updateElements(nodeId, nodeLabel, destIndexNode);
-      setShowFlyout(false);
     }
+
+    updateElementsOnClose();
   }, [isModalVisible, deleteItem]);
 
   if (showFlyout === false) {

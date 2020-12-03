@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import { EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const JobMapTitle: FC<{ analyticsId?: string; modelId?: string }> = ({
   analyticsId,
@@ -14,15 +14,19 @@ export const JobMapTitle: FC<{ analyticsId?: string; modelId?: string }> = ({
 }) => (
   <EuiTitle size="xs">
     <span>
-      {analyticsId
-        ? i18n.translate('xpack.ml.dataframe.analyticsMap.analyticsIdTitle', {
-            defaultMessage: 'Map for analytics ID {analyticsId}',
-            values: { analyticsId },
-          })
-        : i18n.translate('xpack.ml.dataframe.analyticsMap.modelIdTitle', {
-            defaultMessage: 'Map for trained model ID {modelId}',
-            values: { modelId },
-          })}
+      {analyticsId ? (
+        <FormattedMessage
+          id="xpack.ml.dataframe.analyticsMap.analyticsIdTitle"
+          defaultMessage="Map for analytics ID {analyticsId}"
+          values={{ analyticsId }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.ml.dataframe.analyticsMap.modelIdTitle"
+          defaultMessage="Map for trained model ID {modelId}"
+          values={{ modelId }}
+        />
+      )}
     </span>
   </EuiTitle>
 );

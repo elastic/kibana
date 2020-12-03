@@ -7,6 +7,7 @@
 import Boom from '@hapi/boom';
 import { EsErrorBody } from '../util/errors';
 import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
+import { DATA_FRAME_TASK_STATE } from '../constants/data_frame_analytics';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;
@@ -86,18 +87,11 @@ export interface DataFrameAnalyticsConfig {
 
 export type DataFrameAnalysisConfigType = typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];
 
+export type DataFrameTaskStateType = typeof DATA_FRAME_TASK_STATE[keyof typeof DATA_FRAME_TASK_STATE];
+
 interface ProgressSection {
   phase: string;
   progress_percent: number;
-}
-
-enum DATA_FRAME_TASK_STATE {
-  ANALYZING = 'analyzing',
-  FAILED = 'failed',
-  REINDEXING = 'reindexing',
-  STARTED = 'started',
-  STARTING = 'starting',
-  STOPPED = 'stopped',
 }
 
 export interface DataFrameAnalyticsStats {
@@ -117,5 +111,5 @@ export interface DataFrameAnalyticsStats {
   };
   progress: ProgressSection[];
   failure_reason?: string;
-  state: DATA_FRAME_TASK_STATE;
+  state: DataFrameTaskStateType;
 }

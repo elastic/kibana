@@ -86,6 +86,7 @@ export function Cytoscape({
   const dataHandler = useCallback<cytoscape.EventHandler>(
     (event) => {
       if (cy && height > 0) {
+        // temporary workaround for single 'row' maps showing up outside of the graph bounds
         setTimeout(() => cy.layout(getLayoutOptions(width, height)).run(), 150);
       }
     },
@@ -110,7 +111,7 @@ export function Cytoscape({
     if (cy) {
       if (itemsDeleted === false) {
         cy.add(elements);
-      } else if (itemsDeleted === true) {
+      } else {
         cy.elements().remove();
         cy.add(elements);
       }

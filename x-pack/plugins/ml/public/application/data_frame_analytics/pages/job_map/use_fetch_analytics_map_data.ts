@@ -25,7 +25,7 @@ export const useFetchAnalyticsMapData = () => {
   const [error, setError] = useState<any>();
   const [message, setMessage] = useState<string | undefined>();
 
-  const getData = async (idToUse: string, treatAsRoot: boolean, type?: string) => {
+  const fetchAndSetElements = async (idToUse: string, treatAsRoot: boolean, type?: string) => {
     setIsLoading(true);
     // Pass in treatAsRoot flag - endpoint will take job or index to grab jobs created from it
     const analyticsMap: any = await ml.dataFrameAnalytics.getDataFrameAnalyticsMap(
@@ -41,7 +41,7 @@ export const useFetchAnalyticsMapData = () => {
       setError(fetchError);
     }
 
-    if (nodeElements && nodeElements.length === 0) {
+    if (nodeElements?.length === 0) {
       setMessage(
         i18n.translate('xpack.ml.dataframe.analyticsMap.emptyResponseMessage', {
           defaultMessage: 'No related analytics jobs found for {id}.',
@@ -50,7 +50,7 @@ export const useFetchAnalyticsMapData = () => {
       );
     }
 
-    if (nodeElements && nodeElements.length > 0) {
+    if (nodeElements?.length > 0) {
       if (treatAsRoot === false) {
         setElements(nodeElements);
         setNodeDetails(details);
@@ -63,7 +63,7 @@ export const useFetchAnalyticsMapData = () => {
     setIsLoading(false);
   };
 
-  const getDataWrapper = async (params?: GetDataObjectParameter) => {
+  const fetchAndSetElementsWrapper = async (params?: GetDataObjectParameter) => {
     const { analyticsId, id, modelId, type } = params ?? {};
     const treatAsRoot = id !== undefined;
     let idToUse: string;
@@ -76,7 +76,7 @@ export const useFetchAnalyticsMapData = () => {
       idToUse = analyticsId as string;
     }
 
-    await getData(
+    await fetchAndSetElements(
       idToUse,
       treatAsRoot,
       modelId !== undefined && treatAsRoot === false ? JOB_MAP_NODE_TYPES.TRAINED_MODEL : type
@@ -86,7 +86,7 @@ export const useFetchAnalyticsMapData = () => {
   return {
     elements,
     error,
-    getDataWrapper,
+    fetchAndSetElementsWrapper,
     isLoading,
     message,
     nodeDetails,

@@ -43,12 +43,13 @@ interface Props {
 }
 
 export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
+  // itemsDeleted will reset to false when Controls component calls updateElements to remove nodes deleted from map
   const [itemsDeleted, setItemsDeleted] = useState<boolean>(false);
-  const [resetCy, setResetCy] = useState<boolean>(false);
+  const [resetCyToggle, setResetCyToggle] = useState<boolean>(false);
   const {
     elements,
     error,
-    getDataWrapper,
+    fetchAndSetElementsWrapper,
     isLoading,
     message,
     nodeDetails,
@@ -69,38 +70,35 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
     await navigateToUrl(url);
   };
 
-  if (message !== undefined) {
-    notifications.toasts.add(message);
-  }
-
   const updateElements = (nodeId: string, nodeLabel: string, destIndexNode?: string) => {
     // If removing the root job just go back to the jobs list
     if (nodeLabel === analyticsId) {
       redirectToAnalyticsManagementPage();
     } else {
       // Remove job element
-      const filteredElements = elements.filter((e: any) => {
+      const filteredElements = elements.filter((e) => {
         // Filter out job node and related edges, including trained model node.
-        let condition =
+        let isNotDeletedNodeOrRelated =
           e.data.id !== nodeId && e.data.target !== nodeId && e.data.source !== nodeId;
 
-        if (e.data.type === JOB_MAP_NODE_TYPES.TRAINED_MODEL) {
+        if (e.data.id !== undefined && e.data.type === JOB_MAP_NODE_TYPES.TRAINED_MODEL) {
           // remove training model node related to that job
-          condition =
-            condition && nodeDetails[e.data.id]?.metadata?.analytics_config?.id !== nodeLabel;
+          isNotDeletedNodeOrRelated =
+            isNotDeletedNodeOrRelated &&
+            nodeDetails[e.data.id]?.metadata?.analytics_config?.id !== nodeLabel;
         }
 
         if (destIndexNode !== undefined) {
           // Filter out destination index node for that job
           return (
-            condition &&
+            isNotDeletedNodeOrRelated &&
             e.data.id !== destIndexNode &&
             e.data.target !== destIndexNode &&
             e.data.source !== destIndexNode
           );
         }
 
-        return condition;
+        return isNotDeletedNodeOrRelated;
       });
       setItemsDeleted(true);
       setElements(filteredElements);
@@ -108,8 +106,14 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
   };
 
   useEffect(() => {
-    getDataWrapper({ analyticsId, modelId });
+    fetchAndSetElementsWrapper({ analyticsId, modelId });
   }, [analyticsId, modelId]);
+
+  useEffect(() => {
+    if (message !== undefined) {
+      notifications.toasts.add(message);
+    }
+  }, [message]);
 
   if (error !== undefined) {
     notifications.toasts.addDanger(
@@ -146,7 +150,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
                   data-test-subj={`mlAnalyticsRefreshMapButton${
                     isLoading ? ' loading' : ' loaded'
                   }`}
-                  onClick={() => getDataWrapper({ analyticsId, modelId })}
+                  onClick={() => fetchAndSetElementsWrapper({ analyticsId, modelId })}
                   isLoading={isLoading}
                 >
                   <FormattedMessage
@@ -159,7 +163,8 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
                 <EuiButtonEmpty
                   size="xs"
                   data-test-subj="mlAnalyticsResetGraphButton"
-                  onClick={() => setResetCy(!resetCy)}
+                  // trigger reset on value change
+                  onClick={() => setResetCyToggle(!resetCyToggle)}
                 >
                   <FormattedMessage
                     id="xpack.ml.dataframe.analyticsList.resetMapButtonLabel"
@@ -176,11 +181,11 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
           width={width}
           style={cytoscapeDivStyle}
           itemsDeleted={itemsDeleted}
-          resetCy={resetCy}
+          resetCy={resetCyToggle}
         >
           <Controls
             details={nodeDetails}
-            getNodeData={getDataWrapper}
+            getNodeData={fetchAndSetElementsWrapper}
             analyticsId={analyticsId}
             modelId={modelId}
             updateElements={updateElements}
