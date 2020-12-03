@@ -22,6 +22,7 @@ import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesRangeInput } from './values_range_input';
+import { getInvalidFieldMessage } from '../helpers';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
@@ -31,7 +32,7 @@ function ofName(name: string) {
 }
 
 function isSortableByColumn(column: IndexPatternColumn) {
-  return !column.isBucketed;
+  return !column.isBucketed && column.operationType !== 'last_value';
 }
 
 const DEFAULT_SIZE = 3;
@@ -71,6 +72,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       return { dataType: type as DataType, isBucketed: true, scale: 'ordinal' };
     }
   },
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 
