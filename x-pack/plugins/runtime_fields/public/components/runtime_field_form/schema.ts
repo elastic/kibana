@@ -44,17 +44,8 @@ export const schema: FormSchema<RuntimeField> = {
   script: {
     source: {
       label: i18n.translate('xpack.runtimeFields.form.defineFieldLabel', {
-        defaultMessage: 'Define field',
+        defaultMessage: 'Define field (optional)',
       }),
-      validations: [
-        {
-          validator: emptyField(
-            i18n.translate('xpack.runtimeFields.form.validations.scriptIsRequiredErrorMessage', {
-              defaultMessage: 'Script must emit() a value.',
-            })
-          ),
-        },
-      ],
     },
   },
 };
