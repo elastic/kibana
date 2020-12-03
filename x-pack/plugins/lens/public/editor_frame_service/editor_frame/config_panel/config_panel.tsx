@@ -5,7 +5,7 @@
  */
 import './config_panel.scss';
 
-import React, { useMemo, memo } from 'react';
+import React, { useMemo, memo, useEffect, useState, useCallback } from 'react';
 import { EuiFlexItem, EuiToolTip, EuiButton, EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Visualization } from '../../../types';
@@ -24,6 +24,24 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   ) : null;
 });
 
+const getFirstFocusable = (el: HTMLElement | null) => {
+  if (!el) {
+    return null;
+  }
+  const firstFocusable = el.querySelector(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  if (!firstFocusable) {
+    return null;
+  }
+  return (firstFocusable as unknown) as { focus: () => void };
+};
+
+function useLastUpdatedStatus(layerIds){
+  
+}
+
+
 function LayerPanels(
   props: ConfigPanelWrapperProps & {
     activeDatasourceId: string;
@@ -37,6 +55,58 @@ function LayerPanels(
     activeDatasourceId,
     datasourceMap,
   } = props;
+
+  const layerIds = activeVisualization.getLayerIds(visualizationState);
+
+  const [lastUpdated, setLastUpdated] = useState<{
+    type: 'ADD_LAYER' | 'REMOVE_OR_CLEAR_LAYER';
+    id: string;
+  } | null>(null);
+  const [layerRefs, setLayersRefs] = useState<Record<string, HTMLElement | null>>({});
+
+  useEffect(() => {
+    if (!lastUpdated) {
+      return;
+    }
+    let focusable;
+
+    const { type, id } = lastUpdated;
+
+    if (type === 'ADD_LAYER') {
+      focusable = getFirstFocusable(layerRefs[id]);
+    } else if (type === 'REMOVE_OR_CLEAR_LAYER') {
+      const firstLayer = layerIds.length === 1 ? layerIds[0] : layerIds.filter((l) => l !== id)[0];
+      focusable = firstLayer && getFirstFocusable(layerRefs[firstLayer]);
+    }
+
+    if (focusable) {
+      focusable.focus();
+      setLastUpdated(null);
+    }
+  }, [layerIds, layerRefs, lastUpdated]);
+
+  const setLayerRef = useCallback((el, layerId) => {
+    if (el) {
+      setLayersRefs((layersRefs) => ({
+        ...layersRefs,
+        [layerId]: el,
+      }));
+    }
+  }, []);
+
+  const removeLayerRef = useCallback(
+    (layerId) => {
+      if (layerIds.length > 1) {
+        setLayersRefs((layerRefs) => {
+          const newLayerRefs = { ...layerRefs };
+          delete newLayerRefs[layerId];
+          return newLayerRefs;
+        });
+      }
+    },
+    [layerIds]
+  );
+
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
       dispatch({
@@ -85,13 +155,13 @@ function LayerPanels(
     },
     [dispatch]
   );
-  const layerIds = activeVisualization.getLayerIds(visualizationState);
 
   return (
     <EuiForm className="lnsConfigPanel">
       {layerIds.map((layerId, index) => (
         <LayerPanel
           {...props}
+          setLayerRef={setLayerRef}
           key={layerId}
           layerId={layerId}
           index={index}
@@ -112,6 +182,11 @@ function LayerPanels(
                   datasourceMap,
                   state,
                 }),
+            });
+            removeLayerRef(layerId);
+            setLastUpdated({
+              type: 'REMOVE_OR_CLEAR_LAYER',
+              id: layerId,
             });
           }}
         />
@@ -138,17 +213,22 @@ function LayerPanels(
                 defaultMessage: 'Add layer',
               })}
               onClick={() => {
+                const id = generateId();
                 dispatch({
                   type: 'UPDATE_STATE',
                   subType: 'ADD_LAYER',
                   updater: (state) =>
                     appendLayer({
                       activeVisualization,
-                      generateId,
+                      generateId: () => id,
                       trackUiEvent,
                       activeDatasource: datasourceMap[activeDatasourceId],
                       state,
                     }),
+                });
+                setLastUpdated({
+                  type: 'ADD_LAYER',
+                  id,
                 });
               }}
               iconType="plusInCircleFilled"

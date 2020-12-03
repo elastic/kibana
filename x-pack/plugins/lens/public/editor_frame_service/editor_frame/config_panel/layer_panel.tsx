@@ -74,6 +74,7 @@ export function LayerPanel(
       newVisualizationState: unknown
     ) => void;
     onRemoveLayer: () => void;
+    setLayerRef: (instance: HTMLDivElement | null, layerId: string) => void;
   }
 ) {
   const dragDropContext = useContext(DragContext);
@@ -81,12 +82,20 @@ export function LayerPanel(
     initialActiveDimensionState
   );
 
-  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, index } = props;
+  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, setLayerRef, index } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
   useEffect(() => {
     setActiveDimension(initialActiveDimensionState);
   }, [props.activeVisualizationId]);
+
+  const setLayerRefMemoized = React.useCallback(
+    (el) => {
+      console.log('memo');
+      return setLayerRef(el, layerId);
+    },
+    [layerId, setLayerRef]
+  );
 
   if (
     !datasourcePublicAPI ||
@@ -133,6 +142,7 @@ export function LayerPanel(
     <ChildDragDropProvider {...dragDropContext}>
       <EuiPanel
         data-test-subj={`lns-layerPanel-${index}`}
+        panelRef={setLayerRefMemoized}
         className="lnsLayerPanel"
         paddingSize="s"
       >
