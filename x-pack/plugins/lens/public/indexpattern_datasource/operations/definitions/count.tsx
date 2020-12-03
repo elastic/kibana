@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
+import { getInvalidFieldMessage } from './helpers';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
@@ -29,6 +30,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     defaultMessage: 'Count',
   }),
   input: 'field',
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
