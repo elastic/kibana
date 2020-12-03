@@ -10,6 +10,7 @@ import {
   EuiLink,
   EuiAccordion,
   EuiTitle,
+  EuiToolTip,
   EuiPanel,
   EuiButtonIcon,
   EuiBasicTable,
@@ -25,6 +26,9 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   .ingest-integration-title-button {
     padding: ${(props) => props.theme.eui.paddingSizes.m}
       ${(props) => props.theme.eui.paddingSizes.m};
+  }
+
+  &.euiAccordion-isOpen .ingest-integration-title-button {
     border-bottom: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
   }
 `;
@@ -71,6 +75,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
       },
     },
     {
+      align: 'right',
       name: i18n.translate('xpack.fleet.agentDetailsIntegrations.actionsLabel', {
         defaultMessage: 'Actions',
       }),
@@ -78,17 +83,20 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
       width: 'auto',
       render: (inputType: string) => {
         return (
-          <EuiButtonIcon
-            href={getHref('fleet_agent_details', {
-              agentId: agent.id,
-              tabId: 'logs',
-              logQuery: getLogsQueryByInputType(inputType),
-            })}
-            iconType="editorAlignLeft"
-            title={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
+          <EuiToolTip
+            content={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
               defaultMessage: 'View logs',
             })}
-          />
+          >
+            <EuiButtonIcon
+              href={getHref('fleet_agent_details', {
+                agentId: agent.id,
+                tabId: 'logs',
+                logQuery: getLogsQueryByInputType(inputType),
+              })}
+              iconType="editorAlignLeft"
+            />
+          </EuiToolTip>
         );
       },
     },
@@ -142,7 +150,7 @@ export const AgentDetailsIntegrationsSection: React.FunctionComponent<{
   }
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       {(agentPolicy.package_policies as PackagePolicy[]).map((packagePolicy) => {
         return (
           <EuiFlexItem grow={false} key={packagePolicy.id}>
