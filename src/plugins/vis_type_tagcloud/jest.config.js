@@ -21,5 +21,4 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/vis_type_tagcloud'],
-  testRunner: 'jasmine2',
 };
