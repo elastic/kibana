@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test/jest';
-import { datatable, DatatableComponent } from './expression';
+import { getDatatable, DatatableComponent } from './expression';
 import { LensMultiTable } from '../types';
 import { DatatableProps } from './expression';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
@@ -89,7 +89,11 @@ describe('datatable_expression', () => {
   describe('datatable renders', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
-      const result = datatable.fn(data, args, createMockExecutionContext());
+      const result = getDatatable({ formatFactory: (x) => x as IFieldFormat }).fn(
+        data,
+        args,
+        createMockExecutionContext()
+      );
 
       expect(result).toEqual({
         type: 'render',

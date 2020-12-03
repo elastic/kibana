@@ -79,12 +79,11 @@ export interface DatatableRender {
   value: DatatableProps;
 }
 
-export const datatable: ExpressionFunctionDefinition<
-  'lens_datatable',
-  LensMultiTable,
-  Args,
-  DatatableRender
-> = {
+export const getDatatable = ({
+  formatFactory,
+}: {
+  formatFactory: FormatFactory;
+}): ExpressionFunctionDefinition<'lens_datatable', LensMultiTable, Args, DatatableRender> => ({
   name: 'lens_datatable',
   type: 'render',
   inputTypes: ['lens_multitable'],
@@ -107,7 +106,44 @@ export const datatable: ExpressionFunctionDefinition<
       help: '',
     },
   },
-  fn(data, args) {
+  fn(data, args, context) {
+    // do the sorting at this level to propagate it also at CSV download
+    const [firstTable] = Object.values(data.tables);
+    const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
+    const formatters: Record<string, ReturnType<FormatFactory>> = {};
+
+    firstTable.columns.forEach((column) => {
+      formatters[column.id] = formatFactory(column.meta?.params);
+    });
+    const { sortBy, sortDirection } = args.columns;
+
+    const columnsReverseLookup = firstTable.columns.reduce<
+      Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
+    >((memo, { id, name, meta }, i) => {
+      memo[id] = { name, index: i, meta };
+      return memo;
+    }, {});
+
+    if (sortBy && sortDirection !== 'none') {
+      // Sort on raw values for these types, while use the formatted value for the rest
+      const sortingCriteria = ['number', 'date'].includes(
+        columnsReverseLookup[sortBy]?.meta?.type || ''
+      )
+        ? sortBy
+        : (row: Record<string, unknown>) =>
+            possiblyWrapFormat(
+              formatters[sortBy]?.convert(row[sortBy]),
+              columnsReverseLookup[sortBy]?.meta?.type
+            );
+      // replace the table here
+      context.inspectorAdapters.tables[layerId].rows = orderBy(
+        firstTable.rows || [],
+        [sortingCriteria],
+        sortDirection as Direction
+      );
+      // replace also the local copy
+      firstTable.rows = context.inspectorAdapters.tables[layerId].rows;
+    }
     return {
       type: 'render',
       as: 'lens_datatable_renderer',
@@ -117,7 +153,7 @@ export const datatable: ExpressionFunctionDefinition<
       },
     };
   },
-};
+});
 
 type DatatableColumnsResult = DatatableColumns & { type: 'lens_datatable_columns' };
 
@@ -150,7 +186,7 @@ export const datatableColumns: ExpressionFunctionDefinition<
 };
 
 export const getDatatableRenderer = (dependencies: {
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   getType: Promise<(name: string) => IAggType>;
 }): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
@@ -165,7 +201,6 @@ export const getDatatableRenderer = (dependencies: {
     config: DatatableProps,
     handlers: ILensInterpreterRenderHandlers
   ) => {
-    const resolvedFormatFactory = await dependencies.formatFactory;
     const resolvedGetType = await dependencies.getType;
     const onClickValue = (data: LensFilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
@@ -180,7 +215,7 @@ export const getDatatableRenderer = (dependencies: {
       <I18nProvider>
         <DatatableComponent
           {...config}
-          formatFactory={resolvedFormatFactory}
+          formatFactory={dependencies.formatFactory}
           onClickValue={onClickValue}
           onEditAction={onEditAction}
           getType={resolvedGetType}
@@ -195,6 +230,19 @@ export const getDatatableRenderer = (dependencies: {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });
+
+function possiblyWrapFormat(rowFormatted: string, type: string | undefined) {
+  if (type !== 'ip') {
+    return rowFormatted;
+  }
+  // Note this supports only IPv4: maybe there already a solution to support IPv6 and more?
+  return Number(
+    rowFormatted
+      .split('.')
+      .map((n) => `000${n}`.slice(-3))
+      .join('')
+  );
+}
 
 function getNextOrderValue(currentValue: LensSortAction['data']['direction']) {
   const states: Array<LensSortAction['data']['direction']> = ['asc', 'desc', 'none'];
@@ -220,7 +268,7 @@ function getHeaderSortingCell(
   }
   // This is a workaround to hijack the title value of the header cell
   return (
-    <span aria-sort={getDirectionLongLabel(sorting.direction)} aria-live="polite">
+    <span aria-sort={getDirectionLongLabel(sorting.direction)}>
       {name || ''}
       <EuiScreenReaderOnly>
         <span>{sortingLabel}</span>
@@ -298,19 +346,8 @@ export function DatatableComponent(props: DatatableRenderProps) {
 
   const { sortBy, sortDirection } = props.args.columns;
 
-  const rows = firstTable?.rows || [];
-  let sortedRows = rows;
+  const sortedRows = firstTable?.rows || [];
   const isReadOnlySorted = props.renderMode !== 'edit';
-
-  if (sortBy && sortDirection !== 'none') {
-    // Sort on raw values for these types, while use the formatted value for the rest
-    const sortingCriteria = ['number', 'date'].includes(
-      columnsReverseLookup[sortBy]?.meta?.type || ''
-    )
-      ? sortBy
-      : (row: Record<string, unknown>) => formatters[sortBy]?.convert(row[sortBy]);
-    sortedRows = orderBy(rows, [sortingCriteria], sortDirection as Direction);
-  }
 
   const sortedInLabel = i18n.translate('xpack.lens.datatableSortedInReadOnlyMode', {
     defaultMessage: 'Sorted in {sortValue} order',
