@@ -175,9 +175,11 @@ export const getDatatableRenderer = (dependencies: {
             try {
               const hasActions = await hasCompatibleActions({
                 name: 'tableRowContextMenuClick',
-                rowIndex,
-                table,
-                columns: config.args.columns.columnIds,
+                data: {
+                  rowIndex,
+                  table,
+                  columns: config.args.columns.columnIds,
+                },
               });
 
               return hasActions;
