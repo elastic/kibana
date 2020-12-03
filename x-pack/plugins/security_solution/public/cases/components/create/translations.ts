@@ -18,6 +18,28 @@ export const STEP_ONE_TITLE = i18n.translate(
 export const STEP_TWO_TITLE = i18n.translate(
   'xpack.securitySolution.components.create.stepTwoTitle',
   {
+    defaultMessage: 'Case settings',
+  }
+);
+
+export const STEP_THREE_TITLE = i18n.translate(
+  'xpack.securitySolution.components.create.stepTwoTitle',
+  {
     defaultMessage: 'External Connector Fields',
+  }
+);
+
+export const SYNC_ALERTS_LABEL = i18n.translate(
+  'xpack.securitySolution.components.create.syncAlertsLabel',
+  {
+    defaultMessage: 'Sync alert status with case status',
+  }
+);
+
+export const SYNC_ALERTS_HELP = i18n.translate(
+  'xpack.securitySolution.components.create.syncAlertHelpText',
+  {
+    defaultMessage:
+      'Enabling this option will sync the status of alerts in this case with the case status.',
   }
 );
