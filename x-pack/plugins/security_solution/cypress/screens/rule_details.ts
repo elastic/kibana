@@ -36,6 +36,12 @@ export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
 
+export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
+
+export const INDICATOR_INDEX_QUERY = 'Indicator index query';
+
+export const INDICATOR_MAPPING = 'Indicator mapping';
+
 export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
 export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-notes"]';

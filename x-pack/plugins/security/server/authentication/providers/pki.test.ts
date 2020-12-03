@@ -544,7 +544,7 @@ describe('PKIAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(provider.logout(request, null)).resolves.toEqual(
-        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
       );
 
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
@@ -572,7 +572,7 @@ describe('PKIAuthenticationProvider', () => {
       mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
       await expect(provider.logout(request, state)).resolves.toEqual(
-        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
       );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);

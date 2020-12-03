@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ANOMALY_SEVERITY } from '../../../../../ml/common';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
-import { useEnvironments } from '../../../hooks/useEnvironments';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
 import {
@@ -23,7 +23,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { useApmService } from '../../../hooks/use_apm_service';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 interface Params {
   windowSize: number;
@@ -47,10 +47,14 @@ interface Props {
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
-  const { transactionTypes } = useApmService();
+  const { transactionTypes } = useApmServiceContext();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end, transactionType } = urlParams;
-  const { environmentOptions } = useEnvironments({ serviceName, start, end });
+  const { environmentOptions } = useEnvironmentsFetcher({
+    serviceName,
+    start,
+    end,
+  });
 
   if (serviceName && !transactionTypes.length) {
     return null;

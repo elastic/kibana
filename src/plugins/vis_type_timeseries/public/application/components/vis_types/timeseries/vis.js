@@ -39,20 +39,18 @@ class TimeseriesVisualization extends Component {
     model: PropTypes.object,
     onBrush: PropTypes.func,
     visData: PropTypes.object,
-    dateFormat: PropTypes.string,
     getConfig: PropTypes.func,
   };
 
-  xAxisFormatter = (interval) => (val) => {
-    const scaledDataFormat = this.props.getConfig('dateFormat:scaled');
-    const { dateFormat } = this.props;
+  scaledDataFormat = this.props.getConfig('dateFormat:scaled');
+  dateFormat = this.props.getConfig('dateFormat');
 
-    if (!scaledDataFormat || !dateFormat) {
+  xAxisFormatter = (interval) => (val) => {
+    if (!this.scaledDataFormat || !this.dateFormat) {
       return val;
     }
 
-    const formatter = createXaxisFormatter(interval, scaledDataFormat, dateFormat);
-
+    const formatter = createXaxisFormatter(interval, this.scaledDataFormat, this.dateFormat);
     return formatter(val);
   };
 
