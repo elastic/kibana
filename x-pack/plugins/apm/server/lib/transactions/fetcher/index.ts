@@ -39,9 +39,9 @@ interface TopTraceOptions {
 
 export type Options = TopTransactionOptions | TopTraceOptions;
 
-export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
+export type ESResponse = PromiseReturnType<typeof transactionFetcher>;
 
-export type TransactionGroupRequestBase = ReturnType<
+export type TransactionRequestBase = ReturnType<
   typeof getTransactionGroupsProjection
 > & {
   body: {
@@ -53,10 +53,10 @@ export type TransactionGroupRequestBase = ReturnType<
   };
 };
 
-export type TransactionGroupSetup = Setup & SetupTimeRange;
+export type TransactionSetup = Setup & SetupTimeRange;
 
 function getItemsWithRelativeImpact(
-  setup: TransactionGroupSetup,
+  setup: TransactionSetup,
   items: Array<{
     sum?: number | null;
     key: string | Record<'service.name' | 'transaction.name', string>;
@@ -93,9 +93,9 @@ function getItemsWithRelativeImpact(
   return itemsWithRelativeImpact;
 }
 
-export async function transactionGroupsFetcher(
+export async function transactionFetcher(
   options: Options,
-  setup: TransactionGroupSetup,
+  setup: TransactionSetup,
   bucketSize: number
 ) {
   const projection = getTransactionGroupsProjection({
@@ -170,26 +170,24 @@ export async function transactionGroupsFetcher(
   const defaultServiceName =
     options.type === 'top_transactions' ? options.serviceName : undefined;
 
-  const itemsWithKeys: TransactionGroup[] = itemsWithRelativeImpact.map(
-    (item) => {
-      let transactionName: string;
-      let serviceName: string;
+  const itemsWithKeys: Transaction[] = itemsWithRelativeImpact.map((item) => {
+    let transactionName: string;
+    let serviceName: string;
 
-      if (typeof item.key === 'string') {
-        transactionName = item.key;
-        serviceName = defaultServiceName!;
-      } else {
-        transactionName = item.key[TRANSACTION_NAME];
-        serviceName = item.key[SERVICE_NAME];
-      }
-
-      return {
-        ...item,
-        transactionName,
-        serviceName,
-      };
+    if (typeof item.key === 'string') {
+      transactionName = item.key;
+      serviceName = defaultServiceName!;
+    } else {
+      transactionName = item.key[TRANSACTION_NAME];
+      serviceName = item.key[SERVICE_NAME];
     }
-  );
+
+    return {
+      ...item,
+      transactionName,
+      serviceName,
+    };
+  });
 
   return {
     items: take(
@@ -204,7 +202,7 @@ export async function transactionGroupsFetcher(
   };
 }
 
-interface TransactionGroup {
+interface Transaction {
   key: string | Record<'service.name' | 'transaction.name', string>;
   serviceName: string;
   transactionName: string;

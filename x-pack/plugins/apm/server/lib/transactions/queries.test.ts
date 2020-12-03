@@ -14,7 +14,7 @@ import {
 } from '../../utils/test_helpers';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { loggerMock } from '../../../../../../src/core/server/logging/logger.mock';
-import { transactionGroupsFetcher } from './fetcher';
+import { transactionFetcher } from './fetcher';
 
 describe('transaction queries', () => {
   let mock: SearchParamsMock;
@@ -118,7 +118,7 @@ describe('transaction queries', () => {
   it('fetches top transactions', async () => {
     const bucketSize = 100;
     mock = await inspectSearchParams((setup) =>
-      transactionGroupsFetcher(
+      transactionFetcher(
         {
           type: 'top_transactions',
           serviceName: 'foo',
@@ -138,7 +138,7 @@ describe('transaction queries', () => {
   it('fetches top traces', async () => {
     const bucketSize = 100;
     mock = await inspectSearchParams((setup) =>
-      transactionGroupsFetcher(
+      transactionFetcher(
         {
           type: 'top_traces',
           searchAggregatedTransactions: false,

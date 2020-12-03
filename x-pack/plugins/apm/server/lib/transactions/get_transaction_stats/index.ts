@@ -7,19 +7,19 @@ import { merge } from 'lodash';
 import { TRANSACTION_TYPE } from '../../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../../common/utils/array_union_to_callable';
 import { AggregationInputMap } from '../../../../../../typings/elasticsearch';
-import { TransactionGroupRequestBase, TransactionGroupSetup } from '../fetcher';
+import { TransactionRequestBase, TransactionSetup } from '../fetcher';
 import { getTransactionDurationFieldForAggregatedTransactions } from '../../helpers/aggregated_transactions';
 
 interface MetricParams {
-  request: TransactionGroupRequestBase;
-  setup: TransactionGroupSetup;
+  request: TransactionRequestBase;
+  setup: TransactionSetup;
   searchAggregatedTransactions: boolean;
 }
 
 type BucketKey = string | Record<string, string>;
 
 function mergeRequestWithAggs<
-  TRequestBase extends TransactionGroupRequestBase,
+  TRequestBase extends TransactionRequestBase,
   TInputMap extends AggregationInputMap
 >(request: TRequestBase, aggs: TInputMap) {
   return merge({}, request, {
