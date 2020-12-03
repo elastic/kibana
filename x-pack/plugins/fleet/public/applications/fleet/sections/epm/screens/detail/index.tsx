@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState, useMemo, useCallback, ReactEventHandler } from 'react';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -20,7 +20,13 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { DetailViewPanelName, entries, InstallStatus, PackageInfo } from '../../../../types';
+import {
+  CreatePackagePolicyRouteState,
+  DetailViewPanelName,
+  entries,
+  InstallStatus,
+  PackageInfo,
+} from '../../../../types';
 import { Loading, Error } from '../../../../components';
 import {
   useGetPackageInfoByKey,
@@ -77,8 +83,10 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 
 export function Detail() {
   const { pkgkey, panel = DEFAULT_PANEL } = useParams<DetailParams>();
-  const { getHref } = useLink();
+  const { getHref, getPath } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
+  const history = useHistory();
+  const location = useLocation();
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -173,6 +181,34 @@ export function Detail() {
     [getHref, isLoading, packageInfo]
   );
 
+  const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
+    (ev) => {
+      ev.preventDefault();
+
+      const currentPath = history.createHref(location);
+      const redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
+        CreatePackagePolicyRouteState['onCancelNavigateTo'] = [
+        'fleet',
+        {
+          path: currentPath,
+        },
+      ];
+      const redirectBackRouteState: CreatePackagePolicyRouteState = {
+        onSaveNavigateTo: redirectToPath,
+        onCancelNavigateTo: redirectToPath,
+        onCancelUrl: currentPath,
+      };
+
+      history.push({
+        pathname: getPath('add_integration_to_policy', {
+          pkgkey,
+        }),
+        state: redirectBackRouteState,
+      });
+    },
+    [getPath, history, location, pkgkey]
+  );
+
   const headerRightContent = useMemo(
     () =>
       packageInfo ? (
@@ -198,6 +234,7 @@ export function Detail() {
               { isDivider: true },
               {
                 content: (
+                  // eslint-disable-next-line @elastic/eui/href-or-on-click
                   <EuiButton
                     fill
                     isDisabled={!hasWriteCapabilites}
@@ -205,6 +242,7 @@ export function Detail() {
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
                     })}
+                    onClick={handleAddIntegrationPolicyClick}
                   >
                     <FormattedMessage
                       id="xpack.fleet.epm.addPackagePolicyButtonText"
@@ -233,7 +271,14 @@ export function Detail() {
           </EuiFlexGroup>
         </>
       ) : undefined,
-    [getHref, hasWriteCapabilites, packageInfo, pkgkey, updateAvailable]
+    [
+      getHref,
+      handleAddIntegrationPolicyClick,
+      hasWriteCapabilites,
+      packageInfo,
+      pkgkey,
+      updateAvailable,
+    ]
   );
 
   const tabs = useMemo<WithHeaderLayoutProps['tabs']>(() => {
