@@ -207,7 +207,7 @@ export function TransactionDistribution({
               style={{
                 fill: 'transparent',
                 strokeWidth: 1,
-                stroke: theme.eui.euiColorVis1,
+                stroke: theme.eui.euiColorPrimary,
                 opacity: 1,
               }}
             />
