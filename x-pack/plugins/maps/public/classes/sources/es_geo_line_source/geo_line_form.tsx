@@ -61,9 +61,10 @@ export function GeoLineForm(props: Props) {
           })}
           value={props.sortField}
           onChange={onSortFieldChange}
-          fields={props.indexPattern.fields.filter(
-            (field) => field.sortable && !indexPatterns.isNestedField(field)
-          )}
+          fields={props.indexPattern.fields.filter((field) => {
+            const isSplitField = props.splitField ? field.name === props.splitField : false;
+            return !isSplitField && field.sortable && !indexPatterns.isNestedField(field);
+          })}
           isClearable={false}
         />
       </EuiFormRow>
