@@ -24,7 +24,7 @@ import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/
 import { ViewMode } from 'src/plugins/embeddable/public';
 import { createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 import { DashboardContainer, DashboardContainerInput } from '.';
-import { DashboardContainerOptions } from './embeddable/dashboard_container';
+import { DashboardContainerServices } from './embeddable/dashboard_container';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';
 
 describe('DashboardState', function () {
@@ -71,7 +71,7 @@ describe('DashboardState', function () {
       panels: {} as DashboardContainerInput['panels'],
     };
     const input = { ...defaultInput, ...(initialInput ?? {}) };
-    return new DashboardContainer(input, { embeddable: doStart() } as DashboardContainerOptions);
+    return new DashboardContainer(input, { embeddable: doStart() } as DashboardContainerServices);
   }
 
   describe('syncTimefilterWithDashboard', function () {

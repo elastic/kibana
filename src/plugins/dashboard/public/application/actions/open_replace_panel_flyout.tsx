@@ -26,7 +26,7 @@ import {
   EmbeddableOutput,
   EmbeddableStart,
   IContainer,
-} from '../../embeddable_plugin';
+} from '../../../../embeddable/public';
 
 export async function openReplacePanelFlyout(options: {
   embeddable: IContainer;

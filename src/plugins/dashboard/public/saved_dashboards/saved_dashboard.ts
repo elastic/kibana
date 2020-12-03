@@ -24,7 +24,7 @@ import { EmbeddableStart } from '../../../embeddable/public';
 import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
 
-export interface SavedObjectDashboard extends SavedObject {
+export interface DashboardSavedObject extends SavedObject {
   id?: string;
   timeRestore: boolean;
   timeTo?: string;
@@ -45,7 +45,7 @@ export interface SavedObjectDashboard extends SavedObject {
 export function createSavedDashboardClass(
   savedObjectStart: SavedObjectsStart,
   embeddableStart: EmbeddableStart
-): new (id: string) => SavedObjectDashboard {
+): new (id: string) => DashboardSavedObject {
   class SavedDashboard extends savedObjectStart.SavedObjectClass {
     // save these objects with the 'dashboard' type
     public static type = 'dashboard';
@@ -84,7 +84,7 @@ export function createSavedDashboardClass(
           attributes: SavedObjectAttributes;
           references: SavedObjectReference[];
         }) => extractReferences(opts, { embeddablePersistableStateService: embeddableStart }),
-        injectReferences: (so: SavedObjectDashboard, references: SavedObjectReference[]) => {
+        injectReferences: (so: DashboardSavedObject, references: SavedObjectReference[]) => {
           const newAttributes = injectReferences(
             { attributes: so._serialize().attributes, references },
             {
@@ -129,5 +129,5 @@ export function createSavedDashboardClass(
 
   // Unfortunately this throws a typescript error without the casting.  I think it's due to the
   // convoluted way SavedObjects are created.
-  return (SavedDashboard as unknown) as new (id: string) => SavedObjectDashboard;
+  return (SavedDashboard as unknown) as new (id: string) => DashboardSavedObject;
 }

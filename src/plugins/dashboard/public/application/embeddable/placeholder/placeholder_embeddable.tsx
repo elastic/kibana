@@ -21,7 +21,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
-import { Embeddable, EmbeddableInput, IContainer } from '../../../embeddable_plugin';
+import { Embeddable, EmbeddableInput, IContainer } from '../../../../../embeddable/public';
 
 export const PLACEHOLDER_EMBEDDABLE = 'placeholder';
 
