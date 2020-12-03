@@ -94,8 +94,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
         scriptFields.indexOf(dtr.over_field_name!) === -1;
     }
 
-    // We don't currently support nested terms aggregation
-    // & when aggregation interval is different from bucket span
+    // We don't currently support nested terms aggregation when model plot is not enabled
     const hasDatafeed =
       typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
     if (hasDatafeed) {
@@ -106,13 +105,11 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
           // if datafeed has any nested terms aggregations at all
           const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
           const termsField = findAggField(aggregations, 'terms', true);
-          if (termsField !== undefined && Object.keys(termsField).length > 1) {
-            return false;
-          }
-
-          // if aggregation interval is different from bucket span
-          const datetimeBucket = aggs[aggBucketsName].date_histogram;
-          if (datetimeBucket?.fixed_interval !== job.analysis_config?.bucket_span) {
+          if (
+            termsField !== undefined &&
+            Object.keys(termsField).length > 1 &&
+            job.model_plot_config?.enabled !== true
+          ) {
             return false;
           }
         }
@@ -156,21 +153,6 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
 // Returns a reason to indicate why the job configuration is not supported
 // if the result is undefined, that means the single metric job should be viewable
 export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
-  let errorMessage;
-
-  // only allow jobs with at least one detector whose function corresponds to
-  // an ES aggregation which can be viewed in the single metric view and which
-  // doesn't use a scripted field which can be very difficult or impossible to
-  // invert to a reverse search, or when model plot has been enabled.
-  const isChartableTimeSeriesViewJob = job.analysis_config.detectors.some((detector, idx) =>
-    isTimeSeriesViewDetector(job, idx)
-  );
-
-  if (isChartableTimeSeriesViewJob === false) {
-    errorMessage = i18n.translate('xpack.ml.timeSeriesJob.notViewableTimeSeriesJobMessage', {
-      defaultMessage: 'not a viewable time series job',
-    });
-  }
   const hasDatafeed =
     typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
   if (hasDatafeed) {
@@ -186,7 +168,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
           Object.keys(termsField).length > 1 &&
           job.model_plot_config?.enabled !== true
         ) {
-          errorMessage = i18n.translate('xpack.ml.timeSeriesJob.nestedTermsAggregationsMessage', {
+          return i18n.translate('xpack.ml.timeSeriesJob.nestedTermsAggregationsMessage', {
             defaultMessage:
               'there are nested terms aggregations in the datafeed and model plot is disabled',
           });
@@ -194,7 +176,20 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
       }
     }
   }
-  return errorMessage;
+
+  // only allow jobs with at least one detector whose function corresponds to
+  // an ES aggregation which can be viewed in the single metric view and which
+  // doesn't use a scripted field which can be very difficult or impossible to
+  // invert to a reverse search, or when model plot has been enabled.
+  const isChartableTimeSeriesViewJob = job.analysis_config.detectors.some((detector, idx) =>
+    isTimeSeriesViewDetector(job, idx)
+  );
+
+  if (isChartableTimeSeriesViewJob === false) {
+    return i18n.translate('xpack.ml.timeSeriesJob.notViewableTimeSeriesJobMessage', {
+      defaultMessage: 'not a viewable time series job',
+    });
+  }
 }
 
 // Returns the names of the partition, by, and over fields for the detector with the
