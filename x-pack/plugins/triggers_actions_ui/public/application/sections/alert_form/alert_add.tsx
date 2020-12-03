@@ -81,7 +81,6 @@ const AlertAdd = ({
   const {
     http,
     notifications: { toasts },
-    docLinks,
     application: { capabilities },
   } = useKibana().services;
 
@@ -177,7 +176,7 @@ const AlertAdd = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <HealthContextProvider>
-          <HealthCheck docLinks={docLinks} http={http} inFlyout={true} waitForCheck={false}>
+          <HealthCheck inFlyout={true} waitForCheck={false}>
             <EuiFlyoutBody>
               <AlertForm
                 alert={alert}

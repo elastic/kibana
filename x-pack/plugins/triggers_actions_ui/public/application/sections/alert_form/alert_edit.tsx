@@ -63,7 +63,6 @@ export const AlertEdit = ({
   const {
     http,
     notifications: { toasts },
-    docLinks,
   } = useKibana().services;
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
