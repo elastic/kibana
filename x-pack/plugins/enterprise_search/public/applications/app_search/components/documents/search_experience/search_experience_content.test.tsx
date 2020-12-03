@@ -10,11 +10,11 @@ import { setMockSearchContextState } from './__mocks__/hooks.mock';
 import React from 'react';
 
 import { shallow } from 'enzyme';
-import { EuiFlexGroup } from '@elastic/eui';
 // @ts-expect-error types are not available for this package yet
 import { Results } from '@elastic/react-search-ui';
 
 import { ResultView } from './views';
+import { Pagination } from './pagination';
 import { SearchExperienceContent } from './search_experience_content';
 
 describe('SearchExperienceContent', () => {
@@ -37,7 +37,7 @@ describe('SearchExperienceContent', () => {
 
   it('renders', () => {
     const wrapper = shallow(<SearchExperienceContent />);
-     expect(wrapper.isEmptyRender()).toBe(false);
+    expect(wrapper.isEmptyRender()).toBe(false);
   });
 
   it('passes engineName to the result view', () => {
@@ -56,8 +56,7 @@ describe('SearchExperienceContent', () => {
 
   it('renders pagination', () => {
     const wrapper = shallow(<SearchExperienceContent />);
-    const pagination = wrapper.find('Pagination').at(0).dive();
-    expect(pagination.find(EuiFlexGroup).length).toBe(1);
+    expect(wrapper.find(Pagination).exists()).toBe(true);
   });
 
   it('renders empty if a search was not performed yet', () => {

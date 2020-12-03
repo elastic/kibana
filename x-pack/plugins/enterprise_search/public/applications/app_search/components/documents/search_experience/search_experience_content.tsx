@@ -7,28 +7,19 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 // @ts-expect-error types are not available for this package yet
 import { Results, Paging, ResultsPerPage } from '@elastic/react-search-ui';
 import { useValues } from 'kea';
 
-import { ResultView, PagingView, ResultsPerPageView } from './views';
+import { ResultView } from './views';
+import { Pagination } from './pagination';
 import { useSearchContextState } from './hooks';
 import { DocumentCreationButton } from '../document_creation_button';
 import { AppLogic } from '../../../app_logic';
 import { EngineLogic } from '../../engine';
 import { DOCS_PREFIX } from '../../../routes';
 
-const Pagination: React.FC<{ 'aria-label': string }> = ({ 'aria-label': ariaLabel }) => (
-  <EuiFlexGroup alignItems="center" className="documentsSearchExperience__pagingInfo">
-    <EuiFlexItem>
-      <Paging view={PagingView} aria-label={ariaLabel} />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <ResultsPerPage view={ResultsPerPageView} />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 // TODO This is temporary until we create real Result type
 interface Result {
   [key: string]: {
