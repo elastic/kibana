@@ -30,7 +30,7 @@ import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
 } from '../metrics/by_agent/shared/memory';
-import { getErrorRate } from '../transaction_groups/get_error_rate';
+import { getErrorRate } from '../transactions/get_error_rate';
 
 interface Options {
   setup: Setup & SetupTimeRange;

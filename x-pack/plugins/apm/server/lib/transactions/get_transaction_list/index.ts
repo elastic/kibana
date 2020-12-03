@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { transactionGroupsFetcher, Options } from './fetcher';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { transactionGroupsFetcher, Options } from '../fetcher';
 
 export async function getTransactionGroupList(
   options: Options,

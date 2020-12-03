@@ -10,7 +10,7 @@ import {
   PARENT_ID,
   TRANSACTION_ROOT,
 } from '../../common/elasticsearch_fieldnames';
-import { Options } from '../../server/lib/transaction_groups/fetcher';
+import { Options } from '../../server/lib/transactions/fetcher';
 import { getTransactionsProjection } from './transactions';
 import { mergeProjection } from './util/merge_projection';
 

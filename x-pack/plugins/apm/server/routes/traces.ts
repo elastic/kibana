@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTrace } from '../lib/traces/get_trace';
-import { getTransactionGroupList } from '../lib/transaction_groups';
+import { getTransactionGroupList } from '../lib/transactions/get_transaction_list';
 import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';

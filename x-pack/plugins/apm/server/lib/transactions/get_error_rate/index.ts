@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Coordinate } from '../../../typings/timeseries';
+import { Coordinate } from '../../../../typings/timeseries';
 
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../common/event_outcome';
-import { rangeFilter } from '../../../common/utils/range_filter';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import { getBucketSize } from '../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+} from '../../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../../common/event_outcome';
+import { rangeFilter } from '../../../../common/utils/range_filter';
+import { getProcessorEventForAggregatedTransactions } from '../../helpers/aggregated_transactions';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
   calculateTransactionErrorPercentage,
   getOutcomeAggregation,
   getTransactionErrorRateTimeSeries,
-} from '../helpers/transaction_error_rate';
+} from '../../helpers/transaction_error_rate';
 
 export async function getErrorRate({
   serviceName,

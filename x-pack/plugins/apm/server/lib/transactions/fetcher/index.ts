@@ -6,22 +6,22 @@
 import { sortBy, take } from 'lodash';
 import moment from 'moment';
 import { Unionize } from 'utility-types';
-import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
-import { PromiseReturnType } from '../../../../observability/typings/common';
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { joinByKey } from '../../../common/utils/join_by_key';
-import { getTransactionGroupsProjection } from '../../projections/transaction_groups';
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+} from '../../../../common/elasticsearch_fieldnames';
+import { joinByKey } from '../../../../common/utils/join_by_key';
+import { getTransactionGroupsProjection } from '../../../projections/transaction_groups';
+import { mergeProjection } from '../../../projections/util/merge_projection';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
   getAverages,
   getCounts,
   getPercentiles,
   getSums,
-} from './get_transaction_group_stats';
+} from '../get_transaction_stats';
 
 interface TopTransactionOptions {
   type: 'top_transactions';

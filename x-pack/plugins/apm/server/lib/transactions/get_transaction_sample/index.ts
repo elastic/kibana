@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { maybe } from '../../../common/utils/maybe';
+import { maybe } from '../../../../common/utils/maybe';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_SAMPLED,
-} from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeFilter } from '../../../common/utils/range_filter';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+} from '../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { rangeFilter } from '../../../../common/utils/range_filter';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getTransactionSampleForGroup({
   serviceName,

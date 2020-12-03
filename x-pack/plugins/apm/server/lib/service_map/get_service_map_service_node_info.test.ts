@@ -6,7 +6,7 @@
 
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import * as getErrorRateModule from '../transaction_groups/get_error_rate';
+import * as getErrorRateModule from '../transactions/get_error_rate';
 
 describe('getServiceMapServiceNodeInfo', () => {
   describe('with no results', () => {

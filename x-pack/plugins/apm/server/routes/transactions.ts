@@ -15,12 +15,12 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getTransactionCharts } from '../lib/transactions/charts';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
-import { getTransactionGroupList } from '../lib/transaction_groups';
+import { getTransactionGroupList } from '../lib/transactions/get_transaction_list';
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
-import { getTransactionSampleForGroup } from '../lib/transaction_groups/get_transaction_sample_for_group';
+import { getTransactionSampleForGroup } from '../lib/transactions/get_transaction_sample';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
-import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
+import { getErrorRate } from '../lib/transactions/get_error_rate';
 
 export const transactionRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transactions',
