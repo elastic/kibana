@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setMockActions } from '../../../__mocks__/kea.mock';
-
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
