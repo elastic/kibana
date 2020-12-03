@@ -167,7 +167,7 @@ The options are:
 
 - `size`
 
-the maximum size the log file should reach before a rollover will be performed.
+the maximum size the log file should reach before a rollover should be performed.
 
 The default value is `100mb`
 
@@ -206,14 +206,14 @@ Whether the interval should be adjusted to cause the next rollover to occur on t
 For example, when true, if the interval is `4h` and the current hour is 3 am then the first rollover will occur at 4 am 
 and then next ones will occur at 8 am, noon, 4pm, etc.
 
-The default value is true.
+The default value is `true`.
 
 #### Rolling strategies
 
-The rolling strategies determine how the rollover should occur: both the naming of the rolled files,
+The rolling strategy determines how the rollover should occur: both the naming of the rolled files,
 and their retention policy.
 
-There is currently only one strategy supported: `numeric`.
+There is currently one strategy supported: `numeric`.
 
 ##### NumericRollingStrategy
 
@@ -253,13 +253,13 @@ The suffix to append to the file path when rolling. Must include `%i`, as this i
 that will be converted to the file index.
 
 for example, with `path: /var/logs/kibana.log` and `pattern: '-%i'`, the created rolling files
-will be `/var/logs/kibana-1.log`, `/var/logs/kibana-2.log`
+will be `/var/logs/kibana-1.log`, `/var/logs/kibana-2.log`, and so on.
 
 The default value is `-%i`
 
 - `max`
 
-The maximum number of files to keep. Once this number is reached, oldest files will be deleted
+The maximum number of files to keep. Once this number is reached, oldest files will be deleted.
 
 The default value is `7`
 
