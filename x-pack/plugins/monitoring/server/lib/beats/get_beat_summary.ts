@@ -46,8 +46,8 @@ export function handleResponse(response: ElasticsearchResponse, beatUuid: string
     eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst),
     eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst),
     bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst),
-    handlesHardLimit,
-    handlesSoftLimit,
+    handlesHardLimit: handlesHardLimit || null,
+    handlesSoftLimit: handlesSoftLimit || null,
   };
 }
 
