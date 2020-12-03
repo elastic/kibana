@@ -23,6 +23,14 @@ export function setupSavedObjects(
     namespaceType: 'single',
     mappings: mappings.action,
     migrations: getMigrations(encryptedSavedObjects),
+    management: {
+      importableAndExportable: true,
+      icon: 'tokenEvent',
+      defaultSearchField: 'name',
+      getTitle(obj) {
+        return obj.attributes.name;
+      },
+    },
   });
 
   // Encrypted attributes
