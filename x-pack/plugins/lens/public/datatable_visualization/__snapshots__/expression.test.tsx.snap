@@ -32,6 +32,7 @@ exports[`datatable_expression DatatableComponent it renders the title and value 
           "a": "shoes",
           "b": 1588024800000,
           "c": 3,
+          "rowIndex": 0,
         },
       ]
     }
