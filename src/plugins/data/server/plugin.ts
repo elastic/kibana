@@ -99,17 +99,21 @@ export class DataServerPlugin
     core.http.registerRouteHandlerContext(
       'indexPatterns',
       async (context): Promise<Partial<IndexPatternsRequestHandlerContext>> => {
-        const savedObjectsClient = context.core.savedObjects.client;
-        const elasticsearchClient = context.core.elasticsearch.client.asCurrentUser;
+        try {
+          const savedObjectsClient = context.core.savedObjects.client;
+          const elasticsearchClient = context.core.elasticsearch.client.asCurrentUser;
 
-        const indexPatterns = await this.indexPatterns.createIndexPatternsService(
-          savedObjectsClient,
-          elasticsearchClient
-        );
+          const indexPatterns = await this.indexPatterns.createIndexPatternsService(
+            savedObjectsClient,
+            elasticsearchClient
+          );
 
-        return {
-          indexPatterns,
-        };
+          return {
+            indexPatterns,
+          };
+        } catch {
+          return {};
+        }
       }
     );
 
