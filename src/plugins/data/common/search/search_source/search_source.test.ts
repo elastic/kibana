@@ -29,7 +29,7 @@ jest.mock('./legacy', () => ({
 
 const getComputedFields = () => ({
   storedFields: [],
-  scriptFields: [],
+  scriptFields: {},
   docvalueFields: [],
 });
 
@@ -51,6 +51,7 @@ const indexPattern2 = ({
 describe('SearchSource', () => {
   let mockSearchMethod: any;
   let searchSourceDependencies: SearchSourceDependencies;
+  let searchSource: SearchSource;
 
   beforeEach(() => {
     mockSearchMethod = jest.fn().mockReturnValue(of({ rawResponse: '' }));
@@ -64,19 +65,12 @@ describe('SearchSource', () => {
         loadingCount$: new BehaviorSubject(0),
       },
     };
-  });
 
-  describe('#setField()', () => {
-    test('sets the value for the property', () => {
-      const searchSource = new SearchSource({}, searchSourceDependencies);
-      searchSource.setField('aggs', 5);
-      expect(searchSource.getField('aggs')).toBe(5);
-    });
+    searchSource = new SearchSource({}, searchSourceDependencies);
   });
 
   describe('#getField()', () => {
     test('gets the value for the property', () => {
-      const searchSource = new SearchSource({}, searchSourceDependencies);
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).toBe(5);
     });
@@ -84,52 +78,391 @@ describe('SearchSource', () => {
 
   describe('#removeField()', () => {
     test('remove property', () => {
-      const searchSource = new SearchSource({}, searchSourceDependencies);
+      searchSource = new SearchSource({}, searchSourceDependencies);
       searchSource.setField('aggs', 5);
       searchSource.removeField('aggs');
       expect(searchSource.getField('aggs')).toBeFalsy();
     });
   });
 
-  describe(`#setField('index')`, () => {
-    describe('auto-sourceFiltering', () => {
-      describe('new index pattern assigned', () => {
-        test('generates a searchSource filter', async () => {
-          const searchSource = new SearchSource({}, searchSourceDependencies);
-          expect(searchSource.getField('index')).toBe(undefined);
-          expect(searchSource.getField('source')).toBe(undefined);
-          searchSource.setField('index', indexPattern);
-          expect(searchSource.getField('index')).toBe(indexPattern);
-          const request = await searchSource.getSearchRequestBody();
-          expect(request._source).toBe(mockSource);
-        });
+  describe('#setField() / #flatten', () => {
+    test('sets the value for the property', () => {
+      searchSource.setField('aggs', 5);
+      expect(searchSource.getField('aggs')).toBe(5);
+    });
 
-        test('removes created searchSource filter on removal', async () => {
-          const searchSource = new SearchSource({}, searchSourceDependencies);
-          searchSource.setField('index', indexPattern);
-          searchSource.setField('index', undefined);
-          const request = await searchSource.getSearchRequestBody();
-          expect(request._source).toBe(undefined);
+    describe('computed fields handling', () => {
+      test('still provides computed fields when no fields are specified', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: ['hello'],
+            scriptFields: { world: {} },
+            docvalueFields: ['@timestamp'],
+          }),
+        } as unknown) as IndexPattern);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.stored_fields).toEqual(['hello']);
+        expect(request.script_fields).toEqual({ world: {} });
+        expect(request.fields).toEqual(['@timestamp']);
+      });
+
+      test('never includes docvalue_fields', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: {},
+            docvalueFields: ['@timestamp'],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['@timestamp']);
+        searchSource.setField('fieldsFromSource', ['foo']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request).not.toHaveProperty('docvalue_fields');
+      });
+
+      test('overrides computed docvalue fields with ones that are provided', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: {},
+            docvalueFields: ['hello'],
+          }),
+        } as unknown) as IndexPattern);
+        // @ts-expect-error TS won't like using this field name, but technically it's possible.
+        searchSource.setField('docvalue_fields', ['world']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request).toHaveProperty('docvalue_fields');
+        expect(request.docvalue_fields).toEqual(['world']);
+      });
+
+      test('allows explicitly provided docvalue fields to override fields API when fetching fieldsFromSource', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: {},
+            docvalueFields: [{ field: 'a', format: 'date_time' }],
+          }),
+        } as unknown) as IndexPattern);
+        // @ts-expect-error TS won't like using this field name, but technically it's possible.
+        searchSource.setField('docvalue_fields', [{ field: 'b', format: 'date_time' }]);
+        searchSource.setField('fields', ['c']);
+        searchSource.setField('fieldsFromSource', ['a', 'b', 'd']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request).toHaveProperty('docvalue_fields');
+        expect(request._source.includes).toEqual(['c', 'a', 'b', 'd']);
+        expect(request.docvalue_fields).toEqual([{ field: 'b', format: 'date_time' }]);
+        expect(request.fields).toEqual(['c', { field: 'a', format: 'date_time' }]);
+      });
+
+      test('allows you to override computed fields if you provide a format', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: {},
+            docvalueFields: [{ field: 'hello', format: 'date_time' }],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', [{ field: 'hello', format: 'strict_date_time' }]);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request).toHaveProperty('fields');
+        expect(request.fields).toEqual([{ field: 'hello', format: 'strict_date_time' }]);
+      });
+
+      test('injects a date format for computed docvalue fields if none is provided', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: {},
+            docvalueFields: [{ field: 'hello', format: 'date_time' }],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['hello']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request).toHaveProperty('fields');
+        expect(request.fields).toEqual([{ field: 'hello', format: 'date_time' }]);
+      });
+
+      test('injects a date format for computed docvalue fields while merging other properties', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: {},
+            docvalueFields: [{ field: 'hello', format: 'date_time', a: 'test', b: 'test' }],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', [{ field: 'hello', a: 'a', c: 'c' }]);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request).toHaveProperty('fields');
+        expect(request.fields).toEqual([
+          { field: 'hello', format: 'date_time', a: 'a', b: 'test', c: 'c' },
+        ]);
+      });
+
+      test('merges provided script fields with computed fields', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: { hello: {} },
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        // @ts-expect-error TS won't like using this field name, but technically it's possible.
+        searchSource.setField('script_fields', { world: {} });
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request).toHaveProperty('script_fields');
+        expect(request.script_fields).toEqual({
+          hello: {},
+          world: {},
         });
       });
 
-      describe('new index pattern assigned over another', () => {
-        test('replaces searchSource filter with new', async () => {
-          const searchSource = new SearchSource({}, searchSourceDependencies);
-          searchSource.setField('index', indexPattern);
-          searchSource.setField('index', indexPattern2);
-          expect(searchSource.getField('index')).toBe(indexPattern2);
-          const request = await searchSource.getSearchRequestBody();
-          expect(request._source).toBe(mockSource2);
+      test(`requests any fields that aren't script_fields from stored_fields`, async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: { hello: {} },
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['hello', 'a', { field: 'c' }]);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.script_fields).toEqual({ hello: {} });
+        expect(request.stored_fields).toEqual(['a', 'c']);
+      });
+
+      test('ignores objects without a `field` property when setting stored_fields', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: { hello: {} },
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['hello', 'a', { foo: 'c' }]);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.script_fields).toEqual({ hello: {} });
+        expect(request.stored_fields).toEqual(['a']);
+      });
+
+      test(`requests any fields that aren't script_fields from stored_fields with fieldsFromSource`, async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: { hello: {} },
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fieldsFromSource', ['hello', 'a']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.script_fields).toEqual({ hello: {} });
+        expect(request.stored_fields).toEqual(['a']);
+      });
+
+      test('defaults to * for stored fields when no fields are provided', async () => {
+        const requestA = await searchSource.getSearchRequestBody();
+        expect(requestA.stored_fields).toEqual(['*']);
+
+        searchSource.setField('fields', ['*']);
+        const requestB = await searchSource.getSearchRequestBody();
+        expect(requestB.stored_fields).toEqual(['*']);
+      });
+
+      test('defaults to * for stored fields when no fields are provided with fieldsFromSource', async () => {
+        searchSource.setField('fieldsFromSource', ['*']);
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.stored_fields).toEqual(['*']);
+      });
+    });
+
+    describe('source filters handling', () => {
+      test('excludes docvalue fields based on source filtering', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: {},
+            docvalueFields: ['@timestamp', 'exclude-me'],
+          }),
+        } as unknown) as IndexPattern);
+        // @ts-expect-error Typings for excludes filters need to be fixed.
+        searchSource.setField('source', { excludes: ['exclude-*'] });
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual(['@timestamp']);
+      });
+
+      test('defaults to source filters from index pattern', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: {},
+            docvalueFields: ['@timestamp', 'foo-bar', 'foo-baz'],
+          }),
+        } as unknown) as IndexPattern);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual(['@timestamp']);
+      });
+
+      test('filters script fields to only include specified fields', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: { hello: {}, world: {} },
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['hello']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.script_fields).toEqual({ hello: {} });
+      });
+    });
+
+    describe('handling for when specific fields are provided', () => {
+      test('fieldsFromSource will request any fields outside of script_fields from _source & stored fields', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: { hello: {}, world: {} },
+            docvalueFields: ['@timestamp'],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fieldsFromSource', [
+          'hello',
+          'world',
+          '@timestamp',
+          'foo-a',
+          'bar-b',
+        ]);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request._source).toEqual({
+          includes: ['@timestamp', 'bar-b'],
+        });
+        expect(request.stored_fields).toEqual(['@timestamp', 'bar-b']);
+      });
+
+      test('filters request when a specific list of fields is provided', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: ['*'],
+            scriptFields: { hello: {}, world: {} },
+            docvalueFields: ['@timestamp', 'date'],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual(['hello', '@timestamp', 'bar']);
+        expect(request.script_fields).toEqual({ hello: {} });
+        expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
+      });
+
+      test('filters request when a specific list of fields is provided with fieldsFromSource', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: ['*'],
+            scriptFields: { hello: {}, world: {} },
+            docvalueFields: ['@timestamp', 'date'],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fieldsFromSource', ['hello', '@timestamp', 'foo-a', 'bar']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request._source).toEqual({
+          includes: ['@timestamp', 'bar'],
+        });
+        expect(request.fields).toEqual(['@timestamp']);
+        expect(request.script_fields).toEqual({ hello: {} });
+        expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
+      });
+
+      test('filters request when a specific list of fields is provided with fieldsFromSource or fields', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: ['*'],
+            scriptFields: { hello: {}, world: {} },
+            docvalueFields: ['@timestamp', 'date', 'time'],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
+        searchSource.setField('fieldsFromSource', ['foo-b', 'date', 'baz']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request._source).toEqual({
+          includes: ['@timestamp', 'bar', 'date', 'baz'],
+        });
+        expect(request.fields).toEqual(['hello', '@timestamp', 'bar', 'date']);
+        expect(request.script_fields).toEqual({ hello: {} });
+        expect(request.stored_fields).toEqual(['@timestamp', 'bar', 'date', 'baz']);
+      });
+    });
+
+    describe(`#setField('index')`, () => {
+      describe('auto-sourceFiltering', () => {
+        describe('new index pattern assigned', () => {
+          test('generates a searchSource filter', async () => {
+            expect(searchSource.getField('index')).toBe(undefined);
+            expect(searchSource.getField('source')).toBe(undefined);
+            searchSource.setField('index', indexPattern);
+            expect(searchSource.getField('index')).toBe(indexPattern);
+            const request = await searchSource.getSearchRequestBody();
+            expect(request._source).toBe(mockSource);
+          });
+
+          test('removes created searchSource filter on removal', async () => {
+            searchSource.setField('index', indexPattern);
+            searchSource.setField('index', undefined);
+            const request = await searchSource.getSearchRequestBody();
+            expect(request._source).toBe(undefined);
+          });
         });
 
-        test('removes created searchSource filter on removal', async () => {
-          const searchSource = new SearchSource({}, searchSourceDependencies);
-          searchSource.setField('index', indexPattern);
-          searchSource.setField('index', indexPattern2);
-          searchSource.setField('index', undefined);
-          const request = await searchSource.getSearchRequestBody();
-          expect(request._source).toBe(undefined);
+        describe('new index pattern assigned over another', () => {
+          test('replaces searchSource filter with new', async () => {
+            searchSource.setField('index', indexPattern);
+            searchSource.setField('index', indexPattern2);
+            expect(searchSource.getField('index')).toBe(indexPattern2);
+            const request = await searchSource.getSearchRequestBody();
+            expect(request._source).toBe(mockSource2);
+          });
+
+          test('removes created searchSource filter on removal', async () => {
+            searchSource.setField('index', indexPattern);
+            searchSource.setField('index', indexPattern2);
+            searchSource.setField('index', undefined);
+            const request = await searchSource.getSearchRequestBody();
+            expect(request._source).toBe(undefined);
+          });
         });
       });
     });
@@ -137,7 +470,7 @@ describe('SearchSource', () => {
 
   describe('#onRequestStart()', () => {
     test('should be called when starting a request', async () => {
-      const searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+      searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
       const options = {};
@@ -147,7 +480,7 @@ describe('SearchSource', () => {
 
     test('should not be called on parent searchSource', async () => {
       const parent = new SearchSource({}, searchSourceDependencies);
-      const searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+      searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
 
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
@@ -162,12 +495,12 @@ describe('SearchSource', () => {
 
     test('should be called on parent searchSource if callParentStartHandlers is true', async () => {
       const parent = new SearchSource({}, searchSourceDependencies);
-      const searchSource = new SearchSource(
-        { index: indexPattern },
-        searchSourceDependencies
-      ).setParent(parent, {
-        callParentStartHandlers: true,
-      });
+      searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies).setParent(
+        parent,
+        {
+          callParentStartHandlers: true,
+        }
+      );
 
       const fn = jest.fn();
       searchSource.onRequestStart(fn);
@@ -192,7 +525,7 @@ describe('SearchSource', () => {
     });
 
     test('should call msearch', async () => {
-      const searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+      searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
       const options = {};
       await searchSource.fetch(options);
       expect(fetchSoon).toBeCalledTimes(1);
@@ -201,7 +534,7 @@ describe('SearchSource', () => {
 
   describe('#search service fetch()', () => {
     test('should call msearch', async () => {
-      const searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+      searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
       const options = {};
 
       await searchSource.fetch(options);
@@ -212,7 +545,6 @@ describe('SearchSource', () => {
   describe('#serialize', () => {
     test('should reference index patterns', () => {
       const indexPattern123 = { id: '123' } as IndexPattern;
-      const searchSource = new SearchSource({}, searchSourceDependencies);
       searchSource.setField('index', indexPattern123);
       const { searchSourceJSON, references } = searchSource.serialize();
       expect(references[0].id).toEqual('123');
@@ -221,7 +553,6 @@ describe('SearchSource', () => {
     });
 
     test('should add other fields', () => {
-      const searchSource = new SearchSource({}, searchSourceDependencies);
       searchSource.setField('highlightAll', true);
       searchSource.setField('from', 123456);
       const { searchSourceJSON } = searchSource.serialize();
@@ -230,7 +561,6 @@ describe('SearchSource', () => {
     });
 
     test('should omit sort and size', () => {
-      const searchSource = new SearchSource({}, searchSourceDependencies);
       searchSource.setField('highlightAll', true);
       searchSource.setField('from', 123456);
       searchSource.setField('sort', { field: SortDirection.asc });
@@ -240,7 +570,6 @@ describe('SearchSource', () => {
     });
 
     test('should serialize filters', () => {
-      const searchSource = new SearchSource({}, searchSourceDependencies);
       const filter = [
         {
           query: 'query',
@@ -257,7 +586,6 @@ describe('SearchSource', () => {
     });
 
     test('should reference index patterns in filters separately from index field', () => {
-      const searchSource = new SearchSource({}, searchSourceDependencies);
       const indexPattern123 = { id: '123' } as IndexPattern;
       searchSource.setField('index', indexPattern123);
       const filter = [
