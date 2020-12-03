@@ -33,7 +33,7 @@ export function handleEvents(
       const query = new EventsQuery({
         pagination: PaginationBuilder.createBuilder(limit, afterEvent),
         indexPatterns: body.indexPatterns,
-        timerange: body.timerange,
+        timeRange: body.timeRange,
       });
       const results = await query.search(client, body.filter);
 

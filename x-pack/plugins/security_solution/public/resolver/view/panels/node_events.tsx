@@ -22,8 +22,9 @@ import { useLinkProps } from '../use_link_props';
 import * as nodeDataModel from '../../models/node_data';
 
 export function NodeEvents({ nodeID }: { nodeID: string }) {
-  const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
-  const processEvent = nodeDataModel.firstEvent(nodeData);
+  const processEvent = useSelector((state: ResolverState) =>
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state)(nodeID))
+  );
   const nodeStats = useSelector((state: ResolverState) => selectors.nodeStats(state)(nodeID));
 
   if (processEvent === undefined || nodeStats === undefined) {

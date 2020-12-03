@@ -41,11 +41,12 @@ const nodeDetailError = i18n.translate('xpack.securitySolution.resolver.panel.no
 });
 
 export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
-  const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
-  const processEvent = nodeDataModel.firstEvent(nodeData);
-  const isNodeDataLoading = nodeData?.status === 'loading';
+  const processEvent = useSelector((state: ResolverState) =>
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state)(nodeID))
+  );
+  const nodeStatus = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
 
-  return isNodeDataLoading ? (
+  return nodeStatus === 'loading' ? (
     <>
       <StyledPanel>
         <PanelLoading />

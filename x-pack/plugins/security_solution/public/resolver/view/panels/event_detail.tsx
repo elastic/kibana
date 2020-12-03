@@ -48,14 +48,16 @@ export const EventDetail = memo(function EventDetail({
 }) {
   const isEventLoading = useSelector(selectors.isCurrentRelatedEventLoading);
   const isTreeLoading = useSelector(selectors.isTreeLoading);
-  const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
+  const processEvent = useSelector((state: ResolverState) =>
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state)(nodeID))
+  );
+  const nodeStatus = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
 
-  const isNodeDataLoading = nodeData?.status === 'loading';
+  const isNodeDataLoading = nodeStatus === 'loading';
   const isLoading = isEventLoading || isTreeLoading || isNodeDataLoading;
 
   const event = useSelector(selectors.currentRelatedEventData);
 
-  const processEvent = nodeDataModel.firstEvent(nodeData);
   return isLoading ? (
     <StyledPanel>
       <PanelLoading />
