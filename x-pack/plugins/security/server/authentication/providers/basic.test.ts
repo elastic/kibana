@@ -34,6 +34,8 @@ describe('BasicAuthenticationProvider', () => {
   let mockOptions: ReturnType<typeof mockAuthenticationProviderOptions>;
   beforeEach(() => {
     mockOptions = mockAuthenticationProviderOptions();
+    mockOptions.urls.loggedOut.mockReturnValue('/some-logged-out-page');
+
     provider = new BasicAuthenticationProvider(mockOptions);
   });
 
@@ -184,30 +186,13 @@ describe('BasicAuthenticationProvider', () => {
       );
     });
 
-    it('redirects to login view if state is `null`.', async () => {
-      await expect(provider.logout(httpServerMock.createKibanaRequest(), null)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
-      );
-    });
-
-    it('always redirects to the login page.', async () => {
+    it('redirects to the logged out URL.', async () => {
       await expect(provider.logout(httpServerMock.createKibanaRequest(), {})).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
+        DeauthenticationResult.redirectTo('/some-logged-out-page')
       );
-    });
 
-    it('passes query string parameters to the login page.', async () => {
-      await expect(
-        provider.logout(
-          httpServerMock.createKibanaRequest({
-            query: { next: '/app/ml', msg: 'SESSION_EXPIRED' },
-          }),
-          {}
-        )
-      ).resolves.toEqual(
-        DeauthenticationResult.redirectTo(
-          '/mock-server-basepath/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED'
-        )
+      await expect(provider.logout(httpServerMock.createKibanaRequest(), null)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/some-logged-out-page')
       );
     });
   });

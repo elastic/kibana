@@ -15,8 +15,8 @@ import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import { ServiceNodeStats } from '../../../../../common/service_map';
 import { ServiceStatsList } from './ServiceStatsList';
-import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { AnomalyDetection } from './AnomalyDetection';
 import { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 

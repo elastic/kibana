@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { EuiBasicTable } from '@elastic/eui';
 import { asPercent, asInteger } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { createHref } from '../../shared/Links/url_helpers';
 
 type CorrelationsApiResponse =

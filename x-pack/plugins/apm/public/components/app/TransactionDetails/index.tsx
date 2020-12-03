@@ -17,19 +17,19 @@ import React, { useMemo } from 'react';
 import { isEmpty, flatten } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { RouteComponentProps } from 'react-router-dom';
-import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
-import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
-import { useWaterfall } from '../../../hooks/useWaterfall';
+import { useTransactionChartsFetcher } from '../../../hooks/use_transaction_charts_fetcher';
+import { useTransactionDistributionFetcher } from '../../../hooks/use_transaction_distribution_fetcher';
+import { useWaterfallFetcher } from './use_waterfall_fetcher';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { TransactionDistribution } from './Distribution';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event_context';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { Correlations } from '../Correlations';
@@ -50,18 +50,20 @@ export function TransactionDetails({
   const { urlParams } = useUrlParams();
   const history = useHistory();
   const {
-    data: distributionData,
-    status: distributionStatus,
-  } = useTransactionDistribution(urlParams);
+    distributionData,
+    distributionStatus,
+  } = useTransactionDistributionFetcher();
 
   const {
-    data: transactionChartsData,
-    status: transactionChartsStatus,
-  } = useTransactionCharts();
+    transactionChartsData,
+    transactionChartsStatus,
+  } = useTransactionChartsFetcher();
 
-  const { waterfall, exceedsMax, status: waterfallStatus } = useWaterfall(
-    urlParams
-  );
+  const {
+    waterfall,
+    exceedsMax,
+    status: waterfallStatus,
+  } = useWaterfallFetcher();
   const { transactionName, transactionType } = urlParams;
 
   useTrackPageview({ app: 'apm', path: 'transaction_details' });

@@ -1,0 +1,30 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      "threat-indicator": {
+        "is_write_index": false
+      }
+    },
+    "index": "threat-indicator-0001",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "agent": {
+          "properties": {
+            "ephemeral_id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "threat": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}

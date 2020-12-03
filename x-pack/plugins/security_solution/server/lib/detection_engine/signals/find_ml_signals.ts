@@ -5,6 +5,7 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { ExceptionListItemSchema } from '../../../../../lists/common';
 
 import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../../ml/server';
@@ -18,6 +19,7 @@ export const findMlSignals = async ({
   anomalyThreshold,
   from,
   to,
+  exceptionItems,
 }: {
   ml: MlPluginSetup;
   request: KibanaRequest;
@@ -26,6 +28,7 @@ export const findMlSignals = async ({
   anomalyThreshold: number;
   from: string;
   to: string;
+  exceptionItems: ExceptionListItemSchema[];
 }): Promise<AnomalyResults> => {
   const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
   const params = {
@@ -33,6 +36,7 @@ export const findMlSignals = async ({
     threshold: anomalyThreshold,
     earliestMs: dateMath.parse(from)?.valueOf() ?? 0,
     latestMs: dateMath.parse(to)?.valueOf() ?? 0,
+    exceptionItems,
   };
   return getAnomalies(params, mlAnomalySearch);
 };
