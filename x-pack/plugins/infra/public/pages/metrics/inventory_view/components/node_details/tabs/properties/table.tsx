@@ -12,6 +12,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { first } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { euiStyled } from '../../../../../../../../../observability/public';
@@ -124,7 +125,7 @@ const ArrayValue = (props: MoreProps) => {
       {!isExpanded && (
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={false}>
-            {values[0]}
+            {first(values)}
             {' ... '}
           </EuiFlexItem>
           <EuiFlexItem>

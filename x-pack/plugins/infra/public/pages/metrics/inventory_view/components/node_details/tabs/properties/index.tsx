@@ -64,7 +64,7 @@ const TabComponent = (props: TabProps) => {
 
   return (
     <TabContent>
-      {hostFields && (
+      {hostFields && hostFields.length > 0 && (
         <TableWrapper>
           <Table
             title={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.hostsHeader', {
@@ -75,7 +75,7 @@ const TabComponent = (props: TabProps) => {
           />
         </TableWrapper>
       )}
-      {cloudFields && (
+      {cloudFields && cloudFields.length > 0 && (
         <TableWrapper>
           <Table
             title={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.cloudHeader', {
@@ -86,7 +86,7 @@ const TabComponent = (props: TabProps) => {
           />
         </TableWrapper>
       )}
-      {agentFields && (
+      {agentFields && agentFields.length > 0 && (
         <TableWrapper>
           <Table
             title={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.agentHeader', {

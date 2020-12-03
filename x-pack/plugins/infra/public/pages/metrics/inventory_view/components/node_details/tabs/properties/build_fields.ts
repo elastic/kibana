@@ -9,7 +9,7 @@ import { InfraMetadata } from '../../../../../../../../common/http_api';
 export const getFields = (metadata: InfraMetadata, group: 'cloud' | 'host' | 'agent') => {
   switch (group) {
     case 'host':
-      return [
+      return prune([
         {
           name: 'host.architecture',
           value: metadata.info?.host?.architecture,
@@ -58,9 +58,9 @@ export const getFields = (metadata: InfraMetadata, group: 'cloud' | 'host' | 'ag
           name: 'host.os.version',
           value: metadata.info?.host?.os?.version,
         },
-      ];
+      ]);
     case 'cloud':
-      return [
+      return prune([
         {
           name: 'cloud.account.id',
           value: metadata.info?.cloud?.account?.id,
@@ -93,9 +93,9 @@ export const getFields = (metadata: InfraMetadata, group: 'cloud' | 'host' | 'ag
           name: 'cloud.region',
           value: metadata.info?.cloud?.region,
         },
-      ];
+      ]);
     case 'agent':
-      return [
+      return prune([
         {
           name: 'agent.id',
           value: metadata.info?.agent?.id,
@@ -108,6 +108,9 @@ export const getFields = (metadata: InfraMetadata, group: 'cloud' | 'host' | 'ag
           name: 'agent.policy',
           value: metadata.info?.agent?.policy,
         },
-      ];
+      ]);
   }
 };
+
+const prune = (fields: Array<{ name: string; value: string | string[] | undefined }>) =>
+  fields.filter((f) => !!f.value);
