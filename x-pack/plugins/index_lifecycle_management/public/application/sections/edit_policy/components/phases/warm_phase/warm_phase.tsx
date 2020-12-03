@@ -131,7 +131,16 @@ export const WarmPhase: FunctionComponent = () => {
         </EuiDescribedFormGroup>
 
         {enabled && (
-          <>
+          <EuiAccordion
+            id="ilmWarmPhaseAdvancedSettings"
+            buttonContent={i18n.translate(
+              'xpack.indexLifecycleMgmt.warmPhase.advancedSettingsButton',
+              {
+                defaultMessage: 'Advanced settings',
+              }
+            )}
+            paddingSize="m"
+          >
             <DescribedFormField
               title={
                 <h3>
@@ -220,25 +229,13 @@ export const WarmPhase: FunctionComponent = () => {
             )}
 
             {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="warm" />}
-
-            <EuiAccordion
-              id="ilmWarmPhaseAdvancedSettings"
-              buttonContent={i18n.translate(
-                'xpack.indexLifecycleMgmt.warmPhase.advancedSettingsButton',
-                {
-                  defaultMessage: 'Advanced settings',
-                }
-              )}
-              paddingSize="m"
-            >
-              {/* Data tier allocation section */}
-              <DataTierAllocationField
-                description={i18nTexts.dataTierAllocation.description}
-                phase={warmProperty}
-              />
-              <SetPriorityInputField phase="warm" />
-            </EuiAccordion>
-          </>
+            {/* Data tier allocation section */}
+            <DataTierAllocationField
+              description={i18nTexts.dataTierAllocation.description}
+              phase={warmProperty}
+            />
+            <SetPriorityInputField phase="warm" />
+          </EuiAccordion>
         )}
       </>
     </div>
