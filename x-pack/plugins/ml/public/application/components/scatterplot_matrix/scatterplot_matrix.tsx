@@ -15,22 +15,29 @@ import { htmlIdGenerator } from '@elastic/eui';
 
 import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 
-import type { SearchResponse7 } from '../../../../../../../common/types/es_client';
+import type { SearchResponse7 } from '../../../../common/types/es_client';
 
-import { getProcessedFields } from '../../../../../components/data_grid';
+import { ml } from '../../services/ml_api_service';
 
-import { ml } from '../../../../../services/ml_api_service';
+import { getProcessedFields } from '../data_grid';
 
-import scatterplotMatrixVegaLiteSpec from './scatterplot_matrix_vega_lite_spec.json';
+import { getScatterplotMatrixVegaLiteSpec } from './scatterplot_matrix_vega_lite_spec';
+
 import './scatterplot_matrix.scss';
 
 interface ScatterplotMatrixProps {
   fields: string[];
   index: string;
   resultsField?: string;
+  color?: string;
 }
 
-export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({ fields, index, resultsField }) => {
+export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
+  fields,
+  index,
+  resultsField,
+  color,
+}) => {
   const [splom, setSplom] = useState<{ items: any[]; columns: string[] } | undefined>();
 
   const fetchStats = async (options: { didCancel: boolean }) => {
@@ -82,40 +89,22 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({ fields, index, r
     const columns = rawColumns.map((column) => `${column.split('-').join('_')}`);
     columns.length = 3;
 
-    // TODO we want more results than just what's visible in data grid
-    scatterplotMatrixVegaLiteSpec.spec.data = {
-      values:
-        resultsField !== undefined
-          ? items
-          : items.map((d) => {
-              d['ml.outlier_score'] = 0;
-              return d;
-            }),
-    };
+    const values =
+      resultsField !== undefined
+        ? items
+        : items.map((d) => {
+            d['ml.outlier_score'] = 0;
+            return d;
+          });
 
-    scatterplotMatrixVegaLiteSpec.repeat = {
-      column: columns,
-      row: columns.slice().reverse(),
-    };
+    const vegaSpec = getScatterplotMatrixVegaLiteSpec(
+      values,
+      columns,
+      resultsField !== undefined,
+      color
+    );
 
-    scatterplotMatrixVegaLiteSpec.transform = columns.map((column) => ({
-      calculate: `datum['${column}']`,
-      as: column,
-    }));
-    scatterplotMatrixVegaLiteSpec.transform.push({
-      calculate: `datum['ml.outlier_score']`,
-      as: 'outlier_score',
-    });
-
-    if (resultsField === undefined) {
-      delete scatterplotMatrixVegaLiteSpec.spec.selection;
-      delete scatterplotMatrixVegaLiteSpec.spec.encoding.color.condition;
-      delete scatterplotMatrixVegaLiteSpec.spec.encoding.opacity.condition;
-      delete scatterplotMatrixVegaLiteSpec.spec.encoding.size.condition;
-      scatterplotMatrixVegaLiteSpec.spec.encoding.color.value = '#369';
-    }
-
-    const vgSpec = vegaLite.compile(scatterplotMatrixVegaLiteSpec).spec;
+    const vgSpec = vegaLite.compile(vegaSpec).spec;
 
     const view = new vega.View(vega.parse(vgSpec))
       .logLevel(vega.Warn) // set view logging level

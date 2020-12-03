@@ -49,7 +49,7 @@ import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/sea
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
-import { ScatterplotMatrix } from '../../../analytics_exploration/components/outlier_exploration/scatterplot_matrix';
+import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
@@ -452,11 +452,22 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
             label={i18n.translate('xpack.ml.dataframe.analytics.create.scatterplotMatrixLabel', {
               defaultMessage: 'Scatterplot matrix',
             })}
+            helpText={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.scatterplotMatrixLabelHelpText',
+              {
+                defaultMessage:
+                  'Visualizes the relationships between pairs of selected included fields',
+              }
+            )}
             fullWidth
           >
             <Fragment />
           </EuiFormRow>
-          <ScatterplotMatrix fields={includes} index={currentIndexPattern.title} />
+          <ScatterplotMatrix
+            fields={includes}
+            index={currentIndexPattern.title}
+            color={jobType === 'classification' ? dependentVariable : undefined}
+          />
         </>
       )}
       {isJobTypeWithDepVar && (

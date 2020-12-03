@@ -10,8 +10,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
+import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
+
 import { DataFrameAnalyticsListRow } from '../../../analytics_management/components/analytics_list/common';
-import { ScatterplotMatrix } from '../outlier_exploration/scatterplot_matrix';
 
 import {
   ExpandableSection,
