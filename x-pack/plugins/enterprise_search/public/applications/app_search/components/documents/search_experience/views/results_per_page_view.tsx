@@ -25,7 +25,7 @@ export const ResultsPerPageView: React.FC<Props> = ({ onChange, options, value }
   const selectedValue = value && !options.includes(value) ? undefined : value;
 
   return (
-    <div className="sui-results-per-page">
+    <div>
       <EuiSelect
         options={options.map(wrapResultsPerPageOptionForEuiSelect)}
         value={selectedValue}
