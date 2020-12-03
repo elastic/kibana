@@ -37,7 +37,7 @@ function BasicOptions<VisParams extends BasicOptionsParams>({
   return (
     <>
       <SelectOption
-        label={i18n.translate('visDefaultEditor.controls.vislibBasicOptions.legendPositionLabel', {
+        label={i18n.translate('visDefaultEditor.options.vislibBasicOptions.legendPositionLabel', {
           defaultMessage: 'Legend position',
         })}
         options={vis.type.editorConfig.collections.legendPositions}
@@ -46,7 +46,7 @@ function BasicOptions<VisParams extends BasicOptionsParams>({
         setValue={setValue}
       />
       <SwitchOption
-        label={i18n.translate('visDefaultEditor.controls.vislibBasicOptions.showTooltipLabel', {
+        label={i18n.translate('visDefaultEditor.options.vislibBasicOptions.showTooltipLabel', {
           defaultMessage: 'Show tooltip',
         })}
         paramName="addTooltip"

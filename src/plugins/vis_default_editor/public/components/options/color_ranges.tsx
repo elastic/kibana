@@ -71,7 +71,7 @@ function ColorRanges({
   return (
     <RangesParamEditor
       data-test-subj={dataTestSubj}
-      error={i18n.translate('visDefaultEditor.controls.colorRanges.errorText', {
+      error={i18n.translate('visDefaultEditor.options.colorRanges.errorText', {
         defaultMessage: 'Each range should be greater than previous.',
       })}
       hidePlaceholders={true}
