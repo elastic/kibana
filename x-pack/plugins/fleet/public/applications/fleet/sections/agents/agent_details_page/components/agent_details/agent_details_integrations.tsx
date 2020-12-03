@@ -31,6 +31,10 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   &.euiAccordion-isOpen .ingest-integration-title-button {
     border-bottom: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
   }
+
+  .euiTableRow:last-child .euiTableRowCell {
+    border-bottom: none;
+  }
 `;
 
 const CollapsablePanel: React.FC<{ id: string; title: React.ReactNode }> = ({
@@ -39,7 +43,7 @@ const CollapsablePanel: React.FC<{ id: string; title: React.ReactNode }> = ({
   children,
 }) => {
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel paddingSize="none" style={{ overflow: 'hidden' }}>
       <StyledEuiAccordion
         id={id}
         arrowDisplay="right"
