@@ -8,7 +8,7 @@ import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
 import { euiStyled } from '../../../../observability/public';
 
-import { LogEntriesCursor } from '../../../common/http_api';
+import { LogEntryCursor } from '../../../common/log_entry';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { LogSourceConfigurationProperties, useLogSource } from '../../containers/logs/log_source';
@@ -28,7 +28,7 @@ export interface LogStreamProps {
   startTimestamp: number;
   endTimestamp: number;
   query?: string;
-  center?: LogEntriesCursor;
+  center?: LogEntryCursor;
   highlight?: string;
   height?: string | number;
   columns?: LogColumnDefinition[];
