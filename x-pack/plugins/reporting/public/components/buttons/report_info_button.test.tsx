@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ReportInfoButton } from './report_info_button';
 
 jest.mock('../../lib/reporting_api_client');

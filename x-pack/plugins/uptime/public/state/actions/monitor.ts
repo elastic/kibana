@@ -6,7 +6,7 @@
 
 import { createAction } from 'redux-actions';
 import { MonitorDetailsActionPayload } from './types';
-import { MonitorError } from '../../../common/runtime_types';
+import { PingError } from '../../../common/runtime_types';
 import { MonitorLocations } from '../../../common/runtime_types';
 import { QueryParams } from './types';
 import { createAsyncAction } from './utils';
@@ -17,7 +17,7 @@ export interface MonitorLocationsPayload extends QueryParams {
 
 export interface MonitorDetailsState {
   monitorId: string;
-  error: MonitorError;
+  error: PingError;
 }
 
 export const getMonitorDetailsAction = createAsyncAction<

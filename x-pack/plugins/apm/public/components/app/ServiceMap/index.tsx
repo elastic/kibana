@@ -5,31 +5,39 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import React, { PropsWithChildren, ReactNode } from 'react';
+import styled from 'styled-components';
 import { useTrackPageview } from '../../../../../observability/public';
 import {
   invalidLicenseMessage,
   isActivePlatinumLicense,
   SERVICE_MAP_TIMEOUT_ERROR,
 } from '../../../../common/service_map';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
-import { useLicense } from '../../../hooks/useLicense';
-import { useTheme } from '../../../hooks/useTheme';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useLicenseContext } from '../../../context/license/use_license_context';
+import { useTheme } from '../../../hooks/use_theme';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { DatePicker } from '../../shared/DatePicker';
 import { LicensePrompt } from '../../shared/LicensePrompt';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
 import { getCytoscapeDivStyle } from './cytoscape_options';
 import { EmptyBanner } from './EmptyBanner';
 import { EmptyPrompt } from './empty_prompt';
-import { TimeoutPrompt } from './timeout_prompt';
 import { Popover } from './Popover';
+import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './useRefDimensions';
 
 interface ServiceMapProps {
   serviceName?: string;
 }
+
+const ServiceMapDatePickerFlexGroup = styled(EuiFlexGroup)`
+  padding: ${({ theme }) => theme.eui.euiSizeM};
+  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+  margin: 0;
+`;
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -58,9 +66,11 @@ function LoadingSpinner() {
   );
 }
 
-export function ServiceMap({ serviceName }: ServiceMapProps) {
+export function ServiceMap({
+  serviceName,
+}: PropsWithChildren<ServiceMapProps>) {
   const theme = useTheme();
-  const license = useLicense();
+  const license = useLicenseContext();
   const { urlParams } = useUrlParams();
 
   const { data = { elements: [] }, status, error } = useFetcher(() => {
@@ -73,7 +83,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     if (start && end) {
       return callApmApi({
         isCachable: false,
-        pathname: '/api/apm/service-map',
+        endpoint: 'GET /api/apm/service-map',
         params: {
           query: {
             start,
@@ -126,24 +136,25 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   }
 
   return (
-    <div
-      data-test-subj="ServiceMap"
-      style={{
-        height: height - parseInt(theme.eui.gutterTypes.gutterLarge, 10),
-      }}
-      ref={ref}
-    >
-      <Cytoscape
-        elements={data.elements}
-        height={height}
-        serviceName={serviceName}
-        style={getCytoscapeDivStyle(theme, status)}
-      >
-        <Controls />
-        {serviceName && <EmptyBanner />}
-        {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-        <Popover focusedServiceName={serviceName} />
-      </Cytoscape>
-    </div>
+    <>
+      <ServiceMapDatePickerFlexGroup justifyContent="flexEnd" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <DatePicker />
+        </EuiFlexItem>
+      </ServiceMapDatePickerFlexGroup>
+      <div data-test-subj="ServiceMap" style={{ height }} ref={ref}>
+        <Cytoscape
+          elements={data.elements}
+          height={height}
+          serviceName={serviceName}
+          style={getCytoscapeDivStyle(theme, status)}
+        >
+          <Controls />
+          {serviceName && <EmptyBanner />}
+          {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+          <Popover focusedServiceName={serviceName} />
+        </Cytoscape>
+      </div>
+    </>
   );
 }

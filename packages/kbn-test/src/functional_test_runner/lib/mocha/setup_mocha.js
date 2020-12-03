@@ -53,6 +53,7 @@ export async function setupMocha(lifecycle, log, config, providers) {
     providers,
     paths: config.get('testFiles'),
     updateBaselines: config.get('updateBaselines'),
+    updateSnapshots: config.get('updateSnapshots'),
   });
 
   // Each suite has a tag that is the path relative to the root of the repo

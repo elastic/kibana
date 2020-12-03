@@ -78,13 +78,19 @@ function getClauseForType(
   const searchAcrossAllNamespaces = namespaces.includes(ALL_NAMESPACES_STRING);
 
   if (registry.isMultiNamespace(type)) {
-    const namespacesFilterClause = searchAcrossAllNamespaces
-      ? {}
-      : { terms: { namespaces: [...namespaces, ALL_NAMESPACES_STRING] } };
+    const typeFilterClause = { term: { type } };
+
+    const namespacesFilterClause = {
+      terms: { namespaces: [...namespaces, ALL_NAMESPACES_STRING] },
+    };
+
+    const must = searchAcrossAllNamespaces
+      ? [typeFilterClause]
+      : [typeFilterClause, namespacesFilterClause];
 
     return {
       bool: {
-        must: [{ term: { type } }, namespacesFilterClause],
+        must,
         must_not: [{ exists: { field: 'namespace' } }],
       },
     };

@@ -5,15 +5,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
-import type { JobObject, JobSavedObjectService } from './service';
-import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
-import { JobType } from '../../common/types/saved_objects';
+import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
+import type { JobSavedObjectService } from './service';
+import { JobType, DeleteJobCheckResponse } from '../../common/types/saved_objects';
 
 import { Job } from '../../common/types/anomaly_detection_jobs';
 import { Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
+import { ResolveMlCapabilities } from '../../common/types/capabilities';
 
 interface JobSavedObjectStatus {
   jobId: string;
@@ -34,14 +33,6 @@ interface JobStatus {
   };
 }
 
-interface SavedObjectJob {
-  [ML_SAVED_OBJECT_TYPE]: {
-    job_id: string;
-    type: JobType;
-  };
-  namespaces: string[];
-}
-
 interface StatusResponse {
   savedObjects: {
     [type in JobType]: JobSavedObjectStatus[];
@@ -57,6 +48,7 @@ export function checksFactory(
 ) {
   async function checkStatus(): Promise<StatusResponse> {
     const jobObjects = await jobSavedObjectService.getAllJobObjects(undefined, false);
+
     // load all non-space jobs and datafeeds
     const { body: adJobs } = await client.asInternalUser.ml.getJobs<{ jobs: Job[] }>();
     const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{
@@ -95,16 +87,17 @@ export function checksFactory(
       }
     );
 
-    const nonSpaceSavedObjects = await _loadAllJobSavedObjects();
+    const allJobObjects = await jobSavedObjectService.getAllJobObjectsForAllSpaces();
+
     const nonSpaceADObjectIds = new Set(
-      nonSpaceSavedObjects
-        .filter(({ type }) => type === 'anomaly-detector')
-        .map(({ jobId }) => jobId)
+      allJobObjects
+        .filter(({ attributes }) => attributes.type === 'anomaly-detector')
+        .map(({ attributes }) => attributes.job_id)
     );
     const nonSpaceDFAObjectIds = new Set(
-      nonSpaceSavedObjects
-        .filter(({ type }) => type === 'data-frame-analytics')
-        .map(({ jobId }) => jobId)
+      allJobObjects
+        .filter(({ attributes }) => attributes.type === 'data-frame-analytics')
+        .map(({ attributes }) => attributes.job_id)
     );
 
     const adObjectIds = new Set(
@@ -163,230 +156,105 @@ export function checksFactory(
     };
   }
 
-  async function repairJobs(simulate: boolean = false) {
-    type Result = Record<string, { success: boolean; error?: any }>;
-    const results: {
-      savedObjectsCreated: Result;
-      savedObjectsDeleted: Result;
-      datafeedsAdded: Result;
-      datafeedsRemoved: Result;
-    } = {
-      savedObjectsCreated: {},
-      savedObjectsDeleted: {},
-      datafeedsAdded: {},
-      datafeedsRemoved: {},
-    };
+  async function canDeleteJobs(
+    request: KibanaRequest,
+    jobType: JobType,
+    jobIds: string[],
+    spacesEnabled: boolean,
+    resolveMlCapabilities: ResolveMlCapabilities
+  ) {
+    if (jobType !== 'anomaly-detector' && jobType !== 'data-frame-analytics') {
+      throw Boom.badRequest('Job type must be "anomaly-detector" or "data-frame-analytics"');
+    }
 
-    const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{
-      datafeeds: Datafeed[];
-    }>();
+    const mlCapabilities = await resolveMlCapabilities(request);
+    if (mlCapabilities === null) {
+      throw Boom.internal('mlCapabilities is not defined');
+    }
 
-    const tasks: Array<() => Promise<void>> = [];
+    if (
+      (jobType === 'anomaly-detector' && mlCapabilities.canDeleteJob === false) ||
+      (jobType === 'data-frame-analytics' && mlCapabilities.canDeleteDataFrameAnalytics === false)
+    ) {
+      // user does not have access to delete jobs.
+      return jobIds.reduce((results, jobId) => {
+        results[jobId] = {
+          canDelete: false,
+          canUntag: false,
+        };
+        return results;
+      }, {} as DeleteJobCheckResponse);
+    }
 
-    const status = await checkStatus();
-    for (const job of status.jobs['anomaly-detector']) {
-      if (job.checks.savedObjectExits === false) {
-        if (simulate === true) {
-          results.savedObjectsCreated[job.jobId] = { success: true };
-        } else {
-          // create AD saved objects for jobs which are missing them
-          const jobId = job.jobId;
-          const datafeedId = job.datafeedId;
-          tasks.push(async () => {
-            try {
-              await jobSavedObjectService.createAnomalyDetectionJob(jobId, datafeedId ?? undefined);
-              results.savedObjectsCreated[job.jobId] = { success: true };
-            } catch (error) {
-              results.savedObjectsCreated[job.jobId] = {
-                success: false,
-                error: error.body ?? error,
-              };
-            }
-          });
-        }
+    if (spacesEnabled === false) {
+      // spaces are disabled, delete only no untagging
+      return jobIds.reduce((results, jobId) => {
+        results[jobId] = {
+          canDelete: true,
+          canUntag: false,
+        };
+        return results;
+      }, {} as DeleteJobCheckResponse);
+    }
+    const canCreateGlobalJobs = await jobSavedObjectService.canCreateGlobalJobs(request);
+
+    const jobObjects = await Promise.all(
+      jobIds.map((id) => jobSavedObjectService.getJobObject(jobType, id))
+    );
+
+    return jobIds.reduce((results, jobId) => {
+      const jobObject = jobObjects.find((j) => j?.attributes.job_id === jobId);
+      if (jobObject === undefined || jobObject.namespaces === undefined) {
+        // job saved object not found
+        results[jobId] = {
+          canDelete: false,
+          canUntag: false,
+        };
+        return results;
       }
-    }
-    for (const job of status.jobs['data-frame-analytics']) {
-      if (job.checks.savedObjectExits === false) {
-        if (simulate === true) {
-          results.savedObjectsCreated[job.jobId] = { success: true };
-        } else {
-          // create DFA saved objects for jobs which are missing them
-          const jobId = job.jobId;
-          tasks.push(async () => {
-            try {
-              await jobSavedObjectService.createDataFrameAnalyticsJob(jobId);
-              results.savedObjectsCreated[job.jobId] = { success: true };
-            } catch (error) {
-              results.savedObjectsCreated[job.jobId] = {
-                success: false,
-                error: error.body ?? error,
-              };
-            }
-          });
-        }
+
+      const { namespaces } = jobObject;
+      const isGlobalJob = namespaces.includes('*');
+
+      // job is in * space, user can see all spaces - delete and no option to untag
+      if (canCreateGlobalJobs && isGlobalJob) {
+        results[jobId] = {
+          canDelete: true,
+          canUntag: false,
+        };
+        return results;
       }
-    }
 
-    for (const job of status.savedObjects['anomaly-detector']) {
-      if (job.checks.jobExists === false) {
-        if (simulate === true) {
-          results.savedObjectsDeleted[job.jobId] = { success: true };
-        } else {
-          // Delete AD saved objects for jobs which no longer exist
-          const jobId = job.jobId;
-          tasks.push(async () => {
-            try {
-              await jobSavedObjectService.deleteAnomalyDetectionJob(jobId);
-              results.savedObjectsDeleted[job.jobId] = { success: true };
-            } catch (error) {
-              results.savedObjectsDeleted[job.jobId] = {
-                success: false,
-                error: error.body ?? error,
-              };
-            }
-          });
-        }
+      // job is in * space, user cannot see all spaces - no untagging, no deleting
+      if (isGlobalJob) {
+        results[jobId] = {
+          canDelete: false,
+          canUntag: false,
+        };
+        return results;
       }
-    }
-    for (const job of status.savedObjects['data-frame-analytics']) {
-      if (job.checks.jobExists === false) {
-        if (simulate === true) {
-          results.savedObjectsDeleted[job.jobId] = { success: true };
-        } else {
-          // Delete DFA saved objects for jobs which no longer exist
-          const jobId = job.jobId;
-          tasks.push(async () => {
-            try {
-              await jobSavedObjectService.deleteDataFrameAnalyticsJob(jobId);
-              results.savedObjectsDeleted[job.jobId] = { success: true };
-            } catch (error) {
-              results.savedObjectsDeleted[job.jobId] = {
-                success: false,
-                error: error.body ?? error,
-              };
-            }
-          });
-        }
+
+      // jobs with are in individual spaces can only be untagged
+      // from current space if the job is in more than 1 space
+      const canUntag = namespaces.length > 1;
+
+      // job is in individual spaces, user cannot see all of them - untag only, no delete
+      if (namespaces.includes('?')) {
+        results[jobId] = {
+          canDelete: false,
+          canUntag,
+        };
+        return results;
       }
-    }
 
-    for (const job of status.savedObjects['anomaly-detector']) {
-      if (job.checks.datafeedExists === true && job.datafeedId === null) {
-        // add datafeed id for jobs where the datafeed exists but the id is missing from the saved object
-        if (simulate === true) {
-          results.datafeedsAdded[job.jobId] = { success: true };
-        } else {
-          const df = datafeeds.datafeeds.find((d) => d.job_id === job.jobId);
-          const jobId = job.jobId;
-          const datafeedId = df?.datafeed_id;
-
-          tasks.push(async () => {
-            try {
-              if (datafeedId !== undefined) {
-                await jobSavedObjectService.addDatafeed(datafeedId, jobId);
-              }
-              results.datafeedsAdded[job.jobId] = { success: true };
-            } catch (error) {
-              results.datafeedsAdded[job.jobId] = { success: false, error };
-            }
-          });
-        }
-      } else if (
-        job.checks.jobExists === true &&
-        job.checks.datafeedExists === false &&
-        job.datafeedId !== null &&
-        job.datafeedId !== undefined
-      ) {
-        // remove datafeed id for jobs where the datafeed no longer exists but the id is populated in the saved object
-        if (simulate === true) {
-          results.datafeedsRemoved[job.jobId] = { success: true };
-        } else {
-          const datafeedId = job.datafeedId;
-          tasks.push(async () => {
-            try {
-              await jobSavedObjectService.deleteDatafeed(datafeedId);
-              results.datafeedsRemoved[job.jobId] = { success: true };
-            } catch (error) {
-              results.datafeedsRemoved[job.jobId] = { success: false, error: error.body ?? error };
-            }
-          });
-        }
-      }
-    }
-    await Promise.allSettled(tasks.map((t) => t()));
-    return results;
-  }
-
-  async function initSavedObjects(simulate: boolean = false, namespaces: string[] = ['*']) {
-    const results: { jobs: Array<{ id: string; type: string }>; success: boolean; error?: any } = {
-      jobs: [],
-      success: true,
-    };
-    const status = await checkStatus();
-
-    const jobs: JobObject[] = [];
-    const types: JobType[] = ['anomaly-detector', 'data-frame-analytics'];
-
-    types.forEach((type) => {
-      status.jobs[type].forEach((job) => {
-        if (job.checks.savedObjectExits === false) {
-          if (simulate === true) {
-            results.jobs.push({ id: job.jobId, type });
-          } else {
-            jobs.push({
-              job_id: job.jobId,
-              datafeed_id: job.datafeedId ?? null,
-              type,
-            });
-          }
-        }
-      });
-    });
-    try {
-      const createResults = await jobSavedObjectService.bulkCreateJobs(jobs, namespaces);
-      createResults.saved_objects.forEach(({ attributes }) => {
-        results.jobs.push({
-          id: attributes.job_id,
-          type: attributes.type,
-        });
-      });
-    } catch (error) {
-      results.success = false;
-      results.error = Boom.boomify(error).output;
-    }
-    return results;
-  }
-
-  async function _loadAllJobSavedObjects() {
-    const { body } = await client.asInternalUser.search<SearchResponse<SavedObjectJob>>({
-      index: '.kibana*',
-      size: 1000,
-      _source: ['ml-job.job_id', 'ml-job.type', 'namespaces'],
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  type: 'ml-job',
-                },
-              },
-            ],
-          },
-        },
-      },
-    });
-
-    return body.hits.hits.map(({ _source }) => {
-      const { job_id: jobId, type } = _source[ML_SAVED_OBJECT_TYPE];
-      return {
-        jobId,
-        type,
-        spaces: _source.namespaces,
+      // job is individual spaces, user can see all of them - delete and option to untag
+      results[jobId] = {
+        canDelete: true,
+        canUntag,
       };
-    });
+      return results;
+    }, {} as DeleteJobCheckResponse);
   }
 
-  return { checkStatus, repairJobs, initSavedObjects };
+  return { checkStatus, canDeleteJobs };
 }

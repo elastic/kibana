@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { migrations } from './migrations';
-import { SavedObjectMigrationContext } from 'src/core/server';
+import { migrations, LensDocShape } from './migrations';
+import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'src/core/server';
 
 describe('Lens migrations', () => {
   describe('7.7.0 missing dimensions in XY', () => {
@@ -505,6 +505,90 @@ describe('Lens migrations', () => {
       // changes to the outcome of this are critical - this test is a safe guard to not introduce changes accidentally
       // if this test fails, make extra sure it's expected
       expect(result).toMatchSnapshot();
+    });
+  });
+
+  describe('7.11.0 remove suggested priority', () => {
+    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+
+    const example = {
+      type: 'lens',
+      attributes: {
+        state: {
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+              layers: {
+                'bd09dc71-a7e2-42d0-83bd-85df8291f03c': {
+                  indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+                  columns: {
+                    '1d9cc16c-1460-41de-88f8-471932ecbc97': {
+                      label: 'products.created_on',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: 'products.created_on',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto' },
+                      suggestedPriority: 0,
+                    },
+                    '66115819-8481-4917-a6dc-8ffb10dd02df': {
+                      label: 'Count of records',
+                      dataType: 'number',
+                      operationType: 'count',
+                      suggestedPriority: 1,
+                      isBucketed: false,
+                      scale: 'ratio',
+                      sourceField: 'Records',
+                    },
+                  },
+                  columnOrder: [
+                    '1d9cc16c-1460-41de-88f8-471932ecbc97',
+                    '66115819-8481-4917-a6dc-8ffb10dd02df',
+                  ],
+                },
+              },
+            },
+          },
+          datasourceMetaData: {
+            filterableIndexPatterns: [
+              { id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f', title: 'kibana_sample_data_ecommerce' },
+            ],
+          },
+          visualization: {
+            legend: { isVisible: true, position: 'right' },
+            preferredSeriesType: 'bar_stacked',
+            layers: [
+              {
+                layerId: 'bd09dc71-a7e2-42d0-83bd-85df8291f03c',
+                accessors: ['66115819-8481-4917-a6dc-8ffb10dd02df'],
+                position: 'top',
+                seriesType: 'bar_stacked',
+                showGridlines: false,
+                xAccessor: '1d9cc16c-1460-41de-88f8-471932ecbc97',
+              },
+            ],
+          },
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+        title: 'Bar chart',
+        visualizationType: 'lnsXY',
+      },
+    };
+
+    it('should remove the suggested priority from all columns', () => {
+      const result = migrations['7.11.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const resultLayers = result.attributes.state.datasourceStates.indexpattern.layers;
+      const layersWithSuggestedPriority = Object.values(resultLayers).reduce(
+        (count, layer) =>
+          count + Object.values(layer.columns).filter((col) => 'suggestedPriority' in col).length,
+        0
+      );
+
+      expect(layersWithSuggestedPriority).toEqual(0);
     });
   });
 });

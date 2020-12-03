@@ -22,14 +22,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentPolicy } from '../../../../types';
-import { useInput, useCore, sendRequest } from '../../../../hooks';
+import { useInput, useStartServices, sendRequest } from '../../../../hooks';
 import { enrollmentAPIKeyRouteService } from '../../../../services';
 
 function useCreateApiKeyForm(
   policyIdDefaultValue: string | undefined,
   onSuccess: (keyId: string) => void
 ) {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const [isLoading, setIsLoading] = useState(false);
   const apiKeyNameInput = useInput('');
   const policyIdInput = useInput(policyIdDefaultValue);
@@ -46,6 +46,9 @@ function useCreateApiKeyForm(
           policy_id: policyIdInput.value,
         }),
       });
+      if (res.error) {
+        throw res.error;
+      }
       policyIdInput.clear();
       apiKeyNameInput.clear();
       setIsLoading(false);

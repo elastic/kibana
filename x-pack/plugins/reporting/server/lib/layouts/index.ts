@@ -5,9 +5,17 @@
  */
 
 import { LevelLogger } from '../';
+import { LayoutSelectorDictionary, Size } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { Layout } from './layout';
 
+export {
+  LayoutParams,
+  LayoutSelectorDictionary,
+  PageSizeParams,
+  PdfImageSize,
+  Size,
+} from '../../../common/types';
 export { createLayout } from './create_layout';
 export { Layout } from './layout';
 export { PreserveLayout } from './preserve_layout';
@@ -26,38 +34,6 @@ export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({
   itemsCountAttribute: 'data-shared-items-count',
   timefilterDurationAttribute: 'data-shared-timefilter-duration',
 });
-
-export interface PageSizeParams {
-  pageMarginTop: number;
-  pageMarginBottom: number;
-  pageMarginWidth: number;
-  tableBorderWidth: number;
-  headingHeight: number;
-  subheadingHeight: number;
-}
-
-export interface LayoutSelectorDictionary {
-  screenshot: string;
-  renderComplete: string;
-  itemsCountAttribute: string;
-  timefilterDurationAttribute: string;
-}
-
-export interface PdfImageSize {
-  width: number;
-  height?: number;
-}
-
-export interface Size {
-  width: number;
-  height: number;
-}
-
-export interface LayoutParams {
-  id: string;
-  dimensions?: Size;
-  selectors?: LayoutSelectorDictionary;
-}
 
 interface LayoutSelectors {
   // Fields that are not part of Layout: the instances

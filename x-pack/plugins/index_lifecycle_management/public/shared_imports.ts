@@ -32,6 +32,8 @@ export {
   TextField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
+export { attemptToURIDecode } from '../../../../src/plugins/es_ui_shared/public';
+
 export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 
 export const useKibana = () => _useKibana<AppServicesContext>();

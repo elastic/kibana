@@ -6,6 +6,7 @@
 
 import { SavedObject, SavedObjectReference } from 'src/core/types';
 import { Tag, TagAttributes } from '../types';
+import { TagsCapabilities } from '../capabilities';
 
 export const createTagReference = (id: string): SavedObjectReference => ({
   type: 'tag',
@@ -33,5 +34,15 @@ export const createTagAttributes = (parts: Partial<TagAttributes> = {}): TagAttr
   name: 'some-tag',
   description: 'Some tag',
   color: '#FF00CC',
+  ...parts,
+});
+
+export const createTagCapabilities = (parts: Partial<TagsCapabilities> = {}): TagsCapabilities => ({
+  view: true,
+  create: true,
+  edit: true,
+  delete: true,
+  assign: true,
+  viewConnections: true,
   ...parts,
 });

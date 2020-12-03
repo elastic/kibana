@@ -31,7 +31,7 @@ import {
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { isSavedObjectEmbeddableInput } from '../embeddables/saved_object_embeddable';
+import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -171,7 +171,7 @@ export abstract class Container<
       return this.children[id] as TEmbeddable;
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise<TEmbeddable>((resolve, reject) => {
       const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
         if (this.output.embeddableLoaded[id]) {
           subscription.unsubscribe();
@@ -181,6 +181,7 @@ export abstract class Container<
         // If we hit this, the panel was removed before the embeddable finished loading.
         if (this.input.panels[id] === undefined) {
           subscription.unsubscribe();
+          // @ts-expect-error undefined in not assignable to TEmbeddable | ErrorEmbeddable
           resolve(undefined);
         }
       });
@@ -244,9 +245,10 @@ export abstract class Container<
 
   private createNewExplicitEmbeddableInput<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput, EmbeddableOutput> = IEmbeddable<
-      TEmbeddableInput
-    >
+    TEmbeddable extends IEmbeddable<
+      TEmbeddableInput,
+      EmbeddableOutput
+    > = IEmbeddable<TEmbeddableInput>
   >(
     id: string,
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,

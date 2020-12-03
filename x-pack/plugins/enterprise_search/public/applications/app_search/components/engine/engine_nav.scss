@@ -15,3 +15,11 @@
     margin-top: $euiSizeXS;
   }
 }
+
+.appSearchNavIcons {
+  // EUI override
+  &.euiFlexItem {
+    flex-grow: 0;
+    flex-direction: row;
+  }
+}

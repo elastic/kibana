@@ -50,6 +50,7 @@ export interface EditorFrameProps {
     filterableIndexPatterns: string[];
     doc: Document;
     isSaveable: boolean;
+    activeData?: Record<string, Datatable>;
   }) => void;
   showNoDataPopover: () => void;
 }
@@ -71,9 +72,6 @@ export interface EditorFrameSetup {
 export interface EditorFrameStart {
   createInstance: () => Promise<EditorFrameInstance>;
 }
-
-// Hints the default nesting to the data source. 0 is the highest priority
-export type DimensionPriority = 0 | 1 | 2;
 
 export interface TableSuggestionColumn {
   columnId: string;
@@ -169,6 +167,7 @@ export interface Datasource<T = unknown, P = unknown> {
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
   canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
+  updateStateOnCloseDimension?: (props: { layerId: string; columnId: string; state: T }) => T;
 
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
@@ -220,11 +219,6 @@ interface SharedDimensionProps {
    */
   filterOperations: (operation: OperationMetadata) => boolean;
 
-  /** Visualizations can hint at the role this dimension would play, which
-   * affects the default ordering of the query
-   */
-  suggestedPriority?: DimensionPriority;
-
   /** Some dimension editors will allow users to change the operation grouping
    * from the panel, and this lets the visualization hint that it doesn't want
    * users to have that level of control
@@ -250,7 +244,6 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
   dragDropContext: DragContextState;
-  onClick: () => void;
 };
 
 export interface DatasourceLayerPanelProps<T> {
@@ -349,12 +342,19 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   setState: (newState: T) => void;
 };
 
+export interface AccessorConfig {
+  columnId: string;
+  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none';
+  color?: string;
+  palette?: string[];
+}
+
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
 
   /** ID is passed back to visualization. For example, `x` */
   groupId: string;
-  accessors: string[];
+  accessors: AccessorConfig[];
   supportsMoreColumns: boolean;
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;
@@ -541,7 +541,10 @@ export interface Visualization<T = unknown> {
    * Visualizations can provide a custom icon which will open a layer-specific popover
    * If no icon is provided, gear icon is default
    */
-  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
+  getLayerContextMenuIcon?: (opts: {
+    state: T;
+    layerId: string;
+  }) => { icon: IconType | 'gear'; label: string } | undefined;
 
   /**
    * The frame is telling the visualization to update or set a dimension based on user interaction
@@ -595,6 +598,11 @@ export interface Visualization<T = unknown> {
     state: T,
     frame: FramePublicAPI
   ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+
+  /**
+   * The frame calls this function to display warnings about visualization
+   */
+  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
 }
 
 export interface LensFilterEvent {

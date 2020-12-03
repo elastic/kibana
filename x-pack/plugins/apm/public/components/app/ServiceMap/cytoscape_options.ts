@@ -15,7 +15,7 @@ import {
   getServiceHealthStatusColor,
   ServiceHealthStatus,
 } from '../../../../common/service_health_status';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { defaultIcon, iconForNode } from './icons';
 
 export const popoverWidth = 280;
@@ -252,7 +252,6 @@ center,
 ${theme.eui.euiColorLightShade}`,
   backgroundSize: `${theme.eui.euiSizeL} ${theme.eui.euiSizeL}`,
   cursor: `${status === FETCH_STATUS.LOADING ? 'wait' : 'grab'}`,
-  margin: `-${theme.eui.gutterTypes.gutterLarge}`,
   marginTop: 0,
 });
 

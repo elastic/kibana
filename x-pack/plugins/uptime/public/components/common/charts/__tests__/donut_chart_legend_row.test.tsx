@@ -5,7 +5,7 @@
  */
 
 import { DonutChartLegendRow } from '../donut_chart_legend_row';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 describe('DonutChartLegendRow', () => {

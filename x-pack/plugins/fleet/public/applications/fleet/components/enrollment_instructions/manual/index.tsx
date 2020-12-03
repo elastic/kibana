@@ -78,7 +78,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
               <EuiLink
                 target="_blank"
                 external
-                href="https://www.elastic.co/guide/en/ingest-management/current/elastic-agent-installation-configuration.html"
+                href="https://www.elastic.co/guide/en/fleet/current/elastic-agent-installation-configuration.html"
               >
                 <FormattedMessage
                   id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"

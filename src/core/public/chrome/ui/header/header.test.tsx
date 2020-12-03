@@ -20,11 +20,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { StubBrowserStorage, mountWithIntl } from '@kbn/test/jest';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',

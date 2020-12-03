@@ -20,11 +20,7 @@
 import { Transform } from 'stream';
 import { ExecaChildProcess } from 'execa';
 
-import {
-  createPromiseFromStreams,
-  createSplitStream,
-  createMapStream,
-} from '../../../core/server/utils';
+import { createPromiseFromStreams, createSplitStream, createMapStream } from '@kbn/utils';
 
 // creates a stream that skips empty lines unless they are followed by
 // another line, preventing the empty lines produced by splitStream
@@ -69,13 +65,13 @@ export async function watchStdioForLine(
       }
     }),
     createPromiseFromStreams([
-      proc.stdout,
+      proc.stdout!, // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
       createSplitStream('\n'),
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),
     ]),
     createPromiseFromStreams([
-      proc.stderr,
+      proc.stderr!, // TypeScript note: As long as the proc stdio[1] is 'pipe', then stderr will not be null
       createSplitStream('\n'),
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),

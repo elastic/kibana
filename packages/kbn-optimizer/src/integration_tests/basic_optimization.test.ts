@@ -233,6 +233,10 @@ it('uses cache on second run and exist cleanly', async () => {
 });
 
 it('prepares assets for distribution', async () => {
+  if (process.env.CODE_COVERAGE) {
+    // test fails when testing coverage because source includes instrumentation, so skip it
+    return;
+  }
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
@@ -261,7 +265,6 @@ const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabe
 
   // Verify the brotli variant matches
   expect(
-    // @ts-expect-error @types/node is missing the brotli functions
     Zlib.brotliDecompressSync(
       Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
     ).toString()

@@ -135,7 +135,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
           verticalPosition="center"
           horizontalPosition="center"
         >
-          <EuiTitle size="l">
+          <EuiTitle size="l" data-test-subj="policyTitle">
             <h1>
               {isNewPolicy
                 ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {

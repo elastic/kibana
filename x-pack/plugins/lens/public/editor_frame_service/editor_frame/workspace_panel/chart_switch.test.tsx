@@ -12,7 +12,7 @@ import {
   createMockDatasource,
 } from '../../mocks';
 import { EuiKeyPadMenuItem } from '@elastic/eui';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@kbn/test/jest';
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../../types';
 import { Action } from '../state_management';
 import { ChartSwitch } from './chart_switch';

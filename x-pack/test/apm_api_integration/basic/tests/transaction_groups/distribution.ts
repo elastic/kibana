@@ -7,7 +7,6 @@ import expect from '@kbn/expect';
 import qs from 'querystring';
 import { isEmpty } from 'lodash';
 import archives_metadata from '../../../common/archives_metadata';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -20,7 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const url = `/api/apm/services/opbeans-java/transaction_groups/distribution?${qs.stringify({
     start: metadata.start,
     end: metadata.end,
-    uiFilters: {},
+    uiFilters: encodeURIComponent('{}'),
     transactionName: 'APIRestController#stats',
     transactionType: 'request',
   })}`;

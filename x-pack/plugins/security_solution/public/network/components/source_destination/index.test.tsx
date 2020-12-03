@@ -9,6 +9,7 @@ import { shallow } from 'enzyme';
 import { get } from 'lodash/fp';
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../common/test_utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
 import '../../../common/mock/match_media';
@@ -189,9 +190,11 @@ describe('SourceDestination', () => {
   test('it renders the destination ip and port, separated with a colon', () => {
     const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination-ip-and-port"]').first().text()).toEqual(
-      '10.1.2.3:80'
-    );
+    expect(
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="destination-ip-and-port"]').first().text()
+      )
+    ).toEqual('10.1.2.3:80');
   });
 
   test('it renders destination.packets', () => {
@@ -313,9 +316,9 @@ describe('SourceDestination', () => {
   test('it renders the source ip and port, separated with a colon', () => {
     const wrapper = mount(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source-ip-and-port"]').first().text()).toEqual(
-      '192.168.1.2:9987'
-    );
+    expect(
+      removeExternalLinkText(wrapper.find('[data-test-subj="source-ip-and-port"]').first().text())
+    ).toEqual('192.168.1.2:9987');
   });
 
   test('it renders source.packets', () => {

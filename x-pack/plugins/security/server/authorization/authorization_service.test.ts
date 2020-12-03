@@ -22,7 +22,7 @@ import { authorizationModeFactory } from './mode';
 import { privilegesFactory } from './privileges';
 import { AuthorizationService } from '.';
 
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import {
   coreMock,
   elasticsearchServiceMock,

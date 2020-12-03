@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiEmptyPrompt,
+  EuiText,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   PackageInfo,
   RegistryStream,
@@ -13,7 +20,7 @@ import {
 } from '../../../types';
 import { Loading } from '../../../components';
 import { PackagePolicyValidationResults } from './services';
-import { PackagePolicyInputPanel, CustomPackagePolicy } from './components';
+import { PackagePolicyInputPanel } from './components';
 import { CreatePackagePolicyFrom } from './types';
 
 const findStreamsForInputType = (
@@ -99,11 +106,19 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         </EuiFlexGroup>
       </>
     ) : (
-      <CustomPackagePolicy
-        from={from}
-        packageName={packageInfo.name}
-        packagePolicy={packagePolicy}
-        packagePolicyId={packagePolicyId}
+      <EuiEmptyPrompt
+        iconType="checkInCircleFilled"
+        iconColor="secondary"
+        body={
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.noPolicyOptionsMessage"
+                defaultMessage="Nothing to configure"
+              />
+            </p>
+          </EuiText>
+        }
       />
     );
 

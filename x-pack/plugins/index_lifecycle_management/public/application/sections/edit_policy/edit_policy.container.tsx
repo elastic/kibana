@@ -9,7 +9,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useKibana } from '../../../shared_imports';
+import { useKibana, attemptToURIDecode } from '../../../shared_imports';
 
 import { useLoadPoliciesList } from '../../services/api';
 import { getPolicyByName } from '../../lib/policies';
@@ -90,13 +90,13 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
     );
   }
 
-  const existingPolicy = getPolicyByName(policies, policyName);
+  const existingPolicy = getPolicyByName(policies, attemptToURIDecode(policyName));
 
   return (
     <EditPolicyContextProvider
       value={{
         isNewPolicy: !existingPolicy?.policy,
-        policyName,
+        policyName: attemptToURIDecode(policyName),
         policy: existingPolicy?.policy ?? defaultPolicy,
         existingPolicies: policies,
         getUrlForApp,

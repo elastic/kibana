@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ML_ERRORS } from '../../../../../common/anomaly_detection';
-import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { createJobs } from './create_jobs';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 
@@ -42,7 +42,7 @@ export function AddEnvironments({
   const { data = [], status } = useFetcher(
     (callApmApi) =>
       callApmApi({
-        pathname: `/api/apm/settings/anomaly-detection/environments`,
+        endpoint: `GET /api/apm/settings/anomaly-detection/environments`,
       }),
     [],
     { preservePreviousData: false }

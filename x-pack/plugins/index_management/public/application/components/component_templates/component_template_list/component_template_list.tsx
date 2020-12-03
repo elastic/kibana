@@ -84,7 +84,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
           }),
           icon: 'pencil',
           handleActionClick: () =>
-            goToEditComponentTemplate(attemptToURIDecode(componentTemplateName)),
+            goToEditComponentTemplate(attemptToURIDecode(componentTemplateName)!),
         },
         {
           name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.cloneActionLabel', {
@@ -92,7 +92,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
           }),
           icon: 'copy',
           handleActionClick: () =>
-            goToCloneComponentTemplate(attemptToURIDecode(componentTemplateName)),
+            goToCloneComponentTemplate(attemptToURIDecode(componentTemplateName)!),
         },
         {
           name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.deleteButtonLabel', {
@@ -103,7 +103,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
             details._kbnMeta.usedBy.length > 0,
           closePopoverOnClick: true,
           handleActionClick: () => {
-            setComponentTemplatesToDelete([attemptToURIDecode(componentTemplateName)]);
+            setComponentTemplatesToDelete([attemptToURIDecode(componentTemplateName)!]);
           },
         },
       ];

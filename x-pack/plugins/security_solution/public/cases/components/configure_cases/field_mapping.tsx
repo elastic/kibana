@@ -14,16 +14,16 @@ import {
   ActionType,
   ThirdPartyField,
 } from '../../containers/configure/types';
-import { FieldMappingRow } from './field_mapping_row';
-import * as i18n from './translations';
-
-import { connectorsConfiguration } from '../../../common/lib/connectors/config';
-import { setActionTypeToMapping, setThirdPartyToMapping } from './utils';
 import {
   ThirdPartyField as ConnectorConfigurationThirdPartyField,
   AllThirdPartyFields,
-} from '../../../common/lib/connectors/types';
-import { createDefaultMapping } from '../../../common/lib/connectors/utils';
+  createDefaultMapping,
+  connectorsConfiguration,
+} from '../connectors';
+
+import { FieldMappingRow } from './field_mapping_row';
+import * as i18n from './translations';
+import { setActionTypeToMapping, setThirdPartyToMapping } from './utils';
 
 const FieldRowWrapper = styled.div`
   margin-top: 8px;

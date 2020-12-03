@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl as shallow } from '@kbn/test/jest';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
 import { ToolbarPopover } from '../shared_components';
 

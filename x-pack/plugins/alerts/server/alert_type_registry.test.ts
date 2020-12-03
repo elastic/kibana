@@ -95,6 +95,33 @@ describe('register()', () => {
     );
   });
 
+  test('throws if AlertType action groups contains reserved group id', () => {
+    const alertType = {
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+        {
+          id: 'recovered',
+          name: 'Recovered',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      executor: jest.fn(),
+      producer: 'alerts',
+    };
+    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+
+    expect(() => registry.register(alertType)).toThrowError(
+      new Error(
+        `Alert type [id="${alertType.id}"] cannot be registered. Action groups [recovered] are reserved by the framework.`
+      )
+    );
+  });
+
   test('registers the executor with the task manager', () => {
     const alertType = {
       id: 'test',
@@ -201,6 +228,10 @@ describe('get()', () => {
             "id": "default",
             "name": "Default",
           },
+          Object {
+            "id": "recovered",
+            "name": "Recovered",
+          },
         ],
         "actionVariables": Object {
           "context": Array [],
@@ -254,6 +285,10 @@ describe('list()', () => {
             Object {
               "id": "testActionGroup",
               "name": "Test Action Group",
+            },
+            Object {
+              "id": "recovered",
+              "name": "Recovered",
             },
           ],
           "actionVariables": Object {
