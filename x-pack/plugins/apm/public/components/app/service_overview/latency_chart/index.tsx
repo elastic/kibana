@@ -14,7 +14,7 @@ import { useTransactionChartsFetcher } from '../../../../hooks/use_transaction_c
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { getResponseTimeTickFormatter } from '../../../shared/charts/transaction_charts/helper';
 import { useFormatter } from '../../../shared/charts/transaction_charts/use_formatter';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import * as urlHelpers from '../../../shared/Links/url_helpers';
 
 interface Props {
   height?: number;
@@ -48,20 +48,6 @@ export function LatencyChart({ height }: Props) {
   //   text: title,
   // }));
 
-  const updateAggregationType = useCallback(
-    (selectedAggregationType: string) => {
-      const newLocation = {
-        ...history.location,
-        search: fromQuery({
-          ...toQuery(history.location.search),
-          aggregationType: selectedAggregationType,
-        }),
-      };
-      history.push(newLocation);
-    },
-    [history]
-  );
-
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -86,7 +72,9 @@ export function LatencyChart({ height }: Props) {
               options={options}
               value={aggregationType}
               onChange={(nextOption) => {
-                updateAggregationType(nextOption.target.value);
+                urlHelpers.push(history, {
+                  query: { aggregationType: nextOption.target.value },
+                });
               }}
             />
           </EuiFlexItem>
