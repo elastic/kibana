@@ -10,7 +10,6 @@ import { CreateSourceEditor } from './create_source_editor';
 import { ESGeoLineSource, geoLineTitle, REQUIRES_GOLD_LICENSE_MSG } from './es_geo_line_source';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { LAYER_WIZARD_CATEGORY, STYLE_TYPE, VECTOR_STYLES } from '../../../../common/constants';
-import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 import { getIsGoldPlus } from '../../../licensed_features';
@@ -40,7 +39,6 @@ export const geoLineLayerWizardConfig: LayerWizard = {
         return;
       }
 
-      const defaultDynamicProperties = getDefaultDynamicProperties();
       const layerDescriptor = VectorLayer.createDescriptor({
         sourceDescriptor: ESGeoLineSource.createDescriptor(sourceConfig),
         style: VectorStyle.createDescriptor({
