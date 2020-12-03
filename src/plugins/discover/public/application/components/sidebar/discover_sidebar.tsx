@@ -100,7 +100,7 @@ export function DiscoverSidebar({
   useNewFieldsApi,
 }: DiscoverSidebarProps) {
   const [showFields, setShowFields] = useState(false);
-  const [fields, setFields] = useState<IndexPatternField[] | null>(null);
+  const [fields, setFields] = useState<IndexPatternField[] | null>(undefined);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
   useEffect(() => {
@@ -127,13 +127,11 @@ export function DiscoverSidebar({
     selected: selectedFields,
     popular: popularFields,
     unpopular: unpopularFields,
-  } = useMemo(() => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilterState), [
-    fields,
-    columns,
-    popularLimit,
-    fieldCounts,
-    fieldFilterState,
-  ]);
+  } = useMemo(
+    () =>
+      groupFields(fields, columns, popularLimit, fieldCounts, fieldFilterState, useNewFieldsApi),
+    [columns, fieldCounts, fieldFilterState, fields, popularLimit, useNewFieldsApi]
+  );
 
   const fieldTypes = useMemo(() => {
     const result = ['any'];
@@ -146,6 +144,27 @@ export function DiscoverSidebar({
     }
     return result;
   }, [fields]);
+
+  const getMultiFields = () => {
+    if (!useNewFieldsApi || !fields) {
+      return undefined;
+    }
+    const map = new Map();
+    fields.forEach((field) => {
+      const parent = field.spec?.subType?.multi?.parent;
+      if (parent) {
+        if (!map.has(parent)) {
+          map.set(parent, []);
+        }
+        const value = map.get(parent);
+        value.push(field);
+        map.set(parent, value);
+      }
+    });
+    return map;
+  };
+
+  const multiFields = getMultiFields();
 
   if (!selectedIndexPattern || !fields) {
     return null;
@@ -280,6 +299,7 @@ export function DiscoverSidebar({
                         onAddFilter={onAddFilter}
                         getDetails={getDetailsByField}
                         trackUiMetric={trackUiMetric}
+                        multiFields={multiFields?.get(field.name)}
                       />
                     </li>
                   );
@@ -310,6 +330,7 @@ export function DiscoverSidebar({
                     onAddFilter={onAddFilter}
                     getDetails={getDetailsByField}
                     trackUiMetric={trackUiMetric}
+                    multiFields={multiFields?.get(field.name)}
                   />
                 </li>
               );
