@@ -19633,7 +19633,6 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText": "PagerDuty でイベントを送信します。",
     "xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectCriticalOptionLabel": "重大",
     "xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectErrorOptionLabel": "エラー",
-    "xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectFieldLabel": "深刻度",
     "xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectInfoOptionLabel": "情報",
     "xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectWarningOptionLabel": "警告",
     "xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.sourceTextFieldLabel": "ソース (任意)",

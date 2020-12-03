@@ -107,7 +107,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectFieldLabel',
               {
-                defaultMessage: 'Severity',
+                defaultMessage: 'Severity (optional)',
               }
             )}
           >
