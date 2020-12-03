@@ -1706,7 +1706,6 @@ describe('state_helpers', () => {
   describe('getErrorMessages', () => {
     it('should collect errors from the operation definitions', () => {
       const mock = jest.fn().mockReturnValue(['error 1']);
-      // @ts-expect-error not statically analyzed
       operationDefinitionMap.testReference.getErrorMessage = mock;
       const errors = getErrorMessages({
         indexPatternId: '1',
