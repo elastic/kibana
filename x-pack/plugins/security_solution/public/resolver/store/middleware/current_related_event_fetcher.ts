@@ -53,7 +53,7 @@ export function CurrentRelatedEventFetcher(
       from.setDate(today.getDate() - 2);
       const to = new Date();
       to.setDate(today.getDate() + 14);
-      const timerange = {
+      const timeRange = {
         from,
         to,
       };
@@ -65,7 +65,7 @@ export function CurrentRelatedEventFetcher(
           eventTimestamp: currentEventTimestamp,
           eventID: currentEventID,
           indexPatterns: dbParams?.indices ?? [],
-          timerange,
+          timeRange,
         });
       } catch (error) {
         api.dispatch({

@@ -344,12 +344,12 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
     beforeEach(async () => {
       const nodeDataError = ({
         ids,
-        timerange,
+        timeRange,
         indexPatterns,
         limit,
       }: {
         ids: string[];
-        timerange: TimeRange;
+        timeRange: TimeRange;
         indexPatterns: string[];
         limit: number;
       }): Promise<SafeResolverEvent[]> => {
@@ -357,7 +357,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
           throw new Error('fake error');
         }
 
-        return generatorDAL.nodeData({ ids, timeRange: timerange, indexPatterns, limit });
+        return generatorDAL.nodeData({ ids, timeRange, indexPatterns, limit });
       };
 
       // create a resolver simulator, using the data access layer and an arbitrary component instance ID

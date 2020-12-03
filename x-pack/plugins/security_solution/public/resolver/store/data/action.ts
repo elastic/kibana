@@ -11,7 +11,7 @@ import {
   SafeResolverEvent,
   ResolverSchema,
 } from '../../../../common/endpoint/types';
-import { FetchedNodeData, TreeFetcherParameters } from '../../types';
+import { TreeFetcherParameters } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';

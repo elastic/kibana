@@ -387,14 +387,6 @@ export const newIDsToRequest: (
 );
 
 /**
- * Returns true if we are currently loading the node's data.
- */
-export const isNodeDataLoading = composeSelectors(
-  dataStateSelector,
-  dataSelectors.isNodeDataLoading
-);
-
-/**
  * Returns the schema for the current resolver tree. Currently, only used in the graph controls panel.
  */
 export const resolverTreeSourceAndSchema = composeSelectors(

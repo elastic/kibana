@@ -147,19 +147,6 @@ export const nodeDataStatus: (state: DataState) => (id: string) => NodeDataStatu
 );
 
 /**
- * Returns a function that can be called to retrieve whether the node is in the loading state.
- */
-export const isNodeDataLoading: (state: DataState) => (id: string) => boolean = createSelector(
-  nodeDataStatus,
-  (nodeState) => {
-    return (id: string) => {
-      const state = nodeState(id);
-      return state === 'loading';
-    };
-  }
-);
-
-/**
  * Nodes that will be graphed.
  */
 export const graphableNodes = createSelector(resolverTreeResponse, function (treeResponse?) {

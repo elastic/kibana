@@ -43,7 +43,7 @@ export function ResolverTreeFetcher(
     from.setDate(today.getDate() - 2);
     const to = new Date();
     to.setDate(today.getDate() + 14);
-    const timerange = {
+    const timeRange = {
       from,
       to,
     };
@@ -64,7 +64,6 @@ export function ResolverTreeFetcher(
         payload: databaseParameters,
       });
       try {
-        // TODO: Update to use the schema that's passed back!
         const matchingEntities: ResolverEntityIndex = await dataAccessLayer.entities({
           _id: databaseParameters.databaseDocumentID,
           indices: databaseParameters.indices ?? [],
@@ -83,7 +82,7 @@ export function ResolverTreeFetcher(
         result = await dataAccessLayer.resolverTree({
           dataId: entityIDToFetch,
           schema: dataSourceSchema,
-          timerange,
+          timeRange,
           indices: databaseParameters.indices ?? [],
           ancestors: numberOfAncestors,
           descendants: numberOfDescendants,

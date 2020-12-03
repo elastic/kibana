@@ -217,7 +217,9 @@ const UnstyledProcessEventDot = React.memo(
     } = React.createRef();
     const colorMap = useColors();
 
-    const nodeState = useSelector(selectors.nodeDataStatus)(nodeID);
+    const nodeState = useSelector((state: ResolverState) =>
+      selectors.nodeDataStatus(state)(nodeID)
+    );
     const isNodeLoading = nodeState === 'loading';
     const cubeClassName = isNodeLoading ? 'cube loading' : 'cube';
 

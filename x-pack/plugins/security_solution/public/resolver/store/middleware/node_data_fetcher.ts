@@ -63,7 +63,7 @@ export function NodeDataFetcher(
     from.setDate(today.getDate() - 2);
     const to = new Date();
     to.setDate(today.getDate() + 14);
-    const timerange = {
+    const timeRange = {
       from,
       to,
     };
@@ -72,7 +72,7 @@ export function NodeDataFetcher(
     try {
       results = await dataAccessLayer.nodeData({
         ids: Array.from(newIDsToRequest),
-        timeRange: timerange,
+        timeRange,
         indexPatterns: dbParams?.indices ?? [],
         limit: nodeDataLimit,
       });

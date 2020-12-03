@@ -141,7 +141,7 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
   const isOrigin = useSelector((state: ResolverState) => {
     return selectors.originID(state) === nodeID;
   });
-  const nodeState = useSelector(selectors.nodeDataStatus)(nodeID);
+  const nodeState = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
   const { descriptionText } = useColors();
   const linkProps = useLinkProps({ panelView: 'nodeDetail', panelParameters: { nodeID } });
   const dispatch: (action: ResolverAction) => void = useDispatch();

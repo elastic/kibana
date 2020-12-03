@@ -79,7 +79,7 @@ const NodeDetailView = memo(function ({
   nodeID: string;
 }) {
   const processName = eventModel.processNameSafeVersion(processEvent);
-  const nodeState = useSelector(selectors.nodeDataStatus)(nodeID);
+  const nodeState = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
   const relatedEventTotal = useSelector((state: ResolverState) => {
     return selectors.relatedEventTotalCount(state)(nodeID);
   });

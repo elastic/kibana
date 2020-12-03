@@ -47,7 +47,7 @@ export function RelatedEventsFetcher(
       from.setDate(today.getDate() - 2);
       const to = new Date();
       to.setDate(today.getDate() + 14);
-      const timerange = {
+      const timeRange = {
         from,
         to,
       };
@@ -59,14 +59,14 @@ export function RelatedEventsFetcher(
             category: eventCategory,
             after: cursor,
             indexPatterns: dbParams?.indices ?? [],
-            timerange,
+            timeRange,
           });
         } else {
           result = await dataAccessLayer.eventsWithEntityIDAndCategory({
             entityID: nodeID,
             category: eventCategory,
             indexPatterns: dbParams?.indices ?? [],
-            timerange,
+            timeRange,
           });
         }
       } catch (error) {
