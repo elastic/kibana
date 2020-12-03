@@ -18,11 +18,16 @@
  */
 
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { VisualizationController } from '../../visualizations/public';
 import { TileMapVisualizationDependencies } from './plugin';
 import { TileMapVisRenderValue } from './tile_map_fn';
+import { TileMapVisConfig, TileMapVisData } from './types';
 
-const tableVisRegistry = new Map<HTMLElement, VisualizationController>();
+interface TileMapVisController {
+  render(visData?: TileMapVisData, visConfig?: TileMapVisConfig): Promise<void>;
+  destroy(): void;
+}
+
+const tableVisRegistry = new Map<HTMLElement, TileMapVisController>();
 
 export const getTileMapRenderer: (
   deps: TileMapVisualizationDependencies
@@ -41,10 +46,17 @@ export const getTileMapRenderer: (
         domNode,
         handlers,
         config.visConfig
-      ) as VisualizationController;
+      ) as TileMapVisController;
       tableVisRegistry.set(domNode, registeredController);
 
+      const onUiStateChange = () => {
+        registeredController?.render();
+      };
+
+      handlers.uiState?.on('change', onUiStateChange);
+
       handlers.onDestroy(() => {
+        handlers.uiState?.off('change', onUiStateChange);
         registeredController?.destroy();
         tableVisRegistry.delete(domNode);
       });

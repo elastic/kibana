@@ -71,6 +71,7 @@ export function BaseMapsVisualizationProvider() {
       await this._mapIsLoaded;
       this._kibanaMap.resize();
       this._params = visParams;
+      this._esResponse = esResponse;
       await this._updateParams();
 
       if (this._hasESResponseChanged(esResponse)) {
