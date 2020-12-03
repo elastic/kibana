@@ -1481,4 +1481,41 @@ describe('IndexPatternDimensionEditorPanel', () => {
       },
     });
   });
+
+  it('should hide the top level field selector when switching from non-reference to reference', () => {
+    wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
+
+    expect(wrapper.find('ReferenceEditor')).toHaveLength(0);
+
+    wrapper
+      .find('button[data-test-subj="lns-indexPatternDimension-derivative incompatible"]')
+      .simulate('click');
+
+    expect(wrapper.find('ReferenceEditor')).toHaveLength(1);
+  });
+
+  it('should hide the reference editors when switching from reference to non-reference', () => {
+    const stateWithReferences: IndexPatternPrivateState = getStateWithColumns({
+      col1: {
+        label: 'Differences of (incomplete)',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'derivative',
+        references: ['col2'],
+        params: {},
+      },
+    });
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithReferences} />
+    );
+
+    expect(wrapper.find('ReferenceEditor')).toHaveLength(1);
+
+    wrapper
+      .find('button[data-test-subj="lns-indexPatternDimension-avg incompatible"]')
+      .simulate('click');
+
+    expect(wrapper.find('ReferenceEditor')).toHaveLength(0);
+  });
 });

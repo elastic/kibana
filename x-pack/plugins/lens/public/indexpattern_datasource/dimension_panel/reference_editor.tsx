@@ -30,7 +30,6 @@ const operationPanels = getOperationDisplay();
 
 export interface ReferenceEditorProps {
   layer: IndexPatternLayer;
-  parentColumnId: string;
   selectionStyle: 'full' | 'field';
   validation: RequiredReference;
   columnId: string;
@@ -99,16 +98,23 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
 
   const functionOptions: Array<EuiComboBoxOptionOption<OperationType>> = [];
   operationSupportMatrix.operationTypes.forEach((operationType) => {
+    const def = operationDefinitionMap[operationType];
     const label = operationPanels[operationType].displayName;
-    // const isCompatible = !column || column && hasField(column) &&
+    const isCompatible =
+      !column ||
+      (column &&
+        hasField(column) &&
+        def.input === 'field' &&
+        operationSupportMatrix.fieldByOperation[operationType]?.has(column.sourceField)) ||
+      (column && !hasField(column) && def.input !== 'field');
 
     functionOptions.push({
       label,
       value: operationType,
       className: 'lnsIndexPatternDimensionEditor__operation',
-      // 'data-test-subj': `lns-indexPatternDimension-${operationType}${
-      //   compatibleWithCurrentField ? '' : ' incompatible'
-      // }`,
+      'data-test-subj': `lns-indexPatternDimension-${operationType}${
+        isCompatible ? '' : ' incompatible'
+      }`,
     });
   });
 
@@ -142,12 +148,6 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     ? [functionOptions.find(({ value }) => value === column.operationType)!]
     : [];
 
-  // The current operation is invalid if
-  // const invalidOperation =
-  //   Boolean(incompleteInfo?.operationType) ||
-  //   (column &&
-  //     selectedOperationDefinition.input === 'field' &&
-  //     !operationSupportMatrix.fieldByOperation[column.operationType]?.size);
   const invalidField =
     column &&
     selectedOperationDefinition.input === 'field' &&
@@ -159,19 +159,12 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
         {selectionStyle !== 'field' ? (
           <>
             <EuiFormRow
-              data-test-subj="indexPattern-field-selection-row"
+              data-test-subj="indexPattern-subFunction-selection-row"
               label={i18n.translate('xpack.lens.indexPattern.chooseSubFunction', {
                 defaultMessage: 'Choose a sub-function',
               })}
               fullWidth
-              isInvalid={Boolean(incompleteInfo?.operationType)}
-              // error={
-              // column
-              //   ? i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-              //       defaultMessage: 'To use this function, select a different field.',
-              //     })
-              //   : undefined
-              // }
+              isInvalid={!column || Boolean(incompleteInfo?.operationType)}
             >
               <EuiComboBox
                 fullWidth
@@ -185,7 +178,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                   }
                 )}
                 options={functionOptions}
-                // isInvalid={Boolean(incompatibleSelectedOperationType)}
+                isInvalid={!column || Boolean(incompleteInfo?.operationType)}
                 selectedOptions={selectedOption}
                 singleSelection={{ asPlainText: true }}
                 onChange={(choices) => {
@@ -210,19 +203,12 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
         //   operationDefinitionMap[incompatibleSelectedOperationType].input === 'field') ? (
         selectedOperationDefinition.input === 'field' ? (
           <EuiFormRow
-            data-test-subj="indexPattern-field-selection-row"
+            data-test-subj="indexPattern-reference-field-selection-row"
             label={i18n.translate('xpack.lens.indexPattern.chooseField', {
               defaultMessage: 'Select a field',
             })}
             fullWidth
-            // isInvalid={Boolean(incompatibleSelectedOperationType || currentFieldIsInvalid)}
             isInvalid={invalidField}
-            // error={getErrorMessage(
-            //   column,
-            //   Boolean(incompatibleSelectedOperationType),
-            //   selectedOperationDefinition?.input,
-            //   currentFieldIsInvalid
-            // )}
           >
             <FieldSelect
               fieldIsInvalid={invalidField}
@@ -244,46 +230,15 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                 updateLayer(deleteColumn({ layer, columnId }));
               }}
               onChoose={(choice) => {
-                let newLayer: IndexPatternLayer;
-                if (
-                  !incompleteInfo?.operationType &&
-                  column &&
-                  'field' in choice &&
-                  choice.operationType === column.operationType
-                ) {
-                  // Replaces just the field
-                  newLayer = replaceColumn({
+                updateLayer(
+                  insertOrReplaceColumn({
                     layer,
                     columnId,
                     indexPattern: currentIndexPattern,
                     op: choice.operationType,
-                    field: currentIndexPattern.getFieldByName(choice.field)!,
-                  });
-                } else {
-                  // Finds a new operation
-                  const compatibleOperations =
-                    ('field' in choice && operationSupportMatrix.operationByField[choice.field]) ||
-                    new Set();
-                  let operation;
-                  if (compatibleOperations.size > 0) {
-                    operation =
-                      incompleteInfo?.operationType &&
-                      compatibleOperations.has(incompleteInfo.operationType as OperationType)
-                        ? incompleteInfo.operationType
-                        : compatibleOperations.values().next().value;
-                  } else if ('field' in choice) {
-                    operation = choice.operationType;
-                  }
-                  newLayer = insertOrReplaceColumn({
-                    layer,
-                    columnId,
                     field: currentIndexPattern.getFieldByName(choice.field),
-                    indexPattern: currentIndexPattern,
-                    op: operation as OperationType,
-                  });
-                }
-                updateLayer(newLayer);
-                // setInvalidOperationType(null);
+                  })
+                );
               }}
             />
           </EuiFormRow>
@@ -291,29 +246,4 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
       </div>
     </div>
   );
-}
-
-{
-  /* function getErrorMessage(
-  column: IndexPatternColumn | undefined,
-  incompatibleSelectedOperationType: boolean,
-  input: 'none' | 'field' | 'fullReference' | undefined,
-  fieldInvalid: boolean
-) {
-  if (column && incompatibleSelectedOperationType) {
-    if (input === 'field') {
-      return i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-        defaultMessage: 'To use this function, select a different field.',
-      });
-    }
-    return i18n.translate('xpack.lens.indexPattern.chooseFieldLabel', {
-      defaultMessage: 'To use this function, select a field.',
-    });
-  }
-  if (fieldInvalid) {
-    return i18n.translate('xpack.lens.indexPattern.invalidFieldLabel', {
-      defaultMessage: 'Invalid field. Check your index pattern or pick another field.',
-    });
-  }
-} */
 }
