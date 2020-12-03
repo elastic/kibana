@@ -6,9 +6,9 @@
 
 import React from 'react';
 
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 
-import { EuiLinkTo } from '../react_router_helpers';
+import { EuiButtonTo } from '../react_router_helpers';
 
 import { INDEXING_STATUS_HAS_ERRORS_TITLE, INDEXING_STATUS_HAS_ERRORS_BUTTON } from './constants';
 
@@ -24,8 +24,9 @@ export const IndexingStatusErrors: React.FC<IIndexingStatusErrorsProps> = ({ vie
     data-test-subj="IndexingStatusErrors"
   >
     <p>{INDEXING_STATUS_HAS_ERRORS_TITLE}</p>
-    <EuiButton color="danger" fill={true} size="s" data-test-subj="ViewErrorsButton">
-      <EuiLinkTo to={viewLinkPath}>{INDEXING_STATUS_HAS_ERRORS_BUTTON}</EuiLinkTo>
-    </EuiButton>
+
+    <EuiButtonTo to={viewLinkPath} color="danger" fill size="s" data-test-subj="ViewErrorsButton">
+      {INDEXING_STATUS_HAS_ERRORS_BUTTON}
+    </EuiButtonTo>
   </EuiCallOut>
 );
