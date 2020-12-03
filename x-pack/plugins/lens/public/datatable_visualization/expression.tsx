@@ -17,10 +17,12 @@ import {
   EuiFlexItem,
   EuiToolTip,
   Direction,
+  EuiScreenReaderOnly,
+  EuiIcon,
 } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import { IAggType } from 'src/plugins/data/public';
-import { DatatableColumnMeta } from 'src/plugins/expressions';
+import { DatatableColumnMeta, RenderMode } from 'src/plugins/expressions';
 import {
   FormatFactory,
   ILensInterpreterRenderHandlers,
@@ -68,6 +70,7 @@ type DatatableRenderProps = DatatableProps & {
   onClickValue: (data: LensFilterEvent['data']) => void;
   onEditAction?: (data: LensSortAction['data']) => void;
   getType: (name: string) => IAggType;
+  renderMode: RenderMode;
 };
 
 export interface DatatableRender {
@@ -181,6 +184,7 @@ export const getDatatableRenderer = (dependencies: {
           onClickValue={onClickValue}
           onEditAction={onEditAction}
           getType={resolvedGetType}
+          renderMode={handlers.getRenderMode()}
         />
       </I18nProvider>,
       domNode,
@@ -196,6 +200,39 @@ function getNextOrderValue(currentValue: LensSortAction['data']['direction']) {
   const states: Array<LensSortAction['data']['direction']> = ['asc', 'desc', 'none'];
   const newStateIndex = (1 + states.findIndex((state) => state === currentValue)) % states.length;
   return states[newStateIndex];
+}
+
+function getDirectionLongLabel(sortDirection: LensSortAction['data']['direction']) {
+  if (sortDirection === 'none') {
+    return sortDirection;
+  }
+  return sortDirection === 'asc' ? 'ascending' : 'descending';
+}
+
+function getHeaderSortingCell(
+  name: string,
+  columnId: string,
+  sorting: Omit<LensSortAction['data'], 'action'>,
+  sortingLabel: string
+) {
+  if (columnId !== sorting.columnId || sorting.direction === 'none') {
+    return name || '';
+  }
+  // This is a workaround to hijack the title value of the header cell
+  return (
+    <span aria-sort={getDirectionLongLabel(sorting.direction)} aria-live="polite">
+      {name || ''}
+      <EuiScreenReaderOnly>
+        <span>{sortingLabel}</span>
+      </EuiScreenReaderOnly>
+      <EuiIcon
+        className="euiTableSortIcon"
+        type={sorting.direction === 'asc' ? 'sortUp' : 'sortDown'}
+        size="m"
+        aria-label={sortingLabel}
+      />
+    </span>
+  );
 }
 
 export function DatatableComponent(props: DatatableRenderProps) {
@@ -263,6 +300,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
 
   const rows = firstTable?.rows || [];
   let sortedRows = rows;
+  const isReadOnlySorted = props.renderMode !== 'edit';
 
   if (sortBy && sortDirection !== 'none') {
     // Sort on raw values for these types, while use the formatted value for the rest
@@ -273,6 +311,13 @@ export function DatatableComponent(props: DatatableRenderProps) {
       : (row: Record<string, unknown>) => formatters[sortBy]?.convert(row[sortBy]);
     sortedRows = orderBy(rows, [sortingCriteria], sortDirection as Direction);
   }
+
+  const sortedInLabel = i18n.translate('xpack.lens.datatableSortedInReadOnlyMode', {
+    defaultMessage: 'Sorted in {sortValue} order',
+    values: {
+      sortValue: sortDirection === 'asc' ? 'ascending' : 'descending',
+    },
+  });
 
   return (
     <VisualizationContainer
@@ -285,7 +330,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
         tableLayout="auto"
         sorting={{
           sort:
-            !sortBy || sortDirection === 'none'
+            !sortBy || sortDirection === 'none' || isReadOnlySorted
               ? undefined
               : {
                   field: sortBy,
@@ -311,10 +356,21 @@ export function DatatableComponent(props: DatatableRenderProps) {
           const filterable = bucketColumns.includes(field);
           const { name, index: colIndex, meta } = columnsReverseLookup[field];
           const fieldName = meta?.field;
+          const nameContent = !isReadOnlySorted
+            ? name
+            : getHeaderSortingCell(
+                name,
+                field,
+                {
+                  columnId: sortBy,
+                  direction: sortDirection as LensSortAction['data']['direction'],
+                },
+                sortedInLabel
+              );
           return {
             field,
-            name: name || '',
-            sortable: true,
+            name: nameContent,
+            sortable: !isReadOnlySorted,
             render: (value: unknown) => {
               const formattedValue = formatters[field]?.convert(value);
 
