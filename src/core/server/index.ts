@@ -56,6 +56,7 @@ import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } fro
 import { SavedObjectsClientContract } from './saved_objects/types';
 import {
   ISavedObjectTypeRegistry,
+  SavedObjectsClientProviderOptions,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from './saved_objects';
@@ -390,6 +391,7 @@ export interface RequestHandlerContext {
     savedObjects: {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
+      getClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
     };
     elasticsearch: {
       client: IScopedClusterClient;

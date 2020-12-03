@@ -59,7 +59,6 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const savedObjectsClient = context.core.savedObjects.client;
       const {
         type,
         hasReference,
@@ -74,6 +73,13 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
       const supportedTypes = context.core.savedObjects.typeRegistry
         .getImportableAndExportableTypes()
         .map((t) => t.name);
+
+      const includedHiddenTypes = supportedTypes.filter((supportedType) =>
+        context.core.savedObjects.typeRegistry.isHidden(supportedType)
+      );
+
+      const savedObjectsClient = context.core.savedObjects.getClient({ includedHiddenTypes });
+
       if (types) {
         const validationError = validateTypes(types, supportedTypes);
         if (validationError) {
