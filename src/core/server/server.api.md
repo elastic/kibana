@@ -409,7 +409,7 @@ export interface CoreConfigUsageData {
         };
         xsrf: {
             disableProtection: boolean;
-            whitelistConfigured: boolean;
+            allowlistConfigured: boolean;
         };
         requestId: {
             allowFromAnyIp: boolean;
