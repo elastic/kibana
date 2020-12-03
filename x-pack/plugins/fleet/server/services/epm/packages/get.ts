@@ -98,7 +98,10 @@ export async function getPackageInfo(options: {
   const getPackageRes = await getPackageFromSource({
     pkgName,
     pkgVersion,
-    pkgInstallSource: savedObject?.attributes.install_source,
+    pkgInstallSource:
+      savedObject?.attributes.version === pkgVersion
+        ? savedObject?.attributes.install_source
+        : 'registry',
   });
   const paths = getPackageRes.paths;
   const packageInfo = getPackageRes.packageInfo;

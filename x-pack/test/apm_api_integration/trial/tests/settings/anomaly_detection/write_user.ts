@@ -11,7 +11,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
   const apmWriteUser = getService('supertestAsApmWriteUser');
 
   function getJobs() {
-    return apmWriteUser.get(`/api/apm/settings/anomaly-detection`).set('kbn-xsrf', 'foo');
+    return apmWriteUser.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
   }
 
   function createJobs(environments: string[]) {

@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { captureBodyRt } from '../runtime_types/capture_body_rt';
+import { logLevelRt } from '../runtime_types/log_level_rt';
 import { RawSettingDefinition } from './types';
 
 export const generalSettings: RawSettingDefinition[] = [
@@ -91,7 +92,8 @@ export const generalSettings: RawSettingDefinition[] = [
   // LOG_LEVEL
   {
     key: 'log_level',
-    type: 'text',
+    validation: logLevelRt,
+    type: 'select',
     defaultValue: 'info',
     label: i18n.translate('xpack.apm.agentConfig.logLevel.label', {
       defaultMessage: 'Log level',
@@ -99,7 +101,16 @@ export const generalSettings: RawSettingDefinition[] = [
     description: i18n.translate('xpack.apm.agentConfig.logLevel.description', {
       defaultMessage: 'Sets the logging level for the agent',
     }),
-    includeAgents: ['dotnet', 'ruby'],
+    options: [
+      { text: 'trace', value: 'trace' },
+      { text: 'debug', value: 'debug' },
+      { text: 'info', value: 'info' },
+      { text: 'warning', value: 'warning' },
+      { text: 'error', value: 'error' },
+      { text: 'critical', value: 'critical' },
+      { text: 'off', value: 'off' },
+    ],
+    includeAgents: ['dotnet', 'ruby', 'java'],
   },
 
   // Recording
@@ -206,5 +217,43 @@ export const generalSettings: RawSettingDefinition[] = [
           'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but not context information, labels, or spans.',
       }
     ),
+  },
+
+  // Sanitize field names
+  {
+    key: 'sanitize_field_names',
+    type: 'text',
+    defaultValue:
+      'password, passwd, pwd, secret, *key, *token*, *session*, *credit*, *card*, authorization, set-cookie',
+    label: i18n.translate('xpack.apm.agentConfig.sanitizeFiledNames.label', {
+      defaultMessage: 'Sanitize field names',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.sanitizeFiledNames.description',
+      {
+        defaultMessage:
+          'Sometimes it is necessary to sanitize, i.e., remove, sensitive data sent to Elastic APM. This config accepts a list of wildcard patterns of field names which should be sanitized. These apply to HTTP headers (including cookies) and `application/x-www-form-urlencoded` data (POST form fields). The query string and the captured request body (such as `application/json` data) will not get sanitized.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  // Ignore transactions based on URLs
+  {
+    key: 'transaction_ignore_urls',
+    type: 'text',
+    defaultValue:
+      'Agent specific - check out the documentation of this config option in the corresponding agent documentation.',
+    label: i18n.translate('xpack.apm.agentConfig.transactionIgnoreUrl.label', {
+      defaultMessage: 'Ignore transactions based on URLs',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.transactionIgnoreUrl.description',
+      {
+        defaultMessage:
+          'Used to restrict requests to certain URLs from being instrumented. This config accepts a comma-separated list of wildcard patterns of URL paths that should be ignored. When an incoming HTTP request is detected, its request path will be tested against each element in this list. For example, adding `/home/index` to this list would match and remove instrumentation from `http://localhost/home/index` as well as `http://whatever.com/home/index?value1=123`',
+      }
+    ),
+    includeAgents: ['java'],
   },
 ];

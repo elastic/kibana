@@ -15,7 +15,7 @@ import React, {
 } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import cytoscape from 'cytoscape';
-import { useTheme } from '../../../../hooks/useTheme';
+import { useTheme } from '../../../../hooks/use_theme';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
 import { getAnimationOptions } from '../cytoscape_options';

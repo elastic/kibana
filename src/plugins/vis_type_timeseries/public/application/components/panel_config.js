@@ -90,6 +90,6 @@ PanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  dateFormat: PropTypes.string,
   visData$: PropTypes.object,
+  getConfig: PropTypes.func,
 };
