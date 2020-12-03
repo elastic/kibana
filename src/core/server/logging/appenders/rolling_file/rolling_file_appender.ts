@@ -44,7 +44,6 @@ export interface RollingFileAppenderConfig {
   layout: LayoutConfigType;
   /**
    * The absolute path of the file to write to.
-   * If the file, or any of its parent directories, do not exist, they will be created.
    */
   path: string;
   /**
@@ -81,9 +80,6 @@ export class RollingFileAppender implements DisposableAppender {
   private readonly strategy: RollingStrategy;
   private readonly buffer: BufferAppender;
 
-  /**
-   * Creates FileAppender instance with specified layout and file path.
-   */
   constructor(config: RollingFileAppenderConfig) {
     this.context = new RollingFileContext(config.path);
     this.context.refreshFileInfo();
@@ -95,8 +91,8 @@ export class RollingFileAppender implements DisposableAppender {
   }
 
   /**
-   * Formats specified `record` and writes them to the specified file.
-   * @param record `LogRecord` instance to be logged.
+   * Formats specified `record` and writes it to the specified file. If the record
+   * would trigger a rollover, then it will be performed before writing to the file.
    */
   public append(record: LogRecord) {
     // if we are currently rolling the files, push the log record
@@ -119,7 +115,8 @@ export class RollingFileAppender implements DisposableAppender {
   }
 
   /**
-   * Disposes `FileAppender`. Waits for the underlying file stream to be completely flushed and closed.
+   * Disposes the appender.
+   * If a rollout is currently in progress, it will ve awaited.
    */
   public async dispose() {
     if (this.disposed) {
@@ -141,14 +138,13 @@ export class RollingFileAppender implements DisposableAppender {
     try {
       await this.strategy.rollout();
       await this.fileManager.closeStream();
-      this.rollingPromise = undefined;
-      this.isRolling = false;
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log('Error while rolling file: ', e);
-    } finally {
-      this.flushBuffer();
     }
+    this.rollingPromise = undefined;
+    this.isRolling = false;
+    this.flushBuffer();
   }
 
   private flushBuffer() {

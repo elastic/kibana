@@ -32,11 +32,12 @@ export interface TimeIntervalTriggeringPolicyConfig {
    * How often a rollover should occur.
    *
    * @remarks
-   * Due to of modulate rolling works, it is required to have an integer value for the highest time unit
+   * Due to how modulate rolling works, it is required to have an integer value for the highest time unit
    * of the duration (you can't overflow to a higher unit).
-   * For example, `15m` and `4h` are valid values , but `90m` is not (as it is `1.5h`),.
+   * For example, `15m` and `4h` are valid values , but `90m` is not (as it is `1.5h`).
    */
   interval: Duration;
+
   /**
    * Indicates whether the interval should be adjusted to cause the next rollover to occur on the interval boundary.
    *
@@ -65,7 +66,7 @@ export const timeIntervalTriggeringPolicyConfigSchema = schema.object({
  */
 export class TimeIntervalTriggeringPolicy implements TriggeringPolicy {
   /**
-   * millisecond timestamp of when the next rollover should occur.
+   * milliseconds timestamp of when the next rollover should occur.
    */
   private nextRolloverTime: number;
 

@@ -32,6 +32,7 @@ const format = 'YYYY-MM-DD HH:mm:ss';
 describe('TimeIntervalTriggeringPolicy', () => {
   afterEach(() => {
     getNextRollingTimeMock.mockReset();
+    jest.restoreAllMocks();
   });
 
   const createLogRecord = (timestamp: Date): LogRecord => ({
@@ -67,6 +68,22 @@ describe('TimeIntervalTriggeringPolicy', () => {
     expect(getNextRollingTimeMock).toHaveBeenCalledTimes(1);
     expect(getNextRollingTimeMock).toHaveBeenCalledWith(
       context.currentFileTime,
+      config.interval,
+      config.modulate
+    );
+  });
+
+  it('calls `getNextRollingTime` with the current time if `context.currentFileTime` is not set', () => {
+    const currentTime = moment('2018-06-15 04:27:12', format).toDate().getTime();
+    jest.spyOn(Date, 'now').mockReturnValue(currentTime);
+    const context = createContext(0);
+    const config = createConfig('15m', true);
+
+    new TimeIntervalTriggeringPolicy(config, context);
+
+    expect(getNextRollingTimeMock).toHaveBeenCalledTimes(1);
+    expect(getNextRollingTimeMock).toHaveBeenCalledWith(
+      currentTime,
       config.interval,
       config.modulate
     );
