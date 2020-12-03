@@ -11,7 +11,9 @@ import {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
-import { operationDefinitionMap, OperationType } from './operations';
+import { operationDefinitionMap, IndexPatternColumn } from './operations';
+
+import { getInvalidFieldMessage } from './operations/definitions/helpers';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations
@@ -42,60 +44,46 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
   );
 }
 
-export function hasInvalidFields(state: IndexPatternPrivateState) {
+export function hasInvalidColumns(state: IndexPatternPrivateState) {
   return getInvalidLayers(state).length > 0;
 }
 
 export function getInvalidLayers(state: IndexPatternPrivateState) {
   return Object.values(state.layers).filter((layer) => {
-    return layer.columnOrder.some((columnId) => {
-      const column = layer.columns[columnId];
-      return (
-        hasField(column) &&
-        fieldIsInvalid(
-          column.sourceField,
-          column.operationType,
-          state.indexPatterns[layer.indexPatternId]
-        )
-      );
-    });
+    return layer.columnOrder.some((columnId) =>
+      isColumnInvalid(layer, columnId, state.indexPatterns[layer.indexPatternId])
+    );
   });
 }
 
-export function getInvalidFieldsForLayer(
+export function getInvalidColumnsForLayer(
   layers: IndexPatternLayer[],
   indexPatternMap: Record<string, IndexPattern>
 ) {
   return layers.map((layer) => {
-    return layer.columnOrder.filter((columnId) => {
-      const column = layer.columns[columnId];
-      return (
-        hasField(column) &&
-        fieldIsInvalid(
-          column.sourceField,
-          column.operationType,
-          indexPatternMap[layer.indexPatternId]
-        )
-      );
-    });
+    return layer.columnOrder.filter((columnId) =>
+      isColumnInvalid(layer, columnId, indexPatternMap[layer.indexPatternId])
+    );
   });
 }
 
-export function fieldIsInvalid(
-  sourceField: string | undefined,
-  operationType: OperationType | undefined,
+export function isColumnInvalid(
+  layer: IndexPatternLayer,
+  columnId: string,
   indexPattern: IndexPattern
 ) {
-  const operationDefinition = operationType && operationDefinitionMap[operationType];
-  const field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
+  const column = layer.columns[columnId];
 
-  return Boolean(
-    sourceField &&
-      operationDefinition &&
-      !(
-        field &&
-        operationDefinition?.input === 'field' &&
-        operationDefinition.getPossibleOperationForField(field) !== undefined
-      )
+  const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
+  return !!(
+    operationDefinition.getErrorMessage &&
+    operationDefinition.getErrorMessage(layer, columnId, indexPattern)
   );
+}
+
+export function fieldIsInvalid(column: IndexPatternColumn | undefined, indexPattern: IndexPattern) {
+  if (!column || !hasField(column)) {
+    return false;
+  }
+  return !!getInvalidFieldMessage(column, indexPattern)?.length;
 }
