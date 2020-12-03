@@ -75,6 +75,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   input: 'none',
   isTransferable: () => true,
 
+  getDefaultLabel: () => filtersLabel,
   buildColumn({ previousColumn }) {
     let params = { filters: [defaultFilter] };
     if (previousColumn?.operationType === 'terms') {

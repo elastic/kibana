@@ -32,7 +32,7 @@ import {
   createExceptionList,
   createExceptionListItem,
   waitForSignalsToBePresent,
-  getAllSignals,
+  getSignalsByIds,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
         await deleteAllExceptions(es);
       });
 
@@ -101,6 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const ruleWithException: CreateRulesSchema = {
           ...getSimpleRule(),
+          enabled: true,
           exceptions_list: [
             {
               id,
@@ -117,6 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const expected: Partial<RulesSchema> = {
           ...getSimpleRuleOutput(),
+          enabled: true,
           exceptions_list: [
             {
               id,
@@ -397,7 +399,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest);
-          await deleteAllAlerts(es);
+          await deleteAllAlerts(supertest);
           await deleteAllExceptions(es);
           await esArchiver.unload('auditbeat/hosts');
         });
@@ -441,9 +443,10 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           };
-          await createRule(supertest, ruleWithException);
-          await waitForSignalsToBePresent(supertest, 10);
-          const signalsOpen = await getAllSignals(supertest);
+          const { id: createdId } = await createRule(supertest, ruleWithException);
+          await waitForRuleSuccess(supertest, createdId);
+          await waitForSignalsToBePresent(supertest, 10, [createdId]);
+          const signalsOpen = await getSignalsByIds(supertest, [createdId]);
           expect(signalsOpen.hits.hits.length).equal(10);
         });
 
@@ -488,7 +491,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const rule = await createRule(supertest, ruleWithException);
           await waitForRuleSuccess(supertest, rule.id);
-          const signalsOpen = await getAllSignals(supertest);
+          const signalsOpen = await getSignalsByIds(supertest, [rule.id]);
           expect(signalsOpen.hits.hits.length).equal(0);
         });
       });

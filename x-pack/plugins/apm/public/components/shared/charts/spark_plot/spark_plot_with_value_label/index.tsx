@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { px, unit } from '../../../../../style/variables';
-import { useTheme } from '../../../../../hooks/useTheme';
+import { useTheme } from '../../../../../hooks/use_theme';
 import { SparkPlot } from '../';
 
 type Color =

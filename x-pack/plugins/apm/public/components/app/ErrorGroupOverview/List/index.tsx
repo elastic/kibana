@@ -19,7 +19,7 @@ import {
   truncate,
   unit,
 } from '../../../../style/variables';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { ManagedTable } from '../../../shared/ManagedTable';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
@@ -48,9 +48,7 @@ const Culprit = styled.div`
   font-family: ${fontFamilyCode};
 `;
 
-type ErrorGroupListAPIResponse = APIReturnType<
-  'GET /api/apm/services/{serviceName}/errors'
->;
+type ErrorGroupListAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/errors'>;
 
 interface Props {
   items: ErrorGroupListAPIResponse;

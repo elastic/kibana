@@ -68,9 +68,9 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 beforeEach(() => {
   jest.resetAllMocks();
   alertsClientFactoryParams.actions = actionsMock.createStart();
-  (alertsClientFactoryParams.actions as jest.Mocked<
-    ActionsStartContract
-  >).getActionsAuthorizationWithRequest.mockReturnValue(actionsAuthorization);
+  (alertsClientFactoryParams.actions as jest.Mocked<ActionsStartContract>).getActionsAuthorizationWithRequest.mockReturnValue(
+    actionsAuthorization
+  );
   alertsClientFactoryParams.getSpaceId.mockReturnValue('default');
   alertsClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
 });

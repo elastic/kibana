@@ -14,9 +14,7 @@ import { partiallyUpdateAlert, PartiallyUpdateableAlertAttributes } from './part
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
 const MockSavedObjectsClientContract = savedObjectsClientMock.create();
-const MockISavedObjectsRepository = (MockSavedObjectsClientContract as unknown) as jest.Mocked<
-  ISavedObjectsRepository
->;
+const MockISavedObjectsRepository = (MockSavedObjectsClientContract as unknown) as jest.Mocked<ISavedObjectsRepository>;
 
 describe('partially_update_alert', () => {
   beforeEach(() => {

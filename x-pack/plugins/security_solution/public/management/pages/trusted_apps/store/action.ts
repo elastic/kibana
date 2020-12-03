@@ -26,9 +26,7 @@ export type TrustedAppsListResourceStateChanged = ResourceStateChanged<
   TrustedAppsListData
 >;
 
-export type TrustedAppDeletionSubmissionResourceStateChanged = ResourceStateChanged<
-  'trustedAppDeletionSubmissionResourceStateChanged'
->;
+export type TrustedAppDeletionSubmissionResourceStateChanged = ResourceStateChanged<'trustedAppDeletionSubmissionResourceStateChanged'>;
 
 export type TrustedAppDeletionDialogStarted = Action<'trustedAppDeletionDialogStarted'> & {
   payload: {

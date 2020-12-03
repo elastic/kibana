@@ -328,9 +328,7 @@ describe('update()', () => {
         "version": "123",
       }
     `);
-    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
-      ActionsClient
-    >;
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test2', { notifyUsage: true });
   });

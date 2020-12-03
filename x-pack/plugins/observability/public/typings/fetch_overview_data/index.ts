@@ -37,13 +37,13 @@ export interface UXHasDataResponse {
   serviceName: string | number | undefined;
 }
 
-export type HasDataResponse = UXHasDataResponse | boolean;
-
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
 
-export type HasData = (params?: HasDataParams) => Promise<HasDataResponse>;
+export type HasData<T extends ObservabilityFetchDataPlugins> = (
+  params?: HasDataParams
+) => Promise<ObservabilityHasDataResponse[T]>;
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
@@ -54,7 +54,7 @@ export interface DataHandler<
   T extends ObservabilityFetchDataPlugins = ObservabilityFetchDataPlugins
 > {
   fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
-  hasData: HasData;
+  hasData: HasData<T>;
 }
 
 export interface FetchDataResponse {
@@ -112,4 +112,12 @@ export interface ObservabilityFetchDataResponse {
   infra_logs: LogsFetchDataResponse;
   uptime: UptimeFetchDataResponse;
   ux: UxFetchDataResponse;
+}
+
+export interface ObservabilityHasDataResponse {
+  apm: boolean;
+  infra_metrics: boolean;
+  infra_logs: boolean;
+  uptime: boolean;
+  ux: UXHasDataResponse;
 }

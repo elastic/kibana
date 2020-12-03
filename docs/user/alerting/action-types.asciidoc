@@ -23,6 +23,9 @@ a| <<jira-action-type, Jira>>
 
 | Create an incident in Jira.
 
+a| <<teams-action-type, Microsoft Teams>>
+
+| Send a message to a Microsoft Teams channel.
 
 a| <<pagerduty-action-type, PagerDuty>>
 
@@ -65,6 +68,7 @@ include::action-types/email.asciidoc[]
 include::action-types/resilient.asciidoc[]
 include::action-types/index.asciidoc[]
 include::action-types/jira.asciidoc[]
+include::action-types/teams.asciidoc[]
 include::action-types/pagerduty.asciidoc[]
 include::action-types/server-log.asciidoc[]
 include::action-types/servicenow.asciidoc[]

@@ -216,9 +216,9 @@ describe('Saved Object', () => {
 
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(
           (savedObject) => {
-            stubSavedObjectsClientCreate({ id: 'myId' } as SimpleSavedObject<
-              SavedObjectAttributes
-            >);
+            stubSavedObjectsClientCreate({
+              id: 'myId',
+            } as SimpleSavedObject<SavedObjectAttributes>);
 
             return savedObject.save({ confirmOverwrite: false }).then(() => {
               expect(startMock.overlays.openModal).not.toHaveBeenCalled();

@@ -24,7 +24,7 @@ export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
   getCoreUsageDataService: () => CoreUsageDataStart
 ) {
-  return usageCollection.makeUsageCollector<CoreUsageData, { core: CoreUsageData }>({
+  return usageCollection.makeUsageCollector<CoreUsageData>({
     type: 'core',
     isReady: () => typeof getCoreUsageDataService() !== 'undefined',
     schema: {
@@ -65,7 +65,7 @@ export function getCoreUsageCollector(
           },
           xsrf: {
             disableProtection: { type: 'boolean' },
-            whitelistConfigured: { type: 'boolean' },
+            allowlistConfigured: { type: 'boolean' },
           },
           requestId: {
             allowFromAnyIp: { type: 'boolean' },

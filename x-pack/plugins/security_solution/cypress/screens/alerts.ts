@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const ADD_EXCEPTION_BTN = '[data-test-subj="addExceptionButton"]';
+
 export const ALERTS = '[data-test-subj="event"]';
 
 export const ALERT_CHECKBOX = '[data-test-subj="select-event-container"] .euiCheckbox__input';

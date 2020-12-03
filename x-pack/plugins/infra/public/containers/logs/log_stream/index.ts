@@ -12,6 +12,7 @@ import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { LogEntry, LogEntriesCursor } from '../../../../common/http_api';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { LogSourceConfigurationProperties } from '../log_source';
 
 interface LogStreamProps {
   sourceId: string;
@@ -19,6 +20,7 @@ interface LogStreamProps {
   endTimestamp: number;
   query?: string;
   center?: LogEntriesCursor;
+  columns?: LogSourceConfigurationProperties['logColumns'];
 }
 
 interface LogStreamState {
@@ -60,6 +62,7 @@ export function useLogStream({
   endTimestamp,
   query,
   center,
+  columns,
 }: LogStreamProps): LogStreamReturn {
   const { services } = useKibanaContextForPlugin();
   const [state, setState] = useSetState<LogStreamState>(INITIAL_STATE);
@@ -100,6 +103,7 @@ export function useLogStream({
             startTimestamp,
             endTimestamp,
             query: parsedQuery,
+            columns,
             ...fetchPosition,
           },
           services.http.fetch

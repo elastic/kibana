@@ -28,7 +28,6 @@ describe('Actions', () => {
           checked={false}
           expanded={false}
           eventId="abc"
-          loading={false}
           loadingEventIds={[]}
           onEventToggled={jest.fn()}
           onRowSelected={jest.fn()}
@@ -46,9 +45,8 @@ describe('Actions', () => {
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           checked={false}
-          expanded={false}
           eventId="abc"
-          loading={false}
+          expanded={false}
           loadingEventIds={[]}
           onEventToggled={jest.fn()}
           onRowSelected={jest.fn()}
@@ -58,49 +56,5 @@ describe('Actions', () => {
     );
 
     expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
-  });
-
-  test('it renders a button for expanding the event', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Actions
-          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          checked={false}
-          expanded={false}
-          eventId="abc"
-          loading={false}
-          loadingEventIds={[]}
-          onEventToggled={jest.fn()}
-          onRowSelected={jest.fn()}
-          showCheckboxes={false}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="expand-event"]').exists()).toEqual(true);
-  });
-
-  test('it invokes onEventToggled when the button to expand an event is clicked', () => {
-    const onEventToggled = jest.fn();
-
-    const wrapper = mount(
-      <TestProviders>
-        <Actions
-          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          checked={false}
-          expanded={false}
-          eventId="abc"
-          loading={false}
-          loadingEventIds={[]}
-          onEventToggled={onEventToggled}
-          onRowSelected={jest.fn()}
-          showCheckboxes={false}
-        />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="expand-event"]').first().simulate('click');
-
-    expect(onEventToggled).toBeCalled();
   });
 });

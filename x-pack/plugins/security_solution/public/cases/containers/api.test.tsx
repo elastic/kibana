@@ -348,6 +348,7 @@ describe('Case Configuration API', () => {
         method: 'PATCH',
         body: JSON.stringify({
           comment: 'updated comment',
+          type: CommentType.user,
           id: basicCase.comments[0].id,
           version: basicCase.comments[0].version,
         }),
@@ -404,7 +405,7 @@ describe('Case Configuration API', () => {
     });
     const data = {
       comment: 'comment',
-      type: CommentType.user,
+      type: CommentType.user as const,
     };
 
     test('check url, method, signal', async () => {

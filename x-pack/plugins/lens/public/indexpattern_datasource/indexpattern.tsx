@@ -40,13 +40,13 @@ import {
 } from './indexpattern_suggestions';
 
 import {
-  getInvalidFieldReferencesForLayer,
-  getInvalidReferences,
+  getInvalidColumnsForLayer,
+  getInvalidLayers,
   isDraggedField,
   normalizeOperationDataType,
 } from './utils';
 import { LayerPanel } from './layerpanel';
-import { IndexPatternColumn } from './operations';
+import { IndexPatternColumn, getErrorMessages, IncompleteColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -54,7 +54,7 @@ import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/pub
 import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../index';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { deleteColumn } from './operations';
+import { deleteColumn, isReferenced } from './operations';
 import { FieldBasedIndexPatternColumn } from './operations/definitions/column_types';
 import { Dragging } from '../drag_drop/providers';
 
@@ -78,6 +78,7 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
 export * from './rename_columns';
 export * from './format_column';
 export * from './time_scale';
+export * from './counter_rate';
 export * from './suffix_formatter';
 
 export function getIndexPatternDatasource({
@@ -318,6 +319,20 @@ export function getIndexPatternDatasource({
     canHandleDrop,
     onDrop,
 
+    // Reset the temporary invalid state when closing the editor
+    updateStateOnCloseDimension: ({ state, layerId, columnId }) => {
+      const layer = { ...state.layers[layerId] };
+      const newIncomplete: Record<string, IncompleteColumn> = {
+        ...(state.layers[layerId].incompleteColumns || {}),
+      };
+      delete newIncomplete[columnId];
+      return mergeLayer({
+        state,
+        layerId,
+        newLayer: { ...layer, incompleteColumns: newIncomplete },
+      });
+    },
+
     getPublicAPI({ state, layerId }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = indexPatternDatasource.uniqueLabels(state);
 
@@ -325,7 +340,9 @@ export function getIndexPatternDatasource({
         datasourceId: 'indexpattern',
 
         getTableSpec: () => {
-          return state.layers[layerId].columnOrder.map((colId) => ({ columnId: colId }));
+          return state.layers[layerId].columnOrder
+            .filter((colId) => !isReferenced(state.layers[layerId], colId))
+            .map((colId) => ({ columnId: colId }));
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
@@ -349,10 +366,17 @@ export function getIndexPatternDatasource({
       if (!state) {
         return;
       }
-      const invalidLayers = getInvalidReferences(state);
+      const invalidLayers = getInvalidLayers(state);
+
+      const layerErrors = Object.values(state.layers).flatMap((layer) =>
+        (getErrorMessages(layer) ?? []).map((message) => ({
+          shortMessage: message,
+          longMessage: '',
+        }))
+      );
 
       if (invalidLayers.length === 0) {
-        return;
+        return layerErrors.length ? layerErrors : undefined;
       }
 
       const realIndex = Object.values(state.layers)
@@ -363,64 +387,70 @@ export function getIndexPatternDatasource({
           }
         })
         .filter(Boolean) as Array<[number, number]>;
-      const invalidFieldsPerLayer: string[][] = getInvalidFieldReferencesForLayer(
+      const invalidColumnsForLayer: string[][] = getInvalidColumnsForLayer(
         invalidLayers,
         state.indexPatterns
       );
       const originalLayersList = Object.keys(state.layers);
 
-      return realIndex.map(([filteredIndex, layerIndex]) => {
-        const fieldsWithBrokenReferences: string[] = invalidFieldsPerLayer[filteredIndex].map(
-          (columnId) => {
-            const column = invalidLayers[filteredIndex].columns[
-              columnId
-            ] as FieldBasedIndexPatternColumn;
-            return column.sourceField;
-          }
-        );
+      if (layerErrors.length || realIndex.length) {
+        return [
+          ...layerErrors,
+          ...realIndex.map(([filteredIndex, layerIndex]) => {
+            const columnLabelsWithBrokenReferences: string[] = invalidColumnsForLayer[
+              filteredIndex
+            ].map((columnId) => {
+              const column = invalidLayers[filteredIndex].columns[
+                columnId
+              ] as FieldBasedIndexPatternColumn;
+              return column.label;
+            });
 
-        if (originalLayersList.length === 1) {
-          return {
-            shortMessage: i18n.translate(
-              'xpack.lens.indexPattern.dataReferenceFailureShortSingleLayer',
-              {
-                defaultMessage: 'Invalid {fields, plural, one {reference} other {references}}.',
+            if (originalLayersList.length === 1) {
+              return {
+                shortMessage: i18n.translate(
+                  'xpack.lens.indexPattern.dataReferenceFailureShortSingleLayer',
+                  {
+                    defaultMessage:
+                      'Invalid {columns, plural, one {reference} other {references}}.',
+                    values: {
+                      columns: columnLabelsWithBrokenReferences.length,
+                    },
+                  }
+                ),
+                longMessage: i18n.translate(
+                  'xpack.lens.indexPattern.dataReferenceFailureLongSingleLayer',
+                  {
+                    defaultMessage: `"{columns}" {columnsLength, plural, one {has an} other {have}} invalid reference.`,
+                    values: {
+                      columns: columnLabelsWithBrokenReferences.join('", "'),
+                      columnsLength: columnLabelsWithBrokenReferences.length,
+                    },
+                  }
+                ),
+              };
+            }
+            return {
+              shortMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureShort', {
+                defaultMessage:
+                  'Invalid {columnsLength, plural, one {reference} other {references}} on Layer {layer}.',
                 values: {
-                  fields: fieldsWithBrokenReferences.length,
+                  layer: layerIndex,
+                  columnsLength: columnLabelsWithBrokenReferences.length,
                 },
-              }
-            ),
-            longMessage: i18n.translate(
-              'xpack.lens.indexPattern.dataReferenceFailureLongSingleLayer',
-              {
-                defaultMessage: `{fieldsLength, plural, one {Field} other {Fields}} "{fields}" {fieldsLength, plural, one {has an} other {have}} invalid reference.`,
+              }),
+              longMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureLong', {
+                defaultMessage: `Layer {layer} has {columnsLength, plural, one {an invalid} other {invalid}} {columnsLength, plural, one {reference} other {references}} in "{columns}".`,
                 values: {
-                  fields: fieldsWithBrokenReferences.join('", "'),
-                  fieldsLength: fieldsWithBrokenReferences.length,
+                  layer: layerIndex,
+                  columns: columnLabelsWithBrokenReferences.join('", "'),
+                  columnsLength: columnLabelsWithBrokenReferences.length,
                 },
-              }
-            ),
-          };
-        }
-        return {
-          shortMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureShort', {
-            defaultMessage:
-              'Invalid {fieldsLength, plural, one {reference} other {references}} on Layer {layer}.',
-            values: {
-              layer: layerIndex,
-              fieldsLength: fieldsWithBrokenReferences.length,
-            },
+              }),
+            };
           }),
-          longMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureLong', {
-            defaultMessage: `Layer {layer} has {fieldsLength, plural, one {an invalid} other {invalid}} {fieldsLength, plural, one {reference} other {references}} in {fieldsLength, plural, one {field} other {fields}} "{fields}".`,
-            values: {
-              layer: layerIndex,
-              fields: fieldsWithBrokenReferences.join('", "'),
-              fieldsLength: fieldsWithBrokenReferences.length,
-            },
-          }),
-        };
-      });
+        ];
+      }
     },
   };
 
