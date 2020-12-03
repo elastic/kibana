@@ -54,6 +54,8 @@ describe('GET privileges', () => {
       indexDataEnricher: mockedIndexDataEnricher,
       lib: {
         isEsError: jest.fn(),
+        parseEsError: jest.fn(),
+        handleEsError: jest.fn(),
       },
     });
 
@@ -123,6 +125,8 @@ describe('GET privileges', () => {
         indexDataEnricher: mockedIndexDataEnricher,
         lib: {
           isEsError: jest.fn(),
+          parseEsError: jest.fn(),
+          handleEsError: jest.fn(),
         },
       });
 

@@ -20,7 +20,7 @@
 import { noop } from 'lodash';
 import { Collector } from './collector';
 import { CollectorSet } from './collector_set';
-import { UsageCollector, UsageCollectorOptions } from './usage_collector';
+import { UsageCollector } from './usage_collector';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -163,29 +163,6 @@ describe('CollectorSet', () => {
         },
       ]);
     });
-
-    it('should infer the types from the implementations of fetch and formatForBulkUpload', async () => {
-      const collectors = new CollectorSet({ logger });
-      collectors.registerCollector(
-        new Collector(logger, {
-          type: 'MY_TEST_COLLECTOR',
-          fetch: () => ({ test: 1 }),
-          formatForBulkUpload: (result) => ({
-            type: 'MY_TEST_COLLECTOR',
-            payload: { test: result.test * 2 },
-          }),
-          isReady: () => true,
-        })
-      );
-
-      const result = await collectors.bulkFetch(mockCallCluster, mockEsClient, mockSoClient, req);
-      expect(result).toStrictEqual([
-        {
-          type: 'MY_TEST_COLLECTOR',
-          result: { test: 1 }, // It matches the return of `fetch`. `formatForBulkUpload` is used later on
-        },
-      ]);
-    });
   });
 
   describe('toApiFieldNames', () => {
@@ -250,29 +227,6 @@ describe('CollectorSet', () => {
           { day_index: 3, day_name: 'wednesday' },
         ],
       });
-    });
-  });
-
-  describe('isUsageCollector', () => {
-    const collectorOptions: UsageCollectorOptions = {
-      type: 'MY_TEST_COLLECTOR',
-      fetch: () => ({ test: 1 }),
-      isReady: () => true,
-      schema: { test: { type: 'long' } },
-    };
-
-    it('returns true only for UsageCollector instances', () => {
-      const collectors = new CollectorSet({ logger });
-      const usageCollector = new UsageCollector(logger, collectorOptions);
-      const collector = new Collector(logger, collectorOptions);
-      const randomClass = new (class Random {})();
-      expect(collectors.isUsageCollector(usageCollector)).toEqual(true);
-      expect(collectors.isUsageCollector(collector)).toEqual(false);
-      expect(collectors.isUsageCollector(randomClass)).toEqual(false);
-      expect(collectors.isUsageCollector({})).toEqual(false);
-      expect(collectors.isUsageCollector(null)).toEqual(false);
-      expect(collectors.isUsageCollector('')).toEqual(false);
-      expect(collectors.isUsageCollector(void 0)).toEqual(false);
     });
   });
 
@@ -402,7 +356,7 @@ describe('CollectorSet', () => {
               return { test: kibanaRequest ? 1 : 0 };
             },
           });
-          collectorSet.makeUsageCollector<{ test: number }, unknown, false>({
+          collectorSet.makeUsageCollector<{ test: number }, false>({
             type: 'MY_TEST_COLLECTOR',
             isReady: () => true,
             schema: { test: { type: 'long' } },
@@ -415,7 +369,7 @@ describe('CollectorSet', () => {
               kibanaRequest: false,
             },
           });
-          collectorSet.makeUsageCollector<{ test: number }, unknown, false>({
+          collectorSet.makeUsageCollector<{ test: number }, false>({
             type: 'MY_TEST_COLLECTOR',
             isReady: () => true,
             schema: { test: { type: 'long' } },
@@ -442,7 +396,7 @@ describe('CollectorSet', () => {
               kibanaRequest: true,
             },
           });
-          collectorSet.makeUsageCollector<{ test: number }, unknown, false>({
+          collectorSet.makeUsageCollector<{ test: number }, false>({
             type: 'MY_TEST_COLLECTOR',
             isReady: () => true,
             schema: { test: { type: 'long' } },
@@ -460,7 +414,7 @@ describe('CollectorSet', () => {
 
         test('TS should allow `true` when types explicitly declare `true` and do not allow `false` or undefined', () => {
           // false is the default when at least 1 type is specified
-          collectorSet.makeUsageCollector<{ test: number }, unknown, true>({
+          collectorSet.makeUsageCollector<{ test: number }, true>({
             type: 'MY_TEST_COLLECTOR',
             isReady: () => true,
             schema: { test: { type: 'long' } },
@@ -472,7 +426,7 @@ describe('CollectorSet', () => {
               kibanaRequest: true,
             },
           });
-          collectorSet.makeUsageCollector<{ test: number }, unknown, true>({
+          collectorSet.makeUsageCollector<{ test: number }, true>({
             type: 'MY_TEST_COLLECTOR',
             isReady: () => true,
             schema: { test: { type: 'long' } },
@@ -485,7 +439,7 @@ describe('CollectorSet', () => {
               kibanaRequest: false,
             },
           });
-          collectorSet.makeUsageCollector<{ test: number }, unknown, true>({
+          collectorSet.makeUsageCollector<{ test: number }, true>({
             type: 'MY_TEST_COLLECTOR',
             isReady: () => true,
             schema: { test: { type: 'long' } },
@@ -498,7 +452,7 @@ describe('CollectorSet', () => {
               kibanaRequest: undefined,
             },
           });
-          collectorSet.makeUsageCollector<{ test: number }, unknown, true>({
+          collectorSet.makeUsageCollector<{ test: number }, true>({
             type: 'MY_TEST_COLLECTOR',
             isReady: () => true,
             schema: { test: { type: 'long' } },
@@ -509,7 +463,7 @@ describe('CollectorSet', () => {
             // @ts-expect-error
             extendFetchContext: {},
           });
-          collectorSet.makeUsageCollector<{ test: number }, unknown, true>(
+          collectorSet.makeUsageCollector<{ test: number }, true>(
             // @ts-expect-error
             {
               type: 'MY_TEST_COLLECTOR',

@@ -409,7 +409,7 @@ export interface CoreConfigUsageData {
         };
         xsrf: {
             disableProtection: boolean;
-            whitelistConfigured: boolean;
+            allowlistConfigured: boolean;
         };
         requestId: {
             allowFromAnyIp: boolean;
@@ -521,7 +521,7 @@ export interface CoreStatus {
 }
 
 // @internal
-export interface CoreUsageData {
+export interface CoreUsageData extends CoreUsageStats {
     // (undocumented)
     config: CoreConfigUsageData;
     // (undocumented)
@@ -533,6 +533,44 @@ export interface CoreUsageData {
 // @internal
 export interface CoreUsageDataStart {
     getCoreUsageData(): Promise<CoreUsageData>;
+}
+
+// @internal
+export interface CoreUsageStats {
+    // (undocumented)
+    'apiCalls.savedObjectsExport.allTypesSelected.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.allTypesSelected.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.createNewCopiesEnabled.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.overwriteEnabled.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.overwriteEnabled.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.total'?: number;
 }
 
 // @public (undocumented)
@@ -1324,6 +1362,7 @@ export interface LegacyCallAPIOptions {
 export class LegacyClusterClient implements ILegacyClusterClient {
     constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient;
+    // @deprecated
     callAsInternalUser: LegacyAPICaller;
     close(): void;
     }
@@ -1371,7 +1410,9 @@ export interface LegacyRequest extends Request {
 // @public @deprecated
 export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     constructor(internalAPICaller: LegacyAPICaller, scopedAPICaller: LegacyAPICaller, headers?: Headers | undefined);
+    // @deprecated
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
+    // @deprecated
     callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     }
 
@@ -2366,6 +2407,7 @@ export interface SavedObjectsImportUnsupportedTypeError {
 
 // @public (undocumented)
 export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+    initialize?: boolean;
     // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     refresh?: MutatingOperationRefreshSetting;
@@ -2444,7 +2486,7 @@ export class SavedObjectsRepository {
     // (undocumented)
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
-    incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
+    incrementCounter<T = unknown>(type: string, id: string, counterFieldNames: string[], options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }

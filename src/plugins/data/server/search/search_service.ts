@@ -29,7 +29,8 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { first, switchMap } from 'rxjs/operators';
+import { catchError, first, map, switchMap } from 'rxjs/operators';
+import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import {
   ISearchSetup,
@@ -43,7 +44,7 @@ import { AggsService } from './aggs';
 
 import { FieldFormatsStart } from '../field_formats';
 import { IndexPatternsServiceStart } from '../index_patterns';
-import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
+import { getCallMsearch, registerMsearchRoute, registerSearchRoute, shimHitsTotal } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 import { DataPluginStart } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
@@ -64,6 +65,7 @@ import {
   searchSourceRequiredUiSettings,
   SearchSourceService,
 } from '../../common/search';
+import { getEsaggs } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
@@ -85,6 +87,7 @@ type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
+  bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -106,6 +109,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly searchSourceService = new SearchSourceService();
   private defaultSearchStrategyName: string = ES_SEARCH_STRATEGY;
   private searchStrategies: StrategyMap = {};
+  private coreStart?: CoreStart;
   private sessionService: BackgroundSessionService = new BackgroundSessionService();
 
   constructor(
@@ -115,7 +119,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup<{}, DataPluginStart>,
-    { expressions, usageCollection }: SearchServiceSetupDependencies
+    { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
@@ -128,10 +132,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerMsearchRoute(router, routeDependencies);
     registerSessionRoutes(router);
 
+    core.getStartServices().then(([coreStart]) => {
+      this.coreStart = coreStart;
+    });
+
     core.http.registerRouteHandlerContext('search', async (context, request) => {
-      const [coreStart] = await core.getStartServices();
-      const search = this.asScopedProvider(coreStart)(request);
-      const session = this.sessionService.asScopedProvider(coreStart)(request);
+      const search = this.asScopedProvider(this.coreStart!)(request);
+      const session = this.sessionService.asScopedProvider(this.coreStart!)(request);
       return { ...search, session };
     });
 
@@ -146,11 +153,50 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
 
+    bfetch.addBatchProcessingRoute<
+      { request: IKibanaSearchResponse; options?: ISearchOptions },
+      any
+    >('/internal/bsearch', (request) => {
+      const search = this.asScopedProvider(this.coreStart!)(request);
+
+      return {
+        onBatchItem: async ({ request: requestData, options }) => {
+          return search
+            .search(requestData, options)
+            .pipe(
+              first(),
+              map((response) => {
+                return {
+                  ...response,
+                  ...{
+                    rawResponse: shimHitsTotal(response.rawResponse),
+                  },
+                };
+              }),
+              catchError((err) => {
+                // eslint-disable-next-line no-throw-literal
+                throw {
+                  statusCode: err.statusCode || 500,
+                  body: {
+                    message: err.message,
+                    attributes: {
+                      error: err.body?.error || err.message,
+                    },
+                  },
+                };
+              })
+            )
+            .toPromise();
+        },
+      };
+    });
+
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
       registerUsageCollector(usageCollection, this.initializerContext);
     }
 
+    expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
     expressions.registerFunction(kibana);
     expressions.registerFunction(kibanaContextFunction);
     expressions.registerType(kibanaContext);
