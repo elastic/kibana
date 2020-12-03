@@ -140,5 +140,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const hasGeoSrcFilter = await filterBar.hasFilter('geo.src', 'US', true, true);
       expect(hasGeoSrcFilter).to.be(true);
     });
+
+    it('CSV export action exists in panel context menu', async () => {
+      const ACTION_ID = 'ACTION_EXPORT_CSV';
+      const ACTION_TEST_SUBJ = `embeddablePanelAction-${ACTION_ID}`;
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
+      await find.clickByButtonText('lnsPieVis');
+      await dashboardAddPanel.closeAddPanel();
+
+      await panelActions.openContextMenu();
+      await panelActions.clickContextMenuMoreItem();
+      await testSubjects.existOrFail(ACTION_TEST_SUBJ);
+    });
   });
 }

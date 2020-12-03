@@ -8,19 +8,20 @@ import { EnhancementRegistryDefinition } from '../../../../src/plugins/embeddabl
 import { SavedObjectReference } from '../../../../src/core/types';
 import { ActionFactory, DynamicActionsState, SerializedEvent } from './types';
 import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
+import { dynamicActionsCollector } from './telemetry/dynamic_actions_collector';
+import { dynamicActionFactoriesCollector } from './telemetry/dynamic_action_factories_collector';
 
 export const dynamicActionEnhancement = (
   getActionFactory: (id: string) => undefined | ActionFactory
 ): EnhancementRegistryDefinition => {
   return {
     id: 'dynamicActions',
-    telemetry: (state: SerializableState, telemetry: Record<string, any>) => {
-      let telemetryData = telemetry;
-      (state as DynamicActionsState).events.forEach((event: SerializedEvent) => {
-        const factory = getActionFactory(event.action.factoryId);
-        if (factory) telemetryData = factory.telemetry(event, telemetryData);
-      });
-      return telemetryData;
+    telemetry: (serializableState: SerializableState, stats: Record<string, any>) => {
+      const state = serializableState as DynamicActionsState;
+      stats = dynamicActionsCollector(state, stats);
+      stats = dynamicActionFactoriesCollector(getActionFactory, state, stats);
+
+      return stats;
     },
     extract: (state: SerializableState) => {
       const references: SavedObjectReference[] = [];
