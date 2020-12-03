@@ -5,7 +5,7 @@
  */
 
 import * as selectors from './selectors';
-import { DataState, FetchedNodeData } from '../../types';
+import { DataState } from '../../types';
 import { ResolverAction } from '../actions';
 import { dataReducer } from './reducer';
 import { createStore } from 'redux';
@@ -29,7 +29,7 @@ function mockNodeDataWithAllProcessesTerminated({
   secondAncestorID: string;
   firstAncestorID: string;
   originID: string;
-}): Map<string, FetchedNodeData> {
+}): SafeResolverEvent[] {
   const secondAncestor: SafeResolverEvent = mockEndpointEvent({
     entityID: secondAncestorID,
     processName: 'a',
@@ -70,11 +70,14 @@ function mockNodeDataWithAllProcessesTerminated({
     eventType: 'end',
   });
 
-  return new Map([
-    [originID, { events: [originEvent, originEventTermination], terminated: true }],
-    [firstAncestorID, { events: [firstAncestor, firstAncestorTermination], terminated: true }],
-    [secondAncestorID, { events: [secondAncestor, secondAncestorTermination], terminated: true }],
-  ]);
+  return [
+    originEvent,
+    originEventTermination,
+    firstAncestor,
+    firstAncestorTermination,
+    secondAncestor,
+    secondAncestorTermination,
+  ];
 }
 
 describe('data state', () => {
@@ -397,28 +400,31 @@ describe('data state', () => {
     const originID = 'c';
     const firstAncestorID = 'b';
     const secondAncestorID = 'a';
+    const nodeData = mockNodeDataWithAllProcessesTerminated({
+      originID,
+      firstAncestorID,
+      secondAncestorID,
+    });
     beforeEach(() => {
       actions.push({
         type: 'serverReturnedNodeData',
         payload: {
-          nodeData: mockNodeDataWithAllProcessesTerminated({
-            originID,
-            firstAncestorID,
-            secondAncestorID,
-          }),
+          nodeData,
           requestedIDs: new Set([originID, firstAncestorID, secondAncestorID]),
-          reachedLimit: false,
+          // mock the requested size being larger than the returned number of events so we
+          // avoid the case where the limit was reached
+          numberOfRequestedEvents: nodeData.length + 1,
         },
       });
     });
     it('should have origin as terminated', () => {
-      expect(selectors.getNodeState(state())(originID)).toBe('terminated');
+      expect(selectors.nodeDataStatus(state())(originID)).toBe('terminated');
     });
     it('should have first ancestor as termianted', () => {
-      expect(selectors.getNodeState(state())(firstAncestorID)).toBe('terminated');
+      expect(selectors.nodeDataStatus(state())(firstAncestorID)).toBe('terminated');
     });
     it('should have second ancestor as terminated', () => {
-      expect(selectors.getNodeState(state())(secondAncestorID)).toBe('terminated');
+      expect(selectors.nodeDataStatus(state())(secondAncestorID)).toBe('terminated');
     });
   });
   describe('with a tree with 2 children and no ancestors', () => {

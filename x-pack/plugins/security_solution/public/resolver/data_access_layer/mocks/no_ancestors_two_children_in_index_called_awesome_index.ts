@@ -13,7 +13,7 @@ import {
 } from '../../../../common/endpoint/types';
 import { mockEndpointEvent } from '../../mocks/endpoint_event';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
-import { DataAccessLayer, Timerange } from '../../types';
+import { DataAccessLayer, TimeRange } from '../../types';
 
 interface Metadata {
   /**
@@ -59,11 +59,11 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
        */
       relatedEvents({
         entityID,
-        timerange,
+        timeRange,
         indexPatterns,
       }: {
         entityID: string;
-        timerange: Timerange;
+        timeRange: TimeRange;
         indexPatterns: string[];
       }): Promise<ResolverRelatedEvents> {
         return Promise.resolve({
@@ -83,13 +83,13 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         entityID,
         category,
         after,
-        timerange,
+        timeRange,
         indexPatterns,
       }: {
         entityID: string;
         category: string;
         after?: string;
-        timerange: Timerange;
+        timeRange: TimeRange;
         indexPatterns: string[];
       }): Promise<{
         events: SafeResolverEvent[];
@@ -111,14 +111,14 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         eventCategory,
         eventTimestamp,
         eventID,
-        timerange,
+        timeRange,
         indexPatterns,
       }: {
         nodeID: string;
         eventCategory: string[];
         eventTimestamp: string;
         eventID?: string | number;
-        timerange: Timerange;
+        timeRange: TimeRange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {
         return mockEndpointEvent({
@@ -132,12 +132,12 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
        */
       async nodeData({
         ids,
-        timerange,
+        timeRange,
         indexPatterns,
         limit,
       }: {
         ids: string[];
-        timerange: Timerange;
+        timeRange: TimeRange;
         indexPatterns: string[];
         limit: number;
       }): Promise<SafeResolverEvent[]> {
@@ -154,14 +154,14 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
       async resolverTree({
         dataId,
         schema,
-        timerange,
+        timeRange,
         indices,
         ancestors,
         descendants,
       }: {
         dataId: string;
         schema: ResolverSchema;
-        timerange: Timerange;
+        timeRange: TimeRange;
         indices: string[];
         ancestors: number;
         descendants: number;

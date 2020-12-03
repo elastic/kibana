@@ -11,7 +11,7 @@ import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { PaginationBuilder } from '../utils/pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
-interface Timerange {
+interface TimeRange {
   from: string;
   to: string;
 }
@@ -22,19 +22,19 @@ interface Timerange {
 export class EventsQuery {
   private readonly pagination: PaginationBuilder;
   private readonly indexPatterns: string | string[];
-  private readonly timerange: Timerange;
+  private readonly timeRange: TimeRange;
   constructor({
     pagination,
     indexPatterns,
-    timerange,
+    timeRange,
   }: {
     pagination: PaginationBuilder;
     indexPatterns: string | string[];
-    timerange: Timerange;
+    timeRange: TimeRange;
   }) {
     this.pagination = pagination;
     this.indexPatterns = indexPatterns;
-    this.timerange = timerange;
+    this.timeRange = timeRange;
   }
 
   private query(filters: JsonObject[]): JsonObject {
@@ -46,8 +46,8 @@ export class EventsQuery {
             {
               range: {
                 '@timestamp': {
-                  gte: this.timerange.from,
-                  lte: this.timerange.to,
+                  gte: this.timeRange.from,
+                  lte: this.timeRange.to,
                   format: 'strict_date_optional_time',
                 },
               },

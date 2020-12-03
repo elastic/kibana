@@ -40,7 +40,7 @@ export const validateTree = {
     descendants: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
     // if the ancestry array isn't specified allowing 200 might be too high
     ancestors: schema.number({ defaultValue: 200, min: 0, max: 10000 }),
-    timerange: schema.object({
+    timeRange: schema.object({
       from: schema.string(),
       to: schema.string(),
     }),
@@ -71,7 +71,7 @@ export const validateEvents = {
     afterEvent: schema.maybe(schema.string()),
   }),
   body: schema.object({
-    timerange: schema.object({
+    timeRange: schema.object({
       from: schema.string(),
       to: schema.string(),
     }),

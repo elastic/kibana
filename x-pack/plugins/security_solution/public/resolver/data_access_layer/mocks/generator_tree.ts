@@ -5,7 +5,7 @@
  */
 
 import { Tree, TreeOptions } from '../../../../common/endpoint/generate_data';
-import { DataAccessLayer, Timerange } from '../../types';
+import { DataAccessLayer, TimeRange } from '../../types';
 
 import {
   ResolverRelatedEvents,
@@ -57,11 +57,11 @@ export function generateTreeWithDAL(
      */
     async relatedEvents({
       entityID,
-      timerange,
+      timeRange,
       indexPatterns,
     }: {
       entityID: string;
-      timerange: Timerange;
+      timeRange: TimeRange;
       indexPatterns: string[];
     }): Promise<ResolverRelatedEvents> {
       const node = allNodes.get(entityID);
@@ -80,13 +80,13 @@ export function generateTreeWithDAL(
       entityID,
       category,
       after,
-      timerange,
+      timeRange,
       indexPatterns,
     }: {
       entityID: string;
       category: string;
       after?: string;
-      timerange: Timerange;
+      timeRange: TimeRange;
       indexPatterns: string[];
     }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
       const node = allNodes.get(entityID);
@@ -110,14 +110,14 @@ export function generateTreeWithDAL(
       eventCategory,
       eventTimestamp,
       eventID,
-      timerange,
+      timeRange,
       indexPatterns,
     }: {
       nodeID: string;
       eventCategory: string[];
       eventTimestamp: string;
       eventID?: string | number;
-      timerange: Timerange;
+      timeRange: TimeRange;
       indexPatterns: string[];
     }): Promise<SafeResolverEvent | null> {
       return null;
@@ -128,12 +128,12 @@ export function generateTreeWithDAL(
      */
     async nodeData({
       ids,
-      timerange,
+      timeRange,
       indexPatterns,
       limit,
     }: {
       ids: string[];
-      timerange: Timerange;
+      timeRange: TimeRange;
       indexPatterns: string[];
       limit: number;
     }): Promise<SafeResolverEvent[]> {
@@ -154,14 +154,14 @@ export function generateTreeWithDAL(
     async resolverTree({
       dataId,
       schema,
-      timerange,
+      timeRange,
       indices,
       ancestors,
       descendants,
     }: {
       dataId: string;
       schema: ResolverSchema;
-      timerange: Timerange;
+      timeRange: TimeRange;
       indices: string[];
       ancestors: number;
       descendants: number;

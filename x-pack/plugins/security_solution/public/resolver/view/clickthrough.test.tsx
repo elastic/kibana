@@ -11,7 +11,7 @@ import { Simulator } from '../test_utilities/simulator';
 import '../test_utilities/extend_jest';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { urlSearch } from '../test_utilities/url_search';
-import { Vector2, AABB, Timerange, DataAccessLayer } from '../types';
+import { Vector2, AABB, TimeRange, DataAccessLayer } from '../types';
 import { generateTreeWithDAL } from '../data_access_layer/mocks/generator_tree';
 import { ReactWrapper } from 'enzyme';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
@@ -349,7 +349,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
         limit,
       }: {
         ids: string[];
-        timerange: Timerange;
+        timerange: TimeRange;
         indexPatterns: string[];
         limit: number;
       }): Promise<SafeResolverEvent[]> => {
@@ -357,7 +357,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
           throw new Error('fake error');
         }
 
-        return generatorDAL.nodeData({ ids, timerange, indexPatterns, limit });
+        return generatorDAL.nodeData({ ids, timeRange: timerange, indexPatterns, limit });
       };
 
       // create a resolver simulator, using the data access layer and an arbitrary component instance ID

@@ -648,7 +648,7 @@ export interface IsometricTaxiLayout {
 /**
  * Defines the type for bounding a search by a time box.
  */
-export interface Timerange {
+export interface TimeRange {
   from: Date;
   to: Date;
 }
@@ -665,11 +665,11 @@ export interface DataAccessLayer {
    */
   relatedEvents: ({
     entityID,
-    timerange,
+    timeRange,
     indexPatterns,
   }: {
     entityID: string;
-    timerange: Timerange;
+    timeRange: TimeRange;
     indexPatterns: string[];
   }) => Promise<ResolverRelatedEvents>;
 
@@ -681,13 +681,13 @@ export interface DataAccessLayer {
     entityID,
     category,
     after,
-    timerange,
+    timeRange,
     indexPatterns,
   }: {
     entityID: string;
     category: string;
     after?: string;
-    timerange: Timerange;
+    timeRange: TimeRange;
     indexPatterns: string[];
   }) => Promise<ResolverPaginatedEvents>;
 
@@ -697,12 +697,12 @@ export interface DataAccessLayer {
    */
   nodeData({
     ids,
-    timerange,
+    timeRange,
     indexPatterns,
     limit,
   }: {
     ids: string[];
-    timerange: Timerange;
+    timeRange: TimeRange;
     indexPatterns: string[];
     limit: number;
   }): Promise<SafeResolverEvent[]>;
@@ -715,14 +715,14 @@ export interface DataAccessLayer {
     eventCategory,
     eventTimestamp,
     eventID,
-    timerange,
+    timeRange,
     indexPatterns,
   }: {
     nodeID: string;
     eventCategory: string[];
     eventTimestamp: string;
     eventID?: string | number;
-    timerange: Timerange;
+    timeRange: TimeRange;
     indexPatterns: string[];
   }) => Promise<SafeResolverEvent | null>;
 
@@ -732,14 +732,14 @@ export interface DataAccessLayer {
   resolverTree({
     dataId,
     schema,
-    timerange,
+    timeRange,
     indices,
     ancestors,
     descendants,
   }: {
     dataId: string;
     schema: ResolverSchema;
-    timerange: Timerange;
+    timeRange: TimeRange;
     indices: string[];
     ancestors: number;
     descendants: number;

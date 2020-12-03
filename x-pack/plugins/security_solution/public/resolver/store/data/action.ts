@@ -120,7 +120,7 @@ interface ServerReturnedNodeData {
     /**
      * A map of the node's ID to an array of events
      */
-    nodeData: Map<string, FetchedNodeData>;
+    nodeData: SafeResolverEvent[];
     /**
      * The list of IDs that were originally sent to the server. This won't necessarily equal nodeData.keys() because
      * data could have been deleted in Elasticsearch since the original graph nodes were returned or the server's
@@ -128,11 +128,13 @@ interface ServerReturnedNodeData {
      */
     requestedIDs: Set<string>;
     /**
-     * A flag indicating that the server returned the same amount of data that we requested. In this case
+     * The number of events that we requested from the server (the limit in the request).
+     * This will be used to compute a flag about whether we reached the limit with the number of events returned by
+     * the server. If the server returned the same amount of data we requested, then
      * we might be missing events for some of the requested node IDs. We'll mark those nodes in such a way
      * that we'll request their data in a subsequent request.
      */
-    reachedLimit: boolean;
+    numberOfRequestedEvents: number;
   };
 }
 

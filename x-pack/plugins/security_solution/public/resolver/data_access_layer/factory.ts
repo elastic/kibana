@@ -6,7 +6,7 @@
 
 import { KibanaReactContextValue } from '../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../types';
-import { DataAccessLayer, Timerange } from '../types';
+import { DataAccessLayer, TimeRange } from '../types';
 import {
   ResolverNode,
   ResolverRelatedEvents,
@@ -29,11 +29,11 @@ export function dataAccessLayerFactory(
      */
     async relatedEvents({
       entityID,
-      timerange,
+      timeRange,
       indexPatterns,
     }: {
       entityID: string;
-      timerange: Timerange;
+      timeRange: TimeRange;
       indexPatterns: string[];
     }): Promise<ResolverRelatedEvents> {
       const response: ResolverPaginatedEvents = await context.services.http.post(
@@ -42,9 +42,9 @@ export function dataAccessLayerFactory(
           query: {},
           body: JSON.stringify({
             indexPatterns,
-            timerange: {
-              from: timerange.from.toISOString(),
-              to: timerange.to.toISOString(),
+            timeRange: {
+              from: timeRange.from.toISOString(),
+              to: timeRange.to.toISOString(),
             },
             filter: JSON.stringify({
               bool: {
@@ -69,21 +69,21 @@ export function dataAccessLayerFactory(
       entityID,
       category,
       after,
-      timerange,
+      timeRange,
       indexPatterns,
     }: {
       entityID: string;
       category: string;
       after?: string;
-      timerange: Timerange;
+      timeRange: TimeRange;
       indexPatterns: string[];
     }): Promise<ResolverPaginatedEvents> {
       return context.services.http.post('/api/endpoint/resolver/events', {
         query: { afterEvent: after, limit: 25 },
         body: JSON.stringify({
-          timerange: {
-            from: timerange.from.toISOString(),
-            to: timerange.to.toISOString(),
+          timeRange: {
+            from: timeRange.from.toISOString(),
+            to: timeRange.to.toISOString(),
           },
           indexPatterns,
           filter: JSON.stringify({
@@ -104,12 +104,12 @@ export function dataAccessLayerFactory(
      */
     async nodeData({
       ids,
-      timerange,
+      timeRange,
       indexPatterns,
       limit,
     }: {
       ids: string[];
-      timerange: Timerange;
+      timeRange: TimeRange;
       indexPatterns: string[];
       limit: number;
     }): Promise<SafeResolverEvent[]> {
@@ -118,9 +118,9 @@ export function dataAccessLayerFactory(
         {
           query: { limit },
           body: JSON.stringify({
-            timerange: {
-              from: timerange.from.toISOString(),
-              to: timerange.to.toISOString(),
+            timeRange: {
+              from: timeRange.from.toISOString(),
+              to: timeRange.to.toISOString(),
             },
             indexPatterns,
             filter: JSON.stringify({
@@ -145,14 +145,14 @@ export function dataAccessLayerFactory(
       eventID,
       eventCategory,
       eventTimestamp,
-      timerange,
+      timeRange,
       indexPatterns,
     }: {
       nodeID: string;
       eventCategory: string[];
       eventTimestamp: string;
       eventID?: string | number;
-      timerange: Timerange;
+      timeRange: TimeRange;
       indexPatterns: string[];
     }): Promise<SafeResolverEvent | null> {
       /** @description - eventID isn't provided by winlog. This can be removed once runtime fields are available */
@@ -178,9 +178,9 @@ export function dataAccessLayerFactory(
           query: { limit: 1 },
           body: JSON.stringify({
             indexPatterns,
-            timerange: {
-              from: timerange.from.toISOString(),
-              to: timerange.to.toISOString(),
+            timeRange: {
+              from: timeRange.from.toISOString(),
+              to: timeRange.to.toISOString(),
             },
             filter: JSON.stringify(filter),
           }),
@@ -202,14 +202,14 @@ export function dataAccessLayerFactory(
     async resolverTree({
       dataId,
       schema,
-      timerange,
+      timeRange,
       indices,
       ancestors,
       descendants,
     }: {
       dataId: string;
       schema: ResolverSchema;
-      timerange: Timerange;
+      timeRange: TimeRange;
       indices: string[];
       ancestors: number;
       descendants: number;
@@ -218,7 +218,7 @@ export function dataAccessLayerFactory(
         body: JSON.stringify({
           ancestors,
           descendants,
-          timerange,
+          timeRange,
           schema,
           nodes: [dataId],
           indexPatterns: indices,

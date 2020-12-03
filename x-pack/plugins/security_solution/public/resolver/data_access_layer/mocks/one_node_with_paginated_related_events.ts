@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataAccessLayer, Timerange } from '../../types';
+import { DataAccessLayer, TimeRange } from '../../types';
 import { mockTreeWithOneNodeAndTwoPagesOfRelatedEvents } from '../../mocks/resolver_tree';
 import {
   ResolverRelatedEvents,
@@ -53,11 +53,11 @@ export function oneNodeWithPaginatedEvents(): {
        */
       async relatedEvents({
         entityID,
-        timerange,
+        timeRange,
         indexPatterns,
       }: {
         entityID: string;
-        timerange: Timerange;
+        timeRange: TimeRange;
         indexPatterns: string[];
       }): Promise<ResolverRelatedEvents> {
         /**
@@ -79,13 +79,13 @@ export function oneNodeWithPaginatedEvents(): {
         entityID,
         category,
         after,
-        timerange,
+        timeRange,
         indexPatterns,
       }: {
         entityID: string;
         category: string;
         after?: string;
-        timerange: Timerange;
+        timeRange: TimeRange;
         indexPatterns: string[];
       }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
         let events: SafeResolverEvent[] = [];
@@ -111,14 +111,14 @@ export function oneNodeWithPaginatedEvents(): {
         eventCategory,
         eventTimestamp,
         eventID,
-        timerange,
+        timeRange,
         indexPatterns,
       }: {
         nodeID: string;
         eventCategory: string[];
         eventTimestamp: string;
         eventID?: string | number;
-        timerange: Timerange;
+        timeRange: TimeRange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {
         return mockTree.events.find((event) => eventModel.eventID(event) === eventID) ?? null;
@@ -126,12 +126,12 @@ export function oneNodeWithPaginatedEvents(): {
 
       async nodeData({
         ids,
-        timerange,
+        timeRange,
         indexPatterns,
         limit,
       }: {
         ids: string[];
-        timerange: Timerange;
+        timeRange: TimeRange;
         indexPatterns: string[];
         limit: number;
       }): Promise<SafeResolverEvent[]> {
@@ -144,14 +144,14 @@ export function oneNodeWithPaginatedEvents(): {
       async resolverTree({
         dataId,
         schema,
-        timerange,
+        timeRange,
         indices,
         ancestors,
         descendants,
       }: {
         dataId: string;
         schema: ResolverSchema;
-        timerange: Timerange;
+        timeRange: TimeRange;
         indices: string[];
         ancestors: number;
         descendants: number;

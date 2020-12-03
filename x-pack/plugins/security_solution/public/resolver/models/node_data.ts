@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { FetchedNodeData, IDToNodeInfo, NodeData } from '../types';
+import { isTerminatedProcess } from './process_event';
 
 /**
  * Creates a copy of the node data map and initializes the specified IDs to an empty object with status requested.
@@ -62,6 +64,30 @@ export function setReloadedNodes(
   return newData;
 }
 
+function groupByID(events: SafeResolverEvent[]): Map<string, FetchedNodeData> {
+  // group the returned events by their ID
+  const newData = new Map<string, FetchedNodeData>();
+  for (const result of events) {
+    const id = entityIDSafeVersion(result);
+    const terminated = isTerminatedProcess(result);
+    if (id) {
+      const info = newData.get(id);
+      if (!info) {
+        newData.set(id, { events: [result], terminated });
+      } else {
+        info.events.push(result);
+        /**
+         * Track whether we have seen a termination event. It is useful to do this here rather than in a selector
+         * because the selector would have to loop over all events each time a new node's data is received.
+         */
+        info.terminated = info.terminated || terminated;
+      }
+    }
+  }
+
+  return newData;
+}
+
 /**
  * Creates a copy of the node data map and updates it with the data returned by the server. If the server did not return
  * data for a particular ID we will determine whether no data exists for that ID or if the server reached the limit we
@@ -74,16 +100,18 @@ export function setReloadedNodes(
  */
 export function updateWithReceivedNodes({
   storedNodeInfo = new Map<string, NodeData>(),
-  receivedNodes,
+  receivedEvents,
   requestedNodes,
-  reachedLimit,
+  numberOfRequestedEvents,
 }: {
   storedNodeInfo: IDToNodeInfo | undefined;
-  receivedNodes: Map<string, FetchedNodeData>;
+  receivedEvents: SafeResolverEvent[];
   requestedNodes: Set<string>;
-  reachedLimit: boolean;
+  numberOfRequestedEvents: number;
 }): IDToNodeInfo {
   const copiedMap = new Map<string, NodeData>([...storedNodeInfo]);
+  const reachedLimit = receivedEvents.length >= numberOfRequestedEvents;
+  const receivedNodes: Map<string, FetchedNodeData> = groupByID(receivedEvents);
 
   for (const id of requestedNodes.values()) {
     // If the server returned the same number of events that we requested it's possible

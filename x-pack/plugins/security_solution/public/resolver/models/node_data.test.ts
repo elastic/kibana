@@ -5,7 +5,7 @@
  */
 
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
-import { FetchedNodeData, IDToNodeInfo } from '../types';
+import { IDToNodeInfo } from '../types';
 import {
   idsNotInBase,
   setErrorNodes,
@@ -35,9 +35,9 @@ describe('node data model', () => {
       expect(
         updateWithReceivedNodes({
           storedNodeInfo: original,
-          receivedNodes: new Map(),
+          receivedEvents: [],
           requestedNodes: new Set(),
-          reachedLimit: false,
+          numberOfRequestedEvents: 1,
         }) === original
       ).toBeFalsy();
     });
@@ -45,7 +45,7 @@ describe('node data model', () => {
 
   it('overwrites the existing entries and creates new ones when calling setRequestedNodes', () => {
     const state: IDToNodeInfo = new Map([
-      ['1', { events: [generator.generateEvent()], status: 'running' }],
+      ['1', { events: [generator.generateEvent()], status: 'running', eventType: ['start'] }],
     ]);
 
     expect(setRequestedNodes(state, new Set(['1', '2']))).toEqual(
@@ -58,7 +58,7 @@ describe('node data model', () => {
 
   it('overwrites the existing entries and creates new ones when calling setErrorNodes', () => {
     const state: IDToNodeInfo = new Map([
-      ['1', { events: [generator.generateEvent()], status: 'running' }],
+      ['1', { events: [generator.generateEvent()], status: 'running', eventType: ['start'] }],
     ]);
 
     expect(setErrorNodes(state, new Set(['1', '2']))).toEqual(
@@ -76,7 +76,7 @@ describe('node data model', () => {
 
     it('only includes ids that are not in the base state', () => {
       const state: IDToNodeInfo = new Map([
-        ['1', { events: [generator.generateEvent()], status: 'error' }],
+        ['1', { events: [generator.generateEvent()], status: 'error', eventType: ['start'] }],
       ]);
       expect(idsNotInBase(state, new Set(['1', '2', '3']))).toEqual(new Set(['2', '3']));
     });
@@ -90,24 +90,23 @@ describe('node data model', () => {
   });
 
   describe('updateWithReceivedNodes', () => {
-    const node1Events = [generator.generateEvent({ entityID: '1' })];
-    const node2Events = [generator.generateEvent({ entityID: '2' })];
+    const node1Events = [generator.generateEvent({ entityID: '1', eventType: ['start'] })];
+    const node2Events = [generator.generateEvent({ entityID: '2', eventType: ['start'] })];
     const state: IDToNodeInfo = new Map([
       ['1', { events: node1Events, status: 'error' }],
       ['2', { events: node2Events, status: 'error' }],
     ]);
     describe('reachedLimit is false', () => {
       it('overwrites entries with the received data', () => {
-        const genNodeEvent = generator.generateEvent({ entityID: '3' });
-        const received = new Map<string, FetchedNodeData>([
-          ['1', { events: [genNodeEvent], terminated: false }],
-        ]);
+        const genNodeEvent = generator.generateEvent({ entityID: '1', eventType: ['start'] });
+
         expect(
           updateWithReceivedNodes({
             storedNodeInfo: state,
-            receivedNodes: received,
+            receivedEvents: [genNodeEvent],
             requestedNodes: new Set(['1']),
-            reachedLimit: false,
+            // a number greater than the amount received so the reached limit flag with be false
+            numberOfRequestedEvents: 10,
           })
         ).toEqual(
           new Map([
@@ -121,9 +120,9 @@ describe('node data model', () => {
         expect(
           updateWithReceivedNodes({
             storedNodeInfo: state,
-            receivedNodes: new Map(),
+            receivedEvents: [],
             requestedNodes: new Set(['1', '2']),
-            reachedLimit: false,
+            numberOfRequestedEvents: 1,
           })
         ).toEqual(
           new Map([
@@ -139,9 +138,9 @@ describe('node data model', () => {
         expect(
           updateWithReceivedNodes({
             storedNodeInfo: state,
-            receivedNodes: new Map(),
+            receivedEvents: [],
             requestedNodes: new Set(['1']),
-            reachedLimit: true,
+            numberOfRequestedEvents: 0,
           })
         ).toEqual(new Map([['2', { events: node2Events, status: 'error' }]]));
       });
@@ -150,9 +149,9 @@ describe('node data model', () => {
         expect(
           updateWithReceivedNodes({
             storedNodeInfo: state,
-            receivedNodes: new Map(),
+            receivedEvents: [],
             requestedNodes: new Set(['10']),
-            reachedLimit: true,
+            numberOfRequestedEvents: 0,
           })
         ).toEqual(
           new Map([
@@ -163,16 +162,14 @@ describe('node data model', () => {
       });
 
       it('does not delete the entry if it exists in the received node data from the server', () => {
-        const genNodeEvent = generator.generateEvent({ entityID: '3' });
-        const received = new Map<string, FetchedNodeData>([
-          ['1', { events: [genNodeEvent], terminated: false }],
-        ]);
+        const genNodeEvent = generator.generateEvent({ entityID: '1', eventType: ['start'] });
+
         expect(
           updateWithReceivedNodes({
             storedNodeInfo: state,
-            receivedNodes: received,
+            receivedEvents: [genNodeEvent],
             requestedNodes: new Set(['1']),
-            reachedLimit: true,
+            numberOfRequestedEvents: 1,
           })
         ).toEqual(
           new Map([

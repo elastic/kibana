@@ -5,14 +5,11 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
-import { entityIDSafeVersion } from '../../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 
-import { ResolverState, DataAccessLayer, FetchedNodeData } from '../../types';
+import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
-import * as nodeDataModel from '../../models/node_data';
-import { isTerminatedProcess } from '../../models/process_event';
 
 /**
  * Max number of nodes to request from the server
@@ -36,13 +33,12 @@ export function NodeDataFetcher(
      * Using the greatest positive number here so that we will request the node data for the nodes in view
      * before the animation finishes. This will be a better user experience since we'll start the request while
      * the camera is panning and there's a higher chance it'll be finished once the camera finishes panning.
+     *
+     * This gets the visible nodes that we haven't already requested or received data for
      */
-    const visibleNodes: Set<string> = selectors.visibleNodes(state)(Number.POSITIVE_INFINITY);
-    const nodeData = selectors.nodeData(state);
+    const newIDsToRequest: Set<string> = selectors.newIDsToRequest(state)(Number.POSITIVE_INFINITY);
     const dbParams = selectors.treeParametersToFetch(state);
 
-    // Get the visible nodes that we haven't already requested or received data for
-    const newIDsToRequest = nodeDataModel.idsNotInBase(nodeData, visibleNodes);
     if (newIDsToRequest.size <= 0) {
       return;
     }
@@ -76,7 +72,7 @@ export function NodeDataFetcher(
     try {
       results = await dataAccessLayer.nodeData({
         ids: Array.from(newIDsToRequest),
-        timerange,
+        timeRange: timerange,
         indexPatterns: dbParams?.indices ?? [],
         limit: nodeDataLimit,
       });
@@ -93,26 +89,6 @@ export function NodeDataFetcher(
     }
 
     if (results) {
-      // group the returned events by their ID
-      const newData = new Map<string, FetchedNodeData>();
-      for (const result of results) {
-        const id = entityIDSafeVersion(result);
-        const terminated = isTerminatedProcess(result);
-        if (id) {
-          const info = newData.get(id);
-          if (!info) {
-            newData.set(id, { events: [result], terminated });
-          } else {
-            info.events.push(result);
-            /**
-             * Track whether we have seen a termination event. It is useful to do this here rather than in a selector
-             * because the selector would have to loop over all events each time a new node's data is received.
-             */
-            info.terminated = info.terminated || terminated;
-          }
-        }
-      }
-
       /**
        * Dispatch an action including the new node data we received and the original IDs we requested. We might
        * not have received events for each node so the original IDs will help with identifying nodes that we have
@@ -121,7 +97,7 @@ export function NodeDataFetcher(
       api.dispatch({
         type: 'serverReturnedNodeData',
         payload: {
-          nodeData: newData,
+          nodeData: results,
           requestedIDs: newIDsToRequest,
           /**
            * The reason we need this is to handle the case where the results does not contain node data for each node ID
@@ -144,7 +120,7 @@ export function NodeDataFetcher(
            *  In this scenario we'll remove the entry in the node data map so that on a subsequent middleware call
            *  if that node is still in view we'll request its node data.
            */
-          reachedLimit: results.length >= nodeDataLimit,
+          numberOfRequestedEvents: nodeDataLimit,
         },
       });
     }

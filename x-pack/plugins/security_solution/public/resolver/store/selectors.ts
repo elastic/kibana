@@ -8,7 +8,7 @@ import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import { ResolverState, IsometricTaxiLayout } from '../types';
+import { ResolverState, IsometricTaxiLayout, DataState } from '../types';
 import { EventStats } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
 
@@ -346,7 +346,7 @@ export const isLoadingMoreNodeEventsInCategory = composeSelectors(
 /**
  * Returns the state of the node, loading, running, or terminated.
  */
-export const getNodeState = composeSelectors(dataStateSelector, dataSelectors.getNodeState);
+export const nodeDataStatus = composeSelectors(dataStateSelector, dataSelectors.nodeDataStatus);
 
 /**
  * Returns the node data object for a specific node ID.
@@ -359,18 +359,25 @@ export const nodeDataForID = composeSelectors(dataStateSelector, dataSelectors.n
 export const graphNodeForID = composeSelectors(dataStateSelector, dataSelectors.graphNodeForID);
 
 /**
- * Returns a Set of node IDs representing the visible nodes in the view.
+ * Returns a Set of node IDs representing the visible nodes in the view that we do no have node data for already.
  */
-export const visibleNodes: (state: ResolverState) => (time: number) => Set<string> = createSelector(
+export const newIDsToRequest: (
+  state: ResolverState
+) => (time: number) => Set<string> = createSelector(
+  composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData),
   visibleNodesAndEdgeLines,
-  function (visibleNodesAndEdgeLinesAtTime) {
+  function (nodeData, visibleNodesAndEdgeLinesAtTime) {
     return defaultMemoize((time: number) => {
-      const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
+      const { processNodePositions: nodesInView } = visibleNodesAndEdgeLinesAtTime(time);
 
       const nodes: Set<string> = new Set();
-      for (const node of processNodePositions.keys()) {
+      // loop through the nodes in view and see if any of them are new aka we don't have node data for them already
+      for (const node of nodesInView.keys()) {
         const id = nodeModel.nodeID(node);
-        if (id !== undefined) {
+        // if the node has a valid ID field, and we either don't have any node data currently, or
+        // the map doesn't have info for this particular node, then add it to the set so it'll be requested
+        // by the middleware
+        if (id !== undefined && (!nodeData || !nodeData.has(id))) {
           nodes.add(id);
         }
       }
@@ -378,11 +385,6 @@ export const visibleNodes: (state: ResolverState) => (time: number) => Set<strin
     });
   }
 );
-
-/**
- * Returns the full node data structure.
- */
-export const nodeData = composeSelectors(dataStateSelector, dataSelectors.nodeData);
 
 /**
  * Returns true if we are currently loading the node's data.

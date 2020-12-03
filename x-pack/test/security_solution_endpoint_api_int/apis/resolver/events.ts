@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           filter,
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },
@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           filter,
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },
@@ -119,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },
@@ -145,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           filter,
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },
@@ -166,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },
@@ -182,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },
@@ -198,7 +198,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },
@@ -215,7 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },
@@ -233,7 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },
@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('should only return data within the specified timerange', async () => {
+    it('should only return data within the specified timeRange', async () => {
       const from =
         timestampAsDateSafeVersion(tree.origin.relatedEvents[0])?.toISOString() ??
         new Date(0).toISOString();
@@ -260,7 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from,
             to,
           },
@@ -278,7 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           filter: entityIDFilter,
           indexPatterns: ['metrics-*'],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },
@@ -304,7 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           }),
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },
@@ -332,7 +332,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           }),
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },
@@ -355,7 +355,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           }),
           indexPatterns: [eventsIndexPattern],
-          timerange: {
+          timeRange: {
             from: tree.startTime,
             to: tree.endTime,
           },

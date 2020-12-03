@@ -40,11 +40,9 @@ const eventDetailRequestError = i18n.translate(
 
 export const EventDetail = memo(function EventDetail({
   nodeID,
-  eventID,
   eventCategory: eventType,
 }: {
   nodeID: string;
-  eventID: string;
   /** The event type to show in the breadcrumbs */
   eventCategory: string;
 }) {
@@ -52,7 +50,7 @@ export const EventDetail = memo(function EventDetail({
   const isTreeLoading = useSelector(selectors.isTreeLoading);
   const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
 
-  const isNodeDataLoading = useSelector(selectors.isNodeDataLoading)(nodeID);
+  const isNodeDataLoading = nodeData?.status === 'loading';
   const isLoading = isEventLoading || isTreeLoading || isNodeDataLoading;
 
   const event = useSelector(selectors.currentRelatedEventData);

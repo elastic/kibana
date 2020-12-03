@@ -43,7 +43,7 @@ const nodeDetailError = i18n.translate('xpack.securitySolution.resolver.panel.no
 export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
   const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
   const processEvent = nodeDataModel.firstEvent(nodeData);
-  const isNodeDataLoading = useSelector(selectors.isNodeDataLoading)(nodeID);
+  const isNodeDataLoading = nodeData?.status === 'loading';
 
   return isNodeDataLoading ? (
     <>
@@ -78,7 +78,7 @@ const NodeDetailView = memo(function ({
   nodeID: string;
 }) {
   const processName = eventModel.processNameSafeVersion(processEvent);
-  const nodeState = useSelector(selectors.getNodeState)(nodeID);
+  const nodeState = useSelector(selectors.nodeDataStatus)(nodeID);
   const relatedEventTotal = useSelector((state: ResolverState) => {
     return selectors.relatedEventTotalCount(state)(nodeID);
   });

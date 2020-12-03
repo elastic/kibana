@@ -113,7 +113,7 @@ export const originID: (state: DataState) => string | undefined = createSelector
  * Returns a data structure for accessing events for specific nodes in a graph. For Endpoint graphs these nodes will be
  * process lifecycle events.
  */
-export const nodeData = (state: DataState): IDToNodeInfo | undefined => {
+const nodeData = (state: DataState): IDToNodeInfo | undefined => {
   return state.nodeData;
 };
 
@@ -132,7 +132,7 @@ export const nodeDataForID: (
 /**
  * Returns a function that can be called to retrieve the state of the node, running, loading, or terminated.
  */
-export const getNodeState: (state: DataState) => (id: string) => NodeDataStatus = createSelector(
+export const nodeDataStatus: (state: DataState) => (id: string) => NodeDataStatus = createSelector(
   nodeDataForID,
   (nodeInfo) => {
     return (id: string) => {
@@ -150,7 +150,7 @@ export const getNodeState: (state: DataState) => (id: string) => NodeDataStatus 
  * Returns a function that can be called to retrieve whether the node is in the loading state.
  */
 export const isNodeDataLoading: (state: DataState) => (id: string) => boolean = createSelector(
-  getNodeState,
+  nodeDataStatus,
   (nodeState) => {
     return (id: string) => {
       const state = nodeState(id);

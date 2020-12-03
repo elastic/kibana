@@ -189,9 +189,9 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
   } else if (action.type === 'serverReturnedNodeData') {
     const updatedNodeData = nodeDataModel.updateWithReceivedNodes({
       storedNodeInfo: state.nodeData,
-      receivedNodes: action.payload.nodeData,
+      receivedEvents: action.payload.nodeData,
       requestedNodes: action.payload.requestedIDs,
-      reachedLimit: action.payload.reachedLimit,
+      numberOfRequestedEvents: action.payload.numberOfRequestedEvents,
     });
 
     return {
