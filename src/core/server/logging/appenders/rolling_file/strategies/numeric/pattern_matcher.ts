@@ -42,7 +42,7 @@ const createNumericMatcher = (fileBaseName: string, pattern: string): RegExp => 
  * matcher('kibana-1.log') // `1`
  * matcher('kibana-5.log') // `5`
  * matcher('kibana-A.log') // undefined
- * matcher('kibana.log')   // `undefined
+ * matcher('kibana.log')   // undefined
  * ```
  */
 export const getFileNameMatcher = (logFileName: string, pattern: string) => {

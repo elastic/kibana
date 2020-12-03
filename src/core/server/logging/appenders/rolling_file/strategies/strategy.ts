@@ -18,7 +18,7 @@
  */
 
 /**
- * A strategy to perform the log file rollout.
+ * A strategy to perform the log file rollover.
  */
 export interface RollingStrategy {
   /**

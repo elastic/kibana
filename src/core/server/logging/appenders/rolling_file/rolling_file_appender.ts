@@ -166,7 +166,7 @@ export class RollingFileAppender implements DisposableAppender {
   }
 
   /**
-   * Checks if the current even should trigger a rollout
+   * Checks if the current event should trigger a rollout
    */
   private needRollout(record: LogRecord) {
     return this.policy.isTriggeringEvent(record);

@@ -28,6 +28,9 @@ export const shouldSkipRollout = async ({ logFilePath }: { logFilePath: string }
   return !(await exists(logFilePath));
 };
 
+/**
+ * Returns the rolled file basenames, from the most recent to the oldest.
+ */
 export const getOrderedRolledFiles = async ({
   logFileBaseName,
   logFileFolder,
