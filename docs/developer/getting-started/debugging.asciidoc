@@ -57,3 +57,5 @@ Once the agent is active, it will trace all incoming HTTP requests to
 {kib}, monitor for errors, and collect process-level metrics. The
 collected data will be sent to the APM Server and is viewable in the APM
 UI in {kib}.
+
+If you want to run kibana with a local instance of the APM agent, refer to <<running-kibana-with-apm>>.

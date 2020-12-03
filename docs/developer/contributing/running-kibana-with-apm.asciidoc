@@ -3,7 +3,9 @@
 
 With an application as varied and complex as Kibana has become, it's not practical or scalable to craft all possible performance measurements by hand ahead of time. As such, we need to rely on tooling to help us catch things we may otherwise have missed.
 
-For example, say you implement a brand new feature, plugin or service but don't quite know how it will impact Kibana's performance as a whole. APM allows us to not only spot that something is slow, but also hints at why it might be performing slowly (for example, if a function is slow on specific types of inputs).
+For example, say you implement a brand new feature, plugin or service but don't quite know how it will impact Kibana's performance as a whole. APM allows us to not only spot that something is slow, but also hints at why it might be performing slowly. For example, if a function is slow on specific types of inputs, we can see where the time is spent by viewing the trace for that function call in the APM UI.
+
+image::images/apm_example_trace.png[]
 
 The net of metrics captured by APM are both a wide and deep because the entire application is instrumented at runtime and we simply take a sample of these metrics. This means that we don't have to know what we need to measure ahead of time, we'll instead just get (most) of the data we're likely going to need by default.
 
@@ -36,9 +38,33 @@ elastic.apm.transactionSampleRate: 0.1
 elastic.apm.metricsInterval: '120s'
 ----------
 
+If you don't want to add these settings to your `config/kibana.yml` file directly, you can add them to a config file under `config/apm.dev.js`:
+
+Example `config/apm.dev.js` file:
+
+[source,js]
+----
+module.exports = {
+  active: true,
+  serverUrl: 'http://127.0.0.1:8200', // use `http://localhost:8200` as an alternative
+  // secretToken: ... <-- required in prod/cloud
+  centralConfig: false,
+  breakdownMetrics: false,
+  transactionSampleRate: 0.1,
+  metricsInterval: '120s'
+};
+----
+
 7. Start Kibana with APM active using:
 ** `yarn start`
 8. After Kibana starts up, navigate to the APM app, where you should see some transactions.
+
+image::images/apm_ui_transactions.png[]
+
 9. You can now continue doing what you want to in Kibana (e.g. install sample data sets, issue queries in dashboards, build new visualizations etc).
 10. Once you're finished, you can stop Kibana normally, then stop the {es} and APM servers in the apm-integration-testing clone with the following script:
 ** `./scripts/compose.py stop`
+
+For more information about configuring the APM agent, please refer to
+https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuring-the-agent.html[the
+documentation]
