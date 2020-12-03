@@ -66,6 +66,7 @@ import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import { getIndexVersion } from '../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../routes/index/get_signals_template';
+import { filterEventsAgainstList } from './filter_events_with_list';
 
 export const signalRulesAlertType = ({
   logger,
@@ -242,9 +243,18 @@ export const signalRulesAlertType = ({
             anomalyThreshold,
             from,
             to,
+            exceptionItems: exceptionItems ?? [],
           });
 
-          const anomalyCount = anomalyResults.hits.hits.length;
+          const filteredAnomalyResults = await filterEventsAgainstList({
+            listClient,
+            exceptionsList: exceptionItems ?? [],
+            logger,
+            eventSearchResult: anomalyResults,
+            buildRuleMessage,
+          });
+
+          const anomalyCount = filteredAnomalyResults.hits.hits.length;
           if (anomalyCount) {
             logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
           }
@@ -257,7 +267,7 @@ export const signalRulesAlertType = ({
           } = await bulkCreateMlSignals({
             actions,
             throttle,
-            someResult: anomalyResults,
+            someResult: filteredAnomalyResults,
             ruleParams: params,
             services,
             logger,
@@ -276,15 +286,16 @@ export const signalRulesAlertType = ({
           });
           // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
           const shardFailures =
-            (anomalyResults._shards as typeof anomalyResults._shards & { failures: [] }).failures ??
-            [];
+            (filteredAnomalyResults._shards as typeof filteredAnomalyResults._shards & {
+              failures: [];
+            }).failures ?? [];
           const searchErrors = createErrorsFromShard({
             errors: shardFailures,
           });
           result = mergeReturns([
             result,
             createSearchAfterReturnType({
-              success: success && anomalyResults._shards.failed === 0,
+              success: success && filteredAnomalyResults._shards.failed === 0,
               errors: [...errors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],

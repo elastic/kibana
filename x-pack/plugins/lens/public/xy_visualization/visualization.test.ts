@@ -775,4 +775,69 @@ describe('xy_visualization', () => {
       ]);
     });
   });
+
+  describe('#getWarningMessages', () => {
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource('testDatasource');
+
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'd' },
+        { columnId: 'a' },
+        { columnId: 'b' },
+        { columnId: 'c' },
+      ]);
+
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          columns: [
+            { id: 'a', name: 'A', meta: { type: 'number' } },
+            { id: 'b', name: 'B', meta: { type: 'number' } },
+          ],
+          rows: [
+            { a: 1, b: [2, 0] },
+            { a: 3, b: 4 },
+            { a: 5, b: 6 },
+            { a: 7, b: 8 },
+          ],
+        },
+      };
+    });
+    it('should return a warning when numeric accessors contain array', () => {
+      (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+        label: 'Label B',
+      });
+      const warningMessages = xyVisualization.getWarningMessages!(
+        {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: ['b'],
+            },
+          ],
+        },
+        frame
+      );
+      expect(warningMessages).toHaveLength(1);
+      expect(warningMessages && warningMessages[0]).toMatchInlineSnapshot(`
+        <React.Fragment>
+          <strong>
+            Label B
+          </strong>
+           contains array values. Your visualization may not render as expected.
+        </React.Fragment>
+      `);
+    });
+  });
 });
