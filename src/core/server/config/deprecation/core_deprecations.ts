@@ -140,8 +140,6 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
   unusedFromRoot('elasticsearch.preserveHost'),
   unusedFromRoot('elasticsearch.startupTimeout'),
-  rename('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
-  rename('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
   rename('server.xsrf.whitelist', 'server.xsrf.allowlist'),
   configPathDeprecation,
   dataPathDeprecation,
