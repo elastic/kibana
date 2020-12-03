@@ -17,6 +17,51 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
     <div
       className="euiSpacer euiSpacer--s"
     />
+    <div
+      className="euiSwitch"
+    >
+      <button
+        aria-checked={false}
+        aria-labelledby="generated-id"
+        className="euiSwitch__button"
+        id="generated-id"
+        onClick={[Function]}
+        role="switch"
+        type="button"
+      >
+        <span
+          className="euiSwitch__body"
+        >
+          <span
+            className="euiSwitch__thumb"
+          />
+          <span
+            className="euiSwitch__track"
+          >
+            <span
+              className="euiSwitch__icon"
+              data-euiicon-type="cross"
+              size="m"
+            />
+            <span
+              className="euiSwitch__icon euiSwitch__icon--checked"
+              data-euiicon-type="check"
+              size="m"
+            />
+          </span>
+        </span>
+      </button>
+      <span
+        className="euiSwitch__label"
+        id="generated-id"
+        onClick={[Function]}
+      >
+        Full page layout
+      </span>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
     <button
       className="euiButton euiButton--primary euiButton--small euiButton--fill"
       data-test-subj="generateReportButton"
