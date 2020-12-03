@@ -38,7 +38,7 @@ export const SortingView: React.FC<Props> = ({ onChange, options, value }) => {
         options={options.map(wrapSortingOptionForEuiSelect)}
         value={selectedValue}
         prepend={i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.sortBy', {
-          defaultMessage: 'Sort by:',
+          defaultMessage: 'Sort by',
         })}
         onChange={(event) => onChange(event.target.value)}
         aria-label={i18n.translate(
