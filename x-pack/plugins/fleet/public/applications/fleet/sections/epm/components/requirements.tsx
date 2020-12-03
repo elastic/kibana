@@ -48,7 +48,7 @@ export function Requirements(props: RequirementsProps) {
             </EuiTextColor>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <StyledVersion version={requirement.versions} />
+            <StyledVersion version={requirement.version} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}

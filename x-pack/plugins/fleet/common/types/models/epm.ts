@@ -15,6 +15,7 @@ import {
   requiredPackages,
 } from '../../constants';
 import { ValueOf } from '../../types';
+import { PackageSpecManifest } from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -70,22 +71,10 @@ export type DataType = typeof dataTypes;
 export type RegistryRelease = 'ga' | 'beta' | 'experimental';
 
 // Fields common to packages that come from direct upload and the registry
-export interface InstallablePackage {
-  name: string;
-  title?: string;
-  version: string;
-  release?: RegistryRelease;
-  readme?: string;
-  description: string;
-  type: string;
-  categories: string[];
-  screenshots?: RegistryImage[];
-  icons?: RegistryImage[];
+export interface InstallablePackage extends PackageSpecManifest {
   assets?: string[];
   internal?: boolean;
-  format_version: string;
   data_streams?: RegistryDataStream[];
-  policy_templates?: RegistryPolicyTemplate[];
 }
 
 // Uploaded package archives don't have extra fields
@@ -95,35 +84,55 @@ export interface ArchivePackage extends InstallablePackage {}
 
 // Registry packages do have extra fields.
 // cf. type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
-export interface RegistryPackage extends InstallablePackage {
-  requirement: RequirementsByServiceName;
+type RegistryOverridesToOptional = Pick<
+  PackageSpecManifest,
+  'license' | 'conditions' | 'screenshots' | 'policy_templates' | 'title' | 'release'
+>;
+
+// our current types have these as all required, buy they're are all optional (have `omitempty`) according to
+// https://github.com/elastic/package-registry/blob/master/util/package.go#L57
+// & https://github.com/elastic/package-registry/blob/master/util/package.go#L80-L81
+// However, are always present in every registry response I checked. Chose to keep types unchanged for now
+// and confirm with Registry if they are really optional. Can update types and ~4 places in code later if neccessary
+interface RegistryAdditionalProperties {
   download: string;
   path: string;
+  readme: string;
 }
 
-interface RegistryImage {
+interface RegistryOverridePropertyValue {
+  icons?: RegistryImage[];
+  screenshots?: RegistryImage[];
+}
+
+export type RegistryPackage = InstallablePackage &
+  Partial<RegistryOverridesToOptional> &
+  RegistryAdditionalProperties &
+  RegistryOverridePropertyValue;
+
+export interface RegistryImage {
   src: string;
   path: string;
   title?: string;
   size?: string;
   type?: string;
 }
+
 export interface RegistryPolicyTemplate {
   name: string;
   title: string;
   description: string;
-  inputs: RegistryInput[];
+  inputs?: RegistryInput[];
   multiple?: boolean;
 }
-
 export interface RegistryInput {
   type: string;
   title: string;
-  description?: string;
-  vars?: RegistryVarsEntry[];
+  description: string;
   template_path?: string;
+  condition?: string;
+  vars?: RegistryVarsEntry[];
 }
-
 export interface RegistryStream {
   input: string;
   title: string;
@@ -152,10 +161,10 @@ export type RegistrySearchResult = Pick<
   | 'release'
   | 'description'
   | 'type'
-  | 'icons'
-  | 'internal'
   | 'download'
   | 'path'
+  | 'icons'
+  | 'internal'
   | 'data_streams'
   | 'policy_templates'
 >;
@@ -172,7 +181,7 @@ export interface CategorySummaryItem {
   count: number;
 }
 
-export type RequirementsByServiceName = Record<ServiceName, ServiceRequirements>;
+export type RequirementsByServiceName = PackageSpecManifest['conditions'];
 export interface AssetParts {
   pkgkey: string;
   dataset?: string;
@@ -241,12 +250,15 @@ export interface RegistryVarsEntry {
 
 // some properties are optional in Registry responses but required in EPM
 // internal until we need them
-interface PackageAdditions {
+export interface EpmPackageAdditions {
   title: string;
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
   removable?: boolean;
 }
+
+type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
+  SecondType;
 
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
@@ -254,18 +266,8 @@ export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult>;
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
-  | Installable<
-      // remove the properties we'll be altering/replacing from the base type
-      Omit<RegistryPackage, keyof PackageAdditions> &
-        // now add our replacement definitions
-        PackageAdditions
-    >
-  | Installable<
-      // remove the properties we'll be altering/replacing from the base type
-      Omit<ArchivePackage, keyof PackageAdditions> &
-        // now add our replacement definitions
-        PackageAdditions
-    >;
+  | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
+  | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
