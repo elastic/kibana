@@ -39,56 +39,56 @@ describe('resolver visible entities', () => {
       name: '',
       id: '0',
       stats: { total: 0, byCategory: {} },
-      timestamp: 1582233383000,
+      timestamp: 0,
     });
     nodeB = mockResolverNode({
       id: '1',
       name: '',
       parentID: '0',
       stats: { total: 0, byCategory: {} },
-      timestamp: 1582233383000,
+      timestamp: 0,
     });
     nodeC = mockResolverNode({
       id: '2',
       name: '',
       parentID: '1',
       stats: { total: 0, byCategory: {} },
-      timestamp: 1582233383000,
+      timestamp: 0,
     });
     nodeD = mockResolverNode({
       id: '3',
       name: '',
       parentID: '2',
       stats: { total: 0, byCategory: {} },
-      timestamp: 1582233383000,
+      timestamp: 0,
     });
     nodeE = mockResolverNode({
       id: '4',
       name: '',
       parentID: '3',
       stats: { total: 0, byCategory: {} },
-      timestamp: 1582233383000,
+      timestamp: 0,
     });
     nodeF = mockResolverNode({
       id: '5',
       name: '',
       parentID: '4',
       stats: { total: 0, byCategory: {} },
-      timestamp: 1582233383000,
+      timestamp: 0,
     });
     nodeF = mockResolverNode({
       id: '6',
       name: '',
       parentID: '5',
       stats: { total: 0, byCategory: {} },
-      timestamp: 1582233383000,
+      timestamp: 0,
     });
     nodeG = mockResolverNode({
       id: '7',
       name: '',
       parentID: '6',
       stats: { total: 0, byCategory: {} },
-      timestamp: 1582233383000,
+      timestamp: 0,
     });
     store = createStore(resolverReducer, undefined);
   });

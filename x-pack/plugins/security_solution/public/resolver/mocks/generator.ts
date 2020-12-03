@@ -149,6 +149,6 @@ export function formatTree(tree: Tree): NewResolverTree {
 
   return {
     nodes: treeResponse,
-    originId: tree.origin.id,
+    originID: tree.origin.id,
   };
 }

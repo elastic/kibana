@@ -93,12 +93,12 @@ export function mock({
     return null;
   }
   const originNode = nodes[0];
-  const originId = nodeModel.nodeID(originNode);
-  if (!originId) {
+  const originID = nodeModel.nodeID(originNode);
+  if (!originID) {
     throw new Error('first mock event must include an nodeID.');
   }
   return {
-    originId,
+    originID,
     nodes,
   };
 }

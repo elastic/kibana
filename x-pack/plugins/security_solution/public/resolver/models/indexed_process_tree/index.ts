@@ -17,7 +17,7 @@ import * as nodeModel from '../../../../common/endpoint/models/node';
 export function factory(
   // Array of processes to index as a tree
   nodes: ResolverNode[],
-  originId: string | undefined
+  originID: string | undefined
 ): IndexedProcessTree {
   const idToChildren = new Map<string | undefined, ResolverNode[]>();
   const idToValue = new Map<string, ResolverNode>();
@@ -46,7 +46,7 @@ export function factory(
   return {
     idToChildren,
     idToNode: idToValue,
-    originId,
+    originID,
   };
 }
 
@@ -128,13 +128,13 @@ export function countChildren(tree: IndexedProcessTree) {
  * Returns the number of ancestors nodes (including the origin) in the graph.
  */
 export function countAncestors(tree: IndexedProcessTree) {
-  if (!tree.originId) {
+  if (!tree.originID) {
     return 0;
   }
 
   // include the origin
   let total = 1;
-  let current: ResolverNode | undefined = tree.idToNode.get(tree.originId);
+  let current: ResolverNode | undefined = tree.idToNode.get(tree.originID);
   while (current !== undefined && parent(tree, current) !== undefined) {
     total++;
     current = parent(tree, current);

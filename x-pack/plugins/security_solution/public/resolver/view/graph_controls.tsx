@@ -34,38 +34,36 @@ interface StyledGraphControls {
   graphControlsBorderColor: string;
 }
 
+const StyledGraphControlsWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const StyledGraphControlsColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  &:not(last-of-type) {
+    margin-right: 5px;
+  }
+`;
+
+const StyledEuiButtonIcon = styled(EuiButtonIcon)`
+  border-radius: 4px;
+  width: 40px;
+  height: 40px;
+
+  &:not(last-of-type) {
+    margin-bottom: 7px;
+  }
+`;
+
 const StyledGraphControls = styled.div<StyledGraphControls>`
   position: absolute;
   top: 5px;
   right: 5px;
   background-color: transparent;
   color: ${(props) => props.graphControlsIconColor};
-
-  & .graph-controls__wrapper {
-    display: flex;
-    flex-direction: row;
-  }
-
-  & .graph-controls__column {
-    display: flex;
-    flex-direction: column;
-
-    &:not(last-of-type) {
-      margin-right: 5px;
-    }
-  }
-
-  & .graph-controls__popover_buttons {
-    background-color: ${(props) => props.graphControlsBackground};
-    border: 1px solid ${(props) => props.graphControlsBorderColor};
-    border-radius: 4px;
-    width: 40px;
-    height: 40px;
-
-    &:not(last-of-type) {
-      margin-bottom: 7px;
-    }
-  }
 
   .zoom-controls {
     display: flex;
@@ -165,21 +163,30 @@ export const GraphControls = React.memo(
 
     const sourceAndSchema = useSelector(selectors.resolverTreeSourceAndSchema);
 
+    // This defines the schema that is visualized in the (i) popover
     const schemaListItems = [
       {
-        title: 'SOURCE',
+        title: i18n.translate('xpack.securitySolution.resolver.graphControls.schemaSource', {
+          defaultMessage: 'source',
+        }),
         description: <GeneratedText>{sourceAndSchema?.dataSource ?? 'Unknown'}</GeneratedText>,
       },
       {
-        title: 'ID',
+        title: i18n.translate('xpack.securitySolution.resolver.graphControls.schemaID', {
+          defaultMessage: 'id',
+        }),
         description: <GeneratedText>{sourceAndSchema?.schema.id ?? 'Unknown'}</GeneratedText>,
       },
       {
-        title: 'EDGE',
+        title: i18n.translate('xpack.securitySolution.resolver.graphControls.schemaEdge', {
+          defaultMessage: 'edge',
+        }),
         description: <GeneratedText>{sourceAndSchema?.schema.parent ?? 'Unknown'}</GeneratedText>,
       },
     ];
 
+    // This defines the cube legend that allows users to identify the meaning of the cubes within this context
+    // Should be updated to be dynamic if and when non process based resolvers are possible
     const legendListItems = [
       {
         title: (
@@ -247,6 +254,13 @@ export const GraphControls = React.memo(
       },
     ];
 
+    const popoverButtonStyles = {
+      background: colorMap.graphControlsBackground,
+      borderColor: colorMap.graphControlsBorderColor,
+      borderWidth: '1px',
+      borderStyle: 'solid',
+    };
+
     return (
       <StyledGraphControls
         className={className}
@@ -255,20 +269,20 @@ export const GraphControls = React.memo(
         graphControlsBorderColor={colorMap.graphControlsBorderColor}
         data-test-subj="resolver:graph-controls"
       >
-        <div className="graph-controls__wrapper">
-          <div className="graph-controls__column">
+        <StyledGraphControlsWrapper>
+          <StyledGraphControlsColumn>
             <EuiPopover
               ownFocus
               onScroll={closePopover}
               repositionOnScroll={false}
               onClick={() => setActivePopover('schemaInfo')}
               button={
-                <EuiButtonIcon
-                  className="graph-controls__popover_buttons"
+                <StyledEuiButtonIcon
                   size="m"
                   title="Schema Info"
                   aria-label="Schema Info"
                   iconType="iInCircle"
+                  style={popoverButtonStyles}
                 />
               }
               isOpen={activePopover === 'schemaInfo'}
@@ -317,12 +331,12 @@ export const GraphControls = React.memo(
             <EuiPopover
               ownFocus
               button={
-                <EuiButtonIcon
-                  className="graph-controls__popover_buttons"
+                <StyledEuiButtonIcon
                   size="m"
                   title="Nodes Legend"
                   aria-label="Nodes Legend"
                   iconType="node"
+                  style={popoverButtonStyles}
                 />
               }
               onScroll={closePopover}
@@ -362,7 +376,7 @@ export const GraphControls = React.memo(
                 />
               </div>
             </EuiPopover>
-          </div>
+          </StyledGraphControlsColumn>
           <div className="graph-controls__column">
             <EuiPanel className="panning-controls" paddingSize="none" hasShadow>
               <div className="panning-controls-top">
@@ -438,7 +452,7 @@ export const GraphControls = React.memo(
               </button>
             </EuiPanel>
           </div>
-        </div>
+        </StyledGraphControlsWrapper>
       </StyledGraphControls>
     );
   }

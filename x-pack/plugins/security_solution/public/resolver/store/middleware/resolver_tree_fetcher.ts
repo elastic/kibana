@@ -89,7 +89,7 @@ export function ResolverTreeFetcher(
         });
 
         const resolverTree: NewResolverTree = {
-          originId: entityIDToFetch,
+          originID: entityIDToFetch,
           nodes: result,
         };
 

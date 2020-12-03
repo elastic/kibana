@@ -77,7 +77,7 @@ const Navigation = ({
   timelineFullScreen: boolean;
   toggleFullScreen: () => void;
 }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="none">
+  <EuiFlexGroup alignItems="flexStart" gutterSize="none">
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
         {i18n.CLOSE_ANALYZER}
