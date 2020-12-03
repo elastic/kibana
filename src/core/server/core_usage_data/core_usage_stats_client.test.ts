@@ -68,7 +68,7 @@ describe('CoreUsageStatsClient', () => {
   });
 
   describe('#incrementSavedObjectsImport', () => {
-    it('does not throw an error if repository create operation fails', async () => {
+    it('does not throw an error if repository incrementCounter operation fails', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.incrementCounter.mockRejectedValue(new Error('Oh no!'));
 
@@ -120,7 +120,7 @@ describe('CoreUsageStatsClient', () => {
   });
 
   describe('#incrementSavedObjectsResolveImportErrors', () => {
-    it('does not throw an error if repository create operation fails', async () => {
+    it('does not throw an error if repository incrementCounter operation fails', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.incrementCounter.mockRejectedValue(new Error('Oh no!'));
 
@@ -173,7 +173,7 @@ describe('CoreUsageStatsClient', () => {
   });
 
   describe('#incrementSavedObjectsExport', () => {
-    it('does not throw an error if repository create operation fails', async () => {
+    it('does not throw an error if repository incrementCounter operation fails', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.incrementCounter.mockRejectedValue(new Error('Oh no!'));
 
