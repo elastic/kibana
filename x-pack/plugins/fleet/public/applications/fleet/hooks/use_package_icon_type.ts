@@ -42,9 +42,10 @@ export const usePackageIconType = ({
     const svgIcons = (paramIcons || iconList)?.filter(
       (iconDef) => iconDef.type === 'image/svg+xml'
     );
-    const localIconSrc = Array.isArray(svgIcons) && svgIcons[0].src;
+    const localIconSrc =
+      Array.isArray(svgIcons) && toPackageImage(svgIcons[0], packageName, version);
     if (localIconSrc) {
-      CACHED_ICONS.set(pkgKey, toPackageImage(localIconSrc, packageName, version));
+      CACHED_ICONS.set(pkgKey, localIconSrc);
       setIconType(CACHED_ICONS.get(pkgKey) || '');
       return;
     }
