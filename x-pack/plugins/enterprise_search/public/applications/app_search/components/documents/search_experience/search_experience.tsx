@@ -30,7 +30,7 @@ const DEFAULT_SORT_OPTIONS = [
     direction: 'desc',
   },
   {
-    name: i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.recentlyUploadedDesc', {
+    name: i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.recentlyUploadedAsc', {
       defaultMessage: 'Recently Uploaded (asc)',
     }),
     value: 'id',
