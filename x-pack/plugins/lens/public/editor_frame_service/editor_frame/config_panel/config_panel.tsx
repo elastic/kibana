@@ -37,27 +37,7 @@ const getFirstFocusable = (el: HTMLElement | null) => {
   return (firstFocusable as unknown) as { focus: () => void };
 };
 
-function useLastUpdatedStatus(layerIds){
-  
-}
-
-
-function LayerPanels(
-  props: ConfigPanelWrapperProps & {
-    activeDatasourceId: string;
-    activeVisualization: Visualization;
-  }
-) {
-  const {
-    activeVisualization,
-    visualizationState,
-    dispatch,
-    activeDatasourceId,
-    datasourceMap,
-  } = props;
-
-  const layerIds = activeVisualization.getLayerIds(visualizationState);
-
+function useFocusUpdate(layerIds: string[]) {
   const [lastUpdated, setLastUpdated] = useState<{
     type: 'ADD_LAYER' | 'REMOVE_OR_CLEAR_LAYER';
     id: string;
@@ -87,8 +67,8 @@ function LayerPanels(
 
   const setLayerRef = useCallback((el, layerId) => {
     if (el) {
-      setLayersRefs((layersRefs) => ({
-        ...layersRefs,
+      setLayersRefs((refs) => ({
+        ...refs,
         [layerId]: el,
       }));
     }
@@ -97,15 +77,39 @@ function LayerPanels(
   const removeLayerRef = useCallback(
     (layerId) => {
       if (layerIds.length > 1) {
-        setLayersRefs((layerRefs) => {
-          const newLayerRefs = { ...layerRefs };
+        setLayersRefs((refs) => {
+          const newLayerRefs = { ...refs };
           delete newLayerRefs[layerId];
           return newLayerRefs;
         });
       }
+      setLastUpdated({
+        type: 'REMOVE_OR_CLEAR_LAYER',
+        id: layerId,
+      });
     },
     [layerIds]
   );
+
+  return { setLastUpdated, removeLayerRef, setLayerRef };
+}
+
+function LayerPanels(
+  props: ConfigPanelWrapperProps & {
+    activeDatasourceId: string;
+    activeVisualization: Visualization;
+  }
+) {
+  const {
+    activeVisualization,
+    visualizationState,
+    dispatch,
+    activeDatasourceId,
+    datasourceMap,
+  } = props;
+
+  const layerIds = activeVisualization.getLayerIds(visualizationState);
+  const { setLastUpdated, removeLayerRef, setLayerRef } = useFocusUpdate(layerIds);
 
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
@@ -184,10 +188,6 @@ function LayerPanels(
                 }),
             });
             removeLayerRef(layerId);
-            setLastUpdated({
-              type: 'REMOVE_OR_CLEAR_LAYER',
-              id: layerId,
-            });
           }}
         />
       ))}

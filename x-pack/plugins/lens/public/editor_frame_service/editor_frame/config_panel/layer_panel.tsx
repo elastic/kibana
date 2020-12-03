@@ -74,7 +74,7 @@ export function LayerPanel(
       newVisualizationState: unknown
     ) => void;
     onRemoveLayer: () => void;
-    setLayerRef: (instance: HTMLDivElement | null, layerId: string) => void;
+    setLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
   }
 ) {
   const dragDropContext = useContext(DragContext);
@@ -89,13 +89,10 @@ export function LayerPanel(
     setActiveDimension(initialActiveDimensionState);
   }, [props.activeVisualizationId]);
 
-  const setLayerRefMemoized = React.useCallback(
-    (el) => {
-      console.log('memo');
-      return setLayerRef(el, layerId);
-    },
-    [layerId, setLayerRef]
-  );
+  const setLayerRefMemoized = React.useCallback((el) => setLayerRef(layerId, el), [
+    layerId,
+    setLayerRef,
+  ]);
 
   if (
     !datasourcePublicAPI ||
