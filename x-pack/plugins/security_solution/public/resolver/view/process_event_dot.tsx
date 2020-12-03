@@ -67,9 +67,42 @@ const StyledDescriptionText = styled.div<StyledDescriptionText>`
   z-index: 45;
 `;
 
-const StyledOuterGroup = styled.g`
+const StyledOuterGroup = styled.g<{ isNodeLoading: boolean }>`
   fill: none;
   pointer-events: visiblePainted;
+  // The below will apply the loading css to the <use> element that references the cube
+  // when the nodeData is loading for the current node
+  ${(props) =>
+    props.isNodeLoading &&
+    `
+    & .cube {
+    animation-name: pulse;
+    /**
+     * his is a multiple of .6 so it can match up with the EUI button's loading spinner
+     * which is (0.6s). Using .6 here makes it a bit too fast.
+     */
+    animation-duration: 1.8s;
+    animation-delay: 0;
+    animation-direction: normal;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+
+  /**
+   * Animation loading state of the cube.
+   */
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  `}
 `;
 
 /**
@@ -217,9 +250,7 @@ const UnstyledProcessEventDot = React.memo(
     } = React.createRef();
     const colorMap = useColors();
 
-    // TODO: handle the error state so the button can be clicked to reload the node's data
     const isNodeLoading = useSelector(selectors.isNodeDataLoading)(nodeID);
-    const cubeClassName = isNodeLoading ? 'cube loading' : 'cube';
     const nodeState = useSelector(selectors.getNodeState)(nodeID);
     const {
       backingFill,
@@ -332,7 +363,7 @@ const UnstyledProcessEventDot = React.memo(
             zIndex: 30,
           }}
         >
-          <StyledOuterGroup>
+          <StyledOuterGroup isNodeLoading={isNodeLoading}>
             <use
               xlinkHref={`#${symbolIDs.processCubeActiveBacking}`}
               fill={backingFill} // Only visible on hover
@@ -365,7 +396,7 @@ const UnstyledProcessEventDot = React.memo(
               width={markerSize}
               height={markerSize}
               opacity="1"
-              className={cubeClassName}
+              className="cube"
             >
               <animateTransform
                 attributeType="XML"
@@ -526,32 +557,5 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
   }
   & .euiSelectableListItem__text {
     color: white;
-  }
-  & .loading {
-    animation-name: pulse;
-    /**
-     * his is a multiple of .6 so it can match up with the EUI button's loading spinner
-     * which is (0.6s). Using .6 here makes it a bit too fast.
-     */
-    animation-duration: 1.8s;
-    animation-delay: 0;
-    animation-direction: normal;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
-  }
-
-  /**
-   * Animation loading state of the cube.
-   */
-  @keyframes pulse {
-    0% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.35;
-    }
-    100% {
-      opacity: 1;
-    }
   }
 `;
