@@ -106,6 +106,7 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath,
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   unusedFromRoot,
   renameFromRoot,
+  rename,
 }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
@@ -138,9 +139,9 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('xpack.telemetry.url', 'telemetry.url'),
   renameFromRoot('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
   renameFromRoot('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
+  renameFromRoot('server.xsrf.whitelist', 'server.xsrf.allowlist'),
   unusedFromRoot('elasticsearch.preserveHost'),
   unusedFromRoot('elasticsearch.startupTimeout'),
-  rename('server.xsrf.whitelist', 'server.xsrf.allowlist'),
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,
