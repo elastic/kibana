@@ -310,12 +310,6 @@ export class LegacyService implements CoreService {
       logger: this.coreContext.logger,
     });
 
-    // Prevent the repl from being started multiple times in different processes.
-    if (this.coreContext.env.cliArgs.repl && process.env.isDevCliChild) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('./cli').startRepl(kbnServer);
-    }
-
     const { autoListen } = await this.httpConfig$.pipe(first()).toPromise();
 
     if (autoListen) {
