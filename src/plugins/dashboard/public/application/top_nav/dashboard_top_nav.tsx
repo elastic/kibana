@@ -183,7 +183,7 @@ export function DashboardTopNav({
           return { id };
         })
         .catch((error) => {
-          core.notifications?.toasts.addDanger({
+          core.notifications.toasts.addDanger({
             title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
               defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
               values: {
