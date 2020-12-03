@@ -29,6 +29,8 @@ describe('SearchBoxView', () => {
   it('renders', () => {
     const wrapper = shallow(<SearchBoxView {...props} />);
     expect(wrapper.type()).toEqual(EuiFieldSearch);
+    expect(wrapper.find(EuiFieldSearch).prop('value')).toEqual('foo');
+    expect(wrapper.find(EuiFieldSearch).prop('placeholder')).toEqual('bar');
   });
 
   it('passes through an onChange to EuiFieldSearch', () => {
