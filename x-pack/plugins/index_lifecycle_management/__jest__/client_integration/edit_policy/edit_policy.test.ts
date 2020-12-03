@@ -241,7 +241,6 @@ describe('<EditPolicy />', () => {
                 "priority": 50,
               },
             },
-            "min_age": "0ms",
           }
         `);
       });
@@ -249,8 +248,6 @@ describe('<EditPolicy />', () => {
       test('setting all values', async () => {
         const { actions } = testBed;
         await actions.warm.enable(true);
-        await actions.warm.setMinAgeValue('123');
-        await actions.warm.setMinAgeUnits('d');
         await actions.warm.setDataAllocation('node_attrs');
         await actions.warm.setSelectedNodeAttribute('test:123');
         await actions.warm.setReplicas('123');
@@ -298,22 +295,23 @@ describe('<EditPolicy />', () => {
                     "number_of_shards": 123,
                   },
                 },
-                "min_age": "123d",
               },
             },
           }
         `);
       });
 
-      test('setting warm phase on rollover to "true"', async () => {
+      test('setting warm phase on rollover to "false"', async () => {
         const { actions } = testBed;
         await actions.warm.enable(true);
-        await actions.warm.warmPhaseOnRollover(true);
+        await actions.warm.warmPhaseOnRollover(false);
+        await actions.warm.setMinAgeValue('123');
+        await actions.warm.setMinAgeUnits('d');
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
         const warmPhaseMinAge = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
           .min_age;
-        expect(warmPhaseMinAge).toBe(undefined);
+        expect(warmPhaseMinAge).toBe('123d');
       });
     });
 
