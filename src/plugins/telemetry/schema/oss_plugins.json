@@ -1391,7 +1391,7 @@
                     "disableProtection": {
                       "type": "boolean"
                     },
-                    "whitelistConfigured": {
+                    "allowlistConfigured": {
                       "type": "boolean"
                     }
                   }
