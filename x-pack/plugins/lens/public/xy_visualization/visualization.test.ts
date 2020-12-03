@@ -560,7 +560,7 @@ describe('xy_visualization', () => {
       });
 
       it('should respect the order of accessors coming from datasource', () => {
-        const colorAssignment = require('./color_assignment');
+        const colorAssignment = require('./color_assignment'); // eslint-disable-line @typescript-eslint/no-var-requires
         const getAccessorColorConfigSpy = jest.spyOn(colorAssignment, 'getAccessorColorConfig');
         mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
           { columnId: 'c' },
