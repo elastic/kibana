@@ -166,8 +166,7 @@ export function DiscoverSidebar({
     popular: popularFields,
     unpopular: unpopularFields,
   } = useMemo(
-    () =>
-      groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
+    () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
     [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
   );
 
