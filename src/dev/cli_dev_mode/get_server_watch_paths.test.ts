@@ -53,7 +53,7 @@ it('produces the right watch and ignore list', () => {
     Array [
       /\\[\\\\\\\\\\\\/\\]\\(\\\\\\.\\.\\*\\|node_modules\\|bower_components\\|target\\|public\\|__\\[a-z0-9_\\]\\+__\\|coverage\\)\\(\\[\\\\\\\\\\\\/\\]\\|\\$\\)/,
       /\\\\\\.test\\\\\\.\\(js\\|tsx\\?\\)\\$/,
-      /\\\\\\.md\\$/,
+      /\\\\\\.\\(md\\|sh\\|txt\\)\\$/,
       /debug\\\\\\.log\\$/,
       <absolute path>/src/plugins/*/test/**,
       <absolute path>/src/plugins/*/build/**,
