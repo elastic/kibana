@@ -5,6 +5,8 @@
  */
 
 import { LocalUIFilterName } from '../../../common/ui_filter';
+// TODO: caue fix it
+import { AggregationType } from '../../components/app/service_overview/latency_chart';
 
 export type IUrlParams = {
   detailTab?: string;
@@ -28,4 +30,5 @@ export type IUrlParams = {
   pageSize?: number;
   searchTerm?: string;
   percentile?: number;
+  aggregationType?: AggregationType;
 } & Partial<Record<LocalUIFilterName, string>>;

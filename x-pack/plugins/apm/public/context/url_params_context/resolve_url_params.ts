@@ -48,6 +48,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     environment,
     searchTerm,
     percentile,
+    aggregationType = 'avg',
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
@@ -77,6 +78,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     transactionType,
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
+    aggregationType,
 
     // ui filters
     environment,
