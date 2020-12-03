@@ -39,7 +39,7 @@ export const getReadables = (dataPath: string): Promise<Readable> =>
     const readable = fs.createReadStream(dataPath, { encoding: 'utf-8' });
 
     readable.on('data', (stream) => {
-      contents.push(stream);
+      contents.push(stream as string);
     });
 
     readable.on('end', () => {
