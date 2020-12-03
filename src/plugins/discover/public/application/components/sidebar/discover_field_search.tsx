@@ -95,7 +95,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     aggregatable: 'any',
     type: 'any',
     missing: true,
-    unmapped: false,
   });
 
   if (typeof value !== 'string') {
@@ -288,7 +287,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
               })}
             </EuiPopoverTitle>
             {selectionPanel}
-            <EuiPopoverFooter paddingSize="s">
+            <EuiPopoverFooter>
               <EuiSwitch
                 label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
                   defaultMessage: 'Hide missing fields',
