@@ -15,7 +15,11 @@ describe('SearchBoxView', () => {
   const props = {
     onChange: jest.fn(),
     value: 'foo',
-    inputProps: { placeholder: 'bar' },
+    inputProps: {
+      placeholder: 'bar',
+      'aria-label': 'foo',
+      'data-test-subj': 'bar',
+    },
   };
 
   beforeEach(() => {

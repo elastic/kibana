@@ -11,6 +11,8 @@ import { EuiFieldSearch } from '@elastic/eui';
 interface Props {
   inputProps: {
     placeholder: string;
+    'aria-label': string;
+    'data-test-subj': string;
   };
   value: string;
   onChange(value: string): void;
