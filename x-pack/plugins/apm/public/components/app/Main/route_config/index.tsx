@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { ApmServiceContextProvider } from '../../../../context/apm_service_context';
+import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import { APMRouteDefinition } from '../../../../application/routes';

@@ -53,6 +53,21 @@ describe('buildRuleStatusAttributes', () => {
     expect(result.statusDate).toEqual(result.lastSuccessAt);
   });
 
+  it('returns partial failure fields if "partial failure"', () => {
+    const result = buildRuleStatusAttributes(
+      'partial failure',
+      'some indices missing timestamp override field'
+    );
+    expect(result).toEqual({
+      status: 'partial failure',
+      statusDate: expectIsoDateString,
+      lastSuccessAt: expectIsoDateString,
+      lastSuccessMessage: 'some indices missing timestamp override field',
+    });
+
+    expect(result.statusDate).toEqual(result.lastSuccessAt);
+  });
+
   it('returns failure fields if "failed"', () => {
     const result = buildRuleStatusAttributes('failed', 'failure message');
     expect(result).toEqual({

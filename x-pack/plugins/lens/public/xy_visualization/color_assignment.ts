@@ -5,9 +5,11 @@
  */
 
 import { uniq, mapValues } from 'lodash';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { Datatable } from 'src/plugins/expressions';
-import { FormatFactory } from '../types';
+import { AccessorConfig, FormatFactory, FramePublicAPI } from '../types';
+import { getColumnToLabelMap } from './state_helpers';
+import { LayerConfig } from './types';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -84,6 +86,51 @@ export function getColorAssignments(
           layer.accessors.indexOf(yAccessor)
         );
       },
+    };
+  });
+}
+
+export function getAccessorColorConfig(
+  colorAssignments: ColorAssignments,
+  frame: FramePublicAPI,
+  layer: LayerConfig,
+  sortedAccessors: string[],
+  paletteService: PaletteRegistry
+): AccessorConfig[] {
+  const layerContainsSplits = Boolean(layer.splitAccessor);
+  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
+  const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
+  return sortedAccessors.map((accessor) => {
+    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+    if (layerContainsSplits) {
+      return {
+        columnId: accessor as string,
+        triggerIcon: 'disabled',
+      };
+    }
+    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
+    const rank = colorAssignments[currentPalette.name].getRank(
+      layer,
+      columnToLabel[accessor] || accessor,
+      accessor
+    );
+    const customColor =
+      currentYConfig?.color ||
+      paletteService.get(currentPalette.name).getColor(
+        [
+          {
+            name: columnToLabel[accessor] || accessor,
+            rankAtDepth: rank,
+            totalSeriesAtDepth: totalSeriesCount,
+          },
+        ],
+        { maxDepth: 1, totalSeries: totalSeriesCount },
+        currentPalette.params
+      );
+    return {
+      columnId: accessor as string,
+      triggerIcon: customColor ? 'color' : 'disabled',
+      color: customColor ? customColor : undefined,
     };
   });
 }

@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/82445
-  describe.skip('discover doc table', function describeIndexTests() {
+  describe('discover doc table', function describeIndexTests() {
     const defaultRowsLimit = 50;
     const rowsHardLimit = 500;
 

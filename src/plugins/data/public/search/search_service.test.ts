@@ -49,6 +49,8 @@ describe('Search service', () => {
       expect(setup).toHaveProperty('aggs');
       expect(setup).toHaveProperty('usageCollector');
       expect(setup).toHaveProperty('__enhance');
+      expect(setup).toHaveProperty('sessionsClient');
+      expect(setup).toHaveProperty('session');
     });
   });
 
@@ -61,6 +63,8 @@ describe('Search service', () => {
       expect(start).toHaveProperty('aggs');
       expect(start).toHaveProperty('search');
       expect(start).toHaveProperty('searchSource');
+      expect(start).toHaveProperty('sessionsClient');
+      expect(start).toHaveProperty('session');
     });
   });
 });
