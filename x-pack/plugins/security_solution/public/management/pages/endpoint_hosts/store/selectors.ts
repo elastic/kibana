@@ -186,7 +186,7 @@ export const uiQueryParams: (
           typeof query[key] === 'string'
             ? (query[key] as string)
             : Array.isArray(query[key])
-            ? (query[key][query[key].length - 1] as string)
+            ? (query[key] as string[])[(query[key] as string[]).length - 1]
             : undefined;
 
         if (value !== undefined) {
