@@ -44,6 +44,7 @@ import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverServices } from '../../../build_services';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
 export interface DiscoverSidebarProps {
   /**
@@ -65,7 +66,7 @@ export interface DiscoverSidebarProps {
   /**
    * hits fetched from ES, displayed in the doc table
    */
-  hits: Array<Record<string, unknown>>;
+  hits: ElasticSearchHit[];
   /**
    * List of available index patterns
    */

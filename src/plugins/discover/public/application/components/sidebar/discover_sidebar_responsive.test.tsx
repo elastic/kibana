@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { each, cloneDeep } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
@@ -34,6 +34,7 @@ import { SavedObject } from '../../../../../../core/types';
 import { FieldFilterState } from './lib/field_filter';
 import { DiscoverSidebarResponsive } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../build_services';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
 const mockServices = ({
   history: () => ({
@@ -76,9 +77,9 @@ function getCompProps() {
   );
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = _.each(_.cloneDeep(realHits), indexPattern.flattenHit) as Array<
+  const hits = (each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
     Record<string, unknown>
-  >;
+  >) as ElasticSearchHit[];
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
