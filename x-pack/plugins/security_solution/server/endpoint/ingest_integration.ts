@@ -20,7 +20,8 @@ import { AppClientFactory } from '../client';
 import { createDetectionIndex } from '../lib/detection_engine/routes/index/create_index_route';
 import { createPrepackagedRules } from '../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
 import { buildFrameworkRequest } from '../lib/timeline/routes/utils/common';
-import { licenseService } from '../lib/license/license';
+import { isEndpointPolicyValidForLicense } from '../../common/license/policy_config';
+import { LicenseService } from '../../common/license/license';
 
 const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
   let manifest: Manifest | null = null;
@@ -166,7 +167,10 @@ export const getPackagePolicyCreateCallback = (
   return handlePackagePolicyCreate;
 };
 
-export const getPackagePolicyUpdateCallback = (logger: Logger): ExternalCallback[1] => {
+export const getPackagePolicyUpdateCallback = (
+  logger: Logger,
+  licenseService: LicenseService
+): ExternalCallback[1] => {
   const handlePackagePolicyUpdate = async (
     newPackagePolicy: NewPackagePolicy,
     context: RequestHandlerContext,
@@ -176,15 +180,18 @@ export const getPackagePolicyUpdateCallback = (logger: Logger): ExternalCallback
       return newPackagePolicy;
     }
 
-    const licenseError: Error & { statusCode?: number } = new Error('Requires Platinum license');
-    licenseError.statusCode = 403;
-    throw licenseError;
-
-    //    if (!licenseService.isPlatinumPlus()) {
-    // grab correct verbiage
-    //    throw new Error('Requires Platinum license');
-    //   }
-    // return newPackagePolicy;
+    if (
+      !isEndpointPolicyValidForLicense(
+        newPackagePolicy.inputs[0].config?.policy?.value,
+        licenseService.getLicenseInformation()
+      )
+    ) {
+      logger.warn('Incorrect license tier for paid policy fields');
+      const licenseError: Error & { statusCode?: number } = new Error('Requires Platinum license');
+      licenseError.statusCode = 403;
+      throw licenseError;
+    }
+    return newPackagePolicy;
   };
   return handlePackagePolicyUpdate;
 };

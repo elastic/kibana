@@ -13,7 +13,8 @@ import {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
-  NewPackagePolicy,
+  UpdatePackagePolicySchema,
+  NewPackagePolicySchema,
 } from '../../types';
 import { CreatePackagePolicyResponse, DeletePackagePoliciesResponse } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
@@ -77,12 +78,11 @@ export const createPackagePolicyHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
-  const logger = appContextService.getLogger();
   let newData = { ...request.body };
   try {
     newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
-      CreatePackagePolicyRequestSchema.body, // or use newpackagepolicyschema type directly?
+      NewPackagePolicySchema,
       newData,
       context,
       request
@@ -114,7 +114,6 @@ export const updatePackagePolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
-  const logger = appContextService.getLogger();
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
   if (!packagePolicy) {
@@ -128,7 +127,7 @@ export const updatePackagePolicyHandler: RequestHandler<
   try {
     newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyUpdate',
-      UpdatePackagePolicyRequestSchema.body,
+      UpdatePackagePolicySchema,
       newData,
       context,
       request

@@ -53,7 +53,7 @@ import {
 } from './routes';
 import {
   EsAssetReference,
-  IngestManagerConfigType,
+  FleetConfigType,
   NewPackagePolicy,
   UpdatePackagePolicy,
 } from '../common';
@@ -316,8 +316,8 @@ export class FleetPlugin
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
       },
       packagePolicyService,
-      registerExternalCallback: (...args: ExternalCallback) => {
-        return appContextService.addExternalCallback(...args);
+      registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
+        return appContextService.addExternalCallback(type, callback);
       },
     };
   }

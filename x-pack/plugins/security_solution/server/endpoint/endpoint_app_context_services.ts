@@ -33,6 +33,7 @@ import { ElasticsearchAssetType } from '../../../fleet/common/types/models';
 import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
+import { LicenseService } from '../../common/license/license';
 
 export interface MetadataService {
   queryStrategy(
@@ -88,6 +89,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
+  licenseService: LicenseService;
 };
 
 /**
@@ -125,7 +127,7 @@ export class EndpointAppContextService {
 
       dependencies.registerIngestCallback(
         'packagePolicyUpdate',
-        getPackagePolicyUpdateCallback(dependencies.logger)
+        getPackagePolicyUpdateCallback(dependencies.logger, dependencies.licenseService)
       );
     }
   }
