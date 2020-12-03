@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
-import { pauseFollowerIndex } from '../store/actions';
-import { arrify } from '../../../common/services/utils';
-import { areAllSettingsDefault } from '../services/follower_index_default_settings';
+import { pauseFollowerIndex } from '../../store/actions';
+import { arrify } from '../../../../common/services/utils';
+import { areAllSettingsDefault } from '../../services/follower_index_default_settings';
 
 class FollowerIndexPauseProviderUi extends PureComponent {
   static propTypes = {
