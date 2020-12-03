@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertActionParam, ResolvedActionGroup } from '../../../../alerts/common';
+import { AlertActionParam, RecoveredActionGroup } from '../../../../alerts/common';
 import { AlertProvidedActionVariables } from './action_variables';
 
 export const getDefaultsForActionParams = (
@@ -17,7 +17,7 @@ export const getDefaultsForActionParams = (
         dedupKey: `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`,
         eventAction: 'trigger',
       };
-      if (actionGroupId === ResolvedActionGroup.id) {
+      if (actionGroupId === RecoveredActionGroup.id) {
         pagerDutyDefaults.eventAction = 'resolve';
       }
       return pagerDutyDefaults;

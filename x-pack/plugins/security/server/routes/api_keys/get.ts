@@ -10,7 +10,7 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
-export function defineGetApiKeysRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineGetApiKeysRoutes({ router }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/api_key',
@@ -28,11 +28,11 @@ export function defineGetApiKeysRoutes({ router, clusterClient }: RouteDefinitio
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const isAdmin = request.query.isAdmin === 'true';
-        const { api_keys: apiKeys } = (await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('shield.getAPIKeys', { owner: !isAdmin })) as { api_keys: ApiKey[] };
+        const apiResponse = await context.core.elasticsearch.client.asCurrentUser.security.getApiKey<{
+          api_keys: ApiKey[];
+        }>({ owner: !isAdmin });
 
-        const validKeys = apiKeys.filter(({ invalidated }) => !invalidated);
+        const validKeys = apiResponse.body.api_keys.filter(({ invalidated }) => !invalidated);
 
         return response.ok({ body: { apiKeys: validKeys } });
       } catch (error) {

@@ -7,6 +7,7 @@
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
+import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { setupRoutes } from './routes';
 import {
@@ -23,6 +24,7 @@ export interface PluginSetupContract {
 
 export interface PluginStartContract {
   taskManager?: TaskManagerStartContract;
+  data: DataPluginStart;
 }
 
 export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {

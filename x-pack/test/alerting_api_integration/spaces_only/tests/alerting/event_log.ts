@@ -78,7 +78,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             'execute-action',
             'new-instance',
             'active-instance',
-            'resolved-instance',
+            'recovered-instance',
           ],
         });
       });
@@ -87,25 +87,25 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       const executeEvents = getEventsByAction(events, 'execute');
       const executeActionEvents = getEventsByAction(events, 'execute-action');
       const newInstanceEvents = getEventsByAction(events, 'new-instance');
-      const resolvedInstanceEvents = getEventsByAction(events, 'resolved-instance');
+      const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
 
       expect(executeEvents.length >= 4).to.be(true);
       expect(executeActionEvents.length).to.be(2);
       expect(newInstanceEvents.length).to.be(1);
-      expect(resolvedInstanceEvents.length).to.be(1);
+      expect(recoveredInstanceEvents.length).to.be(1);
 
       // make sure the events are in the right temporal order
       const executeTimes = getTimestamps(executeEvents);
       const executeActionTimes = getTimestamps(executeActionEvents);
       const newInstanceTimes = getTimestamps(newInstanceEvents);
-      const resolvedInstanceTimes = getTimestamps(resolvedInstanceEvents);
+      const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
 
       expect(executeTimes[0] < newInstanceTimes[0]).to.be(true);
       expect(executeTimes[1] <= newInstanceTimes[0]).to.be(true);
       expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
       expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
       expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
-      expect(resolvedInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
+      expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
 
       // validate each event
       let executeCount = 0;
@@ -136,8 +136,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           case 'new-instance':
             validateInstanceEvent(event, `created new instance: 'instance'`);
             break;
-          case 'resolved-instance':
-            validateInstanceEvent(event, `resolved instance: 'instance'`);
+          case 'recovered-instance':
+            validateInstanceEvent(event, `recovered instance: 'instance'`);
             break;
           case 'active-instance':
             validateInstanceEvent(event, `active instance: 'instance' in actionGroup: 'default'`);
