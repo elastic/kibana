@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { useFetcher } from '../../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../../hooks/use_fetcher';
 import { toQuery } from '../../../../shared/Links/url_helpers';
 import { Settings } from '../../../Settings';
 import { AgentConfigurationCreateEdit } from '../../../Settings/AgentConfigurations/AgentConfigurationCreateEdit';

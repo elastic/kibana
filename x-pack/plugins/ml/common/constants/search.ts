@@ -7,10 +7,12 @@
 export const ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE = 500;
 export const ANOMALIES_TABLE_DEFAULT_QUERY_SIZE = 500;
 
-export enum SEARCH_QUERY_LANGUAGE {
-  KUERY = 'kuery',
-  LUCENE = 'lucene',
-}
+export const SEARCH_QUERY_LANGUAGE = {
+  KUERY: 'kuery',
+  LUCENE: 'lucene',
+} as const;
+
+export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];
 
 export interface ErrorMessage {
   query: string;

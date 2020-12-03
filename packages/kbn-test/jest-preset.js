@@ -48,7 +48,6 @@ module.exports = {
     '^(!!)?file-loader!': '<rootDir>/packages/kbn-test/target/jest/mocks/file_mock.js',
     '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
     '^src/core/(.*)': '<rootDir>/src/core/$1',
-    '^src/legacy/(.*)': '<rootDir>/src/legacy/$1',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
   },
 

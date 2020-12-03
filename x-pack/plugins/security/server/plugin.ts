@@ -230,7 +230,6 @@ export class Plugin {
       basePath: core.http.basePath,
       httpResources: core.http.resources,
       logger: this.initializerContext.logger.get('routes'),
-      clusterClient,
       config,
       authc: this.authc,
       authz,

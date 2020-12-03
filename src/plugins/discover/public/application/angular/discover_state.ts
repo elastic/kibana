@@ -20,15 +20,23 @@ import { isEqual } from 'lodash';
 import { History } from 'history';
 import { NotificationsStart } from 'kibana/public';
 import {
-  createStateContainer,
   createKbnUrlStateStorage,
-  syncState,
-  ReduxLikeStateContainer,
+  createStateContainer,
   IKbnUrlStateStorage,
+  ReduxLikeStateContainer,
+  StateContainer,
+  syncState,
   withNotifyOnErrors,
 } from '../../../../kibana_utils/public';
-import { esFilters, Filter, Query } from '../../../../data/public';
+import {
+  DataPublicPluginStart,
+  esFilters,
+  Filter,
+  Query,
+  SearchSessionInfoProvider,
+} from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
+import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../url_generator';
 
 export interface AppState {
   /**
@@ -246,4 +254,48 @@ export function isEqualState(stateA: AppState, stateB: AppState) {
   const { filters: stateAFilters = [], ...stateAPartial } = stateA;
   const { filters: stateBFilters = [], ...stateBPartial } = stateB;
   return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
+}
+
+export function createSearchSessionRestorationDataProvider(deps: {
+  appStateContainer: StateContainer<AppState>;
+  data: DataPublicPluginStart;
+  getSavedSearchId: () => string | undefined;
+}): SearchSessionInfoProvider {
+  return {
+    getName: async () => 'Discover',
+    getUrlGeneratorData: async () => {
+      return {
+        urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
+        initialState: createUrlGeneratorState({ ...deps, forceAbsoluteTime: false }),
+        restoreState: createUrlGeneratorState({ ...deps, forceAbsoluteTime: true }),
+      };
+    },
+  };
+}
+
+function createUrlGeneratorState({
+  appStateContainer,
+  data,
+  getSavedSearchId,
+  forceAbsoluteTime, // TODO: not implemented
+}: {
+  appStateContainer: StateContainer<AppState>;
+  data: DataPublicPluginStart;
+  getSavedSearchId: () => string | undefined;
+  forceAbsoluteTime: boolean;
+}): DiscoverUrlGeneratorState {
+  const appState = appStateContainer.get();
+  return {
+    filters: data.query.filterManager.getFilters(),
+    indexPatternId: appState.index,
+    query: appState.query,
+    savedSearchId: getSavedSearchId(),
+    timeRange: data.query.timefilter.timefilter.getTime(), // TODO: handle relative time range
+    searchSessionId: data.search.session.getSessionId(),
+    columns: appState.columns,
+    sort: appState.sort,
+    savedQuery: appState.savedQuery,
+    interval: appState.interval,
+    useHash: false,
+  };
 }
