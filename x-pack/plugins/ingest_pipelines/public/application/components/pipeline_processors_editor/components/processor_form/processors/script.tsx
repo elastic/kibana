@@ -131,7 +131,7 @@ export const Script: FormFieldsComponent = ({ initialFieldValues }) => {
   const [showId, setShowId] = useState(() => !!initialFieldValues?.id);
   const [scriptLanguage, setScriptLanguage] = useState<string>('plaintext');
 
-  const [{ fields }] = useFormData();
+  const [{ fields }] = useFormData({ watch: 'fields.lang' });
 
   const suggestionProvider = PainlessLang.getSuggestionProvider('processor_conditional');
 
