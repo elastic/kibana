@@ -105,9 +105,22 @@ export const HotPhase: FunctionComponent = () => {
           }
           description={
             <EuiTextColor color="subdued">
-              {i18n.translate('xpack.indexLifecycleMgmt.hotPhase.rolloverFieldDescription', {
-                defaultMessage: 'Do something',
-              })}
+              <p>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
+                  defaultMessage="The new index created by rollover is added
+    to the index alias and designated as the write index."
+                />{' '}
+                <LearnMoreLink
+                  text={
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutRolloverLinkText"
+                      defaultMessage="Learn more"
+                    />
+                  }
+                  docPath="indices-rollover-index.html"
+                />
+              </p>
             </EuiTextColor>
           }
           fullWidth
@@ -119,27 +132,6 @@ export const HotPhase: FunctionComponent = () => {
             componentProps={{
               hasEmptyLabelSpace: true,
               fullWidth: false,
-              helpText: (
-                <>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
-                      defaultMessage="The new index created by rollover is added
-          to the index alias and designated as the write index."
-                    />
-                  </p>
-                  <LearnMoreLink
-                    text={
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutRolloverLinkText"
-                        defaultMessage="Learn about rollover"
-                      />
-                    }
-                    docPath="indices-rollover-index.html"
-                  />
-                  <EuiSpacer size="m" />
-                </>
-              ),
               euiFieldProps: {
                 'data-test-subj': 'rolloverSwitch',
               },
