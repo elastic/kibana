@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
+import { aggMovingAvgFnName } from './moving_avg_fn';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
@@ -45,6 +46,7 @@ export const getMovingAvgMetricAgg = () => {
 
   return new MetricAggType({
     name: METRIC_TYPES.MOVING_FN,
+    expressionName: aggMovingAvgFnName,
     dslName: 'moving_fn',
     title: movingAvgTitle,
     makeLabel: (agg) => makeNestedLabel(agg, movingAvgLabel),
