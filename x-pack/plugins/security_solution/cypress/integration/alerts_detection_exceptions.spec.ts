@@ -6,8 +6,8 @@
 import { exception } from '../objects/exception';
 import { newRule } from '../objects/rule';
 
+import { ALERTS_COUNT, NUMBER_OF_ALERTS } from '../screens/alerts';
 import { RULE_STATUS } from '../screens/create_new_rule';
-import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 
 import {
   addExceptionFromFirstAlert,
@@ -52,7 +52,8 @@ describe('Exceptions', () => {
     waitForAlertsToPopulate();
     refreshPage();
 
-    cy.get(SERVER_SIDE_EVENT_COUNT)
+    cy.get(ALERTS_COUNT).should('exist');
+    cy.get(NUMBER_OF_ALERTS)
       .invoke('text')
       .then((numberOfInitialAlertsText) => {
         cy.wrap(parseInt(numberOfInitialAlertsText, 10)).should(
@@ -77,7 +78,8 @@ describe('Exceptions', () => {
       goToAlertsTab();
       refreshPage();
 
-      cy.get(SERVER_SIDE_EVENT_COUNT)
+      cy.get(ALERTS_COUNT).should('exist');
+      cy.get(NUMBER_OF_ALERTS)
         .invoke('text')
         .then((numberOfAlertsAfterCreatingExceptionText) => {
           cy.wrap(parseInt(numberOfAlertsAfterCreatingExceptionText, 10)).should('eql', 0);
@@ -86,7 +88,8 @@ describe('Exceptions', () => {
       goToClosedAlerts();
       refreshPage();
 
-      cy.get(SERVER_SIDE_EVENT_COUNT)
+      cy.get(ALERTS_COUNT).should('exist');
+      cy.get(NUMBER_OF_ALERTS)
         .invoke('text')
         .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
           cy.wrap(parseInt(numberOfClosedAlertsAfterCreatingExceptionText, 10)).should(
@@ -99,7 +102,8 @@ describe('Exceptions', () => {
       waitForTheRuleToBeExecuted();
       refreshPage();
 
-      cy.get(SERVER_SIDE_EVENT_COUNT)
+      cy.get(ALERTS_COUNT).should('exist');
+      cy.get(NUMBER_OF_ALERTS)
         .invoke('text')
         .then((numberOfOpenedAlertsAfterCreatingExceptionText) => {
           cy.wrap(parseInt(numberOfOpenedAlertsAfterCreatingExceptionText, 10)).should('eql', 0);
@@ -113,7 +117,8 @@ describe('Exceptions', () => {
       waitForAlertsToPopulate();
       refreshPage();
 
-      cy.get(SERVER_SIDE_EVENT_COUNT)
+      cy.get(ALERTS_COUNT).should('exist');
+      cy.get(NUMBER_OF_ALERTS)
         .invoke('text')
         .then((numberOfAlertsAfterRemovingExceptionsText) => {
           cy.wrap(parseInt(numberOfAlertsAfterRemovingExceptionsText, 10)).should(
@@ -130,7 +135,8 @@ describe('Exceptions', () => {
       addsException(exception);
       esArchiverLoad('auditbeat_for_exceptions2');
 
-      cy.get(SERVER_SIDE_EVENT_COUNT)
+      cy.get(ALERTS_COUNT).should('exist');
+      cy.get(NUMBER_OF_ALERTS)
         .invoke('text')
         .then((numberOfAlertsAfterCreatingExceptionText) => {
           cy.wrap(parseInt(numberOfAlertsAfterCreatingExceptionText, 10)).should('eql', 0);
@@ -139,7 +145,8 @@ describe('Exceptions', () => {
       goToClosedAlerts();
       refreshPage();
 
-      cy.get(SERVER_SIDE_EVENT_COUNT)
+      cy.get(ALERTS_COUNT).should('exist');
+      cy.get(NUMBER_OF_ALERTS)
         .invoke('text')
         .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
           cy.wrap(parseInt(numberOfClosedAlertsAfterCreatingExceptionText, 10)).should(
@@ -152,7 +159,8 @@ describe('Exceptions', () => {
       waitForTheRuleToBeExecuted();
       refreshPage();
 
-      cy.get(SERVER_SIDE_EVENT_COUNT)
+      cy.get(ALERTS_COUNT).should('exist');
+      cy.get(NUMBER_OF_ALERTS)
         .invoke('text')
         .then((numberOfOpenedAlertsAfterCreatingExceptionText) => {
           cy.wrap(parseInt(numberOfOpenedAlertsAfterCreatingExceptionText, 10)).should('eql', 0);
@@ -165,7 +173,8 @@ describe('Exceptions', () => {
       waitForAlertsToPopulate();
       refreshPage();
 
-      cy.get(SERVER_SIDE_EVENT_COUNT)
+      cy.get(ALERTS_COUNT).should('exist');
+      cy.get(NUMBER_OF_ALERTS)
         .invoke('text')
         .then((numberOfAlertsAfterRemovingExceptionsText) => {
           cy.wrap(parseInt(numberOfAlertsAfterRemovingExceptionsText, 10)).should(

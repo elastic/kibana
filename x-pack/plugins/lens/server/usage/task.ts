@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, CoreSetup, Logger } from 'kibana/server';
+import { CoreSetup, Logger, ElasticsearchClient } from 'kibana/server';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import moment from 'moment';
@@ -69,11 +69,12 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 
 export async function getDailyEvents(
   kibanaIndex: string,
-  callCluster: LegacyAPICaller
+  getEsClient: () => Promise<ElasticsearchClient>
 ): Promise<{
   byDate: Record<string, Record<string, number>>;
   suggestionsByDate: Record<string, Record<string, number>>;
 }> {
+  const esClient = await getEsClient();
   const aggs = {
     daily: {
       date_histogram: {
@@ -114,15 +115,10 @@ export async function getDailyEvents(
     },
   };
 
-  const metrics: ESSearchResponse<
-    unknown,
-    {
-      body: { aggs: typeof aggs };
-    },
-    { restTotalHitsAsInt: true }
-  > = await callCluster('search', {
+  const { body: metrics } = await esClient.search<
+    ESSearchResponse<unknown, { body: { aggs: typeof aggs } }>
+  >({
     index: kibanaIndex,
-    rest_total_hits_as_int: true,
     body: {
       query: {
         bool: {
@@ -156,9 +152,9 @@ export async function getDailyEvents(
   });
 
   // Always delete old date because we don't report it
-  await callCluster('deleteByQuery', {
+  await esClient.deleteByQuery({
     index: kibanaIndex,
-    waitForCompletion: true,
+    wait_for_completion: true,
     body: {
       query: {
         bool: {
@@ -184,9 +180,9 @@ export function telemetryTaskRunner(
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
-    const callCluster = async (...args: Parameters<LegacyAPICaller>) => {
+    const getEsClient = async () => {
       const [coreStart] = await core.getStartServices();
-      return coreStart.elasticsearch.legacy.client.callAsInternalUser(...args);
+      return coreStart.elasticsearch.client.asInternalUser;
     };
 
     return {
@@ -194,8 +190,8 @@ export function telemetryTaskRunner(
         const kibanaIndex = (await config.pipe(first()).toPromise()).kibana.index;
 
         return Promise.all([
-          getDailyEvents(kibanaIndex, callCluster),
-          getVisualizationCounts(callCluster, kibanaIndex),
+          getDailyEvents(kibanaIndex, getEsClient),
+          getVisualizationCounts(getEsClient, kibanaIndex),
         ])
           .then(([lensTelemetry, lensVisualizations]) => {
             return {
