@@ -24,14 +24,22 @@ export const ProcessListAPIRequestRT = rt.type({
 });
 
 export const ProcessListAPIQueryAggregationRT = rt.type({
-  processCount: AggValueRT,
-  states: rt.type({
-    buckets: rt.array(
-      rt.type({
-        key: rt.string,
-        count: AggValueRT,
-      })
-    ),
+  summaryEvent: rt.type({
+    summary: rt.type({
+      hits: rt.type({
+        hits: rt.array(
+          rt.type({
+            _source: rt.type({
+              system: rt.type({
+                process: rt.type({
+                  summary: rt.record(rt.string, rt.number),
+                }),
+              }),
+            }),
+          })
+        ),
+      }),
+    }),
   }),
   processes: rt.type({
     filteredProcs: rt.type({
@@ -82,10 +90,7 @@ export const ProcessListAPIResponseRT = rt.type({
       command: rt.string,
     })
   ),
-  summary: rt.type({
-    total: rt.number,
-    statesCount: rt.record(rt.string, rt.number),
-  }),
+  summary: rt.record(rt.string, rt.number),
 });
 
 export type ProcessListAPIQueryAggregation = rt.TypeOf<typeof ProcessListAPIQueryAggregationRT>;

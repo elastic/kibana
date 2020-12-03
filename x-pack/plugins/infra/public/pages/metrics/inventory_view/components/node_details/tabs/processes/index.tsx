@@ -58,7 +58,7 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
       <ProcessListContextProvider hostTerm={hostTerm} to={currentTime} timefield={timefield}>
         <SummaryTable
           isLoading={loading}
-          processSummary={(!error ? response?.summary : null) ?? { total: 0, statesCount: {} }}
+          processSummary={(!error ? response?.summary : null) ?? { total: 0 }}
         />
         <EuiSpacer size="m" />
         <EuiSearchBar

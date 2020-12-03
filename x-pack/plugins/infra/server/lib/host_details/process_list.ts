@@ -8,6 +8,8 @@ import { ProcessListAPIRequest, ProcessListAPIQueryAggregation } from '../../../
 import { ESSearchClient } from '../metrics/types';
 import { CMDLINE_FIELD } from './common';
 
+const TOP_N = 10;
+
 export const getProcessList = async (
   search: ESSearchClient,
   { hostTerm, timefield, indexPattern, to, sortBy, searchFilter }: ProcessListAPIRequest
@@ -32,20 +34,24 @@ export const getProcessList = async (
       },
     },
     aggs: {
-      processCount: {
-        cardinality: {
-          field: CMDLINE_FIELD,
-        },
-      },
-      states: {
-        terms: {
-          field: 'system.process.state',
-          size: 10,
+      summaryEvent: {
+        filter: {
+          term: {
+            'event.dataset': 'system.process.summary',
+          },
         },
         aggs: {
-          count: {
-            cardinality: {
-              field: CMDLINE_FIELD,
+          summary: {
+            top_hits: {
+              size: 1,
+              sort: [
+                {
+                  [timefield]: {
+                    order: 'desc',
+                  },
+                },
+              ],
+              _source: ['system.process.summary'],
             },
           },
         },
@@ -60,7 +66,7 @@ export const getProcessList = async (
           filteredProcs: {
             terms: {
               field: CMDLINE_FIELD,
-              size: 20,
+              size: TOP_N,
               order: {
                 [sortBy.name]: sortBy.isAscending ? 'asc' : 'desc',
               },
@@ -119,17 +125,13 @@ export const getProcessList = async (
         command: bucket.key,
       };
     });
-    const { processCount, states } = result.aggregations!;
-    const statesCount = states.buckets.reduce(
-      (stateResult, { key, count }) => ({ ...stateResult, [key]: count.value }),
-      {}
-    );
+    const {
+      summary,
+    } = result.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process;
+
     return {
       processList,
-      summary: {
-        total: processCount.value,
-        statesCount,
-      },
+      summary,
     };
   } catch (e) {
     throw e;
