@@ -133,6 +133,7 @@ const SuggestionPreview = ({
             // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsSuggestionPanel__button-isSelected': selected,
           })}
+          paddingSize="none"
           data-test-subj="lnsSuggestion"
           onClick={onSelect}
           aria-current={!!selected}
