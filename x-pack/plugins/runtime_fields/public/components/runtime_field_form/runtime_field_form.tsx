@@ -40,7 +40,7 @@ export interface FormState {
 
 export interface Props {
   links: {
-    painlessSyntax: string;
+    runtimePainless: string;
   };
   defaultValue?: RuntimeField;
   onChange?: (state: FormState) => void;
@@ -221,7 +221,7 @@ const RuntimeFieldFormComp = ({
                 <EuiFlexGroup justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
                     <EuiLink
-                      href={links.painlessSyntax}
+                      href={links.runtimePainless}
                       target="_blank"
                       external
                       data-test-subj="painlessSyntaxLearnMoreLink"
