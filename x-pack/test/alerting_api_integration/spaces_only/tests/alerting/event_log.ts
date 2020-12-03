@@ -131,7 +131,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             validateInstanceEvent(event, `created new instance: 'instance'`);
             break;
           case 'recovered-instance':
-            validateInstanceEvent(event, `recovered instance: 'instance'`);
+            validateInstanceEvent(event, `instance 'instance' has recovered`);
             break;
           case 'active-instance':
             validateInstanceEvent(event, `active instance: 'instance' in actionGroup: 'default'`);
