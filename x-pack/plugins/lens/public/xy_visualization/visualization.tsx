@@ -10,24 +10,19 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import {
-  Visualization,
-  OperationMetadata,
-  VisualizationType,
-  AccessorConfig,
-  FramePublicAPI,
-} from '../types';
+import { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
 import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
-import { getColumnToLabelMap, isHorizontalChart } from './state_helpers';
+import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
-import { ColorAssignments, getColorAssignments } from './color_assignment';
+import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
+import { getColumnToLabelMap } from './state_helpers';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
@@ -300,7 +295,11 @@ export const getXyVisualization = ({
 
   getLayerContextMenuIcon({ state, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
-    return visualizationTypes.find((t) => t.id === layer?.seriesType)?.icon;
+    const visualizationType = visualizationTypes.find((t) => t.id === layer?.seriesType);
+    return {
+      icon: visualizationType?.icon || 'gear',
+      label: visualizationType?.label || '',
+    };
   },
 
   renderLayerContextMenu(domElement, props) {
@@ -324,7 +323,11 @@ export const getXyVisualization = ({
   renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>
-        <DimensionEditor {...props} />
+        <DimensionEditor
+          {...props}
+          formatFactory={data.fieldFormats.deserialize}
+          paletteService={paletteService}
+        />
       </I18nProvider>,
       domElement
     );
@@ -369,52 +372,38 @@ export const getXyVisualization = ({
 
     return errors.length ? errors : undefined;
   },
-});
 
-function getAccessorColorConfig(
-  colorAssignments: ColorAssignments,
-  frame: FramePublicAPI,
-  layer: LayerConfig,
-  sortedAccessors: string[],
-  paletteService: PaletteRegistry
-): AccessorConfig[] {
-  const layerContainsSplits = Boolean(layer.splitAccessor);
-  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
-  const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
-  return sortedAccessors.map((accessor) => {
-    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
-    if (layerContainsSplits) {
-      return {
-        columnId: accessor as string,
-        triggerIcon: 'disabled',
-      };
+  getWarningMessages(state, frame) {
+    if (state?.layers.length === 0 || !frame.activeData) {
+      return;
     }
-    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
-    const rank = colorAssignments[currentPalette.name].getRank(
-      layer,
-      columnToLabel[accessor] || accessor,
-      accessor
-    );
-    const customColor =
-      currentYConfig?.color ||
-      paletteService.get(currentPalette.name).getColor(
-        [
-          {
-            name: columnToLabel[accessor] || accessor,
-            rankAtDepth: rank,
-            totalSeriesAtDepth: totalSeriesCount,
-          },
-        ],
-        { maxDepth: 1, totalSeries: totalSeriesCount },
-        currentPalette.params
-      );
-    return {
-      columnId: accessor as string,
-      triggerIcon: customColor ? 'color' : 'disabled',
-      color: customColor ? customColor : undefined,
-    };
-  });
-}
+
+    const layers = state.layers;
+
+    const filteredLayers = layers.filter(({ accessors }: LayerConfig) => accessors.length > 0);
+    const accessorsWithArrayValues = [];
+    for (const layer of filteredLayers) {
+      const { layerId, accessors } = layer;
+      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      if (!rows) {
+        break;
+      }
+      const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layerId]);
+      for (const accessor of accessors) {
+        const hasArrayValues = rows.some((row) => Array.isArray(row[accessor]));
+        if (hasArrayValues) {
+          accessorsWithArrayValues.push(columnToLabel[accessor]);
+        }
+      }
+    }
+    return accessorsWithArrayValues.map((label) => (
+      <>
+        <strong>{label}</strong> contains array values. Your visualization may not render as
+        expected.
+      </>
+    ));
+  },
+});
 
 function validateLayersForDimension(
   dimension: string,

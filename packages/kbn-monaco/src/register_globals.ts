@@ -25,6 +25,8 @@ import { monaco } from './monaco_imports';
 import xJsonWorkerSrc from '!!raw-loader!../target/public/xjson.editor.worker.js';
 // @ts-ignore
 import defaultWorkerSrc from '!!raw-loader!../target/public/default.editor.worker.js';
+// @ts-ignore
+import painlessWorkerSrc from '!!raw-loader!../target/public/painless.editor.worker.js';
 
 /**
  * Register languages and lexer rules
@@ -42,6 +44,7 @@ monaco.languages.setMonarchTokensProvider(EsqlLang.ID, EsqlLang.lexerRules);
  */
 const mapLanguageIdToWorker: { [key: string]: any } = {
   [XJsonLang.ID]: xJsonWorkerSrc,
+  [PainlessLang.ID]: painlessWorkerSrc,
 };
 
 // @ts-ignore

@@ -15,10 +15,9 @@ import { FeatureImportanceSummaryPanel } from '../total_feature_importance_summa
 
 interface Props {
   jobId: string;
-  defaultIsTraining?: boolean;
 }
 
-export const RegressionExploration: FC<Props> = ({ jobId, defaultIsTraining }) => (
+export const RegressionExploration: FC<Props> = ({ jobId }) => (
   <ExplorationPageWrapper
     jobId={jobId}
     title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle', {
@@ -27,6 +26,5 @@ export const RegressionExploration: FC<Props> = ({ jobId, defaultIsTraining }) =
     })}
     EvaluatePanel={EvaluatePanel}
     FeatureImportanceSummaryPanel={FeatureImportanceSummaryPanel}
-    defaultIsTraining={defaultIsTraining}
   />
 );

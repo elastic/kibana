@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { StickyContainer } from 'react-sticky';
 import {
   disableConsoleWarning,
   mountWithTheme,
@@ -61,11 +60,7 @@ describe('Timeline', () => {
       ],
     };
 
-    const wrapper = mountWithTheme(
-      <StickyContainer>
-        <Timeline {...props} />
-      </StickyContainer>
-    );
+    const wrapper = mountWithTheme(<Timeline {...props} />);
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });
@@ -84,12 +79,7 @@ describe('Timeline', () => {
       },
     };
 
-    const mountTimeline = () =>
-      mountWithTheme(
-        <StickyContainer>
-          <Timeline {...props} />
-        </StickyContainer>
-      );
+    const mountTimeline = () => mountWithTheme(<Timeline {...props} />);
 
     expect(mountTimeline).not.toThrow();
   });

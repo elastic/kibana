@@ -24,12 +24,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-  ISessionService,
-} from '../../common';
+import { IKibanaSearchRequest, IKibanaSearchResponse, ISearchOptions } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import {
   SearchTimeoutError,
@@ -42,6 +37,7 @@ import {
 } from './errors';
 import { toMountPoint } from '../../../kibana_react/public';
 import { AbortError, getCombinedAbortSignal } from '../../../kibana_utils/public';
+import { ISessionService } from './session';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
@@ -133,10 +129,18 @@ export class SearchInterceptor {
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal, ...requestOptions } = options || {};
+
+    const isCurrentSession =
+      options?.sessionId && this.deps.session.getSessionId() === options.sessionId;
+
     return this.batchedFetch(
       {
         request,
-        options: requestOptions,
+        options: {
+          ...requestOptions,
+          isStored: isCurrentSession ? this.deps.session.isStored() : false,
+          isRestore: isCurrentSession ? this.deps.session.isRestore() : false,
+        },
       },
       abortSignal
     );
@@ -160,13 +164,18 @@ export class SearchInterceptor {
       timeoutController.abort();
     });
 
+    const selfAbortController = new AbortController();
+
     // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
     // 1. The user manually aborts (via `cancelPending`)
     // 2. The request times out
-    // 3. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
+    // 3. abort() is called on `selfAbortController`. This is used by session service to abort all pending searches that it tracks
+    //    in the current session
+    // 4. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
     const signals = [
       this.abortController.signal,
       timeoutSignal,
+      selfAbortController.signal,
       ...(abortSignal ? [abortSignal] : []),
     ];
 
@@ -184,6 +193,9 @@ export class SearchInterceptor {
       timeoutSignal,
       combinedSignal,
       cleanup,
+      abort: () => {
+        selfAbortController.abort();
+      },
     };
   }
 

@@ -33,9 +33,7 @@ import {
   SavedObjectsClient,
   Plugin,
   Logger,
-  IClusterClient,
   UiSettingsServiceStart,
-  SavedObjectsServiceStart,
 } from '../../../core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
@@ -88,8 +86,6 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    */
   private readonly oldUiSettingsHandled$ = new AsyncSubject();
   private savedObjectsClient?: ISavedObjectsRepository;
-  private elasticsearchClient?: IClusterClient;
-  private savedObjectsService?: SavedObjectsServiceStart;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.logger = initializerContext.logger.get();
@@ -109,12 +105,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const currentKibanaVersion = this.currentKibanaVersion;
     const config$ = this.config$;
     const isDev = this.isDev;
-    registerCollection(
-      telemetryCollectionManager,
-      elasticsearch.legacy.client,
-      () => this.elasticsearchClient,
-      () => this.savedObjectsService
-    );
+    registerCollection(telemetryCollectionManager);
     const router = http.createRouter();
 
     registerRoutes({
@@ -138,11 +129,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsDepsStart) {
-    const { savedObjects, uiSettings, elasticsearch } = core;
+    const { savedObjects, uiSettings } = core;
     const savedObjectsInternalRepository = savedObjects.createInternalRepository();
     this.savedObjectsClient = savedObjectsInternalRepository;
-    this.elasticsearchClient = elasticsearch.client;
-    this.savedObjectsService = savedObjects;
 
     // Not catching nor awaiting these promises because they should never reject
     this.handleOldUiSettings(uiSettings);

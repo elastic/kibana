@@ -6,6 +6,7 @@
 
 const actualOperations = jest.requireActual('../operations');
 const actualHelpers = jest.requireActual('../layer_helpers');
+const actualTimeScaleUtils = jest.requireActual('../time_scale_utils');
 const actualMocks = jest.requireActual('../mocks');
 
 jest.spyOn(actualOperations.operationDefinitionMap.date_histogram, 'paramEditor');
@@ -23,6 +24,7 @@ export const {
   getOperationResultType,
   operationDefinitionMap,
   operationDefinitions,
+  getInvalidFieldMessage,
 } = actualOperations;
 
 export const {
@@ -39,6 +41,9 @@ export const {
   isColumnTransferable,
   getErrorMessages,
   isReferenced,
+  resetIncomplete,
 } = actualHelpers;
+
+export const { adjustTimeScaleLabelSuffix, DEFAULT_TIME_SCALE } = actualTimeScaleUtils;
 
 export const { createMockedReferenceOperation } = actualMocks;

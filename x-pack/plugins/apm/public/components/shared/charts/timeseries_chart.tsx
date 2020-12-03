@@ -16,6 +16,7 @@ import {
   niceTimeFormatter,
   Placement,
   Position,
+  RectAnnotation,
   ScaleType,
   Settings,
   YDomainRange,
@@ -27,12 +28,13 @@ import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
-import { TimeSeries } from '../../../../typings/timeseries';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { useTheme } from '../../../hooks/useTheme';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useAnnotations } from '../../../hooks/use_annotations';
-import { useChartPointerEvent } from '../../../hooks/use_chart_pointer_event';
+import { RectCoordinate, TimeSeries } from '../../../../typings/timeseries';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useTheme } from '../../../hooks/use_theme';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
+import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
+import { AnomalySeries } from '../../../selectors/chart_selectors';
 import { unit } from '../../../style/variables';
 import { ChartContainer } from './chart_container';
 import { onBrushEnd } from './helper/helper';
@@ -53,6 +55,7 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
+  anomalySeries?: AnomalySeries;
 }
 
 export function TimeseriesChart({
@@ -65,12 +68,13 @@ export function TimeseriesChart({
   yTickFormat,
   showAnnotations = true,
   yDomain,
+  anomalySeries,
 }: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
-  const { annotations } = useAnnotations();
+  const { annotations } = useAnnotationsContext();
   const chartTheme = useChartTheme();
-  const { pointerEvent, setPointerEvent } = useChartPointerEvent();
+  const { pointerEvent, setPointerEvent } = useChartPointerEventContext();
   const { urlParams } = useUrlParams();
   const theme = useTheme();
 
@@ -102,7 +106,12 @@ export function TimeseriesChart({
       <Chart ref={chartRef} id={id}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-          theme={chartTheme}
+          theme={{
+            ...chartTheme,
+            areaSeriesStyle: {
+              line: { visible: false },
+            },
+          }}
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
             tooltip: { visible: true, placement: Placement.Bottom },
@@ -169,6 +178,36 @@ export function TimeseriesChart({
             />
           );
         })}
+
+        {anomalySeries?.bounderies && (
+          <AreaSeries
+            key={anomalySeries.bounderies.title}
+            id={anomalySeries.bounderies.title}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            y0Accessors={['y0']}
+            data={anomalySeries.bounderies.data}
+            color={anomalySeries.bounderies.color}
+            curve={CurveType.CURVE_MONOTONE_X}
+            hideInLegend
+            filterSeriesInTooltip={() => false}
+          />
+        )}
+
+        {anomalySeries?.scores && (
+          <RectAnnotation
+            key={anomalySeries.scores.title}
+            id="score_anomalies"
+            dataValues={(anomalySeries.scores.data as RectCoordinate[]).map(
+              ({ x0, x: x1 }) => ({
+                coordinates: { x0, x1 },
+              })
+            )}
+            style={{ fill: anomalySeries.scores.color }}
+          />
+        )}
       </Chart>
     </ChartContainer>
   );

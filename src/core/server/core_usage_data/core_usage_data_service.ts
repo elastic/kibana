@@ -180,7 +180,7 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
           },
           xsrf: {
             disableProtection: http.xsrf.disableProtection,
-            whitelistConfigured: isConfigured.array(http.xsrf.whitelist),
+            allowlistConfigured: isConfigured.array(http.xsrf.allowlist),
           },
           requestId: {
             allowFromAnyIp: http.requestId.allowFromAnyIp,
