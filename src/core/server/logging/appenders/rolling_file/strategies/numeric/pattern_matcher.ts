@@ -17,28 +17,35 @@
  * under the License.
  */
 
+const escape = (string: string) => string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+
 const createNumericMatcher = (fileBaseName: string, pattern: string): RegExp => {
-  let suffixStart = fileBaseName.indexOf('.');
-  if (suffixStart === -1) {
-    suffixStart = fileBaseName.length;
+  let extStart = fileBaseName.indexOf('.');
+  if (extStart === -1) {
+    extStart = fileBaseName.length;
   }
-  const baseNameWithoutSuffix = fileBaseName
-    .substr(0, suffixStart)
-    // escape special characters in the pattern
-    .replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
-  const suffix = fileBaseName
-    .substr(suffixStart, fileBaseName.length)
-    // escape special characters in the pattern
-    .replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
-  const processedPattern = pattern
-    // escape special characters in the pattern
-    .replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&')
+  const baseNameWithoutExt = escape(fileBaseName.substr(0, extStart));
+  const extension = escape(fileBaseName.substr(extStart, fileBaseName.length));
+  const processedPattern = escape(pattern)
     // create matching group for `%i`
     .replace(/%i/g, '(?<counter>\\d+)');
-  return new RegExp(`^${baseNameWithoutSuffix}${processedPattern}${suffix}$`);
+  return new RegExp(`^${baseNameWithoutExt}${processedPattern}${extension}$`);
 };
 
-export const getNumericMatcher = (logFileName: string, pattern: string) => {
+/**
+ * Builds a matcher that can be used to match a filename against the rolling
+ * file name pattern associated with given `logFileName` and `pattern`
+ *
+ * @example
+ * ```ts
+ * const matcher = getFileNameMatcher('kibana.log', '-%i');
+ * matcher('kibana-1.log') // `1`
+ * matcher('kibana-5.log') // `5`
+ * matcher('kibana-A.log') // undefined
+ * matcher('kibana.log')   // `undefined
+ * ```
+ */
+export const getFileNameMatcher = (logFileName: string, pattern: string) => {
   const matcher = createNumericMatcher(logFileName, pattern);
   return (fileName: string): number | undefined => {
     const match = matcher.exec(fileName);
@@ -49,7 +56,16 @@ export const getNumericMatcher = (logFileName: string, pattern: string) => {
   };
 };
 
-export const getNumericFileName = (
+/**
+ * Returns the rolling file name associated with given basename and pattern for given index.
+ *
+ * @example
+ * ```ts
+ *  getNumericFileName('foo.log', '.%i', 4) // -> `foo.4.log`
+ *  getNumericFileName('kibana.log', '-{%i}', 12) // -> `kibana-{12}.log`
+ * ```
+ */
+export const getRollingFileName = (
   fileBaseName: string,
   pattern: string,
   index: number

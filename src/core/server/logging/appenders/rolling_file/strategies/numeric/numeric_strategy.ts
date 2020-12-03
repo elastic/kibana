@@ -22,7 +22,7 @@ import { schema } from '@kbn/config-schema';
 import { readdir, unlink, rename, exists } from '../fs';
 import { RollingStrategy } from '../strategy';
 import { RollingFileContext } from '../../rolling_file_context';
-import { getNumericMatcher, getNumericFileName } from './pattern_matcher';
+import { getFileNameMatcher, getRollingFileName } from './pattern_matcher';
 
 export interface NumericRollingStrategyConfig {
   kind: 'numeric';
@@ -117,7 +117,7 @@ export class NumericRollingStrategy implements RollingStrategy {
       return;
     }
 
-    const matcher = getNumericMatcher(this.logFileBaseName, this.config.pattern);
+    const matcher = getFileNameMatcher(this.logFileBaseName, this.config.pattern);
     const dirContent = await readdir(this.logFileFolder);
 
     const orderedFiles = dirContent
@@ -138,11 +138,11 @@ export class NumericRollingStrategy implements RollingStrategy {
 
     for (let i = filesToRoll.length - 1; i >= 0; i--) {
       const oldFileName = filesToRoll[i];
-      const newFileName = getNumericFileName(this.logFileBaseName, this.config.pattern, i + 2);
+      const newFileName = getRollingFileName(this.logFileBaseName, this.config.pattern, i + 2);
       await rename(join(this.logFileFolder, oldFileName), join(this.logFileFolder, newFileName));
     }
 
-    const currentFileNewName = getNumericFileName(this.logFileBaseName, this.config.pattern, 1);
+    const currentFileNewName = getRollingFileName(this.logFileBaseName, this.config.pattern, 1);
     await rename(this.context.filePath, join(this.logFileFolder, currentFileNewName));
 
     // updates the context file info to mirror the new size and date
