@@ -19,7 +19,7 @@ The easiest and recommended way of running Kibana with the APM agent locally is 
 1. Clone https://github.com/elastic/apm-integration-testing[elastic/apm-integration-testing]
 2. Change into the apm-integration-testing repo:
 ** `cd apm-integration-testing`
-3. Run {es} and the APM servers without Kibana using:
+3. Run {es} and the APM servers without running Kibana:
 ** `./scripts/compose.py start master --no-kibana`
 4. Change into the {kib} repo:
 ** `cd ../kibana`
