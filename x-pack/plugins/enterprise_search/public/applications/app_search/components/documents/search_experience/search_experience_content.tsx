@@ -27,17 +27,6 @@ interface Result {
   };
 }
 
-const DocumentationLink: React.FC = () => (
-  <EuiButton
-    data-test-subj="documentsSearchDocsLink"
-    href={`${DOCS_PREFIX}/indexing-documents-guide.html`}
-  >
-    {i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.indexingGuide', {
-      defaultMessage: 'Read the indexing guide',
-    })}
-  </EuiButton>
-);
-
 export const SearchExperienceContent: React.FC = () => {
   const { resultSearchTerm, totalResults, wasSearched } = useSearchContextState();
 
@@ -115,7 +104,14 @@ export const SearchExperienceContent: React.FC = () => {
           !isMetaEngine && myRole.canManageEngineDocuments ? (
             <DocumentCreationButton />
           ) : (
-            <DocumentationLink />
+            <EuiButton
+              data-test-subj="documentsSearchDocsLink"
+              href={`${DOCS_PREFIX}/indexing-documents-guide.html`}
+            >
+              {i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.indexingGuide', {
+                defaultMessage: 'Read the indexing guide',
+              })}
+            </EuiButton>
           )
         }
       />
