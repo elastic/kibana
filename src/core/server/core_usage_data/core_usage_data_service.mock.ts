@@ -99,7 +99,7 @@ const createStartContractMock = () => {
             },
             xsrf: {
               disableProtection: false,
-              whitelistConfigured: false,
+              allowlistConfigured: false,
             },
           },
           logging: {
