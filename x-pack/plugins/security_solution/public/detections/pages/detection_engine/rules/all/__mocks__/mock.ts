@@ -138,24 +138,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   tags: ['tag1', 'tag2'],
   to: 'now',
   type: 'saved_query',
-  threat: [
-    {
-      framework: 'mockFramework',
-      tactic: {
-        id: '1234',
-        name: 'tactic1',
-        reference: 'reference1',
-      },
-      technique: [
-        {
-          id: '456',
-          name: 'technique1',
-          reference: 'technique reference',
-          subtechnique: [],
-        },
-      ],
-    },
-  ],
+  threat: getThreatMock(),
   threshold: {
     field: 'host.name',
     value: 50,
