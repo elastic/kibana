@@ -11,7 +11,6 @@ import { isEmpty } from 'lodash';
 import { euiStyled, useUiTracker } from '../../../../../observability/public';
 import { isTimestampColumn } from '../../../utils/log_entry';
 import {
-  LogColumnConfiguration,
   isTimestampLogColumnConfiguration,
   isMessageLogColumnConfiguration,
   isFieldLogColumnConfiguration,
@@ -24,6 +23,7 @@ import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { monospaceTextStyle, hoveredContentStyle, highlightedContentStyle } from './text_styles';
 import { LogEntry, LogColumn } from '../../../../common/http_api';
 import { LogEntryContextMenu } from './log_entry_context_menu';
+import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 
 const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
   defaultMessage: 'View actions for line',
@@ -42,7 +42,7 @@ const LOG_VIEW_IN_CONTEXT_LABEL = i18n.translate(
 
 interface LogEntryRowProps {
   boundingBoxRef?: React.Ref<Element>;
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   columnWidths: LogEntryColumnWidths;
   highlights: LogEntry[];
   isActiveHighlight: boolean;
