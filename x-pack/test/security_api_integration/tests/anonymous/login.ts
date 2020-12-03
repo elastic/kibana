@@ -31,18 +31,24 @@ export default function ({ getService }: FtrProviderContext) {
     expect(cookie.maxAge).to.be(0);
   }
 
-  describe('Anonymous authentication', () => {
-    before(async () => {
-      await security.user.create('anonymous_user', {
-        password: 'changeme',
-        roles: [],
-        full_name: 'Guest',
-      });
-    });
+  const isElasticsearchAnonymousAccessEnabled = (config.get(
+    'esTestCluster.serverArgs'
+  ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
 
-    after(async () => {
-      await security.user.delete('anonymous_user');
-    });
+  describe('Anonymous authentication', () => {
+    if (!isElasticsearchAnonymousAccessEnabled) {
+      before(async () => {
+        await security.user.create('anonymous_user', {
+          password: 'changeme',
+          roles: [],
+          full_name: 'Guest',
+        });
+      });
+
+      after(async () => {
+        await security.user.delete('anonymous_user');
+      });
+    }
 
     it('should reject API requests if client is not authenticated', async () => {
       await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
@@ -97,7 +103,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(user.username).to.eql('anonymous_user');
         expect(user.authentication_provider).to.eql({ type: 'anonymous', name: 'anonymous1' });
-        expect(user.authentication_type).to.eql('realm');
+        expect(user.authentication_type).to.eql(
+          isElasticsearchAnonymousAccessEnabled ? 'anonymous' : 'realm'
+        );
         // Do not assert on the `authentication_realm`, as the value differs for on-prem vs cloud
       });
 
@@ -174,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(cookies).to.have.length(1);
         checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(logoutResponse.headers.location).to.be('/security/logged_out');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
 
         // Old cookie should be invalidated and not allow API access.
         const apiResponse = await supertest

@@ -87,8 +87,8 @@ Object {
     "truststore": Object {},
   },
   "xsrf": Object {
+    "allowlist": Array [],
     "disableProtection": false,
-    "whitelist": Array [],
   },
 }
 `;

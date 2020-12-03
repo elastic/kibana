@@ -142,6 +142,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columns: {
             col1: {
               label: 'Date histogram of timestamp',
+              customLabel: true,
               dataType: 'date',
               isBucketed: true,
 
@@ -153,11 +154,16 @@ describe('IndexPatternDimensionEditorPanel', () => {
               sourceField: 'timestamp',
             },
           },
+          incompleteColumns: {},
         },
       },
     };
 
-    setState = jest.fn();
+    setState = jest.fn().mockImplementation((newState) => {
+      if (wrapper instanceof ReactWrapper) {
+        wrapper.setProps({ state: newState });
+      }
+    });
 
     defaultProps = {
       state,
@@ -544,7 +550,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   describe('transient invalid state', () => {
-    it('should not set the state if selecting an operation incompatible with the current field', () => {
+    it('should set the state if selecting an operation incompatible with the current field', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
       act(() => {
@@ -553,7 +559,20 @@ describe('IndexPatternDimensionEditorPanel', () => {
           .simulate('click');
       });
 
-      expect(setState).not.toHaveBeenCalled();
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+            },
+            incompleteColumns: {
+              col1: { operationType: 'terms' },
+            },
+          },
+        },
+      });
     });
 
     it('should show error message in invalid state', () => {
@@ -566,8 +585,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(
         wrapper.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
       ).toBeDefined();
-
-      expect(setState).not.toHaveBeenCalled();
     });
 
     it('should leave error state if a compatible operation is selected', () => {
@@ -664,6 +681,17 @@ describe('IndexPatternDimensionEditorPanel', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} columnId={'col2'} />);
 
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            incompleteColumns: {
+              col2: { operationType: 'avg' },
+            },
+          },
+        },
+      });
 
       const comboBox = wrapper
         .find(EuiComboBox)
@@ -675,7 +703,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         comboBox.prop('onChange')!([options![1].options![2]]);
       });
 
-      expect(setState).toHaveBeenCalledWith({
+      expect(setState).toHaveBeenLastCalledWith({
         ...state,
         layers: {
           first: {
@@ -759,11 +787,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should set datasource state if compatible field is selected for operation', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
-      act(() => {
-        wrapper
-          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
-          .simulate('click');
-      });
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
+        .simulate('click');
 
       const comboBox = wrapper
         .find(EuiComboBox)
@@ -774,7 +800,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         comboBox.prop('onChange')!([option]);
       });
 
-      expect(setState).toHaveBeenCalledWith({
+      expect(setState).toHaveBeenLastCalledWith({
         ...state,
         layers: {
           first: {
@@ -1046,6 +1072,20 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
 
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          incompleteColumns: {
+            col2: {
+              operationType: 'avg',
+            },
+          },
+        },
+      },
+    });
+
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-dimension-field"]');
@@ -1202,16 +1242,19 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
       'Average',
       'Count',
+      'Last value',
       'Maximum',
       'Median',
       'Minimum',
       'Sum',
       'Unique count',
-      '\u00a0',
     ]);
   });
 
   it('should add a column on selection of a field', () => {
+    // Prevents field format from being loaded
+    setState.mockImplementation(() => {});
+
     wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} columnId={'col2'} />);
 
     const comboBox = wrapper
@@ -1231,6 +1274,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columns: {
             ...state.layers.first.columns,
             col2: expect.objectContaining({
+              operationType: 'range',
               sourceField: 'bytes',
               // Other parts of this don't matter for this test
             }),
