@@ -24,7 +24,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { Vis } from '../../../../../visualizations/public';
 import { SeriesParam } from '../../../types';
-import { NumberInputOption, SelectOption, SwitchOption } from '../../../../../charts/public';
+import {
+  SelectOption,
+  SwitchOption,
+  NumberInputOption,
+} from '../../../../../vis_default_editor/public';
 import { SetChart } from './chart_options';
 
 export interface LineOptionsParams {

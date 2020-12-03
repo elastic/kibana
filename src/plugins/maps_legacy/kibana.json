@@ -6,5 +6,5 @@
   "ui": true,
   "server": true,
   "extraPublicDirs": ["common"],
-  "requiredBundles": ["kibanaReact", "charts"]
+  "requiredBundles": ["kibanaReact", "visDefaultEditor"]
 }

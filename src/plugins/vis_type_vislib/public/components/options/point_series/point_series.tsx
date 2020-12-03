@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { uniq } from 'lodash';
 
 import { ValidationVisOptionsProps } from '../../common';
-import { BasicOptions, SwitchOption } from '../../../../../charts/public';
+import { BasicOptions, SwitchOption } from '../../../../../vis_default_editor/public';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
 import { BasicVislibParams } from '../../../types';

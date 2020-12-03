@@ -17,14 +17,5 @@
  * under the License.
  */
 
-export { BasicOptions } from './basic_options';
 export { ColorModes, Rotates } from './collections';
-export { ColorRanges, SetColorRangeValue } from './color_ranges';
-export { ColorSchemaOptions, SetColorSchemaOptionsValue } from './color_schema';
 export { ColorSchemaParams, Labels, Style } from './types';
-export { NumberInputOption } from './number_input';
-export { RangeOption } from './range';
-export { RequiredNumberInputOption } from './required_number_input';
-export { SelectOption } from './select';
-export { SwitchOption } from './switch';
-export { TextInputOption } from './text_input';

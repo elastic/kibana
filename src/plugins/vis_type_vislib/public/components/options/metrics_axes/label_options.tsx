@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Axis } from '../../../types';
 import { TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../utils/collections';
-import { SelectOption, SwitchOption } from '../../../../../charts/public';
+import { SelectOption, SwitchOption } from '../../../../../vis_default_editor/public';
 
 export type SetAxisLabel = <T extends keyof Axis['labels']>(
   paramName: T,

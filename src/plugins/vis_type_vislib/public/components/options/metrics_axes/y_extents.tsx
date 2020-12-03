@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { Scale } from '../../../types';
 import { ScaleTypes } from '../../../utils/collections';
-import { NumberInputOption } from '../../../../../charts/public';
+import { NumberInputOption } from '../../../../../vis_default_editor/public';
 import { SetScale } from './value_axis_options';
 
 const rangeError = i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.minErrorMessage', {

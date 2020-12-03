@@ -17,19 +17,12 @@
  * under the License.
  */
 
-export { DefaultEditorController } from './default_editor_controller';
-export { useValidation } from './components/controls/utils';
-export * from './components/options';
-export { RangesParamEditor, RangeValues } from './components/controls/ranges';
-export * from './editor_size';
-export * from './vis_options_props';
-export * from './utils';
-export { ISchemas, Schemas, Schema } from './schemas';
-
-/** dummy plugin, we just want visDefaultEditor to have its own bundle */
-export function plugin() {
-  return new (class VisDefaultEditor {
-    setup() {}
-    start() {}
-  })();
-}
+export { BasicOptions } from './basic_options';
+export { SwitchOption } from './switch';
+export { SelectOption } from './select';
+export { ColorRanges, SetColorRangeValue } from './color_ranges';
+export { ColorSchemaOptions, SetColorSchemaOptionsValue } from './color_schema';
+export { NumberInputOption } from './number_input';
+export { RangeOption } from './range';
+export { RequiredNumberInputOption } from './required_number_input';
+export { TextInputOption } from './text_input';
