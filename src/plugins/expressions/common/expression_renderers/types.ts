@@ -82,7 +82,7 @@ export interface IInterpreterRenderHandlers {
   reload: () => void;
   update: (params: any) => void;
   event: (event: any) => void;
-  hasCompatibleActions: (event: any) => Promise<boolean>;
+  hasCompatibleActions?: (event: any) => Promise<boolean>;
   getRenderMode: () => RenderMode;
   uiState?: PersistedState;
 }
