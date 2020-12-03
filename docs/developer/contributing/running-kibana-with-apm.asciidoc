@@ -38,6 +38,16 @@ elastic.apm.transactionSampleRate: 0.1
 elastic.apm.metricsInterval: '120s'
 ----------
 
+7. Start Kibana with APM active using:
+** `yarn start`
+8. After Kibana starts up, navigate to the APM app, where you should see some transactions.
+
+image::images/apm_ui_transactions.png[]
+
+You can now continue doing what you want to in Kibana (e.g. install sample data sets, issue queries in dashboards, build new visualizations etc).
+Once you're finished, you can stop Kibana normally, then stop the {es} and APM servers in the apm-integration-testing clone with the following script:
+** `./scripts/compose.py stop`
+
 If you don't want to add these settings to your `config/kibana.yml` file directly, you can add them to a config file under `config/apm.dev.js`:
 
 Example `config/apm.dev.js` file:
@@ -54,16 +64,6 @@ module.exports = {
   metricsInterval: '120s'
 };
 ----
-
-7. Start Kibana with APM active using:
-** `yarn start`
-8. After Kibana starts up, navigate to the APM app, where you should see some transactions.
-
-image::images/apm_ui_transactions.png[]
-
-9. You can now continue doing what you want to in Kibana (e.g. install sample data sets, issue queries in dashboards, build new visualizations etc).
-10. Once you're finished, you can stop Kibana normally, then stop the {es} and APM servers in the apm-integration-testing clone with the following script:
-** `./scripts/compose.py stop`
 
 For more information about configuring the APM agent, please refer to
 https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuring-the-agent.html[the
