@@ -183,8 +183,17 @@ const frequencyToBaselineFieldsMap = {
   },
 };
 
+const excludeBlockListedFrequencies = (units, blockListedUnits = []) => {
+  if (blockListedUnits.length === 0) {
+    return units;
+  }
+
+  return units.filter(({ value }) => !blockListedUnits.includes(value));
+};
+
 export class CronEditor extends Component {
   static propTypes = {
+    frequencyBlockList: PropTypes.arrayOf(PropTypes.string),
     fieldToPreferredValueMap: PropTypes.object.isRequired,
     frequency: PropTypes.string.isRequired,
     cronExpression: PropTypes.string.isRequired,
@@ -242,8 +251,11 @@ export class CronEditor extends Component {
       (accumFields, field) => {
         if (fields[field] !== undefined) {
           accumFields[field] = fields[field];
-          // Once the user touches a field, we want to persist its value as the user changes
-          // the cron frequency.
+          // If the user changes a field's value, we want to maintain that value in the relevant
+          // field, even as the frequency field changes. For example, if the user selects "Monthly"
+          // frequency and changes the "Hour" field to "10", that field should still say "10" if the
+          // user changes the frequency to "Weekly". We'll support this UX by storing these values
+          // in the fieldToPreferredValueMap.
           newFieldToPreferredValueMap[field] = fields[field];
         } else {
           accumFields[field] = this.state[field];
@@ -341,7 +353,7 @@ export class CronEditor extends Component {
   }
 
   render() {
-    const { frequency } = this.props;
+    const { frequency, frequencyBlockList } = this.props;
 
     return (
       <Fragment>
@@ -352,7 +364,7 @@ export class CronEditor extends Component {
           fullWidth
         >
           <EuiSelect
-            options={UNITS}
+            options={excludeBlockListedFrequencies(UNITS, frequencyBlockList)}
             value={frequency}
             onChange={(e) => this.onChangeFrequency(e.target.value)}
             fullWidth
