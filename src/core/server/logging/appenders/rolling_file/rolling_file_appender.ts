@@ -24,7 +24,7 @@ import { BufferAppender } from '../buffer/buffer_appender';
 import {
   TriggeringPolicyConfig,
   createTriggeringPolicy,
-  rollingPolicyConfigSchema,
+  triggeringPolicyConfigSchema,
   TriggeringPolicy,
 } from './policies';
 import {
@@ -66,7 +66,7 @@ export class RollingFileAppender implements DisposableAppender {
     kind: schema.literal('rolling-file'),
     layout: Layouts.configSchema,
     path: schema.string(),
-    policy: rollingPolicyConfigSchema,
+    policy: triggeringPolicyConfigSchema,
     strategy: rollingStrategyConfigSchema,
   });
 
@@ -87,7 +87,7 @@ export class RollingFileAppender implements DisposableAppender {
   constructor(config: RollingFileAppenderConfig) {
     this.context = new RollingFileContext(config.path);
     this.context.refreshFileInfo();
-    this.fileManager = new RollingFileManager(config.path, this.context);
+    this.fileManager = new RollingFileManager(this.context);
     this.layout = Layouts.create(config.layout);
     this.policy = createTriggeringPolicy(config.policy, this.context);
     this.strategy = createRollingStrategy(config.strategy, this.context);

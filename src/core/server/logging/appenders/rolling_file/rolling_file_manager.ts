@@ -27,8 +27,8 @@ export class RollingFileManager {
   private readonly filePath;
   private outputStream?: WriteStream;
 
-  constructor(path: string, private readonly context: RollingFileContext) {
-    this.filePath = path;
+  constructor(private readonly context: RollingFileContext) {
+    this.filePath = context.filePath;
   }
 
   write(chunk: string) {

@@ -43,7 +43,7 @@ export type TriggeringPolicyConfig =
   | SizeLimitTriggeringPolicyConfig
   | TimeIntervalTriggeringPolicyConfig;
 
-export const rollingPolicyConfigSchema = schema.oneOf([
+export const triggeringPolicyConfigSchema = schema.oneOf([
   sizeLimitTriggeringPolicyConfigSchema,
   timeIntervalTriggeringPolicyConfigSchema,
 ]);
