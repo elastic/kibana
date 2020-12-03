@@ -17,24 +17,4 @@
  * under the License.
  */
 
-import { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { KibanaContext } from './kibana_context_type';
-
-type Input = KibanaContext | null;
-type Output = Promise<Datatable>;
-
-interface Arguments {
-  index: string;
-  metricsAtAllLevels: boolean;
-  partialRows: boolean;
-  includeFormatHints: boolean;
-  aggConfigs: string;
-  timeFields?: string[];
-}
-
-export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
-  'esaggs',
-  Input,
-  Arguments,
-  Output
->;
+export * from './esaggs';
