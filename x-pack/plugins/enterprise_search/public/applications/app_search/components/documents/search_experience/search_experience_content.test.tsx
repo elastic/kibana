@@ -9,7 +9,7 @@ import { setMockSearchContextState } from './__mocks__/hooks.mock';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 // @ts-expect-error types are not available for this package yet
 import { Results } from '@elastic/react-search-ui';
 
@@ -107,14 +107,14 @@ describe('SearchExperienceContent', () => {
     });
 
     it('will include a button to index new documents', () => {
-      const wrapper = shallow(<SearchExperienceContent />);
-      const noDocumentsErrorActions: any = wrapper
-        .find('[data-test-subj="documentsSearchNoDocuments"]')
-        .prop('actions');
-
+      const wrapper = mount(<SearchExperienceContent />);
       expect(
-        shallow(noDocumentsErrorActions).find('[data-test-subj="IndexDocumentsButton"]').length
-      ).toBe(1);
+        wrapper
+          .find(
+            '[data-test-subj="documentsSearchNoDocuments"] [data-test-subj="IndexDocumentsButton"]'
+          )
+          .exists()
+      ).toBe(true);
     });
 
     it('will include a button to documentation if this is a meta engine', () => {
@@ -123,18 +123,23 @@ describe('SearchExperienceContent', () => {
         isMetaEngine: true,
       });
 
-      const wrapper = shallow(<SearchExperienceContent />);
-
-      const noDocumentsErrorActions: any = wrapper
-        .find('[data-test-subj="documentsSearchNoDocuments"]')
-        .prop('actions');
+      const wrapper = mount(<SearchExperienceContent />);
 
       expect(
-        shallow(noDocumentsErrorActions).find('[data-test-subj="IndexDocumentsButton"]').length
-      ).toBe(0);
+        wrapper
+          .find(
+            '[data-test-subj="documentsSearchNoDocuments"] [data-test-subj="IndexDocumentsButton"]'
+          )
+          .exists()
+      ).toBe(false);
+
       expect(
-        shallow(noDocumentsErrorActions).find('[data-test-subj="documentsSearchDocsLink"]').length
-      ).toBe(1);
+        wrapper
+          .find(
+            '[data-test-subj="documentsSearchNoDocuments"] [data-test-subj="documentsSearchDocsLink"]'
+          )
+          .exists()
+      ).toBe(true);
     });
 
     it('will include a button to documentation if the user cannot manage documents', () => {
@@ -143,18 +148,23 @@ describe('SearchExperienceContent', () => {
         myRole: { canManageEngineDocuments: false },
       });
 
-      const wrapper = shallow(<SearchExperienceContent />);
-
-      const noDocumentsErrorActions: any = wrapper
-        .find('[data-test-subj="documentsSearchNoDocuments"]')
-        .prop('actions');
+      const wrapper = mount(<SearchExperienceContent />);
 
       expect(
-        shallow(noDocumentsErrorActions).find('[data-test-subj="IndexDocumentsButton"]').length
-      ).toBe(0);
+        wrapper
+          .find(
+            '[data-test-subj="documentsSearchNoDocuments"] [data-test-subj="IndexDocumentsButton"]'
+          )
+          .exists()
+      ).toBe(false);
+
       expect(
-        shallow(noDocumentsErrorActions).find('[data-test-subj="documentsSearchDocsLink"]').length
-      ).toBe(1);
+        wrapper
+          .find(
+            '[data-test-subj="documentsSearchNoDocuments"] [data-test-subj="documentsSearchDocsLink"]'
+          )
+          .exists()
+      ).toBe(true);
     });
   });
 });
