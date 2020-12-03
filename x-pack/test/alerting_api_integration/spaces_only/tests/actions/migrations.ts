@@ -37,20 +37,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
-    it.only('7.11.0 removes the `incidentConfiguration` in `config`', async () => {
-      const response = await supertest.get(
-        `${getUrlPrefix(``)}/api/actions/action/551a2ab1-784a-46ea-aa68-99g837e5da2d`
-      );
-
-      expect(response.status).to.eql(200);
-      expect(response.body.config).not.key('incidentConfiguration');
-      expect(response.body.config).to.eql({
-        apiUrl:
-          'http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira',
-        projectKey: 'CK',
-      });
-    });
-
     it('7.11.0 migrates webhook connector configurations to have `hasAuth` property', async () => {
       const responseWithAuth = await supertest.get(
         `${getUrlPrefix(``)}/api/actions/action/949f909b-20a0-46e3-aadb-6a4d117bb592`
