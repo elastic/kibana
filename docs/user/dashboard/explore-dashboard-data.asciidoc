@@ -16,3 +16,4 @@ The data that displays depends on the element that you inspect.
 image:images/Dashboard_inspect.png[Inspect in dashboard]
 
 include::explore-underlying-data.asciidoc[]
+include::download-underlying-data.asciidoc[]
