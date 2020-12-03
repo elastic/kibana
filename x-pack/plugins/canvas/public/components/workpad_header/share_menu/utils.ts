@@ -11,14 +11,13 @@ import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
-// FIXME: make this configurable and use `preserve_layout` by default, until the next major release
-const CANVAS_LAYOUT_TYPE = 'canvas';
-
 interface PageCount {
   pageCount: number;
 }
 
-type Arguments = [CanvasWorkpad, PageCount, IBasePath];
+export type LayoutType = 'canvas' | 'preserve_layout';
+
+type Arguments = [CanvasWorkpad, LayoutType, PageCount, IBasePath];
 
 interface PdfUrlData {
   createPdfUri: string;
@@ -27,6 +26,7 @@ interface PdfUrlData {
 
 function getPdfUrlParts(
   { id, name: title, width, height }: CanvasWorkpad,
+  layoutType: LayoutType,
   { pageCount }: PageCount,
   basePath: IBasePath
 ): PdfUrlData {
@@ -54,7 +54,7 @@ function getPdfUrlParts(
     browserTimezone: moment.tz.guess(),
     layout: {
       dimensions: { width, height },
-      id: CANVAS_LAYOUT_TYPE,
+      id: layoutType,
     },
     objectType: 'canvas workpad',
     relativeUrls: workpadUrls,
