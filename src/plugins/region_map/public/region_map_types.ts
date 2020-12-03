@@ -17,31 +17,19 @@
  * under the License.
  */
 
-import { TmsLayer } from '../../index';
-import { MapTypes } from './map_types';
+import { VectorLayer, FileLayerField, WMSOptions } from '../../maps_legacy/public/index';
 
-export interface WMSOptions {
-  selectedTmsLayer?: TmsLayer;
-  enabled: boolean;
-  url?: string;
-  options: {
-    version?: string;
-    layers?: string;
-    format: string;
-    transparent: boolean;
-    attribution?: string;
-    styles?: string;
-  };
-}
-
-export interface TileMapVisParams {
+export interface RegionMapVisParams {
+  readonly addTooltip: true;
+  readonly legendPosition: 'bottomright';
   colorSchema: string;
-  mapType: MapTypes;
-  isDesaturated: boolean;
-  addTooltip: boolean;
-  heatClusterSize: number;
-  legendPosition: 'bottomright' | 'bottomleft' | 'topright' | 'topleft';
-  mapZoom: number;
+  emsHotLink?: string | null;
   mapCenter: [number, number];
+  mapZoom: number;
+  outlineWeight: number | '';
+  isDisplayWarning: boolean;
+  showAllShapes: boolean;
+  selectedLayer?: VectorLayer;
+  selectedJoinField?: FileLayerField;
   wms: WMSOptions;
 }

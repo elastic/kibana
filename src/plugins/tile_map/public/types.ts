@@ -19,7 +19,8 @@
 
 import type { SchemaConfig } from 'src/plugins/visualizations/public';
 import type { DatatableColumnMeta } from 'src/plugins/expressions';
-import type { TileMapVisParams } from 'src/plugins/maps_legacy/public';
+import type { WMSOptions } from 'src/plugins/maps_legacy/public';
+import type { MapTypes } from './utils/map_types';
 
 export interface Feature {
   type: 'Feature';
@@ -55,6 +56,18 @@ export interface TileMapVisDimensions {
   metric: SchemaConfig;
   geohash: SchemaConfig | null;
   geocentroid: SchemaConfig | null;
+}
+
+export interface TileMapVisParams {
+  colorSchema: string;
+  mapType: MapTypes;
+  isDesaturated: boolean;
+  addTooltip: boolean;
+  heatClusterSize: number;
+  legendPosition: 'bottomright' | 'bottomleft' | 'topright' | 'topleft';
+  mapZoom: number;
+  mapCenter: [number, number];
+  wms: WMSOptions;
 }
 
 export interface TileMapVisConfig extends TileMapVisParams {

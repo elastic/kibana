@@ -17,20 +17,18 @@
  * under the License.
  */
 
-import { VectorLayer, FileLayerField } from '../../index';
-import { WMSOptions } from './external_basemap_types';
+import { TmsLayer } from '..';
 
-export interface RegionMapVisParams {
-  readonly addTooltip: true;
-  readonly legendPosition: 'bottomright';
-  colorSchema: string;
-  emsHotLink?: string | null;
-  mapCenter: [number, number];
-  mapZoom: number;
-  outlineWeight: number | '';
-  isDisplayWarning: boolean;
-  showAllShapes: boolean;
-  selectedLayer?: VectorLayer;
-  selectedJoinField?: FileLayerField;
-  wms: WMSOptions;
+export interface WMSOptions {
+  selectedTmsLayer?: TmsLayer;
+  enabled: boolean;
+  url?: string;
+  options: {
+    version?: string;
+    layers?: string;
+    format: string;
+    transparent: boolean;
+    attribution?: string;
+    styles?: string;
+  };
 }

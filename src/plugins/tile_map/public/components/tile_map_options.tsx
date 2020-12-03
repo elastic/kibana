@@ -23,7 +23,9 @@ import { i18n } from '@kbn/i18n';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { BasicOptions, RangeOption, SelectOption, SwitchOption } from '../../../charts/public';
-import { WmsOptions, TileMapVisParams, MapTypes } from '../../../maps_legacy/public';
+import { WmsOptions } from '../../../maps_legacy/public';
+import { TileMapVisParams } from '../types';
+import { MapTypes } from '../utils/map_types';
 
 export type TileMapOptionsProps = VisOptionsProps<TileMapVisParams>;
 
