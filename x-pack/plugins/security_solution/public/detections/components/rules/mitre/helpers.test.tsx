@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  hasSubtechniqueOptions,
-  isMitreAttackInvalid,
-  isMitreAttackTechniqueInvalid,
-} from './helpers';
+import { getValidThreat } from '../../../mitre/valid_threat_mock';
+import { hasSubtechniqueOptions, isMitreAttackInvalid } from './helpers';
+
+const mockTechniques = getValidThreat()[0].technique;
 
 describe('helpers', () => {
   describe('isMitreAttackInvalid', () => {
@@ -30,13 +29,7 @@ describe('helpers', () => {
 
     describe('when technique param exists', () => {
       describe('and contains valid techniques', () => {
-        const validTechniques = [
-          {
-            reference: 'https://test.com',
-            name: 'Audio Capture',
-            id: 'T1123',
-          },
-        ];
+        const validTechniques = mockTechniques;
         it('returns false', () => {
           expect(isMitreAttackInvalid('Test', validTechniques)).toBe(false);
         });
@@ -57,82 +50,9 @@ describe('helpers', () => {
     });
   });
 
-  describe('isMitreTechniqueInvalid', () => {
-    describe('when technique param is undefined', () => {
-      it('returns false if tacticName is `none`', () => {
-        expect(isMitreAttackTechniqueInvalid('none', undefined)).toBe(false);
-      });
-
-      it('returns false if tacticName exists and is not `none`', () => {
-        expect(isMitreAttackTechniqueInvalid('Test', undefined)).toBe(false);
-      });
-    });
-
-    describe('when technique param exists', () => {
-      describe('and has possible subtechnique options', () => {
-        describe('and contains at least one of those options', () => {
-          const validTechnique = {
-            reference: 'https://test.com',
-            name: 'Archive Collected Data',
-            id: 'T1560',
-            subtechnique: [
-              { reference: 'https://test.com', name: 'Archive via Library', id: 'T1560.002' },
-            ],
-          };
-          it('returns false', () => {
-            expect(isMitreAttackTechniqueInvalid('Test', validTechnique)).toBe(false);
-          });
-        });
-
-        describe("and doesn't contain any subtechniques", () => {
-          const validTechnique = {
-            reference: 'https://test.com',
-            name: 'Archive Collected Data',
-            id: 'T1560',
-            subtechnique: [],
-          };
-          it('returns true', () => {
-            expect(isMitreAttackTechniqueInvalid('Test', validTechnique)).toBe(true);
-          });
-        });
-
-        describe('and contains only empty subtechniques', () => {
-          const validTechnique = {
-            reference: 'https://test.com',
-            name: 'Archive Collected Data',
-            id: 'T1560',
-            subtechnique: [{ reference: '', name: 'none', id: '' }],
-          };
-          it('returns true', () => {
-            expect(isMitreAttackTechniqueInvalid('Test', validTechnique)).toBe(true);
-          });
-        });
-      });
-
-      describe("and doesn't have possible subtechnique options", () => {
-        const validTechnique = {
-          reference: 'https://test.com',
-          name: 'Audio Capture',
-          id: 'T1123',
-          subtechnique: [],
-        };
-        it('returns false', () => {
-          expect(isMitreAttackTechniqueInvalid('Test', validTechnique)).toBe(false);
-        });
-      });
-    });
-  });
-
   describe('hasSubtechniqueOptions', () => {
     describe('when technique has subtechnique options', () => {
-      const technique = {
-        reference: 'https://test.com',
-        name: 'Archive Collected Data',
-        id: 'T1560',
-        subtechnique: [
-          { reference: 'https://test.com', name: 'Archive via Library', id: 'T1560.002' },
-        ],
-      };
+      const technique = mockTechniques[0];
       it('returns true', () => {
         expect(hasSubtechniqueOptions(technique)).toBe(true);
       });
@@ -141,8 +61,8 @@ describe('helpers', () => {
     describe('when technique has no subtechnique options', () => {
       const technique = {
         reference: 'https://test.com',
-        name: 'Audio Capture',
-        id: 'T1123',
+        name: 'Mock technique with no subtechniques',
+        id: 'T0000',
         subtechnique: [],
       };
       it('returns false', () => {

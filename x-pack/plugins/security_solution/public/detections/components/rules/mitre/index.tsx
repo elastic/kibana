@@ -12,13 +12,13 @@ import styled from 'styled-components';
 import { isEqual } from 'lodash';
 import { tacticsOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
-import { FieldHook } from '../../../../shared_imports';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
 import { IMitreEnterpriseAttack } from '../../../pages/detection_engine/rules/types';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
-import { getMitreAttackErrorMessages, isMitreAttackInvalid } from './helpers';
+import { isMitreAttackInvalid } from './helpers';
 
 const MitreAttackContainer = styled.div`
   margin-top: 16px;
@@ -41,20 +41,16 @@ interface AddItemProps {
 
 export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
   const [showValidation, setShowValidation] = useState(false);
-
-  const errorMessage = useMemo(() => {
-    const { tacticError } = getMitreAttackErrorMessages(field);
-    return tacticError;
-  }, [field]);
+  const { errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const removeTactic = useCallback(
     (index: number) => {
       const values = [...(field.value as IMitreEnterpriseAttack[])];
-      const newValues = [...values.splice(index, 1)];
-      if (isEmpty(newValues)) {
+      values.splice(index, 1);
+      if (isEmpty(values)) {
         field.setValue(threatDefault);
       } else {
-        field.setValue(newValues);
+        field.setValue(values);
       }
     },
     [field]
@@ -80,13 +76,12 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
         name: '',
         reference: '',
       };
-      field.setValue([
-        ...values.splice(index, 1, {
-          ...values[index],
-          tactic: { id, reference, name },
-          technique: [],
-        }),
-      ]);
+      values.splice(index, 1, {
+        ...values[index],
+        tactic: { id, reference, name },
+        technique: [],
+      });
+      field.setValue([...values]);
     },
     [field]
   );

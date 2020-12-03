@@ -55,11 +55,11 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
       const threats = [...(field.value as IMitreEnterpriseAttack[])];
       const subtechniques = threats[threatIndex].technique[techniqueIndex].subtechnique;
       if (subtechniques != null) {
-        const newSubtechniques = [...subtechniques.splice(index, 1)];
+        subtechniques.splice(index, 1);
 
         threats[threatIndex].technique[techniqueIndex] = {
           ...threats[threatIndex].technique[techniqueIndex],
-          subtechnique: newSubtechniques,
+          subtechnique: subtechniques,
         };
         onFieldChange(threats);
       }
@@ -99,21 +99,27 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
 
       if (subtechniques != null) {
         onFieldChange([
-          ...threats.splice(threatIndex, 1, {
+          ...threats.slice(0, threatIndex),
+          {
             ...threats[threatIndex],
             technique: [
-              ...threats[threatIndex].technique.splice(techniqueIndex, 1, {
+              ...threats[threatIndex].technique.slice(0, techniqueIndex),
+              {
                 ...threats[threatIndex].technique[techniqueIndex],
                 subtechnique: [
-                  ...subtechniques.splice(index, 1, {
+                  ...subtechniques.slice(0, index),
+                  {
                     id,
                     reference,
                     name,
-                  }),
+                  },
+                  ...subtechniques.slice(index + 1),
                 ],
-              }),
+              },
+              ...threats[threatIndex].technique.slice(techniqueIndex + 1),
             ],
-          }),
+          },
+          ...threats.slice(threatIndex + 1),
         ]);
       }
     },

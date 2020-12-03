@@ -76,14 +76,6 @@ export const CUSTOM_MITRE_ATTACK_TECHNIQUES_REQUIRED = i18n.translate(
   }
 );
 
-export const CUSTOM_MITRE_ATTACK_SUBTECHNIQUES_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customMitreAttackSubtechniquesFieldRequiredError',
-  {
-    defaultMessage:
-      'At least one subtechnique is required with techniques that contain subtechnique options.',
-  }
-);
-
 export const URL_FORMAT_INVALID = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.referencesUrlInvalidError',
   {

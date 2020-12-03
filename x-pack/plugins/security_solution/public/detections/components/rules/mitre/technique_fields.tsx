@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { kebabCase, camelCase } from 'lodash/fp';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
 import { techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
@@ -24,11 +24,7 @@ import {
   IMitreEnterpriseAttack,
 } from '../../../pages/detection_engine/rules/types';
 import { MyAddItemButton } from '../add_item_form';
-import {
-  getMitreAttackErrorMessages,
-  hasSubtechniqueOptions,
-  isMitreAttackTechniqueInvalid,
-} from './helpers';
+import { hasSubtechniqueOptions } from './helpers';
 import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
 
@@ -55,23 +51,16 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   threatIndex,
   onFieldChange,
 }): JSX.Element => {
-  const [showValidation, setShowValidation] = useState(false);
-
-  const errorMessage = useMemo(() => {
-    const { techniqueError } = getMitreAttackErrorMessages(field);
-    return techniqueError;
-  }, [field]);
-
   const values = field.value as IMitreEnterpriseAttack[];
 
   const removeTechnique = useCallback(
     (index: number) => {
       const threats = [...(field.value as IMitreEnterpriseAttack[])];
       const techniques = threats[threatIndex].technique;
-      const newTechniques = [...techniques.splice(index, 1)];
+      techniques.splice(index, 1);
       threats[threatIndex] = {
         ...threats[threatIndex],
-        technique: newTechniques,
+        technique: techniques,
       };
       onFieldChange(threats);
     },
@@ -99,25 +88,25 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
         reference: '',
       };
       onFieldChange([
-        ...threats.splice(threatIndex, 1, {
+        ...threats.slice(0, threatIndex),
+        {
           ...threats[threatIndex],
           technique: [
-            ...threats[threatIndex].technique.splice(index, 1, {
+            ...threats[threatIndex].technique.slice(0, index),
+            {
               id,
               reference,
               name,
               subtechnique: [],
-            }),
+            },
+            ...threats[threatIndex].technique.slice(index + 1),
           ],
-        }),
+        },
+        ...threats.slice(threatIndex + 1),
       ]);
     },
     [threatIndex, onFieldChange, field]
   );
-
-  const isTechniqueInvalid = useCallback((tacticName: string, technique: IMitreAttackTechnique) => {
-    return isMitreAttackTechniqueInvalid(tacticName, technique);
-  }, []);
 
   const getSelectTechnique = useCallback(
     (tacticName: string, index: number, disabled: boolean, technique: IMitreAttackTechnique) => {
@@ -148,15 +137,13 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
             fullWidth={true}
             valueOfSelected={camelCase(technique.name)}
             data-test-subj="mitreAttackTechnique"
-            isInvalid={showValidation && isTechniqueInvalid(tacticName, technique)}
-            onBlur={() => setShowValidation(true)}
             disabled={disabled}
             placeholder={i18n.TECHNIQUE_PLACEHOLDER}
           />
         </>
       );
     },
-    [field, showValidation, updateTechnique, isTechniqueInvalid]
+    [field, updateTechnique]
   );
 
   return (
@@ -165,12 +152,8 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
         <div key={index}>
           <EuiSpacer size="s" />
           <EuiFormRow
-            isInvalid={
-              showValidation && isTechniqueInvalid(values[threatIndex].tactic.name, technique)
-            }
             fullWidth
             describedByIds={idAria ? [`${idAria} ${i18n.TECHNIQUE}`] : undefined}
-            error={errorMessage}
           >
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow>
