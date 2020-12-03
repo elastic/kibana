@@ -14,7 +14,10 @@ export function useLinks() {
   const { http } = useStartServices();
   return {
     toAssets: (path: string) => http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${path}`),
-    toImage: (path: string) => http.basePath.prepend(epmRouteService.getFilePath(path)),
+    toPackageImage: (path: string, pkgName: string, pkgVersion: string) =>
+      http.basePath.prepend(
+        epmRouteService.getFilePath(`/package/${pkgName}/${pkgVersion}${path}`)
+      ),
     toRelativeImage: ({
       path,
       packageName,
