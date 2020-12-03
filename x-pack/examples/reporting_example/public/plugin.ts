@@ -35,7 +35,7 @@ export class ReportingExamplePlugin implements Plugin<void, void, {}, {}> {
     });
   }
 
-  public start(core: CoreStart): void {}
+  public start() {}
 
   public stop() {}
 }
