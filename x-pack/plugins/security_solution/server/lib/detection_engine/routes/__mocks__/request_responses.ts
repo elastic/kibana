@@ -29,7 +29,6 @@ import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_e
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
-import { Threat } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({

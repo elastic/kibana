@@ -39,6 +39,7 @@ import {
   mockAboutStepRule,
   mockActionsStepRule,
 } from '../all/__mocks__/mock';
+import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
@@ -405,24 +406,7 @@ describe('helpers', () => {
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-                subtechnique: [],
-              },
-            ],
-          },
-        ],
+        threat: getThreatMock(),
       };
 
       expect(result).toEqual(expected);
@@ -493,24 +477,7 @@ describe('helpers', () => {
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-                subtechnique: [],
-              },
-            ],
-          },
-        ],
+        threat: getThreatMock(),
       };
 
       expect(result).toEqual(expected);
@@ -534,24 +501,7 @@ describe('helpers', () => {
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-                subtechnique: [],
-              },
-            ],
-          },
-        ],
+        threat: getThreatMock(),
       };
 
       expect(result).toEqual(expected);
@@ -561,21 +511,7 @@ describe('helpers', () => {
       const mockStepData = {
         ...mockData,
         threat: [
-          {
-            framework: 'mockFramework',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
+          ...getThreatMock(),
           {
             framework: 'mockFramework',
             tactic: {
@@ -608,24 +544,17 @@ describe('helpers', () => {
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: { id: '1234', name: 'tactic1', reference: 'reference1' },
-            technique: [
-              { id: '456', name: 'technique1', reference: 'technique reference', subtechnique: [] },
-            ],
-          },
-        ],
+        threat: getThreatMock(),
       };
 
       expect(result).toEqual(expected);
     });
 
-    test('returns formatted object with threats that contain subtechniques', () => {
+    test('returns formatted object with threats that contains no subtechniques', () => {
       const mockStepData = {
         ...mockData,
         threat: [
+          ...getThreatMock(),
           {
             framework: 'mockFramework',
             tactic: {
@@ -639,28 +568,6 @@ describe('helpers', () => {
                 name: 'technique1',
                 reference: 'technique reference',
                 subtechnique: [],
-              },
-            ],
-          },
-          {
-            framework: 'mockFramework',
-            tactic: {
-              id: '1234',
-              name: 'tactic2',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-                subtechnique: [
-                  {
-                    id: '789',
-                    name: 'subtechnique1',
-                    reference: 'subtechnique reference',
-                  },
-                ],
               },
             ],
           },
@@ -681,29 +588,12 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: [
+          ...getThreatMock(),
           {
             framework: 'MITRE ATT&CK',
             tactic: { id: '1234', name: 'tactic1', reference: 'reference1' },
             technique: [
               { id: '456', name: 'technique1', reference: 'technique reference', subtechnique: [] },
-            ],
-          },
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: { id: '1234', name: 'tactic2', reference: 'reference1' },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-                subtechnique: [
-                  {
-                    id: '789',
-                    name: 'subtechnique1',
-                    reference: 'subtechnique reference',
-                  },
-                ],
-              },
             ],
           },
         ],
