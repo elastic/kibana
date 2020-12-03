@@ -15,6 +15,7 @@ import { IFieldFormat } from '../../../../../src/plugins/data/public';
 import { IAggType } from 'src/plugins/data/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
+import { EuiBasicTable } from '@elastic/eui';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
@@ -110,6 +111,7 @@ describe('datatable_expression', () => {
             formatFactory={(x) => x as IFieldFormat}
             onClickValue={onClickValue}
             getType={jest.fn()}
+            renderMode="edit"
           />
         )
       ).toMatchSnapshot();
@@ -131,6 +133,7 @@ describe('datatable_expression', () => {
           formatFactory={(x) => x as IFieldFormat}
           onClickValue={onClickValue}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+          renderMode="edit"
         />
       );
 
@@ -166,6 +169,7 @@ describe('datatable_expression', () => {
           formatFactory={(x) => x as IFieldFormat}
           onClickValue={onClickValue}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+          renderMode="edit"
         />
       );
 
@@ -240,6 +244,7 @@ describe('datatable_expression', () => {
           formatFactory={(x) => x as IFieldFormat}
           onClickValue={onClickValue}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+          renderMode="edit"
         />
       );
 
@@ -280,12 +285,13 @@ describe('datatable_expression', () => {
           getType={jest.fn((type) =>
             type === 'count' ? ({ type: 'metrics' } as IAggType) : ({ type: 'buckets' } as IAggType)
           )}
+          renderMode="edit"
         />
       );
       expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDatatable);
     });
 
-    test('it renders the the table with the given sorting', () => {
+    test('it renders the table with the given sorting', () => {
       const { data, args } = sampleArgs();
 
       const wrapper = mountWithIntl(
@@ -303,6 +309,7 @@ describe('datatable_expression', () => {
           onClickValue={onClickValue}
           onEditAction={onEditAction}
           getType={jest.fn()}
+          renderMode="edit"
         />
       );
 
@@ -333,6 +340,34 @@ describe('datatable_expression', () => {
         action: 'sort',
         columnId: 'a',
         direction: 'asc',
+      });
+    });
+
+    test('it renders the table with the given sorting in readOnly mode', () => {
+      const { data, args } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <DatatableComponent
+          data={data}
+          args={{
+            ...args,
+            columns: {
+              ...args.columns,
+              sortBy: 'b',
+              sortDirection: 'desc',
+            },
+          }}
+          formatFactory={(x) => x as IFieldFormat}
+          onClickValue={onClickValue}
+          onEditAction={onEditAction}
+          getType={jest.fn()}
+          renderMode="display"
+        />
+      );
+
+      expect(wrapper.find(EuiBasicTable).prop('sorting')).toMatchObject({
+        sort: undefined,
+        allowNeutralSort: true,
       });
     });
   });
