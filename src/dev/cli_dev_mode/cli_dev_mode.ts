@@ -177,16 +177,12 @@ export class CliDevMode {
 
       this.subscription.add(() => basePathProxy.stop());
     } else {
-      this.log.warn(
-        '===================================================================================================='
-      );
+      this.log.warn('no-base-path', '='.repeat(100));
       this.log.warn(
         'no-base-path',
         'Running Kibana in dev mode with --no-base-path disables several useful features and is not recommended'
       );
-      this.log.warn(
-        '===================================================================================================='
-      );
+      this.log.warn('no-base-path', '='.repeat(100));
     }
 
     this.subscription.add(this.optimizer.run$.subscribe(this.observer('@kbn/optimizer')));
