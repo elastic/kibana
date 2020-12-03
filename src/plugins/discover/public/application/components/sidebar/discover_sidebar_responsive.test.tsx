@@ -31,8 +31,8 @@ import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 import { SavedObject } from '../../../../../../core/types';
-import { getDefaultFieldFilter } from './lib/field_filter';
-import { DiscoverSidebar } from './discover_sidebar';
+import { FieldFilterState } from './lib/field_filter';
+import { DiscoverSidebarResponsive } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../build_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
@@ -107,18 +107,18 @@ function getCompProps() {
     setIndexPattern: jest.fn(),
     state: {},
     trackUiMetric: jest.fn(),
-    fieldFilter: getDefaultFieldFilter(),
+    fieldFilter: {} as FieldFilterState,
     setFieldFilter: jest.fn(),
   };
 }
 
-describe('discover sidebar', function () {
+describe('discover responsive sidebar', function () {
   let props: DiscoverSidebarProps;
   let comp: ReactWrapper<DiscoverSidebarProps>;
 
   beforeAll(() => {
     props = getCompProps();
-    comp = mountWithIntl(<DiscoverSidebar {...props} />);
+    comp = mountWithIntl(<DiscoverSidebarResponsive {...props} />);
   });
 
   it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
@@ -136,5 +136,10 @@ describe('discover sidebar', function () {
   it('should allow deselecting fields', function () {
     findTestSubject(comp, 'fieldToggle-extension').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
+  });
+  it('should allow adding filters', function () {
+    findTestSubject(comp, 'field-extension-showDetails').simulate('click');
+    findTestSubject(comp, 'plus-extension-gif').simulate('click');
+    expect(props.onAddFilter).toHaveBeenCalled();
   });
 });
