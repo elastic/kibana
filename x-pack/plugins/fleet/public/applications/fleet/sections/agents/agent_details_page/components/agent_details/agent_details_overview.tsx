@@ -82,12 +82,6 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               ),
           },
           {
-            title: i18n.translate('xpack.fleet.agentDetails.enrollmentTokenLabel', {
-              defaultMessage: 'Enrollment token',
-            }),
-            description: '-', // Fixme when we have the enrollment tokenhttps://github.com/elastic/kibana/issues/61269
-          },
-          {
             title: i18n.translate('xpack.fleet.agentDetails.integrationsLabel', {
               defaultMessage: 'Integrations',
             }),
@@ -111,7 +105,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             description:
               typeof agent.local_metadata?.elastic?.agent?.log_level === 'string'
                 ? agent.local_metadata.elastic.agent.log_level
-                : `-`,
+                : '-',
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.releaseLabel', {
