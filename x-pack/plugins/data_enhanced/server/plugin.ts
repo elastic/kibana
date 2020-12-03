@@ -11,6 +11,7 @@ import {
   usageProvider,
 } from '../../../../src/plugins/data/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { SecurityPluginSetup } from '../../security/server';
 import { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
 import { registerSessionRoutes } from './routes';
 import { backgroundSessionMapping } from './saved_objects';
@@ -24,6 +25,7 @@ import { getUiSettings } from './ui_settings';
 interface SetupDependencies {
   data: DataPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  security?: SecurityPluginSetup;
 }
 
 export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDependencies> {
@@ -61,7 +63,7 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
     });
 
     const router = core.http.createRouter();
-    registerSessionRoutes(router);
+    registerSessionRoutes(router, deps.security);
   }
 
   public start(core: CoreStart) {}

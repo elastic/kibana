@@ -5,6 +5,9 @@
  */
 
 export interface BackgroundSessionSavedObjectAttributes {
+  realmType?: string;
+  realmName?: string;
+  username?: string;
   /**
    * User-facing session name to be displayed in session management
    */

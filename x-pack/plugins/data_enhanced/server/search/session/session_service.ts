@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { CoreStart, KibanaRequest, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { from, Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import Boom from '@hapi/boom';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -18,6 +19,7 @@ import {
   ISessionService,
   SearchStrategyDependencies,
 } from '../../../../../../src/plugins/data/server';
+import { AuthenticatedUser } from '../../../../security/common/model';
 import {
   BackgroundSessionSavedObjectAttributes,
   BackgroundSessionFindOptions,
@@ -66,8 +68,8 @@ export class BackgroundSessionService implements ISessionService {
     );
   }
 
-  // TODO: Generate the `userId` from the realm type/realm name/username
   public save = async (
+    user: AuthenticatedUser | null,
     sessionId: string,
     {
       name,
@@ -85,10 +87,17 @@ export class BackgroundSessionService implements ISessionService {
     if (!appId) throw new Error('AppId is required');
     if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
 
+    const realmType = user?.authentication_realm.type;
+    const realmName = user?.authentication_realm.name;
+    const username = user?.username;
+
     // Get the mapping of request hash/search ID for this session
     const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
     const idMapping = Object.fromEntries(searchMap.entries());
     const attributes = {
+      realmType,
+      realmName,
+      username,
       name,
       created,
       expires,
@@ -111,41 +120,63 @@ export class BackgroundSessionService implements ISessionService {
     return session;
   };
 
-  // TODO: Throw an error if this session doesn't belong to this user
-  public get = (sessionId: string, { savedObjectsClient }: BackgroundSessionDependencies) => {
-    return savedObjectsClient.get<BackgroundSessionSavedObjectAttributes>(
+  public get = async (
+    user: AuthenticatedUser | null,
+    sessionId: string,
+    { savedObjectsClient }: BackgroundSessionDependencies
+  ) => {
+    const session = await savedObjectsClient.get<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       sessionId
     );
+    this.throwOnUserConflict(user, session);
+    return session;
   };
 
-  // TODO: Throw an error if this session doesn't belong to this user
-  public find = (
+  public find = async (
+    user: AuthenticatedUser | null,
     options: BackgroundSessionFindOptions,
     { savedObjectsClient }: BackgroundSessionDependencies
   ) => {
+    const userFilters =
+      user === null
+        ? []
+        : [
+            `${BACKGROUND_SESSION_TYPE}.attributes.realmType: ${user.authentication_realm.type}`,
+            `${BACKGROUND_SESSION_TYPE}.attributes.realmName: ${user.authentication_realm.name}`,
+            `${BACKGROUND_SESSION_TYPE}.attributes.username: ${user.username}`,
+          ];
+    const filter = userFilters.concat(options.filter ?? []).join(' and ');
     return savedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
       ...options,
+      filter,
       type: BACKGROUND_SESSION_TYPE,
     });
   };
 
-  // TODO: Throw an error if this session doesn't belong to this user
-  public update = (
+  public update = async (
+    user: AuthenticatedUser | null,
     sessionId: string,
     attributes: Partial<BackgroundSessionSavedObjectAttributes>,
-    { savedObjectsClient }: BackgroundSessionDependencies
+    deps: BackgroundSessionDependencies
   ) => {
-    return savedObjectsClient.update<BackgroundSessionSavedObjectAttributes>(
+    const session = await this.get(user, sessionId, deps);
+    this.throwOnUserConflict(user, session);
+    return deps.savedObjectsClient.update<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       sessionId,
       attributes
     );
   };
 
-  // TODO: Throw an error if this session doesn't belong to this user
-  public delete = (sessionId: string, { savedObjectsClient }: BackgroundSessionDependencies) => {
-    return savedObjectsClient.delete(BACKGROUND_SESSION_TYPE, sessionId);
+  public delete = async (
+    user: AuthenticatedUser | null,
+    sessionId: string,
+    deps: BackgroundSessionDependencies
+  ) => {
+    const session = await this.get(user, sessionId, deps);
+    this.throwOnUserConflict(user, session);
+    return deps.savedObjectsClient.delete(BACKGROUND_SESSION_TYPE, sessionId);
   };
 
   /**
@@ -212,14 +243,42 @@ export class BackgroundSessionService implements ISessionService {
           strategy: ISearchStrategy<Request, Response>,
           ...args: Parameters<ISearchStrategy<Request, Response>['search']>
         ) => this.search(strategy, ...args, deps),
-        save: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
-          this.save(sessionId, attributes, deps),
-        get: (sessionId: string) => this.get(sessionId, deps),
-        find: (options: BackgroundSessionFindOptions) => this.find(options, deps),
-        update: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
-          this.update(sessionId, attributes, deps),
-        delete: (sessionId: string) => this.delete(sessionId, deps),
+        save: (
+          user: AuthenticatedUser | null,
+          sessionId: string,
+          attributes: Partial<BackgroundSessionSavedObjectAttributes>
+        ) => this.save(user, sessionId, attributes, deps),
+        get: (user: AuthenticatedUser | null, sessionId: string) => this.get(user, sessionId, deps),
+        find: (user: AuthenticatedUser | null, options: BackgroundSessionFindOptions) =>
+          this.find(user, options, deps),
+        update: (
+          user: AuthenticatedUser | null,
+          sessionId: string,
+          attributes: Partial<BackgroundSessionSavedObjectAttributes>
+        ) => this.update(user, sessionId, attributes, deps),
+        delete: (user: AuthenticatedUser | null, sessionId: string) =>
+          this.delete(user, sessionId, deps),
       };
     };
+  };
+
+  private throwOnUserConflict = (
+    user: AuthenticatedUser | null,
+    session: SavedObject<BackgroundSessionSavedObjectAttributes>
+  ) => {
+    if (!this.doesUserConflict(user, session)) return;
+    throw Boom.notFound();
+  };
+
+  private doesUserConflict = (
+    user: AuthenticatedUser | null,
+    session: SavedObject<BackgroundSessionSavedObjectAttributes>
+  ) => {
+    return (
+      user !== null &&
+      (user.authentication_realm.type !== session.attributes.realmType ||
+        user.authentication_realm.name !== session.attributes.realmName ||
+        user.username !== session.attributes.username)
+    );
   };
 }

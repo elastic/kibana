@@ -10,7 +10,11 @@
     "data",
     "features"
   ],
-  "optionalPlugins": ["kibanaUtils", "usageCollection"],
+  "optionalPlugins": [
+    "kibanaUtils",
+    "usageCollection",
+    "security"
+  ],
   "server": true,
   "ui": true,
   "requiredBundles": ["kibanaUtils", "kibanaReact"]

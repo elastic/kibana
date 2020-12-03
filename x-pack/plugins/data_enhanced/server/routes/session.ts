@@ -6,8 +6,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
+import { SecurityPluginSetup } from '../../../security/server';
 
-export function registerSessionRoutes(router: IRouter): void {
+export function registerSessionRoutes(router: IRouter, security?: SecurityPluginSetup): void {
   router.post(
     {
       path: '/internal/session',
@@ -33,9 +34,10 @@ export function registerSessionRoutes(router: IRouter): void {
         appId,
         urlGeneratorId,
       } = request.body;
+      const user = security?.authc.getCurrentUser(request);
 
       try {
-        const response = await context.search!.session.save(sessionId, {
+        const response = await context.search!.session.save(user, sessionId, {
           name,
           appId,
           expires,
@@ -72,8 +74,9 @@ export function registerSessionRoutes(router: IRouter): void {
     },
     async (context, request, res) => {
       const { id } = request.params;
+      const user = security?.authc.getCurrentUser(request);
       try {
-        const response = await context.search!.session.get(id);
+        const response = await context.search!.session.get(user, id);
 
         return res.ok({
           body: response,
@@ -107,8 +110,9 @@ export function registerSessionRoutes(router: IRouter): void {
     },
     async (context, request, res) => {
       const { page, perPage, sortField, sortOrder, filter } = request.body;
+      const user = security?.authc.getCurrentUser(request);
       try {
-        const response = await context.search!.session.find({
+        const response = await context.search!.session.find(user, {
           page,
           perPage,
           sortField,
@@ -144,8 +148,9 @@ export function registerSessionRoutes(router: IRouter): void {
     },
     async (context, request, res) => {
       const { id } = request.params;
+      const user = security?.authc.getCurrentUser(request);
       try {
-        await context.search!.session.delete(id);
+        await context.search!.session.delete(user, id);
 
         return res.ok();
       } catch (err) {
@@ -178,8 +183,9 @@ export function registerSessionRoutes(router: IRouter): void {
     async (context, request, res) => {
       const { id } = request.params;
       const { name, expires } = request.body;
+      const user = security?.authc.getCurrentUser(request);
       try {
-        const response = await context.search!.session.update(id, { name, expires });
+        const response = await context.search!.session.update(user, id, { name, expires });
 
         return res.ok({
           body: response,

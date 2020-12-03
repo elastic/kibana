@@ -14,6 +14,15 @@ export const backgroundSessionMapping: SavedObjectsType = {
   hidden: true,
   mappings: {
     properties: {
+      realmType: {
+        type: 'keyword',
+      },
+      realmName: {
+        type: 'keyword',
+      },
+      username: {
+        type: 'keyword',
+      },
       name: {
         type: 'keyword',
       },
