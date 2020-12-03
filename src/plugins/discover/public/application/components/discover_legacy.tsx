@@ -274,7 +274,13 @@ export function DiscoverLegacy({
                               toggleChart(!toggleOn);
                             }}
                           >
-                            {toggleOn ? 'Hide chart' : 'Show chart'}
+                            {toggleOn
+                              ? i18n.translate('discover.hideChart', {
+                                  defaultMessage: 'Hide chart',
+                                })
+                              : i18n.translate('discover.showChart', {
+                                  defaultMessage: 'Show chart',
+                                })}
                           </EuiButtonEmpty>
                         </EuiFlexItem>
                       </EuiFlexGroup>
