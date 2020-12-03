@@ -54,10 +54,9 @@ export const createTileMapVisualization = (dependencies) => {
   const { getZoomPrecision, getPrecision, BaseMapsVisualization } = dependencies;
 
   return class CoordinateMapsVisualization extends BaseMapsVisualization {
-    constructor(element, vis, handlers) {
-      super(element, vis);
+    constructor(element, handlers, initialVisParams) {
+      super(element, handlers, initialVisParams);
 
-      this.handlers = handlers;
       this._geohashLayer = null;
       this._tooltipFormatter = mapTooltipProvider(element, tooltipFormatter);
     }
@@ -82,7 +81,7 @@ export const createTileMapVisualization = (dependencies) => {
       // todo: autoPrecision should be vis parameter, not aggConfig one
       const zoomPrecision = getZoomPrecision();
       updateVarsObject.data.precision = geohashAgg.sourceParams.params.autoPrecision
-        ? zoomPrecision[this.vis.getUiState().get('mapZoom')]
+        ? zoomPrecision[this.handlers.uiState.get('mapZoom')]
         : getPrecision(geohashAgg.sourceParams.params.precision);
 
       this.handlers.event(updateVarsObject);
@@ -94,13 +93,12 @@ export const createTileMapVisualization = (dependencies) => {
     }
 
     async _makeKibanaMap() {
-      await super._makeKibanaMap();
+      await super._makeKibanaMap(this._params);
 
       let previousPrecision = this._kibanaMap.getGeohashPrecision();
       let precisionChange = false;
 
-      const uiState = this.vis.getUiState();
-      uiState.on('change', (prop) => {
+      this.handlers.uiState.on('change', (prop) => {
         if (prop === 'mapZoom' || prop === 'mapCenter') {
           this.updateGeohashAgg();
         }
@@ -248,8 +246,6 @@ export const createTileMapVisualization = (dependencies) => {
 
       const { filterManager } = getQueryService();
       filterManager.addFilters([filter]);
-
-      this.vis.updateState();
     }
 
     _getGeoHashAgg() {

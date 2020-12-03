@@ -18,7 +18,7 @@
  */
 
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { ExprVisClass, VisualizationController } from '../../visualizations/public';
+import { VisualizationController } from '../../visualizations/public';
 import { TileMapVisualizationDependencies } from './plugin';
 import { TileMapVisRenderValue } from './tile_map_fn';
 
@@ -32,17 +32,16 @@ export const getTileMapRenderer: (
   render: async (domNode, config, handlers) => {
     let registeredController = tableVisRegistry.get(domNode);
 
-    const vis = new ExprVisClass({
-      type: config.visType,
-      params: config.visConfig,
-    });
-
     if (!registeredController) {
       // @ts-expect-error
       const { createTileMapVisualization } = await import('./tile_map_visualization');
 
       const Controller = createTileMapVisualization(deps);
-      registeredController = new Controller(domNode, vis, handlers) as VisualizationController;
+      registeredController = new Controller(
+        domNode,
+        handlers,
+        config.visConfig
+      ) as VisualizationController;
       tableVisRegistry.set(domNode, registeredController);
 
       handlers.onDestroy(() => {

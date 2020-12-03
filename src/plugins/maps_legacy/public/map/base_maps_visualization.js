@@ -34,8 +34,9 @@ export function BaseMapsVisualizationProvider() {
    * @constructor
    */
   return class BaseMapsVisualization {
-    constructor(element, vis) {
-      this.vis = vis;
+    constructor(element, handlers, initialVisParams) {
+      this.handlers = handlers;
+      this._params = initialVisParams;
       this._container = element;
       this._kibanaMap = null;
       this._chartData = null; //reference to data currently on the map.
@@ -75,7 +76,7 @@ export function BaseMapsVisualizationProvider() {
       if (this._hasESResponseChanged(esResponse)) {
         await this._updateData(esResponse);
       }
-      this._kibanaMap.useUiStateFromVisualization(this.vis);
+      this._kibanaMap.useUiStateFromVisualization(this.handlers.uiState);
 
       await this._whenBaseLayerIsLoaded();
     }
@@ -87,11 +88,11 @@ export function BaseMapsVisualizationProvider() {
      */
     async _makeKibanaMap() {
       const options = {};
-      const uiState = this.vis.getUiState();
-      const zoomFromUiState = parseInt(uiState.get('mapZoom'));
-      const centerFromUIState = uiState.get('mapCenter');
-      options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.params.mapZoom;
-      options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
+      const zoomFromUiState = parseInt(this.handlers.uiState.get('mapZoom'));
+      const centerFromUIState = this.handlers.uiState.get('mapCenter');
+      const { mapZoom, mapCenter } = this._getMapsParams();
+      options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : mapZoom;
+      options.center = centerFromUIState ? centerFromUIState : mapCenter;
 
       const modules = await lazyLoadMapsLegacyModules();
       this._kibanaMap = new modules.KibanaMap(this._container, options);
@@ -100,7 +101,7 @@ export function BaseMapsVisualizationProvider() {
 
       this._kibanaMap.addLegendControl();
       this._kibanaMap.addFitControl();
-      this._kibanaMap.persistUiStateForVisualization(this.vis);
+      this._kibanaMap.persistUiStateForVisualization(this.handlers.uiState);
 
       this._kibanaMap.on('baseLayer:loaded', () => {
         this._baseLayerDirty = false;
@@ -223,15 +224,11 @@ export function BaseMapsVisualizationProvider() {
       await this._updateBaseLayer();
       this._kibanaMap.setLegendPosition(mapParams.legendPosition);
       this._kibanaMap.setShowTooltip(mapParams.addTooltip);
-      this._kibanaMap.useUiStateFromVisualization(this.vis);
+      this._kibanaMap.useUiStateFromVisualization(this.handlers.uiState);
     }
 
     _getMapsParams() {
-      return {
-        ...this.vis.type.visConfig.defaults,
-        type: this.vis.type.name,
-        ...this._params,
-      };
+      return this._params;
     }
 
     _whenBaseLayerIsLoaded() {
