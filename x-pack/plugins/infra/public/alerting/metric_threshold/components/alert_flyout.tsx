@@ -36,7 +36,7 @@ export const AlertFlyout = (props: Props) => {
         },
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [triggersActionsUI, props.visible, props.options, props.series]
+    [triggersActionsUI, props.visible]
   );
 
   return <>{AddAlertFlyout}</>;
