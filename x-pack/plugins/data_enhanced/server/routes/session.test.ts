@@ -6,10 +6,10 @@
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { CoreSetup, RequestHandlerContext } from 'kibana/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
-import { registerSessionRoutes } from './session';
+import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
-import { createSearchRequestHandlerContext } from '../../../../../src/plugins/data/server/search/mocks';
+import { createSearchRequestHandlerContext } from './mocks';
+import { registerSessionRoutes } from './session';
 
 describe('registerSessionRoutes', () => {
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;
