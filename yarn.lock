@@ -1840,10 +1840,10 @@
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/lucene-parser/-/@logrhythm/lucene-parser-3.4.0.tgz#19274929b73c83713c3597febe71a0c62ff2a5e9"
   integrity sha1-GSdJKbc8g3E8NZf+vnGgxi/ypek=
 
-"@logrhythm/nm-web-shared@1.16.0":
-  version "1.16.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/nm-web-shared/-/@logrhythm/nm-web-shared-1.16.0.tgz#595166100e3c0120e0131b81e3cf730d008819bb"
-  integrity sha1-WVFmEA48ASDgExuB489zDQCIGbs=
+"@logrhythm/nm-web-shared@1.26.0":
+  version "1.26.0"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/nm-web-shared/-/@logrhythm/nm-web-shared-1.26.0.tgz#56b5f017cfa0c5f4ed29a09ad96b1a4df67e6f28"
+  integrity sha1-VrXwF8+gxfTtKaCa2WsaTfZ+byg=
 
 "@logrhythm/webui@^5.9.15":
   version "5.9.15"
@@ -9590,7 +9590,7 @@ debug@3.1.0, debug@=3.1.0, debug@~3.1.0:
   dependencies:
     ms "2.0.0"
 
-debug@3.2.6, debug@3.X, debug@^3.0.0, debug@^3.0.1, debug@^3.1.0, debug@^3.1.1, debug@^3.2.5, debug@^3.2.6:
+debug@3.2.6, debug@3.X, debug@^3.0.0, debug@^3.0.1, debug@^3.1.0, debug@^3.1.1, debug@^3.2.5:
   version "3.2.6"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/debug/-/debug-3.2.6.tgz#e83d17de16d8a7efb7717edbe5fb10135eee629b"
   integrity sha1-6D0X3hbYp++3cX7b5fsQE17uYps=
@@ -9984,11 +9984,6 @@ detect-indent@^4.0.0:
   integrity sha1-920GQ1LN9Docts5hnE7jqUdd4gg=
   dependencies:
     repeating "^2.0.0"
-
-detect-libc@^1.0.2:
-  version "1.0.3"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
-  integrity sha1-+hN8S9aY7fVc1c0CrFWfkaTEups=
 
 detect-newline@2.X, detect-newline@^2.1.0:
   version "2.1.0"
@@ -14839,7 +14834,7 @@ icalendar@0.7.1:
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/icalendar/-/icalendar-0.7.1.tgz#d0d3486795f8f1c5cf4f8cafac081b4b4e7a32ae"
   integrity sha1-0NNIZ5X48cXPT4yvrAgbS056Mq4=
 
-iconv-lite@0.4, iconv-lite@0.4.24, iconv-lite@^0.4.17, iconv-lite@^0.4.24, iconv-lite@^0.4.4, iconv-lite@~0.4.13:
+iconv-lite@0.4, iconv-lite@0.4.24, iconv-lite@^0.4.17, iconv-lite@^0.4.24, iconv-lite@~0.4.13:
   version "0.4.24"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/iconv-lite/-/iconv-lite-0.4.24.tgz#2022b4b25fbddc21d2f524974a474aafe733908b"
   integrity sha1-ICK0sl+93CHS9SSXSkdKr+czkIs=
@@ -14886,13 +14881,6 @@ iferr@^0.1.5:
   version "0.1.5"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/iferr/-/iferr-0.1.5.tgz#c60eed69e6d8fdb6b3104a1fcbca1c192dc5b501"
   integrity sha1-xg7taebY/bazEEofy8ocGS3FtQE=
-
-ignore-walk@^3.0.1:
-  version "3.0.3"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/ignore-walk/-/ignore-walk-3.0.3.tgz#017e2447184bfeade7c238e4aefdd1e8f95b1e37"
-  integrity sha1-AX4kRxhL/q3nwjjkrv3R6PlbHjc=
-  dependencies:
-    minimatch "^3.0.4"
 
 ignore@^3.1.2, ignore@^3.3.5:
   version "3.3.10"
@@ -19536,15 +19524,6 @@ nearley@^2.7.10:
     randexp "0.4.6"
     semver "^5.4.1"
 
-needle@^2.2.1:
-  version "2.3.2"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/needle/-/needle-2.3.2.tgz#3342dea100b7160960a450dc8c22160ac712a528"
-  integrity sha1-M0LeoQC3FglgpFDcjCIWCscSpSg=
-  dependencies:
-    debug "^3.2.6"
-    iconv-lite "^0.4.4"
-    sax "^1.2.4"
-
 negotiator@0.6.2:
   version "0.6.2"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/negotiator/-/negotiator-0.6.2.tgz#feacf7ccf525a77ae9634436a64883ffeca346fb"
@@ -19797,22 +19776,6 @@ node-notifier@^5.4.2:
     shellwords "^0.1.1"
     which "^1.3.0"
 
-node-pre-gyp@*:
-  version "0.14.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/node-pre-gyp/-/node-pre-gyp-0.14.0.tgz#9a0596533b877289bcad4e143982ca3d904ddc83"
-  integrity sha1-mgWWUzuHcom8rU4UOYLKPZBN3IM=
-  dependencies:
-    detect-libc "^1.0.2"
-    mkdirp "^0.5.1"
-    needle "^2.2.1"
-    nopt "^4.0.1"
-    npm-packlist "^1.1.6"
-    npmlog "^4.0.2"
-    rc "^1.2.7"
-    rimraf "^2.6.1"
-    semver "^5.3.0"
-    tar "^4.4.2"
-
 node-releases@^1.1.29, node-releases@^1.1.47:
   version "1.1.47"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/node-releases/-/node-releases-1.1.47.tgz#c59ef739a1fd7ecbd9f0b7cf5b7871e8a8b591e4"
@@ -19882,7 +19845,7 @@ nopt@^2.2.0:
   dependencies:
     abbrev "1"
 
-nopt@^4.0.1, nopt@~4.0.1:
+nopt@~4.0.1:
   version "4.0.1"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/nopt/-/nopt-4.0.1.tgz#d0d4685afd5415193c8c7505602d0d17cd64474d"
   integrity sha1-0NRoWv1UFRk8jHUFYC0NF81kR00=
@@ -19968,13 +19931,6 @@ now-and-later@^2.0.0:
   dependencies:
     once "^1.3.2"
 
-npm-bundled@^1.0.1:
-  version "1.1.1"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/npm-bundled/-/npm-bundled-1.1.1.tgz#1edd570865a94cdb1bc8220775e29466c9fb234b"
-  integrity sha1-Ht1XCGWpTNsbyCIHdeKUZsn7I0s=
-  dependencies:
-    npm-normalize-package-bin "^1.0.1"
-
 npm-conf@^1.1.0, npm-conf@^1.1.3:
   version "1.1.3"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/npm-conf/-/npm-conf-1.1.3.tgz#256cc47bd0e218c259c4e9550bf413bc2192aff9"
@@ -19991,19 +19947,10 @@ npm-keyword@^5.0.0:
     got "^7.1.0"
     registry-url "^3.0.3"
 
-npm-normalize-package-bin@^1.0.0, npm-normalize-package-bin@^1.0.1:
+npm-normalize-package-bin@^1.0.0:
   version "1.0.1"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/npm-normalize-package-bin/-/npm-normalize-package-bin-1.0.1.tgz#6e79a41f23fd235c0623218228da7d9c23b8f6e2"
   integrity sha1-bnmkHyP9I1wGIyGCKNp9nCO49uI=
-
-npm-packlist@^1.1.6:
-  version "1.4.8"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/npm-packlist/-/npm-packlist-1.4.8.tgz#56ee6cc135b9f98ad3d51c1c95da22bbb9b2ef3e"
-  integrity sha1-Vu5swTW5+YrT1Rwcldoiu7my7z4=
-  dependencies:
-    ignore-walk "^3.0.1"
-    npm-bundled "^1.0.1"
-    npm-normalize-package-bin "^1.0.1"
 
 npm-run-path@^1.0.0:
   version "1.0.0"
@@ -20042,7 +19989,7 @@ npmconf@^2.1.3:
     semver "2 || 3 || 4"
     uid-number "0.0.5"
 
-"npmlog@0 || 1 || 2 || 3 || 4", npmlog@^4.0.0, npmlog@^4.0.2, npmlog@^4.1.2:
+"npmlog@0 || 1 || 2 || 3 || 4", npmlog@^4.0.0, npmlog@^4.1.2:
   version "4.1.2"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/npmlog/-/npmlog-4.1.2.tgz#08a7f2a8bf734604779a9efa4ad5cc717abb954b"
   integrity sha1-CKfyqL9zRgR3mp76StXMcXq7lUs=
@@ -26273,7 +26220,7 @@ tar-stream@^2.1.0:
     inherits "^2.0.3"
     readable-stream "^3.1.1"
 
-tar@4.4.13, tar@^4.4.2:
+tar@4.4.13:
   version "4.4.13"
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/tar/-/tar-4.4.13.tgz#43b364bc52888d555298637b10d60790254ab525"
   integrity sha1-Q7NkvFKIjVVSmGN7ENYHkCVKtSU=
