@@ -16,24 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { CoreUsageDataSetup, CoreUsageDataStart } from './types';
-export { CoreUsageDataService } from './core_usage_data_service';
-export { CoreUsageStatsClient } from './core_usage_stats_client';
 
-// Because of #79265 we need to explicity import, then export these types for
-// scripts/telemetry_check.js to work as expected
-import {
-  CoreUsageStats,
-  CoreUsageData,
-  CoreConfigUsageData,
-  CoreEnvironmentUsageData,
-  CoreServicesUsageData,
-} from './types';
+import { SavedObjectsType } from '../saved_objects';
+import { CORE_USAGE_STATS_TYPE } from './constants';
 
-export {
-  CoreUsageStats,
-  CoreUsageData,
-  CoreConfigUsageData,
-  CoreEnvironmentUsageData,
-  CoreServicesUsageData,
+/** @internal */
+export const coreUsageStatsType: SavedObjectsType = {
+  name: CORE_USAGE_STATS_TYPE,
+  hidden: true,
+  namespaceType: 'agnostic',
+  mappings: {
+    dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+    properties: {},
+  },
 };

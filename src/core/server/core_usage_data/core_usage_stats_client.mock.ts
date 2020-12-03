@@ -16,24 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { CoreUsageDataSetup, CoreUsageDataStart } from './types';
-export { CoreUsageDataService } from './core_usage_data_service';
-export { CoreUsageStatsClient } from './core_usage_stats_client';
 
-// Because of #79265 we need to explicity import, then export these types for
-// scripts/telemetry_check.js to work as expected
-import {
-  CoreUsageStats,
-  CoreUsageData,
-  CoreConfigUsageData,
-  CoreEnvironmentUsageData,
-  CoreServicesUsageData,
-} from './types';
+import { CoreUsageStatsClient } from '.';
 
-export {
-  CoreUsageStats,
-  CoreUsageData,
-  CoreConfigUsageData,
-  CoreEnvironmentUsageData,
-  CoreServicesUsageData,
+const createUsageStatsClientMock = () =>
+  (({
+    getUsageStats: jest.fn().mockResolvedValue({}),
+    incrementSavedObjectsImport: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsResolveImportErrors: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsExport: jest.fn().mockResolvedValue(null),
+  } as unknown) as jest.Mocked<CoreUsageStatsClient>);
+
+export const coreUsageStatsClientMock = {
+  create: createUsageStatsClientMock,
 };
