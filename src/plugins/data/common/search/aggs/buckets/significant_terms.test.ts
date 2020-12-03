@@ -64,6 +64,38 @@ describe('Significant Terms Agg', () => {
         expect(params.exclude).toBe('400');
       };
 
+      test('produces the expected expression ast', () => {
+        const aggConfigs = getAggConfigs({
+          size: 'SIZE',
+          field: {
+            name: 'FIELD',
+          },
+        });
+        expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
+          Object {
+            "arguments": Object {
+              "enabled": Array [
+                true,
+              ],
+              "field": Array [
+                "FIELD",
+              ],
+              "id": Array [
+                "test",
+              ],
+              "schema": Array [
+                "segment",
+              ],
+              "size": Array [
+                "SIZE",
+              ],
+            },
+            "function": "aggSignificantTerms",
+            "type": "function",
+          }
+        `);
+      });
+
       test('should generate correct label', () => {
         const aggConfigs = getAggConfigs({
           size: 'SIZE',
