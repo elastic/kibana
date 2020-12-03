@@ -119,7 +119,7 @@ export function ActionBar({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow>
+            <EuiFormRow display="center">
               <EuiFieldNumber
                 aria-label={
                   isSuccessor
@@ -130,6 +130,7 @@ export function ActionBar({
                         defaultMessage: 'Number of newer documents',
                       })
                 }
+                compressed
                 className="cxtSizePicker"
                 data-test-subj={`${type}CountPicker`}
                 disabled={isDisabled}

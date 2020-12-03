@@ -70,14 +70,18 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
+import { uniqueId, keyBy, pick, difference, omit, isObject, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
 import { normalizeSortRequest } from './normalize_sort_request';
-import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern } from '../../index_patterns';
 import { ISearchGeneric, ISearchOptions } from '../..';
-import type { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
+import type {
+  ISearchSource,
+  SearchFieldValue,
+  SearchSourceOptions,
+  SearchSourceFields,
+} from './types';
 import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
 import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
@@ -404,7 +408,11 @@ export class SearchSource {
       case 'query':
         return addToRoot(key, (data[key] || []).concat(val));
       case 'fields':
-        const fields = uniq((data[key] || []).concat(val));
+        // uses new Fields API
+        return addToBody('fields', val);
+      case 'fieldsFromSource':
+        // preserves legacy behavior
+        const fields = [...new Set((data[key] || []).concat(val))];
         return addToRoot(key, fields);
       case 'index':
       case 'type':
@@ -451,49 +459,127 @@ export class SearchSource {
   }
 
   private flatten() {
+    const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
 
     searchRequest.body = searchRequest.body || {};
-    const { body, index, fields, query, filters, highlightAll } = searchRequest;
+    const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
 
-    const computedFields = index ? index.getComputedFields() : {};
+    // get some special field types from the index pattern
+    const { docvalueFields, scriptFields, storedFields } = index
+      ? index.getComputedFields()
+      : {
+          docvalueFields: [],
+          scriptFields: {},
+          storedFields: ['*'],
+        };
 
-    body.stored_fields = computedFields.storedFields;
-    body.script_fields = body.script_fields || {};
-    extend(body.script_fields, computedFields.scriptFields);
+    const fieldListProvided = !!body.fields;
+    const getFieldName = (fld: string | Record<string, any>): string =>
+      typeof fld === 'string' ? fld : fld.field;
 
-    const defaultDocValueFields = computedFields.docvalueFields
-      ? computedFields.docvalueFields
-      : [];
-    body.docvalue_fields = body.docvalue_fields || defaultDocValueFields;
+    // set defaults
+    let fieldsFromSource = searchRequest.fieldsFromSource || [];
+    body.fields = body.fields || [];
+    body.script_fields = {
+      ...body.script_fields,
+      ...scriptFields,
+    };
+    body.stored_fields = storedFields;
 
-    if (!body.hasOwnProperty('_source') && index) {
-      body._source = index.getSourceFiltering();
+    // apply source filters from index pattern if specified by the user
+    let filteredDocvalueFields = docvalueFields;
+    if (index) {
+      const sourceFilters = index.getSourceFiltering();
+      if (!body.hasOwnProperty('_source')) {
+        body._source = sourceFilters;
+      }
+      if (body._source.excludes) {
+        const filter = fieldWildcardFilter(
+          body._source.excludes,
+          getConfig(UI_SETTINGS.META_FIELDS)
+        );
+        // also apply filters to provided fields & default docvalueFields
+        body.fields = body.fields.filter((fld: SearchFieldValue) => filter(getFieldName(fld)));
+        fieldsFromSource = fieldsFromSource.filter((fld: SearchFieldValue) =>
+          filter(getFieldName(fld))
+        );
+        filteredDocvalueFields = filteredDocvalueFields.filter((fld: SearchFieldValue) =>
+          filter(getFieldName(fld))
+        );
+      }
     }
 
-    const { getConfig } = this.dependencies;
-
-    if (body._source) {
-      // exclude source fields for this index pattern specified by the user
-      const filter = fieldWildcardFilter(body._source.excludes, getConfig(UI_SETTINGS.META_FIELDS));
-      body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
-        filter(docvalueField.field)
+    // specific fields were provided, so we need to exclude any others
+    if (fieldListProvided || fieldsFromSource.length) {
+      const bodyFieldNames = body.fields.map((field: string | Record<string, any>) =>
+        getFieldName(field)
       );
-    }
+      const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
-    // if we only want to search for certain fields
-    if (fields) {
-      // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
-      body.docvalue_fields = filterDocvalueFields(body.docvalue_fields, fields);
-      body.script_fields = pick(body.script_fields, fields);
-
-      // request the remaining fields from both stored_fields and _source
-      const remainingFields = difference(fields, keys(body.script_fields));
-      body.stored_fields = remainingFields;
-      setWith(body, '_source.includes', remainingFields, (nsValue) =>
-        isObject(nsValue) ? {} : nsValue
+      // filter down script_fields to only include items specified
+      body.script_fields = pick(
+        body.script_fields,
+        Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
       );
+
+      // request the remaining fields from stored_fields just in case, since the
+      // fields API does not handle stored fields
+      const remainingFields = difference(uniqFieldNames, Object.keys(body.script_fields)).filter(
+        Boolean
+      );
+
+      // only include unique values
+      body.stored_fields = [...new Set(remainingFields)];
+
+      if (fieldsFromSource.length) {
+        // include remaining fields in _source
+        setWith(body, '_source.includes', remainingFields, (nsValue) =>
+          isObject(nsValue) ? {} : nsValue
+        );
+
+        // if items that are in the docvalueFields are provided, we should
+        // make sure those are added to the fields API unless they are
+        // already set in docvalue_fields
+        body.fields = [
+          ...body.fields,
+          ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
+            return (
+              fieldsFromSource.includes(getFieldName(fld)) &&
+              !(body.docvalue_fields || [])
+                .map((d: string | Record<string, any>) => getFieldName(d))
+                .includes(getFieldName(fld))
+            );
+          }),
+        ];
+
+        // delete fields array if it is still set to the empty default
+        if (!fieldListProvided && body.fields.length === 0) delete body.fields;
+      } else {
+        // remove _source, since everything's coming from fields API, scripted, or stored fields
+        body._source = false;
+
+        // if items that are in the docvalueFields are provided, we should
+        // inject the format from the computed fields if one isn't given
+        const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
+        body.fields = body.fields.map((fld: SearchFieldValue) => {
+          const fieldName = getFieldName(fld);
+          if (Object.keys(docvaluesIndex).includes(fieldName)) {
+            // either provide the field object from computed docvalues,
+            // or merge the user-provided field with the one in docvalues
+            return typeof fld === 'string'
+              ? docvaluesIndex[fld]
+              : {
+                  ...docvaluesIndex[fieldName],
+                  ...fld,
+                };
+          }
+          return fld;
+        });
+      }
+    } else {
+      body.fields = filteredDocvalueFields;
     }
 
     const esQueryConfigs = getEsQueryConfig({ get: getConfig });
