@@ -104,7 +104,6 @@ export interface DiscoverProps {
   topNavMenu: TopNavMenuData[];
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   updateSavedQueryId: (savedQueryId?: string) => void;
-  vis?: Vis;
   useNewFieldsApi?: boolean;
 }
 

@@ -194,10 +194,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     toastNotifications
   );
   $scope.useNewFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
-  $scope.showUnmappedFields = false;
-  $scope.onShowUnmappedFieldsChange = (val) => {
-    $scope.showUnmappedFields = val;
-  };
+
   const FIRST_N_COLUMNS_FROM_FIELDS_RESPONSE = 3;
   //used for functional testing
   $scope.fetchCounter = 0;
