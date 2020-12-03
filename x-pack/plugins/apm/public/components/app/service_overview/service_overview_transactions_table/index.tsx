@@ -21,8 +21,8 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { px, truncate, unit } from '../../../../style/variables';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   APIReturnType,
   callApmApi,

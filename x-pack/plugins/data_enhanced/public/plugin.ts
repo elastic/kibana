@@ -69,6 +69,7 @@ export class DataEnhancedPlugin
             createConnectedBackgroundSessionIndicator({
               sessionService: plugins.data.search.session,
               application: core.application,
+              timeFilter: plugins.data.query.timefilter.timefilter,
             })
           )
         ),
