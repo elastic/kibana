@@ -6,7 +6,9 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "../../node_modules/.bin/tsc",
-    "kbn:bootstrap": "yarn build"
+    "build": "yarn clean && ../../node_modules/.bin/tsc",
+    "kbn:bootstrap": "yarn build",
+    "kbn:watch": "yarn build --watch",
+    "clean": "../../node_modules/.bin/del target"
   }
 }

@@ -8,9 +8,10 @@
     "devOnly": true
   },
   "scripts": {
-    "build": "../../node_modules/.bin/tsc",
+    "build": "yarn clean && ../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build",
-    "watch": "yarn build --watch"
+    "kbn:watch": "yarn build --watch",
+    "clean": "../../node_modules/.bin/del target"
   },
   "devDependencies": {
     "@kbn/dev-utils": "link:../kbn-dev-utils"

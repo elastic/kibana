@@ -5,9 +5,10 @@
   "license": "Apache-2.0",
   "main": "./target/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "yarn clean && ../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build",
-    "kbn:watch": "yarn build --watch"
+    "kbn:watch": "yarn build --watch",
+    "clean": "../../node_modules/.bin/del target"
   },
   "dependencies": {
     "@kbn/utils": "link:../kbn-utils"
