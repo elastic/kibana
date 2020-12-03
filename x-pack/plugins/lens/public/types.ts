@@ -25,7 +25,10 @@ import {
   VALUE_CLICK_TRIGGER,
   VisualizeFieldContext,
 } from '../../../../src/plugins/ui_actions/public';
-import { LensSortActionData, LENS_EDIT_SORT_ACTION } from './datatable_visualization/expression';
+import type {
+  LensSortActionData,
+  LENS_EDIT_SORT_ACTION,
+} from './datatable_visualization/expression';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
