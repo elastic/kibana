@@ -452,7 +452,7 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
  | experimental[] Set to `true` to allow browser code to access response body whenever request performed with user credentials. *Default:* `false`
 
 | `server.cors.origin:`
- | experimental[] List of origins permitted to access resources. You must specify `server.cors.origin` when `server.cors.credentials: true`. *Default:* "*"
+ | experimental[] List of origins permitted to access resources. You must specify explicit hostnames and not use `*` for `server.cors.origin` when `server.cors.credentials: true`. *Default:* "*"
 
 | `server.compression.referrerWhitelist:`
  | Specifies an array of trusted hostnames, such as the {kib} host, or a reverse
