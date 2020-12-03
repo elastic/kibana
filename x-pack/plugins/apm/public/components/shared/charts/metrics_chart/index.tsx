@@ -15,7 +15,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform_metrics_chart';
 import { Maybe } from '../../../../../typings/common';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { TimeseriesChart } from '../timeseries_chart';
 
