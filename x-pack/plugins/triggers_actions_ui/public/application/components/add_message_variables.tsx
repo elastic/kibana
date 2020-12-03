@@ -40,7 +40,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         }}
       >
         <>
-          <EuiText size="m">
+          <EuiText size="m" data-test-subj={`variableMenuButton-${i}-templated-name`}>
             {variable.useWithTripleBracesInTemplates
               ? `{{{${variable.name}}}}`
               : `{{${variable.name}}}`}
