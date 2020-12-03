@@ -332,7 +332,7 @@ export function LayerPanel(
                           >
                             <ColorIndicator accessorConfig={accessorConfig}>
                               <NativeRenderer
-                                render={props.datasourceMap[datasourceId].renderDimensionTrigger}
+                                render={layerDatasource.renderDimensionTrigger}
                                 nativeProps={{
                                   ...layerDatasourceConfigProps,
                                   columnId: accessor,
@@ -464,12 +464,22 @@ export function LayerPanel(
         <DimensionContainer
           isOpen={!!activeId}
           groupLabel={activeGroup?.groupLabel || ''}
-          handleClose={() => setActiveDimension(initialActiveDimensionState)}
+          handleClose={() => {
+            if (layerDatasource.updateStateOnCloseDimension) {
+              const newState = layerDatasource.updateStateOnCloseDimension({
+                state: layerDatasourceState,
+                layerId,
+                columnId: activeId!,
+              });
+              props.updateDatasource(datasourceId, newState);
+            }
+            setActiveDimension(initialActiveDimensionState);
+          }}
           panel={
             <>
               {activeGroup && activeId && (
                 <NativeRenderer
-                  render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                  render={layerDatasource.renderDimensionEditor}
                   nativeProps={{
                     ...layerDatasourceConfigProps,
                     core: props.core,
