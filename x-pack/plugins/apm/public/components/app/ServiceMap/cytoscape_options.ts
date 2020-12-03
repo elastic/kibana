@@ -15,7 +15,7 @@ import {
   getServiceHealthStatusColor,
   ServiceHealthStatus,
 } from '../../../../common/service_health_status';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { defaultIcon, iconForNode } from './icons';
 
 export const popoverWidth = 280;

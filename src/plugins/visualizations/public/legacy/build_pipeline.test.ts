@@ -92,15 +92,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       uiState = {};
     });
 
-    it('handles input_control_vis function', () => {
-      const params = {
-        some: 'nested',
-        data: { here: true },
-      };
-      const actual = buildPipelineVisFunction.input_control_vis(params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
     describe('handles region_map function', () => {
       it('without buckets', () => {
         const params = { metric: {} };

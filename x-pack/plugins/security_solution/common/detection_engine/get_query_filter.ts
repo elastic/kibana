@@ -6,7 +6,6 @@
 
 import {
   Filter,
-  Query,
   IIndexPattern,
   isFilterDisabled,
   buildEsQuery,
@@ -18,15 +17,10 @@ import {
 } from '../../../lists/common/schemas';
 import { ESBoolQuery } from '../typed_json';
 import { buildExceptionListQueries } from './build_exceptions_query';
-import {
-  Query as QueryString,
-  Language,
-  Index,
-  TimestampOverrideOrUndefined,
-} from './schemas/common/schemas';
+import { Query, Language, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
 
 export const getQueryFilter = (
-  query: QueryString,
+  query: Query,
   language: Language,
   filters: Array<Partial<Filter>>,
   index: Index,
@@ -53,19 +47,18 @@ export const getQueryFilter = (
    * buildEsQuery, this allows us to offer nested queries
    * regardless
    */
-  const exceptionQueries = buildExceptionListQueries({ language: 'kuery', lists });
-  if (exceptionQueries.length > 0) {
-    // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
-    // allowing us to make 1024-item chunks of exception list items.
-    // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
-    // very conservative value.
-    const exceptionFilter = buildExceptionFilter(
-      exceptionQueries,
-      indexPattern,
-      config,
-      excludeExceptions,
-      1024
-    );
+  // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
+  // allowing us to make 1024-item chunks of exception list items.
+  // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
+  // very conservative value.
+  const exceptionFilter = buildExceptionFilter({
+    lists,
+    config,
+    excludeExceptions,
+    chunkSize: 1024,
+    indexPattern,
+  });
+  if (exceptionFilter !== undefined) {
     enabledFilters.push(exceptionFilter);
   }
   const initialQuery = { query, language };
@@ -101,15 +94,17 @@ export const buildEqlSearchRequest = (
     ignoreFilterIfFieldNotInIndex: false,
     dateFormatTZ: 'Zulu',
   };
-  const exceptionQueries = buildExceptionListQueries({ language: 'kuery', lists: exceptionLists });
-  let exceptionFilter: Filter | undefined;
-  if (exceptionQueries.length > 0) {
-    // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
-    // allowing us to make 1024-item chunks of exception list items.
-    // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
-    // very conservative value.
-    exceptionFilter = buildExceptionFilter(exceptionQueries, indexPattern, config, true, 1024);
-  }
+  // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
+  // allowing us to make 1024-item chunks of exception list items.
+  // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
+  // very conservative value.
+  const exceptionFilter = buildExceptionFilter({
+    lists: exceptionLists,
+    config,
+    excludeExceptions: true,
+    chunkSize: 1024,
+    indexPattern,
+  });
   const indexString = index.join();
   const requestFilter: unknown[] = [
     {
@@ -154,13 +149,23 @@ export const buildEqlSearchRequest = (
   }
 };
 
-export const buildExceptionFilter = (
-  exceptionQueries: Query[],
-  indexPattern: IIndexPattern,
-  config: EsQueryConfig,
-  excludeExceptions: boolean,
-  chunkSize: number
-) => {
+export const buildExceptionFilter = ({
+  lists,
+  config,
+  excludeExceptions,
+  chunkSize,
+  indexPattern,
+}: {
+  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+  config: EsQueryConfig;
+  excludeExceptions: boolean;
+  chunkSize: number;
+  indexPattern?: IIndexPattern;
+}) => {
+  const exceptionQueries = buildExceptionListQueries({ language: 'kuery', lists });
+  if (exceptionQueries.length === 0) {
+    return undefined;
+  }
   const exceptionFilter: Filter = {
     meta: {
       alias: null,

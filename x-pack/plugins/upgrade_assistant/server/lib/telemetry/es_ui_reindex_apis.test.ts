@@ -28,22 +28,22 @@ describe('Upgrade Assistant Telemetry SavedObject UIReindex', () => {
       expect(internalRepo.incrementCounter).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        `ui_reindex.close`
+        [`ui_reindex.close`]
       );
       expect(internalRepo.incrementCounter).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        `ui_reindex.open`
+        [`ui_reindex.open`]
       );
       expect(internalRepo.incrementCounter).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        `ui_reindex.start`
+        [`ui_reindex.start`]
       );
       expect(internalRepo.incrementCounter).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        `ui_reindex.stop`
+        [`ui_reindex.stop`]
       );
     });
   });

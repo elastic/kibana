@@ -17,7 +17,7 @@ import {
   RectCoordinate,
   TimeSeries,
 } from '../../typings/timeseries';
-import { IUrlParams } from '../context/UrlParamsContext/types';
+import { IUrlParams } from '../context/url_params_context/types';
 import { getEmptySeries } from '../components/shared/charts/helper/get_empty_series';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
 import { asDuration, asTransactionRate } from '../../common/utils/formatters';

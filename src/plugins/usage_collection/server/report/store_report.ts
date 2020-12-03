@@ -50,7 +50,7 @@ export async function storeReport(
       const savedObjectId = `${appName}:${eventName}`;
       return {
         saved_objects: [
-          await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count'),
+          await internalRepository.incrementCounter('ui-metric', savedObjectId, ['count']),
         ],
       };
     }),

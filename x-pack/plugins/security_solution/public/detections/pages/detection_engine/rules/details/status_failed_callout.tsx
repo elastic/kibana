@@ -13,22 +13,26 @@ import * as i18n from './translations';
 interface RuleStatusFailedCallOutComponentProps {
   date: string;
   message: string;
+  color?: 'danger' | 'primary' | 'success' | 'warning';
 }
 
 const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutComponentProps> = ({
   date,
   message,
+  color,
 }) => (
   <EuiCallOut
     title={
       <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
-        <EuiFlexItem grow={false}>{i18n.ERROR_CALLOUT_TITLE}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {color === 'warning' ? i18n.PARTIAL_FAILURE_CALLOUT_TITLE : i18n.ERROR_CALLOUT_TITLE}
+        </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <FormattedDate value={date} fieldName="last_failure_at" />
         </EuiFlexItem>
       </EuiFlexGroup>
     }
-    color="danger"
+    color={color ? color : 'danger'}
     iconType="alert"
   >
     <p>{message}</p>

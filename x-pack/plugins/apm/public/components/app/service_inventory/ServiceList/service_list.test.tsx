@@ -7,7 +7,7 @@
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ServiceList, SERVICE_COLUMNS } from './';
