@@ -5,7 +5,7 @@
  */
 import { render } from '@testing-library/react';
 import React from 'react';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ChartContainer } from './chart_container';
 
 describe('ChartContainer', () => {

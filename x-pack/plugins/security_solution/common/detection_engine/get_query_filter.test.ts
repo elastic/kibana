@@ -7,6 +7,7 @@
 import { getQueryFilter, buildExceptionFilter, buildEqlSearchRequest } from './get_query_filter';
 import { Filter, EsQueryConfig } from 'src/plugins/data/public';
 import { getExceptionListItemSchemaMock } from '../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { ExceptionListItemSchema } from '../shared_imports';
 
 describe('get_filter', () => {
   describe('getQueryFilter', () => {
@@ -919,19 +920,27 @@ describe('get_filter', () => {
       dateFormatTZ: 'Zulu',
     };
     test('it should build a filter without chunking exception items', () => {
-      const exceptionFilter = buildExceptionFilter(
-        [
-          { language: 'kuery', query: 'host.name: linux and some.field: value' },
-          { language: 'kuery', query: 'user.name: name' },
+      const exceptionItem1: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [
+          { field: 'host.name', operator: 'included', type: 'match', value: 'linux' },
+          { field: 'some.field', operator: 'included', type: 'match', value: 'value' },
         ],
-        {
+      };
+      const exceptionItem2: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [{ field: 'user.name', operator: 'included', type: 'match', value: 'name' }],
+      };
+      const exceptionFilter = buildExceptionFilter({
+        lists: [exceptionItem1, exceptionItem2],
+        config,
+        excludeExceptions: true,
+        chunkSize: 2,
+        indexPattern: {
           fields: [],
           title: 'auditbeat-*',
         },
-        config,
-        true,
-        2
-      );
+      });
       expect(exceptionFilter).toEqual({
         meta: {
           alias: null,
@@ -949,7 +958,7 @@ describe('get_filter', () => {
                         minimum_should_match: 1,
                         should: [
                           {
-                            match: {
+                            match_phrase: {
                               'host.name': 'linux',
                             },
                           },
@@ -961,7 +970,7 @@ describe('get_filter', () => {
                         minimum_should_match: 1,
                         should: [
                           {
-                            match: {
+                            match_phrase: {
                               'some.field': 'value',
                             },
                           },
@@ -976,7 +985,7 @@ describe('get_filter', () => {
                   minimum_should_match: 1,
                   should: [
                     {
-                      match: {
+                      match_phrase: {
                         'user.name': 'name',
                       },
                     },
@@ -990,20 +999,31 @@ describe('get_filter', () => {
     });
 
     test('it should properly chunk exception items', () => {
-      const exceptionFilter = buildExceptionFilter(
-        [
-          { language: 'kuery', query: 'host.name: linux and some.field: value' },
-          { language: 'kuery', query: 'user.name: name' },
-          { language: 'kuery', query: 'file.path: /safe/path' },
+      const exceptionItem1: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [
+          { field: 'host.name', operator: 'included', type: 'match', value: 'linux' },
+          { field: 'some.field', operator: 'included', type: 'match', value: 'value' },
         ],
-        {
+      };
+      const exceptionItem2: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [{ field: 'user.name', operator: 'included', type: 'match', value: 'name' }],
+      };
+      const exceptionItem3: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [{ field: 'file.path', operator: 'included', type: 'match', value: '/safe/path' }],
+      };
+      const exceptionFilter = buildExceptionFilter({
+        lists: [exceptionItem1, exceptionItem2, exceptionItem3],
+        config,
+        excludeExceptions: true,
+        chunkSize: 2,
+        indexPattern: {
           fields: [],
           title: 'auditbeat-*',
         },
-        config,
-        true,
-        2
-      );
+      });
       expect(exceptionFilter).toEqual({
         meta: {
           alias: null,
@@ -1024,7 +1044,7 @@ describe('get_filter', () => {
                               minimum_should_match: 1,
                               should: [
                                 {
-                                  match: {
+                                  match_phrase: {
                                     'host.name': 'linux',
                                   },
                                 },
@@ -1036,7 +1056,7 @@ describe('get_filter', () => {
                               minimum_should_match: 1,
                               should: [
                                 {
-                                  match: {
+                                  match_phrase: {
                                     'some.field': 'value',
                                   },
                                 },
@@ -1051,7 +1071,7 @@ describe('get_filter', () => {
                         minimum_should_match: 1,
                         should: [
                           {
-                            match: {
+                            match_phrase: {
                               'user.name': 'name',
                             },
                           },
@@ -1069,7 +1089,7 @@ describe('get_filter', () => {
                         minimum_should_match: 1,
                         should: [
                           {
-                            match: {
+                            match_phrase: {
                               'file.path': '/safe/path',
                             },
                           },
