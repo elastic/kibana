@@ -42,7 +42,7 @@ const DocumentationLink: React.FC = () => (
     href={`${DOCS_PREFIX}/indexing-documents-guide.html`}
   >
     {i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.indexingGuide', {
-      defaultMessage: 'Read the Indexing Guide',
+      defaultMessage: 'Read the indexing guide',
     })}
   </EuiButton>
 );
@@ -53,9 +53,7 @@ export const SearchExperienceContent: React.FC = () => {
   const { myRole } = useValues(AppLogic);
   const { engineName, isMetaEngine } = useValues(EngineLogic);
 
-  if (!wasSearched) {
-    return null;
-  }
+  if (!wasSearched) return null;
 
   if (totalResults) {
     return (

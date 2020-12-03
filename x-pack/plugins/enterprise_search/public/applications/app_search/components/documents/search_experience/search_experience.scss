@@ -6,7 +6,7 @@
 
   .documentsSearchExperience__sidebar {
     flex-grow: 1;
-    min-width: 300px;
+    min-width: $euiSize * 19;
   }
 
   .documentsSearchExperience__content {
@@ -17,5 +17,3 @@
     flex-grow: 0;
   }
 }
-
-  

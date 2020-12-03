@@ -37,7 +37,7 @@ describe('SearchExperienceContent', () => {
 
   it('renders', () => {
     const wrapper = shallow(<SearchExperienceContent />);
-    expect(wrapper.find(EuiFlexGroup).length).toBe(1);
+     expect(wrapper.isEmptyRender()).toBe(false);
   });
 
   it('passes engineName to the result view', () => {
@@ -69,7 +69,7 @@ describe('SearchExperienceContent', () => {
     expect(wrapper.isEmptyRender()).toBe(true);
   });
 
-  it('renders results if a search was performend and there are more than 0 totalResults', () => {
+  it('renders results if a search was performed and there are more than 0 totalResults', () => {
     setMockSearchContextState({
       ...searchState,
       wasSearched: true,
@@ -100,6 +100,7 @@ describe('SearchExperienceContent', () => {
         totalResults: 0,
       });
     });
+
     it('renders a no documents message', () => {
       const wrapper = shallow(<SearchExperienceContent />);
       expect(wrapper.find('[data-test-subj="documentsSearchResults"]').length).toBe(0);
