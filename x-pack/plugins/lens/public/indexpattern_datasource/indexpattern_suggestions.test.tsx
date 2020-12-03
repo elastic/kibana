@@ -6,11 +6,12 @@
 
 import { DatasourceSuggestion } from '../types';
 import { generateId } from '../id_generator';
-import { IndexPatternPrivateState } from './types';
+import type { IndexPatternPrivateState, IndexPatternLayer } from './types';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
+  IndexPatternSuggestion,
 } from './indexpattern_suggestions';
 import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';
@@ -153,6 +154,7 @@ function testInitialState(): IndexPatternPrivateState {
         columns: {
           col1: {
             label: 'My Op',
+            customLabel: true,
             dataType: 'string',
             isBucketed: true,
 
@@ -170,6 +172,19 @@ function testInitialState(): IndexPatternPrivateState {
     },
     isFirstExistenceFetch: false,
   };
+}
+
+// Simplifies the debug output for failed test
+function getSuggestionSubset(
+  suggestions: IndexPatternSuggestion[]
+): Array<Omit<IndexPatternSuggestion, 'state'>> {
+  return suggestions.map((s) => {
+    const newSuggestion = { ...s } as Omit<IndexPatternSuggestion, 'state'> & {
+      state?: IndexPatternPrivateState;
+    };
+    delete newSuggestion.state;
+    return newSuggestion;
+  });
 }
 
 describe('IndexPattern Data Source suggestions', () => {
@@ -698,6 +713,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   sourceField: 'source',
                   label: 'values of source',
+                  customLabel: true,
                   operationType: 'terms',
                   params: {
                     orderBy: { type: 'column', columnId: 'colb' },
@@ -710,6 +726,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: false,
                   sourceField: 'bytes',
                   label: 'Avg of bytes',
+                  customLabel: true,
                   operationType: 'avg',
                 },
               },
@@ -733,7 +750,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     dataType: 'date',
                     isBucketed: true,
                     sourceField: 'timestamp',
-                    label: 'date histogram of timestamp',
+                    label: 'timestamp',
                     operationType: 'date_histogram',
                     params: {
                       interval: 'w',
@@ -744,6 +761,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     isBucketed: false,
                     sourceField: 'bytes',
                     label: 'Avg of bytes',
+                    customLabel: true,
                     operationType: 'avg',
                   },
                 },
@@ -1008,6 +1026,80 @@ describe('IndexPattern Data Source suggestions', () => {
         const suggestions = getDatasourceSuggestionsForField(modifiedState, '1', documentField);
         expect(suggestions).not.toContain(expect.objectContaining({ changeType: 'extended' }));
       });
+
+      it('hides any referenced metrics when adding new metrics', () => {
+        const initialState = stateWithNonEmptyTables();
+        const modifiedState: IndexPatternPrivateState = {
+          ...initialState,
+          layers: {
+            // ...initialState.layers,
+            currentLayer: {
+              indexPatternId: '1',
+              columnOrder: ['date', 'metric', 'ref'],
+              columns: {
+                date: {
+                  label: '',
+                  customLabel: true,
+                  dataType: 'date',
+                  isBucketed: true,
+                  operationType: 'date_histogram',
+                  sourceField: 'timestamp',
+                  params: { interval: 'auto' },
+                },
+                metric: {
+                  label: '',
+                  customLabel: true,
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'avg',
+                  sourceField: 'bytes',
+                },
+                ref: {
+                  label: '',
+                  customLabel: true,
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'cumulative_sum',
+                  references: ['metric'],
+                },
+              },
+            },
+          },
+        };
+        const suggestions = getSuggestionSubset(
+          getDatasourceSuggestionsForField(modifiedState, '1', documentField)
+        );
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            table: expect.objectContaining({
+              isMultiRow: true,
+              changeType: 'extended',
+              label: undefined,
+              layerId: 'currentLayer',
+              columns: [
+                {
+                  columnId: 'date',
+                  operation: { dataType: 'date', isBucketed: true, label: '' },
+                },
+                {
+                  columnId: 'id1',
+                  operation: {
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: 'Count of records',
+                    scale: 'ratio',
+                  },
+                },
+                {
+                  columnId: 'ref',
+                  operation: { dataType: 'number', isBucketed: false, label: '' },
+                },
+              ],
+            }),
+            keptLayerIds: ['currentLayer'],
+          })
+        );
+      });
     });
 
     describe('finding the layer that is using the current index pattern', () => {
@@ -1121,6 +1213,7 @@ describe('IndexPattern Data Source suggestions', () => {
       });
     });
   });
+
   describe('#getDatasourceSuggestionsForVisualizeField', () => {
     describe('with no layer', () => {
       function stateWithoutLayer() {
@@ -1218,6 +1311,7 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               cola: {
                 label: 'My Op 2',
+                customLabel: true,
                 dataType: 'string',
                 isBucketed: true,
 
@@ -1305,6 +1399,7 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               cola: {
                 label: 'My Op',
+                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'avg',
@@ -1316,7 +1411,7 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      expect(getDatasourceSuggestionsFromCurrentState(state)).toContainEqual(
+      expect(getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state))).toContainEqual(
         expect.objectContaining({
           table: {
             isMultiRow: true,
@@ -1359,6 +1454,7 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               cola: {
                 label: 'My Terms',
+                customLabel: true,
                 dataType: 'string',
                 isBucketed: true,
                 operationType: 'terms',
@@ -1372,6 +1468,7 @@ describe('IndexPattern Data Source suggestions', () => {
               },
               colb: {
                 label: 'My Op',
+                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'avg',
@@ -1383,7 +1480,7 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      expect(getDatasourceSuggestionsFromCurrentState(state)).toContainEqual(
+      expect(getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state))).toContainEqual(
         expect.objectContaining({
           table: {
             isMultiRow: true,
@@ -1442,6 +1539,7 @@ describe('IndexPattern Data Source suggestions', () => {
               },
               colb: {
                 label: 'My Op',
+                customLabel: true,
                 dataType: 'number',
                 isBucketed: true,
                 operationType: 'range',
@@ -1487,6 +1585,7 @@ describe('IndexPattern Data Source suggestions', () => {
               },
               colb: {
                 label: 'My Custom Range',
+                customLabel: true,
                 dataType: 'string',
                 isBucketed: true,
                 operationType: 'range',
@@ -1503,7 +1602,7 @@ describe('IndexPattern Data Source suggestions', () => {
         },
       };
 
-      expect(getDatasourceSuggestionsFromCurrentState(state)).toContainEqual(
+      expect(getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state))).toContainEqual(
         expect.objectContaining({
           table: {
             changeType: 'extended',
@@ -1555,6 +1654,7 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               id1: {
                 label: 'My Op',
+                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'avg',
@@ -1631,6 +1731,7 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               col1: {
                 label: 'My Op',
+                customLabel: true,
                 dataType: 'string',
                 isBucketed: true,
 
@@ -1644,6 +1745,7 @@ describe('IndexPattern Data Source suggestions', () => {
               },
               col2: {
                 label: 'My Op',
+                customLabel: true,
                 dataType: 'string',
                 isBucketed: true,
 
@@ -1657,6 +1759,7 @@ describe('IndexPattern Data Source suggestions', () => {
               },
               col3: {
                 label: 'My Op',
+                customLabel: true,
                 dataType: 'string',
                 isBucketed: true,
 
@@ -1670,6 +1773,7 @@ describe('IndexPattern Data Source suggestions', () => {
               },
               col4: {
                 label: 'My Op',
+                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
 
@@ -1678,6 +1782,7 @@ describe('IndexPattern Data Source suggestions', () => {
               },
               col5: {
                 label: 'My Op',
+                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
 
@@ -1770,7 +1875,7 @@ describe('IndexPattern Data Source suggestions', () => {
             ...initialState.layers.first,
             columns: {
               id1: {
-                label: 'Date histogram',
+                label: 'field2',
                 dataType: 'date',
                 isBucketed: true,
 
@@ -1942,8 +2047,79 @@ describe('IndexPattern Data Source suggestions', () => {
     });
 
     describe('references', () => {
-      it('does not simplify a reference based operation to an invalid state', () => {
-        throw new Error('todo: write all the tests for references');
+      it('will reduce multiple references correctly to a single reference', () => {
+        const initialState = testInitialState();
+        const state: IndexPatternPrivateState = {
+          ...initialState,
+          layers: {
+            ...initialState.layers,
+            first: {
+              ...initialState.layers.first,
+              columnOrder: ['date', 'metric', 'metric2', 'ref', 'ref2'],
+
+              columns: {
+                date: {
+                  label: '',
+                  dataType: 'date',
+                  isBucketed: true,
+                  operationType: 'date_histogram',
+                  sourceField: 'timestamp',
+                  params: { interval: 'auto' },
+                },
+                metric: {
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'count',
+                  sourceField: 'Records',
+                },
+                ref: {
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'cumulative_sum',
+                  references: ['metric'],
+                },
+                metric2: {
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'count',
+                  sourceField: 'Records',
+                },
+                ref2: {
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'cumulative_sum',
+                  references: ['metric2'],
+                },
+              },
+            },
+          },
+        };
+
+        const result = getSuggestionSubset(getDatasourceSuggestionsFromCurrentState(state));
+
+        expect(result).toContainEqual(
+          expect.objectContaining({
+            table: expect.objectContaining({
+              changeType: 'reduced',
+              layerId: 'first',
+              columns: [
+                {
+                  columnId: 'date',
+                  operation: { dataType: 'date', isBucketed: true, label: '' },
+                },
+                {
+                  columnId: 'ref',
+                  operation: { dataType: 'number', isBucketed: false, label: '' },
+                },
+              ],
+            }),
+            keptLayerIds: ['first'],
+          })
+        );
       });
     });
   });

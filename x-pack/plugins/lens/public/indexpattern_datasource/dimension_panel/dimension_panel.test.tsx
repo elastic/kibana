@@ -827,6 +827,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             dataType: 'date',
             isBucketed: true,
             label: '',
+            customLabel: true,
             operationType: 'date_histogram',
             sourceField: 'ts',
             params: {
@@ -845,6 +846,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         columnId: 'col2',
       };
     }
+
     it('should not show custom options if time scaling is not available', () => {
       wrapper = mount(
         <IndexPatternDimensionEditorComponent
@@ -1068,10 +1070,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   it('should support selecting the operation before the field', () => {
-    setState.mockImplementation((newState) => {
-      wrapper.setProps({ state: newState });
-    });
-
     wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} columnId={'col2'} />);
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
@@ -1182,10 +1180,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   it('should indicate compatible fields when selecting the operation first', () => {
-    setState.mockImplementation((newState) => {
-      wrapper.setProps({ state: newState });
-    });
-
     wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} columnId={'col2'} />);
 
     act(() => {

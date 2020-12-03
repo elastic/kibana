@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _, { partition } from 'lodash';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../id_generator';
 import { DatasourceSuggestion, TableChangeType } from '../types';
@@ -18,6 +18,7 @@ import {
   IndexPatternColumn,
   OperationType,
   getExistingColumnGroups,
+  isReferenced,
 } from './operations';
 import { hasField, hasInvalidColumns } from './utils';
 import {
@@ -28,7 +29,7 @@ import {
 } from './types';
 import { documentField } from './document_field';
 
-type IndexPatternSugestion = DatasourceSuggestion<IndexPatternPrivateState>;
+export type IndexPatternSuggestion = DatasourceSuggestion<IndexPatternPrivateState>;
 
 function buildSuggestion({
   state,
@@ -72,10 +73,13 @@ function buildSuggestion({
     },
 
     table: {
-      columns: columnOrder.map((columnId) => ({
-        columnId,
-        operation: columnToOperation(columnMap[columnId]),
-      })),
+      columns: columnOrder
+        // Hide any referenced columns from what visualizations know about
+        .filter((columnId) => !isReferenced(layers[layerId]!, columnId))
+        .map((columnId) => ({
+          columnId,
+          operation: columnToOperation(columnMap[columnId]),
+        })),
       isMultiRow,
       layerId,
       changeType,
@@ -90,7 +94,7 @@ export function getDatasourceSuggestionsForField(
   state: IndexPatternPrivateState,
   indexPatternId: string,
   field: IndexPatternField
-): IndexPatternSugestion[] {
+): IndexPatternSuggestion[] {
   if (hasInvalidColumns(state)) return [];
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
@@ -124,7 +128,7 @@ export function getDatasourceSuggestionsForVisualizeField(
   state: IndexPatternPrivateState,
   indexPatternId: string,
   fieldName: string
-): IndexPatternSugestion[] {
+): IndexPatternSuggestion[] {
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
   // Identify the field by the indexPatternId and the fieldName
@@ -159,7 +163,7 @@ function getExistingLayerSuggestionsForField(
   const fieldInUse = Object.values(layer.columns).some(
     (column) => hasField(column) && column.sourceField === field.name
   );
-  const suggestions: IndexPatternSugestion[] = [];
+  const suggestions: IndexPatternSuggestion[] = [];
 
   if (usableAsBucketOperation && !fieldInUse) {
     if (
@@ -223,7 +227,8 @@ function getExistingLayerSuggestionsForField(
       }
 
       const [, metrics, references] = getExistingColumnGroups(layer);
-      if (metrics.length === 1) {
+      // TODO: Write test for the case where we have exactly one metric and one reference. We shouldn't switch the inner metric.
+      if (metrics.length === 1 && references.length === 0) {
         const layerWithReplacedMetric = replaceColumn({
           layer,
           indexPattern,
@@ -258,7 +263,7 @@ function getEmptyLayerSuggestionsForField(
   layerId: string,
   indexPatternId: string,
   field: IndexPatternField
-): IndexPatternSugestion[] {
+): IndexPatternSuggestion[] {
   const indexPattern = state.indexPatterns[indexPatternId];
   let newLayer: IndexPatternLayer | undefined;
   const bucketOperation = getBucketOperation(field);
@@ -586,7 +591,14 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
         columnOrder: [...bucketedColumns, ...availableMetricColumns],
       };
 
-      if (availableMetricColumns.length > 1) {
+      // Assumes that all references have exactly 1 metric, which might not be true
+      if (availableReferenceColumns.length > 1) {
+        return [
+          allMetricsSuggestion,
+          { ...layer, columnOrder: [...bucketedColumns, availableReferenceColumns[0]] },
+        ];
+      } else if (availableMetricColumns.length > 1 && !availableReferenceColumns.length) {
+        // Only simplify metrics when there are no references
         return [
           allMetricsSuggestion,
           { ...layer, columnOrder: [...bucketedColumns, availableMetricColumns[0]] },
@@ -597,10 +609,12 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
     })
   )
     .concat(
-      availableMetricColumns.map((columnId) => {
-        // build suggestions with only metrics
-        return { ...layer, columnOrder: [columnId] };
-      })
+      availableReferenceColumns.length
+        ? []
+        : availableMetricColumns.map((columnId) => {
+            // build suggestions with only metrics
+            return { ...layer, columnOrder: [columnId] };
+          })
     )
     .map((updatedLayer) => {
       return buildSuggestion({
