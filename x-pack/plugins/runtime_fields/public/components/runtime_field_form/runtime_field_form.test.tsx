@@ -18,7 +18,7 @@ const setup = (props?: Props) =>
   })(props) as TestBed;
 
 const links = {
-  painlessSyntax: 'https://jestTest.elastic.co/to-be-defined.html',
+  runtimePainless: 'https://jestTest.elastic.co/to-be-defined.html',
 };
 
 describe('Runtime field form', () => {
@@ -45,7 +45,7 @@ describe('Runtime field form', () => {
     const { exists, find } = testBed;
 
     expect(exists('painlessSyntaxLearnMoreLink')).toBe(true);
-    expect(find('painlessSyntaxLearnMoreLink').props().href).toBe(links.painlessSyntax);
+    expect(find('painlessSyntaxLearnMoreLink').props().href).toBe(links.runtimePainless);
   });
 
   test('should accept a "defaultValue" prop', () => {

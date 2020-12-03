@@ -93,10 +93,7 @@ describe('Runtime field editor flyout', () => {
 
       expect(onSave).toHaveBeenCalledTimes(0);
       expect(find('saveFieldButton').props().disabled).toBe(true);
-      expect(form.getErrorsMessages()).toEqual([
-        'Give a name to the field.',
-        'Script must emit() a value.',
-      ]);
+      expect(form.getErrorsMessages()).toEqual(['Give a name to the field.']);
       expect(exists('formError')).toBe(true);
       expect(find('formError').text()).toBe('Fix errors in form before continuing.');
     });
