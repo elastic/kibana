@@ -9,12 +9,11 @@ import { fold, map } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as runtimeTypes from 'io-ts';
-import { compact, first } from 'lodash';
+import { compact } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import { JsonArray } from '../../../../common/typed_json';
 import {
   LogEntriesAdapter,
-  LogItemHit,
   LogEntriesParams,
   LogEntryDocument,
   LogEntryQuery,
@@ -198,41 +197,6 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       ),
       fold(constant([]), identity)
     );
-  }
-
-  public async getLogItem(
-    requestContext: RequestHandlerContext,
-    id: string,
-    sourceConfiguration: InfraSourceConfiguration
-  ) {
-    const search = (searchOptions: object) =>
-      this.framework.callWithRequest<LogItemHit, {}>(requestContext, 'search', searchOptions);
-
-    const params = {
-      index: sourceConfiguration.logAlias,
-      terminate_after: 1,
-      body: {
-        size: 1,
-        sort: [
-          { [sourceConfiguration.fields.timestamp]: 'desc' },
-          { [sourceConfiguration.fields.tiebreaker]: 'desc' },
-        ],
-        query: {
-          ids: {
-            values: [id],
-          },
-        },
-        fields: ['*'],
-        _source: false,
-      },
-    };
-
-    const response = await search(params);
-    const document = first(response.hits.hits);
-    if (!document) {
-      throw new Error('Document not found');
-    }
-    return document;
   }
 }
 
