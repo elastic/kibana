@@ -7,7 +7,7 @@
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { transactionFetcher, Options } from '../fetcher';
 
-export async function getTransactionGroupList(
+export async function getTransactionList(
   options: Options,
   setup: Setup & SetupTimeRange
 ) {

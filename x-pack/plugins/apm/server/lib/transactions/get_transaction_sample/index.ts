@@ -14,7 +14,7 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
-export async function getTransactionSampleForGroup({
+export async function getTransactionSample({
   serviceName,
   transactionName,
   setup,

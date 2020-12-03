@@ -15,10 +15,10 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getTransactionCharts } from '../lib/transactions/charts';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
-import { getTransactionGroupList } from '../lib/transactions/get_transaction_list';
+import { getTransactionList } from '../lib/transactions/get_transaction_list';
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
-import { getTransactionSampleForGroup } from '../lib/transactions/get_transaction_sample';
+import { getTransactionSample } from '../lib/transactions/get_transaction_sample';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getErrorRate } from '../lib/transactions/get_error_rate';
 
@@ -46,7 +46,7 @@ export const transactionRoute = createRoute({
       setup
     );
 
-    return getTransactionGroupList(
+    return getTransactionList(
       {
         type: 'top_transactions',
         serviceName,
@@ -197,7 +197,7 @@ export const transactionSampleForGroupRoute = createRoute({
     const { transactionName, serviceName } = context.params.query;
 
     return {
-      transaction: await getTransactionSampleForGroup({
+      transaction: await getTransactionSample({
         setup,
         serviceName,
         transactionName,
