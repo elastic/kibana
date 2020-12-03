@@ -18,7 +18,6 @@ import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionList } from '../lib/transactions/get_transaction_list';
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
-import { getTransactionSample } from '../lib/transactions/get_transaction_sample';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getErrorRate } from '../lib/transactions/get_error_rate';
 
@@ -178,31 +177,6 @@ export const transactionBreakdownRoute = createRoute({
       transactionType,
       setup,
     });
-  },
-});
-
-export const transactionSampleForGroupRoute = createRoute({
-  endpoint: `GET /api/apm/transaction_sample`,
-  params: t.type({
-    query: t.intersection([
-      uiFiltersRt,
-      rangeRt,
-      t.type({ serviceName: t.string, transactionName: t.string }),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-
-    const { transactionName, serviceName } = context.params.query;
-
-    return {
-      transaction: await getTransactionSample({
-        setup,
-        serviceName,
-        transactionName,
-      }),
-    };
   },
 });
 
