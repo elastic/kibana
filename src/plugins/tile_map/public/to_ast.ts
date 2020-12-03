@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { TileMapVisParams } from '../../maps_legacy/public';
 import { EsaggsExpressionFunctionDefinition } from '../../data/common/search/expressions';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { getVisSchemas, Vis, BuildPipelineParams } from '../../visualizations/public';
 import { TileMapExpressionFunctionDefinition } from './tile_map_fn';
-import { TileMapVisConfig } from './types';
+import { TileMapVisConfig, TileMapVisParams } from './types';
 
 export const toExpressionAst = (vis: Vis<TileMapVisParams>, params: BuildPipelineParams) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
