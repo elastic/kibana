@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
+import mime from 'mime-types';
+import path from 'path';
 import { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
 import {
   GetInfoResponse,
@@ -43,6 +45,8 @@ import {
 import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
 import { licenseService } from '../../services';
+import { getArchiveEntry } from '../../services/epm/archive/cache';
+import { bufferToStream } from '../../services/epm/streams';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -102,22 +106,51 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
 ) => {
   try {
     const { pkgName, pkgVersion, filePath } = request.params;
-    const registryResponse = await getFile(`/package/${pkgName}/${pkgVersion}/${filePath}`);
-
-    const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
-    const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
-      const value = registryResponse.headers.get(knownHeader);
-      if (value !== null) {
-        headers[knownHeader] = value;
+    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObject = await getInstallationObject({ savedObjectsClient, pkgName });
+    const pkgInstallSource = savedObject?.attributes.install_source;
+    // TODO: when package storage is available, remove installSource check and check cache and storage, remove registry call
+    if (pkgInstallSource === 'upload' && pkgVersion === savedObject?.attributes.version) {
+      const headerContentType = mime.contentType(path.extname(filePath));
+      if (!headerContentType) {
+        return response.custom({
+          body: `unknown content type for file: ${filePath}`,
+          statusCode: 400,
+        });
       }
-      return headers;
-    }, {} as ResponseHeaders);
+      const archiveFile = getArchiveEntry(`${pkgName}-${pkgVersion}/${filePath}`);
+      if (!archiveFile) {
+        return response.custom({
+          body: `uploaded package file not found: ${filePath}`,
+          statusCode: 404,
+        });
+      }
+      const headers: ResponseHeaders = {
+        'cache-control': 'max-age=10, public',
+        'content-type': headerContentType,
+      };
+      return response.custom({
+        body: bufferToStream(archiveFile),
+        statusCode: 200,
+        headers,
+      });
+    } else {
+      const registryResponse = await getFile(`/package/${pkgName}/${pkgVersion}/${filePath}`);
+      const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
+      const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
+        const value = registryResponse.headers.get(knownHeader);
+        if (value !== null) {
+          headers[knownHeader] = value;
+        }
+        return headers;
+      }, {} as ResponseHeaders);
 
-    return response.custom({
-      body: registryResponse.body,
-      statusCode: registryResponse.status,
-      headers: proxiedHeaders,
-    });
+      return response.custom({
+        body: registryResponse.body,
+        statusCode: registryResponse.status,
+        headers: proxiedHeaders,
+      });
+    }
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
