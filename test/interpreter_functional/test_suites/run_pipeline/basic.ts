@@ -54,10 +54,11 @@ export default function ({
 
     // rather we want to use this to do integration tests.
     describe('full expression', () => {
-      const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
-          {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
-          {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
-            {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
+      const expression = `kibana | kibana_context | esaggs index={indexPatternLoad id='logstash-*'}
+          aggConfigs='[
+            {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
+            {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
+              {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
           }]'  | 
         metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}
       `;
@@ -94,10 +95,11 @@ export default function ({
     // possible to retrieve the intermediate result and reuse it in later expressions
     describe('reusing partial results', () => {
       it('does some screenshot comparisons', async () => {
-        const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
-          {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
-          {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
-            {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
+        const expression = `kibana | kibana_context | esaggs index={indexPatternLoad id='logstash-*'}
+          aggConfigs='[
+            {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
+            {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
+              {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
           }]'`;
         // we execute the part of expression that fetches the data and store its response
         const context = await expectExpression('partial_test', expression).getResponse();

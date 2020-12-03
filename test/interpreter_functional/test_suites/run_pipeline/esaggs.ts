@@ -48,7 +48,9 @@ export default function ({
         };
         const expression = `
           kibana_context timeRange='${JSON.stringify(timeRange)}'
-          | esaggs index='logstash-*' aggConfigs='${JSON.stringify(aggConfigs)}'
+          | esaggs index={indexPatternLoad id='logstash-*'} aggConfigs='${JSON.stringify(
+            aggConfigs
+          )}'
         `;
         const result = await expectExpression('esaggs_primary_timefield', expression).getResponse();
         expect(getCell(result, 0, 0)).to.be(9375);
@@ -62,7 +64,7 @@ export default function ({
         };
         const expression = `
           kibana_context timeRange='${JSON.stringify(timeRange)}'
-          | esaggs index='logstash-*' timeFields='relatedContent.article:published_time' aggConfigs='${JSON.stringify(
+          | esaggs index={indexPatternLoad id='logstash-*'} timeFields='relatedContent.article:published_time' aggConfigs='${JSON.stringify(
             aggConfigs
           )}'
         `;
@@ -78,7 +80,7 @@ export default function ({
         };
         const expression = `
           kibana_context timeRange='${JSON.stringify(timeRange)}'
-          | esaggs index='logstash-*' timeFields='relatedContent.article:published_time' timeFields='@timestamp' aggConfigs='${JSON.stringify(
+          | esaggs index={indexPatternLoad id='logstash-*'} timeFields='relatedContent.article:published_time' timeFields='@timestamp' aggConfigs='${JSON.stringify(
             aggConfigs
           )}'
         `;

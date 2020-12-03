@@ -4,16 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
+import {
+  EsaggsExpressionFunctionDefinition,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from '../../../../../src/plugins/data/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionAstExpression,
+  ExpressionAstFunction,
+} from '../../../../../src/plugins/expressions/public';
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
 
-function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPattern): Ast | null {
+function getExpressionForLayer(
+  layer: IndexPatternLayer,
+  indexPattern: IndexPattern
+): ExpressionAstExpression | null {
   const { columns, columnOrder } = layer;
-
   if (columnOrder.length === 0) {
     return null;
   }
@@ -22,7 +33,7 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
 
   if (columnEntries.length) {
     const aggs: unknown[] = [];
-    const expressions: ExpressionFunctionAST[] = [];
+    const expressions: ExpressionAstFunction[] = [];
     columnEntries.forEach(([colId, col]) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input === 'fullReference') {
@@ -65,13 +76,13 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
         (('format' in col.params && col.params.format) ||
           ('parentFormat' in col.params && col.params.parentFormat))
     ) as Array<[string, FormattedColumn]>;
-    const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(
+    const formatterOverrides: ExpressionAstFunction[] = columnsWithFormatters.map(
       ([id, col]: [string, FormattedColumn]) => {
         // TODO: improve the type handling here
         const parentFormat = 'parentFormat' in col.params ? col.params!.parentFormat! : undefined;
         const format = (col as FormattedColumn).params!.format;
 
-        const base: ExpressionFunctionAST = {
+        const base: ExpressionAstFunction = {
           type: 'function',
           function: 'lens_format_column',
           arguments: {
@@ -98,9 +109,9 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
             operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
         )
       : [];
-    const timeScaleFunctions: ExpressionFunctionAST[] = columnsWithTimeScale.flatMap(
+    const timeScaleFunctions: ExpressionAstFunction[] = columnsWithTimeScale.flatMap(
       ([id, col]) => {
-        const scalingCall: ExpressionFunctionAST = {
+        const scalingCall: ExpressionAstFunction = {
           type: 'function',
           function: 'lens_time_scale',
           arguments: {
@@ -111,7 +122,7 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
           },
         };
 
-        const formatCall: ExpressionFunctionAST = {
+        const formatCall: ExpressionAstFunction = {
           type: 'function',
           function: 'lens_format_column',
           arguments: {
@@ -134,17 +145,18 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
     return {
       type: 'expression',
       chain: [
-        {
-          type: 'function',
-          function: 'esaggs',
-          arguments: {
-            index: [indexPattern.id],
-            metricsAtAllLevels: [false],
-            partialRows: [false],
-            timeFields: allDateHistogramFields,
-            aggConfigs: [JSON.stringify(aggs)],
-          },
-        },
+        buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+          index: buildExpression([
+            buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
+              'indexPatternLoad',
+              { id: indexPattern.id }
+            ),
+          ]),
+          metricsAtAllLevels: false,
+          partialRows: false,
+          timeFields: allDateHistogramFields,
+          aggConfigs: JSON.stringify(aggs),
+        }).toAst(),
         {
           type: 'function',
           function: 'lens_rename_columns',

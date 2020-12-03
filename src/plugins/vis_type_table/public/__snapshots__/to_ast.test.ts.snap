@@ -9,7 +9,20 @@ Object {
           "[]",
         ],
         "index": Array [
-          "123",
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "id": Array [
+                    "123",
+                  ],
+                },
+                "function": "indexPatternLoad",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
         ],
         "metricsAtAllLevels": Array [
           false,
@@ -44,7 +57,20 @@ Object {
           "[]",
         ],
         "index": Array [
-          "123",
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "id": Array [
+                    "123",
+                  ],
+                },
+                "function": "indexPatternLoad",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
         ],
         "metricsAtAllLevels": Array [
           false,

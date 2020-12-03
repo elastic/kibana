@@ -328,7 +328,20 @@ describe('IndexPattern Data Source', () => {
                   "[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]",
                 ],
                 "index": Array [
-                  "1",
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "id": Array [
+                            "1",
+                          ],
+                        },
+                        "function": "indexPatternLoad",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
                 ],
                 "metricsAtAllLevels": Array [
                   false,

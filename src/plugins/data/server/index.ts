@@ -156,6 +156,7 @@ export {
   IndexPatternAttributes,
   UI_SETTINGS,
   IndexPattern,
+  IndexPatternLoadExpressionFunctionDefinition,
 } from '../common';
 
 /**

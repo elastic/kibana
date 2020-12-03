@@ -21,7 +21,10 @@ import { get } from 'lodash';
 import { getVisSchemas, SchemaConfig, Vis } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { MetricVisExpressionFunctionDefinition } from './metric_vis_fn';
-import { EsaggsExpressionFunctionDefinition } from '../../data/common/search/expressions';
+import {
+  EsaggsExpressionFunctionDefinition,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from '../../data/public';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -37,7 +40,11 @@ const prepareDimension = (params: SchemaConfig) => {
 export const toExpressionAst = (vis: Vis, params: any) => {
   // soon this becomes: const esaggs = vis.data.aggs!.toExpressionAst();
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: vis.data.indexPattern!.id!,
+    index: buildExpression([
+      buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
+        id: vis.data.indexPattern!.id!,
+      }),
+    ]),
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: vis.params.showPartialRows || false,
     aggConfigs: JSON.stringify(vis.data.aggs!.aggs),

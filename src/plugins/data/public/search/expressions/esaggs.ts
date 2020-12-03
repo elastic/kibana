@@ -57,7 +57,7 @@ export function getFunctionDefinition({
       } = await getStartDependencies();
 
       const aggConfigsState = JSON.parse(args.aggConfigs);
-      const indexPattern = await indexPatterns.get(args.index);
+      const indexPattern = await indexPatterns.create(args.index.value);
       const aggConfigs = aggs.createAggConfigs(indexPattern, aggConfigsState);
 
       return await handleEsaggsRequest(input, args, {

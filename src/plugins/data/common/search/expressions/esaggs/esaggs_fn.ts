@@ -26,6 +26,7 @@ import {
 } from 'src/plugins/expressions/common';
 
 import { FormatFactory } from '../../../field_formats/utils';
+import { IndexPatternExpressionType } from '../../../index_patterns/expressions';
 import { IndexPatternsContract } from '../../../index_patterns/index_patterns';
 import { calculateBounds } from '../../../query';
 
@@ -42,7 +43,7 @@ type Input = KibanaContext | null;
 type Output = Promise<Datatable>;
 
 interface Arguments {
-  index: string;
+  index: IndexPatternExpressionType;
   metricsAtAllLevels: boolean;
   partialRows: boolean;
   aggConfigs: string;
@@ -75,7 +76,7 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
   }),
   args: {
     index: {
-      types: ['string'],
+      types: ['index_pattern'],
       help: i18n.translate('data.search.functions.esaggs.index.help', {
         defaultMessage: 'Index pattern retrieved with indexPatternLoad',
       }),

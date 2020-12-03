@@ -23,9 +23,15 @@ import { IndexPatternsContract } from '../index_patterns';
 import { IndexPatternSpec } from '..';
 
 const name = 'indexPatternLoad';
+const type = 'index_pattern';
+
+export interface IndexPatternExpressionType {
+  type: typeof type;
+  value: IndexPatternSpec;
+}
 
 type Input = null;
-type Output = Promise<{ type: 'index_pattern'; value: IndexPatternSpec }>;
+type Output = Promise<IndexPatternExpressionType>;
 
 interface Arguments {
   id: string;
@@ -48,7 +54,7 @@ export const getIndexPatternLoadMeta = (): Omit<
   'fn'
 > => ({
   name,
-  type: 'index_pattern',
+  type,
   inputTypes: ['null'],
   help: i18n.translate('data.functions.indexPatternLoad.help', {
     defaultMessage: 'Loads an index pattern',
