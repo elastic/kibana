@@ -192,6 +192,7 @@ const RuntimeFieldFormComp = ({
             title={i18n.translate('xpack.runtimeFields.form.fieldShadowingCalloutTitle', {
               defaultMessage: 'Field shadowing',
             })}
+            color="warning"
             iconType="pin"
             size="s"
             data-test-subj="shadowingFieldCallout"
