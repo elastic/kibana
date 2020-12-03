@@ -7,16 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
-import { ESGeoLineSource, geoLineTitle } from './es_geo_line_source';
+import { ESGeoLineSource, geoLineTitle, REQUIRES_GOLD_LICENSE_MSG } from './es_geo_line_source';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { ColorDynamicOptions } from '../../../../common/descriptor_types';
-import {
-  COLOR_MAP_TYPE,
-  FIELD_ORIGIN,
-  LAYER_WIZARD_CATEGORY,
-  STYLE_TYPE,
-  VECTOR_STYLES,
-} from '../../../../common/constants';
+import { LAYER_WIZARD_CATEGORY, STYLE_TYPE, VECTOR_STYLES } from '../../../../common/constants';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
@@ -28,10 +21,7 @@ export const geoLineLayerWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.esGeoLineDescription', {
     defaultMessage: 'Connect points into lines',
   }),
-  disabledReason: i18n.translate('xpack.maps.source.esGeoLineDisabledReason', {
-    defaultMessage: '{title} requires a Gold license.',
-    values: { title: geoLineTitle },
-  }),
+  disabledReason: REQUIRES_GOLD_LICENSE_MSG,
   icon: TracksLayerIcon,
   getIsDisabled: () => {
     return !getIsGoldPlus();
@@ -54,19 +44,6 @@ export const geoLineLayerWizardConfig: LayerWizard = {
       const layerDescriptor = VectorLayer.createDescriptor({
         sourceDescriptor: ESGeoLineSource.createDescriptor(sourceConfig),
         style: VectorStyle.createDescriptor({
-          [VECTOR_STYLES.LINE_COLOR]: {
-            type: STYLE_TYPE.DYNAMIC,
-            options: {
-              ...(defaultDynamicProperties[VECTOR_STYLES.LINE_COLOR]!
-                .options as ColorDynamicOptions),
-              field: {
-                name: sourceConfig.splitField,
-                origin: FIELD_ORIGIN.SOURCE,
-              },
-              colorCategory: 'palette_30',
-              type: COLOR_MAP_TYPE.CATEGORICAL,
-            },
-          },
           [VECTOR_STYLES.LINE_WIDTH]: {
             type: STYLE_TYPE.STATIC,
             options: {
@@ -75,6 +52,7 @@ export const geoLineLayerWizardConfig: LayerWizard = {
           },
         }),
       });
+      layerDescriptor.alpha = 1;
       previewLayers([layerDescriptor]);
     };
 

@@ -30,12 +30,21 @@ import { Adapters } from '../../../../../../../src/plugins/inspector/common/adap
 import { IField } from '../../fields/field';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { getIsGoldPlus } from '../../../licensed_features';
 
 const MAX_TRACKS = 1000;
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
   defaultMessage: 'Tracks',
 });
+
+export const REQUIRES_GOLD_LICENSE_MSG = i18n.translate(
+  'xpack.maps.source.esGeoLineDisabledReason',
+  {
+    defaultMessage: '{title} requires a Gold license.',
+    values: { title: geoLineTitle },
+  }
+);
 
 export class ESGeoLineSource extends AbstractESAggSource {
   static createDescriptor(
@@ -159,6 +168,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
+    if (!getIsGoldPlus()) {
+      throw new Error(REQUIRES_GOLD_LICENSE_MSG);
+    }
+
     const indexPattern = await this.getIndexPattern();
 
     // Request is broken into 2 requests
