@@ -117,4 +117,7 @@ module.exports = {
     '!**/*.d.ts',
     '!**/index.{js,ts}',
   ],
+
+  // Automatically clear mock calls and instances before every test. Equivalent to calling jest.clearAllMocks() before each test.
+  clearMocks: true,
 };
