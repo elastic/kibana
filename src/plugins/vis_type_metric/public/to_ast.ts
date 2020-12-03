@@ -41,7 +41,6 @@ export const toExpressionAst = (vis: Vis, params: any) => {
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: vis.params.showPartialRows || false,
     aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
   });
 
   const schemas = getVisSchemas(vis, params);

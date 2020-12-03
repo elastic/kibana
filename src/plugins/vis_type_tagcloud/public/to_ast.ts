@@ -40,7 +40,6 @@ export const toExpressionAst = (vis: Vis<TagCloudVisParams>, params: BuildPipeli
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: false,
     aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
   });
 
   const schemas = getVisSchemas(vis, params);

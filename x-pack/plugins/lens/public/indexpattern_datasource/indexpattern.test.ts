@@ -327,9 +327,6 @@ describe('IndexPattern Data Source', () => {
                 "aggConfigs": Array [
                   "[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]",
                 ],
-                "includeFormatHints": Array [
-                  true,
-                ],
                 "index": Array [
                   "1",
                 ],

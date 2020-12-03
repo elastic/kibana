@@ -8,9 +8,6 @@ Object {
         "aggConfigs": Array [
           "[]",
         ],
-        "includeFormatHints": Array [
-          false,
-        ],
         "index": Array [
           "123",
         ],
@@ -45,9 +42,6 @@ Object {
       "arguments": Object {
         "aggConfigs": Array [
           "[]",
-        ],
-        "includeFormatHints": Array [
-          false,
         ],
         "index": Array [
           "123",

@@ -141,7 +141,6 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
             index: [indexPattern.id],
             metricsAtAllLevels: [false],
             partialRows: [false],
-            includeFormatHints: [true],
             timeFields: allDateHistogramFields,
             aggConfigs: [JSON.stringify(aggs)],
           },

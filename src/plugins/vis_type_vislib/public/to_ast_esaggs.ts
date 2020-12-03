@@ -35,6 +35,5 @@ export function getEsaggsFn(vis: Vis<PieVisParams> | Vis<BasicVislibParams>) {
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: false,
     aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
   });
 }

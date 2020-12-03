@@ -53,7 +53,6 @@ export const toExpressionAst = (vis: Vis<TableVisParams>, params: BuildPipelineP
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: vis.params.showPartialRows,
     aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
   });
 
   const schemas = getVisSchemas(vis, params);

@@ -45,7 +45,6 @@ interface Arguments {
   index: string;
   metricsAtAllLevels: boolean;
   partialRows: boolean;
-  includeFormatHints: boolean;
   aggConfigs: string;
   timeFields?: string[];
 }
@@ -93,13 +92,6 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
       default: false,
       help: i18n.translate('data.search.functions.esaggs.partialRows.help', {
         defaultMessage: 'Whether to return rows that only contain partial data',
-      }),
-    },
-    includeFormatHints: {
-      types: ['boolean'],
-      default: false,
-      help: i18n.translate('data.search.functions.esaggs.includeFormatHints.help', {
-        defaultMessage: 'Whether to include a serialized field format',
       }),
     },
     aggConfigs: {
