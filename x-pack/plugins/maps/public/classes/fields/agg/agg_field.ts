@@ -59,6 +59,15 @@ export class AggField extends CountAggField {
     return this._esDocField ? this._esDocField.getName() : '';
   }
 
+  async getLabel(): Promise<string> {
+    return this._label
+      ? this._label
+      : this._source.getAggLabel(
+          this._aggType,
+          this._esDocField ? await this._esDocField.getLabel() : ''
+        );
+  }
+
   async getDataType(): Promise<string> {
     return this._getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
   }

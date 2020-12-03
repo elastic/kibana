@@ -102,13 +102,13 @@ export class ESTermSource extends AbstractESAggSource {
     });
   }
 
-  async getAggLabel(aggType: AGG_TYPE, fieldName: string): Promise<string> {
+  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string {
     return aggType === AGG_TYPE.COUNT
       ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
           defaultMessage: `Count of {indexPatternTitle}`,
           values: { indexPatternTitle: this._descriptor.indexPatternTitle },
         })
-      : super.getAggLabel(aggType, fieldName);
+      : super.getAggLabel(aggType, fieldLabel);
   }
 
   async getPropertiesMap(

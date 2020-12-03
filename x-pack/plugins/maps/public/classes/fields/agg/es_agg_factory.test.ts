@@ -18,17 +18,7 @@ const mockIndexPattern = {
   ],
 } as IIndexPattern;
 
-const mockEsAggSource = {
-  getAggKey: (aggType: AGG_TYPE, fieldName: string) => {
-    return 'agg_key';
-  },
-  getAggLabel: (aggType: AGG_TYPE, fieldName: string) => {
-    return 'agg_label';
-  },
-  getIndexPattern: async () => {
-    return mockIndexPattern;
-  },
-} as IESAggSource;
+const mockEsAggSource = ({} as undefined) as IESAggSource;
 
 describe('esAggFieldsFactory', () => {
   test('Should only create top terms field when term field is not provided', () => {
