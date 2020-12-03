@@ -41,11 +41,11 @@ describe('ConfigPanel', () => {
       datasourceMap: {
         ds1: mockDatasource,
       },
-      activeVisualization: {
+      activeVisualization: ({
         ...mockVisualization,
         getLayerIds: () => Object.keys(frame.datasourceLayers),
         appendLayer: true,
-      },
+      } as unknown) as Visualization,
       datasourceStates: {
         ds1: {
           isLoading: false,

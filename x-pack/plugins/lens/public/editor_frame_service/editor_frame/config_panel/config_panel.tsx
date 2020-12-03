@@ -37,7 +37,7 @@ const getFirstFocusable = (el: HTMLElement | null) => {
   return (firstFocusable as unknown) as { focus: () => void };
 };
 
-export function useFocusUpdate(layerIds: string[]) {
+function useFocusUpdate(layerIds: string[]) {
   const [lastUpdated, setLastUpdated] = useState<{
     type: 'ADD_LAYER' | 'REMOVE_OR_CLEAR_LAYER';
     id: string;
