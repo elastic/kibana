@@ -130,7 +130,6 @@ export const HotPhase: FunctionComponent = () => {
             path="_meta.hot.useRollover"
             component={ToggleField}
             componentProps={{
-              hasEmptyLabelSpace: true,
               fullWidth: false,
               euiFieldProps: {
                 'data-test-subj': 'rolloverSwitch',
