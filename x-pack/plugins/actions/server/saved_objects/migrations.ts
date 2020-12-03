@@ -19,17 +19,26 @@ type ActionMigration = (
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
+  console.log('getMigrations arrives');
   const migrationActionsTen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      !!doc.attributes.config?.casesConfiguration || doc.attributes.actionTypeId === '.email',
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => {
+      console.log('migrationActionsTen');
+      return (
+        !!doc.attributes.config?.casesConfiguration || doc.attributes.actionTypeId === '.email'
+      );
+    },
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
 
   const migrationActionsEleven = encryptedSavedObjects.createMigration<RawAction, RawAction>(
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      !!doc.attributes.config?.isCaseOwned ||
-      !!doc.attributes.config?.incidentConfiguration ||
-      doc.attributes.actionTypeId === '.webhook',
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => {
+      console.log('migrationActionsEleven');
+      return (
+        !!doc.attributes.config?.isCaseOwned ||
+        !!doc.attributes.config?.incidentConfiguration ||
+        doc.attributes.actionTypeId === '.webhook'
+      );
+    },
     pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
   );
 
@@ -43,10 +52,13 @@ function executeMigrationWithErrorHandling(
   migrationFunc: SavedObjectMigrationFn<RawAction, RawAction>,
   version: string
 ) {
+  console.log('executeMigrationWithErrorHandling 1111', { version, migrationFunc });
   return (doc: SavedObjectUnsanitizedDoc<RawAction>, context: SavedObjectMigrationContext) => {
     try {
+      console.log('executeMigrationWithErrorHandling 2222', { doc, context });
       return migrationFunc(doc, context);
     } catch (ex) {
+      console.log('executeMigrationWithErrorHandling 3333', ex);
       context.log.error(
         `encryptedSavedObject ${version} migration failed for action ${doc.id} with error: ${ex.message}`,
         { actionDocument: doc }
