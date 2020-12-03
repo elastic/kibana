@@ -63,7 +63,7 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
     router.handleLegacyErrors(
       handleErrors(
         assertIndexPatternsContext(async (ctx, req, res) => {
-          const ip = ctx.indexPatterns.indexPatterns;
+          const ip = ctx.indexPatterns.indexPatterns!;
           const id = req.params.id;
 
           const indexPattern = await ip.get(id);

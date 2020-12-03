@@ -41,7 +41,7 @@ export const registerDeleteIndexPatternRoute = (router: IRouter) => {
     router.handleLegacyErrors(
       handleErrors(
         assertIndexPatternsContext(async (ctx, req, res) => {
-          const ip = ctx.indexPatterns.indexPatterns;
+          const ip = ctx.indexPatterns.indexPatterns!;
           const id = req.params.id;
 
           await ip.delete(id);

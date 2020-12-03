@@ -67,7 +67,7 @@ export const registerCreateIndexPatternRoute = (router: IRouter) => {
     router.handleLegacyErrors(
       handleErrors(
         assertIndexPatternsContext(async (ctx, req, res) => {
-          const ip = ctx.indexPatterns.indexPatterns;
+          const ip = ctx.indexPatterns.indexPatterns!;
           const body = req.body;
           const indexPattern = await ip.createAndSave(
             body.index_pattern as IndexPatternSpec,
