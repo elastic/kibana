@@ -394,6 +394,9 @@ export interface RequestHandlerContext {
     elasticsearch: {
       client: IScopedClusterClient;
       legacy: {
+        /*
+         * @deprecated Use {@link IScopedClusterClient}.
+         */
         client: ILegacyScopedClusterClient;
       };
     };

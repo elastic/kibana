@@ -111,31 +111,78 @@ describe('Authenticator', () => {
       ).toThrowError('Provider name "__http__" is reserved.');
     });
 
-    it('properly sets `loggedOut` URL.', () => {
-      const basicAuthenticationProviderMock = jest.requireMock('./providers/basic')
-        .BasicAuthenticationProvider;
+    describe('#options.urls.loggedOut', () => {
+      it('points to /login if provider requires login form', () => {
+        const authenticationProviderMock = jest.requireMock(`./providers/basic`)
+          .BasicAuthenticationProvider;
+        authenticationProviderMock.mockClear();
+        new Authenticator(getMockOptions());
+        const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
 
-      basicAuthenticationProviderMock.mockClear();
-      new Authenticator(getMockOptions());
-      expect(basicAuthenticationProviderMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          urls: {
-            loggedOut: '/mock-server-basepath/security/logged_out',
-          },
-        }),
-        expect.anything()
-      );
+        expect(getLoggedOutURL(httpServerMock.createKibanaRequest())).toBe(
+          '/mock-server-basepath/login?msg=LOGGED_OUT'
+        );
 
-      basicAuthenticationProviderMock.mockClear();
-      new Authenticator(getMockOptions({ selector: { enabled: true } }));
-      expect(basicAuthenticationProviderMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          urls: {
-            loggedOut: `/mock-server-basepath/login?msg=LOGGED_OUT`,
-          },
-        }),
-        expect.anything()
-      );
+        expect(
+          getLoggedOutURL(
+            httpServerMock.createKibanaRequest({
+              query: { next: '/app/ml/encode me', msg: 'SESSION_EXPIRED' },
+            })
+          )
+        ).toBe('/mock-server-basepath/login?next=%2Fapp%2Fml%2Fencode+me&msg=SESSION_EXPIRED');
+      });
+
+      it('points to /login if login selector is enabled', () => {
+        const authenticationProviderMock = jest.requireMock(`./providers/saml`)
+          .SAMLAuthenticationProvider;
+        authenticationProviderMock.mockClear();
+        new Authenticator(
+          getMockOptions({
+            selector: { enabled: true },
+            providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+          })
+        );
+        const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+        expect(getLoggedOutURL(httpServerMock.createKibanaRequest())).toBe(
+          '/mock-server-basepath/login?msg=LOGGED_OUT'
+        );
+
+        expect(
+          getLoggedOutURL(
+            httpServerMock.createKibanaRequest({
+              query: { next: '/app/ml/encode me', msg: 'SESSION_EXPIRED' },
+            })
+          )
+        ).toBe('/mock-server-basepath/login?next=%2Fapp%2Fml%2Fencode+me&msg=SESSION_EXPIRED');
+      });
+
+      it('points to /security/logged_out if login selector is NOT enabled', () => {
+        const authenticationProviderMock = jest.requireMock(`./providers/saml`)
+          .SAMLAuthenticationProvider;
+        authenticationProviderMock.mockClear();
+        new Authenticator(
+          getMockOptions({
+            selector: { enabled: false },
+            providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+          })
+        );
+        const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+        expect(getLoggedOutURL(httpServerMock.createKibanaRequest())).toBe(
+          '/mock-server-basepath/security/logged_out?msg=LOGGED_OUT'
+        );
+
+        expect(
+          getLoggedOutURL(
+            httpServerMock.createKibanaRequest({
+              query: { next: '/app/ml/encode me', msg: 'SESSION_EXPIRED' },
+            })
+          )
+        ).toBe(
+          '/mock-server-basepath/security/logged_out?next=%2Fapp%2Fml%2Fencode+me&msg=SESSION_EXPIRED'
+        );
+      });
     });
 
     describe('HTTP authentication provider', () => {
@@ -1769,7 +1816,9 @@ describe('Authenticator', () => {
     });
 
     it('if session does not exist but provider name is valid, returns whatever authentication provider returns.', async () => {
-      const request = httpServerMock.createKibanaRequest({ query: { provider: 'basic1' } });
+      const request = httpServerMock.createKibanaRequest({
+        query: { provider: 'basic1' },
+      });
       mockOptions.session.get.mockResolvedValue(null);
 
       mockBasicAuthenticationProvider.logout.mockResolvedValue(
@@ -1782,7 +1831,7 @@ describe('Authenticator', () => {
 
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledWith(request, null);
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.clear).toHaveBeenCalled();
     });
 
     it('if session does not exist and provider name is not available, returns whatever authentication provider returns.', async () => {
@@ -1811,7 +1860,7 @@ describe('Authenticator', () => {
       );
 
       expect(mockBasicAuthenticationProvider.logout).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.clear).toHaveBeenCalled();
     });
   });
 
