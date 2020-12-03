@@ -47,11 +47,11 @@ export interface RollingFileAppenderConfig {
    */
   path: string;
   /**
-   * The policy to use to determine if a rollover should occur.
+   * The {@link TriggeringPolicy | policy} to use to determine if a rollover should occur.
    */
   policy: TriggeringPolicyConfig;
   /**
-   * The rollout strategy to use for rolling.
+   * The {@link RollingStrategy | rollout strategy} to use for rolling.
    */
   strategy: RollingStrategyConfig;
 }
@@ -92,7 +92,7 @@ export class RollingFileAppender implements DisposableAppender {
 
   /**
    * Formats specified `record` and writes it to the specified file. If the record
-   * would trigger a rollover, then it will be performed before writing to the file.
+   * would trigger a rollover, it will be performed before the effective write operation.
    */
   public append(record: LogRecord) {
     // if we are currently rolling the files, push the log record
@@ -116,7 +116,7 @@ export class RollingFileAppender implements DisposableAppender {
 
   /**
    * Disposes the appender.
-   * If a rollout is currently in progress, it will ve awaited.
+   * If a rollout is currently in progress, it will be awaited.
    */
   public async dispose() {
     if (this.disposed) {
