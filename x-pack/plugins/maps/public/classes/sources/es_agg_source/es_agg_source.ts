@@ -15,13 +15,14 @@ import { getSourceAggKey } from '../../../../common/get_agg_key';
 import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { IField } from '../../fields/field';
+import { ESDocField } from '../../fields/es_doc_field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
 
 export interface IESAggSource extends IESSource {
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;
-  getAggLabel(aggType: AGG_TYPE, fieldName: string): string;
+  getAggLabel(aggType: AGG_TYPE, fieldName: string): Promise<string>;
   getMetricFields(): IESAggField[];
   hasMatchingMetricField(fieldName: string): boolean;
   getMetricFieldForName(fieldName: string): IESAggField | null;
@@ -110,17 +111,22 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     });
   }
 
-  getAggLabel(aggType: AGG_TYPE, fieldName: string): string {
+  async getAggLabel(aggType: AGG_TYPE, fieldName: string): string {
+    let fieldLabel = fieldName;
+    if (fieldName.length) {
+      const esDocField = new ESDocField({ fieldName, source: this, origin: FIELD_ORIGIN.SOURCE });
+      fieldLabel = await esDocField.getLabel();
+    }
     switch (aggType) {
       case AGG_TYPE.COUNT:
         return COUNT_PROP_LABEL;
       case AGG_TYPE.TERMS:
         return i18n.translate('xpack.maps.source.esAggSource.topTermLabel', {
-          defaultMessage: `Top {fieldName}`,
-          values: { fieldName },
+          defaultMessage: `Top {fieldLabel}`,
+          values: { fieldLabel },
         });
       default:
-        return `${aggType} ${fieldName}`;
+        return `${aggType} ${fieldLabel}`;
     }
   }
 

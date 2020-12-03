@@ -31,7 +31,7 @@ function fieldsToOptions(
     .map((field) => {
       const option: EuiComboBoxOptionOption<IFieldType> = {
         value: field,
-        label: field.name,
+        label: field.displayName,
       };
       if (isFieldDisabled && isFieldDisabled(field)) {
         option.disabled = true;
@@ -100,7 +100,7 @@ export function SingleFieldSelect({
       return field.name === value;
     });
     if (selectedField) {
-      selectedOptions.push({ value: selectedField, label: value });
+      selectedOptions.push({ value: selectedField, label: selectedField.displayName });
     }
   }
 

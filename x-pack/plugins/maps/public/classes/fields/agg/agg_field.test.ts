@@ -18,17 +18,7 @@ const mockIndexPattern = {
   ],
 } as IIndexPattern;
 
-const mockEsAggSource = {
-  getAggKey: (aggType: AGG_TYPE, fieldName: string) => {
-    return 'agg_key';
-  },
-  getAggLabel: (aggType: AGG_TYPE, fieldName: string) => {
-    return 'agg_label';
-  },
-  getIndexPattern: async () => {
-    return mockIndexPattern;
-  },
-} as IESAggSource;
+const mockEsAggSource = ({} as unknown) as IESAggSource;
 
 const defaultParams = {
   label: 'my agg field',
