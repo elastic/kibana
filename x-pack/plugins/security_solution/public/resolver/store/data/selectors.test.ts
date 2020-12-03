@@ -317,6 +317,8 @@ describe('data state', () => {
             firstAncestorID,
             secondAncestorID,
           }),
+          dataSource: 'endpoint',
+          schema: { id: '', parent: '' },
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
@@ -374,6 +376,8 @@ describe('data state', () => {
         type: 'serverReturnedResolverData',
         payload: {
           result: resolverTree,
+          dataSource: 'endpoint',
+          schema: { id: '', parent: '' },
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
@@ -403,6 +407,8 @@ describe('data state', () => {
         type: 'serverReturnedResolverData',
         payload: {
           result: resolverTree,
+          dataSource: 'endpoint',
+          schema: { id: '', parent: '' },
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
@@ -434,6 +440,8 @@ describe('data state', () => {
         type: 'serverReturnedResolverData',
         payload: {
           result: tree,
+          dataSource: 'endpoint',
+          schema: { id: '', parent: '' },
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
@@ -450,6 +458,8 @@ describe('data state', () => {
         type: 'serverReturnedResolverData',
         payload: {
           result: tree,
+          dataSource: 'endpoint',
+          schema: { id: '', parent: '' },
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },

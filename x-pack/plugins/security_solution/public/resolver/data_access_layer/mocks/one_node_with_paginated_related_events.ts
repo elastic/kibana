@@ -38,7 +38,10 @@ export function oneNodeWithPaginatedEvents(): {
     databaseDocumentID: '_id',
     entityIDs: { origin: 'origin' },
   };
-  const mockTree = mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
+  const mockTree: {
+    nodes: ResolverNode[];
+    events: SafeResolverEvent[];
+  } = mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
     originID: metadata.entityIDs.origin,
   });
 
@@ -60,7 +63,7 @@ export function oneNodeWithPaginatedEvents(): {
         /**
          * Respond with the mocked related events when the origin's related events are fetched.
          **/
-        const events = entityID === metadata.entityIDs.origin ? mockTree.relatedEvents.events : [];
+        const events = entityID === metadata.entityIDs.origin ? mockTree.events : [];
 
         return {
           entityID,
@@ -86,7 +89,7 @@ export function oneNodeWithPaginatedEvents(): {
         indexPatterns: string[];
       }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
         let events: SafeResolverEvent[] = [];
-        const eventsOfCategory = mockTree.relatedEvents.events.filter(
+        const eventsOfCategory = mockTree.events.filter(
           (event) => event.event?.category === category
         );
         if (after === undefined) {
@@ -114,14 +117,11 @@ export function oneNodeWithPaginatedEvents(): {
         nodeID: string;
         eventCategory: string[];
         eventTimestamp: string;
-        eventID: string;
+        eventID?: string | number;
         timerange: Timerange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {
-        return (
-          mockTree.relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ??
-          null
-        );
+        return mockTree.events.find((event) => eventModel.eventID(event) === eventID) ?? null;
       },
 
       async nodeData({
@@ -156,7 +156,7 @@ export function oneNodeWithPaginatedEvents(): {
         ancestors: number;
         descendants: number;
       }): Promise<ResolverNode[]> {
-        return mockTree.treeResponse;
+        return mockTree.nodes;
       },
 
       /**

@@ -21,9 +21,8 @@ export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
 }: {
   originID: string;
 }): {
-  treeResponse: ResolverNode[];
-  resolverTree: NewResolverTree;
-  relatedEvents: ResolverRelatedEvents;
+  nodes: ResolverNode[];
+  events: SafeResolverEvent[];
 } {
   const timestamp = 1600863932318;
   const nodeName = 'c';
@@ -52,16 +51,8 @@ export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
   const treeResponse = [originNode];
 
   return {
-    treeResponse,
-    resolverTree: {
-      originId: originID,
-      nodes: treeResponse,
-    },
-    relatedEvents: {
-      entityID: originID,
-      events,
-      nextEvent: null,
-    },
+    nodes: treeResponse,
+    events,
   };
 }
 

@@ -34,6 +34,8 @@ describe('Resolver Data Middleware', () => {
         type: 'serverReturnedResolverData',
         payload: {
           result: tree,
+          dataSource: 'endpoint',
+          schema: { id: '', parent: '' },
           parameters: {
             databaseDocumentID: '',
             indices: [],

@@ -41,7 +41,7 @@ export const isPanelViewAndParameters: (
     panelParameters: schema.object({
       nodeID: schema.string(),
       eventCategory: schema.string(),
-      eventID: schema.string(),
+      eventID: schema.oneOf([schema.string(), schema.literal(undefined), schema.number()]),
       eventTimestamp: schema.string(),
     }),
   }),

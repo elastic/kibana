@@ -151,13 +151,13 @@ export function dataAccessLayerFactory(
       nodeID: string;
       eventCategory: string[];
       eventTimestamp: string;
-      eventID: string;
+      eventID?: string | number;
       timerange: Timerange;
       indexPatterns: string[];
     }): Promise<SafeResolverEvent | null> {
       /** @description - eventID isn't provided by winlog. This can be removed once runtime fields are available */
       const filter =
-        eventID === ''
+        eventID === undefined
           ? {
               bool: {
                 filter: [

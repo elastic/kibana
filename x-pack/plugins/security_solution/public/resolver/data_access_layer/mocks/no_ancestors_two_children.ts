@@ -106,7 +106,7 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
         nodeID: string;
         eventCategory: string[];
         eventTimestamp: string;
-        eventID: string;
+        eventID?: string | number;
         timerange: Timerange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {
