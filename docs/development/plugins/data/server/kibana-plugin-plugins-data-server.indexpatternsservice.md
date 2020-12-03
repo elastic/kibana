@@ -14,6 +14,6 @@ export declare class IndexPatternsService implements Plugin<void, IndexPatternsS
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [setup(core)](./kibana-plugin-plugins-data-server.indexpatternsservice.setup.md) |  |  |
+|  [setup(core, { expressions })](./kibana-plugin-plugins-data-server.indexpatternsservice.setup.md) |  |  |
 |  [start(core, { fieldFormats, logger })](./kibana-plugin-plugins-data-server.indexpatternsservice.start.md) |  |  |
 

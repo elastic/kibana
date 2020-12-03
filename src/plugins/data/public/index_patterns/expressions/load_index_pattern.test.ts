@@ -17,22 +17,27 @@
  * under the License.
  */
 
-import { indexPatternLoad } from './load_index_pattern';
-
-jest.mock('../../services', () => ({
-  getIndexPatterns: () => ({
-    get: (id: string) => ({
-      toSpec: () => ({
-        title: 'value',
-      }),
-    }),
-  }),
-}));
+import { IndexPatternLoadStartDependencies } from '../../../common/index_patterns/expressions';
+import { getFunctionDefinition } from './load_index_pattern';
 
 describe('indexPattern expression function', () => {
+  let getStartDependencies: () => Promise<IndexPatternLoadStartDependencies>;
+
+  beforeEach(() => {
+    getStartDependencies = jest.fn().mockResolvedValue({
+      indexPatterns: {
+        get: (id: string) => ({
+          toSpec: () => ({
+            title: 'value',
+          }),
+        }),
+      },
+    });
+  });
+
   test('returns serialized index pattern', async () => {
-    const indexPatternDefinition = indexPatternLoad();
-    const result = await indexPatternDefinition.fn(null, { id: '1' }, {} as any);
+    const indexPatternDefinition = getFunctionDefinition({ getStartDependencies });
+    const result = await indexPatternDefinition().fn(null, { id: '1' }, {} as any);
     expect(result.type).toEqual('index_pattern');
     expect(result.value.title).toEqual('value');
   });

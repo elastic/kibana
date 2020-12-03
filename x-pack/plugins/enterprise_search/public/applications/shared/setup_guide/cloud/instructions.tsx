@@ -23,18 +23,18 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
       steps={[
         {
           title: i18n.translate('xpack.enterpriseSearch.setupGuide.cloud.step1.title', {
-            defaultMessage: 'Edit your Elastic Cloud deployment’s configuration',
+            defaultMessage: 'Edit your deployment’s configuration',
           }),
           children: (
             <EuiText>
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.setupGuide.cloud.step1.instruction1"
-                  defaultMessage="{visitCloudLink} and select your deployment. Within your deployment, select “Edit” from the sidebar to manage your deployment’s configuration."
+                  defaultMessage="Visit the Elastic Cloud console to {editDeploymentLink}."
                   values={{
-                    visitCloudLink: cloudDeploymentLink ? (
-                      <EuiLink href={cloudDeploymentLink} target="_blank">
-                        Visit the Elastic Cloud console
+                    editDeploymentLink: cloudDeploymentLink ? (
+                      <EuiLink href={cloudDeploymentLink + '/edit'} target="_blank">
+                        edit your deployment
                       </EuiLink>
                     ) : (
                       'Visit the Elastic Cloud console'
