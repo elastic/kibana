@@ -17,12 +17,17 @@
  * under the License.
  */
 
-import { basename, dirname, join } from 'path';
+import { basename, dirname } from 'path';
 import { schema } from '@kbn/config-schema';
-import { readdir, unlink, rename, exists } from '../fs';
 import { RollingStrategy } from '../strategy';
 import { RollingFileContext } from '../../rolling_file_context';
-import { getFileNameMatcher, getRollingFileName } from './pattern_matcher';
+import {
+  shouldSkipRollout,
+  getOrderedRolledFiles,
+  deleteFiles,
+  rollCurrentFile,
+  rollPreviousFilesInOrder,
+} from './rolling_tasks';
 
 export interface NumericRollingStrategyConfig {
   kind: 'numeric';
@@ -110,40 +115,33 @@ export class NumericRollingStrategy implements RollingStrategy {
   }
 
   async rollout() {
-    // in case of time-interval triggering policy, we can have an entire
-    // interval without any log event. In that case, the log file is not even
-    // present, and we should not perform the rollout
-    if (!(await exists(this.logFilePath))) {
+    const logFilePath = this.logFilePath;
+    const logFileBaseName = this.logFileBaseName;
+    const logFileFolder = this.logFileFolder;
+    const pattern = this.config.pattern;
+
+    if (await shouldSkipRollout({ logFilePath })) {
       return;
     }
 
-    const matcher = getFileNameMatcher(this.logFileBaseName, this.config.pattern);
-    const dirContent = await readdir(this.logFileFolder);
-
-    const orderedFiles = dirContent
-      .map((fileName) => ({
-        fileName,
-        index: matcher(fileName),
-      }))
-      .filter(({ index }) => index !== undefined)
-      .sort((a, b) => a.index! - b.index!)
-      .map(({ fileName }) => fileName);
-
+    // get the files matching the pattern in the folder, and sort them by `%i` value
+    const orderedFiles = await getOrderedRolledFiles({
+      logFileFolder,
+      logFileBaseName,
+      pattern,
+    });
     const filesToRoll = orderedFiles.slice(0, this.config.max - 1);
     const filesToDelete = orderedFiles.slice(filesToRoll.length, orderedFiles.length);
 
-    for (const fileToDelete of filesToDelete) {
-      await unlink(join(this.logFileFolder, fileToDelete));
+    if (filesToDelete.length > 0) {
+      await deleteFiles({ logFileFolder, filesToDelete });
     }
 
-    for (let i = filesToRoll.length - 1; i >= 0; i--) {
-      const oldFileName = filesToRoll[i];
-      const newFileName = getRollingFileName(this.logFileBaseName, this.config.pattern, i + 2);
-      await rename(join(this.logFileFolder, oldFileName), join(this.logFileFolder, newFileName));
+    if (filesToRoll.length > 0) {
+      await rollPreviousFilesInOrder({ filesToRoll, logFileFolder, logFileBaseName, pattern });
     }
 
-    const currentFileNewName = getRollingFileName(this.logFileBaseName, this.config.pattern, 1);
-    await rename(this.context.filePath, join(this.logFileFolder, currentFileNewName));
+    await rollCurrentFile({ pattern, logFileBaseName, logFileFolder });
 
     // updates the context file info to mirror the new size and date
     this.context.refreshFileInfo();

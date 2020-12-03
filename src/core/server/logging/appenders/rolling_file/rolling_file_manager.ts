@@ -33,8 +33,20 @@ export class RollingFileManager {
 
   write(chunk: string) {
     const stream = this.ensureStreamOpen();
-    this.context.currentFileSize += chunk.length;
+    this.context.currentFileSize += Buffer.byteLength(chunk, 'utf8');
     stream.write(chunk);
+  }
+
+  async closeStream() {
+    return new Promise<void>((resolve) => {
+      if (this.outputStream === undefined) {
+        return resolve();
+      }
+      this.outputStream.end(() => {
+        this.outputStream = undefined;
+        resolve();
+      });
+    });
   }
 
   private ensureStreamOpen() {
@@ -47,17 +59,5 @@ export class RollingFileManager {
       this.context.refreshFileInfo();
     }
     return this.outputStream!;
-  }
-
-  public async closeStream() {
-    return new Promise<void>((resolve) => {
-      if (this.outputStream === undefined) {
-        return resolve();
-      }
-      this.outputStream.end(() => {
-        this.outputStream = undefined;
-        resolve();
-      });
-    });
   }
 }
