@@ -201,10 +201,12 @@ export async function buildContextMenuForActions({
 
   for (const panel of Object.values(panels)) {
     if (panel._level === 0) {
-      panels.mainMenu.items.push({
-        isSeparator: true,
-        key: panel.id + '__separator',
-      });
+      if (panels.mainMenu.items.length > 0) {
+        panels.mainMenu.items.push({
+          isSeparator: true,
+          key: panel.id + '__separator',
+        });
+      }
       if (panel.items.length > 3) {
         panels.mainMenu.items.push({
           name: panel.title || panel.id,
