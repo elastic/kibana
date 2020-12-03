@@ -256,3 +256,17 @@ export const IN_PROGRESS_CASES = i18n.translate(
     defaultMessage: 'In progress cases',
   }
 );
+
+export const SYNC_ALERTS_SWITCH_LABEL_ON = i18n.translate(
+  'xpack.securitySolution.case.settings.syncAlertsSwitchLabel',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const SYNC_ALERTS_SWITCH_LABEL_OFF = i18n.translate(
+  'xpack.securitySolution.case.settings.syncAlertsSwitchLabel',
+  {
+    defaultMessage: 'Off',
+  }
+);
