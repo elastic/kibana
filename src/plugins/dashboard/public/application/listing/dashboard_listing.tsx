@@ -20,8 +20,6 @@
 import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { DashboardSavedObject } from '../../saved_dashboards';
 import { syncQueryStateWithUrl } from '../../../../data/public';
 import { DashboardAppServices, DashboardRedirect } from '../types';
 import { IKbnUrlStateStorage } from '../../../../kibana_utils/public';
@@ -29,6 +27,7 @@ import { TableListView, useKibana } from '../../../../kibana_react/public';
 import { dashboardBreadcrumb, dashboardListingTable } from '../dashboard_strings';
 import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
+import { attemptLoadDashboardByTitle } from '../lib';
 
 export interface DashboardListingProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -65,34 +64,21 @@ export const DashboardListing = ({
     ]);
   }, [setBreadcrumbs]);
 
-  // Load by Title useEffect
   useEffect(() => {
     // syncs `_g` portion of url with query services
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
       data.query,
       kbnUrlStateStorage
     );
-
     if (title) {
-      savedObjectsClient
-        .find<DashboardSavedObject>({
-          search: `"${title}"`,
-          searchFields: ['title'],
-          type: 'dashboard',
-        })
-        .then((results) => {
-          // The search isn't an exact match, lets see if we can find a single exact match to use
-          const matchingDashboards = results.savedObjects.filter(
-            (dashboard) => dashboard.attributes.title.toLowerCase() === title.toLowerCase()
-          );
-          if (matchingDashboards.length === 1) {
-            redirectTo({
-              destination: 'dashboard',
-              id: matchingDashboards[0].id,
-              useReplace: true,
-            });
-          }
+      attemptLoadDashboardByTitle(title, savedObjectsClient).then((result) => {
+        if (!result) return;
+        redirectTo({
+          destination: 'dashboard',
+          id: result.id,
+          useReplace: true,
         });
+      });
     }
 
     return () => {

@@ -17,10 +17,23 @@
  * under the License.
  */
 
-export { saveDashboard } from './save_dashboard';
-export { getAppStateDefaults } from './get_app_state_defaults';
-export { migrateAppState } from './migrate_app_state';
-export { getDashboardIdFromUrl } from './url';
-export { createSessionRestorationDataProvider } from './session_restoration';
-export { addHelpMenuToAppChrome } from './help_menu_util';
-export { attemptLoadDashboardByTitle } from './load_dashboard_by_title';
+import { DashboardSavedObject } from '../..';
+import { SavedObjectsClientContract } from '../../../../../core/public';
+
+export async function attemptLoadDashboardByTitle(
+  title: string,
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<{ id: string } | undefined> {
+  const results = await savedObjectsClient.find<DashboardSavedObject>({
+    search: `"${title}"`,
+    searchFields: ['title'],
+    type: 'dashboard',
+  });
+  // The search isn't an exact match, lets see if we can find a single exact match to use
+  const matchingDashboards = results.savedObjects.filter(
+    (dashboard) => dashboard.attributes.title.toLowerCase() === title.toLowerCase()
+  );
+  if (matchingDashboards.length === 1) {
+    return { id: matchingDashboards[0].id };
+  }
+}

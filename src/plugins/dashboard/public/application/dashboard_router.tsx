@@ -39,6 +39,7 @@ import {
   PluginInitializerContext,
   ScopedHistory,
 } from '../../../../core/public';
+import { addHelpMenuToAppChrome } from './lib';
 import { createDashboardEditUrl, DashboardConstants } from '..';
 
 export const dashboardUrlParams = {
@@ -151,18 +152,7 @@ export async function mountApp({
     };
   };
 
-  const setBadge = () => {
-    if (!coreStart.application.capabilities.dashboard.showWriteControls) {
-      coreStart.chrome.setBadge({
-        text: dashboardReadonlyBadge.text,
-        tooltip: dashboardReadonlyBadge.tooltip,
-        iconType: 'glasses',
-      });
-    }
-  };
-
   const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
-    setBadge();
     const routeParams = parse(routeProps.history.location.search);
     const embedSettings = getDashboardEmbedSettings(routeParams);
     return (
@@ -176,7 +166,6 @@ export async function mountApp({
   };
 
   const renderListingPage = (routeProps: RouteComponentProps) => {
-    setBadge();
     coreStart.chrome.docTitle.change(dashboardPageTitle);
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
@@ -220,6 +209,14 @@ export async function mountApp({
     </I18nProvider>
   );
 
+  addHelpMenuToAppChrome(dashboardServices.chrome, coreStart.docLinks);
+  if (!coreStart.application.capabilities.dashboard.showWriteControls) {
+    coreStart.chrome.setBadge({
+      text: dashboardReadonlyBadge.text,
+      tooltip: dashboardReadonlyBadge.tooltip,
+      iconType: 'glasses',
+    });
+  }
   render(app, element);
   return () => {
     dataStart.search.session.clear();
