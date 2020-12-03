@@ -30,6 +30,8 @@ export interface BackgroundSessionIndicatorProps {
   viewBackgroundSessionsLink?: string;
   onSaveResults?: () => void;
   onRefresh?: () => void;
+  disabled?: boolean;
+  disabledReasonText?: string;
 }
 
 type ActionButtonProps = BackgroundSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
@@ -285,12 +287,13 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
       data-test-subj={'backgroundSessionIndicator'}
       data-state={props.state}
       button={
-        <EuiToolTip content={button.tooltipText}>
+        <EuiToolTip content={props.disabled ? props.disabledReasonText : button.tooltipText}>
           <EuiButtonIcon
             color={button.color}
             aria-label={button['aria-label']}
             iconType={button.iconType}
             onClick={onButtonClick}
+            disabled={props.disabled}
           />
         </EuiToolTip>
       }

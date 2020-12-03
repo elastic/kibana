@@ -22,6 +22,7 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/p
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
 import { createInputControlVisFn } from './input_control_fn';
+import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
 
 type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
@@ -76,6 +77,7 @@ export class InputControlVisPlugin implements Plugin<void, void> {
     };
 
     expressions.registerFunction(createInputControlVisFn);
+    expressions.registerRenderer(getInputControlVisRenderer(visualizationDependencies));
     visualizations.createBaseVisualization(
       createInputControlVisTypeDefinition(visualizationDependencies)
     );

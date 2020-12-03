@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { History, Location } from 'history';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
 import { px } from '../../../../../../style/variables';
 import { Timeline } from '../../../../../shared/charts/Timeline';
@@ -128,7 +127,7 @@ export function Waterfall({
             })}
           />
         )}
-        <StickyContainer>
+        <div>
           <div style={{ display: 'flex' }}>
             <EuiButtonEmpty
               style={{ zIndex: 3, position: 'absolute' }}
@@ -147,7 +146,7 @@ export function Waterfall({
           <WaterfallItemsContainer paddingTop={TIMELINE_MARGINS.top}>
             {renderItems(waterfall.childrenByParentId)}
           </WaterfallItemsContainer>
-        </StickyContainer>
+        </div>
 
         <WaterfallFlyout
           waterfallItemId={waterfallItemId}
