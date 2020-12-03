@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ADD_EXCEPTION_BTN = '[data-test-subj="addExceptionButton"]';
+export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 
 export const ALERTS = '[data-test-subj="event"]';
 
