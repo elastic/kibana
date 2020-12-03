@@ -6,7 +6,7 @@
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import React from 'react';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 // union type constisting of valid guide sections that we link to
 type DocsSection = '/apm/get-started' | '/x-pack' | '/apm/server' | '/kibana';
