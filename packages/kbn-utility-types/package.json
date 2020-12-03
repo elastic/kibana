@@ -12,7 +12,7 @@
     "build": "yarn clean && ../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch",
-    "clean": "../../node_modules/.bin/del target",
+    "clean": "rm -rf target",
     "test": "../../node_modules/.bin/tsd"
   }
 }
