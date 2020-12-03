@@ -42,7 +42,7 @@ export const useField = <T, FormType = FormData, I = T>(
 ) => {
   const {
     type = FIELD_TYPES.TEXT,
-    defaultValue = '', // The value to use a fallback mecanism when no initial value is passed
+    defaultValue = '', // The value to use a fallback mechanism when no initial value is passed
     initialValue = config.defaultValue ?? '', // The value explicitly passed
     isIncludedInOutput = true,
     label = '',

@@ -39,6 +39,7 @@ export async function getFieldCapabilities(
   callCluster: ElasticsearchClient,
   indices: string | string[] = [],
   metaFields: string[] = [],
+  filters?: { aggregatable: boolean },
   fieldCapsOptions?: { allow_no_indices: boolean }
 ) {
   const esFieldCaps = await callFieldCapsApi(callCluster, indices, fieldCapsOptions);
@@ -69,7 +70,8 @@ export async function getFieldCapabilities(
         readFromDocValues: false,
       })
     )
-    .map(mergeOverrides);
+    .map(mergeOverrides)
+    .filter((field) => (filters?.aggregatable ? field.aggregatable === true : true));
 
   return sortBy(allFieldsUnsorted, 'name');
 }

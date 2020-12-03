@@ -65,14 +65,16 @@ export class IndexPatternsFetcher {
     pattern: string | string[];
     metaFields?: string[];
     fieldCapsOptions?: { allow_no_indices: boolean };
+    filters?: { aggregatable: boolean };
     type?: string;
     rollupIndex?: string;
   }): Promise<FieldDescriptor[]> {
-    const { pattern, metaFields, fieldCapsOptions, type, rollupIndex } = options;
+    const { pattern, metaFields, fieldCapsOptions, filters, type, rollupIndex } = options;
     const fieldCapsResponse = await getFieldCapabilities(
       this.elasticsearchClient,
       pattern,
       metaFields,
+      filters,
       {
         allow_no_indices: fieldCapsOptions
           ? fieldCapsOptions.allow_no_indices

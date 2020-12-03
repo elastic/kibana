@@ -37,6 +37,7 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
               .map((index) =>
                 indexPatternsFetcher.getFieldsForWildcard({
                   pattern: index,
+                  filters: request.filters,
                 })
               )
               .map((p) => p.catch((e) => false))
@@ -118,7 +119,7 @@ const missingFields: FieldDescriptor[] = [
  * and should avoid any and all creation of new arrays, iterating over the arrays or performing
  * any n^2 operations.
  * @param indexesAlias The index alias
- * @param index The index its self
+ * @param index The index itself
  * @param indexesAliasIdx The index within the alias
  */
 export const createFieldItem = (

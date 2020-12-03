@@ -167,7 +167,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const ruleType = formRuleType || initialState.ruleType;
   const queryBarQuery =
     formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
-  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
+  const filters = isThresholdRule(ruleType) ? { aggregatable: true } : undefined;
+  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(
+    index,
+    false,
+    filters
+  );
   const [
     threatIndexPatternsLoading,
     { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },

@@ -121,7 +121,8 @@ interface FetchIndexReturn {
 
 export const useFetchIndex = (
   indexNames: string[],
-  onlyCheckIfIndicesExist: boolean = false
+  onlyCheckIfIndicesExist: boolean = false,
+  filters?: { aggregatable: boolean }
 ): [boolean, FetchIndexReturn] => {
   const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
@@ -144,7 +145,7 @@ export const useFetchIndex = (
         setLoading(true);
         const searchSubscription$ = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: iNames, onlyCheckIfIndicesExist },
+            { indices: iNames, onlyCheckIfIndicesExist, filters },
             {
               abortSignal: abortCtrl.current.signal,
               strategy: 'securitySolutionIndexFields',
@@ -193,7 +194,7 @@ export const useFetchIndex = (
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts, onlyCheckIfIndicesExist]
+    [data.search, filters, notifications.toasts, onlyCheckIfIndicesExist]
   );
 
   useEffect(() => {

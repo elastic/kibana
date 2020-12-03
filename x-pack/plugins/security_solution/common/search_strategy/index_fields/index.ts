@@ -51,6 +51,7 @@ export type BeatFields = Record<string, FieldInfo>;
 export interface IndexFieldsStrategyRequest extends IEsSearchRequest {
   indices: string[];
   onlyCheckIfIndicesExist: boolean;
+  filters?: { aggregatable: boolean };
 }
 
 export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
