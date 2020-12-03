@@ -260,7 +260,7 @@ describe('useCamera on an unpainted element', () => {
               id: String(index),
               name: '',
               parentID,
-              timestamp: 1582233383000,
+              timestamp: 0,
               stats: { total: 0, byCategory: {} },
             })
           );
