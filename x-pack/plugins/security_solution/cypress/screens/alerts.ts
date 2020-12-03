@@ -8,6 +8,8 @@ export const ADD_EXCEPTION_BTN = '[data-test-subj="addExceptionButton"]';
 
 export const ALERTS = '[data-test-subj="event"]';
 
+export const ALERTS_COUNT = '[data-test-subj="server-side-event-count"]';
+
 export const ALERT_CHECKBOX = '[data-test-subj="select-event-container"] .euiCheckbox__input';
 
 export const ALERT_ID = '[data-test-subj="draggable-content-_id"]';
@@ -43,7 +45,7 @@ export const MARK_ALERT_IN_PROGRESS_BTN = '[data-test-subj="in-progress-alert-st
 export const MARK_SELECTED_ALERTS_IN_PROGRESS_BTN =
   '[data-test-subj="markSelectedAlertsInProgressButton"]';
 
-export const NUMBER_OF_ALERTS = '[data-test-subj="server-side-event-count"] .euiBadge__text';
+export const NUMBER_OF_ALERTS = '[data-test-subj="local-events-count"]';
 
 export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
 
