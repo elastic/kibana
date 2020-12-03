@@ -83,38 +83,32 @@ export const SearchExperienceContent: React.FC = () => {
 
   // If we have no results AND no search term, show a CTA for the user to index documents
   return (
-    <>
-      <div />
-      <EuiEmptyPrompt
-        data-test-subj="documentsSearchNoDocuments"
-        title={
-          <h2>
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documents.search.indexDocumentsTitle',
-              {
-                defaultMessage: 'No documents yet!',
-              }
-            )}
-          </h2>
-        }
-        body={i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.indexDocuments', {
-          defaultMessage: 'Indexed documents will show up here.',
-        })}
-        actions={
-          !isMetaEngine && myRole.canManageEngineDocuments ? (
-            <DocumentCreationButton />
-          ) : (
-            <EuiButton
-              data-test-subj="documentsSearchDocsLink"
-              href={`${DOCS_PREFIX}/indexing-documents-guide.html`}
-            >
-              {i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.indexingGuide', {
-                defaultMessage: 'Read the indexing guide',
-              })}
-            </EuiButton>
-          )
-        }
-      />
-    </>
+    <EuiEmptyPrompt
+      data-test-subj="documentsSearchNoDocuments"
+      title={
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.indexDocumentsTitle', {
+            defaultMessage: 'No documents yet!',
+          })}
+        </h2>
+      }
+      body={i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.indexDocuments', {
+        defaultMessage: 'Indexed documents will show up here.',
+      })}
+      actions={
+        !isMetaEngine && myRole.canManageEngineDocuments ? (
+          <DocumentCreationButton />
+        ) : (
+          <EuiButton
+            data-test-subj="documentsSearchDocsLink"
+            href={`${DOCS_PREFIX}/indexing-documents-guide.html`}
+          >
+            {i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.indexingGuide', {
+              defaultMessage: 'Read the indexing guide',
+            })}
+          </EuiButton>
+        )
+      }
+    />
   );
 };
