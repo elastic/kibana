@@ -11,6 +11,7 @@ import { get, getOr, isEmpty, find } from 'lodash/fp';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
+import { buildQueryFilter, Filter } from '../../../../../../../src/plugins/data/common';
 import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
 import { SendAlertToTimelineActionProps, UpdateAlertStatusActionProps } from './types';
@@ -285,6 +286,13 @@ export const sendAlertToTimelineAction = async ({
           end: to,
         },
         eventType: 'all',
+        filters: [
+          buildQueryFilter(
+            ecsData.signal?.rule?.filters,
+            ecsData._index ?? '',
+            (ecsData.signal?.rule?.filters as Filter).meta?.alias ?? ''
+          ),
+        ],
         kqlQuery: {
           filterQuery: {
             kuery: {
