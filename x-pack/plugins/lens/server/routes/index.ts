@@ -5,11 +5,12 @@
  */
 
 import { CoreSetup, Logger } from 'src/core/server';
+import { PluginStartContract } from '../plugin';
 import { existingFieldsRoute } from './existing_fields';
 import { initFieldsRoute } from './field_stats';
 import { initLensUsageRoute } from './telemetry';
 
-export function setupRoutes(setup: CoreSetup, logger: Logger) {
+export function setupRoutes(setup: CoreSetup<PluginStartContract>, logger: Logger) {
   existingFieldsRoute(setup, logger);
   initFieldsRoute(setup);
   initLensUsageRoute(setup);

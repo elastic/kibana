@@ -4,115 +4,96 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
-import { LicenseCheck } from '../../../../licensing/server';
+import Boom from '@hapi/boom';
+import {
+  kibanaResponseFactory,
+  RequestHandler,
+  RequestHandlerContext,
+} from '../../../../../../src/core/server';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
-import Boom from '@hapi/boom';
-import { defineEnabledApiKeysRoutes } from './enabled';
-import { APIKeys } from '../../authentication/api_keys';
 
-interface TestOptions {
-  licenseCheckResult?: LicenseCheck;
-  apiResponse?: () => Promise<unknown>;
-  asserts: { statusCode: number; result?: Record<string, any> };
-}
+import { defineEnabledApiKeysRoutes } from './enabled';
+import { Authentication } from '../../authentication';
 
 describe('API keys enabled', () => {
-  const enabledApiKeysTest = (
-    description: string,
-    { licenseCheckResult = { state: 'valid' }, apiResponse, asserts }: TestOptions
-  ) => {
-    test(description, async () => {
-      const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+  function getMockContext(
+    licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
+  ) {
+    return ({
+      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
+    } as unknown) as RequestHandlerContext;
+  }
 
-      const apiKeys = new APIKeys({
-        logger: mockRouteDefinitionParams.logger,
-        clusterClient: mockRouteDefinitionParams.clusterClient,
-        license: mockRouteDefinitionParams.license,
-      });
+  let routeHandler: RequestHandler<any, any, any, any>;
+  let authc: jest.Mocked<Authentication>;
+  beforeEach(() => {
+    const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+    authc = mockRouteDefinitionParams.authc;
 
-      mockRouteDefinitionParams.authc.areAPIKeysEnabled.mockImplementation(() =>
-        apiKeys.areAPIKeysEnabled()
-      );
+    defineEnabledApiKeysRoutes(mockRouteDefinitionParams);
 
-      if (apiResponse) {
-        mockRouteDefinitionParams.clusterClient.callAsInternalUser.mockImplementation(apiResponse);
-      }
-
-      defineEnabledApiKeysRoutes(mockRouteDefinitionParams);
-      const [[, handler]] = mockRouteDefinitionParams.router.get.mock.calls;
-
-      const headers = { authorization: 'foo' };
-      const mockRequest = httpServerMock.createKibanaRequest({
-        method: 'get',
-        path: '/internal/security/api_key/_enabled',
-        headers,
-      });
-      const mockContext = ({
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-      } as unknown) as RequestHandlerContext;
-
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
-      expect(response.status).toBe(asserts.statusCode);
-      expect(response.payload).toEqual(asserts.result);
-
-      if (apiResponse) {
-        expect(mockRouteDefinitionParams.clusterClient.callAsInternalUser).toHaveBeenCalledWith(
-          'shield.invalidateAPIKey',
-          {
-            body: {
-              id: expect.any(String),
-            },
-          }
-        );
-      } else {
-        expect(mockRouteDefinitionParams.clusterClient.asScoped).not.toHaveBeenCalled();
-      }
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
-    });
-  };
+    const [, apiKeyRouteHandler] = mockRouteDefinitionParams.router.get.mock.calls.find(
+      ([{ path }]) => path === '/internal/security/api_key/_enabled'
+    )!;
+    routeHandler = apiKeyRouteHandler;
+  });
 
   describe('failure', () => {
-    enabledApiKeysTest('returns result of license checker', {
-      licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
-      asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
+    test('returns result of license checker', async () => {
+      const mockContext = getMockContext({ state: 'invalid', message: 'test forbidden message' });
+      const response = await routeHandler(
+        mockContext,
+        httpServerMock.createKibanaRequest(),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(403);
+      expect(response.payload).toEqual({ message: 'test forbidden message' });
+      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
     });
 
-    const error = Boom.notAcceptable('test not acceptable message');
-    enabledApiKeysTest('returns error from cluster client', {
-      apiResponse: async () => {
-        throw error;
-      },
-      asserts: { statusCode: 406, result: error },
+    test('returns error from cluster client', async () => {
+      const error = Boom.notAcceptable('test not acceptable message');
+      authc.areAPIKeysEnabled.mockRejectedValue(error);
+
+      const response = await routeHandler(
+        getMockContext(),
+        httpServerMock.createKibanaRequest(),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(406);
+      expect(response.payload).toEqual(error);
     });
   });
 
   describe('success', () => {
-    enabledApiKeysTest('returns true if API Keys are enabled', {
-      apiResponse: async () => ({}),
-      asserts: {
-        statusCode: 200,
-        result: {
-          apiKeysEnabled: true,
-        },
-      },
+    test('returns true if API Keys are enabled', async () => {
+      authc.areAPIKeysEnabled.mockResolvedValue(true);
+
+      const response = await routeHandler(
+        getMockContext(),
+        httpServerMock.createKibanaRequest(),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ apiKeysEnabled: true });
     });
-    enabledApiKeysTest('returns false if API Keys are disabled', {
-      apiResponse: async () => {
-        const error = new Error();
-        (error as any).body = {
-          error: { 'disabled.feature': 'api_keys' },
-        };
-        throw error;
-      },
-      asserts: {
-        statusCode: 200,
-        result: {
-          apiKeysEnabled: false,
-        },
-      },
+
+    test('returns false if API Keys are disabled', async () => {
+      authc.areAPIKeysEnabled.mockResolvedValue(false);
+
+      const response = await routeHandler(
+        getMockContext(),
+        httpServerMock.createKibanaRequest(),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ apiKeysEnabled: false });
     });
   });
 });
