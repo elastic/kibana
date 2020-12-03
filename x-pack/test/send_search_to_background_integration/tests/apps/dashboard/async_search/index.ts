@@ -10,6 +10,8 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('async search', function () {
+    this.tags('ciGroup3');
+
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard/async_search');
