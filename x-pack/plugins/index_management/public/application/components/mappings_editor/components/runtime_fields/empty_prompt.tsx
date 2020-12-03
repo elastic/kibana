@@ -30,7 +30,6 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ createField, runtimeFiel
           <FormattedMessage
             id="xpack.idxMgmt.mappingsEditor.runtimeFields.emptyPromptDescription"
             defaultMessage="Define a field in the mapping and evaluate it at search time."
-            
           />
           <br />
           <EuiLink
