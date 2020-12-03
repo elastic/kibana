@@ -38,16 +38,6 @@ const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   return settings;
 };
 
-const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
-  if ((settings.server?.xsrf?.whitelist ?? []).length > 0) {
-    log(
-      'It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. ' +
-        'It will be removed in 8.0 release. Instead, supply the "kbn-xsrf" header.'
-    );
-  }
-  return settings;
-};
-
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(settings, 'server.basePath') && !has(settings, 'server.rewriteBasePath')) {
     log(
@@ -116,6 +106,7 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath,
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   unusedFromRoot,
   renameFromRoot,
+  rename,
 }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
@@ -148,6 +139,7 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('xpack.telemetry.url', 'telemetry.url'),
   renameFromRoot('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
   renameFromRoot('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
+  renameFromRoot('server.xsrf.whitelist', 'server.xsrf.allowlist'),
   unusedFromRoot('elasticsearch.preserveHost'),
   unusedFromRoot('elasticsearch.startupTimeout'),
   configPathDeprecation,
@@ -155,5 +147,4 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
   mapManifestServiceUrlDeprecation,
-  xsrfDeprecation,
 ];

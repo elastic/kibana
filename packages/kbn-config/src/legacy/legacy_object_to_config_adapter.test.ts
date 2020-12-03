@@ -96,7 +96,7 @@ describe('#get', () => {
         someNotSupportedValue: 'val',
         xsrf: {
           disableProtection: false,
-          whitelist: [],
+          allowlist: [],
         },
       },
     });
@@ -119,7 +119,7 @@ describe('#get', () => {
         someNotSupportedValue: 'val',
         xsrf: {
           disableProtection: false,
-          whitelist: [],
+          allowlist: [],
         },
       },
     });

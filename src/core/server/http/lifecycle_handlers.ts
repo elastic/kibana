@@ -29,12 +29,12 @@ const XSRF_HEADER = 'kbn-xsrf';
 const KIBANA_NAME_HEADER = 'kbn-name';
 
 export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler => {
-  const { whitelist, disableProtection } = config.xsrf;
+  const { allowlist, disableProtection } = config.xsrf;
 
   return (request, response, toolkit) => {
     if (
       disableProtection ||
-      whitelist.includes(request.route.path) ||
+      allowlist.includes(request.route.path) ||
       request.route.options.xsrfRequired === false
     ) {
       return toolkit.next();
