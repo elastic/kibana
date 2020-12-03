@@ -25,7 +25,7 @@ export const AlertFlyout = (props: Props) => {
     () =>
       triggersActionsUI &&
       triggersActionsUI.getAddAlertFlyout({
-        consumer: 'logs',
+        consumer: 'infrastructure',
         addFlyoutVisible: props.visible!,
         setAddFlyoutVisibility: props.setVisible,
         canChangeTrigger: false,
