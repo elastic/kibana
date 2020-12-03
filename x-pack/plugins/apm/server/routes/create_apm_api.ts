@@ -52,13 +52,13 @@ import {
   correlationsForFailedTransactionsRoute,
 } from './correlations';
 import {
-  transactionGroupsBreakdownRoute,
-  transactionGroupsChartsRoute,
-  transactionGroupsDistributionRoute,
-  transactionGroupsRoute,
+  transactionBreakdownRoute,
+  transactionChartsRoute,
+  transactionDistributionRoute,
+  transactionRoute,
   transactionSampleForGroupRoute,
-  transactionGroupsErrorRateRoute,
-} from './transaction_groups';
+  transactionErrorRateRoute,
+} from './transactions';
 import {
   errorGroupsLocalFiltersRoute,
   metricsLocalFiltersRoute,
@@ -152,13 +152,13 @@ const createApmApi = () => {
     .add(tracesByIdRoute)
     .add(rootTransactionByTraceIdRoute)
 
-    // Transaction groups
-    .add(transactionGroupsBreakdownRoute)
-    .add(transactionGroupsChartsRoute)
-    .add(transactionGroupsDistributionRoute)
-    .add(transactionGroupsRoute)
+    // Transactions
+    .add(transactionBreakdownRoute)
+    .add(transactionChartsRoute)
+    .add(transactionDistributionRoute)
+    .add(transactionRoute)
     .add(transactionSampleForGroupRoute)
-    .add(transactionGroupsErrorRateRoute)
+    .add(transactionErrorRateRoute)
 
     // UI filters
     .add(errorGroupsLocalFiltersRoute)
