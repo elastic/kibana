@@ -13,6 +13,7 @@
 - <<saml>>
 - <<oidc>>
 - <<kerberos>>
+- <<anonymous-authentication>>
 - <<http-authentication>>
 
 Enable multiple authentication mechanisms at the same time specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. Make sure each configured provider has a unique name (e.g. `basic1` or `saml1` in the configuration example) and `order` setting. In the event that two or more providers have the same name or `order`, {kib} will fail to start.
@@ -292,6 +293,109 @@ xpack.security.authc.providers:
 -----------------------------------------------
 
 Kibana uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications. At the end of the Kerberos handshake, Kibana will forward the service ticket to Elasticsearch. Elasticsearch will unpack it and it will respond with an access and refresh token which are then used for subsequent authentication.
+
+[[anonymous-authentication]]
+==== Anonymous authentication
+
+[IMPORTANT]
+============================================================================
+Since anonymous access allows anyone to access {kib} as long as they can access network {kib} is exposed to, make sure to grant anonymous service account only as many privileges as really needed.
+============================================================================
+
+Anonymous authentication gives users access to {kib} without requiring them to provide any sort of credentials. This can be useful if you want your users to skip the login step when you embed {kib} dashboard in another application or set up a demo {kib} instance in your internal network while still keeping other {kib} security features intact.
+
+To enable anonymous authentication in {kib}, you need to decide what credentials or so-called anonymous service account {kib} should use internally to authenticate anonymous requests to {es}. You can pick one of the three different approaches here:
+
+NOTE: You can configure only one anonymous authentication provider per {kib} instance.
+
+If you have a user that can authenticate to {es} using username and password, from a Native or LDAP security realms for instance, you can also use these credentials to impersonate the anonymous users. Here is how your `kibana.yml` can look like if you want to use username and password credentials:
+
+[source,yaml]
+-----------------------------------------------
+xpack.security.authc.providers:
+  anonymous.anonymous1:
+    order: 0
+    credentials:
+      username: "anonymous_service_account"
+      password: "anonymous_service_account_password"
+-----------------------------------------------
+
+If using username and password credentials isn't desired or feasible then you can create a dedicated <<api-keys, API key>> for the anonymous service account. In this case your `kibana.yml` can look like this:
+
+[source,yaml]
+-----------------------------------------------
+xpack.security.authc.providers:
+  anonymous.anonymous1:
+    order: 0
+    credentials:
+      apiKey: "VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw=="
+-----------------------------------------------
+
+The configuration snippet above uses an API key string that is the result of base64-encoding of `id` and `api_key` fields returned from the {es} API joined by a colon. You can also specify these fields separately and {kib} will do concatenation and base64-encoding for you:
+
+[source,yaml]
+-----------------------------------------------
+xpack.security.authc.providers:
+  anonymous.anonymous1:
+    order: 0
+    credentials:
+      apiKey.id: "VuaCfGcBCdbkQm-e5aOx"
+      apiKey.key: "ui2lp2axTNmsyakw9tvNnw"
+-----------------------------------------------
+
+It's also possible to use {kib} anonymous access in conjunction with the {es} anonymous access.
+
+Prior to configuring {kib}, ensure that the anonymous access is enabled and properly configured in {es}. See {ref}/anonymous-access.html[Enabling anonymous access] for more information.
+
+Here is how your `kibana.yml` can look like if you want to use {es} anonymous access to impersonate anonymous users in {kib}:
+
+[source,yaml]
+-----------------------------------------------
+xpack.security.authc.providers:
+  anonymous.anonymous1:
+    order: 0
+    credentials: "elasticsearch_anonymous_user" <1>
+-----------------------------------------------
+
+<1> The `elasticsearch_anonymous_user` is just a special constant that doesn't have any other meaning
+
+[float]
+===== Anonymous access and other types of authentication
+
+You can also configure any other authentication mechanisms in addition to the anonymous access in {kib}. In this case Login Selector UI will present a dedicated `Continue as Guest` option for the anonymous access:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.providers:
+  basic.basic1:
+    order: 0
+  anonymous.anonymous1:
+    order: 1
+    credentials:
+      username: "anonymous_service_account"
+      password: "anonymous_service_account_password"
+--------------------------------------------------------------------------------
+
+[float]
+===== Anonymous access and embedding
+
+One of the most popular use cases for the anonymous access is when you embed {kib} into other applications and don't want to force your users to log in just to view it. If you configured {kib} to use anonymous access as a sole authentication mechanism, you don't need to do anything special while embedding {kib}. 
+
+The things become a bit tricky if you configure multiple authentication mechanisms and use Login Selector UI to log in to {kib}. In this case embedded {kib} doesn't know whether you want your users to use anonymous access or not. If the intention is to use anonymous access then you should add `auth_provider_hint=<anonymous-provider-name>` query string parameter to the {kib} URL.
+
+For example, if you generate the iFrame code to embed {kib} it will look like this:
+
+```html
+<iframe src="https://localhost:5601/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?embed=true&_g=(....)" height="600" width="800"></iframe>
+```
+
+To make this iFrame leverage anonymous access automatically, you will need to modify a link to {kib} in `src` iFrame attribute to look like this:
+
+```html
+<iframe src="https://localhost:5601/app/dashboards?auth_provider_hint=anonymous1#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?embed=true&_g=(....)" height="600" width="800"></iframe>
+```
+
+Note that `auth_provider_hint` query string parameter goes _before_ the hash URL fragment.
 
 [[http-authentication]]
 ==== HTTP authentication
