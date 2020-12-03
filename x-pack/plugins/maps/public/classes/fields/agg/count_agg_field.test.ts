@@ -7,16 +7,6 @@
 import { CountAggField } from './count_agg_field';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { IESAggSource } from '../../sources/es_agg_source';
-import { IIndexPattern } from 'src/plugins/data/public';
-
-const mockIndexPattern = {
-  title: 'wildIndex',
-  fields: [
-    {
-      name: 'foo*',
-    },
-  ],
-} as IIndexPattern;
 
 const mockEsAggSource = ({} as unknown) as IESAggSource;
 
