@@ -19,7 +19,7 @@ import { notifyFeatureUsage } from '../../feature';
 
 // get ML anomaly detection jobs for each environment
 export const anomalyDetectionJobsRoute = createRoute({
-  endpoint: 'GET /api/apm/settings/anomaly-detection',
+  endpoint: 'GET /api/apm/settings/anomaly-detection/jobs',
   options: {
     tags: ['access:apm', 'access:ml:canGetJobs'],
   },

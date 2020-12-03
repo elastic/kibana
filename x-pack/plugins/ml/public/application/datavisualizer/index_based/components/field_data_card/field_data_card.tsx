@@ -10,7 +10,6 @@ import React, { FC } from 'react';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 
 import { FieldVisConfig } from '../../common';
-// @ts-ignore
 import { FieldTitleBar } from '../../../../components/field_title_bar/index';
 import {
   BooleanContent,

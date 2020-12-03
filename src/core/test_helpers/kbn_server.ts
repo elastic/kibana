@@ -70,7 +70,6 @@ export function createRootWithSettings(
     configs: [],
     cliArgs: {
       dev: false,
-      open: false,
       quiet: false,
       silent: false,
       watch: false,
@@ -83,7 +82,7 @@ export function createRootWithSettings(
       dist: false,
       ...cliArgs,
     },
-    isDevClusterMaster: false,
+    isDevCliParent: false,
   });
 
   return new Root(

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { isMaster, isWorker } from 'cluster';
 import { Server } from '@hapi/hapi';
 import { LogRotator } from './log_rotator';
 import { LegacyLoggingConfig } from '../schema';
@@ -27,12 +26,6 @@ let logRotator: LogRotator;
 export async function setupLoggingRotate(server: Server, config: LegacyLoggingConfig) {
   // If log rotate is not enabled we skip
   if (!config.rotate.enabled) {
-    return;
-  }
-
-  // We just want to start the logging rotate service once
-  // and we choose to use the master (prod) or the worker server (dev)
-  if (!isMaster && isWorker && process.env.kbnWorkerType !== 'server') {
     return;
   }
 

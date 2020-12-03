@@ -249,7 +249,11 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       </EuiButton>,
       <EuiButton
         key="registerRepo"
-        {...reactRouterNavigate(history, linkToAddRepository(name))}
+        {...reactRouterNavigate(
+          history,
+          // @ts-expect-error
+          linkToAddRepository(name)
+        )}
         fill
         iconType="plusInCircle"
         data-test-subj="registerRepositoryButton"

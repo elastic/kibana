@@ -124,7 +124,7 @@ export class Server {
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
     // rely on dev server to validate config, don't validate in the parent process
-    if (!this.env.isDevClusterMaster) {
+    if (!this.env.isDevCliParent) {
       // Immediately terminate in case of invalid configuration
       // This needs to be done after plugin discovery
       await this.configService.validate();

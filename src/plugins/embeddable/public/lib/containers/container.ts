@@ -171,7 +171,7 @@ export abstract class Container<
       return this.children[id] as TEmbeddable;
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise<TEmbeddable>((resolve, reject) => {
       const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
         if (this.output.embeddableLoaded[id]) {
           subscription.unsubscribe();
@@ -181,6 +181,7 @@ export abstract class Container<
         // If we hit this, the panel was removed before the embeddable finished loading.
         if (this.input.panels[id] === undefined) {
           subscription.unsubscribe();
+          // @ts-expect-error undefined in not assignable to TEmbeddable | ErrorEmbeddable
           resolve(undefined);
         }
       });

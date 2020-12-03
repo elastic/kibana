@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 
 interface Props {
@@ -84,7 +84,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
           transactionType={transactionType}
         >
           {i18n.translate('xpack.apm.metrics.transactionChart.viewJob', {
-            defaultMessage: 'View Job:',
+            defaultMessage: 'View Job',
           })}
         </MLJobLink>
       </ShiftedEuiText>

@@ -264,7 +264,7 @@ test('does not start http server if process is dev cluster master', async () => 
   const service = new HttpService({
     coreId,
     configService,
-    env: Env.createDefault(REPO_ROOT, getEnvOptions({ isDevClusterMaster: true })),
+    env: Env.createDefault(REPO_ROOT, getEnvOptions({ isDevCliParent: true })),
     logger,
   });
 

@@ -19,8 +19,8 @@ jest.mock('./helpers', () => ({
 describe('dnsMatrixHistogramConfig', () => {
   test('should export dnsMatrixHistogramConfig corrrectly', () => {
     expect(dnsMatrixHistogramConfig).toEqual({
-      aggName: 'aggregations.NetworkDns.buckets',
-      parseKey: 'dns.buckets',
+      aggName: 'aggregations.dns_name_query_count.buckets',
+      parseKey: 'dns_question_name.buckets',
       buildDsl: buildDnsHistogramQuery,
       parser: getDnsParsedData,
     });

@@ -178,7 +178,7 @@ describe('EQL search strategy', () => {
 
         expect(requestOptions).toEqual(
           expect.objectContaining({
-            max_retries: 2,
+            maxRetries: 2,
             ignore: [300],
           })
         );

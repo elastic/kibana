@@ -384,7 +384,7 @@ describe('Timeline QueryBar ', () => {
           [
             {
               id: `id-exists`,
-              name,
+              name: 'name',
               enabled: true,
               excluded: false,
               kqlQuery: '',

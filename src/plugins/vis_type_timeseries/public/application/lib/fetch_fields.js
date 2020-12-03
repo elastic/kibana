@@ -19,34 +19,40 @@
 import { i18n } from '@kbn/i18n';
 import { extractIndexPatterns } from '../../../common/extract_index_patterns';
 import { getCoreStart } from '../../services';
+import { ROUTES } from '../../../common/constants';
 
-export async function fetchFields(indexPatterns = ['*']) {
+export async function fetchFields(indexPatterns = [], signal) {
   const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];
   try {
     const indexFields = await Promise.all(
-      patterns.map((pattern) => {
-        return getCoreStart().http.get('/api/metrics/fields', {
+      patterns.map((pattern) =>
+        getCoreStart().http.get(ROUTES.FIELDS, {
           query: {
             index: pattern,
           },
-        });
-      })
+          signal,
+        })
+      )
     );
-    const fields = patterns.reduce((cumulatedFields, currentPattern, index) => {
-      return {
+
+    return patterns.reduce(
+      (cumulatedFields, currentPattern, index) => ({
         ...cumulatedFields,
         [currentPattern]: indexFields[index],
-      };
-    }, {});
-    return fields;
-  } catch (error) {
-    getCoreStart().notifications.toasts.addDanger({
-      title: i18n.translate('visTypeTimeseries.fetchFields.loadIndexPatternFieldsErrorMessage', {
-        defaultMessage: 'Unable to load index_pattern fields',
       }),
-      text: error.message,
-    });
+      {}
+    );
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      getCoreStart().notifications.toasts.addDanger({
+        title: i18n.translate('visTypeTimeseries.fetchFields.loadIndexPatternFieldsErrorMessage', {
+          defaultMessage: 'Unable to load index_pattern fields',
+        }),
+        text: error.message,
+      });
+    }
   }
+  return [];
 }
 
 export async function fetchIndexPatternFields({ params, fields = {} }) {

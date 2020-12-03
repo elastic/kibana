@@ -43,10 +43,10 @@ export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams 
 
 export const heatmapVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'heatmap',
-  title: i18n.translate('visTypeVislib.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
+  title: i18n.translate('visTypeVislib.heatmap.heatmapTitle', { defaultMessage: 'Heat map' }),
   icon: 'heatmap',
   description: i18n.translate('visTypeVislib.heatmap.heatmapDescription', {
-    defaultMessage: 'Shade cells within a matrix',
+    defaultMessage: 'Shade data in cells in a matrix.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
   toExpressionAst,

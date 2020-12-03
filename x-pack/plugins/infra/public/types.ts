@@ -11,7 +11,10 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '../../../../src/plugins/usage_collection/public';
-import type { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
+import type {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../plugins/triggers_actions_ui/public';
 import type { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
 import type {
   ObservabilityPluginSetup,
@@ -37,7 +40,7 @@ export interface InfraClientStartDeps {
   dataEnhanced: DataEnhancedStart;
   observability: ObservabilityPluginStart;
   spaces: SpacesPluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionStart;
   ml: MlPluginStart;
 }

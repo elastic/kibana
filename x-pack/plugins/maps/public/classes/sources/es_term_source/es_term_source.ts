@@ -56,6 +56,9 @@ export class ESTermSource extends AbstractESAggSource {
     }
     return {
       ...normalizedDescriptor,
+      indexPatternTitle: descriptor.indexPatternTitle
+        ? descriptor.indexPatternTitle
+        : descriptor.indexPatternId,
       term: descriptor.term!,
       type: SOURCE_TYPES.ES_TERM_SOURCE,
     };
@@ -64,7 +67,7 @@ export class ESTermSource extends AbstractESAggSource {
   private readonly _termField: ESDocField;
   readonly _descriptor: ESTermSourceDescriptor;
 
-  constructor(descriptor: ESTermSourceDescriptor, inspectorAdapters: Adapters) {
+  constructor(descriptor: ESTermSourceDescriptor, inspectorAdapters?: Adapters) {
     const sourceDescriptor = ESTermSource.createDescriptor(descriptor);
     super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;

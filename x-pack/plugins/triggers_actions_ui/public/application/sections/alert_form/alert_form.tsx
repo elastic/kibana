@@ -496,12 +496,8 @@ export const AlertForm = ({
           }
           setAlertProperty={setActions}
           setActionParamsProperty={setActionParamsProperty}
-          http={http}
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={alertTypeModel?.defaultActionMessage}
-          toastNotifications={toastNotifications}
-          docLinks={docLinks}
-          capabilities={capabilities}
         />
       ) : null}
     </Fragment>

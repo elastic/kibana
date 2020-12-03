@@ -220,6 +220,7 @@ describe('when on the list page', () => {
         HostInfo['metadata']['Endpoint']['policy']['applied']['status']
       > = [];
       let firstPolicyID: string;
+      let firstPolicyRev: number;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const mockedEndpointData = mockEndpointResultList({ total: 4 });
@@ -227,6 +228,7 @@ describe('when on the list page', () => {
           const queryStrategyVersion = mockedEndpointData.query_strategy_version;
 
           firstPolicyID = hostListData[0].metadata.Endpoint.policy.applied.id;
+          firstPolicyRev = hostListData[0].metadata.Endpoint.policy.applied.endpoint_policy_version;
 
           // add ability to change (immutable) policy
           type DeepMutable<T> = { -readonly [P in keyof T]: DeepMutable<T[P]> };
@@ -401,6 +403,16 @@ describe('when on the list page', () => {
             expect(flyout).not.toBeNull();
           });
         });
+      });
+
+      it('should show revision number', async () => {
+        const renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        });
+        const firstPolicyRevElement = (await renderResult.findAllByTestId('policyListRevNo'))[0];
+        expect(firstPolicyRevElement).not.toBeNull();
+        expect(firstPolicyRevElement.textContent).toEqual(`rev. ${firstPolicyRev}`);
       });
     });
   });
@@ -583,6 +595,15 @@ describe('when on the list page', () => {
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
         `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+      );
+    });
+
+    it('should display policy revision number', async () => {
+      const renderResult = await renderAndWaitForData();
+      const policyDetailsRevElement = await renderResult.findByTestId('policyDetailsRevNo');
+      expect(policyDetailsRevElement).not.toBeNull();
+      expect(policyDetailsRevElement.textContent).toEqual(
+        `rev. ${hostDetails.metadata.Endpoint.policy.applied.endpoint_policy_version}`
       );
     });
 

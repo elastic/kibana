@@ -25,14 +25,26 @@ export const NAV = {
     'xpack.enterpriseSearch.workplaceSearch.nav.groups.sourcePrioritization',
     { defaultMessage: 'Source Prioritization' }
   ),
+  CONTENT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.content', {
+    defaultMessage: 'Content',
+  }),
   ROLE_MAPPINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
     defaultMessage: 'Role Mappings',
   }),
   SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
     defaultMessage: 'Security',
   }),
+  SCHEMA: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.schema', {
+    defaultMessage: 'Schema',
+  }),
+  DISPLAY_SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.displaySettings', {
+    defaultMessage: 'Display Settings',
+  }),
   SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.settings', {
     defaultMessage: 'Settings',
+  }),
+  ADD_SOURCE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.addSource', {
+    defaultMessage: 'Add Source',
   }),
   PERSONAL_DASHBOARD: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.nav.personalDashboard',

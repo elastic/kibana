@@ -29,7 +29,7 @@ import {
 } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
-import { IJoin } from '../../../joins/join';
+import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
 
@@ -88,7 +88,7 @@ export class DynamicStyleProperty<T>
       return SOURCE_META_DATA_REQUEST_ID;
     }
 
-    const join = this._layer.getValidJoins().find((validJoin: IJoin) => {
+    const join = this._layer.getValidJoins().find((validJoin: InnerJoin) => {
       return validJoin.getRightJoinSource().hasMatchingMetricField(fieldName);
     });
     return join ? join.getSourceMetaDataRequestId() : null;

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, Fragment, memo } from 'react';
+import React, { useState, Fragment, memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -85,16 +85,23 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     const errorCount = countValidationErrors(inputValidationResults);
     const hasErrors = forceShowErrors && errorCount;
 
-    const inputStreams = packageInputStreams
-      .map((packageInputStream) => {
-        return {
-          packageInputStream,
-          packagePolicyInputStream: packagePolicyInput.streams.find(
-            (stream) => stream.data_stream.dataset === packageInputStream.data_stream.dataset
-          ),
-        };
-      })
-      .filter((stream) => Boolean(stream.packagePolicyInputStream));
+    const hasInputStreams = useMemo(() => packageInputStreams.length > 0, [
+      packageInputStreams.length,
+    ]);
+    const inputStreams = useMemo(
+      () =>
+        packageInputStreams
+          .map((packageInputStream) => {
+            return {
+              packageInputStream,
+              packagePolicyInputStream: packagePolicyInput.streams.find(
+                (stream) => stream.data_stream.dataset === packageInputStream.data_stream.dataset
+              ),
+            };
+          })
+          .filter((stream) => Boolean(stream.packagePolicyInputStream)),
+      [packageInputStreams, packagePolicyInput.streams]
+    );
 
     return (
       <>
@@ -179,13 +186,14 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
           <Fragment>
             <PackagePolicyInputConfig
+              hasInputStreams={hasInputStreams}
               packageInputVars={packageInput.vars}
               packagePolicyInput={packagePolicyInput}
               updatePackagePolicyInput={updatePackagePolicyInput}
               inputVarsValidationResults={{ vars: inputValidationResults.vars }}
               forceShowErrors={forceShowErrors}
             />
-            <ShortenedHorizontalRule margin="m" />
+            {hasInputStreams ? <ShortenedHorizontalRule margin="m" /> : <EuiSpacer size="l" />}
           </Fragment>
         ) : null}
 

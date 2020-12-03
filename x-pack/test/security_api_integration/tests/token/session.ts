@@ -8,7 +8,7 @@ import request, { Cookie } from 'request';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(() => resolve(), ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');

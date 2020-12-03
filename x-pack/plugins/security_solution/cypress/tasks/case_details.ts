@@ -5,7 +5,18 @@
  */
 
 import { TIMELINE_TITLE } from '../screens/timeline';
-import { CASE_DETAILS_TIMELINE_LINK_MARKDOWN } from '../screens/case_details';
+import {
+  CASE_ACTIONS_BTN,
+  CASE_DETAILS_TIMELINE_LINK_MARKDOWN,
+  DELETE_CASE_BTN,
+  DELETE_CASE_CONFIRMATION_BTN,
+} from '../screens/case_details';
+
+export const deleteCase = () => {
+  cy.get(CASE_ACTIONS_BTN).first().click();
+  cy.get(DELETE_CASE_BTN).click();
+  cy.get(DELETE_CASE_CONFIRMATION_BTN).click();
+};
 
 export const openCaseTimeline = () => {
   cy.get(CASE_DETAILS_TIMELINE_LINK_MARKDOWN).click();

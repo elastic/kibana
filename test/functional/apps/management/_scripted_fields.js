@@ -44,6 +44,7 @@ export default function ({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const deployment = getService('deployment');
   const PageObjects = getPageObjects([
     'common',
     'header',
@@ -202,7 +203,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        if (await PageObjects.common.isOss()) {
+        if (await deployment.isOss()) {
           // OSS renders a vertical bar chart and we check the data in the Inspect panel
           const expectedChartValues = [
             ['14', '31'],
@@ -318,7 +319,7 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        if (await PageObjects.common.isOss()) {
+        if (await deployment.isOss()) {
           // OSS renders a vertical bar chart and we check the data in the Inspect panel
           await inspector.open();
           await inspector.expectTableData([
@@ -414,7 +415,7 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        if (await PageObjects.common.isOss()) {
+        if (await deployment.isOss()) {
           // OSS renders a vertical bar chart and we check the data in the Inspect panel
           await inspector.open();
           await inspector.expectTableData([
@@ -514,7 +515,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        if (await PageObjects.common.isOss()) {
+        if (await deployment.isOss()) {
           // OSS renders a vertical bar chart and we check the data in the Inspect panel
           await inspector.open();
           await inspector.setTablePageSize(50);

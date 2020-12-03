@@ -13,6 +13,7 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -57,7 +58,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
       {sources.map(({ name, serviceType, addPath, connected, accountContextOnly }, i) => (
         <React.Fragment key={i}>
           <EuiFlexItem>
-            <div className="source-card-configured euiCard">
+            <EuiPanel paddingSize="s">
               <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
                 <EuiFlexItem>
                   <EuiFlexGroup
@@ -95,7 +96,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-            </div>
+            </EuiPanel>
           </EuiFlexItem>
         </React.Fragment>
       ))}

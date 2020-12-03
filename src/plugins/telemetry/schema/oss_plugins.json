@@ -616,7 +616,7 @@
             }
           }
         },
-        "ingestManager": {
+        "fleet": {
           "properties": {
             "clicks_total": {
               "type": "long"
@@ -1391,7 +1391,7 @@
                     "disableProtection": {
                       "type": "boolean"
                     },
-                    "whitelistConfigured": {
+                    "allowlistConfigured": {
                       "type": "boolean"
                     }
                   }

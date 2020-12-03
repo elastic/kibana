@@ -7,7 +7,6 @@
 import { Plugin } from './plugin';
 
 export { AlertsContextProvider, AlertsContextValue } from './application/context/alerts_context';
-export { ActionsConnectorsContextProvider } from './application/context/actions_connectors_context';
 export { AlertAdd } from './application/sections/alert_form';
 export {
   AlertEdit,
@@ -47,3 +46,4 @@ export * from './plugin';
 export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export { ForLastExpression } from './common/expression_items/for_the_last';
+export { TriggersAndActionsUiServices } from '../public/application/app';

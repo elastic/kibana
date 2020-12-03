@@ -21,16 +21,16 @@ import React from 'react';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDepsMock, getIndexPatternMock } from '../../test_utils';
-import { ControlsTab, ControlsTabUiProps } from './controls_tab';
+import ControlsTab, { ControlsTabProps } from './controls_tab';
 import { Vis } from '../../../../visualizations/public';
 
 const indexPatternsMock = {
   get: getIndexPatternMock,
 };
-let props: ControlsTabUiProps;
+let props: ControlsTabProps;
 
 beforeEach(() => {
-  props = {
+  props = ({
     deps: getDepsMock(),
     vis: ({
       API: {
@@ -78,18 +78,18 @@ beforeEach(() => {
     },
     setValue: jest.fn(),
     intl: null as any,
-  };
+  } as unknown) as ControlsTabProps;
 });
 
 test('renders ControlsTab', () => {
-  const component = shallowWithIntl(<ControlsTab.WrappedComponent {...props} />);
+  const component = shallowWithIntl(<ControlsTab {...props} />);
 
   expect(component).toMatchSnapshot();
 });
 
 describe('behavior', () => {
   test('add control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props} />);
+    const component = mountWithIntl(<ControlsTab {...props} />);
 
     findTestSubject(component, 'inputControlEditorAddBtn').simulate('click');
 
@@ -102,7 +102,7 @@ describe('behavior', () => {
   });
 
   test('remove control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props} />);
+    const component = mountWithIntl(<ControlsTab {...props} />);
     findTestSubject(component, 'inputControlEditorRemoveControl0').simulate('click');
     const expectedParams = [
       'controls',
@@ -125,7 +125,7 @@ describe('behavior', () => {
   });
 
   test('move down control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props} />);
+    const component = mountWithIntl(<ControlsTab {...props} />);
     findTestSubject(component, 'inputControlEditorMoveDownControl0').simulate('click');
     const expectedParams = [
       'controls',
@@ -162,7 +162,7 @@ describe('behavior', () => {
   });
 
   test('move up control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props} />);
+    const component = mountWithIntl(<ControlsTab {...props} />);
     findTestSubject(component, 'inputControlEditorMoveUpControl1').simulate('click');
     const expectedParams = [
       'controls',

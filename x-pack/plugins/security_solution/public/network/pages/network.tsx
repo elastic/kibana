@@ -151,6 +151,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
                   </Display>
 
                   <NetworkRoutes
+                    docValueFields={docValueFields}
                     filterQuery={tabsFilterQuery}
                     from={from}
                     isInitializing={isInitializing}

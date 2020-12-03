@@ -123,6 +123,115 @@ describe('buildBulkBody', () => {
     expect(fakeSignalSourceHit).toEqual(expected);
   });
 
+  test('bulk body builds well-defined body with threshold results', () => {
+    const sampleParams = sampleRuleAlertParams();
+    const baseDoc = sampleDocNoSortId();
+    const doc: SignalSourceHit = {
+      ...baseDoc,
+      _source: {
+        ...baseDoc._source,
+        threshold_result: {
+          count: 5,
+          value: 'abcd',
+        },
+      },
+    };
+    delete doc._source.source;
+    const fakeSignalSourceHit = buildBulkBody({
+      doc,
+      ruleParams: sampleParams,
+      id: sampleRuleGuid,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+    });
+    // Timestamp will potentially always be different so remove it for the test
+    // @ts-expect-error
+    delete fakeSignalSourceHit['@timestamp'];
+    const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
+      someKey: 'someValue',
+      event: {
+        kind: 'signal',
+      },
+      signal: {
+        parent: {
+          id: sampleIdGuid,
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 0,
+        },
+        parents: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+        ],
+        ancestors: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+        ],
+        original_time: '2020-04-20T21:27:45+0000',
+        status: 'open',
+        rule: {
+          actions: [],
+          author: ['Elastic'],
+          building_block_type: 'default',
+          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          rule_id: 'rule-1',
+          false_positives: [],
+          max_signals: 10000,
+          risk_score: 50,
+          risk_score_mapping: [],
+          output_index: '.siem-signals',
+          description: 'Detecting root and admin users',
+          from: 'now-6m',
+          immutable: false,
+          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          interval: '5m',
+          language: 'kuery',
+          license: 'Elastic License',
+          name: 'rule-name',
+          query: 'user.name: root or user.name: admin',
+          references: ['http://google.com'],
+          severity: 'high',
+          severity_mapping: [],
+          tags: ['some fake tag 1', 'some fake tag 2'],
+          threat: [],
+          throttle: 'no_actions',
+          type: 'query',
+          to: 'now',
+          note: '',
+          enabled: true,
+          created_by: 'elastic',
+          updated_by: 'elastic',
+          version: 1,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          exceptions_list: getListArrayMock(),
+        },
+        threshold_result: {
+          count: 5,
+          value: 'abcd',
+        },
+        depth: 1,
+      },
+    };
+    expect(fakeSignalSourceHit).toEqual(expected);
+  });
+
   test('bulk body builds original_event if it exists on the event to begin with', () => {
     const sampleParams = sampleRuleAlertParams();
     const doc = sampleDocNoSortId();

@@ -20,8 +20,7 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import { delay } from 'bluebird';
-
-import { createListStream, createPromiseFromStreams, createConcatStream } from '../../streams';
+import { createListStream, createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
 import { createGenerateDocRecordsStream } from '../generate_doc_records_stream';
 import { Progress } from '../../progress';

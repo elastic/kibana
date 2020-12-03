@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import {
   asDuration,
   asPercent,
-  tpmUnit,
+  asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { ServiceNodeStats } from '../../../../../common/service_map';
 
@@ -55,11 +55,7 @@ export function ServiceStatsList({
           defaultMessage: 'Req. per minute (avg.)',
         }
       ),
-      description: isNumber(transactionStats.avgRequestsPerMinute)
-        ? `${transactionStats.avgRequestsPerMinute.toFixed(2)} ${tpmUnit(
-            'request'
-          )}`
-        : null,
+      description: asTransactionRate(transactionStats.avgRequestsPerMinute),
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {

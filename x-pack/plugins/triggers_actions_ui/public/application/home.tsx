@@ -23,13 +23,13 @@ import {
 import { Section, routeToConnectors, routeToAlerts } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
-import { useAppDependencies } from './app_context';
 import { hasShowActionsCapability } from './lib/capabilities';
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
+import { useKibana } from '../common/lib/kibana';
 
 export interface MatchParams {
   section: Section;
@@ -41,7 +41,13 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { chrome, capabilities, setBreadcrumbs, docLinks, http } = useAppDependencies();
+  const {
+    chrome,
+    application: { capabilities },
+    setBreadcrumbs,
+    docLinks,
+    http,
+  } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
   const tabs: Array<{

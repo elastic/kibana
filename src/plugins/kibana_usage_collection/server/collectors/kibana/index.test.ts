@@ -31,7 +31,7 @@ import { registerKibanaUsageCollector } from './';
 const logger = loggingSystemMock.createLogger();
 
 describe('telemetry_kibana', () => {
-  let collector: Collector<unknown, unknown>;
+  let collector: Collector<unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
@@ -64,25 +64,6 @@ describe('telemetry_kibana', () => {
       index_pattern: { total: 0 },
       graph_workspace: { total: 0 },
       timelion_sheet: { total: 0 },
-    });
-  });
-
-  test('formatForBulkUpload', async () => {
-    const resultFromFetch = {
-      index: '.kibana-tests',
-      dashboard: { total: 0 },
-      visualization: { total: 0 },
-      search: { total: 0 },
-      index_pattern: { total: 0 },
-      graph_workspace: { total: 0 },
-      timelion_sheet: { total: 0 },
-    };
-
-    expect(collector.formatForBulkUpload!(resultFromFetch)).toStrictEqual({
-      type: 'kibana_stats',
-      payload: {
-        usage: resultFromFetch,
-      },
     });
   });
 });

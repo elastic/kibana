@@ -49,7 +49,8 @@ tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
   .chromium \
   .es \
   .chromedriver \
-  .geckodriver;
+  .geckodriver \
+  .yarn-local-mirror;
 
 echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
 
