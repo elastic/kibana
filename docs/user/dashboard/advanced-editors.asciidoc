@@ -1,0 +1,64 @@
+[[add-panels-with-advanced-editors]]
+== Add panels with advanced editors
+
+{kib} provides you with three advanced editors that you can use to create dashboard panels.
+
+[float]
+[[tsvb-advanced-editor]]
+=== TSVB
+
+A time series data visualization builder that allows you to use the full power of the Elasticsearch aggregation framework. To use *TSVB*,
+you can combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
+
+With *TSVB*, you can:
+
+* Create visualizations, data tables, and markdown panels.
+* Create visualizations with multiple indices.
+* Change the aggregations and labels to customize the data.
+
+image::images/tsvb.png[TSVB UI]
+
+[float]
+[[vega-advanced-editor]]
+=== Vega
+
+Build custom visualizations using *Vega* and *Vega-Lite*, backed by one or more data sources including {es}, Elastic Map Service,
+URL, or static data. Use the {kib} extensions to embed *Vega* in your dashboard, and add interactive tools. With *Vega*, then types of 
+visualizations you can create are endless.
+
+Use *Vega* and *Vega-Lite* when you want to create a visualization for:
+
+* Aggregations that use `nested` or `parent/child` mapping
+* Aggregations without an index pattern
+* Queries that use custom time filters
+* Complex calculations
+* Extracting data from _source instead of aggregations
+* Scatter charts, sankey charts, and custom maps
+* Using an unsupported visual theme
+
+*Vega* and *Vega-Lite* are declarative formats that:
+
+* Create complex visualizations
+* Use JSON and a different syntax for declaring visualizations
+* Are not fully interchangeable
+
+image::images/vega.png[Vega UI]
+
+[float]
+[[timelion-advanced-editor]]
+=== Timelion
+
+Displays your data along a scale that changes color according to where your data falls on the expected scale. Use the gauge to show how metric
+values relate to reference threshold values, or determine how a specified field is performing versus how it is expected to perform.
+
+*Timelion* is driven by a simple expression language that you use to:
+
+* Retrieve time series data
+* Perform calculation to tease out the answers to complex questions
+* Visualize the results
+
+image:images/gauge.png[Gauge]
+
+include::tsvb.asciidoc[]
+include::vega.asciidoc[]
+include::timelion.asciidoc[]
