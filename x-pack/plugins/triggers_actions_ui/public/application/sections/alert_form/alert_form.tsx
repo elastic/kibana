@@ -59,6 +59,7 @@ import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilitie
 import { SolutionFilter } from './solution_filter';
 import './alert_form.scss';
 import { recoveredActionGroupMessage } from '../../constants';
+import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 
 const ENTER_KEY = 13;
 
@@ -499,6 +500,9 @@ export const AlertForm = ({
                   defaultActionMessage: recoveredActionGroupMessage,
                 }
               : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
+          )}
+          getDefaultActionParams={getDefaultsForActionParams(
+            (actionGroupId) => actionGroupId === selectedAlertType.recoveryActionGroup.id
           )}
           setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
           setActionGroupIdByIndex={(group: string, index: number) =>
