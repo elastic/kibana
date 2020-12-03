@@ -721,7 +721,7 @@ export interface DataAccessLayer {
     nodeID: string;
     eventCategory: string[];
     eventTimestamp: string;
-    eventID: string;
+    eventID?: string | number;
     timerange: Timerange;
     indexPatterns: string[];
   }) => Promise<SafeResolverEvent | null>;
@@ -933,7 +933,7 @@ export type PanelViewAndParameters =
         /**
          * `event.id` that uniquely identifies the event to show.
          */
-        eventID: string;
+        eventID?: string | number;
 
         /**
          * `event['@timestamp']` that identifies the given timestamp for an event

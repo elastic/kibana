@@ -123,7 +123,7 @@ const NodeEventsListItem = memo(function ({
     panelParameters: {
       nodeID,
       eventCategory,
-      eventID: eventID ? String(eventID) : '',
+      eventID,
       eventTimestamp: String(timestamp),
     },
   });
