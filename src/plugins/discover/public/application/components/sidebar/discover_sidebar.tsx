@@ -45,9 +45,6 @@ import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './l
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverServices } from '../../../build_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
-import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
-import { getIndexPatternFieldList } from '../../helpers/get_index_pattern_field_list';
-import { getServices } from '../../../kibana_services';
 
 export interface DiscoverSidebarProps {
   /**
@@ -138,9 +135,7 @@ export function DiscoverSidebar({
   useFlyout = false,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
-  const [showFields, setShowFields] = useState(false);
-  const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
-  const services = useMemo(() => getServices(), []);
+
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);

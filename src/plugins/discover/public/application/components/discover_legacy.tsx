@@ -166,7 +166,10 @@ export function DiscoverLegacy({
   const contentCentered = resultState === 'uninitialized';
 
   const getDisplayColumns = () => {
-    const { columns } = state;
+    if (!state.columns) {
+      return [];
+    }
+    const columns = [...state.columns];
     if (useNewFieldsApi && columns) {
       const indexOfSource = columns.indexOf('_source');
       if (indexOfSource !== -1 && columns.splice(indexOfSource, 1).length > 0) {
