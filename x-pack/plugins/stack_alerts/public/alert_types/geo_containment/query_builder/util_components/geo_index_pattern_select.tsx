@@ -8,18 +8,17 @@ import React, { Component } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IndexPattern } from 'src/plugins/data/public';
-import {
-  getIndexPatternSelectComponent,
-  getIndexPatternService,
-  getHttp,
-} from '../kibana_services';
-import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../../common/constants';
+import { IndexPattern, IndexPatternsContract } from 'src/plugins/data/public';
+import { HttpSetup } from 'kibana/public';
 
 interface Props {
   onChange: (indexPattern: IndexPattern) => void;
-  value: string | null;
-  isGeoPointsOnly?: boolean;
+  value: string | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  IndexPatternSelectComponent: any;
+  indexPatternService: IndexPatternsContract | undefined;
+  http: HttpSetup;
+  includedGeoTypes: string[];
 }
 
 interface State {
@@ -41,14 +40,14 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
     this._isMounted = true;
   }
 
-  _onIndexPatternSelect = async (indexPatternId?: string) => {
-    if (!indexPatternId || indexPatternId.length === 0) {
+  _onIndexPatternSelect = async (indexPatternId: string) => {
+    if (!indexPatternId || indexPatternId.length === 0 || !this.props.indexPatternService) {
       return;
     }
 
     let indexPattern;
     try {
-      indexPattern = await getIndexPatternService().get(indexPatternId);
+      indexPattern = await this.props.indexPatternService.get(indexPatternId);
     } catch (err) {
       return;
     }
@@ -72,35 +71,39 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
     return (
       <>
         <EuiCallOut
-          title={i18n.translate('xpack.maps.noIndexPattern.messageTitle', {
+          title={i18n.translate('xpack.stackAlerts.geoContainment.noIndexPattern.messageTitle', {
             defaultMessage: `Couldn't find any index patterns with geospatial fields`,
           })}
           color="warning"
         >
           <p>
             <FormattedMessage
-              id="xpack.maps.noIndexPattern.doThisPrefixDescription"
+              id="xpack.stackAlerts.geoContainment.noIndexPattern.doThisPrefixDescription"
               defaultMessage="You'll need to "
             />
-            <EuiLink href={getHttp().basePath.prepend(`/app/management/kibana/indexPatterns`)}>
+            <EuiLink
+              href={this.props.http.basePath.prepend(`/app/management/kibana/indexPatterns`)}
+            >
               <FormattedMessage
-                id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
+                id="xpack.stackAlerts.geoContainment.noIndexPattern.doThisLinkTextDescription"
                 defaultMessage="create an index pattern"
               />
             </EuiLink>
             <FormattedMessage
-              id="xpack.maps.noIndexPattern.doThisSuffixDescription"
+              id="xpack.stackAlerts.geoContainment.noIndexPattern.doThisSuffixDescription"
               defaultMessage=" with geospatial fields."
             />
           </p>
           <p>
             <FormattedMessage
-              id="xpack.maps.noIndexPattern.hintDescription"
+              id="xpack.stackAlerts.geoContainment.noIndexPattern.hintDescription"
               defaultMessage="Don't have any geospatial data sets? "
             />
-            <EuiLink href={getHttp().basePath.prepend('/app/home#/tutorial_directory/sampleData')}>
+            <EuiLink
+              href={this.props.http.basePath.prepend('/app/home#/tutorial_directory/sampleData')}
+            >
               <FormattedMessage
-                id="xpack.maps.noIndexPattern.getStartedLinkText"
+                id="xpack.stackAlerts.geoContainment.noIndexPattern.getStartedLinkText"
                 defaultMessage="Get started with some sample data sets."
               />
             </EuiLink>
@@ -112,29 +115,34 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
   }
 
   render() {
-    const IndexPatternSelect = getIndexPatternSelectComponent();
+    const IndexPatternSelectComponent = this.props.IndexPatternSelectComponent;
     return (
       <>
         {this._renderNoIndexPatternWarning()}
 
         <EuiFormRow
-          label={i18n.translate('xpack.maps.indexPatternSelectLabel', {
+          label={i18n.translate('xpack.stackAlerts.geoContainment.indexPatternSelectLabel', {
             defaultMessage: 'Index pattern',
           })}
         >
-          <IndexPatternSelect
-            isDisabled={this.state.noGeoIndexPatternsExist}
-            indexPatternId={this.props.value ? this.props.value : ''}
-            onChange={this._onIndexPatternSelect}
-            placeholder={i18n.translate('xpack.maps.indexPatternSelectPlaceholder', {
-              defaultMessage: 'Select index pattern',
-            })}
-            fieldTypes={
-              this.props?.isGeoPointsOnly ? [ES_GEO_FIELD_TYPE.GEO_POINT] : ES_GEO_FIELD_TYPES
-            }
-            onNoIndexPatterns={this._onNoIndexPatterns}
-            isClearable={false}
-          />
+          {IndexPatternSelectComponent ? (
+            <IndexPatternSelectComponent
+              isDisabled={this.state.noGeoIndexPatternsExist}
+              indexPatternId={this.props.value}
+              onChange={this._onIndexPatternSelect}
+              placeholder={i18n.translate(
+                'xpack.stackAlerts.geoContainment.indexPatternSelectPlaceholder',
+                {
+                  defaultMessage: 'Select index pattern',
+                }
+              )}
+              fieldTypes={this.props.includedGeoTypes}
+              onNoIndexPatterns={this._onNoIndexPatterns}
+              isClearable={false}
+            />
+          ) : (
+            <div />
+          )}
         </EuiFormRow>
       </>
     );
