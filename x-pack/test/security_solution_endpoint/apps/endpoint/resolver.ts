@@ -194,8 +194,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await (await testSubjects.find('resolver:graph-controls:zoom-in')).click();
       });
 
-      // SKIP: https://github.com/elastic/kibana/issues/83446
-      it.skip('Check Related Events for event.file Node', async () => {
+      it('Check Related Events for event.file Node', async () => {
         const expectedData = [
           '17 authentication',
           '1 registry',
@@ -207,8 +206,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // SKIP: https://github.com/elastic/kibana/issues/83446
-    describe.skip('Resolver Tree events', function () {
+    describe('Resolver Tree events', function () {
       const expectedData = [
         '17 authentication',
         '1 registry',
