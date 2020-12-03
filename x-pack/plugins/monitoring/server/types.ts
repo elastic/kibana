@@ -136,50 +136,50 @@ export interface ElasticsearchResponseHit {
 export interface ElasticsearchSource {
   timestamp: string;
   beats_stats?: {
-    timestamp: string;
-    beat: {
-      uuid: string;
-      name: string;
-      type: string;
-      version: string;
-      host: string;
+    timestamp?: string;
+    beat?: {
+      uuid?: string;
+      name?: string;
+      type?: string;
+      version?: string;
+      host?: string;
     };
-    metrics: {
-      beat: {
-        memstats: {
-          memory_alloc: number;
+    metrics?: {
+      beat?: {
+        memstats?: {
+          memory_alloc?: number;
         };
-        info: {
-          uptime: {
-            ms: number;
+        info?: {
+          uptime?: {
+            ms?: number;
           };
         };
         handles?: {
-          limit: {
-            hard: number;
-            soft: number;
+          limit?: {
+            hard?: number;
+            soft?: number;
           };
         };
       };
-      libbeat: {
-        config: {
-          reloads: number;
+      libbeat?: {
+        config?: {
+          reloads?: number;
         };
-        output: {
-          type: string;
-          write: {
-            bytes: number;
-            errors: number;
+        output?: {
+          type?: string;
+          write?: {
+            bytes?: number;
+            errors?: number;
           };
-          read: {
-            errors: number;
+          read?: {
+            errors?: number;
           };
         };
-        pipeline: {
-          events: {
-            total: number;
-            published: number;
-            dropped: number;
+        pipeline?: {
+          events?: {
+            total?: number;
+            published?: number;
+            dropped?: number;
           };
         };
       };

@@ -28,25 +28,25 @@ export function handleResponse(response: ElasticsearchResponse, apmUuid: string)
     return {};
   }
 
-  const eventsTotalFirst = firstStats.metrics.libbeat.pipeline.events.total;
-  const eventsEmittedFirst = firstStats.metrics.libbeat.pipeline.events.published;
-  const eventsDroppedFirst = firstStats.metrics.libbeat.pipeline.events.dropped;
-  const bytesWrittenFirst = firstStats.metrics.libbeat.output.write.bytes;
+  const eventsTotalFirst = firstStats.metrics?.libbeat?.pipeline?.events?.total;
+  const eventsEmittedFirst = firstStats.metrics?.libbeat?.pipeline?.events?.published;
+  const eventsDroppedFirst = firstStats.metrics?.libbeat?.pipeline?.events?.dropped;
+  const bytesWrittenFirst = firstStats.metrics?.libbeat?.output?.write?.bytes;
 
-  const eventsTotalLast = stats.metrics.libbeat.pipeline.events.total;
-  const eventsEmittedLast = stats.metrics.libbeat.pipeline.events.published;
-  const eventsDroppedLast = stats.metrics.libbeat.pipeline.events.dropped;
-  const bytesWrittenLast = stats.metrics.libbeat.output.write.bytes;
+  const eventsTotalLast = stats.metrics?.libbeat?.pipeline?.events?.total;
+  const eventsEmittedLast = stats.metrics?.libbeat?.pipeline?.events?.published;
+  const eventsDroppedLast = stats.metrics?.libbeat?.pipeline?.events?.dropped;
+  const bytesWrittenLast = stats.metrics?.libbeat?.output?.write?.bytes;
 
   return {
     uuid: apmUuid,
-    transportAddress: stats.beat.host,
-    version: stats.beat.version,
-    name: stats.beat.name,
-    type: upperFirst(stats.beat.type) || null,
-    output: upperFirst(stats.metrics.libbeat.output.type) || null,
-    configReloads: stats.metrics.libbeat.config.reloads,
-    uptime: stats.metrics.beat.info.uptime.ms,
+    transportAddress: stats.beat?.host,
+    version: stats.beat?.version,
+    name: stats.beat?.name,
+    type: upperFirst(stats.beat?.type) || null,
+    output: upperFirst(stats.metrics?.libbeat?.output?.type) || null,
+    configReloads: stats.metrics?.libbeat?.config?.reloads,
+    uptime: stats.metrics?.beat?.info?.uptime?.ms,
     eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst),
     eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst),
     eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst),

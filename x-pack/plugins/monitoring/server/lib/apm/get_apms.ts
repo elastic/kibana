@@ -29,7 +29,7 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
       return accum;
     }
 
-    const uuid = stats?.beat.uuid;
+    const uuid = stats?.beat?.uuid;
 
     // skip this duplicated beat, newer one was already added
     if (accum.ids.has(uuid)) {
@@ -47,36 +47,36 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
     };
 
     const { rate: bytesSentRate } = calculateRate({
-      latestTotal: stats.metrics.libbeat.output.write.bytes,
-      earliestTotal: earliestStats.metrics.libbeat.output.write.bytes,
+      latestTotal: stats.metrics?.libbeat?.output?.write?.bytes,
+      earliestTotal: earliestStats?.metrics?.libbeat?.output?.write?.bytes,
       ...rateOptions,
     });
 
     const { rate: totalEventsRate } = calculateRate({
-      latestTotal: stats.metrics.libbeat.pipeline.events.total,
-      earliestTotal: earliestStats.metrics.libbeat.pipeline.events.total,
+      latestTotal: stats.metrics?.libbeat?.pipeline?.events?.total,
+      earliestTotal: earliestStats.metrics?.libbeat?.pipeline?.events?.total,
       ...rateOptions,
     });
 
-    const errorsWrittenLatest = stats.metrics.libbeat.output.write.errors;
-    const errorsWrittenEarliest = earliestStats.metrics.libbeat.output.write.errors;
-    const errorsReadLatest = stats.metrics.libbeat.output.read.errors;
-    const errorsReadEarliest = earliestStats.metrics.libbeat.output.read.errors;
+    const errorsWrittenLatest = stats.metrics?.libbeat?.output?.write?.errors ?? 0;
+    const errorsWrittenEarliest = earliestStats.metrics?.libbeat?.output?.write?.errors ?? 0;
+    const errorsReadLatest = stats.metrics?.libbeat?.output?.read?.errors ?? 0;
+    const errorsReadEarliest = earliestStats.metrics?.libbeat?.output?.read?.errors ?? 0;
     const errors = getDiffCalculation(
       errorsWrittenLatest + errorsReadLatest,
       errorsWrittenEarliest + errorsReadEarliest
     );
 
     accum.beats.push({
-      uuid: stats.beat.uuid,
-      name: stats.beat.name,
-      type: upperFirst(stats.beat.type),
-      output: upperFirst(stats.metrics.libbeat.output.type),
+      uuid: stats.beat?.uuid,
+      name: stats.beat?.name,
+      type: upperFirst(stats.beat?.type),
+      output: upperFirst(stats.metrics?.libbeat?.output?.type),
       total_events_rate: totalEventsRate,
       bytes_sent_rate: bytesSentRate,
       errors,
-      memory: stats.metrics.beat.memstats.memory_alloc,
-      version: stats.beat.version,
+      memory: stats.metrics?.beat?.memstats?.memory_alloc,
+      version: stats.beat?.version,
       time_of_last_event: hit._source.timestamp,
     });
 

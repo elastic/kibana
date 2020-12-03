@@ -21,33 +21,33 @@ export function handleResponse(response: ElasticsearchResponse, beatUuid: string
   const firstStats = response.hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats;
   const stats = response.hits.hits[0]._source.beats_stats;
 
-  const eventsTotalFirst = firstStats?.metrics.libbeat.pipeline.events.total;
-  const eventsEmittedFirst = firstStats?.metrics.libbeat.pipeline.events.published;
-  const eventsDroppedFirst = firstStats?.metrics.libbeat.pipeline.events.dropped;
-  const bytesWrittenFirst = firstStats?.metrics.libbeat.output.write.bytes;
+  const eventsTotalFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.total ?? null;
+  const eventsEmittedFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.published ?? null;
+  const eventsDroppedFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.dropped ?? null;
+  const bytesWrittenFirst = firstStats?.metrics?.libbeat?.output?.write?.bytes ?? null;
 
-  const eventsTotalLast = stats?.metrics.libbeat.pipeline.events.total;
-  const eventsEmittedLast = stats?.metrics.libbeat.pipeline.events.published;
-  const eventsDroppedLast = stats?.metrics.libbeat.pipeline.events.dropped;
-  const bytesWrittenLast = stats?.metrics.libbeat.output.write.bytes;
-  const handlesHardLimit = stats?.metrics.beat.handles?.limit.hard;
-  const handlesSoftLimit = stats?.metrics.beat.handles?.limit.soft;
+  const eventsTotalLast = stats?.metrics?.libbeat?.pipeline?.events?.total ?? null;
+  const eventsEmittedLast = stats?.metrics?.libbeat?.pipeline?.events?.published ?? null;
+  const eventsDroppedLast = stats?.metrics?.libbeat?.pipeline?.events?.dropped ?? null;
+  const bytesWrittenLast = stats?.metrics?.libbeat?.output?.write?.bytes ?? null;
+  const handlesHardLimit = stats?.metrics?.beat?.handles?.limit?.hard ?? null;
+  const handlesSoftLimit = stats?.metrics?.beat?.handles?.limit?.soft ?? null;
 
   return {
     uuid: beatUuid,
-    transportAddress: stats?.beat.host,
-    version: stats?.beat.version,
-    name: stats?.beat.name,
-    type: upperFirst(stats?.beat.type),
-    output: upperFirst(stats?.metrics.libbeat.output.type),
-    configReloads: stats?.metrics.libbeat.config.reloads,
-    uptime: stats?.metrics.beat.info.uptime.ms,
-    eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst),
-    eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst),
-    eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst),
-    bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst),
-    handlesHardLimit: handlesHardLimit || null,
-    handlesSoftLimit: handlesSoftLimit || null,
+    transportAddress: stats?.beat?.host ?? null,
+    version: stats?.beat?.version ?? null,
+    name: stats?.beat?.name ?? null,
+    type: upperFirst(stats?.beat?.type) ?? null,
+    output: upperFirst(stats?.metrics?.libbeat?.output?.type) ?? null,
+    configReloads: stats?.metrics?.libbeat?.config?.reloads ?? null,
+    uptime: stats?.metrics?.beat?.info?.uptime?.ms ?? null,
+    eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst) ?? null,
+    eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst) ?? null,
+    eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst) ?? null,
+    bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst) ?? null,
+    handlesHardLimit,
+    handlesSoftLimit,
   };
 }
 
