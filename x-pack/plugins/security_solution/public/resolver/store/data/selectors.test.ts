@@ -15,6 +15,7 @@ import {
   mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
   mockTreeWithNoProcessEvents,
 } from '../../mocks/resolver_tree';
+import { endpointSourceSchema } from './../../mocks/tree_schema';
 import * as nodeModel from '../../../../common/endpoint/models/node';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
@@ -366,6 +367,7 @@ describe('data state', () => {
     const firstAncestorID = 'b';
     const secondAncestorID = 'a';
     beforeEach(() => {
+      const { schema, dataSource } = endpointSourceSchema();
       actions.push({
         type: 'serverReturnedResolverData',
         payload: {
@@ -374,8 +376,8 @@ describe('data state', () => {
             firstAncestorID,
             secondAncestorID,
           }),
-          dataSource: 'endpoint',
-          schema: { id: '', parent: '' },
+          dataSource,
+          schema,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
@@ -429,12 +431,13 @@ describe('data state', () => {
         firstChildID,
         secondChildID,
       });
+      const { schema, dataSource } = endpointSourceSchema();
       actions.push({
         type: 'serverReturnedResolverData',
         payload: {
           result: resolverTree,
-          dataSource: 'endpoint',
-          schema: { id: '', parent: '' },
+          dataSource,
+          schema,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
@@ -460,12 +463,13 @@ describe('data state', () => {
         firstChildID,
         secondChildID,
       });
+      const { schema, dataSource } = endpointSourceSchema();
       actions.push({
         type: 'serverReturnedResolverData',
         payload: {
           result: resolverTree,
-          dataSource: 'endpoint',
-          schema: { id: '', parent: '' },
+          dataSource,
+          schema,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
@@ -493,12 +497,13 @@ describe('data state', () => {
         firstChildID,
         secondChildID,
       });
+      const { schema, dataSource } = endpointSourceSchema();
       actions.push({
         type: 'serverReturnedResolverData',
         payload: {
           result: tree,
-          dataSource: 'endpoint',
-          schema: { id: '', parent: '' },
+          dataSource,
+          schema,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
@@ -510,13 +515,14 @@ describe('data state', () => {
   });
   describe('with a tree with no process events', () => {
     beforeEach(() => {
+      const { schema, dataSource } = endpointSourceSchema();
       const tree = mockTreeWithNoProcessEvents();
       actions.push({
         type: 'serverReturnedResolverData',
         payload: {
           result: tree,
-          dataSource: 'endpoint',
-          schema: { id: '', parent: '' },
+          dataSource,
+          schema,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
