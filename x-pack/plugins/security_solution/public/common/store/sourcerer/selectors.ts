@@ -80,31 +80,16 @@ export const getAllExistingIndexNamesSelector = () => {
   return mapStateToProps;
 };
 
-export const defaultIndexNamesSelector = () => {
-  const getScopeSelector = scopeIdSelector();
-  const getConfigIndexPatternsSelector = configIndexPatternsSelector();
-
-  const mapStateToProps = (state: State, scopeId: SourcererScopeName): string[] => {
-    const scope = getScopeSelector(state, scopeId);
-    const configIndexPatterns = getConfigIndexPatternsSelector(state);
-
-    return scope.selectedPatterns.length === 0 ? configIndexPatterns : scope.selectedPatterns;
-  };
-
-  return mapStateToProps;
-};
-
 const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
-
-export const getSelectedPatterns = memoizeOne((selectedPatternsStr: string): string[] => {
-  const selectedPatterns = selectedPatternsStr.split(',');
-  return selectedPatterns.some((index) => index === 'logs-*')
-    ? [...selectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
-    : selectedPatterns;
-});
 
 export const getSourcererScopeSelector = () => {
   const getScopeIdSelector = scopeIdSelector();
+  const getSelectedPatterns = memoizeOne((selectedPatternsStr: string): string[] => {
+    const selectedPatterns = selectedPatternsStr.length > 0 ? selectedPatternsStr.split(',') : [];
+    return selectedPatterns.some((index) => index === 'logs-*')
+      ? [...selectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
+      : selectedPatterns;
+  });
 
   const mapStateToProps = (state: State, scopeId: SourcererScopeName): ManageScope => {
     const scope = getScopeIdSelector(state, scopeId);

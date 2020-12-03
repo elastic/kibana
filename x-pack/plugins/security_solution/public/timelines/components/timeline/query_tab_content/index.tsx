@@ -173,7 +173,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     docValueFields,
     loading: loadingSourcerer,
     indexPattern,
-    selectedPatterns: indexNames,
+    selectedPatterns,
   } = useSourcererScope(SourcererScopeName.timeline);
 
   const { uiSettings } = useKibana().services;
@@ -219,7 +219,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [sort.columnId, sort.sortDirection]
   );
 
-  const [isQueryLoading, setIsQueryLoading] = useState(false);
   const { initializeTimeline, setIsTimelineLoading } = useManageTimeline();
   useEffect(() => {
     initializeTimeline({
@@ -229,13 +228,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [initializeTimeline, filterManager, timelineId]);
 
   const [
-    loading,
+    isQueryLoading,
     { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch },
   ] = useTimelineEvents({
     docValueFields,
     endDate: end,
     id: timelineId,
-    indexNames,
+    indexNames: selectedPatterns,
     fields: timelineQueryFields,
     limit: itemsPerPage,
     filterQuery: combinedQueries?.filterQuery ?? '',
@@ -249,17 +248,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
 
-  useEffect(() => {
-    setIsQueryLoading(loading);
-  }, [loading]);
-
   return (
     <>
       <TimelineRefetch
         id={timelineId}
         inputId="timeline"
         inspect={inspect}
-        loading={loading}
+        loading={isQueryLoading}
         refetch={refetch}
       />
       <FullWidthFlexGroup>
@@ -315,7 +310,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   height={footerHeight}
                   id={timelineId}
                   isLive={isLive}
-                  isLoading={loading || loadingSourcerer}
+                  isLoading={isQueryLoading || loadingSourcerer}
                   itemsCount={events.length}
                   itemsPerPage={itemsPerPage}
                   itemsPerPageOptions={itemsPerPageOptions}
