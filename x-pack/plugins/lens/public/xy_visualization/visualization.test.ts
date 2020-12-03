@@ -560,24 +560,27 @@ describe('xy_visualization', () => {
       });
 
       it('should respect the order of accessors coming from datasource', () => {
-        const colorAssignment = require('./color_assignment'); // eslint-disable-line @typescript-eslint/no-var-requires
-        const getAccessorColorConfigSpy = jest.spyOn(colorAssignment, 'getAccessorColorConfig');
         mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
           { columnId: 'c' },
           { columnId: 'b' },
         ]);
-        callConfigForYConfigs({});
-        expect(getAccessorColorConfigSpy).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          {
-            accessors: ['c', 'b'],
-            layerId: 'first',
-            seriesType: 'area',
-            xAccessor: 'a',
-          },
-          expect.anything()
-        );
+        const paletteGetter = jest.spyOn(paletteServiceMock, 'get');
+        // overrite palette with a palette returning first blue, then green as color
+        paletteGetter.mockReturnValue({
+          id: 'default',
+          title: '',
+          getColors: jest.fn(),
+          toExpression: jest.fn(),
+          getColor: jest.fn().mockReturnValueOnce('blue').mockReturnValueOnce('green'),
+        });
+
+        const yConfigs = callConfigForYConfigs({});
+        expect(yConfigs?.accessors[0].columnId).toEqual('c');
+        expect(yConfigs?.accessors[0].color).toEqual('blue');
+        expect(yConfigs?.accessors[1].columnId).toEqual('b');
+        expect(yConfigs?.accessors[1].color).toEqual('green');
+
+        paletteGetter.mockClear();
       });
     });
   });
