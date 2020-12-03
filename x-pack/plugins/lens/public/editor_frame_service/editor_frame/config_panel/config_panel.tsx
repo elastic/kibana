@@ -24,7 +24,7 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   ) : null;
 });
 
-export const getFirstFocusable = (el: HTMLElement | null) => {
+const getFirstFocusable = (el: HTMLElement | null) => {
   if (!el) {
     return null;
   }
