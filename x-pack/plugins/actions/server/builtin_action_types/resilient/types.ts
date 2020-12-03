@@ -57,7 +57,6 @@ export interface ExternalServiceIncidentResponse {
 
 export type ExternalServiceParams = Record<string, unknown>;
 export interface ExternalServiceFields {
-  id: string;
   input_type: string;
   name: string;
   read_only: boolean;

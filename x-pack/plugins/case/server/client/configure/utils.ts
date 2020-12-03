@@ -5,9 +5,9 @@
  */
 
 import {
+  ConnectorField,
   ConnectorMappingsAttributes,
   ConnectorTypes,
-  ConnectorField,
 } from '../../../common/api/connectors';
 import {
   JiraGetFieldsResponse,
@@ -16,116 +16,137 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../actions/server/types';
 
+const normalizeJiraFields = (jiraFields: JiraGetFieldsResponse): ConnectorField[] =>
+  Object.keys(jiraFields).reduce<ConnectorField[]>(
+    (acc, data) =>
+      jiraFields[data].schema.type === 'string'
+        ? [
+            ...acc,
+            {
+              id: data,
+              name: jiraFields[data].name,
+              required: jiraFields[data].required,
+              type: 'text',
+            },
+          ]
+        : acc,
+    []
+  );
+
+const normalizeResilientFields = (resilientFields: ResilientGetFieldsResponse): ConnectorField[] =>
+  resilientFields.reduce<ConnectorField[]>(
+    (acc: ConnectorField[], data) =>
+      (data.input_type === 'textarea' || data.input_type === 'text') && !data.read_only
+        ? [
+            ...acc,
+            {
+              id: data.name,
+              name: data.text,
+              required: data.required === 'always',
+              type: data.input_type,
+            },
+          ]
+        : acc,
+    []
+  );
+const normalizeServiceNowFields = (snFields: ServiceNowGetFieldsResponse): ConnectorField[] =>
+  snFields.reduce<ConnectorField[]>(
+    (acc, data) => [
+      ...acc,
+      {
+        id: data.element,
+        name: data.column_label,
+        required: data.mandatory === 'true',
+        type: parseFloat(data.max_length) > 160 ? 'textarea' : 'text',
+      },
+    ],
+    []
+  );
+
 export const formatFields = (theData: unknown, theType: string): ConnectorField[] => {
   switch (theType) {
     case ConnectorTypes.jira:
-      const jiraFields = theData as JiraGetFieldsResponse;
-      return Object.keys(jiraFields).reduce<ConnectorField[]>(
-        (acc, data) =>
-          jiraFields[data].schema.type === 'string'
-            ? [
-                ...acc,
-                {
-                  id: data,
-                  name: jiraFields[data].name,
-                  required: jiraFields[data].required,
-                  type: 'text',
-                },
-              ]
-            : acc,
-        []
-      );
+      return normalizeJiraFields(theData as JiraGetFieldsResponse);
     case ConnectorTypes.resilient:
-      const resilientFields = theData as ResilientGetFieldsResponse;
-      return resilientFields.reduce<ConnectorField[]>(
-        (acc, data) =>
-          (data.input_type === 'textarea' || data.input_type === 'text') && !data.read_only
-            ? [
-                ...acc,
-                {
-                  id: data.name,
-                  name: data.text,
-                  required: data.required === 'always',
-                  type: data.input_type,
-                },
-              ]
-            : acc,
-        []
-      );
+      return normalizeResilientFields(theData as ResilientGetFieldsResponse);
     case ConnectorTypes.servicenow:
-      const snFields = theData as ServiceNowGetFieldsResponse;
-      return snFields.reduce<ConnectorField[]>(
-        (acc, data) => [
-          ...acc,
-          {
-            id: data.element,
-            name: data.column_label,
-            required: data.mandatory === 'true',
-            type: parseFloat(data.max_length) > 160 ? 'textarea' : 'text',
-          },
-        ],
-        []
-      );
+      return normalizeServiceNowFields(theData as ServiceNowGetFieldsResponse);
     default:
       return [];
   }
+};
+const findTextField = (fields: ConnectorField[]): string =>
+  (
+    fields.find((field: ConnectorField) => field.type === 'text' && field.required) ??
+    fields.find((field: ConnectorField) => field.type === 'text')
+  )?.id ?? '';
+const findTextAreaField = (fields: ConnectorField[]): string =>
+  (
+    fields.find((field: ConnectorField) => field.type === 'textarea' && field.required) ??
+    fields.find((field: ConnectorField) => field.type === 'textarea') ??
+    fields.find((field: ConnectorField) => field.type === 'text')
+  )?.id ?? '';
+
+const getPreferredFields = (theType: string) => {
+  let title: string = '';
+  let description: string = '';
+  if (theType === ConnectorTypes.jira) {
+    title = 'summary';
+    description = 'description';
+  } else if (theType === ConnectorTypes.resilient) {
+    title = 'name';
+    description = 'description';
+  } else if (theType === ConnectorTypes.servicenow) {
+    title = 'short_description';
+    description = 'description';
+  }
+  return { title, description };
+};
+
+const getRemainingFields = (fields: ConnectorField[], titleTarget: string) =>
+  fields.filter((field: ConnectorField) => field.id !== titleTarget);
+
+const getDynamicFields = (fields: ConnectorField[], dynamicTitle = findTextField(fields)) => {
+  const remainingFields = getRemainingFields(fields, dynamicTitle);
+  const dynamicDescription = findTextAreaField(remainingFields);
+  return {
+    description: dynamicDescription,
+    title: dynamicTitle,
+  };
+};
+
+const getField = (fields: ConnectorField[], fieldId: string) =>
+  fields.find((field: ConnectorField) => field.id === fieldId);
+
+// if dynamic title is not required and preferred is, true
+const shouldTargetBePreferred = (
+  fields: ConnectorField[],
+  dynamic: string,
+  preferred: string
+): boolean => {
+  if (dynamic !== preferred) {
+    const dynamicT = getField(fields, dynamic);
+    const preferredT = getField(fields, preferred);
+    return preferredT != null && !(dynamicT?.required && !preferredT.required);
+  }
+  return false;
 };
 export const createDefaultMapping = (
   fields: ConnectorField[],
   theType: string
 ): ConnectorMappingsAttributes[] => {
-  let titleTarget =
-    (
-      fields.find((field: ConnectorField) => field.type === 'text' && field.required) ??
-      fields.find((field: ConnectorField) => field.type === 'text')
-    )?.id ?? '';
-  let remainingFields = fields.filter((field: ConnectorField) => field.id !== titleTarget);
-  let descriptionTarget =
-    (
-      remainingFields.find(
-        (field: ConnectorField) => field.type === 'textarea' && field.required
-      ) ??
-      remainingFields.find((field: ConnectorField) => field.type === 'textarea') ??
-      remainingFields.find((field: ConnectorField) => field.type === 'text')
-    )?.id ?? '';
-
-  let preferredTitle: string = '';
-  let preferredDescription: string = '';
-  if (theType === ConnectorTypes.jira) {
-    preferredTitle = 'summary';
-    preferredDescription = 'description';
-  } else if (theType === ConnectorTypes.resilient) {
-    preferredTitle = 'name';
-    preferredDescription = 'description';
-  } else if (theType === ConnectorTypes.servicenow) {
-    preferredTitle = 'short_description';
-    preferredDescription = 'description';
-  }
+  const { description: dynamicDescription, title: dynamicTitle } = getDynamicFields(fields);
+  const { description: preferredDescription, title: preferredTitle } = getPreferredFields(theType);
+  let titleTarget = dynamicTitle;
+  let descriptionTarget = dynamicDescription;
   if (preferredTitle.length > 0 && preferredDescription.length > 0) {
-    if (titleTarget !== preferredTitle) {
-      const currentT = fields.find((field: ConnectorField) => field.id === titleTarget);
-      const preferredT = fields.find((field: ConnectorField) => field.id === preferredTitle);
-      if (preferredT != null && !(currentT?.required && !preferredT.required)) {
-        titleTarget = preferredTitle;
-        remainingFields = fields.filter((field: ConnectorField) => field.id !== preferredTitle);
-        descriptionTarget =
-          (
-            remainingFields.find(
-              (field: ConnectorField) => field.type === 'textarea' && field.required
-            ) ??
-            remainingFields.find((field: ConnectorField) => field.type === 'textarea') ??
-            remainingFields.find((field: ConnectorField) => field.type === 'text')
-          )?.id ?? '';
-      }
-      if (descriptionTarget !== preferredDescription) {
-        const currentD = fields.find((field: ConnectorField) => field.id === descriptionTarget);
-        const preferredD = fields.find(
-          (field: ConnectorField) => field.id === preferredDescription
-        );
-        if (preferredD != null && !(currentD?.required && !preferredD.required)) {
-          descriptionTarget = preferredDescription;
-        }
-      }
+    if (shouldTargetBePreferred(fields, dynamicTitle, preferredTitle)) {
+      const { description: dynamicDescriptionOverwrite } = getDynamicFields(fields, preferredTitle);
+      titleTarget = preferredTitle;
+      descriptionTarget = dynamicDescriptionOverwrite;
+    }
+    if (shouldTargetBePreferred(fields, descriptionTarget, preferredDescription)) {
+      descriptionTarget = preferredDescription;
     }
   }
   return [
