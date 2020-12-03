@@ -29,7 +29,6 @@ export interface SchemaConflicts {
   [key: string]: SchemaConflictFieldTypes;
 }
 
-
 export interface IIndexingStatus {
   percentageComplete: number;
   numDocumentsWithErrors: number;
