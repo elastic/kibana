@@ -17,82 +17,19 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import type { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
-
-export interface ISessionService {
-  /**
-   * Returns the active session ID
-   * @returns The active session ID
-   */
-  getSessionId: () => string | undefined;
-  /**
-   * Returns the observable that emits an update every time the session ID changes
-   * @returns `Observable`
-   */
-  getSession$: () => Observable<string | undefined>;
-
-  /**
-   * Whether the active session is already saved (i.e. sent to background)
-   */
-  isStored: () => boolean;
-
-  /**
-   * Whether the active session is restored (i.e. reusing previous search IDs)
-   */
-  isRestore: () => boolean;
-
-  /**
-   * Starts a new session
-   */
-  start: () => string;
-
-  /**
-   * Restores existing session
-   */
-  restore: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
-
-  /**
-   * Clears the active session.
-   */
-  clear: () => void;
-
-  /**
-   * Saves a session
-   */
-  save: (name: string, url: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
-
-  /**
-   * Gets a saved session
-   */
-  get: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
-
-  /**
-   * Gets a list of saved sessions
-   */
-  find: (
-    options: SearchSessionFindOptions
-  ) => Promise<SavedObjectsFindResponse<BackgroundSessionSavedObjectAttributes>>;
-
-  /**
-   * Updates a session
-   */
-  update: (
-    sessionId: string,
-    attributes: Partial<BackgroundSessionSavedObjectAttributes>
-  ) => Promise<any>;
-
-  /**
-   * Deletes a session
-   */
-  delete: (sessionId: string) => Promise<void>;
-}
-
 export interface BackgroundSessionSavedObjectAttributes {
+  /**
+   * User-facing session name to be displayed in session management
+   */
   name: string;
+  /**
+   * App that created the session. e.g 'discover'
+   */
+  appId: string;
   created: string;
   expires: string;
   status: string;
+  urlGeneratorId: string;
   initialState: Record<string, unknown>;
   restoreState: Record<string, unknown>;
   idMapping: Record<string, string>;

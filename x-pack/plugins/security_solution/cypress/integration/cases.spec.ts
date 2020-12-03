@@ -39,7 +39,12 @@ import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../screens
 
 import { goToCaseDetails, goToCreateNewCase } from '../tasks/all_cases';
 import { openCaseTimeline } from '../tasks/case_details';
-import { backToCases, createNewCaseWithTimeline } from '../tasks/create_new_case';
+import {
+  attachTimeline,
+  backToCases,
+  createCase,
+  fillCasesMandatoryfields,
+} from '../tasks/create_new_case';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
@@ -57,7 +62,9 @@ describe('Cases', () => {
   it('Creates a new case with timeline and opens the timeline', () => {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
-    createNewCaseWithTimeline(case1);
+    fillCasesMandatoryfields(case1);
+    attachTimeline(case1);
+    createCase();
     backToCases();
 
     cy.get(ALL_CASES_PAGE_TITLE).should('have.text', 'Cases');

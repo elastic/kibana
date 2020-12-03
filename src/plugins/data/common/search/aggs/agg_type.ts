@@ -55,7 +55,8 @@ export interface AggTypeConfig<
     aggConfig: TAggConfig,
     searchSource: ISearchSource,
     inspectorRequestAdapter?: RequestAdapter,
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
+    searchSessionId?: string
   ) => Promise<any>;
   getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
@@ -182,6 +183,8 @@ export class AggType<
    * @param searchSourceAggs - SearchSource aggregation configuration
    * @param resp - Response to the main request
    * @param nestedSearchSource - the new SearchSource that will be used to make post flight request
+   * @param abortSignal - `AbortSignal` to abort the request
+   * @param searchSessionId - searchSessionId to be used for grouping requests into a single search session
    * @return {Promise}
    */
   postFlightRequest: (
@@ -190,7 +193,8 @@ export class AggType<
     aggConfig: TAggConfig,
     searchSource: ISearchSource,
     inspectorRequestAdapter?: RequestAdapter,
-    abortSignal?: AbortSignal
+    abortSignal?: AbortSignal,
+    searchSessionId?: string
   ) => Promise<any>;
   /**
    * Get the serialized format for the values produced by this agg type,

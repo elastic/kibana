@@ -72,7 +72,7 @@ export const ItemDetailsPropertySummary = memo<ItemDetailsPropertySummaryProps>(
   ({ name, value }) => (
     <>
       <DescriptionListTitle>{name}</DescriptionListTitle>
-      <DescriptionListDescription>{value}</DescriptionListDescription>
+      <DescriptionListDescription className="eui-textBreakWord">{value}</DescriptionListDescription>
     </>
   )
 );

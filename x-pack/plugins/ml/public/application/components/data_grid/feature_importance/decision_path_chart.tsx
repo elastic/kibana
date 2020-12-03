@@ -91,8 +91,7 @@ export const DecisionPathChart = ({
   maxDomain,
   baseline,
 }: DecisionPathChartProps) => {
-  // adjust the height so it's compact for items with more features
-  const baselineData: LineAnnotationDatum[] | undefined = useMemo(
+  const regressionBaselineData: LineAnnotationDatum[] | undefined = useMemo(
     () =>
       baseline && isRegressionFeatureImportanceBaseline(baseline)
         ? [
@@ -111,6 +110,19 @@ export const DecisionPathChart = ({
         : undefined,
     [baseline]
   );
+  const xAxisLabel = regressionBaselineData
+    ? i18n.translate(
+        'xpack.ml.dataframe.analytics.explorationResults.decisionPathLinePredictionTitle',
+        {
+          defaultMessage: 'Prediction',
+        }
+      )
+    : i18n.translate(
+        'xpack.ml.dataframe.analytics.explorationResults.decisionPathLinePredictionProbabilityTitle',
+        {
+          defaultMessage: 'Prediction probability',
+        }
+      );
   // if regression, guarantee up to num_precision significant digits without having it in scientific notation
   // if classification, hide the numeric values since we only want to show the path
   const tickFormatter = useCallback((d) => formatSingleValue(d, '').toString(), []);
@@ -121,11 +133,11 @@ export const DecisionPathChart = ({
         size={{ height: DECISION_PATH_MARGIN + decisionPathData.length * DECISION_PATH_ROW_HEIGHT }}
       >
         <Settings theme={theme} rotation={90} />
-        {baselineData && (
+        {regressionBaselineData && (
           <LineAnnotation
             id="xpack.ml.dataframe.analytics.explorationResults.decisionPathBaseline"
             domainType={AnnotationDomainTypes.YDomain}
-            dataValues={baselineData}
+            dataValues={regressionBaselineData}
             style={baselineStyle}
             marker={AnnotationBaselineMarker}
           />
@@ -137,8 +149,8 @@ export const DecisionPathChart = ({
           title={i18n.translate(
             'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxisTitle',
             {
-              defaultMessage: "Prediction for '{predictionFieldName}'",
-              values: { predictionFieldName },
+              defaultMessage: "{xAxisLabel} for '{predictionFieldName}'",
+              values: { predictionFieldName, xAxisLabel },
             }
           )}
           showGridLines={false}
@@ -156,12 +168,7 @@ export const DecisionPathChart = ({
         <Axis showGridLines={true} id="left" position={Position.Left} />
         <LineSeries
           id={'xpack.ml.dataframe.analytics.explorationResults.decisionPathLine'}
-          name={i18n.translate(
-            'xpack.ml.dataframe.analytics.explorationResults.decisionPathLineTitle',
-            {
-              defaultMessage: 'Prediction',
-            }
-          )}
+          name={xAxisLabel}
           xScaleType={ScaleType.Ordinal}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
