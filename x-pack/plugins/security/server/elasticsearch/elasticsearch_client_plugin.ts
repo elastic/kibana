@@ -23,133 +23,6 @@ export function elasticsearchClientPlugin(Client: any, config: unknown, componen
   });
 
   /**
-   * Perform a [shield.changePassword](Change the password of a user) request
-   *
-   * @param {Object} params - An object with parameters used to carry out this action
-   * @param {Boolean} params.refresh - Refresh the index after performing the operation
-   * @param {String} params.username - The username of the user to change the password for
-   */
-  shield.changePassword = ca({
-    params: {
-      refresh: {
-        type: 'boolean',
-      },
-    },
-    urls: [
-      {
-        fmt: '/_security/user/<%=username%>/_password',
-        req: {
-          username: {
-            type: 'string',
-            required: false,
-          },
-        },
-      },
-      {
-        fmt: '/_security/user/_password',
-      },
-    ],
-    needBody: true,
-    method: 'POST',
-  });
-
-  /**
-   * Perform a [shield.clearCachedRealms](Clears the internal user caches for specified realms) request
-   *
-   * @param {Object} params - An object with parameters used to carry out this action
-   * @param {String} params.usernames - Comma-separated list of usernames to clear from the cache
-   * @param {String} params.realms - Comma-separated list of realms to clear
-   */
-  shield.clearCachedRealms = ca({
-    params: {
-      usernames: {
-        type: 'string',
-        required: false,
-      },
-    },
-    url: {
-      fmt: '/_security/realm/<%=realms%>/_clear_cache',
-      req: {
-        realms: {
-          type: 'string',
-          required: true,
-        },
-      },
-    },
-    method: 'POST',
-  });
-
-  /**
-   * Perform a [shield.clearCachedRoles](Clears the internal caches for specified roles) request
-   *
-   * @param {Object} params - An object with parameters used to carry out this action
-   * @param {String} params.name - Role name
-   */
-  shield.clearCachedRoles = ca({
-    params: {},
-    url: {
-      fmt: '/_security/role/<%=name%>/_clear_cache',
-      req: {
-        name: {
-          type: 'string',
-          required: true,
-        },
-      },
-    },
-    method: 'POST',
-  });
-
-  /**
-   * Perform a [shield.deleteRole](Remove a role from the native shield realm) request
-   *
-   * @param {Object} params - An object with parameters used to carry out this action
-   * @param {Boolean} params.refresh - Refresh the index after performing the operation
-   * @param {String} params.name - Role name
-   */
-  shield.deleteRole = ca({
-    params: {
-      refresh: {
-        type: 'boolean',
-      },
-    },
-    url: {
-      fmt: '/_security/role/<%=name%>',
-      req: {
-        name: {
-          type: 'string',
-          required: true,
-        },
-      },
-    },
-    method: 'DELETE',
-  });
-
-  /**
-   * Perform a [shield.deleteUser](Remove a user from the native shield realm) request
-   *
-   * @param {Object} params - An object with parameters used to carry out this action
-   * @param {Boolean} params.refresh - Refresh the index after performing the operation
-   * @param {String} params.username - username
-   */
-  shield.deleteUser = ca({
-    params: {
-      refresh: {
-        type: 'boolean',
-      },
-    },
-    url: {
-      fmt: '/_security/user/<%=username%>',
-      req: {
-        username: {
-          type: 'string',
-          required: true,
-        },
-      },
-    },
-    method: 'DELETE',
-  });
-
-  /**
    * Perform a [shield.getRole](Retrieve one or more roles from the native shield realm) request
    *
    * @param {Object} params - An object with parameters used to carry out this action
@@ -169,30 +42,6 @@ export function elasticsearchClientPlugin(Client: any, config: unknown, componen
       },
       {
         fmt: '/_security/role',
-      },
-    ],
-  });
-
-  /**
-   * Perform a [shield.getUser](Retrieve one or more users from the native shield realm) request
-   *
-   * @param {Object} params - An object with parameters used to carry out this action
-   * @param {String, String[], Boolean} params.username - A comma-separated list of usernames
-   */
-  shield.getUser = ca({
-    params: {},
-    urls: [
-      {
-        fmt: '/_security/user/<%=username%>',
-        req: {
-          username: {
-            type: 'list',
-            required: false,
-          },
-        },
-      },
-      {
-        fmt: '/_security/user',
       },
     ],
   });
@@ -247,19 +96,6 @@ export function elasticsearchClientPlugin(Client: any, config: unknown, componen
     },
     needBody: true,
     method: 'PUT',
-  });
-
-  /**
-   * Perform a [shield.getUserPrivileges](Retrieve a user's list of privileges) request
-   *
-   */
-  shield.getUserPrivileges = ca({
-    params: {},
-    urls: [
-      {
-        fmt: '/_security/user/_privileges',
-      },
-    ],
   });
 
   /**
@@ -489,36 +325,6 @@ export function elasticsearchClientPlugin(Client: any, config: unknown, componen
     },
   });
 
-  shield.getBuiltinPrivileges = ca({
-    params: {},
-    urls: [
-      {
-        fmt: '/_security/privilege/_builtin',
-      },
-    ],
-  });
-
-  /**
-   * Gets API keys in Elasticsearch
-   * @param {boolean} owner A boolean flag that can be used to query API keys owned by the currently authenticated user.
-   * Defaults to false. The realm_name or username parameters cannot be specified when this parameter is set to true as
-   * they are assumed to be the currently authenticated ones.
-   */
-  shield.getAPIKeys = ca({
-    method: 'GET',
-    urls: [
-      {
-        fmt: `/_security/api_key?owner=<%=owner%>`,
-        req: {
-          owner: {
-            type: 'boolean',
-            required: true,
-          },
-        },
-      },
-    ],
-  });
-
   /**
    * Creates an API key in Elasticsearch for the current user.
    *
@@ -590,65 +396,5 @@ export function elasticsearchClientPlugin(Client: any, config: unknown, componen
     url: {
       fmt: '/_security/delegate_pki',
     },
-  });
-
-  /**
-   * Retrieves all configured role mappings.
-   *
-   * @returns {{ [roleMappingName]: { enabled: boolean; roles: string[]; rules: Record<string, any>} }}
-   */
-  shield.getRoleMappings = ca({
-    method: 'GET',
-    urls: [
-      {
-        fmt: '/_security/role_mapping',
-      },
-      {
-        fmt: '/_security/role_mapping/<%=name%>',
-        req: {
-          name: {
-            type: 'string',
-            required: true,
-          },
-        },
-      },
-    ],
-  });
-
-  /**
-   * Saves the specified role mapping.
-   */
-  shield.saveRoleMapping = ca({
-    method: 'POST',
-    needBody: true,
-    urls: [
-      {
-        fmt: '/_security/role_mapping/<%=name%>',
-        req: {
-          name: {
-            type: 'string',
-            required: true,
-          },
-        },
-      },
-    ],
-  });
-
-  /**
-   * Deletes the specified role mapping.
-   */
-  shield.deleteRoleMapping = ca({
-    method: 'DELETE',
-    urls: [
-      {
-        fmt: '/_security/role_mapping/<%=name%>',
-        req: {
-          name: {
-            type: 'string',
-            required: true,
-          },
-        },
-      },
-    ],
   });
 }

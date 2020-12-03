@@ -7,7 +7,7 @@
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
-import type { AuthenticationProvider } from '../../../../plugins/security/common/types';
+import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
 import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

@@ -7,7 +7,7 @@
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import React from 'react';
 import url from 'url';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props extends EuiLinkAnchorProps {
   path?: string;
