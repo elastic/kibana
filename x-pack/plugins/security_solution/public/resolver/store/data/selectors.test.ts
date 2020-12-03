@@ -16,6 +16,7 @@ import {
   mockNodeDataWithAllProcessesTerminated,
   mockTreeWithNoProcessEvents,
 } from '../../mocks/resolver_tree';
+import { endpointSourceSchema } from './../../mocks/tree_schema';
 import * as nodeModel from '../../../../common/endpoint/models/node';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 
@@ -309,6 +310,7 @@ describe('data state', () => {
     const firstAncestorID = 'b';
     const secondAncestorID = 'a';
     beforeEach(() => {
+      const { schema, dataSource } = endpointSourceSchema();
       actions.push({
         type: 'serverReturnedResolverData',
         payload: {
@@ -317,6 +319,8 @@ describe('data state', () => {
             firstAncestorID,
             secondAncestorID,
           }),
+          dataSource,
+          schema,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
@@ -370,10 +374,13 @@ describe('data state', () => {
         firstChildID,
         secondChildID,
       });
+      const { schema, dataSource } = endpointSourceSchema();
       actions.push({
         type: 'serverReturnedResolverData',
         payload: {
           result: resolverTree,
+          dataSource,
+          schema,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
@@ -399,10 +406,13 @@ describe('data state', () => {
         firstChildID,
         secondChildID,
       });
+      const { schema, dataSource } = endpointSourceSchema();
       actions.push({
         type: 'serverReturnedResolverData',
         payload: {
           result: resolverTree,
+          dataSource,
+          schema,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
@@ -430,10 +440,13 @@ describe('data state', () => {
         firstChildID,
         secondChildID,
       });
+      const { schema, dataSource } = endpointSourceSchema();
       actions.push({
         type: 'serverReturnedResolverData',
         payload: {
           result: tree,
+          dataSource,
+          schema,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },

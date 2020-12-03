@@ -12,6 +12,7 @@ import { ResolverNode } from '../../../../common/endpoint/types';
 import { visibleNodesAndEdgeLines } from '../selectors';
 import { mock as mockResolverTree } from '../../models/resolver_tree';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
+import { endpointSourceSchema } from './../../mocks/tree_schema';
 import { mockResolverNode } from '../../mocks/resolver_node';
 
 describe('resolver visible entities', () => {
@@ -94,9 +95,15 @@ describe('resolver visible entities', () => {
   describe('when rendering a large tree with a small viewport', () => {
     beforeEach(() => {
       const nodes: ResolverNode[] = [nodeA, nodeB, nodeC, nodeD, nodeE, nodeF, nodeG];
+      const { schema, dataSource } = endpointSourceSchema();
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        payload: { result: mockResolverTree({ nodes })!, parameters: mockTreeFetcherParameters() },
+        payload: {
+          result: mockResolverTree({ nodes })!,
+          dataSource,
+          schema,
+          parameters: mockTreeFetcherParameters(),
+        },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [300, 200] };
       store.dispatch(action);
@@ -114,9 +121,15 @@ describe('resolver visible entities', () => {
   describe('when rendering a large tree with a large viewport', () => {
     beforeEach(() => {
       const nodes: ResolverNode[] = [nodeA, nodeB, nodeC, nodeD, nodeE, nodeF, nodeG];
+      const { schema, dataSource } = endpointSourceSchema();
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        payload: { result: mockResolverTree({ nodes })!, parameters: mockTreeFetcherParameters() },
+        payload: {
+          result: mockResolverTree({ nodes })!,
+          dataSource,
+          schema,
+          parameters: mockTreeFetcherParameters(),
+        },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [2000, 2000] };
       store.dispatch(action);

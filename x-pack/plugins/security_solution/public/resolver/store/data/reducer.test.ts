@@ -10,6 +10,7 @@ import * as selectors from './selectors';
 import { DataState } from '../../types';
 import { DataAction } from './action';
 import { generateTreeWithDAL, Metadata } from '../../data_access_layer/mocks/generator_tree';
+import { endpointSourceSchema } from './../../mocks/tree_schema';
 import { NewResolverTree } from '../../../../common/endpoint/types';
 
 /**
@@ -30,10 +31,13 @@ describe('Resolver Data Middleware', () => {
       requestedAncestors: number,
       requestedDescendants: number
     ) => {
+      const { schema, dataSource } = endpointSourceSchema();
       const action: DataAction = {
         type: 'serverReturnedResolverData',
         payload: {
           result: tree,
+          dataSource,
+          schema,
           parameters: {
             databaseDocumentID: '',
             indices: [],

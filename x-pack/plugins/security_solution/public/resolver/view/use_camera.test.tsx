@@ -25,6 +25,7 @@ import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import { act } from 'react-dom/test-utils';
 import { mockResolverNode } from '../mocks/resolver_node';
+import { endpointSourceSchema } from '../mocks/tree_schema';
 
 describe('useCamera on an unpainted element', () => {
   /** Enzyme full DOM wrapper for the element the camera is attached to. */
@@ -266,9 +267,15 @@ describe('useCamera on an unpainted element', () => {
         }
         const tree = mockResolverTree({ nodes });
         if (tree !== null) {
+          const { schema, dataSource } = endpointSourceSchema();
           const serverResponseAction: ResolverAction = {
             type: 'serverReturnedResolverData',
-            payload: { result: tree, parameters: mockTreeFetcherParameters() },
+            payload: {
+              result: tree,
+              dataSource,
+              schema,
+              parameters: mockTreeFetcherParameters(),
+            },
           };
           store.dispatch(serverResponseAction);
         } else {
