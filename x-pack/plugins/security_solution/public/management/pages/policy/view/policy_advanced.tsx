@@ -6,7 +6,17 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFieldText, EuiFormRow, EuiIconTip, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { policyConfig } from '../store/policy_details/selectors';
@@ -37,9 +47,17 @@ function getValue(obj: Record<string, unknown>, path: string[]) {
   return currentPolicyConfig[path[path.length - 1]];
 }
 
+const warningMessage = `This section contains policy values that support advanced use cases. If not configured
+properly, these values can cause unpredictable behavior. Please consult documentation
+carefully or contact support before editing these values.`;
+
 export const AdvancedPolicyForms = React.memo(() => {
   return (
     <>
+      <EuiCallOut title="Proceed with caution!" color="warning" iconType="help">
+        <p>{warningMessage}</p>
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiText size="xs" color="subdued">
         <h4>
           <FormattedMessage
@@ -108,7 +126,18 @@ const PolicyAdvanced = React.memo(
       <>
         <EuiFormRow
           fullWidth
-          label={configPath.join('.') + <EuiIconTip content={documentation} position="right" />}
+          label={
+            <EuiFlexGroup>
+              <EuiFlexItem>{configPath.join('.')}</EuiFlexItem>
+              {documentation === '' ? (
+                <></>
+              ) : (
+                <EuiFlexItem>
+                  <EuiIconTip content={documentation} position="right" />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          }
           labelAppend={
             <EuiText size="xs">
               {lastSupportedVersion
