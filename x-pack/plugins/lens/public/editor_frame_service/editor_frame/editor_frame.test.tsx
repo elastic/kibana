@@ -1143,7 +1143,7 @@ describe('editor_frame', () => {
           .find(EuiPanel)
           .map((el) => el.parents(EuiToolTip).prop('content'))
       ).toEqual([
-        'Current',
+        'Current Visualization',
         'Suggestion1',
         'Suggestion2',
         'Suggestion3',

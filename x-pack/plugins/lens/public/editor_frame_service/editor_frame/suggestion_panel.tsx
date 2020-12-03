@@ -133,9 +133,10 @@ const SuggestionPreview = ({
             // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsSuggestionPanel__button-isSelected': selected,
           })}
-          paddingSize="none"
           data-test-subj="lnsSuggestion"
           onClick={onSelect}
+          aria-current={!!selected}
+          aria-label={preview.title}
         >
           {preview.expression || preview.error ? (
             <PreviewRenderer
@@ -356,7 +357,7 @@ export function SuggestionPanel({
                 visualizationMap[currentVisualizationId].getDescription(currentVisualizationState)
                   .icon || 'empty',
               title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
-                defaultMessage: 'Current',
+                defaultMessage: 'Current visualization',
               }),
             }}
             ExpressionRenderer={AutoRefreshExpressionRenderer}

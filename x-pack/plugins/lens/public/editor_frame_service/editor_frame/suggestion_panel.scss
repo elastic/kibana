@@ -16,6 +16,7 @@
   // Padding / negative margins to make room for overflow shadow
   padding-left: $euiSizeXS;
   margin-left: -$euiSizeXS;
+  padding-bottom: $euiSizeXS;
 }
 
 .lnsSuggestionPanel__button {
@@ -27,13 +28,26 @@
   margin-left: $euiSizeXS / 2;
   margin-bottom: $euiSizeXS / 2;
 
+  &:focus {
+    @include euiFocusRing;
+    transform: none !important; // sass-lint:disable-line no-important
+  }
+
   .lnsSuggestionPanel__expressionRenderer {
     position: static; // Let the progress indicator position itself against the button
   }
 }
 
 .lnsSuggestionPanel__button-isSelected {
-  @include euiFocusRing;
+  background-color: $euiColorLightestShade !important; // sass-lint:disable-line no-important
+
+  &:not(:focus) {
+    box-shadow: none !important; // sass-lint:disable-line no-important
+  }
+
+  &:focus {
+    @include euiFocusRing;
+  }
 }
 
 .lnsSuggestionPanel__suggestionIcon {
