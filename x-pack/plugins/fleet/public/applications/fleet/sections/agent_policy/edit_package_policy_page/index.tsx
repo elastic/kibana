@@ -244,6 +244,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
             packagePolicyName: packagePolicy.name,
           },
         }),
+        'data-test-subj': 'policyUpdateSuccessToast',
         text:
           agentCount && agentPolicy
             ? i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationMessage', {
@@ -406,6 +407,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
                       iconType="save"
                       color="primary"
                       fill
+                      data-test-subj="saveIntegration"
                     >
                       <FormattedMessage
                         id="xpack.fleet.editPackagePolicy.saveButton"

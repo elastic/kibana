@@ -22,15 +22,15 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggMin';
+export const aggMinFnName = 'aggMin';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.MIN>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggMinFnName, Input, AggArgs, Output>;
 
 export const aggMin = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggMinFnName,
   help: i18n.translate('data.search.aggs.function.metrics.min.help', {
     defaultMessage: 'Generates a serialized agg config for a Min agg',
   }),
