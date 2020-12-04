@@ -13,7 +13,6 @@ import { getTransactionBreakdown } from '../../lib/transactions/breakdown';
 import { getTransactionGroupList } from '../../lib/transaction_groups';
 import { createRoute } from '../create_route';
 import { uiFiltersRt, rangeRt } from '../default_api_types';
-import { getTransactionSampleForGroup } from '../../lib/transaction_groups/get_transaction_sample_for_group';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 import { getErrorRate } from '../../lib/transaction_groups/get_error_rate';
 
