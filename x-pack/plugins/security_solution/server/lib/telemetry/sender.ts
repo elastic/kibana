@@ -61,7 +61,6 @@ export class TelemetryEventsSender {
   private isSending = false;
   private queue: TelemetryEvent[] = [];
   private isOptedIn?: boolean = true; // Assume true until the first check
-  private wasOptedInChecked?: boolean = false; // False until the first check
   private diagTask?: TelemetryDiagTask;
 
   constructor(logger: Logger) {
@@ -158,15 +157,9 @@ export class TelemetryEventsSender {
     });
   }
 
-  // this returns a cached version of the telemetry opt-in. The cache is updated
-  // in the periodically executed sendIfDue function. This function returns false
-  // until the first execution of that function.
-  public isTelemetryOptedIn(): boolean {
-    if (!this.wasOptedInChecked) {
-      return false;
-    } else {
-      return this.isOptedIn === true;
-    }
+  public async isTelemetryOptedIn() {
+    this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
+    return this.isOptedIn === true;
   }
 
   private async sendIfDue() {
@@ -181,8 +174,7 @@ export class TelemetryEventsSender {
     try {
       this.isSending = true;
 
-      this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
-      this.wasOptedInChecked = true;
+      this.isOptedIn = await this.isTelemetryOptedIn();
       if (!this.isOptedIn) {
         this.logger.debug(`Telemetry is not opted-in.`);
         this.queue = [];
@@ -209,7 +201,6 @@ export class TelemetryEventsSender {
       }));
       this.queue = [];
 
-      /*
       await this.sendEvents(
         toSend,
         telemetryUrl,
@@ -217,7 +208,6 @@ export class TelemetryEventsSender {
         clusterInfo.version?.number,
         licenseInfo?.uid
       );
-      */
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
       this.queue = [];

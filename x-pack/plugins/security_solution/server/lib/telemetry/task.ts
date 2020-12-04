@@ -76,7 +76,7 @@ export class TelemetryDiagTask {
       return;
     }
 
-    const isOptedIn = this.sender.isTelemetryOptedIn();
+    const isOptedIn = await this.sender.isTelemetryOptedIn();
     if (!isOptedIn) {
       this.logger.debug(`Telemetry is not opted-in.`);
       return;
