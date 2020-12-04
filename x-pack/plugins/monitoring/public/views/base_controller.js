@@ -239,12 +239,9 @@ export class MonitoringViewBaseController {
       console.warn(`"#${this.reactNodeId}" element has not been added to the DOM yet`);
       return;
     }
-    const services = {
-      usageCollection: Legacy.shims.usageCollection,
-    };
     const I18nContext = Legacy.shims.I18nContext;
     const wrappedComponent = (
-      <KibanaContextProvider services={services}>
+      <KibanaContextProvider services={Legacy.shims.kibanaServices}>
         <I18nContext>
           {!this._isDataInitialized ? (
             <PageLoading pageViewTitle={trackPageView ? this.telemetryPageViewTitle : null} />
