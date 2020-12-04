@@ -6,29 +6,16 @@
         "is_write_index": false
       }
     },
-    "index": ".siem-signals-default-outdated",
+    "index": ".siem-signals-default-legacy",
     "mappings": {
       "_meta": {
-        "version": 3
+        "version": 1
       },
       "properties": {
         "@timestamp": {
           "type": "date"
         },
-        "signal": {
-          "properties": {
-            "_meta": {
-              "properties": {
-                "schema_version": {
-                  "type": "long"
-                },
-                "migration_version": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        }
+        "signal": { "type": "object" }
       }
     },
     "settings": {

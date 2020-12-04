@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
-
 import { IRouter } from 'src/core/server';
-import { DETECTION_ENGINE_UPGRADE_SIGNALS_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_SIGNALS_UPGRADE_URL } from '../../../../../common/constants';
+import { upgradeSignalsSchema } from '../../../../../common/detection_engine/schemas/request/upgrade_signals_schema';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { upgradeSignals } from '../../migrations/upgrade_signals';
 import { buildSiemResponse, transformError } from '../utils';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
@@ -17,10 +17,9 @@ import { indexNeedsUpgrade, signalsNeedUpgrade } from '../../migrations/helpers'
 export const upgradeSignalsRoute = (router: IRouter) => {
   router.post(
     {
-      path: DETECTION_ENGINE_UPGRADE_SIGNALS_URL,
-      // TODO io-ts
+      path: DETECTION_ENGINE_SIGNALS_UPGRADE_URL,
       validate: {
-        body: schema.object({ index: schema.arrayOf(schema.string()) }),
+        body: buildRouteValidation(upgradeSignalsSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -60,7 +59,7 @@ export const upgradeSignalsRoute = (router: IRouter) => {
                 task_id: taskId,
               };
             } else {
-              return { destination_index: null, source_index: index, id: null };
+              return { destination_index: null, source_index: index, task_id: null };
             }
           })
         );

@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { ReindexResponse } from 'elasticsearch';
 
 import { IRouter } from 'src/core/server';
-import { DETECTION_ENGINE_FINALIZE_SIGNALS_UPGRADE_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_SIGNALS_FINALIZE_UPGRADE_URL } from '../../../../../common/constants';
 import { getIndexCount } from '../../index/get_index_count';
 import { applyMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import { replaceSignalsIndexAlias } from '../../migrations/replace_signals_index_alias';
@@ -23,7 +23,7 @@ interface TaskResponse {
 export const finalizeSignalsUpgradeRoute = (router: IRouter) => {
   router.post(
     {
-      path: DETECTION_ENGINE_FINALIZE_SIGNALS_UPGRADE_URL,
+      path: DETECTION_ENGINE_SIGNALS_FINALIZE_UPGRADE_URL,
       // TODO io-ts
       validate: {
         body: schema.object({

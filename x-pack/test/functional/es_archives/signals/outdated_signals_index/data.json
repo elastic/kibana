@@ -4,8 +4,8 @@
     "id": "1",
     "index": ".siem-signals-default-outdated",
     "source": {
-      "@timestamp": "2020-10-10T00:00:00.000Z",
-      "signal": {}
+      "@timestamp": "2020-10-20T00:00:00.000Z",
+      "signal": { "_meta": { "schema_version": 3 } }
     },
     "type": "_doc"
   }

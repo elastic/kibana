@@ -5,7 +5,7 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { DETECTION_ENGINE_MIGRATE_SIGNALS_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_SIGNALS_MIGRATE_URL } from '../../../../../common/constants';
 import { getMigrationStatusSchema } from '../../../../../common/detection_engine/schemas/request/get_migration_status_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { getIndexAliases } from '../../index/get_index_aliases';
@@ -16,7 +16,7 @@ import { buildSiemResponse, transformError } from '../utils';
 export const getMigrationStatusRoute = (router: IRouter) => {
   router.get(
     {
-      path: DETECTION_ENGINE_MIGRATE_SIGNALS_URL,
+      path: DETECTION_ENGINE_SIGNALS_MIGRATE_URL,
       validate: {
         query: buildRouteValidation(getMigrationStatusSchema),
       },
