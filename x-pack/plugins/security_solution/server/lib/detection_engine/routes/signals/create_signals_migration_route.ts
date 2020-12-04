@@ -12,12 +12,17 @@ import { migrateSignals } from '../../migrations/migrate_signals';
 import { buildSiemResponse, transformError } from '../utils';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 import { getMigrationStatus } from '../../migrations/get_migration_status';
-import { indexNeedsMigration, signalsNeedMigration } from '../../migrations/helpers';
+import {
+  encodeMigrationToken,
+  indexNeedsMigration,
+  signalsNeedMigration,
+} from '../../migrations/helpers';
 
 export const createSignalsMigrationRoute = (router: IRouter) => {
   router.post(
     {
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
+      // TODO add reindex parameters
       validate: {
         body: buildRouteValidation(createSignalsMigrationSchema),
       },
@@ -39,32 +44,31 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
 
         const migrationStatuses = await getMigrationStatus({ esClient, index: indices });
 
-        // TODO parallelize
-        const upgradeResults = await Promise.all(
+        const migrationResults = await Promise.all(
           indices.map(async (index) => {
             const status = migrationStatuses.find(({ name }) => name === index);
             if (
               indexNeedsMigration({ status, version: SIGNALS_TEMPLATE_VERSION }) ||
               signalsNeedMigration({ status, version: SIGNALS_TEMPLATE_VERSION })
             ) {
-              const { destinationIndex, sourceIndex, taskId } = await migrateSignals({
+              const migrationDetails = await migrateSignals({
                 esClient,
                 index,
                 version: SIGNALS_TEMPLATE_VERSION,
               });
+              const migrationToken = encodeMigrationToken(migrationDetails);
 
               return {
-                destination_index: destinationIndex,
-                source_index: sourceIndex,
-                task_id: taskId,
+                name: index,
+                migrationToken,
               };
             } else {
-              return { destination_index: null, source_index: index, task_id: null };
+              return { name: index, migrationToken: null };
             }
           })
         );
 
-        return response.ok({ body: { indices: upgradeResults } });
+        return response.ok({ body: { indices: migrationResults } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

@@ -15,3 +15,9 @@ export interface MigrationStatus {
   migration_versions: Bucket[];
   schema_versions: Bucket[];
 }
+
+export interface MigrationDetails {
+  destinationIndex: string;
+  sourceIndex: string;
+  taskId: string;
+}

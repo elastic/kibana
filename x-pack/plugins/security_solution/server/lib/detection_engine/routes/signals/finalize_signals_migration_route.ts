@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { ReindexResponse } from 'elasticsearch';
 
 import { IRouter } from 'src/core/server';
 import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
+import { finalizeSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { getIndexCount } from '../../index/get_index_count';
+import { decodeMigrationToken } from '../../migrations/helpers';
 import { applyMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import { replaceSignalsIndexAlias } from '../../migrations/replace_signals_index_alias';
 import { buildSiemResponse, transformError } from '../utils';
@@ -24,13 +26,8 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
   router.post(
     {
       path: DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
-      // TODO io-ts
       validate: {
-        body: schema.object({
-          destination_index: schema.string(),
-          source_index: schema.string(),
-          task_id: schema.string(),
-        }),
+        body: buildRouteValidation(finalizeSignalsMigrationSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -39,11 +36,7 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const {
-        destination_index: destinationIndex,
-        source_index: sourceIndex,
-        task_id: taskId,
-      } = request.body;
+      const { migration_token: migrationToken } = request.body;
 
       // TODO permissions check
       try {
@@ -52,6 +45,7 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
+        const { destinationIndex, sourceIndex, taskId } = decodeMigrationToken(migrationToken);
         const { body: task } = await esClient.tasks.get<TaskResponse>({ task_id: taskId });
 
         if (!task.completed) {
@@ -59,6 +53,7 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
             body: {
               completed: false,
               destination_index: destinationIndex,
+              migration_token: migrationToken,
               source_index: sourceIndex,
               task_id: taskId,
             },

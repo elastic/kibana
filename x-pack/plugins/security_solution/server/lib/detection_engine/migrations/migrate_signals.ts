@@ -6,12 +6,8 @@
 
 import { ElasticsearchClient } from 'src/core/server';
 import { createSignalsMigrationIndex } from './create_signals_migration_index';
+import { MigrationDetails } from './types';
 
-interface SignalsMigration {
-  destinationIndex: string;
-  sourceIndex: string;
-  taskId: string;
-}
 /**
  * Migrates signals for a given concrete index. Signals are reindexed into a
  * new index in order to receive new fields. Migrated signals have a
@@ -21,7 +17,7 @@ interface SignalsMigration {
  * @param index name of the concrete signals index to be migrated
  * @param version version of the current signals template/mappings
  *
- * @returns identifying information representing the {@link SignalsMigration}
+ * @returns identifying information representing the {@link MigrationDetails}
  * @throws if elasticsearch returns an error
  */
 export const migrateSignals = async ({
@@ -32,7 +28,7 @@ export const migrateSignals = async ({
   esClient: ElasticsearchClient;
   index: string;
   version: number;
-}): Promise<SignalsMigration> => {
+}): Promise<MigrationDetails> => {
   const migrationIndex = await createSignalsMigrationIndex({
     esClient,
     index,
