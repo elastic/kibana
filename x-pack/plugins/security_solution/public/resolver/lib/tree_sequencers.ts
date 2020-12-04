@@ -19,3 +19,21 @@ export function* levelOrder<T>(root: T, children: (parent: T) => T[]): Iterable<
     nextLevel = [];
   }
 }
+
+export function calculateGenerations<T, S>(
+  id: T,
+  currentLevel: number,
+  children: (parent: T) => S[]
+) {
+  const childrenArray = children(id);
+  if (childrenArray.length <= 0) {
+    return currentLevel;
+  }
+
+  let greatestLevel = 0;
+  for (const currChild of childrenArray) {
+    const returnedLevel = calculateGenerations(currChild, currentLevel + 1, children);
+    greatestLevel = Math.max(greatestLevel, returnedLevel);
+  }
+  return greatestLevel;
+}

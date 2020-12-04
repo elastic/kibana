@@ -12,9 +12,42 @@ import {
   NewResolverTree,
   ResolverNode,
   EventStats,
+  ResolverSchema,
 } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
+import { IndexedProcessTree } from '../types';
+import { calculateGenerations } from '../lib/tree_sequencers';
 
+/**
+ * Given an indexedProcessTree, we will walk the tree via DFS and calculate the number of generations
+ * beginning with the origin
+ */
+export function originDescendantGenerationCount(tree: IndexedProcessTree) {
+  if (tree.originID) {
+    return calculateGenerations<string | undefined, ResolverNode>(
+      tree.originID,
+      0,
+      (parentID: string | undefined): ResolverNode[] => {
+        const currentSiblings = tree.idToChildren.get(parentID);
+        return currentSiblings === undefined ? [] : currentSiblings;
+      }
+    );
+  }
+}
+
+export function ancestorRequestAmount(schema: ResolverSchema): number {
+  const withAncestryField = 200;
+  const withoutAncestryField = 20;
+
+  return schema.ancestry ? withAncestryField : withoutAncestryField;
+}
+
+export function generationRequestAmount(schema: ResolverSchema): number {
+  const withAncestryField = 1000;
+  const withoutAncestryField = 10;
+
+  return schema.ancestry ? withAncestryField : withoutAncestryField;
+}
 /**
  * This returns a map of nodeIDs to the associated stats provided by the datasource.
  */
