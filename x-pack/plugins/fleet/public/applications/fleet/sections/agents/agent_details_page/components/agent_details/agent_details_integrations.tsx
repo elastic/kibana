@@ -14,6 +14,7 @@ import {
   EuiPanel,
   EuiButtonIcon,
   EuiBasicTable,
+  EuiBasicTableProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -67,7 +68,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
     return packagePolicy.inputs.filter((input) => input.enabled);
   }, [packagePolicy.inputs]);
 
-  const columns = [
+  const columns: EuiBasicTableProps<PackagePolicyInput>['columns'] = [
     {
       field: 'type',
       width: '100%',
