@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiLink,
+  EuiText,
 } from '@elastic/eui';
 
 import {
@@ -80,6 +81,8 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
 
         let calloutContent: React.ReactNode | undefined;
 
+        let helpText: React.ReactNode | undefined;
+
         if (!isLoading) {
           if (error) {
             calloutContent = (
@@ -107,78 +110,76 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
               />
             );
           } else if (repos.length === 0) {
-            calloutContent = (
-              <EuiCallOut
-                data-test-subj="noSnapshotRepositoriesCallout"
-                iconType="help"
-                color="warning"
-                title={
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundTitle"
-                    defaultMessage="No snapshot repositories found"
-                  />
-                }
-              >
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundMessage"
-                  defaultMessage="{link} to use searchable snapshots."
-                  values={{
-                    link: (
-                      <EuiLink
-                        href={getUrlForApp('management', {
-                          path: `data/snapshot_restore/add_repository`,
-                        })}
-                        target="_blank"
-                      >
-                        {i18n.translate(
-                          'xpack.indexLifecycleMgmt.editPolicy.createSearchableSnapshotLink',
-                          {
-                            defaultMessage: 'Create a snapshot repository',
-                          }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiCallOut>
+            helpText = (
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundMessage"
+                defaultMessage="{noReposFound}. {link} to use searchable snapshots."
+                values={{
+                  noReposFound: (
+                    <EuiText
+                      className="ilmSearchableSnapshotField__warningHelpText"
+                      size="xs"
+                      color="warning"
+                    >
+                      {i18n.translate(
+                        'xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesHelpText',
+                        { defaultMessage: 'No snapshot repositories found' }
+                      )}
+                    </EuiText>
+                  ),
+                  link: (
+                    <EuiLink
+                      href={getUrlForApp('management', {
+                        path: `data/snapshot_restore/add_repository`,
+                      })}
+                      target="_blank"
+                    >
+                      {i18n.translate(
+                        'xpack.indexLifecycleMgmt.editPolicy.createSearchableSnapshotLink',
+                        {
+                          defaultMessage: 'Create a snapshot repository',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
             );
           } else if (searchableSnapshotRepo && !repos.includes(searchableSnapshotRepo)) {
-            calloutContent = (
-              <>
-                <EuiSpacer size="m" />
-                <EuiCallOut
-                  data-test-subj="customPolicyCallout"
-                  color="warning"
-                  title={
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.repositoryNotFoundTitle"
-                      defaultMessage="Repository name not found"
-                    />
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyMessage"
-                    defaultMessage="{link} with this name."
-                    values={{
-                      link: (
-                        <EuiLink
-                          href={getUrlForApp('management', {
-                            path: `data/snapshot_restore/add_repository`,
-                          })}
-                          target="_blank"
-                        >
-                          {i18n.translate(
-                            'xpack.indexLifecycleMgmt.editPolicy.createSearchableSnapshotLink',
-                            {
-                              defaultMessage: 'Create a snapshot repository',
-                            }
-                          )}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </EuiCallOut>
-              </>
+            helpText = (
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyMessage"
+                defaultMessage="{noRepoWithName}. {link} to use with this policy."
+                values={{
+                  noRepoWithName: (
+                    <EuiText
+                      color="warning"
+                      className="ilmSearchableSnapshotField__warningHelpText"
+                      size="xs"
+                    >
+                      {i18n.translate(
+                        'xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyMessage',
+                        { defaultMessage: 'No repository with this name exist' }
+                      )}
+                    </EuiText>
+                  ),
+                  link: (
+                    <EuiLink
+                      href={getUrlForApp('management', {
+                        path: `data/snapshot_restore/add_repository`,
+                      })}
+                      target="_blank"
+                    >
+                      {i18n.translate(
+                        'xpack.indexLifecycleMgmt.editPolicy.createSearchableSnapshotLink',
+                        {
+                          defaultMessage: 'Create a snapshot repository',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
             );
           }
         }
@@ -210,6 +211,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
                       {
                         ...field,
                         value: singleSelectionArray,
+                        helpText,
                       } as any
                     }
                     fullWidth={false}
