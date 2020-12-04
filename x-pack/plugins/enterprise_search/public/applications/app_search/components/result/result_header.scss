@@ -1,0 +1,26 @@
+.appSearchResultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  &Column {
+    display: flex;
+    flex-wrap: wrap;
+
+    &--left {
+      justify-content: flex-start;
+
+      & > div {
+        margin-right: 27px;
+      }
+    }
+
+    &--right {
+      justify-content: flex-end;
+
+      & > div + div {
+        margin-left: 27px;
+      }
+    }
+  }
+}

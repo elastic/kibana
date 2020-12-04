@@ -19,7 +19,12 @@ describe('ResultView', () => {
     title: {
       raw: 'A title',
     },
-    _meta: {},
+    _meta: {
+      id: '1',
+      scopedId: '1',
+      score: 100,
+      engine: 'my-engine',
+    },
   };
 
   it('renders', () => {

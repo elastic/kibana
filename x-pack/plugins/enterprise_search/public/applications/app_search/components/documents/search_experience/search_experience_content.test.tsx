@@ -46,7 +46,12 @@ describe('SearchExperienceContent', () => {
         id: {
           raw: '1',
         },
-        _meta: {},
+        _meta: {
+          id: '1',
+          scopedId: '1',
+          score: 100,
+          engine: 'my-engine',
+        },
         foo: {
           raw: 'bar',
         },

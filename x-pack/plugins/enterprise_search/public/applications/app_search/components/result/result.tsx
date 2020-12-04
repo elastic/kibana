@@ -11,20 +11,23 @@ import './result.scss';
 import { EuiPanel, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Result as ResultType } from './types';
+import { FieldValue, Result as ResultType } from './types';
 import { ResultField } from './result_field';
+import { ResultHeader } from './result_header';
 
 interface Props {
   result: ResultType;
+  showScore?: boolean;
 }
 
 const RESULT_CUTOFF = 5;
 
-export const Result: React.FC<Props> = ({ result }) => {
+export const Result: React.FC<Props> = ({ result, showScore }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const ID = 'id';
   const META = '_meta';
+  const resultMeta = result[META];
   const resultFields = Object.entries(result).filter(([key]) => key !== META && key !== ID);
   const numResults = resultFields.length;
 
@@ -43,11 +46,12 @@ export const Result: React.FC<Props> = ({ result }) => {
       >
         <div className="appSearchResult__contentWrap">
           <div className="appSearchResult__contentInner">
+            <ResultHeader resultMeta={resultMeta} showScore={!!showScore} />
             <div className="appSearchResult__fieldsetContainer">
               <div>
                 {resultFields
                   .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
-                  .map(([field, value]) => (
+                  .map(([field, value]: [string, FieldValue]) => (
                     <ResultField
                       key={field}
                       field={field}

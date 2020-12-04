@@ -9,8 +9,9 @@ import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiPanel } from '@elastic/eui';
 
-import { Result } from './result';
 import { ResultField } from './result_field';
+import { ResultHeader } from './result_header';
+import { Result } from './result';
 
 describe('Result', () => {
   const props = {
@@ -27,7 +28,12 @@ describe('Result', () => {
       length: {
         raw: 100,
       },
-      _meta: {},
+      _meta: {
+        id: '1',
+        scopedId: '1',
+        score: 100,
+        engine: 'my-engine',
+      },
     },
   };
 
@@ -43,6 +49,17 @@ describe('Result', () => {
       'description',
       'length',
     ]);
+  });
+
+  it('passes through showScore and resultMeta to ResultHeader', () => {
+    const wrapper = shallow(<Result {...props} showScore={true} />);
+    expect(wrapper.find(ResultHeader).prop('showScore')).toBe(true);
+    expect(wrapper.find(ResultHeader).prop('resultMeta')).toEqual({
+      id: '1',
+      scopedId: '1',
+      score: 100,
+      engine: 'my-engine',
+    });
   });
 
   describe('when there are more than 5 fields', () => {
@@ -69,7 +86,12 @@ describe('Result', () => {
         size: {
           raw: 200,
         },
-        _meta: {},
+        _meta: {
+          id: '1',
+          scopedId: '1',
+          score: 100,
+          engine: 'my-engine',
+        },
       },
     };
 
