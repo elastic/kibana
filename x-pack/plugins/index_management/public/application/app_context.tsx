@@ -36,6 +36,7 @@ export interface AppDependencies {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   uiSettings: CoreSetup['uiSettings'];
   urlGenerators: SharePluginStart['urlGenerators'];
+  docLinks: CoreStart['docLinks'];
 }
 
 export const AppContextProvider = ({

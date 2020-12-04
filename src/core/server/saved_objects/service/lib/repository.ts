@@ -1566,12 +1566,12 @@ export class SavedObjectsRepository {
    * @param options - {@link SavedObjectsIncrementCounterOptions}
    * @returns The saved object after the specified fields were incremented
    */
-  async incrementCounter(
+  async incrementCounter<T = unknown>(
     type: string,
     id: string,
     counterFields: CounterField[],
     options: SavedObjectsIncrementCounterOptions = {}
-  ): Promise<SavedObject> {
+  ): Promise<SavedObject<T>> {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
     }

@@ -5,8 +5,8 @@
  */
 
 import * as rt from 'io-ts';
+import { logEntryCursorRT } from '../../log_entry';
 import { jsonArrayRT } from '../../typed_json';
-import { logEntriesCursorRT } from './common';
 import { logSourceColumnConfigurationRT } from '../log_sources';
 
 export const LOG_ENTRIES_PATH = '/api/log_entries/entries';
@@ -26,17 +26,17 @@ export const logEntriesBaseRequestRT = rt.intersection([
 
 export const logEntriesBeforeRequestRT = rt.intersection([
   logEntriesBaseRequestRT,
-  rt.type({ before: rt.union([logEntriesCursorRT, rt.literal('last')]) }),
+  rt.type({ before: rt.union([logEntryCursorRT, rt.literal('last')]) }),
 ]);
 
 export const logEntriesAfterRequestRT = rt.intersection([
   logEntriesBaseRequestRT,
-  rt.type({ after: rt.union([logEntriesCursorRT, rt.literal('first')]) }),
+  rt.type({ after: rt.union([logEntryCursorRT, rt.literal('first')]) }),
 ]);
 
 export const logEntriesCenteredRequestRT = rt.intersection([
   logEntriesBaseRequestRT,
-  rt.type({ center: logEntriesCursorRT }),
+  rt.type({ center: logEntryCursorRT }),
 ]);
 
 export const logEntriesRequestRT = rt.union([
@@ -85,7 +85,7 @@ export const logEntryContextRT = rt.union([
 
 export const logEntryRT = rt.type({
   id: rt.string,
-  cursor: logEntriesCursorRT,
+  cursor: logEntryCursorRT,
   columns: rt.array(logColumnRT),
   context: logEntryContextRT,
 });
@@ -104,8 +104,8 @@ export const logEntriesResponseRT = rt.type({
   data: rt.intersection([
     rt.type({
       entries: rt.array(logEntryRT),
-      topCursor: rt.union([logEntriesCursorRT, rt.null]),
-      bottomCursor: rt.union([logEntriesCursorRT, rt.null]),
+      topCursor: rt.union([logEntryCursorRT, rt.null]),
+      bottomCursor: rt.union([logEntryCursorRT, rt.null]),
     }),
     rt.partial({
       hasMoreBefore: rt.boolean,
