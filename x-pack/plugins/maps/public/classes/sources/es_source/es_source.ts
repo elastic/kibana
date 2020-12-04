@@ -33,7 +33,11 @@ import {
 import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IField } from '../../fields/field';
-import { ES_GEO_FIELD_TYPE, FieldFormatter } from '../../../../common/constants';
+import {
+  DEFAULT_MAX_BUCKETS_LIMIT,
+  ES_GEO_FIELD_TYPE,
+  FieldFormatter,
+} from '../../../../common/constants';
 import {
   Adapters,
   RequestResponder,
@@ -176,6 +180,9 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     const splitField = getField(indexPattern, entityField);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = { size: numEntities };
+    if (numEntities === DEFAULT_MAX_BUCKETS_LIMIT) {
+      termsAgg.shard_size = DEFAULT_MAX_BUCKETS_LIMIT;
+    }
     entitySearchSource.setField('aggs', {
       totalEntities: {
         cardinality: addFieldToDSL(cardinalityAgg, splitField),

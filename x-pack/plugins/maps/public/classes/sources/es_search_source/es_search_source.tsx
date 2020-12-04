@@ -297,58 +297,41 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       };
     }
 
-    const topHitsSplitField: IFieldType = getField(indexPattern, topHitsSplitFieldName);
-    const cardinalityAgg = { precision_threshold: 1 };
-    const termsAgg = {
-      size: DEFAULT_MAX_BUCKETS_LIMIT,
-      shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
-    };
-
-    const searchSource = await this.makeSearchSource(searchFilters, 0);
-    searchSource.setField('aggs', {
-      totalEntities: {
-        cardinality: addFieldToDSL(cardinalityAgg, topHitsSplitField),
-      },
-      entitySplit: {
-        terms: addFieldToDSL(termsAgg, topHitsSplitField),
-        aggs: {
-          entityHits: {
-            top_hits: topHits,
-          },
+    const { totalEntities, areEntitiesTrimmed, locationsResp } = await this._getEntityLocations({
+      entityField: topHitsSplitFieldName,
+      numEntities: DEFAULT_MAX_BUCKETS_LIMIT,
+      layerName,
+      searchFilters,
+      registerCancelCallback,
+      locationAggs: {
+        entityHits: {
+          top_hits: topHits,
         },
       },
     });
 
-    const resp = await this._runEsQuery({
-      requestId: this.getId(),
-      requestName: layerName,
-      searchSource,
-      registerCancelCallback,
-      requestDescription: 'Elasticsearch document top hits request',
-    });
-
     const allHits: any[] = [];
-    const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
-    const totalEntities = _.get(resp, 'aggregations.totalEntities.value', 0);
-    // can not compare entityBuckets.length to totalEntities because totalEntities is an approximate
-    const areEntitiesTrimmed = entityBuckets.length >= DEFAULT_MAX_BUCKETS_LIMIT;
     let areTopHitsTrimmed = false;
-    entityBuckets.forEach((entityBucket: any) => {
-      const total = _.get(entityBucket, 'entityHits.hits.total', 0);
-      const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
+    const buckets = _.get(locationsResp, 'aggregations.entitySplit.buckets', {});
+    const entityKeys = Object.keys(buckets);
+    for (let i = 0; i < entityKeys.length; i++) {
+      const entityKey = entityKeys[i];
+      const bucket = buckets[entityKey];
+      const total = _.get(bucket, 'entityHits.hits.total', 0);
+      const hits = _.get(bucket, 'entityHits.hits.hits', []);
       // Reverse hits list so top documents by sort are drawn on top
       allHits.push(...hits.reverse());
       if (total > hits.length) {
         areTopHitsTrimmed = true;
       }
-    });
+    }
 
     return {
       hits: allHits,
       meta: {
         areResultsTrimmed: areEntitiesTrimmed || areTopHitsTrimmed, // used to force re-fetch when zooming in
         areEntitiesTrimmed,
-        entityCount: entityBuckets.length,
+        entityCount: buckets.length,
         totalEntities,
       },
     };
