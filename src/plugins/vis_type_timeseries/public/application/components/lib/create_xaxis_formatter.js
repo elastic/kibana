@@ -30,6 +30,6 @@ function getFormat(interval, rules = []) {
 
 export function createXaxisFormatter(interval, rules, dateFormat) {
   return (val) => {
-    return moment(val).format(getFormat(interval, rules) || dateFormat);
+    return moment(val).format(getFormat(interval, rules) ?? dateFormat);
   };
 }
