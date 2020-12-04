@@ -41,8 +41,10 @@ export function IngestManagerCreatePackagePolicy({
     /**
      * Finds and returns the save button on the sticky bottom bar
      */
-    async findDSaveButton() {
-      return await testSubjects.find('createPackagePolicySaveButton');
+    async findSaveButton(forEditPage: boolean = false) {
+      return await testSubjects.find(
+        forEditPage ? 'saveIntegration' : 'createPackagePolicySaveButton'
+      );
     },
 
     /**
@@ -80,11 +82,22 @@ export function IngestManagerCreatePackagePolicy({
       await testSubjects.setValue('packagePolicyNameInput', name);
     },
 
+    async getPackagePolicyDescriptionValue() {
+      return await testSubjects.getAttribute('packagePolicyDescriptionInput', 'value');
+    },
+
+    async setPackagePolicyDescription(desc: string) {
+      await this.scrollToCenterOfWindow('packagePolicyDescriptionInput');
+      await testSubjects.setValue('packagePolicyDescriptionInput', desc);
+    },
+
     /**
      * Waits for the save Notification toast to be visible
      */
-    async waitForSaveSuccessNotification() {
-      await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
+    async waitForSaveSuccessNotification(forEditPage: boolean = false) {
+      await testSubjects.existOrFail(
+        forEditPage ? 'policyUpdateSuccessToast' : 'packagePolicyCreateSuccessToast'
+      );
     },
 
     /**
@@ -115,11 +128,13 @@ export function IngestManagerCreatePackagePolicy({
 
     /**
      * Center a given Element on the Window viewport
-     * @param element
+     * @param element   if defined as a string, it should be the test subject to find
      */
-    async scrollToCenterOfWindow(element: WebElementWrapper) {
+    async scrollToCenterOfWindow(element: WebElementWrapper | string) {
+      const ele = typeof element === 'string' ? await testSubjects.find(element) : element;
+
       const [elementPosition, windowSize] = await Promise.all([
-        element.getPosition(),
+        ele.getPosition(),
         browser.getWindowSize(),
       ]);
       await browser.execute(
