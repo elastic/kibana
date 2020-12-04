@@ -180,10 +180,14 @@ export const setSetupModeMenuItem = () => {
 
   const globalState = angularState.injector.get('globalState');
   const enabled = !globalState.inSetupMode;
+
+  const services = {
+    usageCollection: Legacy.shims.usageCollection,
+  };
   const I18nContext = Legacy.shims.I18nContext;
 
   render(
-    <KibanaContextProvider services={Legacy.shims.kibanaServices}>
+    <KibanaContextProvider services={services}>
       <I18nContext>
         <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />
       </I18nContext>
