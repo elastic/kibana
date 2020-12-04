@@ -151,7 +151,6 @@ const VisLegendItemComponent = ({
 
   const renderDetails = () => (
     <EuiPopover
-      ownFocus
       display="block"
       button={button}
       isOpen={selected}

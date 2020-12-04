@@ -221,9 +221,6 @@ export const prepareDimension = (variable: string, data: any) => {
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
-  input_control_vis: (params) => {
-    return `input_control_vis ${prepareJson('visConfig', params)}`;
-  },
   region_map: (params, schemas) => {
     const visConfig = {
       ...params,

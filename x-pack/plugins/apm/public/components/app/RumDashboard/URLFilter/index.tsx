@@ -10,9 +10,9 @@ import { useHistory } from 'react-router-dom';
 import { omit } from 'lodash';
 import { URLSearch } from './URLSearch';
 import { UrlList } from './UrlList';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { removeUndefinedProps } from '../../../../context/UrlParamsContext/helpers';
+import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { LocalUIFilterName } from '../../../../../common/ui_filter';
 
 export function URLFilter() {

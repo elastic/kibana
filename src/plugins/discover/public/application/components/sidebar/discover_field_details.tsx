@@ -19,7 +19,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiLink, EuiIconTip, EuiText, EuiPopoverFooter, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
 import {
@@ -36,7 +36,7 @@ interface DiscoverFieldDetailsProps {
   indexPattern: IndexPattern;
   details: FieldDetails;
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
-  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 export function DiscoverFieldDetails({
