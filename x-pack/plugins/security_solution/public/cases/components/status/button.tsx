@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback, useState, useMemo, useEffect } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 
 import { CaseStatuses, caseStatuses } from '../../../../../case/common/api';
@@ -17,6 +17,7 @@ interface Props {
   onStatusChanged: (status: CaseStatuses) => void;
 }
 
+// Rotate over the statuses. open -> in-progress -> closes -> open...
 const getNextItem = (item: number) => (item + 1) % caseStatuses.length;
 
 const StatusActionButtonComponent: React.FC<Props> = ({
@@ -25,19 +26,14 @@ const StatusActionButtonComponent: React.FC<Props> = ({
   disabled,
   isLoading,
 }) => {
-  // Rotate over the array of statuses. open -> in-progress -> closes -> open...
   const indexOfCurrentStatus = useMemo(
     () => caseStatuses.findIndex((caseStatus) => caseStatus === status),
     [status]
   );
-  const [nextStatusIndex, setNextStatusIndex] = useState(getNextItem(indexOfCurrentStatus));
-
-  // The useEffect is needed to update status updates from the context menu.
-  useEffect(() => setNextStatusIndex(getNextItem(indexOfCurrentStatus)), [indexOfCurrentStatus]);
+  const nextStatusIndex = useMemo(() => getNextItem(indexOfCurrentStatus), [indexOfCurrentStatus]);
 
   const onClick = useCallback(() => {
     onStatusChanged(caseStatuses[nextStatusIndex]);
-    setNextStatusIndex(getNextItem(nextStatusIndex));
   }, [nextStatusIndex, onStatusChanged]);
 
   return (
