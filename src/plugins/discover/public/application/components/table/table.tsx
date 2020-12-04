@@ -72,11 +72,7 @@ export function DocViewTable({
                     }
                   }
                 : undefined;
-            const isArrayOfObjects =
-              Array.isArray(flattened[field]) && arrayContainsObjects(flattened[field]);
             const displayUnderscoreWarning = !mapping(field) && field.indexOf('_') === 0;
-            const displayNoMappingWarning =
-              !mapping(field) && !displayUnderscoreWarning && !isArrayOfObjects;
 
             // Discover doesn't flatten arrays of objects, so for documents with an `object` or `nested` field that
             // contains an array, Discover will only detect the top level root field. We want to detect when those
@@ -128,7 +124,6 @@ export function DocViewTable({
                 fieldMapping={mapping(field)}
                 fieldType={String(fieldType)}
                 displayUnderscoreWarning={displayUnderscoreWarning}
-                displayNoMappingWarning={displayNoMappingWarning}
                 isCollapsed={isCollapsed}
                 isCollapsible={isCollapsible}
                 isColumnActive={Array.isArray(columns) && columns.includes(field)}

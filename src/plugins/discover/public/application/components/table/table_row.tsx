@@ -32,7 +32,6 @@ export interface Props {
   field: string;
   fieldMapping?: FieldMapping;
   fieldType: string;
-  displayNoMappingWarning: boolean;
   displayUnderscoreWarning: boolean;
   isCollapsible: boolean;
   isColumnActive: boolean;
@@ -48,7 +47,6 @@ export function DocViewTableRow({
   field,
   fieldMapping,
   fieldType,
-  displayNoMappingWarning,
   displayUnderscoreWarning,
   isCollapsible,
   isCollapsed,
@@ -80,7 +78,6 @@ export function DocViewTableRow({
           <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
         )}
         {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
-        {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
         <div
           className={valueClassName}
           data-test-subj={`tableDocViewRow-${field}-value`}
