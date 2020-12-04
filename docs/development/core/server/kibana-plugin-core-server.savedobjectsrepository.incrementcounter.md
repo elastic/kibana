@@ -9,7 +9,7 @@ Increments all the specified counter fields by one. Creates the document if one 
 <b>Signature:</b>
 
 ```typescript
-incrementCounter(type: string, id: string, counterFieldNames: string[], options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
+incrementCounter<T = unknown>(type: string, id: string, counterFieldNames: string[], options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
 ```
 
 ## Parameters
@@ -23,7 +23,7 @@ incrementCounter(type: string, id: string, counterFieldNames: string[], options?
 
 <b>Returns:</b>
 
-`Promise<SavedObject>`
+`Promise<SavedObject<T>>`
 
 The saved object after the specified fields were incremented
 
