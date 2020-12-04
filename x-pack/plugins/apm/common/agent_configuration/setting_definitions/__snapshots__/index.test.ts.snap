@@ -64,8 +64,38 @@ Array [
   },
   Object {
     "key": "log_level",
-    "type": "text",
-    "validationName": "string",
+    "options": Array [
+      Object {
+        "text": "trace",
+        "value": "trace",
+      },
+      Object {
+        "text": "debug",
+        "value": "debug",
+      },
+      Object {
+        "text": "info",
+        "value": "info",
+      },
+      Object {
+        "text": "warning",
+        "value": "warning",
+      },
+      Object {
+        "text": "error",
+        "value": "error",
+      },
+      Object {
+        "text": "critical",
+        "value": "critical",
+      },
+      Object {
+        "text": "off",
+        "value": "off",
+      },
+    ],
+    "type": "select",
+    "validationName": "(\\"trace\\" | \\"debug\\" | \\"info\\" | \\"warning\\" | \\"error\\" | \\"critical\\" | \\"off\\")",
   },
   Object {
     "key": "profiling_inferred_spans_enabled",
@@ -109,6 +139,11 @@ Array [
     "key": "recording",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "sanitize_field_names",
+    "type": "text",
+    "validationName": "string",
   },
   Object {
     "key": "server_timeout",
@@ -169,6 +204,11 @@ Array [
     "key": "stress_monitor_system_cpu_stress_threshold",
     "type": "float",
     "validationName": "floatRt",
+  },
+  Object {
+    "key": "transaction_ignore_urls",
+    "type": "text",
+    "validationName": "string",
   },
   Object {
     "key": "transaction_max_spans",
