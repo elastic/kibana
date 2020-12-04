@@ -34,7 +34,7 @@ export interface TableGroup {
   tables: Table[];
   title: string;
   name: string;
-  key: any;
+  key: string | number;
   column: number;
   row: number;
 }
@@ -57,14 +57,14 @@ export function tableVisResponseHandler(input: Input, dimensions: Dimensions): T
     const splitColumnIndex = split[0].accessor;
     const splitColumnFormatter = getFormatService().deserialize(split[0].format);
     const splitColumn = input.columns[splitColumnIndex];
-    const splitMap = {};
+    const splitMap: { [key: string]: number } = {};
     let splitIndex = 0;
 
     input.rows.forEach((row, rowIndex) => {
-      const splitValue: any = row[splitColumn.id];
+      const splitValue: string | number = row[splitColumn.id];
 
-      if (!splitMap.hasOwnProperty(splitValue as any)) {
-        (splitMap as any)[splitValue] = splitIndex++;
+      if (!splitMap.hasOwnProperty(splitValue)) {
+        splitMap[splitValue] = splitIndex++;
         const tableGroup: Required<TableGroup, 'tables'> = {
           title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
           name: splitColumn.name,
@@ -83,7 +83,7 @@ export function tableVisResponseHandler(input: Input, dimensions: Dimensions): T
         tables.push(tableGroup);
       }
 
-      const tableIndex = (splitMap as any)[splitValue];
+      const tableIndex = splitMap[splitValue];
       tables[tableIndex].tables[0].rows.push(row);
     });
   } else {
