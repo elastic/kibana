@@ -6,14 +6,11 @@
 
 import { IRouter } from 'src/core/server';
 import { DETECTION_ENGINE_MIGRATE_SIGNALS_URL } from '../../../../../common/constants';
-import { getSignalsIndices } from '../../migrations/get_signals_indices';
-import { migrateSignals } from '../../migrations/migrate_signals';
-import { migrateSignalsIndices } from '../../migrations/migrate_signals_indices';
-import { getSignalsTemplate, SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
+import { getMigrationStatusInRange } from '../../migrations/get_migration_status_in_range';
 import { buildSiemResponse, transformError } from '../utils';
 
-export const migrateSignalsRoute = (router: IRouter) => {
-  router.post(
+export const getMigrationStatusRoute = (router: IRouter) => {
+  router.get(
     {
       path: DETECTION_ENGINE_MIGRATE_SIGNALS_URL,
       validate: false,
@@ -26,7 +23,6 @@ export const migrateSignalsRoute = (router: IRouter) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
 
       // TODO if insufficient permissions for the following actions, reject
-
       try {
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
@@ -35,21 +31,9 @@ export const migrateSignalsRoute = (router: IRouter) => {
 
         const from = 'now-500d'; // TODO make a parameter
         const signalsIndex = appClient.getSignalsIndex();
-        const indicesInRange = await getSignalsIndices({ esClient, index: signalsIndex, from });
-        const getMappings = (index: string) => getSignalsTemplate(index).mappings;
-        const indicesMigrated = await migrateSignalsIndices({
-          esClient,
-          getMappings,
-          indices: indicesInRange,
-          version: SIGNALS_TEMPLATE_VERSION,
-        });
+        const indices = await getMigrationStatusInRange({ esClient, from, index: signalsIndex });
 
-        // TODO we should maybe just run over indicesToMigrate instead of
-        // indicesMigrated; just because the mappings are updated doesn't mean
-        // the docs are
-        const task = await migrateSignals({ esClient, indices: indicesInRange });
-
-        return response.ok({ body: { indicesInRange, indicesMigrated, task } });
+        return response.ok({ body: { indices } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

@@ -14,7 +14,7 @@ import { findRulesRoute } from '../lib/detection_engine/routes/rules/find_rules_
 import { deleteRulesRoute } from '../lib/detection_engine/routes/rules/delete_rules_route';
 import { updateRulesRoute } from '../lib/detection_engine/routes/rules/update_rules_route';
 import { patchRulesRoute } from '../lib/detection_engine/routes/rules/patch_rules_route';
-import { migrateSignalsRoute } from '../lib/detection_engine/routes/signals/migrate_signals_route';
+import { getMigrationStatusRoute } from '../lib/detection_engine/routes/index/get_migration_status_route';
 import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
 import { querySignalsRoute } from '../lib/detection_engine/routes/signals/query_signals_route';
 import { deleteIndexRoute } from '../lib/detection_engine/routes/index/delete_index_route';
@@ -81,7 +81,7 @@ export const initRoutes = (
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
-  migrateSignalsRoute(router);
+  getMigrationStatusRoute(router);
   setSignalsStatusRoute(router);
   querySignalsRoute(router);
 

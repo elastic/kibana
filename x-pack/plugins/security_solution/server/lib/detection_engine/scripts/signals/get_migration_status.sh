@@ -9,11 +9,10 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./signals/migrate_signals.sh
+# Example: ./signals/get_migration_status.sh
   curl -s -k \
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/signals/migrate \
-  -d '{"from": "now-1h"}' \
+  -X GET ${KIBANA_URL}${SPACE_URL}/api/detection_engine/signals/migrate \
   | jq .

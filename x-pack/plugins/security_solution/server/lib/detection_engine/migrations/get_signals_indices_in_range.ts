@@ -6,13 +6,6 @@
 
 import { ElasticsearchClient } from 'src/core/server';
 
-/* TODO do we need any other restrictions on this search?
-  we're using the results to:
-    * Update their settings
-    * run an update_by_query
-    * run update_by scripts
-*/
-
 interface IndexesResponse {
   aggregations: {
     indexes: {
@@ -22,18 +15,16 @@ interface IndexesResponse {
     };
   };
 }
-interface GetSignalsIndices {
-  esClient: ElasticsearchClient;
-  index: string;
-  from: string;
-}
 
-// TODO: exclude write index ?
-export const getSignalsIndices = async ({
+export const getSignalsIndicesInRange = async ({
   esClient,
   from,
   index,
-}: GetSignalsIndices): Promise<string[]> => {
+}: {
+  esClient: ElasticsearchClient;
+  index: string[];
+  from: string;
+}): Promise<string[]> => {
   const response = await esClient.search<IndexesResponse>({
     index,
     body: {
