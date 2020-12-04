@@ -127,7 +127,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         getActionsColumnWidth(
           isEventViewer,
           showCheckboxes,
-          hasAdditionalActions(id as TimelineId) ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH : 0
+          hasAdditionalActions(id as TimelineId)
+            ? // The extra one is for cases timeline action
+              DEFAULT_ICON_BUTTON_WIDTH * 2 + EXTRA_WIDTH
+            : 0
         ),
       [isEventViewer, showCheckboxes, id]
     );

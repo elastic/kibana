@@ -136,27 +136,6 @@ export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
   }
 );
 
-export const ACTION_ADD_CASE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addCase',
-  {
-    defaultMessage: 'Add to case',
-  }
-);
-
-export const ACTION_ADD_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addNewCase',
-  {
-    defaultMessage: 'Add to new case',
-  }
-);
-
-export const ACTION_ADD_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addExistingCase',
-  {
-    defaultMessage: 'Add to existing case',
-  }
-);
-
 export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.closedAlertSuccessToastMessage', {
     values: { totalAlerts },
@@ -201,9 +180,3 @@ export const IN_PROGRESS_ALERT_FAILED_TOAST = i18n.translate(
     defaultMessage: 'Failed to mark alert(s) as in progress',
   }
 );
-
-export const CASE_CREATED_SUCCESS_TOAST = (title: string) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.alerts.caseCreatedSuccessToast', {
-    values: { title },
-    defaultMessage: 'An alert has been added to "{title}"',
-  });
