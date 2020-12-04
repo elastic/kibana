@@ -465,8 +465,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .auth(ROLES.t1_analyst, 'changeme')
           .expect(403);
       });
-
-      it('returns an error if the original signals and the migrated signals have different counts');
     });
   });
 };

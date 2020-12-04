@@ -39,7 +39,6 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const { migration_token: migrationToken } = request.body;
 
-      // TODO permissions check
       try {
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
