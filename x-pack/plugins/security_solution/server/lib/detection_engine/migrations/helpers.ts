@@ -9,7 +9,7 @@ import { MigrationStatus } from './types';
 export const isOutdated = ({ current, target }: { current: number; target: number }): boolean =>
   current < target;
 
-export const indexNeedsUpgrade = ({
+export const indexNeedsMigration = ({
   status,
   version,
 }: {
@@ -17,7 +17,7 @@ export const indexNeedsUpgrade = ({
   version: number;
 }): boolean => !!status && isOutdated({ current: status.version, target: version });
 
-export const signalsNeedUpgrade = ({
+export const signalsNeedMigration = ({
   status,
   version,
 }: {

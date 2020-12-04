@@ -35,7 +35,7 @@ const getPolicyExists = async ({
  * Checks that the migration cleanup ILM policy exists for the given signals
  * alias, and creates it if necessary.
  *
- * This policy is applied to outdated signals indexes post-upgrade, ensuring
+ * This policy is applied to outdated signals indexes post-migration, ensuring
  * that they are eventually deleted.
  *
  * @param esClient An {@link ElasticsearchClient}
@@ -65,7 +65,7 @@ export const ensureMigrationCleanupPolicy = async ({
  * Applies the migration cleanup ILM policy to the specified signals index.
  *
  * This is invoked for an outdated signals index after a successful index
- * upgrade, ensuring that it's eventually deleted.
+ * migration, ensuring that it's eventually deleted.
  *
  * @param esClient An {@link ElasticsearchClient}
  * @param alias name of the signals alias

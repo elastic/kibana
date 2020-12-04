@@ -5,26 +5,26 @@
  */
 
 import { ElasticsearchClient } from 'src/core/server';
-import { createSignalsUpgradeIndex } from './create_signals_upgrade_index';
+import { createSignalsMigrationIndex } from './create_signals_migration_index';
 
-interface SignalsUpgrade {
+interface SignalsMigration {
   destinationIndex: string;
   sourceIndex: string;
   taskId: string;
 }
 /**
- * Upgrades signals for a given concrete index. Signals are reindexed into a
- * new index in order to receive new fields. Upgraded signals have a
- * `signal._meta.schema_version` field representing the mappings version at the time of the upgrade.
+ * Migrates signals for a given concrete index. Signals are reindexed into a
+ * new index in order to receive new fields. Migrated signals have a
+ * `signal._meta.schema_version` field representing the mappings version at the time of the migration.
  *
  * @param esClient An {@link ElasticsearchClient}
- * @param index name of the concrete signals index to be upgraded
+ * @param index name of the concrete signals index to be migrated
  * @param version version of the current signals template/mappings
  *
- * @returns identifying information representing the {@link SignalsUpgrade}
+ * @returns identifying information representing the {@link SignalsMigration}
  * @throws if elasticsearch returns an error
  */
-export const upgradeSignals = async ({
+export const migrateSignals = async ({
   esClient,
   index,
   version,
@@ -32,8 +32,8 @@ export const upgradeSignals = async ({
   esClient: ElasticsearchClient;
   index: string;
   version: number;
-}): Promise<SignalsUpgrade> => {
-  const upgradeIndex = await createSignalsUpgradeIndex({
+}): Promise<SignalsMigration> => {
+  const migrationIndex = await createSignalsMigrationIndex({
     esClient,
     index,
     version,
@@ -42,7 +42,7 @@ export const upgradeSignals = async ({
   // TODO batch size?
   const response = await esClient.reindex<{ task: string }>({
     body: {
-      dest: { index: upgradeIndex },
+      dest: { index: migrationIndex },
       source: { index },
       script: {
         lang: 'painless',
@@ -62,7 +62,7 @@ export const upgradeSignals = async ({
   });
 
   return {
-    destinationIndex: upgradeIndex,
+    destinationIndex: migrationIndex,
     sourceIndex: index,
     taskId: response.body.task,
   };

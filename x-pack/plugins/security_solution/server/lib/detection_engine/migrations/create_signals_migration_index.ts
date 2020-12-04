@@ -7,7 +7,7 @@
 import { ElasticsearchClient } from 'src/core/server';
 
 /**
- * Creates the destination index to be used during the upgrade/reindex of a
+ * Creates the destination index to be used during the migration of a
  * given signals index.
  *
  * The destination index's name is determined by adding a suffix of
@@ -19,7 +19,7 @@ import { ElasticsearchClient } from 'src/core/server';
  *
  * @returns the name of the created index
  */
-export const createSignalsUpgradeIndex = async ({
+export const createSignalsMigrationIndex = async ({
   esClient,
   index,
   version,

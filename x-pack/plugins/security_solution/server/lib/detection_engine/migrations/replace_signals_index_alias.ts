@@ -10,8 +10,8 @@ import { ElasticsearchClient } from 'src/core/server';
  * Updates aliases for the old and new concrete indexes specified, respectively
  * removing and adding them atomically.
  *
- * This is invoked as part of the finalization of a signals upgrade: once the
- * upgraded index has been verified, its alias replaces the outdated index.
+ * This is invoked as part of the finalization of a signals migration: once the
+ * migrated index has been verified, its alias replaces the outdated index.
  *
  * @param esClient An {@link ElasticsearchClient}
  * @param alias name of the signals alias

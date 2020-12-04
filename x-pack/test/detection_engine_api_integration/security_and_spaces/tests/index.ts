@@ -33,6 +33,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./patch_rules'));
     loadTestFile(require.resolve('./query_signals'));
     loadTestFile(require.resolve('./open_close_signals'));
-    loadTestFile(require.resolve('./upgrading_signals'));
+    loadTestFile(require.resolve('./migrating_signals'));
   });
 };

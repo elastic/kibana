@@ -18,8 +18,8 @@ interface IndexesResponse {
 
 /**
  * Retrieves the list of indices containing signals that fall between now and
- * the given date. This is most relevant to signals upgrades, where we want
- * to scope the number of indexes/documents that we upgrade.
+ * the given date. This is most relevant to signals migrations, where we want
+ * to scope the number of indexes/documents that we migrate.
  *
  *
  * @param esClient An {@link ElasticsearchClient}

@@ -7,9 +7,9 @@
 import expect from '@kbn/expect';
 
 import {
-  DETECTION_ENGINE_SIGNALS_FINALIZE_UPGRADE_URL,
-  DETECTION_ENGINE_SIGNALS_MIGRATE_URL,
-  DETECTION_ENGINE_SIGNALS_UPGRADE_URL,
+  DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
+  DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
+  DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '../../../../plugins/security_solution/common/constants';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('Upgrading signals', () => {
+  describe('Migrating signals', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
     });
@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns no indexes if no signals exist in the specified range', async () => {
         const { body } = await supertest
-          .get(DETECTION_ENGINE_SIGNALS_MIGRATE_URL)
+          .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
           .query({ from: '2020-10-20' })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const {
           body: { indices },
         } = await supertest
-          .get(DETECTION_ENGINE_SIGNALS_MIGRATE_URL)
+          .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
           .query({ from: '2020-10-10' })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         const { body } = await supertest
-          .get(DETECTION_ENGINE_SIGNALS_MIGRATE_URL)
+          .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
           .query({ from: '2020-10-10' })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -128,7 +128,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createUserAndRole(security, ROLES.t1_analyst);
 
         await supertestWithoutAuth
-          .get(DETECTION_ENGINE_SIGNALS_MIGRATE_URL)
+          .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
           .set('kbn-xsrf', 'true')
           .auth(ROLES.t1_analyst, 'changeme')
           .query({ from: '2020-10-10' })
@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('upgrading signals', async () => {
+    describe('Creating a signals migration', async () => {
       let legacySignalsIndexName: string;
       let outDatedSignalsIndexName: string;
 
@@ -154,25 +154,25 @@ export default ({ getService }: FtrProviderContext): void => {
         await esArchiver.unload('signals/legacy_signals_index');
       });
 
-      it('returns the information necessary to finalize the upgrade', async () => {
+      it('returns the information necessary to finalize the migration', async () => {
         const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_UPGRADE_URL)
+          .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
           .send({ index: [legacySignalsIndexName] })
           .expect(200);
 
         expect(body.indices).length(1);
-        const [upgradeInfo] = body.indices;
-        expect(upgradeInfo.source_index).to.eql(legacySignalsIndexName);
-        expect(upgradeInfo.destination_index).not.to.eql(legacySignalsIndexName);
-        expect(upgradeInfo.destination_index).to.contain(legacySignalsIndexName);
-        expect(upgradeInfo.task_id).to.be.a('string');
-        expect(upgradeInfo.task_id.length).to.be.greaterThan(0);
+        const [migrationInfo] = body.indices;
+        expect(migrationInfo.source_index).to.eql(legacySignalsIndexName);
+        expect(migrationInfo.destination_index).not.to.eql(legacySignalsIndexName);
+        expect(migrationInfo.destination_index).to.contain(legacySignalsIndexName);
+        expect(migrationInfo.task_id).to.be.a('string');
+        expect(migrationInfo.task_id.length).to.be.greaterThan(0);
       });
 
-      it('creates a new index containing upgraded signals', async () => {
+      it('creates a new index containing migrated signals', async () => {
         const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_UPGRADE_URL)
+          .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
           .send({ index: [legacySignalsIndexName, outDatedSignalsIndexName] })
           .expect(200);
@@ -184,37 +184,37 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const [{ destination_index: newIndex }] = body.indices;
         await waitForIndexToPopulate(es, newIndex);
-        const { body: upgradeResults } = await es.search({ index: newIndex });
-        expect(upgradeResults.hits.hits).length(1);
-        const upgradedSignal = upgradeResults.hits.hits[0]._source.signal;
-        expect(upgradedSignal._meta.schema_version).to.equal(SIGNALS_TEMPLATE_VERSION);
+        const { body: migrationResults } = await es.search({ index: newIndex });
+        expect(migrationResults.hits.hits).length(1);
+        const migratedSignal = migrationResults.hits.hits[0]._source.signal;
+        expect(migratedSignal._meta.schema_version).to.equal(SIGNALS_TEMPLATE_VERSION);
       });
 
-      it('returns null values for indexes that were specified but not upgraded', async () => {
+      it('returns null values for indexes that were specified but not migrated', async () => {
         const currentWriteIndex = '.siem-signals-default-000001';
 
         const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_UPGRADE_URL)
+          .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
           .send({ index: [currentWriteIndex] })
           .expect(200);
 
         expect(body.indices).length(1);
-        const [upgradeInfo] = body.indices;
-        expect(upgradeInfo.source_index).to.eql(currentWriteIndex);
-        expect(upgradeInfo.destination_index).to.be(null);
-        expect(upgradeInfo.task_id).to.be(null);
+        const [migrationInfo] = body.indices;
+        expect(migrationInfo.source_index).to.eql(currentWriteIndex);
+        expect(migrationInfo.destination_index).to.be(null);
+        expect(migrationInfo.task_id).to.be(null);
       });
 
       it('rejects a duplicated request as the destination index already exists', async () => {
         await supertest
-          .post(DETECTION_ENGINE_SIGNALS_UPGRADE_URL)
+          .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
           .send({ index: [legacySignalsIndexName] })
           .expect(200);
 
         await supertest
-          .post(DETECTION_ENGINE_SIGNALS_UPGRADE_URL)
+          .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
           .send({ index: [legacySignalsIndexName] })
           .expect(400);
@@ -224,7 +224,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createUserAndRole(security, ROLES.t1_analyst);
 
         await supertestWithoutAuth
-          .post(DETECTION_ENGINE_SIGNALS_UPGRADE_URL)
+          .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
           .auth(ROLES.t1_analyst, 'changeme')
           .send({ index: [legacySignalsIndexName] })
@@ -232,10 +232,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('finalizing signals upgrades', async () => {
+    describe('finalizing signals migrations', async () => {
       let legacySignalsIndexName: string;
       let outDatedSignalsIndexName: string;
-      let upgradeResponse: any;
+      let migrationResponse: any;
 
       beforeEach(async () => {
         legacySignalsIndexName = getIndexNameFromLoad(
@@ -245,8 +245,8 @@ export default ({ getService }: FtrProviderContext): void => {
           await esArchiver.load('signals/outdated_signals_index')
         );
 
-        ({ body: upgradeResponse } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_UPGRADE_URL)
+        ({ body: migrationResponse } = await supertest
+          .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
           .send({ index: [legacySignalsIndexName, outDatedSignalsIndexName] })
           .expect(200));
@@ -258,51 +258,51 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns an error if the specified indexes do not match the task', async () => {
-        const upgradeInfo = { ...upgradeResponse.indices[0], destination_index: 'bad index' };
+        const migrationInfo = { ...migrationResponse.indices[0], destination_index: 'bad index' };
         const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_UPGRADE_URL)
+          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send(upgradeInfo)
+          .send(migrationInfo)
           .expect(400);
 
         expect(body).to.eql({
-          message: `Upgrade parameters are invalid. The task_id [${upgradeInfo.task_id}] did not correspond to the indices [${upgradeInfo.source_index},${upgradeInfo.destination_index}]`,
+          message: `Migration parameters are invalid. The task_id [${migrationInfo.task_id}] did not correspond to the indices [${migrationInfo.source_index},${migrationInfo.destination_index}]`,
           status_code: 400,
         });
       });
 
       it('returns an error if the task does not exist', async () => {
-        const upgradeInfo = { ...upgradeResponse.indices[0], task_id: 'nope' };
+        const migrationInfo = { ...migrationResponse.indices[0], task_id: 'nope' };
         const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_UPGRADE_URL)
+          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send(upgradeInfo)
+          .send(migrationInfo)
           .expect(400);
 
         expect(body).to.eql({
-          message: `Upgrade parameters are invalid. The task_id [${upgradeInfo.task_id}] does not exist.`,
+          message: `Migration parameters are invalid. The task_id [${migrationInfo.task_id}] does not exist.`,
           status_code: 400,
         });
       });
 
-      it('returns an error if the original signals and the upgraded signals have different counts');
+      it('returns an error if the original signals and the migrated signals have different counts');
 
-      it('replaces the original index alias with the upgraded one', async () => {
-        const upgradeInfo = upgradeResponse.indices[0];
+      it('replaces the original index alias with the migrated one', async () => {
+        const migrationInfo = migrationResponse.indices[0];
         await supertest
-          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_UPGRADE_URL)
+          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
-          .send(upgradeInfo)
+          .send(migrationInfo)
           .expect(200);
 
         const { body } = await supertest
-          .get(DETECTION_ENGINE_SIGNALS_MIGRATE_URL)
+          .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
           .query({ from: '2020-10-10' })
           .set('kbn-xsrf', 'true')
           .expect(200);
 
         expect(body.indices).to.contain({
-          name: upgradeInfo.destination_index,
+          name: migrationInfo.destination_index,
         });
       });
 

@@ -5,21 +5,21 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { DETECTION_ENGINE_SIGNALS_UPGRADE_URL } from '../../../../../common/constants';
-import { upgradeSignalsSchema } from '../../../../../common/detection_engine/schemas/request/upgrade_signals_schema';
+import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
+import { createSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { upgradeSignals } from '../../migrations/upgrade_signals';
+import { migrateSignals } from '../../migrations/migrate_signals';
 import { buildSiemResponse, transformError } from '../utils';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 import { getMigrationStatus } from '../../migrations/get_migration_status';
-import { indexNeedsUpgrade, signalsNeedUpgrade } from '../../migrations/helpers';
+import { indexNeedsMigration, signalsNeedMigration } from '../../migrations/helpers';
 
-export const upgradeSignalsRoute = (router: IRouter) => {
+export const createSignalsMigrationRoute = (router: IRouter) => {
   router.post(
     {
-      path: DETECTION_ENGINE_SIGNALS_UPGRADE_URL,
+      path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
       validate: {
-        body: buildRouteValidation(upgradeSignalsSchema),
+        body: buildRouteValidation(createSignalsMigrationSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -44,10 +44,10 @@ export const upgradeSignalsRoute = (router: IRouter) => {
           indices.map(async (index) => {
             const status = migrationStatuses.find(({ name }) => name === index);
             if (
-              indexNeedsUpgrade({ status, version: SIGNALS_TEMPLATE_VERSION }) ||
-              signalsNeedUpgrade({ status, version: SIGNALS_TEMPLATE_VERSION })
+              indexNeedsMigration({ status, version: SIGNALS_TEMPLATE_VERSION }) ||
+              signalsNeedMigration({ status, version: SIGNALS_TEMPLATE_VERSION })
             ) {
-              const { destinationIndex, sourceIndex, taskId } = await upgradeSignals({
+              const { destinationIndex, sourceIndex, taskId } = await migrateSignals({
                 esClient,
                 index,
                 version: SIGNALS_TEMPLATE_VERSION,
