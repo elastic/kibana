@@ -19,6 +19,9 @@
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
   },
+  "config": {
+    "puppeteer_skip_chromium_download": true
+  },
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
@@ -266,8 +269,7 @@
     "proper-lockfile": "^3.2.0",
     "proxy-from-env": "1.0.0",
     "puid": "1.0.7",
-    "puppeteer": "^2.1.1",
-    "puppeteer-core": "^1.19.0",
+    "puppeteer": "^5.5.0",
     "query-string": "^6.13.2",
     "raw-loader": "^3.1.0",
     "re2": "^1.15.4",
