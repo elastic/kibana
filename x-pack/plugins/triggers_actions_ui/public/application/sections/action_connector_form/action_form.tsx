@@ -37,6 +37,7 @@ import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_en
 import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
 import { ActionGroup, AlertActionParam } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
+import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 
 export interface ActionGroupWithMessageVariables extends ActionGroup {
   omitOptionalMessageVariables?: boolean;
@@ -58,6 +59,7 @@ export interface ActionAccordionFormProps {
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
+  getDefaultActionParams?: DefaultActionParamsGetter;
 }
 
 interface ActiveActionConnectorState {
@@ -80,6 +82,7 @@ export const ActionForm = ({
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   actionTypeRegistry,
+  getDefaultActionParams,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -344,6 +347,7 @@ export const ActionForm = ({
               messageVariables={messageVariables}
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
+              defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
               onAddConnector={() => {
                 setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });

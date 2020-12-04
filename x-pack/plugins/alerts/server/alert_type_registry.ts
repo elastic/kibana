@@ -201,7 +201,7 @@ function augmentActionGroupsWithReserved<
     );
   } else if (intersectingReservedActionGroups.length > 0) {
     throw new Error(
-      i18n.translate('xpack.alerts.alertTypeRegistry.register.recoveryActionGroupUsageError', {
+      i18n.translate('xpack.alerts.alertTypeRegistry.register.reservedActionGroupUsageError', {
         defaultMessage:
           'Alert type [id="{id}"] cannot be registered. Action groups [{actionGroups}] are reserved by the framework.',
         values: {
