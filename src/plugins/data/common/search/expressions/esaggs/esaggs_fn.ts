@@ -30,7 +30,7 @@ import { IndexPatternExpressionType } from '../../../index_patterns/expressions'
 import { IndexPatternsContract } from '../../../index_patterns/index_patterns';
 import { calculateBounds } from '../../../query';
 
-import { AggsStart } from '../../aggs';
+import { AggsStart, AggExpressionType } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 
 import { KibanaContext } from '../kibana_context_type';
@@ -44,9 +44,9 @@ type Output = Promise<Datatable>;
 
 interface Arguments {
   index: IndexPatternExpressionType;
-  metricsAtAllLevels: boolean;
-  partialRows: boolean;
-  aggConfigs: string;
+  aggs?: AggExpressionType[];
+  metricsAtAllLevels?: boolean;
+  partialRows?: boolean;
   timeFields?: string[];
 }
 
@@ -77,8 +77,17 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
   args: {
     index: {
       types: ['index_pattern'],
+      required: true,
       help: i18n.translate('data.search.functions.esaggs.index.help', {
         defaultMessage: 'Index pattern retrieved with indexPatternLoad',
+      }),
+    },
+    aggs: {
+      types: ['agg_type'],
+      multi: true,
+      default: [],
+      help: i18n.translate('data.search.functions.esaggs.aggConfigs.help', {
+        defaultMessage: 'List of aggs configured with agg_type functions',
       }),
     },
     metricsAtAllLevels: {
@@ -93,13 +102,6 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
       default: false,
       help: i18n.translate('data.search.functions.esaggs.partialRows.help', {
         defaultMessage: 'Whether to return rows that only contain partial data',
-      }),
-    },
-    aggConfigs: {
-      types: ['string'],
-      default: '""',
-      help: i18n.translate('data.search.functions.esaggs.aggConfigs.help', {
-        defaultMessage: 'Stringfied array of aggregation config state',
       }),
     },
     timeFields: {
