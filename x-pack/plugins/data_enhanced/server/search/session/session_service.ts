@@ -20,6 +20,7 @@ import {
   SearchStrategyDependencies,
 } from '../../../../../../src/plugins/data/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
+import { SecurityPluginSetup } from '../../../../security/server';
 import {
   BackgroundSessionSavedObjectAttributes,
   BackgroundSessionFindOptions,
@@ -41,9 +42,10 @@ export class BackgroundSessionService implements ISessionService {
    */
   private sessionSearchMap = new Map<string, Map<string, string>>();
 
-  constructor() {}
+  constructor(private security?: SecurityPluginSetup) {}
 
   public search<Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(
+    user: AuthenticatedUser | null,
     strategy: ISearchStrategy<Request, Response>,
     searchRequest: Request,
     options: ISearchOptions,
@@ -56,14 +58,14 @@ export class BackgroundSessionService implements ISessionService {
         ? searchRequest
         : {
             ...searchRequest,
-            id: await this.getId(searchRequest, options, deps),
+            id: await this.getId(user, searchRequest, options, deps),
           };
 
     return from(getSearchRequest()).pipe(
       switchMap((request) => strategy.search(request, options, searchDeps)),
       tapFirst((response) => {
         if (searchRequest.id || !options.sessionId || !response.id || options.isRestore) return;
-        this.trackId(searchRequest, response.id, options, deps);
+        this.trackId(user, searchRequest, response.id, options, deps);
       })
     );
   }
@@ -87,9 +89,9 @@ export class BackgroundSessionService implements ISessionService {
     if (!appId) throw new Error('AppId is required');
     if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
 
-    const realmType = user?.authentication_realm.type;
-    const realmName = user?.authentication_realm.name;
-    const username = user?.username;
+    const realmType = user?.authentication_realm.type ?? null;
+    const realmName = user?.authentication_realm.name ?? null;
+    const username = user?.username ?? null;
 
     // Get the mapping of request hash/search ID for this session
     const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
@@ -185,6 +187,7 @@ export class BackgroundSessionService implements ISessionService {
    * @internal
    */
   public trackId = async (
+    user: AuthenticatedUser | null,
     searchRequest: IKibanaSearchRequest,
     searchId: string,
     { sessionId, isStored }: ISearchOptions,
@@ -197,7 +200,7 @@ export class BackgroundSessionService implements ISessionService {
     // Otherwise, just update the in-memory mapping for this session for when the session is saved.
     if (isStored) {
       const attributes = { idMapping: { [requestHash]: searchId } };
-      await this.update(sessionId, attributes, deps);
+      await this.update(user, sessionId, attributes, deps);
     } else {
       const map = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
       map.set(requestHash, searchId);
@@ -211,6 +214,7 @@ export class BackgroundSessionService implements ISessionService {
    * @internal
    */
   public getId = async (
+    user: AuthenticatedUser | null,
     searchRequest: IKibanaSearchRequest,
     { sessionId, isStored, isRestore }: ISearchOptions,
     deps: BackgroundSessionDependencies
@@ -223,7 +227,7 @@ export class BackgroundSessionService implements ISessionService {
       throw new Error('Get search ID is only supported when restoring a session');
     }
 
-    const session = await this.get(sessionId, deps);
+    const session = await this.get(user, sessionId, deps);
     const requestHash = createRequestHash(searchRequest.params);
     if (!session.attributes.idMapping.hasOwnProperty(requestHash)) {
       throw new Error('No search ID in this session matching the given search request');
@@ -234,6 +238,7 @@ export class BackgroundSessionService implements ISessionService {
 
   public asScopedProvider = ({ savedObjects }: CoreStart) => {
     return (request: KibanaRequest) => {
+      const user = this.security?.authc.getCurrentUser(request) ?? null;
       const savedObjectsClient = savedObjects.getScopedClient(request, {
         includedHiddenTypes: [BACKGROUND_SESSION_TYPE],
       });
@@ -242,22 +247,14 @@ export class BackgroundSessionService implements ISessionService {
         search: <Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(
           strategy: ISearchStrategy<Request, Response>,
           ...args: Parameters<ISearchStrategy<Request, Response>['search']>
-        ) => this.search(strategy, ...args, deps),
-        save: (
-          user: AuthenticatedUser | null,
-          sessionId: string,
-          attributes: Partial<BackgroundSessionSavedObjectAttributes>
-        ) => this.save(user, sessionId, attributes, deps),
-        get: (user: AuthenticatedUser | null, sessionId: string) => this.get(user, sessionId, deps),
-        find: (user: AuthenticatedUser | null, options: BackgroundSessionFindOptions) =>
-          this.find(user, options, deps),
-        update: (
-          user: AuthenticatedUser | null,
-          sessionId: string,
-          attributes: Partial<BackgroundSessionSavedObjectAttributes>
-        ) => this.update(user, sessionId, attributes, deps),
-        delete: (user: AuthenticatedUser | null, sessionId: string) =>
-          this.delete(user, sessionId, deps),
+        ) => this.search(user, strategy, ...args, deps),
+        save: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
+          this.save(user, sessionId, attributes, deps),
+        get: (sessionId: string) => this.get(user, sessionId, deps),
+        find: (options: BackgroundSessionFindOptions) => this.find(user, options, deps),
+        update: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
+          this.update(user, sessionId, attributes, deps),
+        delete: (sessionId: string) => this.delete(user, sessionId, deps),
       };
     };
   };
@@ -266,19 +263,13 @@ export class BackgroundSessionService implements ISessionService {
     user: AuthenticatedUser | null,
     session: SavedObject<BackgroundSessionSavedObjectAttributes>
   ) => {
-    if (!this.doesUserConflict(user, session)) return;
-    throw Boom.notFound();
-  };
-
-  private doesUserConflict = (
-    user: AuthenticatedUser | null,
-    session: SavedObject<BackgroundSessionSavedObjectAttributes>
-  ) => {
-    return (
-      user !== null &&
-      (user.authentication_realm.type !== session.attributes.realmType ||
-        user.authentication_realm.name !== session.attributes.realmName ||
-        user.username !== session.attributes.username)
-    );
+    if (user === null) return;
+    if (
+      user.authentication_realm.type !== session.attributes.realmType ||
+      user.authentication_realm.name !== session.attributes.realmName ||
+      user.username !== session.attributes.username
+    ) {
+      throw Boom.notFound();
+    }
   };
 }

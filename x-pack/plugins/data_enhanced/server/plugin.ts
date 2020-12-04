@@ -58,12 +58,12 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
     deps.data.__enhance({
       search: {
         defaultStrategy: ENHANCED_ES_SEARCH_STRATEGY,
-        sessionService: new BackgroundSessionService(),
+        sessionService: new BackgroundSessionService(deps.security),
       },
     });
 
     const router = core.http.createRouter();
-    registerSessionRoutes(router, deps.security);
+    registerSessionRoutes(router);
   }
 
   public start(core: CoreStart) {}
