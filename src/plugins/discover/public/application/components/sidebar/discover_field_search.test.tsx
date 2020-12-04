@@ -50,17 +50,18 @@ describe('DiscoverFieldSearch', () => {
   test('change in active filters should change facet selection and call onChange', () => {
     const onChange = jest.fn();
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
-    let btn = findTestSubject(component, 'toggleFieldFilterButton');
-    expect(btn.hasClass('euiFacetButton--isSelected')).toBeFalsy();
+    const btn = findTestSubject(component, 'toggleFieldFilterButton');
+    const badge = btn.find('.euiNotificationBadge');
+    expect(badge.text()).toEqual('0');
     btn.simulate('click');
     const aggregatableButtonGroup = findButtonGroup(component, 'aggregatable');
+
     act(() => {
       // @ts-ignore
       (aggregatableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
     });
     component.update();
-    btn = findTestSubject(component, 'toggleFieldFilterButton');
-    expect(btn.hasClass('euiFacetButton--isSelected')).toBe(true);
+    expect(badge.text()).toEqual('1');
     expect(onChange).toBeCalledWith('aggregatable', true);
   });
 
