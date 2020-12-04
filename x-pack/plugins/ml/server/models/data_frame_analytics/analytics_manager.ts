@@ -11,13 +11,16 @@ import {
   JobMapNodeTypes,
 } from '../../../common/constants/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../../common/types/trained_models';
-import { DataFrameAnalyticsStats } from '../../../common/types/data_frame_analytics';
-import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
-import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   AnalyticsMapEdgeElement,
   AnalyticsMapReturnType,
   AnalyticsMapNodeElement,
+  DataFrameAnalyticsStats,
+  MapElements,
+} from '../../../common/types/data_frame_analytics';
+import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
+import { getAnalysisType } from '../../../common/util/analytics_utils';
+import {
   ExtendAnalyticsMapArgs,
   GetAnalyticsMapArgs,
   InitialElementsReturnType,
@@ -27,7 +30,6 @@ import {
   isIndexPatternLinkReturnType,
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
-  MapElements,
   NextLinkReturnType,
 } from './types';
 import type { MlClient } from '../../lib/ml_client';

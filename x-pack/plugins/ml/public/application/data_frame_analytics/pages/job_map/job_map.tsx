@@ -130,51 +130,49 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
   return (
     <>
       <EuiSpacer size="m" />
+      <EuiFlexGroup direction="column" gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <JobMapTitle analyticsId={analyticsId} modelId={modelId} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <JobMapLegend />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" component="span">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj={`mlAnalyticsRefreshMapButton${isLoading ? ' loading' : ' loaded'}`}
+                onClick={() => fetchAndSetElementsWrapper({ analyticsId, modelId })}
+                isLoading={isLoading}
+              >
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsList.refreshMapButtonLabel"
+                  defaultMessage="Refresh"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj="mlAnalyticsResetGraphButton"
+                // trigger reset on value change
+                onClick={() => setResetCyToggle(!resetCyToggle)}
+              >
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsList.resetMapButtonLabel"
+                  defaultMessage="Reset"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <div style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }} ref={ref}>
-        <EuiFlexGroup direction="column" gutterSize="none" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <JobMapTitle analyticsId={analyticsId} modelId={modelId} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <JobMapLegend />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" component="span">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  data-test-subj={`mlAnalyticsRefreshMapButton${
-                    isLoading ? ' loading' : ' loaded'
-                  }`}
-                  onClick={() => fetchAndSetElementsWrapper({ analyticsId, modelId })}
-                  isLoading={isLoading}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.dataframe.analyticsList.refreshMapButtonLabel"
-                    defaultMessage="Refresh"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  data-test-subj="mlAnalyticsResetGraphButton"
-                  // trigger reset on value change
-                  onClick={() => setResetCyToggle(!resetCyToggle)}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.dataframe.analyticsList.resetMapButtonLabel"
-                    defaultMessage="Reset"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <Cytoscape
           height={height}
           elements={elements}

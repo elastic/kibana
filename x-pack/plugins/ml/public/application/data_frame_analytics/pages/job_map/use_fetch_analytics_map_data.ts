@@ -10,6 +10,7 @@ import { uniqWith, isEqual } from 'lodash';
 import cytoscape from 'cytoscape';
 import { ml } from '../../../services/ml_api_service';
 import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
+import { AnalyticsMapReturnType } from '../../../../../common/types/data_frame_analytics';
 
 interface GetDataObjectParameter {
   analyticsId?: string;
@@ -28,7 +29,7 @@ export const useFetchAnalyticsMapData = () => {
   const fetchAndSetElements = async (idToUse: string, treatAsRoot: boolean, type?: string) => {
     setIsLoading(true);
     // Pass in treatAsRoot flag - endpoint will take job or index to grab jobs created from it
-    const analyticsMap: any = await ml.dataFrameAnalytics.getDataFrameAnalyticsMap(
+    const analyticsMap: AnalyticsMapReturnType = await ml.dataFrameAnalytics.getDataFrameAnalyticsMap(
       idToUse,
       treatAsRoot,
       type

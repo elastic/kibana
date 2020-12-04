@@ -11,7 +11,8 @@ import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constants/states';
-import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/data_frame_task_state';
+import { DataFrameTaskStateType } from '../../../../plugins/ml/common/types/data_frame_analytics';
+import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/common/constants/data_frame_analytics';
 import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 import {
@@ -240,7 +241,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return analyticsStats;
     },
 
-    async getAnalyticsState(analyticsId: string): Promise<DATA_FRAME_TASK_STATE> {
+    async getAnalyticsState(analyticsId: string): Promise<DataFrameTaskStateType> {
       log.debug(`Fetching analytics state for job ${analyticsId}`);
       const analyticsStats = await this.getDFAJobStats(analyticsId);
 
@@ -249,7 +250,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         `Expected dataframe analytics stats to have exactly one object (got '${analyticsStats.data_frame_analytics.length}')`
       );
 
-      const state: DATA_FRAME_TASK_STATE = analyticsStats.data_frame_analytics[0].state;
+      const state: DataFrameTaskStateType = analyticsStats.data_frame_analytics[0].state;
 
       return state;
     },
@@ -286,7 +287,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async waitForAnalyticsState(
       analyticsId: string,
-      expectedAnalyticsState: DATA_FRAME_TASK_STATE
+      expectedAnalyticsState: DataFrameTaskStateType
     ) {
       await retry.waitForWithTimeout(
         `analytics state to be ${expectedAnalyticsState}`,

@@ -29,8 +29,13 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 import { CytoscapeContext } from './cytoscape';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
+import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { useNotifications, useNavigateToPath } from '../../../../contexts/kibana';
+import {
+  useMlUrlGenerator,
+  useNotifications,
+  useNavigateToPath,
+} from '../../../../contexts/kibana';
 import { getIndexPatternIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
@@ -84,6 +89,7 @@ export const Controls: FC<Props> = ({
   const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
   const { deleteItem, deleteTargetIndex, isModalVisible, openModal } = deleteAction;
   const { toasts } = useNotifications();
+  const mlUrlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
   const navigateToWizardWithClonedJob = useNavigateToWizardWithClonedJob();
 
@@ -104,7 +110,12 @@ export const Controls: FC<Props> = ({
     const indexId = getIndexPatternIdFromName(nodeLabel);
 
     if (indexId) {
-      await navigateToPath(`/data_frame_analytics/new_job?index=${encodeURIComponent(indexId)}`);
+      const path = await mlUrlGenerator.createUrl({
+        page: ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
+        pageState: { index: indexId },
+      });
+
+      await navigateToPath(path);
     } else {
       toasts.addDanger(
         i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.indexPatternMissingMessage', {

@@ -113,3 +113,27 @@ export interface DataFrameAnalyticsStats {
   failure_reason?: string;
   state: DataFrameTaskStateType;
 }
+
+export interface AnalyticsMapNodeElement {
+  data: {
+    id: string;
+    label: string;
+    type: string;
+    analysisType?: string;
+  };
+}
+
+export interface AnalyticsMapEdgeElement {
+  data: {
+    id: string;
+    source: string;
+    target: string;
+  };
+}
+
+export type MapElements = AnalyticsMapNodeElement | AnalyticsMapEdgeElement;
+export interface AnalyticsMapReturnType {
+  elements: MapElements[];
+  details: Record<string, any>; // transform, job, or index details
+  error: null | any;
+}
