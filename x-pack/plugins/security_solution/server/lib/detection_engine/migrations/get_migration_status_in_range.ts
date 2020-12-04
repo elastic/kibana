@@ -5,9 +5,10 @@
  */
 
 import { ElasticsearchClient } from 'src/core/server';
-import { getMigrationStatus, MigrationStatus } from './get_migration_status';
+import { getMigrationStatus } from './get_migration_status';
 import { getSignalsIndexAliases } from './get_signals_index_aliases';
 import { getSignalsIndicesInRange } from './get_signals_indices_in_range';
+import { MigrationStatus } from './types';
 
 export const getMigrationStatusInRange = async ({
   esClient,

@@ -41,27 +41,31 @@ export const upgradeSignalsRoute = (router: IRouter) => {
         const migrationStatuses = await getMigrationStatus({ esClient, index: indices });
 
         // TODO parallelize
-        const tasks = await Promise.all(
+        const upgradeResults = await Promise.all(
           indices.map(async (index) => {
             const status = migrationStatuses.find(({ name }) => name === index);
             if (
               indexNeedsUpgrade({ status, version: SIGNALS_TEMPLATE_VERSION }) ||
               signalsNeedUpgrade({ status, version: SIGNALS_TEMPLATE_VERSION })
             ) {
-              const taskId = await upgradeSignals({
+              const { destinationIndex, sourceIndex, taskId } = await upgradeSignals({
                 esClient,
                 index,
                 version: SIGNALS_TEMPLATE_VERSION,
               });
 
-              return { index, id: taskId };
+              return {
+                destination_index: destinationIndex,
+                source_index: sourceIndex,
+                task_id: taskId,
+              };
             } else {
-              return { index, id: null };
+              return { destination_index: null, source_index: index, id: null };
             }
           })
         );
 
-        return response.ok({ body: { tasks } });
+        return response.ok({ body: { indices: upgradeResults } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

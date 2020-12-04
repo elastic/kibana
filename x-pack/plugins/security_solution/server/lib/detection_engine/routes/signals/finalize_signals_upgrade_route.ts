@@ -9,12 +9,13 @@ import { ReindexResponse } from 'elasticsearch';
 
 import { IRouter } from 'src/core/server';
 import { DETECTION_ENGINE_FINALIZE_SIGNALS_UPGRADE_URL } from '../../../../../common/constants';
+import { getSignalsCount } from '../../migrations/get_signals_count';
 import { buildSiemResponse, transformError } from '../utils';
 
 interface TaskResponse {
   completed: boolean;
   response?: ReindexResponse;
-  task: unknown;
+  task: { description?: string };
 }
 
 export const finalizeSignalsUpgradeRoute = (router: IRouter) => {
@@ -23,7 +24,11 @@ export const finalizeSignalsUpgradeRoute = (router: IRouter) => {
       path: DETECTION_ENGINE_FINALIZE_SIGNALS_UPGRADE_URL,
       // TODO io-ts
       validate: {
-        body: schema.object({ task_id: schema.string() }),
+        body: schema.object({
+          destination_index: schema.string(),
+          source_index: schema.string(),
+          task_id: schema.string(),
+        }),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -32,7 +37,11 @@ export const finalizeSignalsUpgradeRoute = (router: IRouter) => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const { task_id: taskId } = request.body;
+      const {
+        destination_index: destinationIndex,
+        source_index: sourceIndex,
+        task_id: taskId,
+      } = request.body;
 
       // TODO permissions check
       try {
@@ -44,15 +53,55 @@ export const finalizeSignalsUpgradeRoute = (router: IRouter) => {
         const { body: task } = await esClient.tasks.get<TaskResponse>({ task_id: taskId });
 
         if (!task.completed) {
-          return response.ok({ body: { completed: false, task_id: taskId } });
+          return response.ok({
+            body: {
+              completed: false,
+              destination_index: destinationIndex,
+              source_index: sourceIndex,
+              task_id: taskId,
+            },
+          });
         }
 
-        // TODO
-        // verify docs match
-        // update_by_query for signal.schema_version
-        // update aliases
+        const { description } = task.task;
+        if (
+          !description ||
+          !description.includes(destinationIndex) ||
+          !description.includes(sourceIndex)
+        ) {
+          throw new Error(
+            `The specified task does not match the source and destination indexes. Task [${taskId}] did not specify source index [${sourceIndex}] and destination index [${destinationIndex}] `
+          );
+        }
 
-        return response.ok({ body: {} });
+        const sourceCount = await getSignalsCount({ esClient, index: sourceIndex });
+        const destinationCount = await getSignalsCount({ esClient, index: destinationIndex });
+        if (sourceCount !== destinationCount) {
+          throw new Error(
+            `The source and destination indexes have different document counts. Source [${sourceIndex}] has [${sourceCount}] documents, while destination [${destinationIndex}] has [${destinationCount}] documents.`
+          );
+        }
+
+        const signalsIndex = appClient.getSignalsIndex();
+        await esClient.indices.updateAliases({
+          body: {
+            actions: [
+              { remove: { index: sourceIndex, alias: signalsIndex } },
+              { add: { index: destinationIndex, alias: signalsIndex } },
+            ],
+          },
+        });
+
+        // TODO add deletion policy to sourceIndex
+
+        return response.ok({
+          body: {
+            completed: true,
+            destination_index: destinationIndex,
+            source_index: sourceIndex,
+            task_id: taskId,
+          },
+        });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

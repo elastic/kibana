@@ -9,11 +9,11 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./signals/finalize_signals_upgrade.sh oTUltX4IQMOUUVeiohTt8A:464
+# Example: ./signals/finalize_signals_upgrade.sh oTUltX4IQMOUUVeiohTt8A:464 .siem-signals-default-000001 .siem-signals-default-000001-r3
   curl -s -k \
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/signals/finalize_upgrade \
-  -d "{\"task_id\": \"$1\"}" \
+  -d "{\"destination_index\": \"$3\", \"source_index\": \"$2\", \"task_id\": \"$1\"}" \
   | jq .
