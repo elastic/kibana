@@ -36,6 +36,8 @@ import {
   BrushEndListener,
   RenderChangeListener,
   ScaleType,
+  AccessorFn,
+  Accessor,
 } from '@elastic/charts';
 import { keys } from '@elastic/eui';
 
@@ -48,7 +50,7 @@ import {
 } from '../../charts/public';
 import { Datatable, IInterpreterRenderHandlers } from '../../expressions/public';
 
-import { Aspect, VisParams } from './types';
+import { VisParams } from './types';
 import {
   getAdjustedDomain,
   getXDomain,
@@ -64,6 +66,7 @@ import { getThemeService, getColorsService, getDataActions } from './services';
 import { ChartType } from '../common';
 
 import './_chart.scss';
+import { getXAccessor } from './utils/get_x_accessor';
 
 export interface VisComponentProps {
   visParams: VisParams;
@@ -108,7 +111,7 @@ const VisComponent = (props: VisComponentProps) => {
   );
 
   const handleFilterClick = useCallback(
-    (visData: Datatable, xAccessor: string | number | null): ElementClickListener => (elements) => {
+    (visData: Datatable, xAccessor: Accessor | AccessorFn): ElementClickListener => (elements) => {
       if (xAccessor !== null) {
         const event = getFilterFromChartClickEventFn(
           visData,
@@ -121,10 +124,14 @@ const VisComponent = (props: VisComponentProps) => {
   );
 
   const handleBrush = useCallback(
-    (visData: Datatable, { accessor, params }: Aspect): BrushEndListener | undefined => {
-      if (accessor !== null && 'interval' in params) {
+    (
+      visData: Datatable,
+      xAccessor: Accessor | AccessorFn,
+      isInterval: boolean
+    ): BrushEndListener | undefined => {
+      if (xAccessor !== null && isInterval) {
         return (brushArea) => {
-          const event = getBrushFromChartBrushEventFn(visData, accessor)(brushArea);
+          const event = getBrushFromChartBrushEventFn(visData, xAccessor)(brushArea);
           props.fireEvent(event);
         };
       }
@@ -133,7 +140,7 @@ const VisComponent = (props: VisComponentProps) => {
   );
 
   const getFilterEventData = useCallback(
-    (visData: Datatable, xAccessor: string | number | null) => (
+    (visData: Datatable, xAccessor: Accessor | AccessorFn) => (
       series: XYChartSeriesIdentifier
     ): ClickTriggerEvent | null => {
       if (xAccessor !== null) {
@@ -234,6 +241,7 @@ const VisComponent = (props: VisComponentProps) => {
     },
     [allSeries, getSeriesName, props.uiState]
   );
+  const xAccessor = getXAccessor(config.aspects.x);
 
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
@@ -250,14 +258,14 @@ const VisComponent = (props: VisComponentProps) => {
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
           legendColorPicker={getColorPicker(legendPosition, setColor, getSeriesName)}
-          onElementClick={handleFilterClick(visData, config.aspects.x.accessor)}
-          onBrushEnd={handleBrush(visData, config.aspects.x)}
+          onElementClick={handleFilterClick(visData, xAccessor)}
+          onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params)}
           onRenderChange={onRenderChange}
           legendAction={
             config.aspects.series && (config.aspects.series?.length ?? 0) > 0
               ? getLegendActions(
                   canFilter,
-                  getFilterEventData(visData, config.aspects.x.accessor),
+                  getFilterEventData(visData, xAccessor),
                   handleFilterAction,
                   getSeriesName
                 )
@@ -284,7 +292,8 @@ const VisComponent = (props: VisComponentProps) => {
           visData.rows,
           getSeriesName,
           getSeriesColor,
-          timeZone
+          timeZone,
+          xAccessor
         )}
       </Chart>
     </div>

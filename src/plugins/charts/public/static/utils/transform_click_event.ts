@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { XYChartSeriesIdentifier, GeometryValue, XYBrushArea } from '@elastic/charts';
+import {
+  XYChartSeriesIdentifier,
+  GeometryValue,
+  XYBrushArea,
+  Accessor,
+  AccessorFn,
+  Datum,
+} from '@elastic/charts';
 
 import { RangeSelectContext, ValueClickContext } from '../../../../embeddable/public';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
@@ -32,12 +39,40 @@ export interface BrushTriggerEvent {
   data: RangeSelectContext['data'];
 }
 
+function getAccessorValue(datum: Datum, accessor: Accessor | AccessorFn) {
+  if (typeof accessor === 'function') {
+    return accessor(datum);
+  }
+
+  return datum[accessor];
+}
+
+/**
+ * This is a little unorthodox, but using functional accessors makes it
+ * difficult to match the correct column. This creates a test object to throw
+ * an error when the target id is accessed, thus matcing the target column.
+ */
+function validateFnAccessorId(id: string, accessor: AccessorFn) {
+  const matchedMessage = 'validateFnAccessorId matched';
+
+  try {
+    accessor({
+      get [id]() {
+        throw new Error(matchedMessage);
+      },
+    });
+    return false;
+  } catch ({ message }) {
+    return message === matchedMessage;
+  }
+}
+
 /**
  * Helper function to transform `@elastic/charts` click event into filter action event
  */
 export const getFilterFromChartClickEventFn = (
   table: Datatable,
-  xAccessor: string | number,
+  xAccessor: Accessor | AccessorFn,
   negate: boolean = false
 ) => (points: Array<[GeometryValue, XYChartSeriesIdentifier]>): ClickTriggerEvent => {
   const data: ValueClickContext['data']['data'] = [];
@@ -46,7 +81,10 @@ export const getFilterFromChartClickEventFn = (
   points.forEach((point) => {
     const [geometry, { yAccessor, splitAccessors }] = point;
     const columnIndices = table.columns.reduce<number[]>((acc, { id }, index) => {
-      if ([xAccessor, yAccessor, ...splitAccessors.keys()].includes(id)) {
+      if (
+        (typeof xAccessor === 'function' && validateFnAccessorId(id, xAccessor)) ||
+        [xAccessor, yAccessor, ...splitAccessors.keys()].includes(id)
+      ) {
         acc.push(index);
       }
 
@@ -55,7 +93,7 @@ export const getFilterFromChartClickEventFn = (
 
     const rowIndex = table.rows.findIndex((row) => {
       return (
-        row[xAccessor] === geometry.x &&
+        getAccessorValue(row, xAccessor) === geometry.x &&
         row[yAccessor] === geometry.y &&
         [...splitAccessors.entries()].every(([key, value]) => row[key] === value)
       );
@@ -126,9 +164,10 @@ export const getFilterFromSeriesFn = (table: Datatable) => (
 /**
  * Helper function to transform `@elastic/charts` brush event into brush action event
  */
-export const getBrushFromChartBrushEventFn = (table: Datatable, xAccessor: string | number) => ({
-  x: selectedRange,
-}: XYBrushArea): BrushTriggerEvent => {
+export const getBrushFromChartBrushEventFn = (
+  table: Datatable,
+  xAccessor: Accessor | AccessorFn
+) => ({ x: selectedRange }: XYBrushArea): BrushTriggerEvent => {
   const [start, end] = selectedRange ?? [0, 0];
   const range: [number, number] = [start, end];
   const column = table.columns.findIndex((c) => c.id === xAccessor);

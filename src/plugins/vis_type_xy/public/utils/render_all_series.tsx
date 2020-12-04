@@ -27,16 +27,15 @@ import {
   XYChartSeriesIdentifier,
   SeriesColorAccessorFn,
   SeriesName,
+  Accessor,
   AccessorFn,
 } from '@elastic/charts';
-import { Accessor } from '@elastic/charts/dist/utils/accessor';
 import { ColorVariant } from '@elastic/charts/dist/utils/commons';
 
 import { DatatableRow } from '../../../expressions/public';
-import { BUCKET_TYPES } from '../../../data/public';
 
 import { ChartType } from '../../common';
-import { SeriesParam, VisConfig, FakeParams, Aspect } from '../types';
+import { SeriesParam, VisConfig } from '../types';
 
 /**
  * Matches vislib curve to elastic charts
@@ -54,32 +53,6 @@ const getCurveType = (type?: 'linear' | 'cardinal' | 'step-after'): CurveType =>
   }
 };
 
-const getXAccessor = (xAspect: Aspect): Accessor | AccessorFn => {
-  if (!xAspect.accessor) {
-    return () => (xAspect.params as FakeParams)?.defaultValue;
-  }
-
-  if (
-    !(
-      (xAspect.aggType === BUCKET_TYPES.DATE_RANGE || xAspect.aggType === BUCKET_TYPES.RANGE) &&
-      xAspect.formatter
-    )
-  ) {
-    return xAspect.accessor;
-  }
-
-  const formatter = xAspect.formatter;
-  const accessor = xAspect.accessor;
-  return (d) => {
-    const v = d[accessor];
-    if (!v) {
-      return;
-    }
-    const f = formatter(v);
-    return f;
-  };
-};
-
 /**
  * Renders chart Line, Area or Bar series
  * @param config
@@ -94,11 +67,10 @@ export const renderAllSeries = (
   data: DatatableRow[],
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
   getSeriesColor: SeriesColorAccessorFn,
-  timeZone: string
-) => {
-  const xAccessor = getXAccessor(aspects.x);
-
-  return seriesParams.map(
+  timeZone: string,
+  xAccessor: Accessor | AccessorFn
+) =>
+  seriesParams.map(
     ({
       show,
       valueAxis: groupId,
@@ -206,4 +178,3 @@ export const renderAllSeries = (
       }
     }
   );
-};

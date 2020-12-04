@@ -142,7 +142,7 @@ function getScale<S extends XScaleType | YScaleType>(
   const type = (isCategoryAxis
     ? getScaleType(
         scale,
-        format?.id === 'number' || format?.params?.id === 'number',
+        format?.id === 'number' || (format?.params?.id === 'number' && format?.id !== 'range'),
         'date' in params,
         'interval' in params
       )
