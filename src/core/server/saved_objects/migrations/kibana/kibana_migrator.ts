@@ -22,10 +22,9 @@
  * (the shape of the mappings and documents in the index).
  */
 
-import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { BehaviorSubject } from 'rxjs';
-
-import { ElasticsearchClient } from 'src/core/server/elasticsearch';
+import { KibanaConfigType } from '../../../kibana_config';
+import { ElasticsearchClient } from '../../../elasticsearch';
 import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import {
@@ -71,8 +70,6 @@ export interface KibanaMigratorStatus {
  */
 export class KibanaMigrator {
   private readonly client: ElasticsearchClient;
-  // TODO migrationsV2: make private once we release migrations v2
-  public readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaConfig: KibanaConfigType;
   private readonly log: Logger;
@@ -87,6 +84,8 @@ export class KibanaMigrator {
   private migrationsRetryDelay?: number;
   // TODO migrationsV2: make private once we release migrations v2
   public kibanaVersion: string;
+  // TODO migrationsV2: make private once we release migrations v2
+  public readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -172,7 +171,7 @@ export class KibanaMigrator {
     });
 
     const migrators = Object.keys(indexMap).map((index) => {
-      // TODO migrationsV2: remove once we release migrations v2
+      // TODO migrationsV2: remove old migrations algorithm
       if (this.savedObjectsConfig.enableV2) {
         return {
           migrate: (): Promise<MigrationResult> => {
@@ -192,7 +191,7 @@ export class KibanaMigrator {
                 ),
               migrationVersionPerType: this.documentMigrator.migrationVersion,
               indexPrefix: index,
-            }).then((res) => ({
+            }).then(() => ({
               status: 'migrated' as 'migrated',
               destIndex: 'target',
               sourceIndex: 'source',

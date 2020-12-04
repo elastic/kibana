@@ -43,7 +43,7 @@ describe('migration actions', () => {
       },
     });
 
-    const setup = await root.setup();
+    await root.setup();
     start = await root.start();
     client = start.elasticsearch.client.asInternalUser;
 

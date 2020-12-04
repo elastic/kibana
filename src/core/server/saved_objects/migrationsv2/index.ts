@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { gt, valid } from 'semver';
 import chalk from 'chalk';
 import * as Either from 'fp-ts/lib/Either';
@@ -25,6 +24,7 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { cloneDeep } from 'lodash';
+import { ElasticsearchClient } from '../../elasticsearch';
 import * as Actions from './actions';
 import { IndexMapping } from '../mappings';
 import { Logger, LogMeta } from '../../logging';

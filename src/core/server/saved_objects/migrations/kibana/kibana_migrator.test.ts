@@ -23,6 +23,7 @@ import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
+import { errors as esErrors } from '@elastic/elasticsearch';
 
 const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
@@ -89,39 +90,81 @@ describe('KibanaMigrator', () => {
       expect(options.client.cat.templates).toHaveBeenCalledTimes(1);
     });
 
-    it('emits results on getMigratorResult$()', async () => {
-      const options = mockOptions();
+    describe('when enableV2 = false', () => {
+      it('when enableV2 = false creates an IndexMigrator which retries NoLivingConnectionsError errors from ES client', async () => {
+        const options = mockOptions();
 
-      options.client.cat.templates.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          { templates: [] },
-          { statusCode: 404 }
-        )
-      );
-      options.client.indices.get.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
-      );
-      options.client.indices.getAlias.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
-      );
+        options.client.cat.templates.mockReturnValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { templates: [] },
+            { statusCode: 404 }
+          )
+        );
+        options.client.indices.get.mockReturnValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        );
+        options.client.indices.getAlias.mockReturnValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        );
 
-      const migrator = new KibanaMigrator(options);
-      const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
-      await migrator.runMigrations();
-      const { status, result } = await migratorStatus;
-      expect(status).toEqual('completed');
-      expect(result![0]).toMatchObject({
-        destIndex: '.my-index_1',
-        elapsedMs: expect.any(Number),
-        sourceIndex: '.my-index',
-        status: 'migrated',
+        options.client.indices.create = jest
+          .fn()
+          .mockReturnValueOnce(
+            elasticsearchClientMock.createErrorTransportRequestPromise(
+              new esErrors.NoLivingConnectionsError('reason', {} as any)
+            )
+          )
+          .mockImplementationOnce(() =>
+            elasticsearchClientMock.createSuccessTransportRequestPromise('success')
+          );
+
+        const migrator = new KibanaMigrator(options);
+        const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+        await migrator.runMigrations();
+
+        expect(options.client.indices.create).toHaveBeenCalledTimes(3);
+        const { status } = await migratorStatus;
+        return expect(status).toEqual('completed');
       });
-      expect(result![1]).toMatchObject({
-        destIndex: 'other-index_1',
-        elapsedMs: expect.any(Number),
-        sourceIndex: 'other-index',
-        status: 'migrated',
+
+      it('emits results on getMigratorResult$()', async () => {
+        const options = mockOptions();
+
+        options.client.cat.templates.mockReturnValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { templates: [] },
+            { statusCode: 404 }
+          )
+        );
+        options.client.indices.get.mockReturnValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        );
+        options.client.indices.getAlias.mockReturnValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        );
+
+        const migrator = new KibanaMigrator(options);
+        const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+        await migrator.runMigrations();
+        const { status, result } = await migratorStatus;
+        expect(status).toEqual('completed');
+        expect(result![0]).toMatchObject({
+          destIndex: '.my-index_1',
+          elapsedMs: expect.any(Number),
+          sourceIndex: '.my-index',
+          status: 'migrated',
+        });
+        expect(result![1]).toMatchObject({
+          destIndex: 'other-index_1',
+          elapsedMs: expect.any(Number),
+          sourceIndex: 'other-index',
+          status: 'migrated',
+        });
       });
+    });
+    describe('when enableV2 = true', () => {
+      it.todo('creates a V2 migrator');
+      it.todo('emits results on getMigratorResult$()');
     });
   });
 });
@@ -168,6 +211,7 @@ const mockOptions = () => {
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
+      enableV2: false,
     },
     client: elasticsearchClientMock.createElasticsearchClient(),
   };

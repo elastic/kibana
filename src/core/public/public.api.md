@@ -8,6 +8,7 @@ import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
 import { ConfigPath } from '@kbn/config';
+import { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
