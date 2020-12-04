@@ -14,7 +14,7 @@ export function convertToGeoJson(esResponse: any, entitySplitFieldName: string) 
   const features: Feature[] = [];
   let numTrimmedTracks = 0;
 
-  const buckets = _.get(esResponse, 'aggregations.tracks.buckets', {});
+  const buckets = _.get(esResponse, 'aggregations.entitySplit.buckets', {});
   const entityKeys = Object.keys(buckets);
   for (let i = 0; i < entityKeys.length; i++) {
     const entityKey = entityKeys[i];

@@ -39,6 +39,8 @@ import {
   RequestResponder,
 } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 export interface IESSource extends IVectorSource {
   isESSource(): true;
@@ -144,6 +146,109 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     // id used as uuid to track requests in inspector
     clonedDescriptor.id = uuid();
     return clonedDescriptor;
+  }
+
+  async _getEntityLocations({
+    entityField,
+    numEntities,
+    layerName,
+    searchFilters,
+    registerCancelCallback,
+    locationAggs,
+  }: {
+    entityField: string;
+    numEntities: number;
+    layerName: string;
+    searchFilters: VectorSourceRequestMeta;
+    registerCancelCallback: (callback: () => void) => void;
+    locationAggs: unknown;
+  }) {
+    // Entity request needs to be broken into 2 requests
+    // 1) fetch entities: filtered by buffer so that top entities in view are returned
+    // 2) fetch locations for entities: not filtered by buffer to avoid filtering out locations
+    //    that extend past the area of the map buffer.
+
+    //
+    // fetch entities
+    //
+    const indexPattern = await this.getIndexPattern();
+    const entitySearchSource = await this.makeSearchSource(searchFilters, 0);
+    const splitField = getField(indexPattern, entityField);
+    const cardinalityAgg = { precision_threshold: 1 };
+    const termsAgg = { size: numEntities };
+    entitySearchSource.setField('aggs', {
+      totalEntities: {
+        cardinality: addFieldToDSL(cardinalityAgg, splitField),
+      },
+      entitySplit: {
+        terms: addFieldToDSL(termsAgg, splitField),
+      },
+    });
+    const entityResp = await this._runEsQuery({
+      requestId: `${this.getId()}_entities`,
+      requestName: i18n.translate('xpack.maps.source.esSource.entityRequestName', {
+        defaultMessage: '{layerName} entities',
+        values: {
+          layerName,
+        },
+      }),
+      searchSource: entitySearchSource,
+      registerCancelCallback,
+      requestDescription: i18n.translate('xpack.maps.source.esSource.entityRequestDescription', {
+        defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
+      }),
+    });
+    const totalEntities = _.get(entityResp, 'aggregations.totalEntities.value', 0);
+    const areEntitiesTrimmed = totalEntities > numEntities;
+    const entityBuckets: Array<{ key: string; doc_count: number }> = _.get(
+      entityResp,
+      'aggregations.entitySplit.buckets',
+      []
+    );
+    const entityFilters: { [key: string]: unknown } = {};
+    for (let i = 0; i < entityBuckets.length; i++) {
+      entityFilters[entityBuckets[i].key] = esFilters.buildPhraseFilter(
+        splitField,
+        entityBuckets[i].key,
+        indexPattern
+      ).query;
+    }
+
+    //
+    // fetch locations
+    //
+    const locationsSearchFilters = { ...searchFilters };
+    delete locationsSearchFilters.buffer;
+    const locationsSearchSource = await this.makeSearchSource(locationsSearchFilters, 0);
+    locationsSearchSource.setField('aggs', {
+      entitySplit: {
+        filters: {
+          filters: entityFilters,
+        },
+        aggs: locationAggs,
+      },
+    });
+    const locationsResp = await this._runEsQuery({
+      requestId: `${this.getId()}_tracks`,
+      requestName: i18n.translate('xpack.maps.source.esSource.locationsRequestName', {
+        defaultMessage: '{layerName} locations',
+        values: {
+          layerName,
+        },
+      }),
+      searchSource: locationsSearchSource,
+      registerCancelCallback,
+      requestDescription: i18n.translate('xpack.maps.source.esSource.locationsRequestDescription', {
+        defaultMessage:
+          'Elasticsearch request to fetch entity locations. Positions are not filtered by map buffer.',
+      }),
+    });
+
+    return {
+      areEntitiesTrimmed,
+      totalEntities,
+      locationsResp,
+    };
   }
 
   async _runEsQuery({

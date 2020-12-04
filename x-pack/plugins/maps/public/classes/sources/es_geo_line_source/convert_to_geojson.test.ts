@@ -8,7 +8,7 @@ import { convertToGeoJson } from './convert_to_geojson';
 
 const esResponse = {
   aggregations: {
-    tracks: {
+    entitySplit: {
       buckets: {
         ios: {
           doc_count: 1,

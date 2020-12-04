@@ -29,7 +29,6 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { getIsGoldPlus } from '../../../licensed_features';
 
 const MAX_TRACKS = 250;
@@ -173,100 +172,28 @@ export class ESGeoLineSource extends AbstractESAggSource {
     }
 
     const indexPattern = await this.getIndexPattern();
-
-    // Request is broken into 2 requests
-    // 1) fetch entities: filtered by buffer so that top entities in view are returned
-    // 2) fetch tracks: not filtered by buffer to avoid having invalid tracks
-    //    when the track extends beyond the area of the map buffer.
-
-    //
-    // Fetch entities
-    //
-    const entitySearchSource = await this.makeSearchSource(searchFilters, 0);
-    const splitField = getField(indexPattern, this._descriptor.splitField);
-    const cardinalityAgg = { precision_threshold: 1 };
-    const termsAgg = { size: MAX_TRACKS };
-    entitySearchSource.setField('aggs', {
-      totalEntities: {
-        cardinality: addFieldToDSL(cardinalityAgg, splitField),
-      },
-      entitySplit: {
-        terms: addFieldToDSL(termsAgg, splitField),
-      },
-    });
-    const entityResp = await this._runEsQuery({
-      requestId: `${this.getId()}_entities`,
-      requestName: i18n.translate('xpack.maps.source.esGeoLine.entityRequestName', {
-        defaultMessage: '{layerName} entities',
-        values: {
-          layerName,
-        },
-      }),
-      searchSource: entitySearchSource,
+    const { totalEntities, areEntitiesTrimmed, locationsResp } = await this._getEntityLocations({
+      entityField: this._descriptor.splitField,
+      numEntities: MAX_TRACKS,
+      layerName,
+      searchFilters,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.esGeoLine.entityRequestDescription', {
-        defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
-      }),
-    });
-    const entityBuckets: Array<{ key: string; doc_count: number }> = _.get(
-      entityResp,
-      'aggregations.entitySplit.buckets',
-      []
-    );
-    const totalEntities = _.get(entityResp, 'aggregations.totalEntities.value', 0);
-    const areEntitiesTrimmed = entityBuckets.length >= MAX_TRACKS;
-
-    //
-    // Fetch tracks
-    //
-    const entityFilters: { [key: string]: unknown } = {};
-    for (let i = 0; i < entityBuckets.length; i++) {
-      entityFilters[entityBuckets[i].key] = esFilters.buildPhraseFilter(
-        splitField,
-        entityBuckets[i].key,
-        indexPattern
-      ).query;
-    }
-    const tracksSearchFilters = { ...searchFilters };
-    delete tracksSearchFilters.buffer;
-    const tracksSearchSource = await this.makeSearchSource(tracksSearchFilters, 0);
-    tracksSearchSource.setField('aggs', {
-      tracks: {
-        filters: {
-          filters: entityFilters,
-        },
-        aggs: {
-          path: {
-            geo_line: {
-              point: {
-                field: this._descriptor.geoField,
-              },
-              sort: {
-                field: this._descriptor.sortField,
-              },
+      locationAggs: {
+        path: {
+          geo_line: {
+            point: {
+              field: this._descriptor.geoField,
+            },
+            sort: {
+              field: this._descriptor.sortField,
             },
           },
-          ...this.getValueAggsDsl(indexPattern),
         },
+        ...this.getValueAggsDsl(indexPattern),
       },
     });
-    const tracksResp = await this._runEsQuery({
-      requestId: `${this.getId()}_tracks`,
-      requestName: i18n.translate('xpack.maps.source.esGeoLine.trackRequestName', {
-        defaultMessage: '{layerName} tracks',
-        values: {
-          layerName,
-        },
-      }),
-      searchSource: tracksSearchSource,
-      registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.esGeoLine.trackRequestDescription', {
-        defaultMessage:
-          'Elasticsearch geo_line request to fetch tracks for entities. Tracks are not filtered by map buffer.',
-      }),
-    });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
-      tracksResp,
+      locationsResp,
       this._descriptor.splitField
     );
 
@@ -279,7 +206,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         // Do not trigger re-fetch when tracks are trimmed since the tracks themselves are not filtered by map view extent.
         areResultsTrimmed: areEntitiesTrimmed,
         areEntitiesTrimmed,
-        entityCount: entityBuckets.length,
+        entityCount: featureCollection.features.length,
         numTrimmedTracks,
         totalEntities,
       } as ESGeoLineSourceResponseMeta,
