@@ -14,6 +14,7 @@ import { setPolicy } from '../../index/set_policy';
 import { setTemplate } from '../../index/set_template';
 import { getSignalsTemplate, SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
 import { createBootstrapIndex } from '../../index/create_bootstrap_index';
+import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import signalsPolicy from './signals_policy.json';
 import { templateNeedsUpdate } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
@@ -61,6 +62,7 @@ export const createDetectionIndex = async (
   siemClient: AppClient
 ): Promise<void> => {
   const clusterClient = context.core.elasticsearch.legacy.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const callCluster = clusterClient.callAsCurrentUser;
 
   if (!siemClient) {
@@ -68,6 +70,7 @@ export const createDetectionIndex = async (
   }
 
   const index = siemClient.getSignalsIndex();
+  await ensureMigrationCleanupPolicy({ esClient, index });
   const policyExists = await getPolicyExists(callCluster, index);
   if (!policyExists) {
     await setPolicy(callCluster, index, signalsPolicy);

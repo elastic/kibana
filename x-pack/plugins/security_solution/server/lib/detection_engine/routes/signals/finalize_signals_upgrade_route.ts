@@ -10,6 +10,7 @@ import { ReindexResponse } from 'elasticsearch';
 import { IRouter } from 'src/core/server';
 import { DETECTION_ENGINE_FINALIZE_SIGNALS_UPGRADE_URL } from '../../../../../common/constants';
 import { getSignalsCount } from '../../migrations/get_signals_count';
+import { getMigrationCleanupPolicyName } from '../../migrations/migration_cleanup';
 import { buildSiemResponse, transformError } from '../utils';
 
 interface TaskResponse {
@@ -87,12 +88,21 @@ export const finalizeSignalsUpgradeRoute = (router: IRouter) => {
           body: {
             actions: [
               { remove: { index: sourceIndex, alias: signalsIndex } },
-              { add: { index: destinationIndex, alias: signalsIndex } },
+              { add: { index: destinationIndex, alias: signalsIndex, is_write_index: false } },
             ],
           },
         });
 
-        // TODO add deletion policy to sourceIndex
+        await esClient.indices.putSettings({
+          index: sourceIndex,
+          body: {
+            index: {
+              lifecycle: {
+                name: getMigrationCleanupPolicyName(signalsIndex),
+              },
+            },
+          },
+        });
 
         return response.ok({
           body: {
