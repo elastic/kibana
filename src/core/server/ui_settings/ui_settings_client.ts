@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { defaultsDeep, omit } from 'lodash';
+import { omit } from 'lodash';
 
 import { SavedObjectsErrorHelpers } from '../saved_objects';
 import { SavedObjectsClientContract } from '../saved_objects/types';
@@ -45,10 +45,7 @@ interface UserProvidedValue<T = unknown> {
   isOverridden?: boolean;
 }
 
-type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
-
 type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
-type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
 export class UiSettingsClient implements IUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
@@ -83,17 +80,24 @@ export class UiSettingsClient implements IUiSettingsClient {
 
   async get<T = any>(key: string): Promise<T> {
     const all = await this.getAll();
-    return all[key];
+    return all[key] as T;
   }
 
   async getAll<T = any>() {
-    const raw = await this.getRaw();
+    const result: Record<string, any> = {};
 
-    return Object.keys(raw).reduce((all, key) => {
-      const item = raw[key];
-      all[key] = ('userValue' in item ? item.userValue : item.value) as T;
-      return all;
-    }, {} as Record<string, T>);
+    Object.keys(this.defaults).forEach((key) => {
+      result[key] = this.defaults[key].value;
+    });
+
+    const userProvided = await this.getUserProvided();
+    Object.keys(userProvided).forEach((key) => {
+      if (userProvided[key].userValue !== undefined) {
+        result[key] = userProvided[key].userValue;
+      }
+    });
+
+    return result as Record<string, T>;
   }
 
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
@@ -146,11 +150,6 @@ export class UiSettingsClient implements IUiSettingsClient {
     if (this.isOverridden(key)) {
       throw new CannotOverrideError(`Unable to update "${key}" because it is overridden`);
     }
-  }
-
-  private async getRaw(): Promise<UiSettingsRaw> {
-    const userProvided = await this.getUserProvided();
-    return defaultsDeep({}, userProvided, this.defaults);
   }
 
   private validateKey(key: string, value: unknown) {
