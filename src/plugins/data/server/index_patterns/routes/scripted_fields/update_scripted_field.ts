@@ -21,11 +21,14 @@ import { schema } from '@kbn/config-schema';
 import { FieldSpec } from 'src/plugins/data/common';
 import { IRouter } from '../../../../../../core/server';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
-import { assertIndexPatternsContext } from '../util/assert_index_patterns_context';
 import { handleErrors } from '../util/handle_errors';
 import { fieldSpecSchemaFields } from '../util/schemas';
+import type { IndexPatternsServiceProvider } from '../../index_patterns_service';
 
-export const registerUpdateScriptedFieldRoute = (router: IRouter) => {
+export const registerUpdateScriptedFieldRoute = (
+  router: IRouter,
+  indexPatternsProvider: IndexPatternsServiceProvider
+) => {
   router.post(
     {
       path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
@@ -65,56 +68,59 @@ export const registerUpdateScriptedFieldRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(
-      handleErrors(
-        assertIndexPatternsContext(async (ctx, req, res) => {
-          const ip = ctx.indexPatterns.indexPatterns!;
-          const id = req.params.id;
-          const name = req.params.name;
-          const {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            refresh_fields = true,
-          } = req.body;
+      handleErrors(async (ctx, req, res) => {
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+          savedObjectsClient,
+          elasticsearchClient
+        );
+        const id = req.params.id;
+        const name = req.params.name;
+        const {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          refresh_fields = true,
+        } = req.body;
 
-          const field = ({ ...req.body.field, name } as unknown) as FieldSpec;
+        const field = ({ ...req.body.field, name } as unknown) as FieldSpec;
 
-          const indexPattern = await ip.get(id);
-          let fieldObject = indexPattern.fields.getByName(field.name);
+        const indexPattern = await indexPatternsService.get(id);
+        let fieldObject = indexPattern.fields.getByName(field.name);
 
-          if (!fieldObject) {
-            throw new ErrorIndexPatternFieldNotFound(id, name);
-          }
+        if (!fieldObject) {
+          throw new ErrorIndexPatternFieldNotFound(id, name);
+        }
 
-          if (!fieldObject.scripted) {
-            throw new Error('Only scripted fields can be updated.');
-          }
+        if (!fieldObject.scripted) {
+          throw new Error('Only scripted fields can be updated.');
+        }
 
-          const oldSpec = fieldObject.toSpec();
+        const oldSpec = fieldObject.toSpec();
 
-          indexPattern.fields.remove(fieldObject);
-          indexPattern.fields.add({
-            ...oldSpec,
-            ...field,
-          });
+        indexPattern.fields.remove(fieldObject);
+        indexPattern.fields.add({
+          ...oldSpec,
+          ...field,
+        });
 
-          await ip.updateSavedObject(indexPattern);
-          if (refresh_fields) {
-            await ip.refreshFields(indexPattern);
-          }
+        await indexPatternsService.updateSavedObject(indexPattern);
+        if (refresh_fields) {
+          await indexPatternsService.refreshFields(indexPattern);
+        }
 
-          fieldObject = indexPattern.fields.getByName(field.name);
-          if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
+        fieldObject = indexPattern.fields.getByName(field.name);
+        if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-              field: fieldObject.toSpec(),
-              index_pattern: indexPattern.toSpec(),
-            }),
-          });
-        })
-      )
+        return res.ok({
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            field: fieldObject.toSpec(),
+            index_pattern: indexPattern.toSpec(),
+          }),
+        });
+      })
     )
   );
 };

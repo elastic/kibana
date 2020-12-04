@@ -22,8 +22,12 @@ import { IRouter } from '../../../../../../core/server';
 import { assertIndexPatternsContext } from '../util/assert_index_patterns_context';
 import { handleErrors } from '../util/handle_errors';
 import { fieldSpecSchema } from '../util/schemas';
+import type { IndexPatternsServiceProvider } from '../../index_patterns_service';
 
-export const registerPutScriptedFieldRoute = (router: IRouter) => {
+export const registerPutScriptedFieldRoute = (
+  router: IRouter,
+  indexPatternsProvider: IndexPatternsServiceProvider
+) => {
   router.put(
     {
       path: '/api/index_patterns/index_pattern/{id}/scripted_field',
@@ -46,7 +50,12 @@ export const registerPutScriptedFieldRoute = (router: IRouter) => {
     router.handleLegacyErrors(
       handleErrors(
         assertIndexPatternsContext(async (ctx, req, res) => {
-          const ip = ctx.indexPatterns.indexPatterns!;
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+            savedObjectsClient,
+            elasticsearchClient
+          );
           const id = req.params.id;
           const {
             // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -58,7 +67,7 @@ export const registerPutScriptedFieldRoute = (router: IRouter) => {
             throw new Error('Only scripted fields can be put.');
           }
 
-          const indexPattern = await ip.get(id);
+          const indexPattern = await indexPatternsService.get(id);
 
           const oldFieldObject = indexPattern.fields.getByName(field.name);
           if (!!oldFieldObject) {
@@ -71,9 +80,9 @@ export const registerPutScriptedFieldRoute = (router: IRouter) => {
             searchable: true,
           });
 
-          await ip.updateSavedObject(indexPattern);
+          await indexPatternsService.updateSavedObject(indexPattern);
           if (refresh_fields) {
-            await ip.refreshFields(indexPattern);
+            await indexPatternsService.refreshFields(indexPattern);
           }
 
           const fieldObject = indexPattern.fields.getByName(field.name);

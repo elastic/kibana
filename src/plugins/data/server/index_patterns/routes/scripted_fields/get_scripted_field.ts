@@ -22,8 +22,12 @@ import { IRouter } from '../../../../../../core/server';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { assertIndexPatternsContext } from '../util/assert_index_patterns_context';
 import { handleErrors } from '../util/handle_errors';
+import type { IndexPatternsServiceProvider } from '../../index_patterns_service';
 
-export const registerGetScriptedFieldRoute = (router: IRouter) => {
+export const registerGetScriptedFieldRoute = (
+  router: IRouter,
+  indexPatternsProvider: IndexPatternsServiceProvider
+) => {
   router.get(
     {
       path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
@@ -46,11 +50,16 @@ export const registerGetScriptedFieldRoute = (router: IRouter) => {
     router.handleLegacyErrors(
       handleErrors(
         assertIndexPatternsContext(async (ctx, req, res) => {
-          const ip = ctx.indexPatterns.indexPatterns!;
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+            savedObjectsClient,
+            elasticsearchClient
+          );
           const id = req.params.id;
           const name = req.params.name;
 
-          const indexPattern = await ip.get(id);
+          const indexPattern = await indexPatternsService.get(id);
           const field = indexPattern.fields.getByName(name);
 
           if (!field) {

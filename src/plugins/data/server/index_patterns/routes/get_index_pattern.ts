@@ -21,8 +21,12 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../core/server';
 import { assertIndexPatternsContext } from './util/assert_index_patterns_context';
 import { handleErrors } from './util/handle_errors';
+import type { IndexPatternsServiceProvider } from '../index_patterns_service';
 
-export const registerGetIndexPatternRoute = (router: IRouter) => {
+export const registerGetIndexPatternRoute = (
+  router: IRouter,
+  indexPatternsProvider: IndexPatternsServiceProvider
+) => {
   router.get(
     {
       path: '/api/index_patterns/index_pattern/{id}',
@@ -41,9 +45,14 @@ export const registerGetIndexPatternRoute = (router: IRouter) => {
     router.handleLegacyErrors(
       handleErrors(
         assertIndexPatternsContext(async (ctx, req, res) => {
-          const ip = ctx.indexPatterns.indexPatterns!;
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+            savedObjectsClient,
+            elasticsearchClient
+          );
           const id = req.params.id;
-          const indexPattern = await ip.get(id);
+          const indexPattern = await indexPatternsService.get(id);
 
           return res.ok({
             headers: {

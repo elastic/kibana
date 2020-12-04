@@ -22,6 +22,7 @@ import { IRouter } from '../../../../../core/server';
 import { assertIndexPatternsContext } from './util/assert_index_patterns_context';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, serializedFieldFormatSchema } from './util/schemas';
+import type { IndexPatternsServiceProvider } from '../index_patterns_service';
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),
@@ -40,7 +41,10 @@ const indexPatternUpdateSchema = schema.object({
   fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
 });
 
-export const registerUpdateIndexPatternRoute = (router: IRouter) => {
+export const registerUpdateIndexPatternRoute = (
+  router: IRouter,
+  indexPatternsProvider: IndexPatternsServiceProvider
+) => {
   router.post(
     {
       path: '/api/index_patterns/index_pattern/{id}',
@@ -63,10 +67,15 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
     router.handleLegacyErrors(
       handleErrors(
         assertIndexPatternsContext(async (ctx, req, res) => {
-          const ip = ctx.indexPatterns.indexPatterns!;
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+            savedObjectsClient,
+            elasticsearchClient
+          );
           const id = req.params.id;
 
-          const indexPattern = await ip.get(id);
+          const indexPattern = await indexPatternsService.get(id);
 
           const {
             // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -137,10 +146,10 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
             throw new Error('Index pattern change set is empty.');
           }
 
-          await ip.updateSavedObject(indexPattern);
+          await indexPatternsService.updateSavedObject(indexPattern);
 
           if (doRefreshFields && refresh_fields) {
-            await ip.refreshFields(indexPattern);
+            await indexPatternsService.refreshFields(indexPattern);
           }
 
           return res.ok({

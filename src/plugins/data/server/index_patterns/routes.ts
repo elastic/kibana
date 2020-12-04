@@ -50,19 +50,19 @@ export function registerRoutes(
 
   // Index Patterns API
   registerCreateIndexPatternRoute(router, indexPatternsProvider);
-  registerGetIndexPatternRoute(router);
-  registerDeleteIndexPatternRoute(router);
-  registerUpdateIndexPatternRoute(router);
+  registerGetIndexPatternRoute(router, indexPatternsProvider);
+  registerDeleteIndexPatternRoute(router, indexPatternsProvider);
+  registerUpdateIndexPatternRoute(router, indexPatternsProvider);
 
   // Fields API
-  registerUpdateFieldsRoute(router);
+  registerUpdateFieldsRoute(router, indexPatternsProvider);
 
   // Scripted Field API
-  registerCreateScriptedFieldRoute(router);
-  registerPutScriptedFieldRoute(router);
-  registerGetScriptedFieldRoute(router);
-  registerDeleteScriptedFieldRoute(router);
-  registerUpdateScriptedFieldRoute(router);
+  registerCreateScriptedFieldRoute(router, indexPatternsProvider);
+  registerPutScriptedFieldRoute(router, indexPatternsProvider);
+  registerGetScriptedFieldRoute(router, indexPatternsProvider);
+  registerDeleteScriptedFieldRoute(router, indexPatternsProvider);
+  registerUpdateScriptedFieldRoute(router, indexPatternsProvider);
 
   router.get(
     {

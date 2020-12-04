@@ -22,8 +22,12 @@ import { IRouter } from '../../../../../../core/server';
 import { assertIndexPatternsContext } from '../util/assert_index_patterns_context';
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../util/schemas';
+import type { IndexPatternsServiceProvider } from '../../index_patterns_service';
 
-export const registerUpdateFieldsRoute = (router: IRouter) => {
+export const registerUpdateFieldsRoute = (
+  router: IRouter,
+  indexPatternsProvider: IndexPatternsServiceProvider
+) => {
   router.post(
     {
       path: '/api/index_patterns/index_pattern/{id}/fields',
@@ -63,7 +67,12 @@ export const registerUpdateFieldsRoute = (router: IRouter) => {
     router.handleLegacyErrors(
       handleErrors(
         assertIndexPatternsContext(async (ctx, req, res) => {
-          const ip = ctx.indexPatterns.indexPatterns!;
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+            savedObjectsClient,
+            elasticsearchClient
+          );
           const id = req.params.id;
           const {
             // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -76,7 +85,7 @@ export const registerUpdateFieldsRoute = (router: IRouter) => {
             throw new Error('No fields provided.');
           }
 
-          const indexPattern = await ip.get(id);
+          const indexPattern = await indexPatternsService.get(id);
 
           let changeCount = 0;
           for (const fieldName of fieldNames) {
@@ -106,10 +115,10 @@ export const registerUpdateFieldsRoute = (router: IRouter) => {
             throw new Error('Change set is empty.');
           }
 
-          await ip.updateSavedObject(indexPattern);
+          await indexPatternsService.updateSavedObject(indexPattern);
 
           if (refresh_fields) {
-            await ip.refreshFields(indexPattern);
+            await indexPatternsService.refreshFields(indexPattern);
           }
 
           return res.ok({
