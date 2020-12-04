@@ -56,7 +56,6 @@ import {
   transactionsChartsRoute,
   transactionsChartsDistributionRoute,
   transactionsGroupsRoute,
-  transactionSampleForGroupRoute,
   transactionGroupsErrorRateRoute,
 } from './transactions/transactions_routes';
 import {
@@ -157,7 +156,6 @@ const createApmApi = () => {
     .add(transactionsChartsRoute)
     .add(transactionsChartsDistributionRoute)
     .add(transactionsGroupsRoute)
-    .add(transactionSampleForGroupRoute)
     .add(transactionGroupsErrorRateRoute)
 
     // UI filters

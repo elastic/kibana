@@ -187,31 +187,6 @@ export const transactionsChartsBreakdownRoute = createRoute({
   },
 });
 
-export const transactionSampleForGroupRoute = createRoute({
-  endpoint: `GET /api/apm/transaction_sample`,
-  params: t.type({
-    query: t.intersection([
-      uiFiltersRt,
-      rangeRt,
-      t.type({ serviceName: t.string, transactionName: t.string }),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-
-    const { transactionName, serviceName } = context.params.query;
-
-    return {
-      transaction: await getTransactionSampleForGroup({
-        setup,
-        serviceName,
-        transactionName,
-      }),
-    };
-  },
-});
-
 export const transactionGroupsErrorRateRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transaction_groups/error_rate',
   params: t.type({
