@@ -6,10 +6,9 @@
 
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 import { LocalUIFilterName } from '../../../../common/ui_filter';
-// TODO: caue fix it
-import { AggregationType } from '../../app/service_overview/latency_chart';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? parse(search.slice(1), { sort: false }) : {};
@@ -86,7 +85,7 @@ export type APMQueryParams = {
   refreshInterval?: string | number;
   searchTerm?: string;
   percentile?: 50 | 75 | 90 | 95 | 99;
-  aggregationType?: AggregationType;
+  latencyAggregationType?: LatencyAggregationType;
 } & { [key in LocalUIFilterName]?: string };
 
 // forces every value of T[K] to be type: string

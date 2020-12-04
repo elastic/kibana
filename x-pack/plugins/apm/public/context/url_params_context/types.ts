@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { LocalUIFilterName } from '../../../common/ui_filter';
-// TODO: caue fix it
-import { AggregationType } from '../../components/app/service_overview/latency_chart';
 
 export type IUrlParams = {
   detailTab?: string;
@@ -30,5 +29,5 @@ export type IUrlParams = {
   pageSize?: number;
   searchTerm?: string;
   percentile?: number;
-  aggregationType?: AggregationType;
+  latencyAggregationType?: LatencyAggregationType;
 } & Partial<Record<LocalUIFilterName, string>>;

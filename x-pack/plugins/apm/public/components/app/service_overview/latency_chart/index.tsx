@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTransactionChartsFetcher } from '../../../../hooks/use_transaction_charts_fetcher';
@@ -20,9 +21,7 @@ interface Props {
   height?: number;
 }
 
-export type AggregationType = 'avg' | 'p95' | 'p99';
-
-const options: Array<{ value: AggregationType; text: string }> = [
+const options: Array<{ value: LatencyAggregationType; text: string }> = [
   { value: 'avg', text: 'Average' },
   { value: 'p95', text: '95th percentile' },
   { value: 'p99', text: '99th percentile' },
@@ -31,12 +30,12 @@ const options: Array<{ value: AggregationType; text: string }> = [
 export function LatencyChart({ height }: Props) {
   const history = useHistory();
   const { urlParams } = useUrlParams();
-  const { aggregationType } = urlParams;
+  const { latencyAggregationType } = urlParams;
 
-  const {
-    transactionChartsData,
-    transactionChartsStatus,
-  } = useTransactionChartsFetcher();
+  // const {
+  //   transactionChartsData,
+  //   transactionChartsStatus,
+  // } = useTransactionChartsFetcher();
   // const { responseTimeSeries, anomalySeries } = transactionChartsData;
 
   // const timeSeries = responseTimeSeries
@@ -70,10 +69,10 @@ export function LatencyChart({ height }: Props) {
                 { defaultMessage: 'Metric' }
               )}
               options={options}
-              value={aggregationType}
+              value={latencyAggregationType}
               onChange={(nextOption) => {
                 urlHelpers.push(history, {
-                  query: { aggregationType: nextOption.target.value },
+                  query: { latencyAggregationType: nextOption.target.value },
                 });
               }}
             />

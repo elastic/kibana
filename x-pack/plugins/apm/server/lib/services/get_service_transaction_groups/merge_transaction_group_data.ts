@@ -10,6 +10,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
+import { getLatencyValue } from '../../helpers/latency_aggregation_type';
 
 import { TransactionGroupTimeseriesData } from './get_timeseries_data_for_transaction_groups';
 
@@ -53,7 +54,7 @@ export function mergeTransactionGroupData({
             ...acc.latency,
             timeseries: acc.latency.timeseries.concat({
               x: point.key,
-              y: point.avg_latency.value,
+              y: getLatencyValue(point.latency),
             }),
           },
           throughput: {

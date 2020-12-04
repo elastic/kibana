@@ -69,7 +69,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
 
   const {
     uiFilters,
-    urlParams: { start, end },
+    urlParams: { start, end, latencyAggregationType },
   } = useUrlParams();
 
   const [tableOptions, setTableOptions] = useState<{
@@ -94,7 +94,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     },
     status,
   } = useFetcher(() => {
-    if (!start || !end) {
+    if (!start || !end || !latencyAggregationType) {
       return;
     }
 
@@ -112,6 +112,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
           pageIndex: tableOptions.pageIndex,
           sortField: tableOptions.sort.field,
           sortDirection: tableOptions.sort.direction,
+          latencyAggregationType,
         },
       },
     }).then((response) => {
@@ -135,6 +136,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     tableOptions.pageIndex,
     tableOptions.sort.field,
     tableOptions.sort.direction,
+    latencyAggregationType,
   ]);
 
   const {
