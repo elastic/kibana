@@ -135,6 +135,7 @@ export function TransactionDistribution({
   const timeFormatter = getDurationFormatter(xMax);
 
   const tooltipProps: SettingsSpec['tooltip'] = {
+    placement: 'bottom',
     headerFormatter: (tooltip: TooltipValue) => {
       const serie = buckets.find((bucket) => bucket.x0 === tooltip.value);
       if (serie) {
@@ -198,6 +199,7 @@ export function TransactionDistribution({
           />
           {selectedBucket && (
             <RectAnnotation
+              zIndex={-1}
               id="highlighted_bucket"
               dataValues={[
                 {
