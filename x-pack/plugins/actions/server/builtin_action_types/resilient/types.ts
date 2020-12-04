@@ -22,8 +22,6 @@ import {
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
 
-import { ExternalServiceCommentResponse, SimpleComment } from '../case/types';
-
 export type ResilientPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema
 >;
@@ -203,4 +201,13 @@ export interface CreateIncidentData {
   description?: { format: string; content: string };
   incident_type_ids?: Array<{ id: number }>;
   severity_code?: { id: number };
+}
+export interface SimpleComment {
+  comment: string;
+  commentId: string;
+}
+export interface ExternalServiceCommentResponse {
+  commentId: string;
+  pushedDate: string;
+  externalCommentId?: string;
 }

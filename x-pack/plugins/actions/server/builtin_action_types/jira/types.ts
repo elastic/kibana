@@ -21,7 +21,6 @@ import {
   ExecutorSubActionGetIssueParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ExternalServiceCommentResponse, SimpleComment } from '../case/types';
 import { Logger } from '../../../../../../src/core/server';
 
 export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
@@ -186,7 +185,7 @@ export interface GetIssueHandlerArgs {
 
 export interface ExternalServiceApi {
   getFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
-  getIncident: (id: GetIncidentApiHandlerArgs) => Promise<ExternalServiceParams | undefined>;
+  getIncident: (args: GetIncidentApiHandlerArgs) => Promise<ExternalServiceParams | undefined>;
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   issueTypes: (args: GetIssueTypesHandlerArgs) => Promise<GetIssueTypesResponse>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
@@ -211,4 +210,13 @@ export interface Fields {
 export interface ResponseError {
   errorMessages: string[] | null | undefined;
   errors: { [k: string]: string } | null | undefined;
+}
+export interface SimpleComment {
+  comment: string;
+  commentId: string;
+}
+export interface ExternalServiceCommentResponse {
+  commentId: string;
+  pushedDate: string;
+  externalCommentId?: string;
 }

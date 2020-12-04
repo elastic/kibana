@@ -17,7 +17,6 @@ import {
   ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ExternalServiceCommentResponse } from '../case/types';
 import { Logger } from '../../../../../../src/core/server';
 
 export type ServiceNowPublicConfigurationType = TypeOf<
@@ -116,4 +115,10 @@ export interface ExternalServiceApi {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
+}
+
+export interface ExternalServiceCommentResponse {
+  commentId: string;
+  pushedDate: string;
+  externalCommentId?: string;
 }

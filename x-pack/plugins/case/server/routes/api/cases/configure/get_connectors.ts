@@ -17,7 +17,7 @@ import {
   RESILIENT_ACTION_TYPE_ID,
 } from '../../../../../common/constants';
 
-const isCaseOwned = (action: FindActionResult): boolean =>
+const isConnectorSupported = (action: FindActionResult): boolean =>
   [SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
     action.actionTypeId
   );
@@ -40,7 +40,7 @@ export function initCaseConfigureGetActionConnector({ router }: RouteDeps) {
           throw Boom.notFound('Action client have not been found');
         }
 
-        const results = (await actionsClient.getAll()).filter(isCaseOwned);
+        const results = (await actionsClient.getAll()).filter(isConnectorSupported);
         return response.ok({ body: results });
       } catch (error) {
         return response.customError(wrapError(error));
