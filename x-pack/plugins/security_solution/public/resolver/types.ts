@@ -747,7 +747,7 @@ export interface DataAccessLayer {
   }) => Promise<SafeResolverEvent | null>;
 
   /**
-   * Fetch a ResolverTree for a given id
+   * Fetch a resolver graph for a given id.
    */
   resolverTree({
     dataId,
@@ -937,8 +937,6 @@ export type PanelViewAndParameters =
       panelParameters: {
         /**
          * The nodeID (e.g. `process.entity_id`) for the node related to the event being shown.
-         * @warning - All these have to be strings since they are used for the url parameters. So you can get the string 'undefined'
-         * rather than just a regular undefined value
          */
         nodeID: string;
         /**

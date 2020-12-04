@@ -216,12 +216,8 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
     // If the camera has not moved it will return a node with ID 2kt059pl3i, this is the first node with the state
     // loading that is outside of the initial loaded view
     const getLoadingNodeInList = async () => {
-      return (
-        await graphSimulator.resolveWrapper(() =>
-          graphSimulator.testSubject('resolver:node-list:node-link')
-        )
-      )
-        ?.findWhere((wrapper) => wrapper.prop('data-test-node-state') === 'loading')
+      return (await graphSimulator.resolve('resolver:node-list:node-link'))
+        ?.findWhere((wrapper) => wrapper.text().toLowerCase().includes('loading'))
         ?.first();
     };
 
@@ -235,14 +231,27 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
     graphSimulator.runAnimationFramesTimeFromNow(1000);
   };
 
-  const firstLoadingNodeInList: (graphSimulator: Simulator) => Promise<ReactWrapper | undefined> = (
+  const firstLoadingNodeInListID = '2kt059pl3i';
+
+  const identifiedLoadingNodeInGraph: (
     graphSimulator: Simulator
-  ) =>
+  ) => Promise<ReactWrapper | undefined> = async (graphSimulator: Simulator) =>
     graphSimulator.resolveWrapper(() =>
       graphSimulator.selectedProcessNode(firstLoadingNodeInListID)
     );
 
-  const firstLoadingNodeInListID = '2kt059pl3i';
+  const identifiedLoadingNodeInGraphState: (
+    graphSimulator: Simulator
+  ) => Promise<string | undefined> = async (graphSimulator: Simulator) =>
+    (
+      await graphSimulator.resolveWrapper(() =>
+        graphSimulator.selectedProcessNode(firstLoadingNodeInListID)
+      )
+    )
+      ?.find('[data-test-subj="resolver:node:description"]')
+      .first()
+      .text();
+
   let generatorDAL: DataAccessLayer;
 
   beforeEach(async () => {
@@ -300,12 +309,10 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
 
       await expect(
         simulator.map(async () => ({
-          nodeState: (await firstLoadingNodeInList(simulator))?.prop(
-            'data-test-resolver-node-state'
-          ),
+          nodeState: await identifiedLoadingNodeInGraphState(simulator),
         }))
       ).toYieldEqualTo({
-        nodeState: 'error',
+        nodeState: 'Error Process',
       });
     });
 
@@ -313,7 +320,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
       beforeEach(async () => {
         throwError = true;
         // ensure that the node is in view
-        await firstLoadingNodeInList(simulator);
+        await identifiedLoadingNodeInGraph(simulator);
         // at this point the node's state should be error
 
         // don't throw an error now, so we can test that the reload button actually loads the data correctly
@@ -331,12 +338,10 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
         // we should receive the node's data now so we'll know that it is terminated
         await expect(
           simulator.map(async () => ({
-            nodeState: (await firstLoadingNodeInList(simulator))?.prop(
-              'data-test-resolver-node-state'
-            ),
+            nodeState: await identifiedLoadingNodeInGraphState(simulator),
           }))
         ).toYieldEqualTo({
-          nodeState: 'terminated',
+          nodeState: 'Terminated Process',
         });
       });
     });
@@ -357,19 +362,17 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
     it('should load the node data for the process and mark the process node as terminated in the graph', async () => {
       await expect(
         simulator.map(async () => ({
-          nodeState: (await firstLoadingNodeInList(simulator))?.prop(
-            'data-test-resolver-node-state'
-          ),
+          nodeState: await identifiedLoadingNodeInGraphState(simulator),
         }))
       ).toYieldEqualTo({
-        nodeState: 'terminated',
+        nodeState: 'Terminated Process',
       });
     });
 
     describe('when finishing the navigation to the node that is not loaded and navigating back to the process list in the panel', () => {
       beforeEach(async () => {
         // make sure the node is in view
-        await firstLoadingNodeInList(simulator);
+        await identifiedLoadingNodeInGraph(simulator);
 
         const breadcrumbs = await simulator.resolve(
           'resolver:node-detail:breadcrumbs:node-list-link'
@@ -383,22 +386,26 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
 
       it('should load the node data and mark it as terminated in the node list', async () => {
         const getNodeInPanelList = async () => {
+          // grab the node in the list that has the ID that we're looking for
           return (
-            await simulator.resolveWrapper(() =>
-              simulator.testSubject('resolver:node-list:node-link')
-            )
-          )
-            ?.findWhere((wrapper) => wrapper.prop('data-test-node-id') === firstLoadingNodeInListID)
-            ?.first();
+            (await simulator.resolve('resolver:node-list:node-link'))
+              ?.findWhere(
+                (wrapper) => wrapper.prop('data-test-node-id') === firstLoadingNodeInListID
+              )
+              ?.first()
+              // grab the description tag so we can determine the state of the process
+              .find('desc')
+              .first()
+          );
         };
 
         // check that the panel displays the node as terminated as well
         await expect(
           simulator.map(async () => ({
-            nodeState: (await getNodeInPanelList())?.prop('data-test-node-state'),
+            nodeState: (await getNodeInPanelList())?.text(),
           }))
         ).toYieldEqualTo({
-          nodeState: 'terminated',
+          nodeState: 'Terminated Process',
         });
       });
     });
