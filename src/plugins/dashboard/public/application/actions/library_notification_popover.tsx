@@ -50,7 +50,6 @@ export function LibraryNotificationPopover({
 
   return (
     <EuiPopover
-      ownFocus
       button={
         <EuiButtonIcon
           color="text"
