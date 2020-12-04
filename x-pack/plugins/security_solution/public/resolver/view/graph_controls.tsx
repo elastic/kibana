@@ -32,15 +32,10 @@ import { CubeForProcess } from './panels/cube_for_process';
 import { GeneratedText } from './generated_text';
 
 interface StyledGraphControlProps {
-  backgroundColor: string;
-  iconColor: string;
-  borderColor: string;
+  $backgroundColor: string;
+  $iconColor: string;
+  $borderColor: string;
 }
-
-const StyledGraphControlsWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-`;
 
 const StyledGraphControlsColumn = styled.div`
   display: flex;
@@ -57,13 +52,14 @@ const StyledEuiDescriptionListTitle = styled(EuiDescriptionListTitle)`
 `;
 
 const StyledEuiDescriptionListDescription = styled(EuiDescriptionListDescription)`
-  max-width: 75%;
+  min-width: 75%;
+  width: 75%;
 `;
 
 const StyledEuiButtonIcon = styled(EuiButtonIcon)<StyledGraphControlProps>`
-  background-color: ${(props) => props.backgroundColor};
-  color: ${(props) => props.iconColor};
-  border-color: ${(props) => props.borderColor};
+  background-color: ${(props) => props.$backgroundColor};
+  color: ${(props) => props.$iconColor};
+  border-color: ${(props) => props.$borderColor};
   border-width: 1px;
   border-style: solid;
   border-radius: 4px;
@@ -76,11 +72,13 @@ const StyledEuiButtonIcon = styled(EuiButtonIcon)<StyledGraphControlProps>`
 `;
 
 const StyledGraphControls = styled.div<Partial<StyledGraphControlProps>>`
+  display: flex;
+  flex-direction: row;
   position: absolute;
   top: 5px;
   right: 5px;
   background-color: transparent;
-  color: ${(props) => props.iconColor};
+  color: ${(props) => props.$iconColor};
 
   .zoom-controls {
     display: flex;
@@ -181,112 +179,110 @@ export const GraphControls = React.memo(
     return (
       <StyledGraphControls
         className={className}
-        iconColor={colorMap.graphControls}
+        $iconColor={colorMap.graphControls}
         data-test-subj="resolver:graph-controls"
       >
-        <StyledGraphControlsWrapper>
-          <StyledGraphControlsColumn>
-            <SchemaInformation
-              closePopover={closePopover}
-              isOpen={activePopover === 'schemaInfo'}
-              setActivePopover={setActivePopover}
-            />
-            <CubeLegend
-              closePopover={closePopover}
-              isOpen={activePopover === 'nodesLegend'}
-              setActivePopover={setActivePopover}
-            />
-          </StyledGraphControlsColumn>
-          <StyledGraphControlsColumn>
-            <EuiPanel className="panning-controls" paddingSize="none" hasShadow>
-              <div className="panning-controls-top">
-                <button
-                  className="north-button"
-                  data-test-subj="resolver:graph-controls:north-button"
-                  title={i18n.translate('xpack.securitySolution.resolver.graphControls.north', {
-                    defaultMessage: 'North',
-                  })}
-                  onClick={handleNorth}
-                >
-                  <EuiIcon type="arrowUp" />
-                </button>
-              </div>
-              <div className="panning-controls-middle">
-                <button
-                  className="west-button"
-                  data-test-subj="resolver:graph-controls:west-button"
-                  title={i18n.translate('xpack.securitySolution.resolver.graphControls.west', {
-                    defaultMessage: 'West',
-                  })}
-                  onClick={handleWest}
-                >
-                  <EuiIcon type="arrowLeft" />
-                </button>
-                <button
-                  className="center-button"
-                  data-test-subj="resolver:graph-controls:center-button"
-                  title={i18n.translate('xpack.securitySolution.resolver.graphControls.center', {
-                    defaultMessage: 'Center',
-                  })}
-                  onClick={handleCenterClick}
-                >
-                  <EuiIcon type="bullseye" />
-                </button>
-                <button
-                  className="east-button"
-                  data-test-subj="resolver:graph-controls:east-button"
-                  title={i18n.translate('xpack.securitySolution.resolver.graphControls.east', {
-                    defaultMessage: 'East',
-                  })}
-                  onClick={handleEast}
-                >
-                  <EuiIcon type="arrowRight" />
-                </button>
-              </div>
-              <div className="panning-controls-bottom">
-                <button
-                  className="south-button"
-                  data-test-subj="resolver:graph-controls:south-button"
-                  title={i18n.translate('xpack.securitySolution.resolver.graphControls.south', {
-                    defaultMessage: 'South',
-                  })}
-                  onClick={handleSouth}
-                >
-                  <EuiIcon type="arrowDown" />
-                </button>
-              </div>
-            </EuiPanel>
-            <EuiPanel className="zoom-controls" paddingSize="none" hasShadow>
+        <StyledGraphControlsColumn>
+          <SchemaInformation
+            closePopover={closePopover}
+            isOpen={activePopover === 'schemaInfo'}
+            setActivePopover={setActivePopover}
+          />
+          <CubeLegend
+            closePopover={closePopover}
+            isOpen={activePopover === 'nodesLegend'}
+            setActivePopover={setActivePopover}
+          />
+        </StyledGraphControlsColumn>
+        <StyledGraphControlsColumn>
+          <EuiPanel className="panning-controls" paddingSize="none" hasShadow>
+            <div className="panning-controls-top">
               <button
-                title={i18n.translate('xpack.securitySolution.resolver.graphControls.zoomIn', {
-                  defaultMessage: 'Zoom In',
+                className="north-button"
+                data-test-subj="resolver:graph-controls:north-button"
+                title={i18n.translate('xpack.securitySolution.resolver.graphControls.north', {
+                  defaultMessage: 'North',
                 })}
-                data-test-subj="resolver:graph-controls:zoom-in"
-                onClick={handleZoomInClick}
+                onClick={handleNorth}
               >
-                <EuiIcon type="plusInCircle" />
+                <EuiIcon type="arrowUp" />
               </button>
-              <EuiRange
-                className="zoom-slider"
-                data-test-subj="resolver:graph-controls:zoom-slider"
-                min={0}
-                max={1}
-                step={0.01}
-                value={scalingFactor}
-                onChange={handleZoomAmountChange}
-              />
+            </div>
+            <div className="panning-controls-middle">
               <button
-                title={i18n.translate('xpack.securitySolution.resolver.graphControls.zoomOut', {
-                  defaultMessage: 'Zoom Out',
+                className="west-button"
+                data-test-subj="resolver:graph-controls:west-button"
+                title={i18n.translate('xpack.securitySolution.resolver.graphControls.west', {
+                  defaultMessage: 'West',
                 })}
-                data-test-subj="resolver:graph-controls:zoom-out"
-                onClick={handleZoomOutClick}
+                onClick={handleWest}
               >
-                <EuiIcon type="minusInCircle" />
+                <EuiIcon type="arrowLeft" />
               </button>
-            </EuiPanel>
-          </StyledGraphControlsColumn>
-        </StyledGraphControlsWrapper>
+              <button
+                className="center-button"
+                data-test-subj="resolver:graph-controls:center-button"
+                title={i18n.translate('xpack.securitySolution.resolver.graphControls.center', {
+                  defaultMessage: 'Center',
+                })}
+                onClick={handleCenterClick}
+              >
+                <EuiIcon type="bullseye" />
+              </button>
+              <button
+                className="east-button"
+                data-test-subj="resolver:graph-controls:east-button"
+                title={i18n.translate('xpack.securitySolution.resolver.graphControls.east', {
+                  defaultMessage: 'East',
+                })}
+                onClick={handleEast}
+              >
+                <EuiIcon type="arrowRight" />
+              </button>
+            </div>
+            <div className="panning-controls-bottom">
+              <button
+                className="south-button"
+                data-test-subj="resolver:graph-controls:south-button"
+                title={i18n.translate('xpack.securitySolution.resolver.graphControls.south', {
+                  defaultMessage: 'South',
+                })}
+                onClick={handleSouth}
+              >
+                <EuiIcon type="arrowDown" />
+              </button>
+            </div>
+          </EuiPanel>
+          <EuiPanel className="zoom-controls" paddingSize="none" hasShadow>
+            <button
+              title={i18n.translate('xpack.securitySolution.resolver.graphControls.zoomIn', {
+                defaultMessage: 'Zoom In',
+              })}
+              data-test-subj="resolver:graph-controls:zoom-in"
+              onClick={handleZoomInClick}
+            >
+              <EuiIcon type="plusInCircle" />
+            </button>
+            <EuiRange
+              className="zoom-slider"
+              data-test-subj="resolver:graph-controls:zoom-slider"
+              min={0}
+              max={1}
+              step={0.01}
+              value={scalingFactor}
+              onChange={handleZoomAmountChange}
+            />
+            <button
+              title={i18n.translate('xpack.securitySolution.resolver.graphControls.zoomOut', {
+                defaultMessage: 'Zoom Out',
+              })}
+              data-test-subj="resolver:graph-controls:zoom-out"
+              onClick={handleZoomOutClick}
+            >
+              <EuiIcon type="minusInCircle" />
+            </button>
+          </EuiPanel>
+        </StyledGraphControlsColumn>
       </StyledGraphControls>
     );
   }
@@ -331,9 +327,9 @@ const SchemaInformation = ({
           title={schemaInfoButtonTitle}
           aria-label={schemaInfoButtonTitle}
           iconType="iInCircle"
-          backgroundColor={colorMap.graphControlsBackground}
-          iconColor={colorMap.graphControls}
-          borderColor={colorMap.graphControlsBorderColor}
+          $backgroundColor={colorMap.graphControlsBackground}
+          $iconColor={colorMap.graphControls}
+          $borderColor={colorMap.graphControlsBorderColor}
         />
       }
       isOpen={isOpen}
@@ -439,9 +435,9 @@ const CubeLegend = ({
           title={nodesLegendButtonTitle}
           aria-label={nodesLegendButtonTitle}
           iconType="node"
-          backgroundColor={colorMap.graphControlsBackground}
-          iconColor={colorMap.graphControls}
-          borderColor={colorMap.graphControlsBorderColor}
+          $backgroundColor={colorMap.graphControlsBackground}
+          $iconColor={colorMap.graphControls}
+          $borderColor={colorMap.graphControlsBorderColor}
         />
       }
       onScroll={closePopover}
