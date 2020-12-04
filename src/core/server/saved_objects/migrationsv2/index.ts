@@ -27,7 +27,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { cloneDeep } from 'lodash';
 import * as Actions from './actions';
 import { IndexMapping } from '../mappings';
-import { Logger } from '../../logging';
+import { Logger, LogMeta } from '../../logging';
 import { SavedObjectsMigrationVersion } from '../types';
 import { AliasAction } from './actions';
 import { ControlState, stateActionMachine } from './state_action_machine';
@@ -411,8 +411,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             stateP.targetMappings,
             indices[source].mappings
           ),
-          versionIndexReadyActions: Option.some([
-            { remove: { index: source, alias: currentAlias(stateP) /* must_exist: true*/ } }, // TODO: blocked by https://github.com/elastic/elasticsearch/issues/62642
+          versionIndexReadyActions: Option.some<AliasAction[]>([
+            { remove: { index: source, alias: currentAlias(stateP), must_exist: true } },
             { add: { index: target, alias: currentAlias(stateP) } },
             { add: { index: target, alias: versionAlias(stateP) } },
           ]),
@@ -458,7 +458,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
               },
             },
           ],
-          versionIndexReadyActions: Option.some([
+          versionIndexReadyActions: Option.some<AliasAction[]>([
             {
               remove: {
                 index: legacyReindexTarget,
@@ -633,7 +633,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     return stateP;
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
     const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isRight(res) && res.right === 'update_by_query_succeded') {
+    if (Either.isRight(res) && res.right === 'update_by_query_succeeded') {
       return {
         ...stateP,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH',
@@ -674,7 +674,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     return stateP;
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
     const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isRight(res) && res.right === 'bulk_index_succeded') {
+    if (Either.isRight(res) && res.right === 'bulk_index_succeeded') {
       return {
         ...stateP,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH',
@@ -691,7 +691,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       controlState: 'MARK_VERSION_INDEX_READY',
     };
   } else if (stateP.controlState === 'MARK_VERSION_INDEX_READY') {
-    // TODO Handle "required alias [.kibana] does not exist" errors blocked by https://github.com/elastic/elasticsearch/issues/62642
     return { ...stateP, controlState: 'DONE' };
   } else if (stateP.controlState === 'DONE' || stateP.controlState === 'FATAL') {
     return stateP;
@@ -764,8 +763,9 @@ export const next = (
     return null;
   } else {
     // Otherwise return the delayed action
-    // TS infers (state: never) => ... here because state is inferred to be the
-    // intersection of all states instead of the union.
+    // We use an explicit cast as otherwise TS infers `(state: never) => ...`
+    // here because state is inferred to be the intersection of all states
+    // instead of the union.
     const nextAction = map[state.controlState] as (
       state: State
     ) => ReturnType<typeof map[AllActionStates]>;
@@ -810,6 +810,8 @@ export async function migrationStateMachine({
     },
   };
 
+  const indexLogger = logger.get(indexPrefix.slice(1));
+
   const initialState: State = {
     indexPrefix,
     controlState: 'INIT',
@@ -824,19 +826,18 @@ export async function migrationStateMachine({
 
   const logStateTransition = (oldState: State, newState: State) => {
     if (newState.logs.length > oldState.logs.length) {
-      newState.logs.slice(oldState.logs.length).forEach((log) => logger[log.level](log.message));
+      newState.logs
+        .slice(oldState.logs.length)
+        .forEach((log) => indexLogger[log.level](log.message));
     }
 
     // @ts-expect-error
     const { logs, outdatedDocuments, ...logState } = newState;
-    logger.info(
-      `${oldState.controlState} -> ${newState.controlState}:${newState.indexPrefix}` +
-        JSON.stringify(logState)
-    );
+    indexLogger.info(`${oldState.controlState} -> ${newState.controlState}: `, logState);
   };
 
   const logActionResponse = (state: State, res: unknown) => {
-    logger.info(`${state.controlState} RESPONSE:${state.indexPrefix}` + JSON.stringify(res));
+    indexLogger.info(`${state.controlState} RESPONSE`, res as LogMeta);
   };
 
   return await stateActionMachine<State>(

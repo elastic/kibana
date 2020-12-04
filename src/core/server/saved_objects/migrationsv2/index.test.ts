@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import {
@@ -380,7 +379,7 @@ describe('migrations v2', () => {
         };
         test('LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_DELETE if action succeeds', () => {
           const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.right(
-            'reindex_succeded'
+            'reindex_succeeded'
           );
           const newState = model(legacyReindexWaitForTaskState, res);
           expect(newState.controlState).toEqual('LEGACY_DELETE');
@@ -433,7 +432,7 @@ describe('migrations v2', () => {
           legacy: 'legacy_index_name',
         };
         test('LEGACY_DELETE -> SET_SOURCE_WRITE_BLOCK if action succeeds', () => {
-          const res: ResponseType<'LEGACY_DELETE'> = Either.right('succeded');
+          const res: ResponseType<'LEGACY_DELETE'> = Either.right('update_aliases_succeeded');
           const newState = model(legacyDeleteState, res);
           expect(newState.controlState).toEqual('SET_SOURCE_WRITE_BLOCK');
           expect(newState.retryCount).toEqual(0);
@@ -562,7 +561,7 @@ describe('migrations v2', () => {
         };
         test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> OUTDATED_DOCUMENTS_SEARCH', () => {
           const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.right(
-            'update_by_query_succeded'
+            'update_by_query_succeeded'
           );
           const newState = model(
             updateTargetMappingsWaitForTaskState,
@@ -628,7 +627,7 @@ describe('migrations v2', () => {
         };
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH if action succeeds', () => {
           const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right(
-            'bulk_index_succeded'
+            'bulk_index_succeeded'
           );
           const newState = model(outdatedDocumentsTransformState, res);
           expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');

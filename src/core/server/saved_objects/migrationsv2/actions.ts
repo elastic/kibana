@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable no-console */
-
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
@@ -29,16 +27,6 @@ import { flow } from 'fp-ts/lib/function';
 import { ElasticsearchClient } from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '../serialization';
-
-export type AllResponses =
-  | CloneIndexResponse
-  | SetIndexWriteBlockResponse
-  | FetchIndexResponse
-  | ReindexResponse
-  | WaitForTaskResponse
-  | DeleteIndexResponse
-  | UpdateByQueryResponse
-  | UpdateAndPickupMappingsResponse;
 
 const retryResponseStatuses = [
   503, // ServiceUnavailable
@@ -54,7 +42,7 @@ export interface RetryableEsClientError {
   error?: Error;
 }
 
-const catchRetryableEsClientErrors = (
+export const catchRetryableEsClientErrors = (
   e: EsErrors.ElasticsearchClientError
 ): Either.Either<RetryableEsClientError, never> => {
   if (
@@ -202,8 +190,20 @@ export const cloneIndex = (
           wait_for_active_shards: 'all',
           body: {
             settings: {
-              auto_expand_replicas: '0-1',
+              // The source we're cloning from will have a write block set, so
+              // we need to remove it to allow writes to our newly cloned index
               'index.blocks.write': false,
+              // ES rule of thumb: shards should be several GB to 10's of GB, so
+              // Kibana is unlikely to cross that limit.
+              number_of_shards: 1,
+              // Allocate 1 replica if there are enough data nodes
+              auto_expand_replicas: '0-1',
+              // Set an explicit refresh interval so that we don't inherit the
+              // value from incorrectly configured index templates (not required
+              // after we adopt system indices)
+              refresh_interval: '1s',
+              // Bump priority so that recovery happens before newer indices
+              'index.priority': 10,
             },
           },
           timeout: '60s',
@@ -262,7 +262,7 @@ export const cloneIndex = (
   );
 };
 
-export interface WaitForTaskResponse {
+interface WaitForTaskResponse {
   error: Option.Option<{ type: string; reason: string; index: string }>;
   completed: boolean;
   failures: Option.Option<any[]>;
@@ -278,7 +278,7 @@ export interface WaitForTaskResponse {
  * @param taskId
  * @param timeout
  */
-export const waitForTask = (
+const waitForTask = (
   client: ElasticsearchClient,
   taskId: string,
   timeout: string
@@ -296,7 +296,6 @@ export const waitForTask = (
     })
     .then((res) => {
       const body = res.body;
-      console.log('\n' + JSON.stringify(res) + '\n');
       return Either.right({
         completed: body.completed,
         error: Option.fromNullable(body.error),
@@ -307,21 +306,6 @@ export const waitForTask = (
         description: body.task.description,
       });
     });
-};
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DeleteIndexResponse {}
-
-export const deleteIndex = (
-  client: ElasticsearchClient,
-  index: string
-): TaskEither.TaskEither<RetryableEsClientError, DeleteIndexResponse> => () => {
-  return client.indices
-    .delete({ index, timeout: '60s' })
-    .then(() => {
-      return Either.right({});
-    })
-    .catch(catchRetryableEsClientErrors);
 };
 
 export interface UpdateByQueryResponse {
@@ -383,9 +367,8 @@ export interface ReindexResponse {
 }
 
 /**
- * Reindex documents from the `sourceIndex` into the `targetIndex` and wait up
- * to 60 seconds for the operation to complete. Returns a task ID which can be
- * tracked for progress.
+ * Reindex documents from the `sourceIndex` into the `targetIndex`. Returns a
+ * task ID which can be tracked for progress.
  *
  * @remarks This action is idempotent allowing several Kibana instances to run
  * this in parralel. By using `op_type: 'create', conflicts: 'proceed'` there
@@ -446,7 +429,7 @@ export const waitForReindexTask = flow(
       | { type: 'index_not_found_exception'; index: string }
       | { type: 'target_index_had_write_block' }
       | RetryableEsClientError,
-      'reindex_succeded'
+      'reindex_succeeded'
     > => {
       const failureIsAWriteBlock = ({ type, reason }: { type: string; reason: string }) =>
         type === 'cluster_block_exception' &&
@@ -479,7 +462,7 @@ export const waitForReindexTask = flow(
           );
         }
       } else {
-        return TaskEither.right('reindex_succeded' as const);
+        return TaskEither.right('reindex_succeeded' as const);
       }
     }
   )
@@ -488,7 +471,7 @@ export const waitForReindexTask = flow(
 export const waitForUpdateByQeuryTask = flow(
   waitForTask,
   TaskEither.chain(
-    (res): TaskEither.TaskEither<RetryableEsClientError, 'update_by_query_succeded'> => {
+    (res): TaskEither.TaskEither<RetryableEsClientError, 'update_by_query_succeeded'> => {
       const failureIsSnapshotInProgress = ({ type }: { type: string }) =>
         type === 'snapshot_in_progress_exception';
       if (Option.isSome(res.failures)) {
@@ -508,7 +491,7 @@ export const waitForUpdateByQeuryTask = flow(
           'update_by_query failed with the following error:\n' + JSON.stringify(res.error.value)
         );
       } else {
-        return TaskEither.right('update_by_query_succeded' as const);
+        return TaskEither.right('update_by_query_succeeded' as const);
       }
     }
   )
@@ -516,7 +499,7 @@ export const waitForUpdateByQeuryTask = flow(
 
 export type AliasAction =
   | { remove_index: { index: string } }
-  | { remove: { index: string; alias: string /* must_exist: boolean*/ } }
+  | { remove: { index: string; alias: string; must_exist: boolean } }
   | { add: { index: string; alias: string } };
 
 /**
@@ -529,8 +512,9 @@ export const updateAliases = (
   aliasActions: AliasAction[]
 ): TaskEither.TaskEither<
   | { type: 'index_not_found_exception'; index: string }
+  | { type: 'alias_not_found_exception' }
   | { type: 'remove_index_not_a_concrete_index' },
-  'succeded'
+  'update_aliases_succeeded'
 > => () => {
   return client.indices
     .updateAliases({
@@ -539,20 +523,29 @@ export const updateAliases = (
       },
     })
     .then((res) => {
-      return Either.right('succeded' as const);
+      return Either.right('update_aliases_succeeded' as const);
     })
     .catch((err: EsErrors.ElasticsearchClientError) => {
-      console.log(JSON.stringify(err));
       if (err instanceof EsErrors.ResponseError) {
-        if (err.message === 'index_not_found_exception') {
-          return Either.left({ type: 'index_not_found_exception' as const, index: err.body.index });
+        if (err.body.error.type === 'index_not_found_exception') {
+          return Either.left({
+            type: 'index_not_found_exception' as const,
+            index: err.body.error.index,
+          });
         } else if (
-          err.message === 'illegal_argument_exception' &&
-          err.body.reason.match(
+          err.body.error.type === 'illegal_argument_exception' &&
+          err.body.error.reason.match(
             /The provided expression \[.+\] matches an alias, specify the corresponding concrete indices instead./
           )
         ) {
           return Either.left({ type: 'remove_index_not_a_concrete_index' });
+        } else if (
+          err.body.error.type === 'resource_not_found_exception' &&
+          err.body.error.reason.match(/required alias \[.+\] does not exist/)
+        ) {
+          return Either.left({
+            type: 'alias_not_found_exception',
+          });
         }
       }
       throw err;
@@ -599,7 +592,6 @@ export const createIndex = (
           body: {
             mappings,
             settings: {
-              'index.blocks.write': true,
               // ES rule of thumb: shards should be several GB to 10's of GB, so
               // Kibana is unlikely to cross that limit.
               number_of_shards: 1,
@@ -609,6 +601,8 @@ export const createIndex = (
               // value from incorrectly configured index templates (not required
               // after we adopt system indices)
               refresh_interval: '1s',
+              // Bump priority so that recovery happens before newer indices
+              'index.priority': 10,
             },
           },
         },
@@ -762,20 +756,29 @@ export const bulkIndex = (
   client: ElasticsearchClient,
   index: string,
   docs: SavedObjectsRawDoc[]
-): TaskEither.TaskEither<RetryableEsClientError, 'bulk_index_succeded'> => () => {
+): TaskEither.TaskEither<RetryableEsClientError, 'bulk_index_succeeded'> => () => {
   return client
     .bulk<{
       took: number;
       errors: boolean;
       items: [
         {
-          index: { _id: string; status: number } & {
-            // | { result: string; _shards: ShardsResponse } |
-            error: { type: string; reason: string }; // the filter_path should restrict responses
+          index: {
+            _id: string;
+            status: number;
+            // the filter_path ensures that only items with errors are returned
+            error: { type: string; reason: string };
           };
         }
       ];
     }>({
+      // Because we only add aliases in the MARK_VERSION_INDEX_READY step we
+      // can't bulkIndex to an alias with require_alias=true. This means if
+      // users tamper during this operation (delete indices or restore a
+      // snapshot), we could end up auto-creating an index without the correct
+      // mappings. Such tampering could lead to many other problems and is
+      // probably unlikely so for now we'll accept this risk and wait till
+      // system indices puts in place a hard control.
       require_alias: false,
       wait_for_active_shards: 'all',
       refresh: 'wait_for',
@@ -801,13 +804,13 @@ export const bulkIndex = (
     .then((res) => {
       // TODO follow-up with es-distrib team: update operations can cause
       // version conflicts even when no seq_no is specified, can we be sure
-      // that a bulk index version conflict can _only_ be caused by another
-      // Kibana writing to the index?
+      // that a bulk index version conflict can _only_ be caused because
+      // another Kibana has already successfully migrated this document?
       const errors = (res.body.items ?? []).filter(
         (item) => item.index.error.type !== 'version_conflict_engine_exception'
       );
       if (errors.length === 0) {
-        return Either.right('bulk_index_succeded' as const);
+        return Either.right('bulk_index_succeeded' as const);
       } else {
         throw new Error(JSON.stringify(errors));
       }
