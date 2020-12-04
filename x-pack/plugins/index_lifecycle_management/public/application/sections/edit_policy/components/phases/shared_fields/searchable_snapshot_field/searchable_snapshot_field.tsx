@@ -242,17 +242,16 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
     if (phase === 'hot' && isUsingSearchableSnapshotInHotPhase) {
       infoCallout = (
         <EuiCallOut
-          data-test-subj="searchableSnapshotFieldsDisabledCallout"
+          size="s"
           title={i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutTitle',
-            { defaultMessage: 'Some actions have been disabled' }
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
+            {
+              defaultMessage:
+                'Force merge, shrink, freeze and cold phase searchable snapshots are not allowed when searchable snapshots are enabled in the hot phase.',
+            }
           )}
-        >
-          {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody', {
-            defaultMessage:
-              'Force merge, shrink, freeze and cold phase searchable snapshots are not allowed when searchable snapshots are enabled in the hot phase.',
-          })}
-        </EuiCallOut>
+          data-test-subj="searchableSnapshotFieldsDisabledCallout"
+        />
       );
     } else if (isDisabledDueToLicense) {
       infoCallout = (
