@@ -201,6 +201,36 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(index.migration_task_id).to.be(null);
       });
 
+      it('specifying the signals alias itself is a no-op', async () => {
+        const signalsAlias = `${DEFAULT_SIGNALS_INDEX}-default`;
+
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ index: [signalsAlias] })
+          .expect(200);
+
+        expect(body.indices).length(1);
+        const [index] = body.indices;
+        expect(index.index).to.eql(signalsAlias);
+        expect(index.migration_token).to.be(null);
+        expect(index.migration_index).to.be(null);
+        expect(index.migration_task_id).to.be(null);
+      });
+
+      it('rejects if an unknown index is specified', async () => {
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ index: ['random-index', outDatedSignalsIndexName] })
+          .expect(404);
+
+        expect(body).to.eql({
+          message: 'index_not_found_exception: no such index [random-index]',
+          status_code: 404,
+        });
+      });
+
       it('rejects a duplicated request as the destination index already exists', async () => {
         await supertest
           .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)

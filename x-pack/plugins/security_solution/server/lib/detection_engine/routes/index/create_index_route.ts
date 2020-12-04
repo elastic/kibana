@@ -75,7 +75,7 @@ export const createDetectionIndex = async (
   if (!policyExists) {
     await setPolicy(callCluster, index, signalsPolicy);
   }
-  if (await templateNeedsUpdate(callCluster, index)) {
+  if (await templateNeedsUpdate({ alias: index, esClient })) {
     await setTemplate(callCluster, index, getSignalsTemplate(index));
   }
   const indexExists = await getIndexExists(callCluster, index);

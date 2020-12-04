@@ -10,7 +10,7 @@ import { createSignalsMigrationSchema } from '../../../../../common/detection_en
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { migrateSignals } from '../../migrations/migrate_signals';
 import { buildSiemResponse, transformError } from '../utils';
-import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
+import { getTemplateVersion } from '../index/check_template_version';
 import { getMigrationStatus } from '../../migrations/get_migration_status';
 import {
   encodeMigrationToken,
@@ -35,26 +35,29 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const indices = request.body.index;
 
-      // TODO permissions check
       try {
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
+        const currentVersion = await getTemplateVersion({
+          alias: appClient.getSignalsIndex(),
+          esClient,
+        });
         const migrationStatuses = await getMigrationStatus({ esClient, index: indices });
 
         const migrationResults = await Promise.all(
           indices.map(async (index) => {
             const status = migrationStatuses.find(({ name }) => name === index);
             if (
-              indexNeedsMigration({ status, version: SIGNALS_TEMPLATE_VERSION }) ||
-              signalsNeedMigration({ status, version: SIGNALS_TEMPLATE_VERSION })
+              indexNeedsMigration({ status, version: currentVersion }) ||
+              signalsNeedMigration({ status, version: currentVersion })
             ) {
               const migrationDetails = await migrateSignals({
                 esClient,
                 index,
-                version: SIGNALS_TEMPLATE_VERSION,
+                version: currentVersion,
               });
               const migrationToken = encodeMigrationToken(migrationDetails);
 
