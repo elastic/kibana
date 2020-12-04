@@ -276,7 +276,7 @@ export function updateLayerOrder(newLayerOrder: number[]) {
   };
 }
 
-export function updateMetricsProp(layerId: string, value: unknown) {
+function updateMetricsProp(layerId: string, value: unknown) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -447,7 +447,7 @@ function removeLayerFromLayerList(layerId: string) {
   };
 }
 
-export function updateStyleProperties(layerId: string, previousFields: IField[]) {
+function updateStyleProperties(layerId: string, previousFields: IField[]) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
