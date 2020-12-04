@@ -86,7 +86,7 @@ carefully or contact support before editing these values.`;
 export const AdvancedPolicyForms = React.memo(() => {
   return (
     <>
-      <EuiCallOut title="Proceed with caution!" color="warning" iconType="help">
+      <EuiCallOut title="Proceed with caution!" color="warning" iconType="alert">
         <p>{warningMessage}</p>
       </EuiCallOut>
       <EuiSpacer />
