@@ -83,7 +83,7 @@ export const config = {
       ),
       xsrf: schema.object({
         disableProtection: schema.boolean({ defaultValue: false }),
-        whitelist: schema.arrayOf(
+        allowlist: schema.arrayOf(
           schema.string({ validate: match(/^\//, 'must start with a slash') }),
           { defaultValue: [] }
         ),
@@ -144,7 +144,7 @@ export class HttpConfig {
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
   public csp: ICspConfig;
   public externalUrl: IExternalUrlConfig;
-  public xsrf: { disableProtection: boolean; whitelist: string[] };
+  public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
 
   /**
