@@ -295,11 +295,6 @@ export class VectorStyle implements IVectorStyle {
       }
     });
 
-    // return {
-    //   hasChanges,
-    //   nextStyleDescriptor: VectorStyle.createDescriptor(updatedProperties, this.isTimeAware()),
-    // };
-
     return this._deleteFieldsFromDescriptorAndUpdateStyling(
       nextFields,
       updatedProperties,
