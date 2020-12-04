@@ -10044,11 +10044,16 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
   },
 ];
 
+/**
+ * A full object of Mitre Attack Threat data that is taken directly from the `mitre_tactics_techniques.ts` file
+ *
+ * Is built alongside and sampled from the data in the file so to always be valid with the most up to date MITRE ATT&CK data
+ */
 export const mockThreatData = {
   tactic: {
     name: 'Privilege Escalation',
-    id: 'TA0009',
-    reference: 'https://attack.mitre.org/tactics/TA0009',
+    id: 'TA0004',
+    reference: 'https://attack.mitre.org/tactics/TA0004',
   },
   technique: {
     name: 'Event Triggered Execution',

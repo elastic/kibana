@@ -84,7 +84,7 @@ const buildMockThreatData = (tactics, techniques, subtechniques) => {
   const subtechnique = subtechniques[0];
   const technique = techniques.find((technique) => technique.id === subtechnique.techniqueId);
   const tactic = tactics.find(
-    (tactic) => (tactic.name = startCase(camelCase(subtechnique.tactics[0])))
+    (tactic) => tactic.name === startCase(camelCase(technique.tactics[0]))
   );
 
   return {
@@ -190,6 +190,11 @@ async function main() {
               .replace(/}"/g, '}')
               .replace(/"{/g, '{')};
 
+          /**
+           * A full object of Mitre Attack Threat data that is taken directly from the \`mitre_tactics_techniques.ts\` file
+           * 
+           * Is built alongside and sampled from the data in the file so to always be valid with the most up to date MITRE ATT&CK data
+           */
           export const mockThreatData = ${JSON.stringify(
             buildMockThreatData(tactics, techniques, subtechniques),
             null,
