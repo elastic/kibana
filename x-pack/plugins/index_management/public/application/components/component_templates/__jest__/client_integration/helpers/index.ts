@@ -9,7 +9,7 @@ import { setup as componentTemplateDetailsSetup } from './component_template_det
 
 export { nextTick, getRandomString, findTestSubject } from '@kbn/test/jest';
 
-export { setupEnvironment, appDependencies } from './setup_environment';
+export { setupEnvironment, componentTemplatesDependencies } from './setup_environment';
 
 export const pageHelpers = {
   componentTemplateList: { setup: componentTemplatesListSetup },

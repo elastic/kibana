@@ -251,11 +251,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         .map((field) => $(field).text());
     }
 
-    public async getSidebarWidth() {
-      const sidebar = await testSubjects.find('discover-sidebar');
-      return await sidebar.getAttribute('clientWidth');
-    }
-
     public async hasNoResults() {
       return await testSubjects.exists('discoverNoResults');
     }
@@ -284,6 +279,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickFieldListItemRemove(field: string) {
+      if (!(await testSubjects.exists('fieldList-selected'))) {
+        return;
+      }
       const selectedList = await testSubjects.find('fieldList-selected');
       if (await testSubjects.descendantExists(`field-${field}`, selectedList)) {
         await this.clickFieldListItemToggle(field);
