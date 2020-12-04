@@ -13,7 +13,7 @@ import { EngineDetails } from './types';
 
 interface EngineValues {
   dataLoading: boolean;
-  engine: EngineDetails | {};
+  engine: Partial<EngineDetails>;
   engineName: string;
   isMetaEngine: boolean;
   isSampleEngine: boolean;
