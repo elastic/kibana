@@ -161,10 +161,12 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
       const { transformId } = req.params;
       try {
-        const stats = ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats(
-          transformId !== undefined ? { transform_id: transformId } : undefined
-        );
-        return res.ok({ body: stats });
+        const {
+          body,
+        } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
+          transform_id: transformId,
+        });
+        return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
       }
