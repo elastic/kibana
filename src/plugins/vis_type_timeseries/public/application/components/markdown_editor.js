@@ -49,12 +49,12 @@ export class MarkdownEditor extends Component {
   }
 
   render() {
-    const { visData, model, dateFormat } = this.props;
+    const { visData, model, getConfig } = this.props;
 
     if (!visData) {
       return null;
     }
-
+    const dateFormat = getConfig('dateFormat');
     const series = _.get(visData, `${model.id}.series`, []);
     const variables = convertSeriesToVars(series, model, dateFormat, this.props.getConfig);
     const rows = [];
@@ -214,6 +214,6 @@ export class MarkdownEditor extends Component {
 MarkdownEditor.propTypes = {
   onChange: PropTypes.func,
   model: PropTypes.object,
-  dateFormat: PropTypes.string,
+  getConfig: PropTypes.func,
   visData: PropTypes.object,
 };
