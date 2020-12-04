@@ -37,9 +37,9 @@ import { createSessionRestorationDataProvider } from './lib/session_restoration'
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from './types';
 import {
   getDashboardTitle,
-  dashboard60Warning,
+  getDashboard60Warning,
   leaveConfirmStrings,
-  dashboardBreadcrumb,
+  getDashboardBreadcrumb,
 } from '../dashboard_strings';
 import {
   getInputSubscription,
@@ -197,7 +197,7 @@ export function DashboardApp({
             pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
           });
 
-          core.notifications.toasts.addWarning(dashboard60Warning);
+          core.notifications.toasts.addWarning(getDashboard60Warning());
         } else {
           // E.g. a corrupt or deleted dashboard
           core.notifications.toasts.addDanger(error.message);
@@ -497,16 +497,16 @@ export function DashboardApp({
     }
     chrome.setBreadcrumbs([
       {
-        text: dashboardBreadcrumb,
+        text: getDashboardBreadcrumb(),
         'data-test-subj': 'dashboardListingBreadcrumb',
         onClick: () => {
           if (state.dashboardStateManager?.getIsDirty()) {
             core.overlays
-              .openConfirm(leaveConfirmStrings.leaveSubtitle, {
-                confirmButtonText: leaveConfirmStrings.confirmButtonText,
-                cancelButtonText: leaveConfirmStrings.cancelButtonText,
+              .openConfirm(leaveConfirmStrings.getLeaveSubtitle(), {
+                confirmButtonText: leaveConfirmStrings.getConfirmButtonText(),
+                cancelButtonText: leaveConfirmStrings.getCancelButtonText(),
                 defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-                title: leaveConfirmStrings.leaveTitle,
+                title: leaveConfirmStrings.getLeaveTitle(),
               })
               .then((isConfirmed) => {
                 if (isConfirmed) {

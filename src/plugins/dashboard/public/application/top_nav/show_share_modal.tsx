@@ -57,19 +57,19 @@ export function ShowShareModal({
     const checkboxes = [
       {
         id: dashboardUrlParams.showTopMenu,
-        label: shareModalStrings.topMenuCheckbox(),
+        label: shareModalStrings.getTopMenuCheckbox(),
       },
       {
         id: dashboardUrlParams.showQueryInput,
-        label: shareModalStrings.queryCheckbox(),
+        label: shareModalStrings.getQueryCheckbox(),
       },
       {
         id: dashboardUrlParams.showTimeFilter,
-        label: shareModalStrings.timeFilterCheckbox(),
+        label: shareModalStrings.getTimeFilterCheckbox(),
       },
       {
         id: showFilterBarId,
-        label: shareModalStrings.filterBarCheckbox(),
+        label: shareModalStrings.getFilterBarCheckbox(),
       },
     ];
 
@@ -95,7 +95,7 @@ export function ShowShareModal({
         idToSelectedMap={urlParamsSelectedMap}
         onChange={handleChange}
         legend={{
-          children: shareModalStrings.checkboxLegend(),
+          children: shareModalStrings.getCheckboxLegend(),
         }}
         data-test-subj="embedUrlParamExtension"
       />

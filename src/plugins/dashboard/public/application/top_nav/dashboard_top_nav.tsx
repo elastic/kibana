@@ -167,11 +167,11 @@ export function DashboardTopNav({
       }
 
       core.overlays
-        .openConfirm(leaveConfirmStrings.discardSubtitle, {
-          confirmButtonText: leaveConfirmStrings.confirmButtonText,
-          cancelButtonText: leaveConfirmStrings.cancelButtonText,
+        .openConfirm(leaveConfirmStrings.getDiscardSubtitle(), {
+          confirmButtonText: leaveConfirmStrings.getConfirmButtonText(),
+          cancelButtonText: leaveConfirmStrings.getCancelButtonText(),
           defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-          title: leaveConfirmStrings.discardTitle,
+          title: leaveConfirmStrings.getDiscardTitle(),
         })
         .then((isConfirmed) => {
           if (isConfirmed) {

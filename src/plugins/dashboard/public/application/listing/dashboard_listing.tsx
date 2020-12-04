@@ -23,7 +23,7 @@ import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
 
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../types';
-import { dashboardBreadcrumb, dashboardListingTable } from '../../dashboard_strings';
+import { getDashboardBreadcrumb, dashboardListingTable } from '../../dashboard_strings';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
 
 import { syncQueryStateWithUrl } from '../../services/data';
@@ -61,7 +61,7 @@ export const DashboardListing = ({
   useEffect(() => {
     setBreadcrumbs([
       {
-        text: dashboardBreadcrumb,
+        text: getDashboardBreadcrumb(),
       },
     ]);
   }, [setBreadcrumbs]);
@@ -143,7 +143,12 @@ export const DashboardListing = ({
       : [];
   }, [savedObjectsTagging]);
 
-  const { entityName, tableCaption, tableListTitle, entityNamePlural } = dashboardListingTable;
+  const {
+    getEntityName,
+    getTableCaption,
+    getTableListTitle,
+    getEntityNamePlural,
+  } = dashboardListingTable;
   return (
     <TableListView
       createItem={hideWriteControls ? undefined : () => redirectTo({ destination: 'dashboard' })}
@@ -155,15 +160,15 @@ export const DashboardListing = ({
       headingId="dashboardListingHeading"
       findItems={fetchItems}
       rowHeader="title"
+      entityNamePlural={getEntityNamePlural()}
+      tableListTitle={getTableListTitle()}
+      tableCaption={getTableCaption()}
+      entityName={getEntityName()}
       {...{
-        entityNamePlural,
         noItemsFragment,
-        tableListTitle,
         searchFilters,
-        tableCaption,
         listingLimit,
         tableColumns,
-        entityName,
       }}
     />
   );
@@ -176,7 +181,7 @@ const getTableColumns = (
   return [
     {
       field: 'title',
-      name: dashboardListingTable.titleColumnName,
+      name: dashboardListingTable.getTitleColumnName(),
       sortable: true,
       render: (field: string, record: { id: string; title: string }) => (
         <EuiLink
@@ -189,7 +194,7 @@ const getTableColumns = (
     },
     {
       field: 'description',
-      name: dashboardListingTable.descriptionColumnName,
+      name: dashboardListingTable.getDescriptionColumnName(),
       render: (field: string, record: { description: string }) => <span>{record.description}</span>,
       sortable: true,
     },
