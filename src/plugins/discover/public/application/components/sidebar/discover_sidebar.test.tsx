@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { each, cloneDeep } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
@@ -26,35 +26,41 @@ import realHits from 'fixtures/real_hits.js';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
+import { DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 import { SavedObject } from '../../../../../../core/types';
+import { getDefaultFieldFilter } from './lib/field_filter';
+import { DiscoverSidebar } from './discover_sidebar';
+import { DiscoverServices } from '../../../build_services';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
-jest.mock('../../../kibana_services', () => ({
-  getServices: () => ({
-    history: () => ({
-      location: {
-        search: '',
-      },
-    }),
-    capabilities: {
-      visualize: {
-        show: true,
-      },
-      discover: {
-        save: false,
-      },
-    },
-    uiSettings: {
-      get: (key: string) => {
-        if (key === 'fields:popularLimit') {
-          return 5;
-        }
-      },
+const mockServices = ({
+  history: () => ({
+    location: {
+      search: '',
     },
   }),
+  capabilities: {
+    visualize: {
+      show: true,
+    },
+    discover: {
+      save: false,
+    },
+  },
+  uiSettings: {
+    get: (key: string) => {
+      if (key === 'fields:popularLimit') {
+        return 5;
+      }
+    },
+  },
+} as unknown) as DiscoverServices;
+
+jest.mock('../../../kibana_services', () => ({
+  getServices: () => mockServices,
 }));
 
 jest.mock('./lib/get_index_pattern_field_list', () => ({
@@ -71,9 +77,9 @@ function getCompProps() {
   );
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = _.each(_.cloneDeep(realHits), indexPattern.flattenHit) as Array<
+  const hits = (each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
     Record<string, unknown>
-  >;
+  >) as ElasticSearchHit[];
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
@@ -97,9 +103,12 @@ function getCompProps() {
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
+    services: mockServices,
     setIndexPattern: jest.fn(),
     state: {},
     trackUiMetric: jest.fn(),
+    fieldFilter: getDefaultFieldFilter(),
+    setFieldFilter: jest.fn(),
   };
 }
 
@@ -127,10 +136,5 @@ describe('discover sidebar', function () {
   it('should allow deselecting fields', function () {
     findTestSubject(comp, 'fieldToggle-extension').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
-  });
-  it('should allow adding filters', function () {
-    findTestSubject(comp, 'field-extension-showDetails').simulate('click');
-    findTestSubject(comp, 'plus-extension-gif').simulate('click');
-    expect(props.onAddFilter).toHaveBeenCalled();
   });
 });

@@ -18,6 +18,7 @@
  */
 
 import { InternalHttpServiceSetup } from '../../http';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 import { Logger } from '../../logging';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { IKibanaMigrator } from '../migrations';
@@ -38,11 +39,13 @@ import { registerMigrateRoute } from './migrate';
 
 export function registerRoutes({
   http,
+  coreUsageData,
   logger,
   config,
   migratorPromise,
 }: {
   http: InternalHttpServiceSetup;
+  coreUsageData: CoreUsageDataSetup;
   logger: Logger;
   config: SavedObjectConfig;
   migratorPromise: Promise<IKibanaMigrator>;
@@ -59,9 +62,9 @@ export function registerRoutes({
   registerBulkCreateRoute(router);
   registerBulkUpdateRoute(router);
   registerLogLegacyImportRoute(router, logger);
-  registerExportRoute(router, config);
-  registerImportRoute(router, config);
-  registerResolveImportErrorsRoute(router, config);
+  registerExportRoute(router, { config, coreUsageData });
+  registerImportRoute(router, { config, coreUsageData });
+  registerResolveImportErrorsRoute(router, { config, coreUsageData });
 
   const internalRouter = http.createRouter('/internal/saved_objects/');
 
