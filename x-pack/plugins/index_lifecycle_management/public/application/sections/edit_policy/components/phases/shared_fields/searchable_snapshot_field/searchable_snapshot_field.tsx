@@ -116,7 +116,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
                 )}
               >
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundMessage"
+                  id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundBody"
                   defaultMessage="{link} to use searchable snapshots."
                   values={{
                     link: (
@@ -148,7 +148,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
                 color="warning"
               >
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoryHelpText"
+                  id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoryWithNameBody"
                   defaultMessage="Enter the name of an existing repository, or {link} with this name."
                   values={{
                     link: (
