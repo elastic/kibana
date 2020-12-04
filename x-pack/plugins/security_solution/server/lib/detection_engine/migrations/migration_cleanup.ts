@@ -48,3 +48,24 @@ export const ensureMigrationCleanupPolicy = async ({
     });
   }
 };
+
+export const applyMigrationCleanupPolicy = async ({
+  alias,
+  esClient,
+  index,
+}: {
+  alias: string;
+  esClient: ElasticsearchClient;
+  index: string;
+}): Promise<void> => {
+  await esClient.indices.putSettings({
+    index,
+    body: {
+      index: {
+        lifecycle: {
+          name: getMigrationCleanupPolicyName(alias),
+        },
+      },
+    },
+  });
+};
