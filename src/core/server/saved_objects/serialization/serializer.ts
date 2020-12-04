@@ -75,7 +75,6 @@ export class SavedObjectsSerializer {
     const { _id, _source, _seq_no, _primary_term } = doc;
     const {
       type,
-      namespace,
       namespaces,
       originId,
       migrationVersion,
@@ -87,12 +86,13 @@ export class SavedObjectsSerializer {
       _seq_no != null || _primary_term != null
         ? encodeVersion(_seq_no!, _primary_term!)
         : undefined;
+    const { id, namespace } = this.trimIdPrefix(_source.namespace, type, _id, flexible);
     const includeNamespace = namespace && (flexible || this.registry.isSingleNamespace(type));
     const includeNamespaces = this.registry.isMultiNamespace(type);
 
     return {
       type,
-      id: this.trimIdPrefix(namespace, type, _id, flexible),
+      id,
       ...(includeNamespace && { namespace }),
       ...(includeNamespaces && { namespaces }),
       ...(originId && { originId }),
@@ -168,33 +168,64 @@ export class SavedObjectsSerializer {
     return `${LEGACY_URL_ALIAS_TYPE}:${namespace}:${type}:${id}`;
   }
 
-  private trimIdPrefix(namespace: string | undefined, type: string, id: string, flexible: boolean) {
-    assertNonEmptyString(id, 'document id');
-    assertNonEmptyString(type, 'saved object type');
-
-    const { prefix, idMatchesPrefix } = this.parseIdPrefix(namespace, type, id, flexible);
-    return idMatchesPrefix ? id.slice(prefix.length) : id;
-  }
-
-  private parseIdPrefix(
-    namespace: string | undefined,
+  /**
+   * Given a document's source namespace, type, and raw ID, trim the ID prefix (based on the namespaceType), returning the object ID and the
+   * detected namespace. A single-namespace object is only considered to exist in a namespace if its raw ID is prefixed by that *and* it has
+   * the namespace field in its source.
+   */
+  private trimIdPrefix(
+    sourceNamespace: string | undefined,
     type: string,
     id: string,
     flexible: boolean
   ) {
-    const namespacePrefix =
-      namespace && this.registry.isSingleNamespace(type) ? `${namespace}:` : '';
-    let prefix = `${namespacePrefix}${type}:`;
+    assertNonEmptyString(id, 'document id');
+    assertNonEmptyString(type, 'saved object type');
 
-    let idMatchesPrefix = id.startsWith(prefix);
-    if (!idMatchesPrefix && namespace && flexible && this.registry.isMultiNamespace(type)) {
-      // retry checking the prefix by treating this raw ID as the single-namespace ID format
-      prefix = `${namespace}:${type}:`;
-      idMatchesPrefix = id.startsWith(prefix);
+    const { prefix, idMatchesPrefix, namespace } = this.parseIdPrefix(
+      sourceNamespace,
+      type,
+      id,
+      flexible
+    );
+    return {
+      id: idMatchesPrefix ? id.slice(prefix.length) : id,
+      namespace,
+    };
+  }
+
+  private parseIdPrefix(
+    sourceNamespace: string | undefined,
+    type: string,
+    id: string,
+    flexible: boolean
+  ) {
+    let prefix: string; // the prefix that is used to validate this raw object ID
+    let namespace: string | undefined; // the namespace that is in the raw object ID (only for single-namespace objects)
+    const parseFlexibly = flexible && this.registry.isMultiNamespace(type);
+    if (sourceNamespace && (this.registry.isSingleNamespace(type) || parseFlexibly)) {
+      prefix = `${sourceNamespace}:${type}:`;
+      if (parseFlexibly && !getIdMatchesPrefix(id, prefix)) {
+        prefix = `${type}:`;
+      } else {
+        // this is either a single-namespace object, or is being converted into a multi-namespace object
+        namespace = sourceNamespace;
+      }
+    } else {
+      // there is no source namespace, OR there is a source namespace but this is not a single-namespace object
+      prefix = `${type}:`;
     }
 
-    return { prefix, idMatchesPrefix };
+    return {
+      prefix,
+      idMatchesPrefix: getIdMatchesPrefix(id, prefix),
+      namespace,
+    };
   }
+}
+
+function getIdMatchesPrefix(id: string, prefix: string) {
+  return id.startsWith(prefix) && id.length > prefix.length;
 }
 
 function assertNonEmptyString(value: string, name: string) {

@@ -67,7 +67,11 @@ import _ from 'lodash';
 import Semver from 'semver';
 import { Logger } from '../../../logging';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
-import { SavedObjectsMigrationVersion, SavedObjectsType } from '../../types';
+import {
+  SavedObjectsMigrationVersion,
+  SavedObjectsNamespaceType,
+  SavedObjectsType,
+} from '../../types';
 import { MigrationLogger } from './migration_logger';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectMigrationFn } from '../types';
@@ -89,10 +93,13 @@ interface TransformResult {
   additionalDocs: SavedObjectUnsanitizedDoc[];
 }
 
-type TransformFn = (doc: SavedObjectUnsanitizedDoc, options?: TransformOptions) => TransformResult;
+type ApplyTransformsFn = (
+  doc: SavedObjectUnsanitizedDoc,
+  options?: TransformOptions
+) => TransformResult;
 
 interface TransformOptions {
-  convertTypes?: boolean;
+  convertNamespaceTypes?: boolean;
 }
 
 interface DocumentMigratorOptions {
@@ -129,7 +136,7 @@ export interface VersionedTransformer {
  */
 export class DocumentMigrator implements VersionedTransformer {
   private migrations: ActiveMigrations;
-  private transformDoc: TransformFn;
+  private transformDoc: ApplyTransformsFn;
 
   /**
    * Creates an instance of DocumentMigrator.
@@ -196,7 +203,9 @@ export class DocumentMigrator implements VersionedTransformer {
     // Ex: Importing sample data that is cached at import level, migrations would
     // execute on mutated data the second time.
     const clonedDoc = _.cloneDeep(doc);
-    const { transformedDoc, additionalDocs } = this.transformDoc(clonedDoc, { convertTypes: true });
+    const { transformedDoc, additionalDocs } = this.transformDoc(clonedDoc, {
+      convertNamespaceTypes: true,
+    });
     return [transformedDoc, ...additionalDocs];
   };
 }
@@ -234,7 +243,7 @@ function validateMigrationDefinition(registry: ISavedObjectTypeRegistry, kibanaV
   }
 
   function assertValidConvertToMultiNamespaceType(
-    namespaceType: string,
+    namespaceType: SavedObjectsNamespaceType,
     convertToMultiNamespaceTypeVersion: string,
     type: string
   ) {
@@ -330,16 +339,16 @@ function buildDocumentTransform({
 }: {
   kibanaVersion: string;
   migrations: ActiveMigrations;
-}): TransformFn {
+}): ApplyTransformsFn {
   return function transformAndValidate(
     doc: SavedObjectUnsanitizedDoc,
     options: TransformOptions = {}
   ) {
-    const { convertTypes = false } = options;
+    const { convertNamespaceTypes = false } = options;
     let transformedDoc: SavedObjectUnsanitizedDoc;
     let additionalDocs: SavedObjectUnsanitizedDoc[] = [];
     if (doc.migrationVersion) {
-      const result = applyMigrations(doc, migrations, kibanaVersion, convertTypes);
+      const result = applyMigrations(doc, migrations, kibanaVersion, convertNamespaceTypes);
       transformedDoc = result.transformedDoc;
       additionalDocs = additionalDocs.concat(
         result.additionalDocs.map((x) => markAsUpToDate(x, migrations, kibanaVersion))
@@ -363,7 +372,7 @@ function applyMigrations(
   doc: SavedObjectUnsanitizedDoc,
   migrations: ActiveMigrations,
   kibanaVersion: string,
-  convertTypes: boolean
+  convertNamespaceTypes: boolean
 ) {
   let additionalDocs: SavedObjectUnsanitizedDoc[] = [];
   while (true) {
@@ -376,7 +385,7 @@ function applyMigrations(
         additionalDocs,
       };
     }
-    const result = migrateProp(doc, prop, migrations, convertTypes);
+    const result = migrateProp(doc, prop, migrations, convertNamespaceTypes);
     doc = result.transformedDoc;
     additionalDocs = [...additionalDocs, ...result.additionalDocs];
   }
@@ -394,7 +403,7 @@ function props(doc: SavedObjectUnsanitizedDoc) {
  */
 function propVersion(doc: SavedObjectUnsanitizedDoc | ActiveMigrations, prop: string) {
   return (
-    ((doc as any)[prop] && (doc as any)[prop].latestVersion) ||
+    (doc.hasOwnProperty(prop) && (doc as any)[prop].latestVersion) ||
     (doc.migrationVersion && (doc as any).migrationVersion[prop])
   );
 }
@@ -424,7 +433,7 @@ function markAsUpToDate(
  * If the object does not exist in the default namespace (undefined), its ID is also regenerated, and an "originId" is added to preserve
  * legacy import/copy behavior.
  */
-function convertType(doc: SavedObjectUnsanitizedDoc) {
+function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
   const { namespace, ...otherAttrs } = doc;
   const additionalDocs: SavedObjectUnsanitizedDoc[] = [];
 
@@ -467,7 +476,7 @@ function getConversionTransforms(type: SavedObjectsType): Transform[] {
   return [
     {
       version: convertToMultiNamespaceTypeVersion,
-      transform: convertType,
+      transform: convertNamespaceType,
       transformType: 'convert',
     },
   ];
@@ -571,7 +580,7 @@ function getHasPendingReferenceTransform(
   migrations: ActiveMigrations,
   prop: string
 ) {
-  if (!migrations[prop]) {
+  if (!migrations.hasOwnProperty(prop)) {
     return false;
   }
 
@@ -618,7 +627,7 @@ function migrateProp(
   doc: SavedObjectUnsanitizedDoc,
   prop: string,
   migrations: ActiveMigrations,
-  convertTypes: boolean
+  convertNamespaceTypes: boolean
 ): TransformResult {
   const originalType = doc.type;
   let migrationVersion = _.clone(doc.migrationVersion) || {};
@@ -631,7 +640,7 @@ function migrateProp(
       break;
     }
 
-    if (transformType === 'migrate' || convertTypes) {
+    if (transformType === 'migrate' || convertNamespaceTypes) {
       // migrate transforms are always applied, but conversion transforms and reference transforms are only applied when Kibana is upgraded
       const result = transform(doc);
       doc = result.transformedDoc;

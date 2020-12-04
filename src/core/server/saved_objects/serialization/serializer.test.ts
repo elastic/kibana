@@ -450,20 +450,35 @@ describe('#rawToSavedObject', () => {
     describe('with "flexible" option enabled', () => {
       const options = { flexible: true };
 
-      test(`removes type prefix from _id`, () => {
+      test(`removes type prefix from _id and, and does not copy _source.namespace to namespace`, () => {
         const _actual = multiNamespaceSerializer.rawToSavedObject(raw, options);
         expect(_actual).toHaveProperty('id', 'bar');
+        expect(_actual).not.toHaveProperty('namespace');
       });
 
-      test(`removes type and namespace prefix from _id`, () => {
+      test(`removes type and namespace prefix from _id, and copies _source.namespace to namespace`, () => {
         const _id = `${raw._source.namespace}:${raw._id}`;
         const _actual = multiNamespaceSerializer.rawToSavedObject({ ...raw, _id }, options);
         expect(_actual).toHaveProperty('id', 'bar');
+        expect(_actual).toHaveProperty('namespace', raw._source.namespace); // "baz"
       });
 
-      test(`copies _source.namespace to namespace if "flexible" option is enabled`, () => {
-        const _actual = multiNamespaceSerializer.rawToSavedObject(raw, options);
-        expect(_actual).toHaveProperty('namespace', 'baz');
+      test(`removes type and namespace prefix from _id when the namespace matches the type`, () => {
+        const _raw = createSampleDoc({ _id: 'foo:foo:bar', _source: { namespace: 'foo' } });
+        const _actual = multiNamespaceSerializer.rawToSavedObject(_raw, options);
+        expect(_actual).toHaveProperty('id', 'bar');
+        expect(_actual).toHaveProperty('namespace', 'foo');
+      });
+
+      test(`does not remove the entire _id when the namespace matches the type`, () => {
+        // This is not a realistic/valid document, but we defensively check to ensure we aren't trimming the entire ID.
+        // In this test case, a multi-namespace document has a raw ID with the type prefix "foo:" and an object ID of "foo:" (no namespace
+        // prefix). This document *also* has a `namespace` field the same as the type, while it should not have a `namespace` field at all
+        // since it has no namespace prefix in its raw ID.
+        const _raw = createSampleDoc({ _id: 'foo:foo:', _source: { namespace: 'foo' } });
+        const _actual = multiNamespaceSerializer.rawToSavedObject(_raw, options);
+        expect(_actual).toHaveProperty('id', 'foo:');
+        expect(_actual).not.toHaveProperty('namespace');
       });
     });
   });
