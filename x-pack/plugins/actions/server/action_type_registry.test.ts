@@ -193,25 +193,11 @@ describe('list()', () => {
       minimumLicenseRequired: 'basic',
       executor,
     });
-    actionTypeRegistry.register({
-      id: 'my-action-type-no-disabled-action-group',
-      name: 'My action type with no disabled action groups',
-      minimumLicenseRequired: 'basic',
-      executor,
-    });
     const actionTypes = actionTypeRegistry.list();
     expect(actionTypes).toEqual([
       {
         id: 'my-action-type',
         name: 'My action type',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'basic',
-      },
-      {
-        id: 'my-action-type-no-disabled-action-group',
-        name: 'My action type with no disabled action groups',
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
