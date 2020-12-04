@@ -17,9 +17,4 @@
  * under the License.
  */
 
-export interface Stats {
-  min: number;
-  max: number;
-  sum: number;
-  avg: number;
-}
+export { registerUiCountersRollups } from './register_rollups';
