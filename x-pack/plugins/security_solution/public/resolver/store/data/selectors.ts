@@ -153,9 +153,9 @@ export const graphableNodes = createSelector(resolverTreeResponse, function (tre
   const nodes: Map<string, ResolverNode> = new Map();
   if (treeResponse?.nodes) {
     for (const node of treeResponse.nodes) {
-      const nodeId = nodeModel.nodeID(node);
-      if (nodeId !== undefined) {
-        nodes.set(nodeId, node);
+      const nodeID = nodeModel.nodeID(node);
+      if (nodeID !== undefined) {
+        nodes.set(nodeID, node);
       }
     }
     return [...nodes.values()];
@@ -173,7 +173,7 @@ const tree = createSelector(graphableNodes, originID, function indexedProcessTre
 });
 
 /**
- * This returns a map of nodeIds to the associated stats provided by the datasource.
+ * This returns a map of nodeIDs to the associated stats provided by the datasource.
  */
 export const nodeStats: (
   state: DataState
@@ -182,7 +182,7 @@ export const nodeStats: (
   (resolverTree?: NewResolverTree) => {
     if (resolverTree) {
       const map = resolverTreeModel.nodeStats(resolverTree);
-      return (nodeId: string) => map.get(nodeId);
+      return (nodeID: string) => map.get(nodeID);
     } else {
       return () => undefined;
     }
@@ -195,8 +195,8 @@ export const nodeStats: (
 export const relatedEventTotalCount: (
   state: DataState
 ) => (entityID: string) => number | undefined = createSelector(nodeStats, (getNodeStats) => {
-  return (nodeId) => {
-    return getNodeStats(nodeId)?.total;
+  return (nodeID) => {
+    return getNodeStats(nodeID)?.total;
   };
 });
 
@@ -423,9 +423,9 @@ export const ariaFlowtoCandidate: (
 
       if (previousChild) {
         // if there is a previous child, it has no following sibling.
-        const nodeId = nodeModel.nodeID(previousChild);
-        if (nodeId !== undefined) {
-          memo.set(nodeId, null);
+        const previousChildNodeID = nodeModel.nodeID(previousChild);
+        if (previousChildNodeID !== undefined) {
+          memo.set(previousChildNodeID, null);
         }
       }
 

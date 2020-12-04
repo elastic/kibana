@@ -18,6 +18,8 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiIconTip,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
@@ -47,6 +49,15 @@ const StyledGraphControlsColumn = styled.div`
   &:not(last-of-type) {
     margin-right: 5px;
   }
+`;
+
+const StyledEuiDescriptionListTitle = styled(EuiDescriptionListTitle)`
+  text-transform: uppercase;
+  max-width: 25%;
+`;
+
+const StyledEuiDescriptionListDescription = styled(EuiDescriptionListDescription)`
+  max-width: 75%;
 `;
 
 const StyledEuiButtonIcon = styled(EuiButtonIcon)<StyledGraphControlProps>`
@@ -294,32 +305,17 @@ const SchemaInformation = ({
   const sourceAndSchema = useSelector(selectors.resolverTreeSourceAndSchema);
   const setAsActivePopover = useCallback(() => setActivePopover('schemaInfo'), [setActivePopover]);
 
-  // This defines the schema that is visualized in the (i) popover
-  const schemaListItems = [
-    {
-      title: i18n.translate('xpack.securitySolution.resolver.graphControls.schemaSource', {
-        defaultMessage: 'source',
-      }),
-      description: <GeneratedText>{sourceAndSchema?.dataSource ?? 'Unknown'}</GeneratedText>,
-    },
-    {
-      title: i18n.translate('xpack.securitySolution.resolver.graphControls.schemaID', {
-        defaultMessage: 'id',
-      }),
-      description: <GeneratedText>{sourceAndSchema?.schema.id ?? 'Unknown'}</GeneratedText>,
-    },
-    {
-      title: i18n.translate('xpack.securitySolution.resolver.graphControls.schemaEdge', {
-        defaultMessage: 'edge',
-      }),
-      description: <GeneratedText>{sourceAndSchema?.schema.parent ?? 'Unknown'}</GeneratedText>,
-    },
-  ];
-
   const schemaInfoButtonTitle = i18n.translate(
     'xpack.securitySolution.resolver.graphControls.schemaInfoButtonTitle',
     {
       defaultMessage: 'Schema Information',
+    }
+  );
+
+  const unknownSchemaValue = i18n.translate(
+    'xpack.securitySolution.resolver.graphControls.unknownSchemaValue',
+    {
+      defaultMessage: 'Unknown',
     }
   );
 
@@ -358,7 +354,10 @@ const SchemaInformation = ({
           position="right"
         />
       </EuiPopoverTitle>
-      <div style={{ width: '256px' }}>
+      <div
+        // Limit the width based on UX design
+        style={{ maxWidth: '256px' }}
+      >
         <StyledDescriptionList
           data-test-subj="resolver:schema-info"
           type="column"
@@ -377,8 +376,34 @@ const SchemaInformation = ({
             } as HTMLAttributes<HTMLElement>
           }
           compressed
-          listItems={schemaListItems}
-        />
+        >
+          <>
+            <StyledEuiDescriptionListTitle>
+              {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaSource', {
+                defaultMessage: 'source',
+              })}
+            </StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListDescription>
+              <GeneratedText>{sourceAndSchema?.dataSource ?? unknownSchemaValue}</GeneratedText>
+            </StyledEuiDescriptionListDescription>
+            <StyledEuiDescriptionListTitle>
+              {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaID', {
+                defaultMessage: 'id',
+              })}
+            </StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListDescription>
+              <GeneratedText>{sourceAndSchema?.schema.id ?? unknownSchemaValue}</GeneratedText>
+            </StyledEuiDescriptionListDescription>
+            <StyledEuiDescriptionListTitle>
+              {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaEdge', {
+                defaultMessage: 'edge',
+              })}
+            </StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListDescription>
+              <GeneratedText>{sourceAndSchema?.schema.parent ?? unknownSchemaValue}</GeneratedText>
+            </StyledEuiDescriptionListDescription>
+          </>
+        </StyledDescriptionList>
       </div>
     </EuiPopover>
   );
@@ -397,73 +422,6 @@ const CubeLegend = ({
   // Should be updated to be dynamic if and when non process based resolvers are possible
   const setAsActivePopover = useCallback(() => setActivePopover('nodesLegend'), [setActivePopover]);
   const colorMap = useColors();
-
-  const legendListItems = [
-    {
-      title: (
-        <CubeForProcess
-          size="2.5em"
-          data-test-subj="resolver:node-detail:title-icon"
-          state="running"
-        />
-      ),
-      description: (
-        <GeneratedText>
-          {i18n.translate('xpack.securitySolution.resolver.graphControls.runningProcessCube', {
-            defaultMessage: 'Running Process',
-          })}
-        </GeneratedText>
-      ),
-    },
-    {
-      title: (
-        <CubeForProcess
-          size="2.5em"
-          data-test-subj="resolver:node-detail:title-icon"
-          state="terminated"
-        />
-      ),
-      description: (
-        <GeneratedText>
-          {i18n.translate('xpack.securitySolution.resolver.graphControls.terminatedProcessCube', {
-            defaultMessage: 'Terminated Process',
-          })}
-        </GeneratedText>
-      ),
-    },
-    {
-      title: (
-        <CubeForProcess
-          size="2.5em"
-          data-test-subj="resolver:node-detail:title-icon"
-          state="loading"
-        />
-      ),
-      description: (
-        <GeneratedText>
-          {i18n.translate('xpack.securitySolution.resolver.graphControls.currentlyLoadingCube', {
-            defaultMessage: 'Loading Process',
-          })}
-        </GeneratedText>
-      ),
-    },
-    {
-      title: (
-        <CubeForProcess
-          size="2.5em"
-          data-test-subj="resolver:node-detail:title-icon"
-          state="error"
-        />
-      ),
-      description: (
-        <GeneratedText>
-          {i18n.translate('xpack.securitySolution.resolver.graphControls.errorCube', {
-            defaultMessage: 'Error',
-          })}
-        </GeneratedText>
-      ),
-    },
-  ];
 
   const nodesLegendButtonTitle = i18n.translate(
     'xpack.securitySolution.resolver.graphControls.nodesLegendButtonTitle',
@@ -498,7 +456,10 @@ const CubeLegend = ({
           defaultMessage: 'legend',
         })}
       </EuiPopoverTitle>
-      <div style={{ width: '212px' }}>
+      <div
+        // Limit the width based on UX design
+        style={{ maxWidth: '212px' }}
+      >
         <StyledDescriptionList
           data-test-subj="resolver:graph-controls:legend"
           type="column"
@@ -519,8 +480,75 @@ const CubeLegend = ({
             } as HTMLAttributes<HTMLElement>
           }
           compressed
-          listItems={legendListItems}
-        />
+        >
+          <>
+            <StyledEuiDescriptionListTitle>
+              <CubeForProcess
+                size="2.5em"
+                data-test-subj="resolver:node-detail:title-icon"
+                state="running"
+              />
+            </StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListDescription>
+              <GeneratedText>
+                {i18n.translate(
+                  'xpack.securitySolution.resolver.graphControls.runningProcessCube',
+                  {
+                    defaultMessage: 'Running Process',
+                  }
+                )}
+              </GeneratedText>
+            </StyledEuiDescriptionListDescription>
+            <StyledEuiDescriptionListTitle>
+              <CubeForProcess
+                size="2.5em"
+                data-test-subj="resolver:node-detail:title-icon"
+                state="terminated"
+              />
+            </StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListDescription>
+              <GeneratedText>
+                {i18n.translate(
+                  'xpack.securitySolution.resolver.graphControls.terminatedProcessCube',
+                  {
+                    defaultMessage: 'Terminated Process',
+                  }
+                )}
+              </GeneratedText>
+            </StyledEuiDescriptionListDescription>
+            <StyledEuiDescriptionListTitle>
+              <CubeForProcess
+                size="2.5em"
+                data-test-subj="resolver:node-detail:title-icon"
+                state="loading"
+              />
+            </StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListDescription>
+              <GeneratedText>
+                {i18n.translate(
+                  'xpack.securitySolution.resolver.graphControls.currentlyLoadingCube',
+                  {
+                    defaultMessage: 'Loading Process',
+                  }
+                )}
+              </GeneratedText>
+            </StyledEuiDescriptionListDescription>
+            <StyledEuiDescriptionListTitle>
+              <CubeForProcess
+                size="2.5em"
+                data-test-subj="resolver:node-detail:title-icon"
+                state="error"
+              />
+            </StyledEuiDescriptionListTitle>
+            <StyledEuiDescriptionListDescription>
+              <GeneratedText>
+                {i18n.translate('xpack.securitySolution.resolver.graphControls.errorCube', {
+                  defaultMessage: 'Error',
+                })}
+              </GeneratedText>
+            </StyledEuiDescriptionListDescription>
+          </>
+        </StyledDescriptionList>
       </div>
     </EuiPopover>
   );

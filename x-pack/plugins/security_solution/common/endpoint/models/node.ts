@@ -13,7 +13,7 @@ import { firstNonNullValue } from './ecs_safety_helpers';
  */
 
 /**
- * @description - Extract the first non null value from the nodeId depending on the datasource. Returns
+ * @description - Extract the first non null value from the nodeID depending on the datasource. Returns
  * undefined if the field was never set.
  */
 export function nodeID(node: ResolverNode): string | undefined {

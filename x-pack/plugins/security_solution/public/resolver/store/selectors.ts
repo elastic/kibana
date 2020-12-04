@@ -88,7 +88,7 @@ export const resolverComponentInstanceID = composeSelectors(
 );
 
 /**
- * This returns a map of nodeIds to the associated stats provided by the datasource.
+ * This returns a map of nodeIDs to the associated stats provided by the datasource.
  */
 export const nodeStats: (
   state: ResolverState

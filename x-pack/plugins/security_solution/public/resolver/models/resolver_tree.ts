@@ -16,15 +16,15 @@ import {
 import * as nodeModel from '../../../common/endpoint/models/node';
 
 /**
- * This returns a map of nodeIds to the associated stats provided by the datasource.
+ * This returns a map of nodeIDs to the associated stats provided by the datasource.
  */
 export function nodeStats(tree: NewResolverTree): Map<ResolverNode['id'], EventStats> {
   const stats = new Map();
 
   for (const node of tree.nodes) {
     if (node.stats) {
-      const nodeId = nodeModel.nodeID(node);
-      stats.set(nodeId, node.stats);
+      const nodeID = nodeModel.nodeID(node);
+      stats.set(nodeID, node.stats);
     }
   }
   return stats;

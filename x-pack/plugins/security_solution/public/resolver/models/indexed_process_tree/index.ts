@@ -23,9 +23,9 @@ export function factory(
   const idToValue = new Map<string, ResolverNode>();
 
   for (const node of nodes) {
-    const nodeId: string | undefined = nodeModel.nodeID(node);
-    if (nodeId !== undefined) {
-      idToValue.set(nodeId, node);
+    const nodeID: string | undefined = nodeModel.nodeID(node);
+    if (nodeID !== undefined) {
+      idToValue.set(nodeID, node);
 
       const uniqueParentId: string | undefined = nodeModel.parentId(node);
 

@@ -746,16 +746,16 @@ export class EndpointDocGenerator {
   public generateTree(options: TreeOptions = {}): Tree {
     const optionsWithDef = getTreeOptionsWithDef(options);
     const addEventToMap = (nodeMap: Map<string, TreeNode>, event: Event) => {
-      const nodeId = entityIDSafeVersion(event);
-      if (!nodeId) {
+      const nodeID = entityIDSafeVersion(event);
+      if (!nodeID) {
         return nodeMap;
       }
 
       // if a node already exists for the entity_id we'll use that one, otherwise let's create a new empty node
       // and add the event to the right array.
-      let node = nodeMap.get(nodeId);
+      let node = nodeMap.get(nodeID);
       if (!node) {
-        node = { id: nodeId, lifecycle: [], relatedEvents: [], relatedAlerts: [] };
+        node = { id: nodeID, lifecycle: [], relatedEvents: [], relatedAlerts: [] };
       }
 
       // place the event in the right array depending on its category
@@ -769,7 +769,7 @@ export class EndpointDocGenerator {
         node.relatedAlerts.push(event);
       }
 
-      return nodeMap.set(nodeId, node);
+      return nodeMap.set(nodeID, node);
     };
 
     const groupNodesByParent = (children: Map<string, TreeNode>) => {

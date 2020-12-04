@@ -19,7 +19,7 @@ import { useCamera } from './use_camera';
 import { SymbolDefinitions } from './symbol_definitions';
 import { useStateSyncingActions } from './use_state_syncing_actions';
 import { StyledMapContainer, GraphContainer } from './styles';
-import { nodeID } from '../../../common/endpoint/models/node';
+import * as nodeModel from '../../../common/endpoint/models/node';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverProps, ResolverState } from '../types';
 import { PanelRouter } from './panels';
@@ -114,11 +114,14 @@ export const ResolverWithoutProviders = React.memo(
               )
             )}
             {[...processNodePositions].map(([treeNode, position]) => {
-              const nodeId = nodeID(treeNode);
+              const nodeID = nodeModel.nodeID(treeNode);
+              if (nodeID === undefined) {
+                throw new Error('Tried to render a node without an ID');
+              }
               return (
                 <ProcessEventDot
-                  key={nodeId}
-                  nodeID={nodeId}
+                  key={nodeID}
+                  nodeID={nodeID}
                   position={position}
                   projectionMatrix={projectionMatrix}
                   node={treeNode}
