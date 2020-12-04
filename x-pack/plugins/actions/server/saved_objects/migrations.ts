@@ -19,38 +19,17 @@ type ActionMigration = (
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  console.log('getMigrations arrives');
   const migrationActionsTen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => {
-      console.log('migrationActionsTen', {
-        actionTypeId: doc.attributes.actionTypeId,
-        keys: Object.keys(doc.attributes.config),
-        ternary:
-          !!doc.attributes.config?.casesConfiguration || doc.attributes.actionTypeId === '.email',
-      });
-      return (
-        !!doc.attributes.config?.casesConfiguration || doc.attributes.actionTypeId === '.email'
-      );
-    },
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      !!doc.attributes.config?.casesConfiguration || doc.attributes.actionTypeId === '.email',
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
 
   const migrationActionsEleven = encryptedSavedObjects.createMigration<RawAction, RawAction>(
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => {
-      console.log('migrationActionsEleven', {
-        actionTypeId: doc.attributes.actionTypeId,
-        keys: Object.keys(doc.attributes.config),
-        ternary:
-          !!doc.attributes.config?.isCaseOwned ||
-          !!doc.attributes.config?.incidentConfiguration ||
-          doc.attributes.actionTypeId === '.webhook',
-      });
-      return (
-        !!doc.attributes.config?.isCaseOwned ||
-        !!doc.attributes.config?.incidentConfiguration ||
-        doc.attributes.actionTypeId === '.webhook'
-      );
-    },
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      !!doc.attributes.config?.isCaseOwned ||
+      !!doc.attributes.config?.incidentConfiguration ||
+      doc.attributes.actionTypeId === '.webhook',
     pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
   );
 
@@ -64,13 +43,10 @@ function executeMigrationWithErrorHandling(
   migrationFunc: SavedObjectMigrationFn<RawAction, RawAction>,
   version: string
 ) {
-  console.log('executeMigrationWithErrorHandling 1111', version);
   return (doc: SavedObjectUnsanitizedDoc<RawAction>, context: SavedObjectMigrationContext) => {
     try {
-      console.log('executeMigrationWithErrorHandling 2222');
       return migrationFunc(doc, context);
     } catch (ex) {
-      console.log('executeMigrationWithErrorHandling 3333', ex);
       context.log.error(
         `encryptedSavedObject ${version} migration failed for action ${doc.id} with error: ${ex.message}`,
         { actionDocument: doc }
@@ -83,13 +59,11 @@ function executeMigrationWithErrorHandling(
 function renameCasesConfigurationObject(
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> {
-  console.log('renameCasesConfigurationObject start', doc.attributes.actionTypeId);
   if (!doc.attributes.config?.casesConfiguration) {
     return doc;
   }
   const { casesConfiguration, ...restConfiguration } = doc.attributes.config;
 
-  console.log('renameCasesConfigurationObject return', doc.attributes.actionTypeId);
   return {
     ...doc,
     attributes: {
@@ -105,7 +79,6 @@ function renameCasesConfigurationObject(
 function removeCasesFieldMappings(
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> {
-  console.log('removeCasesFieldMappings start', doc.attributes.actionTypeId);
   if (
     !doc.attributes.config?.hasOwnProperty('isCaseOwned') &&
     !doc.attributes.config?.hasOwnProperty('incidentConfiguration')
@@ -114,7 +87,6 @@ function removeCasesFieldMappings(
   }
   const { incidentConfiguration, isCaseOwned, ...restConfiguration } = doc.attributes.config;
 
-  console.log('removeCasesFieldMappings return', doc.attributes.actionTypeId);
   return {
     ...doc,
     attributes: {
