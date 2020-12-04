@@ -5,7 +5,7 @@
  */
 
 import { NotificationsStart, FatalErrorsSetup } from 'kibana/public';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { createGetterSetter } from '../../../../src/plugins/kibana_utils/common';
 
 let notifications: NotificationsStart | null = null;
@@ -32,14 +32,14 @@ export function setFatalErrors(newFatalErrors: FatalErrorsSetup) {
 }
 
 export const [getUiStatsReporter, setUiStatsReporter] = createGetterSetter<
-  (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void
+  (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void
 >('uiMetric');
 
 // default value if usageCollection is not available
 setUiStatsReporter(() => {});
 
 export function trackUiMetric(
-  type: UiStatsMetricType,
+  type: UiCounterMetricType,
   eventNames: string | string[],
   count?: number
 ) {
