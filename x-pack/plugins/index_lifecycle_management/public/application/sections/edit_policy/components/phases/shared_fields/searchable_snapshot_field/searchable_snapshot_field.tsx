@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiComboBoxOptionOption,
@@ -13,7 +14,6 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiLink,
-  EuiFormRow,
 } from '@elastic/eui';
 
 import {
@@ -21,6 +21,7 @@ import {
   ComboBoxField,
   useKibana,
   fieldValidators,
+  useFormData,
 } from '../../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../../edit_policy_context';
@@ -58,6 +59,19 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   const isDisabledInColdDueToHotPhase = phase === 'cold' && isUsingSearchableSnapshotInHotPhase;
 
   const isDisabled = isDisabledDueToLicense || isDisabledInColdDueToHotPhase;
+
+  const [isFieldToggleChecked, setIsFieldToggleChecked] = useState(() =>
+    Boolean(policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository)
+  );
+
+  useEffect(() => {
+    if (isDisabled) {
+      setIsFieldToggleChecked(false);
+    }
+  }, [isDisabled]);
+
+  const [formData] = useFormData({ watch: searchableSnapshotPath });
+  const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
 
   const renderField = () => (
     <SearchableSnapshotDataProvider>
@@ -127,6 +141,44 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
                   }}
                 />
               </EuiCallOut>
+            );
+          } else if (searchableSnapshotRepo && !repos.includes(searchableSnapshotRepo)) {
+            calloutContent = (
+              <>
+                <EuiSpacer size="m" />
+                <EuiCallOut
+                  data-test-subj="customPolicyCallout"
+                  color="warning"
+                  title={
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.repositoryNotFoundTitle"
+                      defaultMessage="Repository name not found"
+                    />
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyMessage"
+                    defaultMessage="{link} with this name."
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={getUrlForApp('management', {
+                            path: `data/snapshot_restore/add_repository`,
+                          })}
+                          target="_blank"
+                        >
+                          {i18n.translate(
+                            'xpack.indexLifecycleMgmt.editPolicy.createSearchableSnapshotLink',
+                            {
+                              defaultMessage: 'Create a snapshot repository',
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiCallOut>
+              </>
             );
           }
         }
@@ -205,7 +257,6 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutTitle',
             { defaultMessage: 'Some actions have been disabled' }
           )}
-          iconType="questionInCircle"
         >
           {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody', {
             defaultMessage:
@@ -213,26 +264,8 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
           })}
         </EuiCallOut>
       );
-    }
-
-    if (infoCallout) {
-      return (
-        <>
-          <EuiSpacer size="s" />
-          {infoCallout}
-          <EuiSpacer size="s" />
-        </>
-      );
-    }
-
-    return;
-  };
-
-  const renderDisabledCallout = (): JSX.Element | undefined => {
-    let disabledCallout: JSX.Element | undefined;
-
-    if (isDisabledDueToLicense) {
-      disabledCallout = (
+    } else if (isDisabledDueToLicense) {
+      infoCallout = (
         <EuiCallOut
           data-test-subj="searchableSnapshotDisabledDueToLicense"
           title={i18n.translate(
@@ -250,46 +283,43 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
         </EuiCallOut>
       );
     } else if (isDisabledInColdDueToHotPhase) {
-      disabledCallout = (
+      infoCallout = (
         <EuiCallOut
+          size="s"
           data-test-subj="searchableSnapshotFieldsEnabledInHotCallout"
           title={i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledCalloutTitle',
-            { defaultMessage: 'Searchable snapshot disabled' }
-          )}
-          iconType="questionInCircle"
-        >
-          {i18n.translate(
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledCalloutBody',
             {
               defaultMessage:
                 'Cannot perform searchable snapshot in cold when it is configured in hot phase.',
             }
           )}
-        </EuiCallOut>
+        />
       );
     }
 
-    return disabledCallout;
+    return infoCallout ? (
+      <>
+        <EuiSpacer />
+        {infoCallout}
+        <EuiSpacer />
+      </>
+    ) : undefined;
   };
 
   return (
     <DescribedFormField
       data-test-subj={`searchableSnapshotField-${phase}`}
-      switchProps={
-        isDisabled
-          ? undefined
-          : {
-              'data-test-subj': 'searchableSnapshotToggle',
-              label: i18n.translate(
-                'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
-                { defaultMessage: 'Create searchable snapshot' }
-              ),
-              initialValue: Boolean(
-                policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
-              ),
-            }
-      }
+      switchProps={{
+        checked: isFieldToggleChecked,
+        disabled: isDisabled,
+        onChange: setIsFieldToggleChecked,
+        'data-test-subj': 'searchableSnapshotToggle',
+        label: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
+          { defaultMessage: 'Create searchable snapshot' }
+        ),
+      }}
       title={
         <h3>
           {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle', {
@@ -313,7 +343,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
       }
       fullWidth
     >
-      {isDisabled ? <EuiFormRow>{renderDisabledCallout() ?? <div />}</EuiFormRow> : renderField}
+      {isDisabled ? <div /> : renderField}
     </DescribedFormField>
   );
 };

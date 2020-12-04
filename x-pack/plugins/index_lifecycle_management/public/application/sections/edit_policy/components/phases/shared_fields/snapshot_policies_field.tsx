@@ -71,7 +71,6 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
         <EuiSpacer size="m" />
         <EuiCallOut
           data-test-subj="noPoliciesCallout"
-          iconType="help"
           color="warning"
           title={
             <FormattedMessage
@@ -105,7 +104,6 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
         <EuiSpacer size="m" />
         <EuiCallOut
           data-test-subj="customPolicyCallout"
-          iconType="help"
           color="warning"
           title={
             <FormattedMessage
