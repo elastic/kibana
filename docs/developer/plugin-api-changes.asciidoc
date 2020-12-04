@@ -5,6 +5,18 @@ This page discusses the plugin API changes that you need to be aware of when mig
 your application to {kib} {minor-version}.
 
 
+[[breaking_plugin_v7.11.0_83575]]
+.Conflict checking is now disabled by default when copying saved objects
+[%collapsible]
+====
+
+See the `createNewCopies` parameter in 
+the <<spaces-api-copy-saved-objects,Copy saved objects to space API documentation>> for more information.
+
+*via https://github.com/elastic/kibana/pull/83575[#83575]*
+
+====
+
 [[breaking_plugin_v7.11.0_84326]]
 .`SavedObjectsRepository.incrementCounter` supports array of fields
 [%collapsible]
