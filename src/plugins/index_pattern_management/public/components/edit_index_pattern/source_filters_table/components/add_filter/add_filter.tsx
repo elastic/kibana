@@ -31,7 +31,7 @@ const sourcePlaceholder = i18n.translate(
   'indexPatternManagement.editIndexPattern.sourcePlaceholder',
   {
     defaultMessage:
-      "source filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')",
+      "field filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')",
   }
 );
 

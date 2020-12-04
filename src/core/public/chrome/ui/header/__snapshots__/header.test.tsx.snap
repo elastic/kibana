@@ -4753,12 +4753,11 @@ exports[`Header renders 1`] = `
                         hasArrow={true}
                         id="headerHelpMenu"
                         isOpen={false}
-                        ownFocus={true}
+                        ownFocus={false}
                         panelPaddingSize="m"
                         repositionOnScroll={true}
                       >
                         <EuiOutsideClickDetector
-                          isDisabled={true}
                           onOutsideClick={[Function]}
                         >
                           <div
