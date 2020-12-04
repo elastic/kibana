@@ -5518,10 +5518,10 @@
   resolved "https://registry.yarnpkg.com/@types/proper-lockfile/-/proper-lockfile-3.0.1.tgz#dd770a2abce3adbcce3bd1ed892ce2f5f17fbc86"
   integrity sha512-ODOjqxmaNs0Zkij+BJovsNJRSX7BJrr681o8ZnNTNIcTermvVFzLpz/XFtfg3vNrlPVTJY1l4e9h2LvHoxC1lg==
 
-"@types/puppeteer@^1.20.1":
-  version "1.20.1"
-  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.20.1.tgz#0aba5ae3d290daa91cd3ba9f66ba5e9fba3499cc"
-  integrity sha512-F91CqYDHETg3pQfIPNBNZKmi7R1xS1y4yycOYX7o6Xk16KF+IV+9LqTmVuG+FIxw/53/JEy94zKjjGjg92V6bg==
+"@types/puppeteer@^5.4.1":
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-5.4.1.tgz#8d0075ad7705e8061b06df6a9a3abc6ca5fb7cd9"
+  integrity sha512-mEytIRrqvsFgs16rHOa5jcZcoycO/NSjg1oLQkFUegj3HOHeAP1EUfRi+eIsJdGrx2oOtfN39ckibkRXzs+qXA==
   dependencies:
     "@types/node" "*"
 
