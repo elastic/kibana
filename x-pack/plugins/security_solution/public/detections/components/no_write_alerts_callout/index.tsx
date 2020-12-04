@@ -5,18 +5,30 @@
  */
 
 import { EuiCallOut, EuiButton } from '@elastic/eui';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { useMessagesStorage } from '../../../common/containers/local_storage/use_messages_storage';
 
 import * as i18n from './translations';
 
-const NoWriteAlertsCallOutComponent = () => {
-  const [showCallOut, setShowCallOut] = useState(true);
-  const handleCallOut = useCallback(() => setShowCallOut(false), [setShowCallOut]);
+const MESSAGE_PLUGIN = 'security-detections';
+const MESSAGE_ID = 'dismiss-NoWriteAlertsCallOut';
 
-  return showCallOut ? (
+const NoWriteAlertsCallOutComponent = () => {
+  const { addMessage, hasMessage } = useMessagesStorage();
+
+  const wasDismissed = useMemo<boolean>(() => hasMessage(MESSAGE_PLUGIN, MESSAGE_ID), [hasMessage]);
+
+  const [isVisible, setIsVisible] = useState<boolean>(!wasDismissed);
+
+  const dismiss = useCallback(() => {
+    setIsVisible(false);
+    addMessage(MESSAGE_PLUGIN, MESSAGE_ID);
+  }, [setIsVisible, addMessage]);
+
+  return isVisible ? (
     <EuiCallOut title={i18n.NO_WRITE_ALERTS_CALLOUT_TITLE} iconType="iInCircle">
       <p>{i18n.NO_WRITE_ALERTS_CALLOUT_MSG}</p>
-      <EuiButton onClick={handleCallOut}>{i18n.DISMISS_CALLOUT}</EuiButton>
+      <EuiButton onClick={dismiss}>{i18n.DISMISS_CALLOUT}</EuiButton>
     </EuiCallOut>
   ) : null;
 };
