@@ -3,57 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
+import { registerTestBed, TestBed, findTestSubject } from '@kbn/test/jest';
 
-import { registerTestBed, TestBed } from '@kbn/test/jest';
-import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
+// This import needs to come first as it sets the jest.mock calls
+import { WithAppDependencies } from './setup_environment';
 import { getChildFieldsName } from '../../../lib';
+import { RuntimeField } from '../../../shared_imports';
 import { MappingsEditor } from '../../../mappings_editor';
-import { MappingsEditorProvider } from '../../../mappings_editor_context';
-
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-    // which does not produce a valid component wrapper
-    EuiComboBox: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockComboBox'}
-        data-currentvalue={props.selectedOptions}
-        onChange={async (syntheticEvent: any) => {
-          props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-      />
-    ),
-    // Mocking EuiSuperSelect to be able to easily change its value
-    // with a `myWrapper.simulate('change', { target: { value: 'someValue' } })`
-    EuiSuperSelect: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
-        value={props.valueOfSelected}
-        onChange={(e) => {
-          props.onChange(e.target.value);
-        }}
-      />
-    ),
-  };
-});
-
-const { GlobalFlyoutProvider } = GlobalFlyout;
 
 export interface DomFields {
   [key: string]: {
@@ -64,8 +23,9 @@ export interface DomFields {
 }
 
 const createActions = (testBed: TestBed<TestSubjects>) => {
-  const { find, form, component } = testBed;
+  const { find, exists, form, component } = testBed;
 
+  // --- Mapped fields ---
   const getFieldInfo = (testSubjectField: string): { name: string; type: string } => {
     const name = find(`${testSubjectField}-fieldName` as TestSubjects).text();
     const type = find(`${testSubjectField}-datatype` as TestSubjects).props()['data-type-value'];
@@ -206,8 +166,102 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     component.update();
   };
 
-  const selectTab = async (tab: 'fields' | 'templates' | 'advanced') => {
-    const index = ['fields', 'templates', 'advanced'].indexOf(tab);
+  // --- Runtime fields ---
+  const openRuntimeFieldEditor = () => {
+    find('createRuntimeFieldButton').simulate('click');
+    component.update();
+  };
+
+  const updateRuntimeFieldForm = async (field: RuntimeField) => {
+    const valueToLabelMap = {
+      keyword: 'Keyword',
+      date: 'Date',
+      ip: 'IP',
+      long: 'Long',
+      double: 'Double',
+      boolean: 'Boolean',
+    };
+
+    if (!exists('runtimeFieldEditor')) {
+      throw new Error(`Can't update runtime field form as the editor is not opened.`);
+    }
+
+    await act(async () => {
+      form.setInputValue('runtimeFieldEditor.nameField.input', field.name);
+      form.setInputValue('runtimeFieldEditor.scriptField', field.script.source);
+      find('typeField').simulate('change', [
+        {
+          label: valueToLabelMap[field.type],
+          value: field.type,
+        },
+      ]);
+    });
+  };
+
+  const getRuntimeFieldsList = () => {
+    const fields = find('runtimeFieldsListItem').map((wrapper) => wrapper);
+    return fields.map((field) => {
+      return {
+        reactWrapper: field,
+        name: findTestSubject(field, 'fieldName').text(),
+        type: findTestSubject(field, 'fieldType').text(),
+      };
+    });
+  };
+
+  /**
+   * Open the editor, fill the form and close the editor
+   * @param field the field to add
+   */
+  const addRuntimeField = async (field: RuntimeField) => {
+    openRuntimeFieldEditor();
+
+    await updateRuntimeFieldForm(field);
+
+    await act(async () => {
+      find('runtimeFieldEditor.saveFieldButton').simulate('click');
+    });
+    component.update();
+  };
+
+  const deleteRuntimeField = async (name: string) => {
+    const runtimeField = getRuntimeFieldsList().find((field) => field.name === name);
+
+    if (!runtimeField) {
+      throw new Error(`Runtime field "${name}" to delete not found.`);
+    }
+
+    await act(async () => {
+      findTestSubject(runtimeField.reactWrapper, 'removeFieldButton').simulate('click');
+    });
+    component.update();
+
+    // Modal is opened, confirm deletion
+    const modal = find('runtimeFieldDeleteConfirmModal');
+
+    act(() => {
+      findTestSubject(modal, 'confirmModalConfirmButton').simulate('click');
+    });
+
+    component.update();
+  };
+
+  const startEditRuntimeField = async (name: string) => {
+    const runtimeField = getRuntimeFieldsList().find((field) => field.name === name);
+
+    if (!runtimeField) {
+      throw new Error(`Runtime field "${name}" to edit not found.`);
+    }
+
+    await act(async () => {
+      findTestSubject(runtimeField.reactWrapper, 'editFieldButton').simulate('click');
+    });
+    component.update();
+  };
+
+  // --- Other ---
+  const selectTab = async (tab: 'fields' | 'runtimeFields' | 'templates' | 'advanced') => {
+    const index = ['fields', 'runtimeFields', 'templates', 'advanced'].indexOf(tab);
 
     const tabElement = find('formTab').at(index);
     if (tabElement.length === 0) {
@@ -268,19 +322,17 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     getToggleValue,
     getCheckboxValue,
     toggleFormRow,
+    openRuntimeFieldEditor,
+    getRuntimeFieldsList,
+    updateRuntimeFieldForm,
+    addRuntimeField,
+    deleteRuntimeField,
+    startEditRuntimeField,
   };
 };
 
 export const setup = (props: any = { onUpdate() {} }): MappingsEditorTestBed => {
-  const ComponentToTest = (propsOverride: { [key: string]: any }) => (
-    <MappingsEditorProvider>
-      <GlobalFlyoutProvider>
-        <MappingsEditor {...props} {...propsOverride} />
-      </GlobalFlyoutProvider>
-    </MappingsEditorProvider>
-  );
-
-  const setupTestBed = registerTestBed<TestSubjects>(ComponentToTest, {
+  const setupTestBed = registerTestBed<TestSubjects>(WithAppDependencies(MappingsEditor), {
     memoryRouter: {
       wrapComponent: false,
     },
@@ -312,10 +364,12 @@ export const getMappingsEditorDataFactory = (onChangeHandler: jest.MockedFunctio
     const [arg] = mockCalls[mockCalls.length - 1];
     const { isValid, validate, getData } = arg;
 
-    let isMappingsValid = isValid;
+    let isMappingsValid: boolean = isValid;
 
     if (isMappingsValid === undefined) {
-      isMappingsValid = await act(validate);
+      await act(async () => {
+        isMappingsValid = await validate();
+      });
       component.update();
     }
 
