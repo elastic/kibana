@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const esArchiver = getService('esArchiver');
 
-  describe('lens rollup tests', () => {
+  describe.skip('lens rollup tests', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('lens/rollup/data');
       await esArchiver.loadIfNeeded('lens/rollup/config');
@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('lens/rollup/config');
     });
 
-    it.skip('should allow creation of lens xy chart', async () => {
+    it('should allow creation of lens xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
