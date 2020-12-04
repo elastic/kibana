@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 
 import {
+  DETECTION_ENGINE_SIGNALS_FINALIZE_UPGRADE_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATE_URL,
   DETECTION_ENGINE_SIGNALS_UPGRADE_URL,
 } from '../../../../plugins/security_solution/common/constants';
@@ -232,11 +233,79 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('finalizing signals upgrades', async () => {
-      it('returns completed: false and parrots the parameters if the task is still pending');
-      it('returns an error if the specified indexes do not match the task');
-      it('returns an error if the task does not exist');
+      let legacySignalsIndexName: string;
+      let outDatedSignalsIndexName: string;
+      let upgradeResponse: any;
+
+      beforeEach(async () => {
+        legacySignalsIndexName = getIndexNameFromLoad(
+          await esArchiver.load('signals/legacy_signals_index')
+        );
+        outDatedSignalsIndexName = getIndexNameFromLoad(
+          await esArchiver.load('signals/outdated_signals_index')
+        );
+
+        ({ body: upgradeResponse } = await supertest
+          .post(DETECTION_ENGINE_SIGNALS_UPGRADE_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ index: [legacySignalsIndexName, outDatedSignalsIndexName] })
+          .expect(200));
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload('signals/outdated_signals_index');
+        await esArchiver.unload('signals/legacy_signals_index');
+      });
+
+      it('returns an error if the specified indexes do not match the task', async () => {
+        const upgradeInfo = { ...upgradeResponse.indices[0], destination_index: 'bad index' };
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_UPGRADE_URL)
+          .set('kbn-xsrf', 'true')
+          .send(upgradeInfo)
+          .expect(400);
+
+        expect(body).to.eql({
+          message: `Upgrade parameters are invalid. The task_id [${upgradeInfo.task_id}] did not correspond to the indices [${upgradeInfo.source_index},${upgradeInfo.destination_index}]`,
+          status_code: 400,
+        });
+      });
+
+      it('returns an error if the task does not exist', async () => {
+        const upgradeInfo = { ...upgradeResponse.indices[0], task_id: 'nope' };
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_UPGRADE_URL)
+          .set('kbn-xsrf', 'true')
+          .send(upgradeInfo)
+          .expect(400);
+
+        expect(body).to.eql({
+          message: `Upgrade parameters are invalid. The task_id [${upgradeInfo.task_id}] does not exist.`,
+          status_code: 400,
+        });
+      });
+
       it('returns an error if the original signals and the upgraded signals have different counts');
-      it('replaces the original index alias with the upgraded one');
+
+      it('replaces the original index alias with the upgraded one', async () => {
+        const upgradeInfo = upgradeResponse.indices[0];
+        await supertest
+          .post(DETECTION_ENGINE_SIGNALS_FINALIZE_UPGRADE_URL)
+          .set('kbn-xsrf', 'true')
+          .send(upgradeInfo)
+          .expect(200);
+
+        const { body } = await supertest
+          .get(DETECTION_ENGINE_SIGNALS_MIGRATE_URL)
+          .query({ from: '2020-10-10' })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        expect(body.indices).to.contain({
+          name: upgradeInfo.destination_index,
+        });
+      });
+
       it('marks the original index for deletion');
     });
   });
