@@ -17,8 +17,9 @@ import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ReactWrapper } from 'enzyme';
-import { AppContextProvider } from '../../app_context';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+
 jest.mock('../../lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
   health: jest.fn((async) => ({ isSufficientlySecure: true, hasPermanentEncryptionKey: true })),
@@ -60,6 +61,7 @@ describe('alert_add', () => {
           },
         ],
         defaultActionGroupId: 'testActionGroup',
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers: {
           [ALERTS_FEATURE_ID]: { read: true, all: true },
@@ -130,7 +132,7 @@ describe('alert_add', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={{ ...deps }}>
         <AlertsContextProvider
           value={{
             reloadAlerts: () => {
@@ -160,7 +162,7 @@ describe('alert_add', () => {
             initialValues={initialValues}
           />
         </AlertsContextProvider>
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     // Wait for active space to resolve before requesting the component to update

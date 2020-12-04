@@ -30,6 +30,7 @@ import {
   EuiLink,
   EuiText,
   EuiNotificationBadge,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -57,6 +58,8 @@ import { AlertActionParam, ALERTS_FEATURE_ID } from '../../../../../alerts/commo
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './alert_form.scss';
+import { recoveredActionGroupMessage } from '../../constants';
+import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 
 const ENTER_KEY = 13;
 
@@ -305,6 +308,7 @@ export const AlertForm = ({
           ? !item.alertTypeModel.requiresAppContext
           : item.alertType!.producer === alert.consumer
       );
+  const selectedAlertType = alert?.alertTypeId && alertTypesIndex?.get(alert?.alertTypeId);
 
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
 
@@ -460,45 +464,53 @@ export const AlertForm = ({
       {AlertParamsExpressionComponent &&
       defaultActionGroupId &&
       alert.alertTypeId &&
-      alertTypesIndex?.has(alert.alertTypeId) ? (
-        <Suspense fallback={<CenterJustifiedSpinner />}>
-          <AlertParamsExpressionComponent
-            alertParams={alert.params}
-            alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
-            alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
-            errors={errors}
-            setAlertParams={setAlertParams}
-            setAlertProperty={setAlertProperty}
-            alertsContext={alertsContext}
-            defaultActionGroupId={defaultActionGroupId}
-            actionGroups={alertTypesIndex.get(alert.alertTypeId)!.actionGroups}
-          />
-        </Suspense>
+      selectedAlertType ? (
+        <EuiErrorBoundary>
+          <Suspense fallback={<CenterJustifiedSpinner />}>
+            <AlertParamsExpressionComponent
+              alertParams={alert.params}
+              alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+              alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
+              errors={errors}
+              setAlertParams={setAlertParams}
+              setAlertProperty={setAlertProperty}
+              alertsContext={alertsContext}
+              defaultActionGroupId={defaultActionGroupId}
+              actionGroups={selectedAlertType.actionGroups}
+            />
+          </Suspense>
+        </EuiErrorBoundary>
       ) : null}
       {canShowActions &&
       defaultActionGroupId &&
       alertTypeModel &&
       alert.alertTypeId &&
-      alertTypesIndex?.has(alert.alertTypeId) ? (
+      selectedAlertType ? (
         <ActionForm
           actions={alert.actions}
           setHasActionsDisabled={setHasActionsDisabled}
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          messageVariables={alertTypesIndex.get(alert.alertTypeId)!.actionVariables}
+          messageVariables={selectedAlertType.actionVariables}
           defaultActionGroupId={defaultActionGroupId}
-          actionGroups={alertTypesIndex.get(alert.alertTypeId)!.actionGroups}
+          actionGroups={selectedAlertType.actionGroups.map((actionGroup) =>
+            actionGroup.id === selectedAlertType.recoveryActionGroup.id
+              ? {
+                  ...actionGroup,
+                  omitOptionalMessageVariables: true,
+                  defaultActionMessage: recoveredActionGroupMessage,
+                }
+              : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
+          )}
+          getDefaultActionParams={getDefaultsForActionParams(
+            (actionGroupId) => actionGroupId === selectedAlertType.recoveryActionGroup.id
+          )}
           setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
           setActionGroupIdByIndex={(group: string, index: number) =>
             setActionProperty('group', group, index)
           }
-          setAlertProperty={setActions}
+          setActions={setActions}
           setActionParamsProperty={setActionParamsProperty}
-          http={http}
           actionTypeRegistry={actionTypeRegistry}
-          defaultActionMessage={alertTypeModel?.defaultActionMessage}
-          toastNotifications={toastNotifications}
-          docLinks={docLinks}
-          capabilities={capabilities}
         />
       ) : null}
     </Fragment>

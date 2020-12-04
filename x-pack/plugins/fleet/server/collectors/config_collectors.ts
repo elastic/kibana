@@ -6,6 +6,6 @@
 
 import { FleetConfigType } from '..';
 
-export const getIsFleetEnabled = (config: FleetConfigType) => {
+export const getIsAgentsEnabled = (config: FleetConfigType) => {
   return config.agents.enabled;
 };

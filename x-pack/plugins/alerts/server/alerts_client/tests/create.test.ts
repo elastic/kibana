@@ -15,6 +15,7 @@ import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { RecoveredActionGroup } from '../../../common';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -378,9 +379,7 @@ describe('create()', () => {
         "scheduledTaskId": "task-123",
       }
     `);
-    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
-      ActionsClient
-    >;
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
   });
 
@@ -685,6 +684,7 @@ describe('create()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -702,9 +702,7 @@ describe('create()', () => {
   test('throws error if loading actions fails', async () => {
     const data = getMockData();
     // Reset from default behaviour
-    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
-      ActionsClient
-    >;
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockRejectedValueOnce(new Error('Test Error'));
     alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);

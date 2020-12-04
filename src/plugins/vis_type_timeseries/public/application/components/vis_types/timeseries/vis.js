@@ -34,24 +34,23 @@ import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 import { getCoreStart } from '../../../../services';
 
-export class TimeseriesVisualization extends Component {
+class TimeseriesVisualization extends Component {
   static propTypes = {
     model: PropTypes.object,
     onBrush: PropTypes.func,
     visData: PropTypes.object,
-    dateFormat: PropTypes.string,
     getConfig: PropTypes.func,
   };
 
-  xAxisFormatter = (interval) => (val) => {
-    const { scaledDataFormat, dateFormat } = this.props.visData;
+  scaledDataFormat = this.props.getConfig('dateFormat:scaled');
+  dateFormat = this.props.getConfig('dateFormat');
 
-    if (!scaledDataFormat || !dateFormat) {
+  xAxisFormatter = (interval) => (val) => {
+    if (!this.scaledDataFormat || !this.dateFormat) {
       return val;
     }
 
-    const formatter = createXaxisFormatter(interval, scaledDataFormat, dateFormat);
-
+    const formatter = createXaxisFormatter(interval, this.scaledDataFormat, this.dateFormat);
     return formatter(val);
   };
 
@@ -245,3 +244,7 @@ export class TimeseriesVisualization extends Component {
     );
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TimeseriesVisualization as default };
