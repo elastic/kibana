@@ -244,15 +244,15 @@ export class VectorStyle implements IVectorStyle {
   async _updateFieldsInDescriptor(
     nextFields: IField[],
     styleFieldsHelper: StyleFieldsHelper,
-    originalProperties: VectorStylePropertiesDescriptor,
     previousFields: IField[]
   ) {
+    const originalProperties = this.getRawProperties();
     const invalidStyleNames: VECTOR_STYLES[] = (Object.keys(
       originalProperties
     ) as VECTOR_STYLES[]).filter((key) => {
       const dynamicOptions = getDynamicOptions(originalProperties, key);
       if (!dynamicOptions || !dynamicOptions.field || !dynamicOptions.field.name) {
-        return;
+        return false;
       }
 
       const hasMatchingField = nextFields.some((field) => {
@@ -265,6 +265,7 @@ export class VectorStyle implements IVectorStyle {
 
     let hasChanges = false;
 
+    const updatedProperties: VectorStylePropertiesDescriptor = { ...originalProperties };
     invalidStyleNames.forEach((invalidStyleName) => {
       for (let i = 0; i < previousFields.length; i++) {
         const previousField = previousFields[i];
@@ -284,24 +285,28 @@ export class VectorStyle implements IVectorStyle {
           name: previousField.getName(),
         });
         hasChanges = true;
-        (originalProperties[invalidStyleName]!
-          .options! as DynamicStylePropertyOptions).field = newFieldDescriptor;
+        updatedProperties[invalidStyleName] = {
+          ...originalProperties[invalidStyleName],
+          options: {
+            ...originalProperties[invalidStyleName].options,
+            field: newFieldDescriptor,
+          },
+        };
       }
     });
 
     return {
       hasChanges,
-      nextStyleDescriptor: VectorStyle.createDescriptor(originalProperties, this.isTimeAware()),
+      nextStyleDescriptor: VectorStyle.createDescriptor(updatedProperties, this.isTimeAware()),
     };
   }
 
   async _deleteFieldsFromDescriptorAndUpdateStyling(
     nextFields: IField[],
     styleFieldsHelper: StyleFieldsHelper,
-    originalProperties: VectorStylePropertiesDescriptor,
-    mapColors: string[],
-    hasChanges: boolean
+    mapColors: string[]
   ) {
+    const originalProperties = this.getRawProperties();
     const updatedProperties = {} as VectorStylePropertiesDescriptor;
 
     const dynamicProperties = (Object.keys(originalProperties) as VECTOR_STYLES[]).filter((key) => {
@@ -360,8 +365,8 @@ export class VectorStyle implements IVectorStyle {
       };
     } else {
       return {
-        hasChanges,
-        nextStyleDescriptor: VectorStyle.createDescriptor(originalProperties, this.isTimeAware()),
+        hasChanges: false,
+        nextStyleDescriptor: { ...this._descriptor },
       };
     }
   }
@@ -386,20 +391,12 @@ export class VectorStyle implements IVectorStyle {
 
     return previousFields.length === nextFields.length
       ? // Field-config changed
-        await this._updateFieldsInDescriptor(
-          nextFields,
-          styleFieldsHelper,
-          this.getRawProperties(),
-          previousFields,
-          mapColors
-        )
+        await this._updateFieldsInDescriptor(nextFields, styleFieldsHelper, previousFields)
       : // Deletions or additions
         await this._deleteFieldsFromDescriptorAndUpdateStyling(
           nextFields,
           styleFieldsHelper,
-          this.getRawProperties(),
-          mapColors,
-          false
+          mapColors
         );
   }
 
@@ -554,7 +551,7 @@ export class VectorStyle implements IVectorStyle {
     return this._descriptor.isTimeAware;
   }
 
-  getRawProperties() {
+  getRawProperties(): VectorStylePropertiesDescriptor {
     return this._descriptor.properties || {};
   }
 
@@ -981,7 +978,7 @@ function getDynamicOptions(
 function rectifyFieldDescriptor(
   currentField: IESAggField,
   previousFieldDescriptor: StylePropertyField
-): Promise<StylePropertyField | undefined> {
+): StylePropertyField {
   return {
     origin: previousFieldDescriptor.origin,
     name: currentField.getName(),

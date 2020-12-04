@@ -282,13 +282,13 @@ export function updateMetricsProp(layerId, value) {
     getState: () => MapStoreState
   ) => {
     const layer = getLayerById(layerId, getState());
+    const previousFields = await (layer as IVectorLayer).getFields();
     await dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
       propName: 'metrics',
       value,
     });
-    const previousFields = await (layer as IVectorLayer).getFields();
     await dispatch(updateStyleProperties(layerId, previousFields as IESAggField[]));
     dispatch(syncDataForLayerId(layerId));
   };

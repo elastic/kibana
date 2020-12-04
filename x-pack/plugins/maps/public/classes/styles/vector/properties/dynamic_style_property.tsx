@@ -18,7 +18,6 @@ import {
   VECTOR_STYLES,
   RawValue,
   FieldFormatter,
-  TOP_TERM_PERCENTAGE_SUFFIX,
 } from '../../../../../common/constants';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
 import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
@@ -27,14 +26,12 @@ import {
   FieldMetaOptions,
   RangeFieldMeta,
   StyleMetaData,
-  StylePropertyField,
 } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
-import { IESAggField } from '../../../fields/agg';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
