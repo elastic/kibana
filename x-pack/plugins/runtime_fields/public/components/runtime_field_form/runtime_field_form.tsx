@@ -126,7 +126,7 @@ const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessConte
     case 'boolean':
       return 'boolean_script_field_script_field';
     default:
-      return 'painless_test';
+      return 'string_script_field_script_field';
   }
 };
 

@@ -90,7 +90,7 @@ interface Context {
    * An array of existing concrete fields. If the user gives a name to the runtime
    * field that matches one of the concrete fields, a callout will be displayed
    * to indicate that this runtime field will shadow the concrete field.
-   * This array is also used to provide the list of field autocomplete suggestions to the * code editor
+   * This array is also used to provide the list of field autocomplete suggestions to the code editor
    */
   existingConcreteFields?: Array<{
     name: string;
