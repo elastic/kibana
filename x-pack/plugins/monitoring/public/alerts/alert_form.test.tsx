@@ -4,32 +4,71 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+/**
+ * Prevent any breaking changes to context requirement from breaking the alert form/actions
+ */
+
+import React, { Fragment, lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { ReactWrapper } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../../triggers_actions_ui/public/application/alert_type_registry.mock';
 import { ValidationResult, Alert } from '../../../triggers_actions_ui/public/types';
 import { AlertForm } from '../../../triggers_actions_ui/public/application/sections/alert_form/alert_form';
+import ActionForm from '../../../triggers_actions_ui/public/application/sections/action_connector_form/action_form';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public/application/context/alerts_context';
+import { Legacy } from '../legacy_shims';
+import { I18nProvider } from '@kbn/i18n/react';
+import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
 
-const ALERTS_FEATURE_ID = 'alerts';
-const validationMethod = (): ValidationResult => ({ errors: {} });
+interface AlertAction {
+  group: string;
+  id: string;
+  actionTypeId: string;
+  params: unknown;
+}
 
-const actionTypeRegistry = actionTypeRegistryMock.create();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+jest.mock('../../../triggers_actions_ui/public/application/lib/action_connector_api', () => ({
+  loadAllActions: jest.fn(),
+  loadActionTypes: jest.fn(),
+}));
+
 jest.mock('../../../triggers_actions_ui/public/application/lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
 }));
 
+const initLegacyShims = () => {
+  const triggersActionsUi = {
+    actionTypeRegistry: actionTypeRegistryMock.create(),
+    alertTypeRegistry: alertTypeRegistryMock.create(),
+  };
+  const data = { query: { timefilter: { timefilter: {} } } } as any;
+  const ngInjector = {} as angular.auto.IInjectorService;
+  Legacy.init(
+    {
+      core: coreMock.createStart(),
+      data,
+      isCloud: false,
+      triggersActionsUi,
+      usageCollection: {},
+    } as any,
+    ngInjector
+  );
+};
+
+const ALERTS_FEATURE_ID = 'alerts';
+const validationMethod = (): ValidationResult => ({ errors: {} });
+const actionTypeRegistry = actionTypeRegistryMock.create();
+const alertTypeRegistry = alertTypeRegistryMock.create();
+
 describe('alert_form', () => {
   beforeEach(() => {
+    initLegacyShims();
     jest.resetAllMocks();
   });
 
-  let deps: any;
   const alertType = {
     id: 'alert-type',
     iconClass: 'test',
@@ -41,6 +80,12 @@ describe('alert_form', () => {
     requiresAppContext: false,
   };
 
+  const mockedActionParamsFields = lazy(async () => ({
+    default() {
+      return <Fragment />;
+    },
+  }));
+
   const actionType = {
     id: 'alert-action-type',
     iconClass: '',
@@ -48,7 +93,7 @@ describe('alert_form', () => {
     validateConnector: validationMethod,
     validateParams: validationMethod,
     actionConnectorFields: null,
-    actionParamsFields: null,
+    actionParamsFields: mockedActionParamsFields,
   };
 
   describe('alert_form edit alert', () => {
@@ -56,19 +101,19 @@ describe('alert_form', () => {
 
     beforeEach(async () => {
       const coreStart = coreMock.createStart();
-      deps = {
-        toastNotifications: coreStart.notifications.toasts,
-        ...coreStart,
-        actionTypeRegistry,
-        alertTypeRegistry,
-      };
-
       alertTypeRegistry.list.mockReturnValue([alertType]);
       alertTypeRegistry.get.mockReturnValue(alertType);
       alertTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
+
+      const monitoringDependencies = {
+        toastNotifications: coreStart.notifications.toasts,
+        ...Legacy.shims.kibanaServices,
+        actionTypeRegistry,
+        alertTypeRegistry,
+      } as any;
 
       const initialAlert = ({
         name: 'test',
@@ -88,10 +133,7 @@ describe('alert_form', () => {
       wrapper = mountWithIntl(
         <AlertsContextProvider
           value={{
-            reloadAlerts: () => {
-              return new Promise<void>(() => {});
-            },
-            ...deps,
+            ...monitoringDependencies,
           }}
         >
           <AlertForm
@@ -127,6 +169,102 @@ describe('alert_form', () => {
       throttleField.at(1).simulate('change', { target: { value: newThrottle.toString() } });
       const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
       expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
+    });
+  });
+
+  describe('alert_form > action_form', () => {
+    describe('action_form in alert', () => {
+      async function setup() {
+        initLegacyShims();
+        const { loadAllActions } = jest.requireMock(
+          '../../../triggers_actions_ui/public/application/lib/action_connector_api'
+        );
+        loadAllActions.mockResolvedValueOnce([
+          {
+            secrets: {},
+            id: 'test',
+            actionTypeId: actionType.id,
+            name: 'Test connector',
+            config: {},
+            isPreconfigured: false,
+          },
+        ]);
+
+        actionTypeRegistry.list.mockReturnValue([actionType]);
+        actionTypeRegistry.has.mockReturnValue(true);
+        actionTypeRegistry.get.mockReturnValue(actionType);
+
+        const initialAlert = ({
+          name: 'test',
+          alertTypeId: alertType.id,
+          params: {},
+          consumer: ALERTS_FEATURE_ID,
+          schedule: {
+            interval: '1m',
+          },
+          actions: [
+            {
+              group: 'default',
+              id: 'test',
+              actionTypeId: actionType.id,
+              params: {
+                message: '',
+              },
+            },
+          ],
+          tags: [],
+          muteAll: false,
+          enabled: false,
+          mutedInstanceIds: [],
+        } as unknown) as Alert;
+
+        const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
+
+        const actionWrapper = mount(
+          <I18nProvider>
+            <KibanaReactContext.Provider>
+              <ActionForm
+                actions={initialAlert.actions}
+                defaultActionGroupId={'default'}
+                setActionIdByIndex={(id: string, index: number) => {
+                  initialAlert.actions[index].id = id;
+                }}
+                setAlertProperty={(_updatedActions: AlertAction[]) => {}}
+                setActionParamsProperty={(key: string, value: any, index: number) =>
+                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                }
+                actionTypeRegistry={actionTypeRegistry}
+                actionTypes={[
+                  {
+                    id: actionType.id,
+                    name: 'Test',
+                    enabled: true,
+                    enabledInConfig: true,
+                    enabledInLicense: true,
+                    minimumLicenseRequired: 'basic',
+                  },
+                ]}
+              />
+            </KibanaReactContext.Provider>
+          </I18nProvider>
+        );
+
+        // Wait for active space to resolve before requesting the component to update
+        await act(async () => {
+          await nextTick();
+          actionWrapper.update();
+        });
+
+        return actionWrapper;
+      }
+
+      it('renders available action cards', async () => {
+        const wrapperTwo = await setup();
+        const actionOption = wrapperTwo.find(
+          `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+        );
+        expect(actionOption.exists()).toBeTruthy();
+      });
     });
   });
 });
