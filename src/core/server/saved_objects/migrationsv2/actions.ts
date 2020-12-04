@@ -282,7 +282,7 @@ const waitForTask = (
   client: ElasticsearchClient,
   taskId: string,
   timeout: string
-): TaskEither.TaskEither<never, WaitForTaskResponse> => () => {
+): TaskEither.TaskEither<RetryableEsClientError, WaitForTaskResponse> => () => {
   return client.tasks
     .get<{
       completed: boolean;
@@ -305,7 +305,8 @@ const waitForTask = (
             : Option.none,
         description: body.task.description,
       });
-    });
+    })
+    .catch(catchRetryableEsClientErrors);
 };
 
 export interface UpdateByQueryResponse {
@@ -384,7 +385,7 @@ export const reindex = (
   sourceIndex: string,
   targetIndex: string,
   reindexScript: Option.Option<string>
-): TaskEither.TaskEither<never, ReindexResponse> => () => {
+): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
       // Require targetIndex to be an alias. Prevents a new index from being
@@ -417,7 +418,8 @@ export const reindex = (
     })
     .then(({ body: { task: taskId } }) => {
       return Either.right({ taskId });
-    });
+    })
+    .catch(catchRetryableEsClientErrors);
 };
 
 export const waitForReindexTask = flow(
@@ -434,28 +436,19 @@ export const waitForReindexTask = flow(
       const failureIsAWriteBlock = ({ type, reason }: { type: string; reason: string }) =>
         type === 'cluster_block_exception' &&
         reason.match(/index \[.+] blocked by: \[FORBIDDEN\/8\/index write \(api\)\]/);
-      const failureIsSnapshotInProgress = ({ type }: { type: string }) =>
-        type === 'snapshot_in_progress_exception';
 
-      if (Option.isSome(res.error) && res.error.value.type === 'index_not_found_exception') {
-        return TaskEither.left({
-          type: 'index_not_found_exception' as const,
-          index: res.error.value.index,
-        });
+      if (Option.isSome(res.error)) {
+        if (res.error.value.type === 'index_not_found_exception') {
+          return TaskEither.left({
+            type: 'index_not_found_exception' as const,
+            index: res.error.value.index,
+          });
+        } else {
+          throw new Error('Reindex failed with the following error:\n' + JSON.stringify(res.error));
+        }
       } else if (Option.isSome(res.failures)) {
         if (res.failures.value.every(failureIsAWriteBlock)) {
           return TaskEither.left({ type: 'target_index_had_write_block' as const });
-        } else if (res.failures.value.some(failureIsSnapshotInProgress)) {
-          // TODO: Reindex will automatically retry read and write failures.
-          // Is it still necessary to handle retryable failures like
-          // snapshot_in_progress_exception ourselves? If this is rare enough
-          // it's sufficient to let the whole migration crash and retry the
-          // migration from scratch instead of retrying the reindex step only.
-          // TODO: I haven't been able to reproduce this error
-          return TaskEither.left({
-            type: 'retryable_es_client_error',
-            message: 'snapshot_in_progress_exception',
-          });
         } else {
           throw new Error(
             'Reindex failed with the following failures:\n' + JSON.stringify(res.failures)
@@ -472,16 +465,7 @@ export const waitForUpdateByQeuryTask = flow(
   waitForTask,
   TaskEither.chain(
     (res): TaskEither.TaskEither<RetryableEsClientError, 'update_by_query_succeeded'> => {
-      const failureIsSnapshotInProgress = ({ type }: { type: string }) =>
-        type === 'snapshot_in_progress_exception';
       if (Option.isSome(res.failures)) {
-        if (res.failures.value.some(failureIsSnapshotInProgress)) {
-          // TODO: I haven't been able to reproduce this error
-          return TaskEither.left({
-            type: 'retryable_es_client_error',
-            message: 'snapshot_in_progress_exception',
-          });
-        }
         throw new Error(
           'update_by_query failed with the following failures:\n' +
             JSON.stringify(res.failures.value)
@@ -513,7 +497,8 @@ export const updateAliases = (
 ): TaskEither.TaskEither<
   | { type: 'index_not_found_exception'; index: string }
   | { type: 'alias_not_found_exception' }
-  | { type: 'remove_index_not_a_concrete_index' },
+  | { type: 'remove_index_not_a_concrete_index' }
+  | RetryableEsClientError,
   'update_aliases_succeeded'
 > => () => {
   return client.indices
@@ -522,7 +507,7 @@ export const updateAliases = (
         actions: aliasActions,
       },
     })
-    .then((res) => {
+    .then(() => {
       return Either.right('update_aliases_succeeded' as const);
     })
     .catch((err: EsErrors.ElasticsearchClientError) => {
@@ -538,18 +523,19 @@ export const updateAliases = (
             /The provided expression \[.+\] matches an alias, specify the corresponding concrete indices instead./
           )
         ) {
-          return Either.left({ type: 'remove_index_not_a_concrete_index' });
+          return Either.left({ type: 'remove_index_not_a_concrete_index' as const });
         } else if (
           err.body.error.type === 'resource_not_found_exception' &&
           err.body.error.reason.match(/required alias \[.+\] does not exist/)
         ) {
           return Either.left({
-            type: 'alias_not_found_exception',
+            type: 'alias_not_found_exception' as const,
           });
         }
       }
       throw err;
-    });
+    })
+    .catch(catchRetryableEsClientErrors);
 };
 
 export interface AcknowledgeResponse {

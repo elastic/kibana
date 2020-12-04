@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
-import { InternalCoreStart } from 'src/core/server/internal_types';
+import { ElasticsearchClient } from '../../../';
+import { InternalCoreStart } from '../../../internal_types';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import { SavedObjectsRawDoc } from '../../serialization';
@@ -87,15 +87,12 @@ describe('migration actions', () => {
   describe('waitForReindexTask', () => {
     it.todo('returns left index_not_found_exception');
     it.todo('returns left target_index_had_write_block if all failures are due to a write block');
-    it.todo(
-      'returns left retryable_es_client_error if some failures were due to a snapshot_in_progress_exception'
-    );
   });
 
   describe('waitForUpdateByQueryTask', () => {
-    it.todo(
-      'returns left retryable_es_client_error if some failures were due to a snapshot_in_progress_exception'
-    );
+    it.todo('throws if there are failures');
+    it.todo('throws if there is an error');
+    it.todo('returns right when successful');
   });
 
   describe('updateAliases', () => {
