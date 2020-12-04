@@ -7,6 +7,7 @@
 import { extname } from 'path';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
+import uuidv5 from 'uuid/v5';
 import {
   PACKAGE_ASSETS_INDEX_NAME,
   InstallablePackage,
@@ -16,6 +17,10 @@ import {
 import { CallESAsCurrentUser } from '../../../types';
 import { appContextService } from '../../../services';
 import { getArchiveEntry } from './index';
+
+// uuid v5 requires a SHA-1 UUID as a namespace
+// used to ensure consistent ids when given the same inputs
+const ID_NAMESPACE = '71403015-cdd5-404b-a5da-6c43f35cad84';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
@@ -87,7 +92,10 @@ export async function createBulkBody(opts: {
       const { name, version } = packageInfo;
       const doc = await archiveEntryToESDocument({ path, buffer, name, version, installSource });
       const action = {
-        index: { _index: PACKAGE_ASSETS_INDEX_NAME, _id: doc.asset_path },
+        index: {
+          _index: PACKAGE_ASSETS_INDEX_NAME,
+          _id: uuidv5(doc.asset_path, ID_NAMESPACE),
+        },
       };
 
       return [action, doc];
