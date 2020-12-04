@@ -4,52 +4,62 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { upperFirst, get } from 'lodash';
+import { upperFirst } from 'lodash';
+import { LegacyRequest, ElasticsearchResponse } from '../../types';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
+// @ts-ignore
 import { createBeatsQuery } from './create_beats_query.js';
+// @ts-ignore
 import { getDiffCalculation } from './_beats_stats';
 
-export function handleResponse(response, beatUuid) {
-  const firstStats = get(
-    response,
-    'hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats'
-  );
-  const stats = get(response, 'hits.hits[0]._source.beats_stats');
+export function handleResponse(response: ElasticsearchResponse, beatUuid: string) {
+  if (!response.hits || response.hits.hits.length === 0) {
+    return {};
+  }
 
-  const eventsTotalFirst = get(firstStats, 'metrics.libbeat.pipeline.events.total', null);
-  const eventsEmittedFirst = get(firstStats, 'metrics.libbeat.pipeline.events.published', null);
-  const eventsDroppedFirst = get(firstStats, 'metrics.libbeat.pipeline.events.dropped', null);
-  const bytesWrittenFirst = get(firstStats, 'metrics.libbeat.output.write.bytes', null);
+  const firstStats = response.hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats;
+  const stats = response.hits.hits[0]._source.beats_stats;
 
-  const eventsTotalLast = get(stats, 'metrics.libbeat.pipeline.events.total', null);
-  const eventsEmittedLast = get(stats, 'metrics.libbeat.pipeline.events.published', null);
-  const eventsDroppedLast = get(stats, 'metrics.libbeat.pipeline.events.dropped', null);
-  const bytesWrittenLast = get(stats, 'metrics.libbeat.output.write.bytes', null);
-  const handlesHardLimit = get(stats, 'metrics.beat.handles.limit.hard', null);
-  const handlesSoftLimit = get(stats, 'metrics.beat.handles.limit.soft', null);
+  const eventsTotalFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.total ?? null;
+  const eventsEmittedFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.published ?? null;
+  const eventsDroppedFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.dropped ?? null;
+  const bytesWrittenFirst = firstStats?.metrics?.libbeat?.output?.write?.bytes ?? null;
+
+  const eventsTotalLast = stats?.metrics?.libbeat?.pipeline?.events?.total ?? null;
+  const eventsEmittedLast = stats?.metrics?.libbeat?.pipeline?.events?.published ?? null;
+  const eventsDroppedLast = stats?.metrics?.libbeat?.pipeline?.events?.dropped ?? null;
+  const bytesWrittenLast = stats?.metrics?.libbeat?.output?.write?.bytes ?? null;
+  const handlesHardLimit = stats?.metrics?.beat?.handles?.limit?.hard ?? null;
+  const handlesSoftLimit = stats?.metrics?.beat?.handles?.limit?.soft ?? null;
 
   return {
     uuid: beatUuid,
-    transportAddress: get(stats, 'beat.host', null),
-    version: get(stats, 'beat.version', null),
-    name: get(stats, 'beat.name', null),
-    type: upperFirst(get(stats, 'beat.type')) || null,
-    output: upperFirst(get(stats, 'metrics.libbeat.output.type')) || null,
-    configReloads: get(stats, 'metrics.libbeat.config.reloads', null),
-    uptime: get(stats, 'metrics.beat.info.uptime.ms', null),
-    eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst),
-    eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst),
-    eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst),
-    bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst),
+    transportAddress: stats?.beat?.host ?? null,
+    version: stats?.beat?.version ?? null,
+    name: stats?.beat?.name ?? null,
+    type: upperFirst(stats?.beat?.type) ?? null,
+    output: upperFirst(stats?.metrics?.libbeat?.output?.type) ?? null,
+    configReloads: stats?.metrics?.libbeat?.config?.reloads ?? null,
+    uptime: stats?.metrics?.beat?.info?.uptime?.ms ?? null,
+    eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst) ?? null,
+    eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst) ?? null,
+    eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst) ?? null,
+    bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst) ?? null,
     handlesHardLimit,
     handlesSoftLimit,
   };
 }
 
 export async function getBeatSummary(
-  req,
-  beatsIndexPattern,
-  { clusterUuid, beatUuid, start, end }
+  req: LegacyRequest,
+  beatsIndexPattern: string,
+  {
+    clusterUuid,
+    beatUuid,
+    start,
+    end,
+  }: { clusterUuid: string; beatUuid: string; start: number; end: number }
 ) {
   checkParam(beatsIndexPattern, 'beatsIndexPattern in beats/getBeatSummary');
 
