@@ -37,50 +37,49 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       const alertId = response.body.id;
       objectRemover.add(spaceId, alertId, 'alert', 'alerts');
 
-      // Delay before performing update to avoid 409 errors
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await retry.try(async () => {
+        // break AAD
+        await supertest
+          .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${alertId}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            attributes: {
+              name: 'bar',
+            },
+          })
+          .expect(200);
 
-      // break AAD
-      await supertest
-        .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${alertId}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {
-            name: 'bar',
-          },
-        })
-        .expect(200);
-
-      const events = await retry.try(async () => {
-        // there can be a successful execute before the error one
-        const someEvents = await getEventLog({
-          getService,
-          spaceId,
-          type: 'alert',
-          id: alertId,
-          provider: 'alerting',
-          actions: new Map([['execute', { gte: 1 }]]),
+        const events = await retry.try(async () => {
+          // there can be a successful execute before the error one
+          const someEvents = await getEventLog({
+            getService,
+            spaceId,
+            type: 'alert',
+            id: alertId,
+            provider: 'alerting',
+            actions: new Map([['execute', { gte: 1 }]]),
+          });
+          const errorEvents = someEvents.filter(
+            (event) => event?.kibana?.alerting?.status === 'error'
+          );
+          if (errorEvents.length === 0) {
+            throw new Error('no execute/error events yet');
+          }
+          return errorEvents;
         });
-        const errorEvents = someEvents.filter(
-          (event) => event?.kibana?.alerting?.status === 'error'
-        );
-        if (errorEvents.length === 0) {
-          throw new Error('no execute/error events yet');
-        }
-        return errorEvents;
-      });
 
-      const event = events[0];
-      expect(event).to.be.ok();
+        const event = events[0];
+        expect(event).to.be.ok();
 
-      validateEvent(event, {
-        spaceId,
-        savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
-        outcome: 'failure',
-        message: `test.noop:${alertId}: execution failed`,
-        errorMessage: 'Unable to decrypt attribute "apiKey"',
-        status: 'error',
-        reason: 'decrypt',
+        validateEvent(event, {
+          spaceId,
+          savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
+          outcome: 'failure',
+          message: `test.noop:${alertId}: execution failed`,
+          errorMessage: 'Unable to decrypt attribute "apiKey"',
+          status: 'error',
+          reason: 'decrypt',
+        });
       });
     });
   });

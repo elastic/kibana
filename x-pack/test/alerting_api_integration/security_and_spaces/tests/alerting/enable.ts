@@ -20,6 +20,7 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default function createEnableAlertTests({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
+  const retry = getService('retry');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -304,68 +305,69 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
-          // Delay before performing update to avoid 409 errors
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await retry.try(async () => {
+            await supertest
+              .put(
+                `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
+              )
+              .set('kbn-xsrf', 'foo')
+              .send({
+                attributes: {
+                  name: 'bar',
+                },
+              })
+              .expect(200);
 
-          await supertest
-            .put(
-              `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
-            )
-            .set('kbn-xsrf', 'foo')
-            .send({
-              attributes: {
-                name: 'bar',
-              },
-            })
-            .expect(200);
+            const response = await alertUtils.getEnableRequest(createdAlert.id);
 
-          const response = await alertUtils.getEnableRequest(createdAlert.id);
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
-            case 'global_read at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'enable',
-                  'test.noop',
-                  'alertsFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
-            case 'superuser at space1':
-            case 'space_1_all at space1':
-            case 'space_1_all_alerts_none_actions at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(204);
-              expect(response.body).to.eql('');
-              const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
-                .set('kbn-xsrf', 'foo')
-                .auth(user.username, user.password)
-                .expect(200);
-              expect(typeof updatedAlert.scheduledTaskId).to.eql('string');
-              const { _source: taskRecord } = await getScheduledTask(updatedAlert.scheduledTaskId);
-              expect(taskRecord.type).to.eql('task');
-              expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
-              expect(JSON.parse(taskRecord.task.params)).to.eql({
-                alertId: createdAlert.id,
-                spaceId: space.id,
-              });
-              // Ensure AAD isn't broken
-              await checkAAD({
-                supertest,
-                spaceId: space.id,
-                type: 'alert',
-                id: createdAlert.id,
-              });
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
+            switch (scenario.id) {
+              case 'no_kibana_privileges at space1':
+              case 'space_1_all at space2':
+              case 'global_read at space1':
+                expect(response.statusCode).to.eql(403);
+                expect(response.body).to.eql({
+                  error: 'Forbidden',
+                  message: getConsumerUnauthorizedErrorMessage(
+                    'enable',
+                    'test.noop',
+                    'alertsFixture'
+                  ),
+                  statusCode: 403,
+                });
+                break;
+              case 'superuser at space1':
+              case 'space_1_all at space1':
+              case 'space_1_all_alerts_none_actions at space1':
+              case 'space_1_all_with_restricted_fixture at space1':
+                expect(response.statusCode).to.eql(204);
+                expect(response.body).to.eql('');
+                const { body: updatedAlert } = await supertestWithoutAuth
+                  .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                  .set('kbn-xsrf', 'foo')
+                  .auth(user.username, user.password)
+                  .expect(200);
+                expect(typeof updatedAlert.scheduledTaskId).to.eql('string');
+                const { _source: taskRecord } = await getScheduledTask(
+                  updatedAlert.scheduledTaskId
+                );
+                expect(taskRecord.type).to.eql('task');
+                expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+                expect(JSON.parse(taskRecord.task.params)).to.eql({
+                  alertId: createdAlert.id,
+                  spaceId: space.id,
+                });
+                // Ensure AAD isn't broken
+                await checkAAD({
+                  supertest,
+                  spaceId: space.id,
+                  type: 'alert',
+                  id: createdAlert.id,
+                });
+                break;
+              default:
+                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+            }
+          });
         });
 
         it(`shouldn't enable alert from another space`, async () => {

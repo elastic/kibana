@@ -428,89 +428,88 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
-          // Delay before performing update to avoid 409 errors
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await retry.try(async () => {
+            await supertest
+              .put(
+                `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
+              )
+              .set('kbn-xsrf', 'foo')
+              .send({
+                attributes: {
+                  name: 'bar',
+                },
+              })
+              .expect(200);
 
-          await supertest
-            .put(
-              `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
-            )
-            .set('kbn-xsrf', 'foo')
-            .send({
-              attributes: {
-                name: 'bar',
+            const updatedData = {
+              name: 'bcd',
+              tags: ['bar'],
+              params: {
+                foo: true,
               },
-            })
-            .expect(200);
+              schedule: { interval: '12s' },
+              actions: [],
+              throttle: '1m',
+            };
+            const response = await supertestWithoutAuth
+              .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+              .set('kbn-xsrf', 'foo')
+              .auth(user.username, user.password)
+              .send(updatedData);
 
-          const updatedData = {
-            name: 'bcd',
-            tags: ['bar'],
-            params: {
-              foo: true,
-            },
-            schedule: { interval: '12s' },
-            actions: [],
-            throttle: '1m',
-          };
-          const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
-            .set('kbn-xsrf', 'foo')
-            .auth(user.username, user.password)
-            .send(updatedData);
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
-            case 'global_read at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.noop',
-                  'alertsFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
-            case 'superuser at space1':
-            case 'space_1_all at space1':
-            case 'space_1_all_alerts_none_actions at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql({
-                ...updatedData,
-                id: createdAlert.id,
-                alertTypeId: 'test.noop',
-                consumer: 'alertsFixture',
-                createdBy: 'elastic',
-                enabled: true,
-                updatedBy: user.username,
-                apiKeyOwner: user.username,
-                muteAll: false,
-                mutedInstanceIds: [],
-                scheduledTaskId: createdAlert.scheduledTaskId,
-                createdAt: response.body.createdAt,
-                updatedAt: response.body.updatedAt,
-                executionStatus: response.body.executionStatus,
-              });
-              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
-              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
-              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(
-                Date.parse(response.body.createdAt)
-              );
-              // Ensure AAD isn't broken
-              await checkAAD({
-                supertest,
-                spaceId: space.id,
-                type: 'alert',
-                id: createdAlert.id,
-              });
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
+            switch (scenario.id) {
+              case 'no_kibana_privileges at space1':
+              case 'space_1_all at space2':
+              case 'global_read at space1':
+                expect(response.statusCode).to.eql(403);
+                expect(response.body).to.eql({
+                  error: 'Forbidden',
+                  message: getConsumerUnauthorizedErrorMessage(
+                    'update',
+                    'test.noop',
+                    'alertsFixture'
+                  ),
+                  statusCode: 403,
+                });
+                break;
+              case 'superuser at space1':
+              case 'space_1_all at space1':
+              case 'space_1_all_alerts_none_actions at space1':
+              case 'space_1_all_with_restricted_fixture at space1':
+                expect(response.statusCode).to.eql(200);
+                expect(response.body).to.eql({
+                  ...updatedData,
+                  id: createdAlert.id,
+                  alertTypeId: 'test.noop',
+                  consumer: 'alertsFixture',
+                  createdBy: 'elastic',
+                  enabled: true,
+                  updatedBy: user.username,
+                  apiKeyOwner: user.username,
+                  muteAll: false,
+                  mutedInstanceIds: [],
+                  scheduledTaskId: createdAlert.scheduledTaskId,
+                  createdAt: response.body.createdAt,
+                  updatedAt: response.body.updatedAt,
+                  executionStatus: response.body.executionStatus,
+                });
+                expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+                expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+                expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(
+                  Date.parse(response.body.createdAt)
+                );
+                // Ensure AAD isn't broken
+                await checkAAD({
+                  supertest,
+                  spaceId: space.id,
+                  type: 'alert',
+                  id: createdAlert.id,
+                });
+                break;
+              default:
+                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+            }
+          });
         });
 
         it('should handle update alert request appropriately when alert name has leading and trailing whitespaces', async () => {
