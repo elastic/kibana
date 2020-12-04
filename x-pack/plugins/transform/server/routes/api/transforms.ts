@@ -6,6 +6,7 @@
 import { schema } from '@kbn/config-schema';
 
 import {
+  ElasticsearchClient,
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
@@ -16,7 +17,6 @@ import {
   TransformGetTransform,
   TransformGetTransformStats,
 } from '@elastic/elasticsearch/api/requestParams';
-import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { TRANSFORM_STATE } from '../../../common/constants';
 import {
   transformIdParamSchema,
@@ -545,11 +545,9 @@ const startTransformsHandler: RequestHandler<
   const transformsInfo = req.body;
 
   try {
+    const body = await startTransforms(transformsInfo, ctx.core.elasticsearch.client.asCurrentUser);
     return res.ok({
-      body: await startTransforms(
-        transformsInfo,
-        ctx.core.elasticsearch.client.asCurrentUser.transform.startTransform
-      ),
+      body,
     });
   } catch (e) {
     return res.customError(wrapError(wrapEsError(e)));
@@ -558,14 +556,16 @@ const startTransformsHandler: RequestHandler<
 
 async function startTransforms(
   transformsInfo: StartTransformsRequestSchema,
-  startCallback: KibanaClient['transform']['startTransform']
+  esClient: ElasticsearchClient
 ) {
   const results: StartTransformsResponseSchema = {};
 
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;
     try {
-      await startCallback({ transform_id: transformId });
+      await esClient.transform.startTransform({
+        transform_id: transformId,
+      });
       results[transformId] = { success: true };
     } catch (e) {
       if (isRequestTimeout(e)) {
@@ -591,10 +591,7 @@ const stopTransformsHandler: RequestHandler<
 
   try {
     return res.ok({
-      body: await stopTransforms(
-        transformsInfo,
-        ctx.core.elasticsearch.client.asCurrentUser.transform.stopTransform
-      ),
+      body: await stopTransforms(transformsInfo, ctx.core.elasticsearch.client.asCurrentUser),
     });
   } catch (e) {
     return res.customError(wrapError(wrapEsError(e)));
@@ -603,14 +600,14 @@ const stopTransformsHandler: RequestHandler<
 
 async function stopTransforms(
   transformsInfo: StopTransformsRequestSchema,
-  stopCallback: KibanaClient['transform']['stopTransform']
+  esClient: ElasticsearchClient
 ) {
   const results: StopTransformsResponseSchema = {};
 
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;
     try {
-      await stopCallback({
+      await esClient.transform.stopTransform({
         transform_id: transformId,
         force:
           transformInfo.state !== undefined
