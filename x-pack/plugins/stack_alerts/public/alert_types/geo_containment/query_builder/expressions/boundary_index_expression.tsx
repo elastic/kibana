@@ -7,9 +7,9 @@
 import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from 'src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { HttpSetup } from 'kibana/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
 import { ES_GEO_SHAPE_TYPES, GeoContainmentAlertParams } from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
