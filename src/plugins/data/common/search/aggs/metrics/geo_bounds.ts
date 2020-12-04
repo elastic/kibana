@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { aggGeoBoundsFnName } from './geo_bounds_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
@@ -38,6 +39,7 @@ const geoBoundsLabel = i18n.translate('data.search.aggs.metrics.geoBoundsLabel',
 export const getGeoBoundsMetricAgg = () => {
   return new MetricAggType({
     name: METRIC_TYPES.GEO_BOUNDS,
+    expressionName: aggGeoBoundsFnName,
     title: geoBoundsTitle,
     makeLabel: () => geoBoundsLabel,
     params: [

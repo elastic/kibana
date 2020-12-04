@@ -63,7 +63,7 @@ describe('AggTypesMetricsPercentileRanksProvider class', function () {
     );
   });
 
-  it('uses the custom label if it is set', function () {
+  it('uses the custom label if it is set', () => {
     const responseAggs: any = getPercentileRanksMetricAgg(aggTypesDependencies).getResponseAggs(
       aggConfigs.aggs[0] as IPercentileRanksAggConfig
     );
@@ -73,5 +73,63 @@ describe('AggTypesMetricsPercentileRanksProvider class', function () {
 
     expect(percentileRankLabelFor5kBytes).toBe('Percentile rank 5000 of "my custom field label"');
     expect(percentileRankLabelFor10kBytes).toBe('Percentile rank 10000 of "my custom field label"');
+  });
+
+  it('produces the expected expression ast', () => {
+    const responseAggs: any = getPercentileRanksMetricAgg(aggTypesDependencies).getResponseAggs(
+      aggConfigs.aggs[0] as IPercentileRanksAggConfig
+    );
+    expect(responseAggs[0].toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Object {
+          "customLabel": Array [
+            "my custom field label",
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "bytes",
+          ],
+          "id": Array [
+            "percentile_ranks.5000",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+          "values": Array [
+            "[5000,10000]",
+          ],
+        },
+        "function": "aggPercentileRanks",
+        "type": "function",
+      }
+    `);
+    expect(responseAggs[1].toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Object {
+          "customLabel": Array [
+            "my custom field label",
+          ],
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "bytes",
+          ],
+          "id": Array [
+            "percentile_ranks.10000",
+          ],
+          "schema": Array [
+            "metric",
+          ],
+          "values": Array [
+            "[5000,10000]",
+          ],
+        },
+        "function": "aggPercentileRanks",
+        "type": "function",
+      }
+    `);
   });
 });

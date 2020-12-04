@@ -152,6 +152,9 @@ export class Execution<
     this.context = {
       getSearchContext: () => this.execution.params.searchContext || {},
       getSearchSessionId: () => execution.params.searchSessionId,
+      getKibanaRequest: execution.params.kibanaRequest
+        ? () => execution.params.kibanaRequest
+        : undefined,
       variables: execution.params.variables || {},
       types: executor.getTypes(),
       abortSignal: this.abortController.signal,

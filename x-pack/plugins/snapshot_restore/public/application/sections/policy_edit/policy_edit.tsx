@@ -64,8 +64,22 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
 
   // Update policy state when data is loaded
   useEffect(() => {
-    if (policyData && policyData.policy) {
-      setPolicy(policyData.policy);
+    if (policyData?.policy) {
+      const { policy: policyToEdit } = policyData;
+
+      // The policy response includes data not pertinent to the form
+      // that we need to remove, e.g., lastSuccess, lastFailure, stats
+      const policyFormData: SlmPolicyPayload = {
+        name: policyToEdit.name,
+        snapshotName: policyToEdit.snapshotName,
+        schedule: policyToEdit.schedule,
+        repository: policyToEdit.repository,
+        config: policyToEdit.config,
+        retention: policyToEdit.retention,
+        isManagedPolicy: policyToEdit.isManagedPolicy,
+      };
+
+      setPolicy(policyFormData);
     }
   }, [policyData]);
 
