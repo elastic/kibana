@@ -331,6 +331,7 @@ beforeEach(() => {
     name: 'Test',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor() {},
     producer: 'alerts',
   }));
@@ -340,6 +341,7 @@ beforeEach(() => {
     name: 'Test',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor() {},
     producer: 'alerts',
   });

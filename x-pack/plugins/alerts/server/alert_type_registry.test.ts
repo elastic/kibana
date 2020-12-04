@@ -8,6 +8,7 @@ import { TaskRunnerFactory } from './task_runner';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertType } from './types';
 import { taskManagerMock } from '../../task_manager/server/mocks';
+import { LicenseType } from '../../licensing/server';
 
 const taskManager = taskManagerMock.createSetup();
 const alertTypeRegistryParams = {
@@ -35,6 +36,7 @@ describe('has()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -54,6 +56,7 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic' as LicenseType,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -85,6 +88,7 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic' as LicenseType,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -110,6 +114,7 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic' as LicenseType,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -133,6 +138,7 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic' as LicenseType,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -162,6 +168,7 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic' as LicenseType,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -183,6 +190,7 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -197,6 +205,7 @@ describe('register()', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         executor: jest.fn(),
         producer: 'alerts',
       })
@@ -217,6 +226,7 @@ describe('get()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -274,6 +284,7 @@ describe('list()', () => {
         },
       ],
       defaultActionGroupId: 'testActionGroup',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -346,6 +357,7 @@ function alertTypeWithVariables(id: string, context: string, state: string): Ale
     name: `${id}-name`,
     actionGroups: [],
     defaultActionGroupId: id,
+    minimumLicenseRequired: 'basic' as LicenseType,
     async executor() {},
     producer: 'alerts',
   };

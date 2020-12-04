@@ -43,6 +43,7 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         authorizedConsumers: {},
         actionVariables: {
           context: [],
@@ -107,6 +108,7 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         authorizedConsumers: {},
         actionVariables: {
           context: [],
@@ -156,6 +158,7 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         authorizedConsumers: {},
         actionVariables: {
           context: [],

@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
+import { LicenseType } from '../../../../licensing/server';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoThresholdExecutor } from './geo_threshold';
 import {
@@ -182,6 +183,7 @@ export function getAlertType(
 ): {
   defaultActionGroupId: string;
   actionGroups: ActionGroup[];
+  minimumLicenseRequired: LicenseType;
   executor: ({
     previousStartedAt: currIntervalStartTime,
     startedAt: currIntervalEndTime,
@@ -233,5 +235,6 @@ export function getAlertType(
       params: ParamsSchema,
     },
     actionVariables,
+    minimumLicenseRequired: 'gold',
   };
 }

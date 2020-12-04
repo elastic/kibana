@@ -54,12 +54,12 @@ import {
   unmuteAlertInstanceRoute,
   healthRoute,
 } from './routes';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LICENSE_TYPE, LicensingPluginSetup } from '../../licensing/server';
 import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../actions/server';
-import { AlertsHealth, Services } from './types';
+import { AlertsHealth, AlertType, Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
@@ -90,7 +90,7 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 };
 
 export interface PluginSetupContract {
-  registerType: AlertTypeRegistry['register'];
+  registerType: (alertType: AlertType) => void;
 }
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
@@ -250,7 +250,12 @@ export class AlertingPlugin {
     healthRoute(router, this.licenseState, plugins.encryptedSavedObjects);
 
     return {
-      registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
+      registerType: (alertType: AlertType) => {
+        if (!(alertType.minimumLicenseRequired in LICENSE_TYPE)) {
+          throw new Error(`"${alertType.minimumLicenseRequired}" is not a valid license type`);
+        }
+        alertTypeRegistry.register(alertType);
+      },
     };
   }
 

@@ -100,6 +100,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) =>
       context: [],
       state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
     },
+    minimumLicenseRequired: 'basic',
     async executor({ options, dynamicSettings, uptimeEsClient }) {
       const {
         services: { alertInstanceFactory },

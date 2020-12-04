@@ -309,6 +309,7 @@ function mockAlertType(overloads: Partial<AlertType> = {}): AlertType {
     defaultActionGroupId: 'default',
     authorizedConsumers: {},
     producer: 'alerts',
+    minimumLicenseRequired: 'basic',
     ...overloads,
   };
 }

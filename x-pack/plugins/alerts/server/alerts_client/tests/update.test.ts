@@ -97,6 +97,7 @@ describe('update()', () => {
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       async executor() {},
       producer: 'alerts',
     });
@@ -676,6 +677,7 @@ describe('update()', () => {
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -1021,6 +1023,7 @@ describe('update()', () => {
         name: 'Test',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         async executor() {},
         producer: 'alerts',
       });

@@ -16,6 +16,7 @@ import {
 } from '../../../../../../alerts/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
+import { LicenseType } from '../../../../../../licensing/public';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -60,6 +61,7 @@ describe('alert_details', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic' as LicenseType,
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
     };
@@ -85,6 +87,7 @@ describe('alert_details', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic' as LicenseType,
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
     };
@@ -113,6 +116,7 @@ describe('alert_details', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [], params: [] },
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic' as LicenseType,
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
     };
@@ -147,6 +151,7 @@ describe('alert_details', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic' as LicenseType,
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers,
       };
@@ -202,6 +207,7 @@ describe('alert_details', () => {
         actionVariables: { context: [], state: [], params: [] },
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
+        minimumLicenseRequired: 'basic' as LicenseType,
         authorizedConsumers,
       };
       const actionTypes: ActionType[] = [
@@ -262,6 +268,7 @@ describe('alert_details', () => {
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers,
+        minimumLicenseRequired: 'basic' as LicenseType,
       };
 
       expect(
@@ -282,6 +289,7 @@ describe('alert_details', () => {
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers,
+        minimumLicenseRequired: 'basic' as LicenseType,
       };
 
       expect(
@@ -311,6 +319,7 @@ describe('disable button', () => {
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
 
     const enableButton = shallow(
@@ -339,6 +348,7 @@ describe('disable button', () => {
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
 
     const enableButton = shallow(
@@ -367,6 +377,7 @@ describe('disable button', () => {
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
 
     const disableAlert = jest.fn();
@@ -404,6 +415,7 @@ describe('disable button', () => {
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
 
     const enableAlert = jest.fn();
@@ -444,6 +456,7 @@ describe('mute button', () => {
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
 
     const enableButton = shallow(
@@ -473,6 +486,7 @@ describe('mute button', () => {
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
 
     const enableButton = shallow(
@@ -502,6 +516,7 @@ describe('mute button', () => {
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
 
     const muteAlert = jest.fn();
@@ -540,6 +555,7 @@ describe('mute button', () => {
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
 
     const unmuteAlert = jest.fn();
@@ -578,6 +594,7 @@ describe('mute button', () => {
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
       authorizedConsumers,
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
 
     const enableButton = shallow(
@@ -643,6 +660,7 @@ describe('edit button', () => {
       defaultActionGroupId: 'default',
       producer: 'alerting',
       authorizedConsumers,
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
 
     expect(
@@ -685,6 +703,7 @@ describe('edit button', () => {
       defaultActionGroupId: 'default',
       producer: 'alerting',
       authorizedConsumers,
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
 
     expect(
@@ -720,6 +739,7 @@ describe('edit button', () => {
       defaultActionGroupId: 'default',
       producer: 'alerting',
       authorizedConsumers,
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
 
     expect(

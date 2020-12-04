@@ -28,6 +28,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       params: [],
     },
     producer: 'alertsFixture',
+    minimumLicenseRequired: 'basic',
   };
 
   const expectedRestrictedNoOpType = {
@@ -44,6 +45,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       params: [],
     },
     producer: 'alertsRestrictedFixture',
+    minimumLicenseRequired: 'basic',
   };
 
   describe('list_alert_types', () => {

@@ -9,6 +9,7 @@ import { ComponentType } from 'react';
 import { ActionGroup, AlertActionParam } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
+import { AlertType as AlertTypeApi } from '../../alerts/common';
 import {
   SanitizedAlert as Alert,
   AlertAction,
@@ -133,14 +134,9 @@ export interface ActionVariables {
   params: ActionVariable[];
 }
 
-export interface AlertType {
-  id: string;
-  name: string;
-  actionGroups: ActionGroup[];
+export interface AlertType extends Omit<AlertTypeApi, 'actionVariables'> {
   actionVariables: ActionVariables;
-  defaultActionGroupId: ActionGroup['id'];
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
-  producer: string;
 }
 
 export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;

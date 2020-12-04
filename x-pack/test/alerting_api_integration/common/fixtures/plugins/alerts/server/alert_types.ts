@@ -7,6 +7,7 @@
 import { CoreSetup } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { times } from 'lodash';
+import { LicenseType } from '../../../../../../../plugins/licensing/public';
 import { ES_TEST_INDEX_NAME } from '../../../../lib';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
@@ -43,6 +44,7 @@ function getAlwaysFiringAlertType() {
     },
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic' as LicenseType,
     actionVariables: {
       state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
       params: [{ name: 'instanceParamsValue', description: 'the instance params value' }],
@@ -113,6 +115,7 @@ function getCumulativeFiringAlertType() {
     ],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor(alertExecutorOptions) {
       const { services, state } = alertExecutorOptions;
       const group = 'default';
@@ -157,6 +160,7 @@ function getNeverFiringAlertType() {
     },
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor({ services, params, state }) {
       await services.callCluster('index', {
         index: params.index,
@@ -196,6 +200,7 @@ function getFailingAlertType() {
     ],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor({ services, params, state }) {
       await services.callCluster('index', {
         index: params.index,
@@ -234,6 +239,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
     ],
     defaultActionGroupId: 'default',
     producer: 'alertsFixture',
+    minimumLicenseRequired: 'basic',
     validate: {
       params: paramsSchema,
     },
@@ -319,6 +325,7 @@ function getValidationAlertType() {
       },
     ],
     producer: 'alertsFixture',
+    minimumLicenseRequired: 'basic',
     defaultActionGroupId: 'default',
     validate: {
       params: paramsSchema,
@@ -343,6 +350,7 @@ function getPatternFiringAlertType() {
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor(alertExecutorOptions) {
       const { services, state, params } = alertExecutorOptions;
       const pattern = params.pattern;
@@ -398,6 +406,7 @@ export function defineAlertTypes(
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor() {},
   };
   const onlyContextVariablesAlertType: AlertType = {
@@ -406,6 +415,7 @@ export function defineAlertTypes(
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     actionVariables: {
       context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
     },
@@ -420,6 +430,7 @@ export function defineAlertTypes(
     actionVariables: {
       state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
     },
+    minimumLicenseRequired: 'basic',
     async executor() {},
   };
   const throwAlertType: AlertType = {
@@ -433,6 +444,7 @@ export function defineAlertTypes(
     ],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor() {
       throw new Error('this alert is intended to fail');
     },
@@ -448,6 +460,7 @@ export function defineAlertTypes(
     ],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor() {
       await new Promise((resolve) => setTimeout(resolve, 5000));
     },

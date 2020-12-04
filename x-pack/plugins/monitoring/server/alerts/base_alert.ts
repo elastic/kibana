@@ -113,6 +113,7 @@ export class BaseAlert {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: (options: AlertExecutorOptions): Promise<any> => this.execute(options),
       producer: 'monitoring',
       actionVariables: {
