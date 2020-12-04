@@ -50,7 +50,7 @@ const TabComponent = (props: TabProps) => {
 
   return (
     <TabContent>
-      <EuiFlexGroup gutterSize={'m'} alignItems={'center'}>
+      <EuiFlexGroup gutterSize={'m'} alignItems={'center'} responsive={false}>
         <EuiFlexItem>
           <EuiFieldSearch
             fullWidth
