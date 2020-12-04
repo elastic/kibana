@@ -30,8 +30,12 @@ import { registerPutScriptedFieldRoute } from './routes/scripted_fields/put_scri
 import { registerGetScriptedFieldRoute } from './routes/scripted_fields/get_scripted_field';
 import { registerDeleteScriptedFieldRoute } from './routes/scripted_fields/delete_scripted_field';
 import { registerUpdateScriptedFieldRoute } from './routes/scripted_fields/update_scripted_field';
+import type { IndexPatternsServiceProvider } from './index_patterns_service';
 
-export function registerRoutes(http: HttpServiceSetup) {
+export function registerRoutes(
+  http: HttpServiceSetup,
+  indexPatternsProvider: IndexPatternsServiceProvider
+) {
   const parseMetaFields = (metaFields: string | string[]) => {
     let parsedFields: string[] = [];
     if (typeof metaFields === 'string') {
@@ -45,7 +49,7 @@ export function registerRoutes(http: HttpServiceSetup) {
   const router = http.createRouter();
 
   // Index Patterns API
-  registerCreateIndexPatternRoute(router);
+  registerCreateIndexPatternRoute(router, indexPatternsProvider);
   registerGetIndexPatternRoute(router);
   registerDeleteIndexPatternRoute(router);
   registerUpdateIndexPatternRoute(router);

@@ -23,6 +23,7 @@ import { IRouter } from '../../../../../core/server';
 import { assertIndexPatternsContext } from './util/assert_index_patterns_context';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, serializedFieldFormatSchema } from './util/schemas';
+import type { IndexPatternsServiceProvider } from '../index_patterns_service';
 
 const indexPatternSpecSchema = schema.object({
   title: schema.string(),
@@ -52,7 +53,10 @@ const indexPatternSpecSchema = schema.object({
   ),
 });
 
-export const registerCreateIndexPatternRoute = (router: IRouter) => {
+export const registerCreateIndexPatternRoute = (
+  router: IRouter,
+  indexPatternsProvider: IndexPatternsServiceProvider
+) => {
   router.post(
     {
       path: '/api/index_patterns/index_pattern',
@@ -67,9 +71,14 @@ export const registerCreateIndexPatternRoute = (router: IRouter) => {
     router.handleLegacyErrors(
       handleErrors(
         assertIndexPatternsContext(async (ctx, req, res) => {
-          const ip = ctx.indexPatterns.indexPatterns!;
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+            savedObjectsClient,
+            elasticsearchClient
+          );
           const body = req.body;
-          const indexPattern = await ip.createAndSave(
+          const indexPattern = await indexPatternsService.createAndSave(
             body.index_pattern as IndexPatternSpec,
             body.override,
             !body.refresh_fields
