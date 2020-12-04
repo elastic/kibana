@@ -17,4 +17,33 @@
  * under the License.
  */
 
-export { ClusterManager } from '../../../cli/cluster/cluster_manager';
+export const extendedEnvSerializer: jest.SnapshotSerializerPlugin = {
+  test: (v) =>
+    typeof v === 'object' &&
+    v !== null &&
+    typeof v.env === 'object' &&
+    v.env !== null &&
+    !v.env['<inheritted process.env>'],
+
+  serialize(val, config, indentation, depth, refs, printer) {
+    const customizations: Record<string, unknown> = {
+      '<inheritted process.env>': true,
+    };
+    for (const [key, value] of Object.entries(val.env)) {
+      if (process.env[key] !== value) {
+        customizations[key] = value;
+      }
+    }
+
+    return printer(
+      {
+        ...val,
+        env: customizations,
+      },
+      config,
+      indentation,
+      depth,
+      refs
+    );
+  },
+};
