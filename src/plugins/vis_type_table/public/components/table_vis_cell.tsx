@@ -42,6 +42,7 @@ export const createTableVisCell = (formattedColumns: FormattedColumn[], rows: Ta
        */
       dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
       data-test-subj="tbvChartCellContent"
+      className="tbvChartCellContent"
     />
   );
 
