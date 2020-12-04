@@ -17,30 +17,23 @@
  * under the License.
  */
 
-// Test helpers to simplify mocking environment options.
+import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_path';
+it.each([
+  ['app/foo'],
+  ['app/bar'],
+  ['login'],
+  ['logout'],
+  ['status'],
+  ['s/1/status'],
+  ['s/2/app/foo'],
+])('allows %s', (path) => {
+  if (!shouldRedirectFromOldBasePath(path)) {
+    throw new Error(`expected [${path}] to be redirected from old base path`);
+  }
+});
 
-import { EnvOptions } from '../env';
-
-type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends Array<infer R> ? Array<DeepPartial<R>> : DeepPartial<T[P]>;
-};
-
-export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions {
-  return {
-    configs: options.configs || [],
-    cliArgs: {
-      dev: true,
-      quiet: false,
-      silent: false,
-      watch: false,
-      basePath: false,
-      disableOptimizer: true,
-      cache: true,
-      dist: false,
-      oss: false,
-      runExamples: false,
-      ...(options.cliArgs || {}),
-    },
-    isDevCliParent: options.isDevCliParent !== undefined ? options.isDevCliParent : false,
-  };
-}
+it.each([['api/foo'], ['v1/api/bar'], ['bundles/foo/foo.bundle.js']])('blocks %s', (path) => {
+  if (shouldRedirectFromOldBasePath(path)) {
+    throw new Error(`expected [${path}] to NOT be redirected from old base path`);
+  }
+});

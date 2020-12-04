@@ -17,14 +17,19 @@
  * under the License.
  */
 
-import { BinderBase, Emitter } from './binder';
-
-export class BinderFor extends BinderBase {
-  constructor(private readonly emitter: Emitter) {
-    super();
+/**
+ * Determine which requested paths should be redirected from one basePath
+ * to another. We only do this for a supset of the paths so that people don't
+ * think that specifying a random three character string at the beginning of
+ * a URL will work.
+ */
+export function shouldRedirectFromOldBasePath(path: string) {
+  // strip `s/{id}` prefix when checking for need to redirect
+  if (path.startsWith('s/')) {
+    path = path.split('/').slice(2).join('/');
   }
 
-  public on(...args: any[]) {
-    super.on(this.emitter, ...args);
-  }
+  const isApp = path.startsWith('app/');
+  const isKnownShortPath = ['login', 'logout', 'status'].includes(path);
+  return isApp || isKnownShortPath;
 }
