@@ -6,7 +6,7 @@
 
 import { ElasticsearchClient } from 'src/core/server';
 
-export const getSignalsCount = async ({
+export const getIndexCount = async ({
   esClient,
   index,
 }: {

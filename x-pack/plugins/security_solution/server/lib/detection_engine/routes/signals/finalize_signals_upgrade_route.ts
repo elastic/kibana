@@ -9,7 +9,7 @@ import { ReindexResponse } from 'elasticsearch';
 
 import { IRouter } from 'src/core/server';
 import { DETECTION_ENGINE_FINALIZE_SIGNALS_UPGRADE_URL } from '../../../../../common/constants';
-import { getSignalsCount } from '../../migrations/get_signals_count';
+import { getIndexCount } from '../../index/get_index_count';
 import { applyMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import { replaceSignalsIndexAlias } from '../../migrations/replace_signals_index_alias';
 import { buildSiemResponse, transformError } from '../utils';
@@ -76,8 +76,8 @@ export const finalizeSignalsUpgradeRoute = (router: IRouter) => {
           );
         }
 
-        const sourceCount = await getSignalsCount({ esClient, index: sourceIndex });
-        const destinationCount = await getSignalsCount({ esClient, index: destinationIndex });
+        const sourceCount = await getIndexCount({ esClient, index: sourceIndex });
+        const destinationCount = await getIndexCount({ esClient, index: destinationIndex });
         if (sourceCount !== destinationCount) {
           throw new Error(
             `The source and destination indexes have different document counts. Source [${sourceIndex}] has [${sourceCount}] documents, while destination [${destinationIndex}] has [${destinationCount}] documents.`

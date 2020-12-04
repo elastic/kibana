@@ -6,7 +6,9 @@
 
 import { IRouter } from 'src/core/server';
 import { DETECTION_ENGINE_MIGRATE_SIGNALS_URL } from '../../../../../common/constants';
-import { getMigrationStatusInRange } from '../../migrations/get_migration_status_in_range';
+import { getIndexAliases } from '../../index/get_index_aliases';
+import { getMigrationStatus } from '../../migrations/get_migration_status';
+import { getSignalsIndicesInRange } from '../../migrations/get_signals_indices_in_range';
 import { buildSiemResponse, transformError } from '../utils';
 
 export const getMigrationStatusRoute = (router: IRouter) => {
@@ -30,10 +32,20 @@ export const getMigrationStatusRoute = (router: IRouter) => {
         }
 
         const from = 'now-500d'; // TODO make a parameter
-        const signalsIndex = appClient.getSignalsIndex();
-        const indices = await getMigrationStatusInRange({ esClient, from, index: signalsIndex });
 
-        return response.ok({ body: { indices } });
+        const signalsAlias = appClient.getSignalsIndex();
+        const indexAliases = await getIndexAliases({ alias: signalsAlias, esClient });
+        const nonWriteIndices = indexAliases
+          .filter((indexAlias) => !indexAlias.isWriteIndex)
+          .map((indexAlias) => indexAlias.index);
+        const indicesInRange = await getSignalsIndicesInRange({
+          esClient,
+          index: nonWriteIndices,
+          from,
+        });
+        const migrationStatuses = await getMigrationStatus({ esClient, index: indicesInRange });
+
+        return response.ok({ body: { indices: migrationStatuses } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

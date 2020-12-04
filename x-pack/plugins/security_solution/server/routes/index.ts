@@ -14,9 +14,11 @@ import { findRulesRoute } from '../lib/detection_engine/routes/rules/find_rules_
 import { deleteRulesRoute } from '../lib/detection_engine/routes/rules/delete_rules_route';
 import { updateRulesRoute } from '../lib/detection_engine/routes/rules/update_rules_route';
 import { patchRulesRoute } from '../lib/detection_engine/routes/rules/patch_rules_route';
-import { getMigrationStatusRoute } from '../lib/detection_engine/routes/index/get_migration_status_route';
-import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
+import { finalizeSignalsUpgradeRoute } from '../lib/detection_engine/routes/signals/finalize_signals_upgrade_route';
+import { getMigrationStatusRoute } from '../lib/detection_engine/routes/signals/get_migration_status_route';
 import { querySignalsRoute } from '../lib/detection_engine/routes/signals/query_signals_route';
+import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
+import { upgradeSignalsRoute } from '../lib/detection_engine/routes/signals/upgrade_signals_route';
 import { deleteIndexRoute } from '../lib/detection_engine/routes/index/delete_index_route';
 import { readTagsRoute } from '../lib/detection_engine/routes/tags/read_tags_route';
 import { readPrivilegesRoute } from '../lib/detection_engine/routes/privileges/read_privileges_route';
@@ -39,8 +41,6 @@ import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/install_prepacked_timelines_route';
 import { getTimelineRoute } from '../lib/timeline/routes/get_timeline_route';
-import { upgradeSignalsRoute } from '../lib/detection_engine/routes/signals/upgrade_signals_route';
-import { finalizeSignalsUpgradeRoute } from '../lib/detection_engine/routes/signals/finalize_signals_upgrade_route';
 
 export const initRoutes = (
   router: IRouter,

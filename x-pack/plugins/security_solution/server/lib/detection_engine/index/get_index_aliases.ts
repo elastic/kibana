@@ -16,24 +16,26 @@ interface AliasesResponse {
   };
 }
 
-interface Alias {
-  name: string;
+interface IndexAlias {
+  alias: string;
+  index: string;
   isWriteIndex: boolean;
 }
 
-export const getSignalsIndexAliases = async ({
+export const getIndexAliases = async ({
   esClient,
-  index,
+  alias,
 }: {
   esClient: ElasticsearchClient;
-  index: string;
-}): Promise<Alias[]> => {
+  alias: string;
+}): Promise<IndexAlias[]> => {
   const response = await esClient.indices.getAlias<AliasesResponse>({
-    index,
+    name: alias,
   });
 
-  return Object.keys(response.body).map((indexName) => ({
-    name: indexName,
-    isWriteIndex: response.body[indexName].aliases[index]?.is_write_index === true,
+  return Object.keys(response.body).map((index) => ({
+    alias,
+    index,
+    isWriteIndex: response.body[index].aliases[alias]?.is_write_index === true,
   }));
 };
