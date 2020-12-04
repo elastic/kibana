@@ -34,7 +34,7 @@ describe('get_filter', () => {
   });
 
   describe('getFilter', () => {
-    xtest('returns a query if given a type of query', async () => {
+    test('returns a query if given a type of query', async () => {
       const filter = await getFilter({
         type: 'query',
         filters: undefined,
@@ -68,7 +68,7 @@ describe('get_filter', () => {
       });
     });
 
-    xtest('throws on type query if query is undefined', async () => {
+    test('throws on type query if query is undefined', async () => {
       await expect(
         getFilter({
           type: 'query',
@@ -83,7 +83,7 @@ describe('get_filter', () => {
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
 
-    xtest('throws on type query if language is undefined', async () => {
+    test('throws on type query if language is undefined', async () => {
       await expect(
         getFilter({
           type: 'query',
@@ -98,7 +98,7 @@ describe('get_filter', () => {
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
 
-    xtest('throws on type query if index is undefined', async () => {
+    test('throws on type query if index is undefined', async () => {
       await expect(
         getFilter({
           type: 'query',
@@ -113,7 +113,7 @@ describe('get_filter', () => {
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
 
-    xtest('returns a saved query if given a type of query', async () => {
+    test('returns a saved query if given a type of query', async () => {
       const filter = await getFilter({
         type: 'saved_query',
         filters: undefined,
@@ -136,7 +136,7 @@ describe('get_filter', () => {
       });
     });
 
-    xtest('throws on saved query if saved_id is undefined', async () => {
+    test('throws on saved query if saved_id is undefined', async () => {
       await expect(
         getFilter({
           type: 'saved_query',
@@ -151,7 +151,7 @@ describe('get_filter', () => {
       ).rejects.toThrow('savedId parameter should be defined');
     });
 
-    xtest('throws on saved query if index is undefined', async () => {
+    test('throws on saved query if index is undefined', async () => {
       await expect(
         getFilter({
           type: 'saved_query',
@@ -166,7 +166,7 @@ describe('get_filter', () => {
       ).rejects.toThrow('savedId parameter should be defined');
     });
 
-    xtest('throws on machine learning query', async () => {
+    test('throws on machine learning query', async () => {
       await expect(
         getFilter({
           type: 'machine_learning',
@@ -190,13 +190,8 @@ describe('get_filter', () => {
         savedId: undefined,
         services: servicesMock,
         index: ['auditbeat-*'],
-        lists: [
-          {
-            ...getExceptionListItemSchemaMock(),
-          },
-        ],
+        lists: [getExceptionListItemSchemaMock()],
       });
-      console.log(JSON.stringify(filter));
       expect(filter).toEqual({
         bool: {
           must: [],

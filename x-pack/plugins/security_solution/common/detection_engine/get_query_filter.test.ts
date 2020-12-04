@@ -11,7 +11,7 @@ import { ExceptionListItemSchema } from '../shared_imports';
 import { buildExceptionFilter } from './build_exceptions_filter';
 
 describe('get_filter', () => {
-  xdescribe('getQueryFilter', () => {
+  describe('getQueryFilter', () => {
     test('it should work with an empty filter as kuery', () => {
       const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
       expect(esQuery).toEqual({
@@ -543,7 +543,7 @@ describe('get_filter', () => {
       });
     });
 
-    xdescribe('when "excludeExceptions" is false', () => {
+    describe('when "excludeExceptions" is false', () => {
       test('it should work with a list', () => {
         const esQuery = getQueryFilter(
           'host.name: linux',
@@ -1107,7 +1107,7 @@ describe('get_filter', () => {
     });
   });
 
-  xdescribe('buildEqlSearchRequest', () => {
+  describe('buildEqlSearchRequest', () => {
     test('should build a basic request with time range', () => {
       const request = buildEqlSearchRequest(
         'process where true',
