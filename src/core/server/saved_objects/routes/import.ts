@@ -80,8 +80,18 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         });
       }
 
+      const supportedTypes = context.core.savedObjects.typeRegistry
+        .getImportableAndExportableTypes()
+        .map((t) => t.name);
+
+      const includedHiddenTypes = supportedTypes.filter((supportedType) =>
+        context.core.savedObjects.typeRegistry.isHidden(supportedType)
+      );
+
+      const savedObjectsClient = context.core.savedObjects.getClient({ includedHiddenTypes });
+
       const result = await importSavedObjectsFromStream({
-        savedObjectsClient: context.core.savedObjects.client,
+        savedObjectsClient,
         typeRegistry: context.core.savedObjects.typeRegistry,
         readStream,
         objectLimit: maxImportExportSize,
