@@ -104,6 +104,9 @@ Object {
   },
   "cluster_uuid": "test",
   "collection": "local",
+  "license": Object {
+    "type": "basic",
+  },
   "stack_stats": Object {
     "data": Array [],
     "kibana": Object {
@@ -183,6 +186,9 @@ Object {
   },
   "cluster_uuid": "test",
   "collection": "local",
+  "license": Object {
+    "type": "basic",
+  },
   "stack_stats": Object {
     "data": Array [],
     "kibana": Object {

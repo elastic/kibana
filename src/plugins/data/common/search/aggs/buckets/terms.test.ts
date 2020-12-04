@@ -52,6 +52,80 @@ describe('Terms Agg', () => {
       );
     };
 
+    test('produces the expected expression ast', () => {
+      const aggConfigs = getAggConfigs({
+        include: {
+          pattern: '404',
+        },
+        exclude: {
+          pattern: '400',
+        },
+        field: {
+          name: 'field',
+        },
+        orderAgg: {
+          type: 'count',
+        },
+      });
+      expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Object {
+            "enabled": Array [
+              true,
+            ],
+            "field": Array [
+              "field",
+            ],
+            "id": Array [
+              "test",
+            ],
+            "missingBucket": Array [
+              false,
+            ],
+            "missingBucketLabel": Array [
+              "Missing",
+            ],
+            "order": Array [
+              "desc",
+            ],
+            "orderAgg": Array [
+              Object {
+                "chain": Array [
+                  Object {
+                    "arguments": Object {
+                      "enabled": Array [
+                        true,
+                      ],
+                      "id": Array [
+                        "test-orderAgg",
+                      ],
+                      "schema": Array [
+                        "orderAgg",
+                      ],
+                    },
+                    "function": "aggCount",
+                    "type": "function",
+                  },
+                ],
+                "type": "expression",
+              },
+            ],
+            "otherBucket": Array [
+              false,
+            ],
+            "otherBucketLabel": Array [
+              "Other",
+            ],
+            "size": Array [
+              5,
+            ],
+          },
+          "function": "aggTerms",
+          "type": "function",
+        }
+      `);
+    });
+
     test('converts object to string type', () => {
       const aggConfigs = getAggConfigs({
         include: {

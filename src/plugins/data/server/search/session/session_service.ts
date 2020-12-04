@@ -18,14 +18,19 @@
  */
 
 import { CoreStart, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { from } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import {
   BackgroundSessionSavedObjectAttributes,
+  BackgroundSessionStatus,
   IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchOptions,
   SearchSessionFindOptions,
-  BackgroundSessionStatus,
+  tapFirst,
 } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
+import { ISearchStrategy, SearchStrategyDependencies } from '../types';
 import { createRequestHash } from './utils';
 
 const DEFAULT_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
@@ -59,25 +64,65 @@ export class BackgroundSessionService {
     this.sessionSearchMap.clear();
   };
 
+  public search = <Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(
+    strategy: ISearchStrategy<Request, Response>,
+    searchRequest: Request,
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => {
+    // If this is a restored background search session, look up the ID using the provided sessionId
+    const getSearchRequest = async () =>
+      !options.isRestore || searchRequest.id
+        ? searchRequest
+        : {
+            ...searchRequest,
+            id: await this.getId(searchRequest, options, deps),
+          };
+
+    return from(getSearchRequest()).pipe(
+      switchMap((request) => strategy.search(request, options, deps)),
+      tapFirst((response) => {
+        if (searchRequest.id || !options.sessionId || !response.id || options.isRestore) return;
+        this.trackId(searchRequest, response.id, options, {
+          savedObjectsClient: deps.savedObjectsClient,
+        });
+      })
+    );
+  };
+
   // TODO: Generate the `userId` from the realm type/realm name/username
   public save = async (
     sessionId: string,
     {
       name,
+      appId,
       created = new Date().toISOString(),
       expires = new Date(Date.now() + DEFAULT_EXPIRATION).toISOString(),
       status = BackgroundSessionStatus.IN_PROGRESS,
+      urlGeneratorId,
       initialState = {},
       restoreState = {},
     }: Partial<BackgroundSessionSavedObjectAttributes>,
     { savedObjectsClient }: BackgroundSessionDependencies
   ) => {
     if (!name) throw new Error('Name is required');
+    if (!appId) throw new Error('AppId is required');
+    if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
 
     // Get the mapping of request hash/search ID for this session
     const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
     const idMapping = Object.fromEntries(searchMap.entries());
-    const attributes = { name, created, expires, status, initialState, restoreState, idMapping };
+    const attributes = {
+      name,
+      created,
+      expires,
+      status,
+      initialState,
+      restoreState,
+      idMapping,
+      urlGeneratorId,
+      appId,
+    };
     const session = await savedObjectsClient.create<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       attributes,
@@ -194,10 +239,6 @@ export class BackgroundSessionService {
         update: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
           this.update(sessionId, attributes, deps),
         delete: (sessionId: string) => this.delete(sessionId, deps),
-        trackId: (searchRequest: IKibanaSearchRequest, searchId: string, options: ISearchOptions) =>
-          this.trackId(searchRequest, searchId, options, deps),
-        getId: (searchRequest: IKibanaSearchRequest, options: ISearchOptions) =>
-          this.getId(searchRequest, options, deps),
       };
     };
   };

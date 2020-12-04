@@ -30,7 +30,7 @@ export type InstallSource = 'registry' | 'upload';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing';
 
-export type DetailViewPanelName = 'overview' | 'policies' | 'settings';
+export type DetailViewPanelName = 'overview' | 'policies' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | ValueOf<AgentAssetType>;
@@ -101,7 +101,7 @@ export interface RegistryPackage extends InstallablePackage {
   path: string;
 }
 
-interface RegistryImage {
+export interface RegistryImage {
   src: string;
   path: string;
   title?: string;
@@ -121,6 +121,7 @@ export interface RegistryInput {
   title: string;
   description?: string;
   vars?: RegistryVarsEntry[];
+  template_path?: string;
 }
 
 export interface RegistryStream {

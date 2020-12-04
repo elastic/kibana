@@ -45,7 +45,7 @@ export function registerKqlTelemetryRoute(
       const counterName = optIn ? 'optInCount' : 'optOutCount';
 
       try {
-        await internalRepository.incrementCounter('kql-telemetry', 'kql-telemetry', counterName);
+        await internalRepository.incrementCounter('kql-telemetry', 'kql-telemetry', [counterName]);
       } catch (error) {
         logger.warn(`Unable to increment counter: ${error}`);
         return response.customError({

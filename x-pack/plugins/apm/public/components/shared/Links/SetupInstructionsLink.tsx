@@ -7,7 +7,7 @@
 import { EuiButton, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 const SETUP_INSTRUCTIONS_LABEL = i18n.translate(
   'xpack.apm.setupInstructionsButtonLabel',

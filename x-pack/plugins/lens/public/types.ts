@@ -167,6 +167,11 @@ export interface Datasource<T = unknown, P = unknown> {
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
   canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
+  updateStateOnCloseDimension?: (props: {
+    layerId: string;
+    columnId: string;
+    state: T;
+  }) => T | undefined;
 
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
@@ -540,7 +545,10 @@ export interface Visualization<T = unknown> {
    * Visualizations can provide a custom icon which will open a layer-specific popover
    * If no icon is provided, gear icon is default
    */
-  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
+  getLayerContextMenuIcon?: (opts: {
+    state: T;
+    layerId: string;
+  }) => { icon: IconType | 'gear'; label: string } | undefined;
 
   /**
    * The frame is telling the visualization to update or set a dimension based on user interaction
@@ -594,6 +602,11 @@ export interface Visualization<T = unknown> {
     state: T,
     frame: FramePublicAPI
   ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+
+  /**
+   * The frame calls this function to display warnings about visualization
+   */
+  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
 }
 
 export interface LensFilterEvent {
