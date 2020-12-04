@@ -68,9 +68,15 @@ const expectedUrls = machineLearningRule.referenceUrls.join('');
 const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
 const expectedTags = machineLearningRule.tags.join('');
 const expectedMitre = machineLearningRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
+  .map(
+    (mitre) =>
+      mitre.tactic +
+      mitre.techniques
+        .map((technique) => {
+          return technique.name + technique.subtechniques.join('');
+        })
+        .join('')
+  )
   .join('');
 const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
 
