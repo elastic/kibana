@@ -3,11 +3,6 @@
 exports[`Storyshots components/WorkpadHeader/ElementMenu default 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownLeft"
-  onKeyDown={[Function]}
-  onMouseDown={[Function]}
-  onMouseUp={[Function]}
-  onTouchEnd={[Function]}
-  onTouchStart={[Function]}
 >
   <div
     className="euiPopover__anchor"
