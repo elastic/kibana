@@ -22,6 +22,9 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerResolveImportErrorsRoute } from '../resolve_import_errors';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectConfig } from '../../saved_objects_config';
 
@@ -30,6 +33,7 @@ type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const { v4: uuidv4 } = jest.requireActual('uuid');
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const config = { maxImportPayloadBytes: 26214400, maxImportExportSize: 10000 } as SavedObjectConfig;
+let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 const URL = '/api/saved_objects/_resolve_import_errors';
 
 describe(`POST ${URL}`, () => {
@@ -76,7 +80,12 @@ describe(`POST ${URL}`, () => {
     savedObjectsClient.checkConflicts.mockResolvedValue({ errors: [] });
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerResolveImportErrorsRoute(router, config);
+    coreUsageStatsClient = coreUsageStatsClientMock.create();
+    coreUsageStatsClient.incrementSavedObjectsResolveImportErrors.mockRejectedValue(
+      new Error('Oh no!') // this error is intentionally swallowed so the export does not fail
+    );
+    const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+    registerResolveImportErrorsRoute(router, { config, coreUsageData });
 
     await server.start();
   });
@@ -85,7 +94,7 @@ describe(`POST ${URL}`, () => {
     await server.stop();
   });
 
-  it('formats successful response', async () => {
+  it('formats successful response and records usage stats', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
@@ -107,6 +116,10 @@ describe(`POST ${URL}`, () => {
 
     expect(result.body).toEqual({ success: true, successCount: 0 });
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
+    expect(coreUsageStatsClient.incrementSavedObjectsResolveImportErrors).toHaveBeenCalledWith({
+      headers: expect.anything(),
+      createNewCopies: false,
+    });
   });
 
   it('defaults migrationVersion to empty object', async () => {
