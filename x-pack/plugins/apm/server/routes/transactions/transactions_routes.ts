@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import * as t from 'io-ts';
+import { toNumberRt } from '../../../common/runtime_types/to_number_rt';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
+import { getServiceTransactionGroups } from '../../lib/services/get_service_transaction_groups';
+import { getTransactionBreakdown } from '../../lib/transactions/breakdown';
 import { getTransactionCharts } from '../../lib/transactions/charts';
 import { getTransactionDistribution } from '../../lib/transactions/distribution';
-import { getTransactionBreakdown } from '../../lib/transactions/breakdown';
 import { getTransactionGroupList } from '../../lib/transaction_groups';
-import { createRoute } from '../create_route';
-import { uiFiltersRt, rangeRt } from '../default_api_types';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 import { getErrorRate } from '../../lib/transaction_groups/get_error_rate';
+import { createRoute } from '../create_route';
+import { rangeRt, uiFiltersRt } from '../default_api_types';
 
 /**
  * Returns a list of transactions grouped by name
@@ -53,6 +55,55 @@ export const transactionsGroupsRoute = createRoute({
       },
       setup
     );
+  },
+});
+
+export const transactionsGroupsOverviewRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups/overview',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([
+      rangeRt,
+      uiFiltersRt,
+      t.type({
+        size: toNumberRt,
+        numBuckets: toNumberRt,
+        pageIndex: toNumberRt,
+        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+        sortField: t.union([
+          t.literal('latency'),
+          t.literal('throughput'),
+          t.literal('errorRate'),
+          t.literal('impact'),
+        ]),
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    const {
+      path: { serviceName },
+      query: { size, numBuckets, pageIndex, sortDirection, sortField },
+    } = context.params;
+
+    return getServiceTransactionGroups({
+      setup,
+      serviceName,
+      pageIndex,
+      searchAggregatedTransactions,
+      size,
+      sortDirection,
+      sortField,
+      numBuckets,
+    });
   },
 });
 

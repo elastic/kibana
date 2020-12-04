@@ -23,7 +23,6 @@ import {
   serviceAnnotationsCreateRoute,
   serviceErrorGroupsRoute,
   serviceThroughputRoute,
-  serviceTransactionGroupsRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -57,6 +56,7 @@ import {
   transactionsChartsDistributionRoute,
   transactionsChartsErrorRateRoute,
   transactionsGroupsRoute,
+  transactionsGroupsOverviewRoute,
 } from './transactions/transactions_routes';
 import {
   errorGroupsLocalFiltersRoute,
@@ -121,7 +121,6 @@ const createApmApi = () => {
     .add(serviceAnnotationsCreateRoute)
     .add(serviceErrorGroupsRoute)
     .add(serviceThroughputRoute)
-    .add(serviceTransactionGroupsRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -157,6 +156,7 @@ const createApmApi = () => {
     .add(transactionsChartsDistributionRoute)
     .add(transactionsChartsErrorRateRoute)
     .add(transactionsGroupsRoute)
+    .add(transactionsGroupsOverviewRoute)
 
     // UI filters
     .add(errorGroupsLocalFiltersRoute)
