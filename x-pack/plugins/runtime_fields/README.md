@@ -35,7 +35,7 @@ const MyComponent = () => {
 
   const saveRuntimeField = (field: RuntimeField) => {
     // Do something with the field
-    console.log(field); // { name: 'myField', type: 'boolean', script: "return 'hello'" }
+    // See interface returned in @returns section below
   };
 
   const openRuntimeFieldsEditor = async() => {
@@ -45,6 +45,7 @@ const MyComponent = () => {
     closeRuntimeFieldEditor.current = openEditor({
       onSave: saveRuntimeField,
       /* defaultValue: optional field to edit */
+      /* ctx: Context -- see section below */
     });
   };
 
@@ -61,7 +62,40 @@ const MyComponent = () => {
 }
 ```
 
-#### Alternative
+#### `@returns`
+
+You get back a `RuntimeField` object with the following interface
+
+```ts
+interface RuntimeField {
+  name: string;
+  type: RuntimeType; // 'long' | 'boolean' ...
+  script: {
+    source: string;
+  }
+}
+```
+
+#### Context object
+
+You can provide a context object to the runtime field editor. It has the following interface
+
+```ts
+interface Context {
+  /** An array of field name not allowed. You would probably provide an array of existing runtime fields
+   * to prevent the user creating a field with the same name.
+   */
+  namesNotAllowed?: string[];
+  /**
+   * An array of existing concrete fields. If the user gives a name to the runtime
+   * field that matches one of the concrete fields, a callout will be displayed
+   * to indicate that this runtime field will shadow the concrete field.
+   */
+  existingConcreteFields?: string[];
+}
+```
+
+#### Other type of integration
 
 The runtime field editor is also exported as static React component that you can import into your components. The editor is exported in 2 flavours:
 
@@ -96,6 +130,7 @@ const MyComponent = () => {
             onCancel={() => setIsFlyoutVisible(false)}
             docLinks={docLinksStart}
             defaultValue={/*optional runtime field to edit*/}
+            ctx={/*optional context object -- see section above*/}
           />
         </EuiFlyout>
       )}
@@ -138,6 +173,7 @@ const MyComponent = () => {
             onCancel={() => flyoutEditor.current?.close()}
             docLinks={docLinksStart}
             defaultValue={defaultRuntimeField}
+            ctx={/*optional context object -- see section above*/}
           />
         </KibanaReactContextProvider>
       )
@@ -182,6 +218,7 @@ const MyComponent = () => {
         onChange={setRuntimeFieldFormState}
         docLinks={docLinksStart}
         defaultValue={/*optional runtime field to edit*/}
+        ctx={/*optional context object -- see section above*/}
       />
 
       <EuiSpacer />
