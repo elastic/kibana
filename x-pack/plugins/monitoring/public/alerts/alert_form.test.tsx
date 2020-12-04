@@ -229,7 +229,7 @@ describe('alert_form', () => {
                 setActionIdByIndex={(id: string, index: number) => {
                   initialAlert.actions[index].id = id;
                 }}
-                setAlertProperty={(_updatedActions: AlertAction[]) => {}}
+                setActions={(_updatedActions: AlertAction[]) => {}}
                 setActionParamsProperty={(key: string, value: any, index: number) =>
                   (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
                 }
