@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
+import { omit, isObject } from 'lodash';
 import uuid from 'uuid';
 import {
   ElasticsearchClient,
@@ -136,7 +136,13 @@ export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedOb
 /**
  * @public
  */
-export type CounterField = string | { incrementBy?: number; fieldName: string };
+export interface SavedObjectsIncrementCounterField {
+  /** The field name to increment the counter by.*/
+  fieldName: string;
+  /** The number to increment the field by (defaults to 1).*/
+  incrementBy?: number;
+}
+
 /**
  * @public
  */
@@ -1528,7 +1534,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Increments all the specified counter fields by one. Creates the document
+   * Increments all the specified counter fields (by one by default). Creates the document
    * if one doesn't exist for the given id.
    *
    * @remarks
@@ -1562,14 +1568,14 @@ export class SavedObjectsRepository {
    *
    * @param type - The type of saved object whose fields should be incremented
    * @param id - The id of the document whose fields should be incremented
-   * @param counterFieldNames - An array of field names to increment
+   * @param counterFields - An array of field names to increment or an array of {@link SavedObjectsIncrementCounterField}
    * @param options - {@link SavedObjectsIncrementCounterOptions}
    * @returns The saved object after the specified fields were incremented
    */
   async incrementCounter<T = unknown>(
     type: string,
     id: string,
-    counterFields: CounterField[],
+    counterFields: Array<string | SavedObjectsIncrementCounterField>,
     options: SavedObjectsIncrementCounterOptions = {}
   ): Promise<SavedObject<T>> {
     if (typeof type !== 'string') {
@@ -1578,11 +1584,9 @@ export class SavedObjectsRepository {
 
     const isArrayOfCounterFields =
       Array.isArray(counterFields) &&
-      !counterFields.some(
+      counterFields.every(
         (field) =>
-          typeof field !== 'string' &&
-          typeof field === 'object' &&
-          typeof field.fieldName !== 'string'
+          typeof field === 'string' || (isObject(field) && typeof field.fieldName === 'string')
       );
 
     if (!isArrayOfCounterFields) {

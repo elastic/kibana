@@ -3412,11 +3412,13 @@ describe('SavedObjectsRepository', () => {
         await test({});
       });
 
-      it(`throws when counterFieldName is not a string`, async () => {
+      it(`throws when counterField is not CounterField type`, async () => {
         const test = async (field) => {
           await expect(
             savedObjectsRepository.incrementCounter(type, id, field)
-          ).rejects.toThrowError(`"counterFieldNames" argument must be an array of strings`);
+          ).rejects.toThrowError(
+            `"counterFields" argument must be of type Array<string | { incrementBy?: number; fieldName: string }>`
+          );
           expect(client.update).not.toHaveBeenCalled();
         };
 
@@ -3425,6 +3427,7 @@ describe('SavedObjectsRepository', () => {
         await test([false]);
         await test([{}]);
         await test([{}, false, 42, null, 'string']);
+        await test([{ fieldName: 'string' }, false, null, 'string']);
       });
 
       it(`throws when type is invalid`, async () => {
@@ -3523,7 +3526,8 @@ describe('SavedObjectsRepository', () => {
             body: expect.objectContaining({
               script: expect.objectContaining({
                 params: expect.objectContaining({
-                  count: 3,
+                  counterFieldNames: [counterFields[0]],
+                  counts: [3],
                 }),
               }),
             }),
