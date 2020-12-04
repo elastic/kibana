@@ -79,22 +79,27 @@ describe('date_range params', () => {
     const dateRange = aggConfigs.aggs[0];
     expect(dateRange.toExpressionAst()).toMatchInlineSnapshot(`
       Object {
-        "arguments": Object {
-          "enabled": Array [
-            true,
-          ],
-          "id": Array [
-            "date_range",
-          ],
-          "ranges": Array [
-            "[{\\"from\\":\\"now-1w/w\\",\\"to\\":\\"now\\"}]",
-          ],
-          "schema": Array [
-            "buckets",
-          ],
-        },
-        "function": "aggDateRange",
-        "type": "function",
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "enabled": Array [
+                true,
+              ],
+              "id": Array [
+                "date_range",
+              ],
+              "ranges": Array [
+                "[{\\"from\\":\\"now-1w/w\\",\\"to\\":\\"now\\"}]",
+              ],
+              "schema": Array [
+                "buckets",
+              ],
+            },
+            "function": "aggDateRange",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
       }
     `);
   });

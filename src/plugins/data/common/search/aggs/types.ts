@@ -22,46 +22,78 @@ import { DatatableColumn } from 'src/plugins/expressions';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import { TimeRange } from '../../query';
 import {
-  AggConfigSerialized,
+  aggAvg,
+  aggBucketAvg,
+  aggBucketMax,
+  aggBucketMin,
+  aggBucketSum,
+  aggCardinality,
   AggConfigs,
-  AggParamsRange,
-  AggParamsIpRange,
-  AggParamsDateRange,
-  AggParamsFilter,
-  AggParamsFilters,
-  AggParamsSignificantTerms,
-  AggParamsGeoTile,
-  AggParamsGeoHash,
-  AggParamsTerms,
+  AggConfigSerialized,
+  aggCount,
+  aggCumulativeSum,
+  aggDateHistogram,
+  aggDateRange,
+  aggDerivative,
+  aggFilter,
+  aggFilters,
+  aggGeoBounds,
+  aggGeoCentroid,
+  aggGeoHash,
+  aggGeoTile,
+  aggHistogram,
+  aggIpRange,
+  aggMax,
+  aggMedian,
+  aggMin,
+  aggMovingAvg,
   AggParamsAvg,
-  AggParamsCardinality,
-  AggParamsGeoBounds,
-  AggParamsGeoCentroid,
-  AggParamsMax,
-  AggParamsMedian,
-  AggParamsMin,
-  AggParamsStdDeviation,
-  AggParamsSum,
   AggParamsBucketAvg,
   AggParamsBucketMax,
   AggParamsBucketMin,
   AggParamsBucketSum,
+  AggParamsCardinality,
   AggParamsCumulativeSum,
+  AggParamsDateHistogram,
+  AggParamsDateRange,
   AggParamsDerivative,
+  AggParamsFilter,
+  AggParamsFilters,
+  AggParamsGeoBounds,
+  AggParamsGeoCentroid,
+  AggParamsGeoHash,
+  AggParamsGeoTile,
+  AggParamsHistogram,
+  AggParamsIpRange,
+  AggParamsMax,
+  AggParamsMedian,
+  AggParamsMin,
   AggParamsMovingAvg,
   AggParamsPercentileRanks,
   AggParamsPercentiles,
+  AggParamsRange,
   AggParamsSerialDiff,
+  AggParamsSignificantTerms,
+  AggParamsStdDeviation,
+  AggParamsSum,
+  AggParamsTerms,
   AggParamsTopHit,
-  AggParamsHistogram,
-  AggParamsDateHistogram,
+  aggPercentileRanks,
+  aggPercentiles,
+  aggRange,
+  aggSerialDiff,
+  aggSignificantTerms,
+  aggStdDeviation,
+  aggSum,
+  aggTerms,
+  aggTopHit,
   AggTypesRegistry,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
+  BUCKET_TYPES,
   CreateAggConfigParams,
   getCalculateAutoTimeExpression,
   METRIC_TYPES,
-  BUCKET_TYPES,
 } from './';
 
 export { IAggConfig, AggConfigSerialized } from './agg_config';
@@ -169,4 +201,42 @@ export interface AggParamsMapping {
   [METRIC_TYPES.PERCENTILES]: AggParamsPercentiles;
   [METRIC_TYPES.SERIAL_DIFF]: AggParamsSerialDiff;
   [METRIC_TYPES.TOP_HITS]: AggParamsTopHit;
+}
+
+/**
+ * A global list of the expression function definitions for each agg type function.
+ */
+export interface AggFunctionsMapping {
+  aggFilter: ReturnType<typeof aggFilter>;
+  aggFilters: ReturnType<typeof aggFilters>;
+  aggSignificantTerms: ReturnType<typeof aggSignificantTerms>;
+  aggIpRange: ReturnType<typeof aggIpRange>;
+  aggDateRange: ReturnType<typeof aggDateRange>;
+  aggRange: ReturnType<typeof aggRange>;
+  aggGeoTile: ReturnType<typeof aggGeoTile>;
+  aggGeoHash: ReturnType<typeof aggGeoHash>;
+  aggHistogram: ReturnType<typeof aggHistogram>;
+  aggDateHistogram: ReturnType<typeof aggDateHistogram>;
+  aggTerms: ReturnType<typeof aggTerms>;
+  aggAvg: ReturnType<typeof aggAvg>;
+  aggBucketAvg: ReturnType<typeof aggBucketAvg>;
+  aggBucketMax: ReturnType<typeof aggBucketMax>;
+  aggBucketMin: ReturnType<typeof aggBucketMin>;
+  aggBucketSum: ReturnType<typeof aggBucketSum>;
+  aggCardinality: ReturnType<typeof aggCardinality>;
+  aggCount: ReturnType<typeof aggCount>;
+  aggCumulativeSum: ReturnType<typeof aggCumulativeSum>;
+  aggDerivative: ReturnType<typeof aggDerivative>;
+  aggGeoBounds: ReturnType<typeof aggGeoBounds>;
+  aggGeoCentroid: ReturnType<typeof aggGeoCentroid>;
+  aggMax: ReturnType<typeof aggMax>;
+  aggMedian: ReturnType<typeof aggMedian>;
+  aggMin: ReturnType<typeof aggMin>;
+  aggMovingAvg: ReturnType<typeof aggMovingAvg>;
+  aggPercentileRanks: ReturnType<typeof aggPercentileRanks>;
+  aggPercentiles: ReturnType<typeof aggPercentiles>;
+  aggSerialDiff: ReturnType<typeof aggSerialDiff>;
+  aggStdDeviation: ReturnType<typeof aggStdDeviation>;
+  aggSum: ReturnType<typeof aggSum>;
+  aggTopHit: ReturnType<typeof aggTopHit>;
 }

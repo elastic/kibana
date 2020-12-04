@@ -81,41 +81,73 @@ describe('Histogram Agg', () => {
     });
     expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
       Object {
-        "arguments": Object {
-          "enabled": Array [
-            true,
-          ],
-          "extended_bounds": Array [
-            "{\\"min\\":\\"\\",\\"max\\":\\"\\"}",
-          ],
-          "field": Array [
-            "field",
-          ],
-          "has_extended_bounds": Array [
-            false,
-          ],
-          "id": Array [
-            "test",
-          ],
-          "interval": Array [
-            "auto",
-          ],
-          "intervalBase": Array [
-            100,
-          ],
-          "min_doc_count": Array [
-            false,
-          ],
-          "schema": Array [
-            "segment",
-          ],
-        },
-        "function": "aggHistogram",
-        "type": "function",
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "enabled": Array [
+                true,
+              ],
+              "extended_bounds": Array [
+                "{\\"min\\":\\"\\",\\"max\\":\\"\\"}",
+              ],
+              "field": Array [
+                "field",
+              ],
+              "has_extended_bounds": Array [
+                false,
+              ],
+              "id": Array [
+                "test",
+              ],
+              "interval": Array [
+                "auto",
+              ],
+              "intervalBase": Array [
+                100,
+              ],
+              "min_doc_count": Array [
+                false,
+              ],
+              "schema": Array [
+                "segment",
+              ],
+            },
+            "function": "aggHistogram",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
       }
     `);
   });
 
+  test('preserves interval type when generating AST', () => {
+    const aggConfigs = getAggConfigs({
+      interval: 1000,
+      field: {
+        name: 'field',
+      },
+    });
+    const aggConfigs2 = getAggConfigs({
+      interval: 'auto',
+      field: {
+        name: 'field',
+      },
+    });
+
+    expect(aggConfigs.aggs[0].toExpressionAst()?.chain[0].arguments.interval)
+      .toMatchInlineSnapshot(`
+      Array [
+        1000,
+      ]
+    `);
+    expect(aggConfigs2.aggs[0].toExpressionAst()?.chain[0].arguments.interval)
+      .toMatchInlineSnapshot(`
+      Array [
+        "auto",
+      ]
+    `);
+  });
   describe('ordered', () => {
     let histogramType: BucketAggType<IBucketHistogramAggConfig>;
 

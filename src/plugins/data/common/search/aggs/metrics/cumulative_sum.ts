@@ -26,7 +26,7 @@ import { METRIC_TYPES } from './metric_agg_types';
 import { AggConfigSerialized, BaseAggParams } from '../types';
 
 export interface AggParamsCumulativeSum extends BaseAggParams {
-  buckets_path: string;
+  buckets_path?: string;
   customMetric?: AggConfigSerialized;
   metricAgg?: string;
 }
