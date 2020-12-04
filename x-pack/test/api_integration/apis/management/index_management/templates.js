@@ -191,6 +191,26 @@ export default function ({ getService }) {
           '[request body.indexPatterns]: expected value of type [array] '
         );
       });
+
+      it('should parse the ES error and return the cause', async () => {
+        const templateName = `template-${getRandomString()}`;
+        const payload = getTemplatePayload(templateName, [getRandomString()]);
+        const runtime = {
+          myRuntimeField: {
+            type: 'boolean',
+            script: {
+              source: 'emit("hello with error', // error in script
+            },
+          },
+        };
+        payload.template.mappings = { ...payload.template.mappings, runtime };
+        const { body } = await createTemplate(payload).expect(400);
+
+        expect(body.attributes).an('object');
+        expect(body.attributes.message).contain('template after composition is invalid');
+        // one of the item of the cause array should point to our script
+        expect(body.attributes.cause.join(',')).contain('"hello with error');
+      });
     });
 
     describe('update', () => {
@@ -247,6 +267,32 @@ export default function ({ getService }) {
         expect(
           catTemplateResponse.find(({ name: templateName }) => templateName === name).version
         ).to.equal(updatedVersion.toString());
+      });
+
+      it('should parse the ES error and return the cause', async () => {
+        const templateName = `template-${getRandomString()}`;
+        const payload = getTemplatePayload(templateName, [getRandomString()]);
+        const runtime = {
+          myRuntimeField: {
+            type: 'keyword',
+            script: {
+              source: 'emit("hello")',
+            },
+          },
+        };
+
+        // Add runtime field
+        payload.template.mappings = { ...payload.template.mappings, runtime };
+
+        await createTemplate(payload).expect(200);
+
+        // Update template with an error in the runtime field script
+        payload.template.mappings.runtime.myRuntimeField.script = 'emit("hello with error';
+        const { body } = await updateTemplate(payload, templateName).expect(400);
+
+        expect(body.attributes).an('object');
+        // one of the item of the cause array should point to our script
+        expect(body.attributes.cause.join(',')).contain('"hello with error');
       });
     });
 
