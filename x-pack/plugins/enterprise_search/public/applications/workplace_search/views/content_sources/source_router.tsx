@@ -56,11 +56,7 @@ export const SourceRouter: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const {
-    name,
-    serviceType,
-    supportedByLicense,
-  } = contentSource;
+  const { name, serviceType, supportedByLicense } = contentSource;
   const isCustomSource = serviceType === CUSTOM_SERVICE_TYPE;
 
   const callout = (
