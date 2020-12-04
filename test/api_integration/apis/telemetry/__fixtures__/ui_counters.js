@@ -17,33 +17,31 @@
  * under the License.
  */
 
-import { METRIC_TYPE } from './';
-
-export type UiStatsMetricType = METRIC_TYPE.CLICK | METRIC_TYPE.LOADED | METRIC_TYPE.COUNT;
-export interface UiStatsMetricConfig {
-  type: UiStatsMetricType;
-  appName: string;
-  eventName: string;
-  count?: number;
-}
-
-export interface UiStatsMetric {
-  type: UiStatsMetricType;
-  appName: string;
-  eventName: string;
-  count: number;
-}
-
-export function createUiStatsMetric({
-  type,
-  appName,
-  eventName,
-  count = 1,
-}: UiStatsMetricConfig): UiStatsMetric {
-  return {
-    type,
-    appName,
-    eventName,
-    count,
-  };
-}
+export const basicUiCounters = {
+  dailyEvents: [
+    {
+      appName: 'myApp',
+      eventName: 'my_event_885082425109579',
+      lastUpdatedAt: '2020-11-30T11:43:00.961Z',
+      fromTimestamp: '2020-11-30T00:00:00Z',
+      counterType: 'loaded',
+      total: 1,
+    },
+    {
+      appName: 'myApp',
+      eventName: 'my_event_885082425109579_2',
+      lastUpdatedAt: '2020-10-28T11:43:00.961Z',
+      fromTimestamp: '2020-10-28T00:00:00Z',
+      counterType: 'count',
+      total: 1,
+    },
+    {
+      appName: 'myApp',
+      eventName: 'my_event_885082425109579',
+      lastUpdatedAt: '2020-11-30T11:43:00.961Z',
+      fromTimestamp: '2020-11-30T00:00:00Z',
+      counterType: 'click',
+      total: 2,
+    },
+  ],
+};
