@@ -2517,7 +2517,6 @@ export interface SavedObjectsResolveImportErrorsOptions {
 
 // @public (undocumented)
 export interface SavedObjectsResolveResponse<T = unknown> {
-    // (undocumented)
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     // (undocumented)
     saved_object: SavedObject<T>;

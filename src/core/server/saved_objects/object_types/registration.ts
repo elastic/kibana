@@ -18,17 +18,16 @@
  */
 
 import { LEGACY_URL_ALIAS_TYPE } from './constants';
-import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from '..';
+import { ISavedObjectTypeRegistry, SavedObjectsType, SavedObjectTypeRegistry } from '..';
 
-const legacyUrlAliasMappings = {
-  properties: {
-    targetNamespace: { type: 'keyword' },
-    targetType: { type: 'keyword' },
-    targetId: { type: 'keyword' },
-    lastResolved: { type: 'date' },
-    resolveCounter: { type: 'integer' },
-    disabled: { type: 'boolean' },
+const legacyUrlAliasType: SavedObjectsType = {
+  name: LEGACY_URL_ALIAS_TYPE,
+  namespaceType: 'agnostic',
+  mappings: {
+    dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+    properties: {},
   },
+  hidden: true,
 };
 
 /**
@@ -37,10 +36,5 @@ const legacyUrlAliasMappings = {
 export function registerCoreObjectTypes(
   typeRegistry: ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
 ) {
-  typeRegistry.registerType({
-    name: LEGACY_URL_ALIAS_TYPE,
-    namespaceType: 'agnostic',
-    mappings: legacyUrlAliasMappings,
-    hidden: true,
-  });
+  typeRegistry.registerType(legacyUrlAliasType);
 }

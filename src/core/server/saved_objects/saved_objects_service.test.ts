@@ -39,6 +39,7 @@ import { httpServerMock } from '../http/http_server.mocks';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
 import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
 import { SavedObjectsRepository } from './service/lib/repository';
+import { registerCoreObjectTypes } from './object_types';
 
 jest.mock('./service/lib/repository');
 jest.mock('./object_types');
@@ -82,6 +83,16 @@ describe('SavedObjectsService', () => {
   });
 
   describe('#setup()', () => {
+    it('calls registerCoreObjectTypes', async () => {
+      const coreContext = createCoreContext();
+      const soService = new SavedObjectsService(coreContext);
+
+      const mockedRegisterCoreObjectTypes = registerCoreObjectTypes as jest.Mock<any, any>;
+      expect(mockedRegisterCoreObjectTypes).not.toHaveBeenCalled();
+      await soService.setup(createSetupDeps());
+      expect(mockedRegisterCoreObjectTypes).toHaveBeenCalledTimes(1);
+    });
+
     describe('#setClientFactoryProvider', () => {
       it('registers the factory to the clientProvider', async () => {
         const coreContext = createCoreContext();

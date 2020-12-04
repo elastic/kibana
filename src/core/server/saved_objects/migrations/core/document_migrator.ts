@@ -197,7 +197,7 @@ export class DocumentMigrator implements VersionedTransformer {
     // execute on mutated data the second time.
     const clonedDoc = _.cloneDeep(doc);
     const { transformedDoc, additionalDocs } = this.transformDoc(clonedDoc, { convertTypes: true });
-    return [transformedDoc].concat(additionalDocs);
+    return [transformedDoc, ...additionalDocs];
   };
 }
 
@@ -378,7 +378,7 @@ function applyMigrations(
     }
     const result = migrateProp(doc, prop, migrations, convertTypes);
     doc = result.transformedDoc;
-    additionalDocs = additionalDocs.concat(result.additionalDocs);
+    additionalDocs = [...additionalDocs, ...result.additionalDocs];
   }
 }
 
@@ -437,8 +437,7 @@ function convertType(doc: SavedObjectUnsanitizedDoc) {
   }
 
   const { id: originId, type } = otherAttrs;
-  // Deterministically generate a new ID for this object; the uuidv5 namespace constant (uuidv5.DNS) is arbitrary
-  const id = uuidv5(`${namespace}:${type}:${originId}`, uuidv5.DNS);
+  const id = deterministicallyRegenerateObjectId(namespace, type, originId!);
   if (namespace !== undefined) {
     const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
       id: `${namespace}:${type}:${originId}`,
@@ -481,13 +480,13 @@ function getReferenceTransforms(typeRegistry: ISavedObjectTypeRegistry): Transfo
   const transformMap = typeRegistry
     .getAllTypes()
     .filter((type) => type.convertToMultiNamespaceTypeVersion)
-    .reduce((acc, { convertToMultiNamespaceTypeVersion: key, name }) => {
-      const val = acc.get(key!) ?? new Set();
-      return acc.set(key!, val.add(name));
+    .reduce((acc, { convertToMultiNamespaceTypeVersion: version, name }) => {
+      const types = acc.get(version!) ?? new Set();
+      return acc.set(version!, types.add(name));
     }, new Map<string, Set<string>>());
 
-  return Array.from(transformMap, ([key, val]) => ({
-    version: key,
+  return Array.from(transformMap, ([version, types]) => ({
+    version,
     transform: (doc) => {
       const { namespace, references } = doc;
       if (namespace && references?.length) {
@@ -497,7 +496,7 @@ function getReferenceTransforms(typeRegistry: ISavedObjectTypeRegistry): Transfo
             references: references.map(({ type, id, ...attrs }) => ({
               ...attrs,
               type,
-              id: val.has(type) ? uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS) : id,
+              id: types.has(type) ? deterministicallyRegenerateObjectId(namespace, type, id) : id,
             })),
           },
           additionalDocs: [],
@@ -591,7 +590,6 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
   return props(doc).find((p) => {
     const latestVersion = propVersion(migrations, p);
     const docVersion = propVersion(doc, p);
-    const hasPendingReferenceTransform = getHasPendingReferenceTransform(doc, migrations, p);
 
     // We verify that the version is not greater than the version supported by Kibana.
     // If we didn't, this would cause an infinite loop, as we'd be unable to migrate the property
@@ -606,7 +604,10 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
       );
     }
 
-    return (latestVersion && latestVersion !== docVersion) || hasPendingReferenceTransform;
+    return (
+      (latestVersion && latestVersion !== docVersion) ||
+      getHasPendingReferenceTransform(doc, migrations, p) // If the object itself is up-to-date, check if its references are up-to-date too
+    );
   });
 }
 
@@ -634,7 +635,7 @@ function migrateProp(
       // migrate transforms are always applied, but conversion transforms and reference transforms are only applied when Kibana is upgraded
       const result = transform(doc);
       doc = result.transformedDoc;
-      additionalDocs = additionalDocs.concat(result.additionalDocs);
+      additionalDocs = [...additionalDocs, ...result.additionalDocs];
     }
     if (transformType === 'reference') {
       // regardless of whether or not the reference transform was applied, increment the version
@@ -715,4 +716,15 @@ function assertNoDowngrades(
         `to ${docVersion[downgrade]}.`
     );
   }
+}
+
+/**
+ * Deterministically regenerates a saved object's ID based upon it's current namespace, type, and ID. This ensures that we can regenerate
+ * any existing object IDs without worrying about collisions if two objects that exist in different namespaces share an ID. It also ensures
+ * that we can later regenerate any inbound object references to match.
+ *
+ * @note This is only intended to be used when single-namespace object types are converted into multi-namespace object types.
+ */
+function deterministicallyRegenerateObjectId(namespace: string, type: string, id: string) {
+  return uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS); // the uuidv5 namespace constant (uuidv5.DNS) is arbitrary
 }
