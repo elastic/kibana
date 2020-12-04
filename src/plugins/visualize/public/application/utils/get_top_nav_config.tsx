@@ -327,8 +327,6 @@ export const getTopNavConfig = (
                 };
 
                 if (dashboardId) {
-                  // TODO: this should be an edit by value path
-                  // const appPath = `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(id)}`;
                   const appPath = `${VisualizeConstants.LANDING_PAGE_PATH}`;
 
                   // Manually insert a new url so the back button will open the saved visualization.

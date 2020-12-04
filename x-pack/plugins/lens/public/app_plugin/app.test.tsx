@@ -662,38 +662,6 @@ describe('Lens App', () => {
         });
       });
 
-      it('Shows Save button in create by value mode with no originating app', async () => {
-        const props = makeDefaultProps();
-        const services = makeDefaultServices();
-        services.dashboardFeatureFlag = { allowByValueEmbeddables: true };
-        props.incomingState = {
-          originatingApp: '',
-          valueInput: {
-            id: 'whatchaGonnaDoWith',
-            attributes: {
-              title:
-                'whatcha gonna do with all these references? All these references in your value Input',
-              references: [] as SavedObjectReference[],
-            },
-          } as LensByValueInput,
-        };
-
-        const { component } = mountWith({ props, services });
-
-        await act(async () => {
-          const topNavMenuConfig = component.find(TopNavMenu).prop('config');
-          expect(topNavMenuConfig).not.toContainEqual(
-            expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
-          );
-          expect(topNavMenuConfig).not.toContainEqual(
-            expect.objectContaining(navMenuItems.expectedSaveAsButton)
-          );
-          expect(topNavMenuConfig).toContainEqual(
-            expect.objectContaining(navMenuItems.expectedSaveButton)
-          );
-        });
-      });
-
       it('Shows Save and Return and Save As buttons in edit by reference mode', async () => {
         const props = makeDefaultProps();
         props.initialInput = { savedObjectId: defaultSavedObjectId, id: '5678' };

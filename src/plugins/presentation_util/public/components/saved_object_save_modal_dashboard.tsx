@@ -59,12 +59,16 @@ export interface DashboardSaveModalProps {
 }
 
 export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
-  const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>('existing');
+  const { documentInfo, savedObjectsClient, tagOptions } = props;
+  const initialCopyOnSave = !Boolean(documentInfo.id);
+
+  const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>(
+    documentInfo.id ? null : 'existing'
+  );
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
   );
-
-  const { documentInfo, savedObjectsClient, tagOptions } = props;
+  const [copyOnSave, setCopyOnSave] = useState<boolean>(initialCopyOnSave);
 
   const renderDashboardSelect = (state: SaveModalState) => {
     const isDisabled = Boolean(!state.copyOnSave && documentInfo.id);
@@ -156,8 +160,9 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
     );
   };
 
-  const onCopyOnSaveChange = (copyOnSave: boolean) => {
+  const onCopyOnSaveChange = (newCopyOnSave: boolean) => {
     setDashboardOption(null);
+    setCopyOnSave(newCopyOnSave);
   };
 
   const onModalSave = (onSaveProps: OnSaveProps) => {
@@ -176,12 +181,14 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
     props.onSave({ ...onSaveProps, dashboardId });
   };
 
-  const saveLibraryLabel = i18n.translate(
-    'presentationUtil.saveModalDashboard.saveToLibraryLabel',
-    {
-      defaultMessage: 'Save and add to library',
-    }
-  );
+  const saveLibraryLabel =
+    !copyOnSave && documentInfo.id
+      ? i18n.translate('presentationUtil.saveModalDashboard.saveLabel', {
+          defaultMessage: 'Save',
+        })
+      : i18n.translate('presentationUtil.saveModalDashboard.saveToLibraryLabel', {
+          defaultMessage: 'Save and add to library',
+        });
   const saveDashboardLabel = i18n.translate(
     'presentationUtil.saveModalDashboard.saveAndGoToDashboardLabel',
     {
@@ -191,19 +198,22 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
 
   const confirmButtonLabel = dashboardOption === null ? saveLibraryLabel : saveDashboardLabel;
 
+  const isValid = !(dashboardOption === 'existing' && selectedDashboard === null);
+
   return (
     <SavedObjectSaveModal
       onSave={onModalSave}
       onClose={props.onClose}
       title={documentInfo.title}
       showCopyOnSave={documentInfo.id ? true : false}
-      initialCopyOnSave={Boolean(documentInfo.id)}
+      initialCopyOnSave={initialCopyOnSave}
       confirmButtonLabel={confirmButtonLabel}
       objectType={props.objectType}
       options={dashboardOption === null ? tagOptions : undefined} // Show tags when not adding to dashboard
       rightOptions={renderDashboardSelect}
       description={documentInfo.description}
       showDescription={true}
+      isValid={isValid}
       onCopyOnSaveChange={onCopyOnSaveChange}
     />
   );

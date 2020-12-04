@@ -63,6 +63,7 @@ interface Props {
   rightOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   description?: string;
   showDescription: boolean;
+  isValid?: boolean;
 }
 
 export interface SaveModalState {
@@ -279,12 +280,14 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       confirmLabel = this.props.confirmButtonLabel;
     }
 
+    const isValid = this.props.isValid !== undefined ? this.props.isValid : true;
+
     return (
       <EuiButton
         fill
         data-test-subj="confirmSaveSavedObjectButton"
         isLoading={isLoading}
-        isDisabled={title.length === 0}
+        isDisabled={title.length === 0 || !isValid}
         type="submit"
       >
         {confirmLabel}
