@@ -18,7 +18,7 @@
  */
 
 const { join } = require('path');
-const { readdirSync, readFileSync, writeFileSync } = require('fs');
+const { readdirSync, readFileSync, writeFileSync, renameSync } = require('fs');
 const ora = require('ora');
 
 const generatedAntlrFolder = join(__dirname, '..', 'src', 'painless', 'antlr');
@@ -51,5 +51,15 @@ generatedAntlrFolderContents
       return log.fail(err.message);
     }
   });
+
+// Rename generated parserListener file to snakecase to satisfy file casing check
+try {
+  renameSync(
+    join(generatedAntlrFolder, 'painless_parserListener.ts'),
+    join(generatedAntlrFolder, 'painless_parser_listener.ts')
+  );
+} catch (err) {
+  log.warn(`Unable to rename parserListener file to snakecase: ${err.message}`);
+}
 
 log.succeed('Updated generated antlr grammar successfully');
