@@ -9,6 +9,10 @@ import { EventActionOptions } from '../components/builtin_action_types/types';
 import { AlertProvidedActionVariables } from './action_variables';
 
 export type DefaultActionParams = Record<string, AlertActionParam> | undefined;
+export type DefaultActionParamsGetter = (
+  actionTypeId: string,
+  actionGroupId: string
+) => DefaultActionParams;
 export const getDefaultsForActionParams = (
   actionTypeId: string,
   actionGroupId: string,
