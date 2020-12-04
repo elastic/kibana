@@ -319,12 +319,15 @@ export function getIndexPatternDatasource({
     canHandleDrop,
     onDrop,
 
-    // Reset the temporary invalid state when closing the editor
+    // Reset the temporary invalid state when closing the editor, but don't
+    // update the state if it's not needed
     updateStateOnCloseDimension: ({ state, layerId, columnId }) => {
       const layer = { ...state.layers[layerId] };
-      const newIncomplete: Record<string, IncompleteColumn> = {
-        ...(state.layers[layerId].incompleteColumns || {}),
-      };
+      const current = state.layers[layerId].incompleteColumns || {};
+      if (!Object.values(current).length) {
+        return;
+      }
+      const newIncomplete: Record<string, IncompleteColumn> = { ...current };
       delete newIncomplete[columnId];
       return mergeLayer({
         state,
