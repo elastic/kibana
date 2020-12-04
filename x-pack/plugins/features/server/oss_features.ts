@@ -5,14 +5,17 @@
  */
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig } from '../common';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { DEFAULT_APP_CATEGORIES, ISavedObjectTypeRegistry } from '../../../../src/core/server';
 
 export interface BuildOSSFeaturesParams {
-  savedObjectTypes: string[];
+  savedObjectTypeRegistry: ISavedObjectTypeRegistry;
   includeTimelion: boolean;
 }
 
-export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSSFeaturesParams) => {
+export const buildOSSFeatures = ({
+  savedObjectTypeRegistry,
+  includeTimelion,
+}: BuildOSSFeaturesParams) => {
   return [
     {
       id: 'discover',
@@ -346,7 +349,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           },
           api: ['copySavedObjectsToSpaces'],
           savedObject: {
-            all: [...savedObjectTypes],
+            all: [...savedObjectTypeRegistry.getImportableAndExportableTypes().map((t) => t.name)],
             read: [],
           },
           ui: ['read', 'edit', 'delete', 'copyIntoSpace', 'shareIntoSpace'],
@@ -360,7 +363,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           api: ['copySavedObjectsToSpaces'],
           savedObject: {
             all: [],
-            read: [...savedObjectTypes],
+            read: [...savedObjectTypeRegistry.getImportableAndExportableTypes().map((t) => t.name)],
           },
           ui: ['read'],
         },

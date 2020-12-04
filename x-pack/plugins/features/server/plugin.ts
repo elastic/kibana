@@ -109,16 +109,11 @@ export class Plugin {
   public stop() {}
 
   private registerOssFeatures(savedObjects: SavedObjectsServiceStart) {
-    const registry = savedObjects.getTypeRegistry();
-    const savedObjectTypes = registry.getVisibleTypes().map((t) => t.name);
+    const savedObjectTypeRegistry = savedObjects.getTypeRegistry();
 
-    this.logger.debug(
-      `Registering OSS features with SO types: ${savedObjectTypes.join(', ')}. "includeTimelion": ${
-        this.isTimelionEnabled
-      }.`
-    );
+    this.logger.debug(`Registering OSS features. "includeTimelion": ${this.isTimelionEnabled}.`);
     const features = buildOSSFeatures({
-      savedObjectTypes,
+      savedObjectTypeRegistry,
       includeTimelion: this.isTimelionEnabled,
     });
 
