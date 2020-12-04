@@ -7,8 +7,8 @@
 import { ElasticsearchClient } from 'src/core/server';
 import migrationCleanupPolicy from './migration_cleanup_policy.json';
 
-export const getMigrationCleanupPolicyName = (index: string): string =>
-  `${index}-migration-cleanup`;
+export const getMigrationCleanupPolicyName = (alias: string): string =>
+  `${alias}-migration-cleanup`;
 
 const getPolicyExists = async ({
   esClient,
@@ -31,14 +31,26 @@ const getPolicyExists = async ({
   }
 };
 
+/**
+ * Checks that the migration cleanup ILM policy exists for the given signals
+ * alias, and creates it if necessary.
+ *
+ * This policy is applied to outdated signals indexes post-upgrade, ensuring
+ * that they are eventually deleted.
+ *
+ * @param esClient An {@link ElasticsearchClient}
+ * @param alias name of the signals alias
+ *
+ * @throws if elasticsearch returns an error
+ */
 export const ensureMigrationCleanupPolicy = async ({
   esClient,
-  index,
+  alias,
 }: {
   esClient: ElasticsearchClient;
-  index: string;
+  alias: string;
 }): Promise<void> => {
-  const policy = getMigrationCleanupPolicyName(index);
+  const policy = getMigrationCleanupPolicyName(alias);
 
   const policyExists = await getPolicyExists({ esClient, policy });
   if (!policyExists) {
@@ -49,6 +61,18 @@ export const ensureMigrationCleanupPolicy = async ({
   }
 };
 
+/**
+ * Applies the migration cleanup ILM policy to the specified signals index.
+ *
+ * This is invoked for an outdated signals index after a successful index
+ * upgrade, ensuring that it's eventually deleted.
+ *
+ * @param esClient An {@link ElasticsearchClient}
+ * @param alias name of the signals alias
+ * @param index name of the concrete signals index to receive the policy
+ *
+ * @throws if elasticsearch returns an error
+ */
 export const applyMigrationCleanupPolicy = async ({
   alias,
   esClient,

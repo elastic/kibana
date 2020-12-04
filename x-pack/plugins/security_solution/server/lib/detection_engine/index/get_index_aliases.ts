@@ -22,6 +22,14 @@ interface IndexAlias {
   isWriteIndex: boolean;
 }
 
+/**
+ * Retrieves all index aliases for a given alias name
+ *
+ * @param esClient An {@link ElasticsearchClient}
+ * @param alias alias name used to filter results
+ *
+ * @returns an array of {@link IndexAlias} objects
+ */
 export const getIndexAliases = async ({
   esClient,
   alias,

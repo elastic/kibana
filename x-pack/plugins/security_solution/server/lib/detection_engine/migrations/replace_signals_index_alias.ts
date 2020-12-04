@@ -6,6 +6,20 @@
 
 import { ElasticsearchClient } from 'src/core/server';
 
+/**
+ * Updates aliases for the old and new concrete indexes specified, respectively
+ * removing and adding them atomically.
+ *
+ * This is invoked as part of the finalization of a signals upgrade: once the
+ * upgraded index has been verified, its alias replaces the outdated index.
+ *
+ * @param esClient An {@link ElasticsearchClient}
+ * @param alias name of the signals alias
+ * @param newIndex name of the concrete signals index to be aliased
+ * @param oldIndex name of the concrete signals index to be unaliased
+ *
+ * @throws if elasticsearch returns an error
+ */
 export const replaceSignalsIndexAlias = async ({
   alias,
   esClient,

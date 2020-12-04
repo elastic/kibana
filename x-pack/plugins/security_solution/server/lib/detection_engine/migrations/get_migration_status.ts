@@ -27,6 +27,22 @@ interface IndexMappingsResponse {
   [indexName: string]: { mappings: { _meta: { version: number } } };
 }
 
+/**
+ * Retrieves a breakdown of information relevant to the migration of each
+ * given signals index.
+ *
+ * This includes:
+ *   * the mappings version of the index
+ *   * aggregated counts of the schema versions of signals in the index
+ *   * aggregated counts of the migration versions of signals in the index
+ *
+ * @param esClient An {@link ElasticsearchClient}
+ * @param index name(s) of the signals index(es)
+ *
+ * @returns an array of {@link MigrationStatus} objects
+ *
+ * @throws if elasticsearch returns an error
+ */
 export const getMigrationStatus = async ({
   esClient,
   index,

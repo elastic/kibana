@@ -6,6 +6,19 @@
 
 import { ElasticsearchClient } from 'src/core/server';
 
+/**
+ * Creates the destination index to be used during the upgrade/reindex of a
+ * given signals index.
+ *
+ * The destination index's name is determined by adding a suffix of
+ * `-r${templateVersion}` to the source index name
+ *
+ * @param esClient An {@link ElasticsearchClient}
+ * @param index name of the source signals index
+ * @param version version of the current signals template/mappings
+ *
+ * @returns the name of the created index
+ */
 export const createSignalsUpgradeIndex = async ({
   esClient,
   index,

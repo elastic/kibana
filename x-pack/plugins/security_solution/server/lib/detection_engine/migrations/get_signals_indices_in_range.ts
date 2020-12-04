@@ -16,6 +16,18 @@ interface IndexesResponse {
   };
 }
 
+/**
+ * Retrieves the list of indices containing signals that fall between now and
+ * the given date. This is most relevant to signals upgrades, where we want
+ * to scope the number of indexes/documents that we upgrade.
+ *
+ *
+ * @param esClient An {@link ElasticsearchClient}
+ * @param from date math string representing the start of the range
+ * @param index name(s) of the signals index(es)
+ *
+ * @returns an array of index names
+ */
 export const getSignalsIndicesInRange = async ({
   esClient,
   from,

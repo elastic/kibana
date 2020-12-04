@@ -7,6 +7,23 @@
 import { ElasticsearchClient } from 'src/core/server';
 import { createSignalsUpgradeIndex } from './create_signals_upgrade_index';
 
+interface SignalsUpgrade {
+  destinationIndex: string;
+  sourceIndex: string;
+  taskId: string;
+}
+/**
+ * Upgrades signals for a given concrete index. Signals are reindexed into a
+ * new index in order to receive new fields. Upgraded signals have a
+ * `signal._meta.schema_version` field representing the mappings version at the time of the upgrade.
+ *
+ * @param esClient An {@link ElasticsearchClient}
+ * @param index name of the concrete signals index to be upgraded
+ * @param version version of the current signals template/mappings
+ *
+ * @returns identifying information representing the {@link SignalsUpgrade}
+ * @throws if elasticsearch returns an error
+ */
 export const upgradeSignals = async ({
   esClient,
   index,
@@ -15,7 +32,7 @@ export const upgradeSignals = async ({
   esClient: ElasticsearchClient;
   index: string;
   version: number;
-}): Promise<{ destinationIndex: string; sourceIndex: string; taskId: string }> => {
+}): Promise<SignalsUpgrade> => {
   const upgradeIndex = await createSignalsUpgradeIndex({
     esClient,
     index,

@@ -70,7 +70,7 @@ export const createDetectionIndex = async (
   }
 
   const index = siemClient.getSignalsIndex();
-  await ensureMigrationCleanupPolicy({ esClient, index });
+  await ensureMigrationCleanupPolicy({ alias: index, esClient });
   const policyExists = await getPolicyExists(callCluster, index);
   if (!policyExists) {
     await setPolicy(callCluster, index, signalsPolicy);

@@ -6,6 +6,14 @@
 
 import { ElasticsearchClient } from 'src/core/server';
 
+/**
+ * Retrieves the count of documents in a given index
+ *
+ * @param esClient An {@link ElasticsearchClient}
+ * @param index index whose documents will be counted
+ *
+ * @returns the document count
+ */
 export const getIndexCount = async ({
   esClient,
   index,
