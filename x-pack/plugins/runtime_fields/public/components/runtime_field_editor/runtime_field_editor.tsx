@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { DocLinksStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 
@@ -43,8 +44,54 @@ export interface Props {
 
 export const RuntimeFieldEditor = ({ defaultValue, onChange, docLinks, ctx }: Props) => {
   const links = getLinks(docLinks);
+  const { index, searchRequestBody, search } = ctx ?? {};
+
+  const [currentField, setCurrentField] = useState<RuntimeField | undefined>(defaultValue);
+
+  const renderPreviewField = () => {
+    if (!search || !index) {
+      return null;
+    }
+
+    return (
+      <PreviewField
+        index={index}
+        searchRequestBody={searchRequestBody}
+        search={search}
+        runtimeField={currentField}
+      />
+    );
+  };
+
+  const onFieldChange = useCallback<Required<FormProps>['onChange']>(
+    async (fieldState) => {
+      if (onChange) {
+        onChange(fieldState);
+      }
+
+      const isValid = fieldState.isValid ?? (await fieldState.validate());
+
+      if (isValid) {
+        setCurrentField(fieldState.getData());
+      } else {
+        setCurrentField(undefined);
+      }
+    },
+    [onChange]
+  );
 
   return (
-    <RuntimeFieldForm links={links} defaultValue={defaultValue} onChange={onChange} ctx={ctx} />
+    <>
+      <RuntimeFieldForm
+        links={links}
+        defaultValue={defaultValue}
+        onChange={onFieldChange}
+        ctx={ctx}
+      />
+
+      <EuiSpacer />
+
+      {renderPreviewField()}
+    </>
   );
 };
