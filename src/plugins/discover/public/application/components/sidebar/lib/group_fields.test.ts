@@ -63,7 +63,14 @@ describe('group_fields', function () {
 
     const fieldFilterState = getDefaultFieldFilter();
 
-    const actual = groupFields(fields as any, ['currency'], 5, fieldCounts, fieldFilterState);
+    const actual = groupFields(
+      fields as any,
+      ['currency'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      false
+    );
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "popular": Array [

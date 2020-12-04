@@ -131,7 +131,7 @@ export function DiscoverSidebar({
   setFieldFilter,
   setIndexPattern,
   trackUiMetric,
-  useNewFieldsApi,
+  useNewFieldsApi = false,
   useFlyout = false,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);

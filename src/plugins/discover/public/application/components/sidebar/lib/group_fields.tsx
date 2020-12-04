@@ -34,7 +34,7 @@ export function groupFields(
   popularLimit: number,
   fieldCounts: Record<string, number>,
   fieldFilterState: FieldFilterState,
-  useNewFieldsApi
+  useNewFieldsApi: boolean
 ): GroupedFields {
   const result: GroupedFields = {
     selected: [],

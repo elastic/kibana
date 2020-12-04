@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { IndexPattern } from './index_pattern';
-import { ES_FIELD_TYPES, FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../common';
+import { FieldFormatsContentType } from '../../../common';
 
 const formattedCache = new WeakMap();
 const partialFormattedCache = new WeakMap();

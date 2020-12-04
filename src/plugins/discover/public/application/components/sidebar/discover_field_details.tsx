@@ -38,7 +38,7 @@ interface DiscoverFieldDetailsProps {
   details: FieldDetails;
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
-  showFooter: boolean;
+  showFooter?: boolean;
 }
 
 export type { DiscoverFieldDetailsProps };
@@ -73,7 +73,7 @@ export function DiscoverFieldDetails({
         setShowVisualizeLink(false);
       }
     );
-  }, [field, indexPattern.id, details.columns]);
+  }, [field, indexPattern.id, details, details.columns]);
 
   const handleVisualizeLinkClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     // regular link click. let the uiActions code handle the navigation and show popup if needed

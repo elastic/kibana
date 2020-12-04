@@ -44,6 +44,8 @@ describe('updateSearchSource', () => {
         } as unknown) as IUiSettingsClient,
       } as unknown) as DiscoverServices,
       sort: [] as SortOrder[],
+      columns: [],
+      useNewFieldsApi: false,
     });
     expect(result.getField('index')).toEqual(indexPatternMock);
     expect(result.getField('size')).toEqual(sampleSize);
