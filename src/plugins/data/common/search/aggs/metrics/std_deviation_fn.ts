@@ -22,15 +22,20 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggStdDeviation';
+export const aggStdDeviationFnName = 'aggStdDeviation';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.STD_DEV>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggStdDeviationFnName,
+  Input,
+  AggArgs,
+  Output
+>;
 
 export const aggStdDeviation = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggStdDeviationFnName,
   help: i18n.translate('data.search.aggs.function.metrics.std_deviation.help', {
     defaultMessage: 'Generates a serialized agg config for a Standard Deviation agg',
   }),
