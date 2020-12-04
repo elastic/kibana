@@ -10,6 +10,7 @@ import { IRouter } from 'src/core/server';
 import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
 import { finalizeSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { BadRequestError } from '../../errors/bad_request_error';
 import { getIndexCount } from '../../index/get_index_count';
 import { decodeMigrationToken } from '../../migrations/helpers';
 import { applyMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
@@ -52,10 +53,10 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
           return response.ok({
             body: {
               completed: false,
-              destination_index: destinationIndex,
+              index: sourceIndex,
+              migration_index: destinationIndex,
+              migration_task_id: taskId,
               migration_token: migrationToken,
-              source_index: sourceIndex,
-              task_id: taskId,
             },
           });
         }
@@ -66,8 +67,8 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
           !description.includes(destinationIndex) ||
           !description.includes(sourceIndex)
         ) {
-          throw new Error(
-            `The specified task does not match the source and destination indexes. Task [${taskId}] did not specify source index [${sourceIndex}] and destination index [${destinationIndex}] `
+          throw new BadRequestError(
+            `The specified task does not match the source and destination indexes. Task [${taskId}] did not specify source index [${sourceIndex}] and destination index [${destinationIndex}]`
           );
         }
 
@@ -92,9 +93,10 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
         return response.ok({
           body: {
             completed: true,
-            destination_index: destinationIndex,
-            source_index: sourceIndex,
-            task_id: taskId,
+            index: sourceIndex,
+            migration_index: destinationIndex,
+            migration_task_id: taskId,
+            migration_token: migrationToken,
           },
         });
       } catch (err) {

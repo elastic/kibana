@@ -59,11 +59,18 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
               const migrationToken = encodeMigrationToken(migrationDetails);
 
               return {
-                name: index,
-                migrationToken,
+                index,
+                migration_index: migrationDetails.destinationIndex,
+                migration_task_id: migrationDetails.taskId,
+                migration_token: migrationToken,
               };
             } else {
-              return { name: index, migrationToken: null };
+              return {
+                index,
+                migration_index: null,
+                migration_task_id: null,
+                migration_token: null,
+              };
             }
           })
         );
