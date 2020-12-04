@@ -177,9 +177,10 @@ export class CliDevMode {
     this.subscription = new Rx.Subscription();
 
     if (basePathProxy) {
-      const serverReady$ = new Rx.BehaviorSubject<boolean>(false);
-      const optimizerReady$ = new Rx.BehaviorSubject<boolean>(false);
-      const userWaiting$ = new Rx.BehaviorSubject<boolean>(false);
+      const serverReady$ = new Rx.BehaviorSubject(false);
+      const optimizerReady$ = new Rx.BehaviorSubject(false);
+      const userWaiting$ = new Rx.BehaviorSubject(false);
+
       this.subscription.add(
         Rx.merge(
           this.devServer.isReady$().pipe(tap(serverReady$)),
