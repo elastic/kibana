@@ -16,7 +16,7 @@ import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { useAllCasesModal } from '../../../../cases/components/use_all_cases_modal';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineSelectors } from '../../../store/timeline';
 import { Case } from '../../../../cases/containers/types';
 
@@ -101,7 +101,7 @@ export const Properties = React.memo<Props>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     const { navigateToApp } = useKibana().services.application;
-    const currentTimeline = useShallowEqualSelector((state) =>
+    const { savedObjectId: timelineSavedObjectId } = useDeepEqualSelector((state) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
 
@@ -113,16 +113,16 @@ export const Properties = React.memo<Props>(
 
         dispatch(
           setInsertTimeline({
-            graphEventId: currentTimeline.graphEventId ?? '',
+            graphEventId: graphEventId ?? '',
             timelineId,
-            timelineSavedObjectId: currentTimeline.savedObjectId ?? '',
-            timelineTitle: currentTimeline.title,
+            timelineSavedObjectId: timelineSavedObjectId ?? '',
+            timelineTitle: title,
           })
         );
       },
       // dispatch causes unnecessary rerenders
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [currentTimeline, navigateToApp, timelineId]
+      [graphEventId, navigateToApp, timelineId, timelineSavedObjectId, title]
     );
     const { Modal: AllCasesModal, openModal: openCaseModal } = useAllCasesModal({ onRowClick });
 

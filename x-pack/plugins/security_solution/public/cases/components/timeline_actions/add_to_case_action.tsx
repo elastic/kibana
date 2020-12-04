@@ -54,12 +54,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, 
     [postComment, eventId, eventIndex, dispatchToaster]
   );
 
-  const onCaseCreated = useCallback((theCase: Case) => attachAlertToCase(theCase), [
-    attachAlertToCase,
-  ]);
-
   const { Modal: CreateCaseModal, openModal: openCreateCaseModal } = useCreateCaseModal({
-    onCaseCreated,
+    onCaseCreated: attachAlertToCase,
   });
 
   const onCaseClicked = useCallback(

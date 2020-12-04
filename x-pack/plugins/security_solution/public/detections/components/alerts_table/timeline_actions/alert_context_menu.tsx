@@ -56,7 +56,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     (ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status)) ?? undefined
   );
   const eventId = ecsRowData._id;
-  const eventIndex = ecsRowData._index;
   const ruleId = useMemo(
     (): string | null =>
       (ecsRowData.signal?.rule && ecsRowData.signal.rule.id && ecsRowData.signal.rule.id[0]) ??
