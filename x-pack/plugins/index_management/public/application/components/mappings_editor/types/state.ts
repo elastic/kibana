@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormHook, OnFormUpdateArg } from '../shared_imports';
-import { Field, NormalizedFields } from './document_fields';
+import { FormHook, OnFormUpdateArg, RuntimeField } from '../shared_imports';
+import {
+  Field,
+  NormalizedFields,
+  NormalizedRuntimeField,
+  NormalizedRuntimeFields,
+} from './document_fields';
 import { FieldsEditor, SearchResult } from './mappings_editor';
 
 export type Mappings = MappingsTemplates &
@@ -58,6 +63,11 @@ export interface DocumentFieldsState {
   fieldToAddFieldTo?: string;
 }
 
+interface RuntimeFieldsListState {
+  status: DocumentFieldsStatus;
+  fieldToEdit?: string;
+}
+
 export interface ConfigurationFormState extends OnFormUpdateArg<MappingsConfiguration> {
   defaultValue: MappingsConfiguration;
   submitForm?: FormHook<MappingsConfiguration>['submit'];
@@ -72,7 +82,9 @@ export interface State {
   isValid: boolean | undefined;
   configuration: ConfigurationFormState;
   documentFields: DocumentFieldsState;
+  runtimeFieldsList: RuntimeFieldsListState;
   fields: NormalizedFields;
+  runtimeFields: NormalizedRuntimeFields;
   fieldForm?: OnFormUpdateArg<any>;
   fieldsJsonEditor: {
     format(): MappingsFields;
@@ -100,6 +112,12 @@ export type Action =
   | { type: 'documentField.editField'; value: string }
   | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
   | { type: 'documentField.changeEditor'; value: FieldsEditor }
+  | { type: 'runtimeFieldsList.createField' }
+  | { type: 'runtimeFieldsList.editField'; value: string }
+  | { type: 'runtimeFieldsList.closeRuntimeFieldEditor' }
+  | { type: 'runtimeField.add'; value: RuntimeField }
+  | { type: 'runtimeField.remove'; value: string }
+  | { type: 'runtimeField.edit'; value: NormalizedRuntimeField }
   | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
   | { type: 'search:update'; value: string }
   | { type: 'validity:update'; value: boolean };

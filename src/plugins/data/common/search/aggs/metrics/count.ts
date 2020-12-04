@@ -18,12 +18,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { aggCountFnName } from './count_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 
 export const getCountMetricAgg = () =>
   new MetricAggType({
     name: METRIC_TYPES.COUNT,
+    expressionName: aggCountFnName,
     title: i18n.translate('data.search.aggs.metrics.countTitle', {
       defaultMessage: 'Count',
     }),

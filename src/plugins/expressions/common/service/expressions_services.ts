@@ -17,6 +17,9 @@
  * under the License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { KibanaRequest } from 'src/core/server';
+
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
@@ -57,6 +60,13 @@ export interface ExpressionExecutionParams {
    * function are saved and are available for introspection.
    */
   debug?: boolean;
+
+  /**
+   * Makes a `KibanaRequest` object available to expression functions. Useful for
+   * functions which are running on the server and need to perform operations that
+   * are scoped to a specific user.
+   */
+  kibanaRequest?: KibanaRequest;
 
   searchSessionId?: string;
 
