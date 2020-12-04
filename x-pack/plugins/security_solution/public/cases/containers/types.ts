@@ -10,7 +10,7 @@ import {
   UserAction,
   CaseConnector,
   CommentType,
-  CaseStatus,
+  CaseStatuses,
 } from '../../../../case/common/api';
 
 export { CaseConnector, ActionConnector } from '../../../../case/common/api';
@@ -58,7 +58,7 @@ export interface Case {
   createdBy: ElasticUser;
   description: string;
   externalService: CaseExternalService | null;
-  status: CaseStatus;
+  status: CaseStatuses;
   tags: string[];
   title: string;
   totalComment: number;
@@ -76,7 +76,7 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
-  status: CaseStatus;
+  status: CaseStatuses;
   tags: string[];
   reporters: User[];
 }

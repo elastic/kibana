@@ -6,12 +6,12 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
-import { CaseStatus } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import { statuses } from './config';
 
 export interface Props {
   caseCount: number | null;
-  caseStatus: CaseStatus;
+  caseStatus: CaseStatuses;
   isLoading: boolean;
   dataTestSubj?: string;
 }

@@ -393,7 +393,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 <Stats
                   dataTestSubj="inProgressStatsHeader"
                   caseCount={countInProgressCases}
-                  caseStatus={'in-progress'}
+                  caseStatus={CaseStatuses['in-progress']}
                   isLoading={isCasesStatusLoading}
                 />
               </EuiFlexItem>

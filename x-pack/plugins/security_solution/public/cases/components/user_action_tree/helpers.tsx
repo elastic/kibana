@@ -10,7 +10,7 @@ import React from 'react';
 import {
   CaseFullExternalService,
   ActionConnector,
-  CaseStatus,
+  CaseStatuses,
 } from '../../../../../case/common/api';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
@@ -28,7 +28,7 @@ interface LabelTitle {
   field: string;
 }
 
-const getStatusTitle = (status: CaseStatus) => {
+const getStatusTitle = (status: CaseStatuses) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems={'center'}>
       <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
@@ -53,8 +53,8 @@ export const getLabelTitle = ({ action, field }: LabelTitle) => {
       return '';
     }
 
-    // The above check ensures that the newValue is of type CaseStatus.
-    return getStatusTitle(action.newValue as CaseStatus);
+    // The above check ensures that the newValue is of type CaseStatuses.
+    return getStatusTitle(action.newValue as CaseStatuses);
   } else if (field === 'comment' && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
   }

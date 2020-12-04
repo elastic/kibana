@@ -7,14 +7,14 @@
 import React, { memo, useCallback, useState, useMemo, useEffect } from 'react';
 import { EuiButton } from '@elastic/eui';
 
-import { CaseStatus, caseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses, caseStatuses } from '../../../../../case/common/api';
 import { statuses } from './config';
 
 interface Props {
-  status: CaseStatus;
+  status: CaseStatuses;
   disabled: boolean;
   isLoading: boolean;
-  onStatusChanged: (status: CaseStatus) => void;
+  onStatusChanged: (status: CaseStatuses) => void;
 }
 
 const getNextItem = (item: number) => (item + 1) % caseStatuses.length;

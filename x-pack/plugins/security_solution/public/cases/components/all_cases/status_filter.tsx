@@ -6,18 +6,18 @@
 
 import React, { memo } from 'react';
 import { EuiSuperSelect, EuiSuperSelectOption, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { CaseStatus } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import { Status, statuses } from '../status';
 
 interface Props {
-  stats: Record<CaseStatus, number>;
-  selectedStatus: CaseStatus;
-  onStatusChanged: (status: CaseStatus) => void;
+  stats: Record<CaseStatuses, number>;
+  selectedStatus: CaseStatuses;
+  onStatusChanged: (status: CaseStatuses) => void;
 }
 
 const StatusFilterComponent: React.FC<Props> = ({ stats, selectedStatus, onStatusChanged }) => {
-  const caseStatuses = Object.keys(statuses) as CaseStatus[];
-  const options: Array<EuiSuperSelectOption<CaseStatus>> = caseStatuses.map((status) => ({
+  const caseStatuses = Object.keys(statuses) as CaseStatuses[];
+  const options: Array<EuiSuperSelectOption<CaseStatuses>> = caseStatuses.map((status) => ({
     value: status,
     inputDisplay: (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'}>

@@ -7,12 +7,12 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { memoize } from 'lodash/fp';
 import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { CaseStatus } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import { Status, statuses } from '../status';
 
 interface Props {
-  currentStatus: CaseStatus;
-  onStatusChanged: (status: CaseStatus) => void;
+  currentStatus: CaseStatuses;
+  onStatusChanged: (status: CaseStatuses) => void;
 }
 
 const StatusContextMenuComponent: React.FC<Props> = ({ currentStatus, onStatusChanged }) => {
@@ -26,15 +26,15 @@ const StatusContextMenuComponent: React.FC<Props> = ({ currentStatus, onStatusCh
 
   const onContextMenuItemClick = useMemo(
     () =>
-      memoize<(status: CaseStatus) => () => void>((status) => () => {
+      memoize<(status: CaseStatuses) => () => void>((status) => () => {
         closePopover();
         onStatusChanged(status);
       }),
     [closePopover, onStatusChanged]
   );
 
-  const caseStatuses = Object.keys(statuses) as CaseStatus[];
-  const panelItems = caseStatuses.map((status: CaseStatus) => (
+  const caseStatuses = Object.keys(statuses) as CaseStatuses[];
+  const panelItems = caseStatuses.map((status: CaseStatuses) => (
     <EuiContextMenuItem
       key={status}
       icon={status === currentStatus ? 'check' : 'empty'}

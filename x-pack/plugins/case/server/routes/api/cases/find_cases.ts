@@ -15,7 +15,7 @@ import {
   CasesFindResponseRt,
   CasesFindRequestRt,
   throwErrors,
-  CaseStatus,
+  CaseStatuses,
   caseStatuses,
 } from '../../../../common/api';
 import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
@@ -26,7 +26,7 @@ import { CASES_URL } from '../../../../common/constants';
 const combineFilters = (filters: string[], operator: 'OR' | 'AND'): string =>
   filters?.filter((i) => i !== '').join(` ${operator} `);
 
-const getStatusFilter = (status: CaseStatus, appendFilter?: string) =>
+const getStatusFilter = (status: CaseStatuses, appendFilter?: string) =>
   `${CASE_SAVED_OBJECT}.attributes.status: ${status}${
     !isEmpty(appendFilter) ? ` AND ${appendFilter}` : ''
   }`;

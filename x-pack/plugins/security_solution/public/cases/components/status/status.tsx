@@ -8,12 +8,12 @@ import React, { memo, useMemo } from 'react';
 import { noop } from 'lodash/fp';
 import { EuiBadge } from '@elastic/eui';
 
-import { CaseStatus } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import { statuses } from './config';
 import * as i18n from './translations';
 
 interface Props {
-  type: CaseStatus;
+  type: CaseStatuses;
   withArrow?: boolean;
   onClick?: () => void;
 }

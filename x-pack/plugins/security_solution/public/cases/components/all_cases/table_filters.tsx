@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { isEqual } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
 
-import { CaseStatus, CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import { FilterOptions } from '../../containers/types';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
@@ -115,7 +115,7 @@ const CasesTableFiltersComponent = ({
   );
 
   const onStatusChanged = useCallback(
-    (status: CaseStatus) => {
+    (status: CaseStatuses) => {
       onFilterChanged({ status });
     },
     [onFilterChanged]
@@ -123,9 +123,9 @@ const CasesTableFiltersComponent = ({
 
   const stats = useMemo(
     () => ({
-      open: countOpenCases ?? 0,
-      'in-progress': countInProgressCases ?? 0,
-      closed: countClosedCases ?? 0,
+      [CaseStatuses.open]: countOpenCases ?? 0,
+      [CaseStatuses['in-progress']]: countInProgressCases ?? 0,
+      [CaseStatuses.closed]: countClosedCases ?? 0,
     }),
     [countClosedCases, countInProgressCases, countOpenCases]
   );

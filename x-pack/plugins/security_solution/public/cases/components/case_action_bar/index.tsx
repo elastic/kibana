@@ -14,7 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { CaseStatus } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import * as i18n from '../case_view/translations';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { CaseViewActions } from '../case_view/actions';
@@ -38,7 +38,7 @@ interface CaseActionBarProps {
   disabled?: boolean;
   isLoading: boolean;
   onRefresh: () => void;
-  onStatusChanged: (status: CaseStatus) => void;
+  onStatusChanged: (status: CaseStatuses) => void;
 }
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   caseData,

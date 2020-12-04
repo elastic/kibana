@@ -9,7 +9,7 @@ import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } 
 import {
   CommentResponse,
   ServiceConnectorCaseResponse,
-  CaseStatus,
+  CaseStatuses,
   UserAction,
   UserActionField,
   CaseResponse,
@@ -18,7 +18,6 @@ import {
   CasesResponse,
   CasesFindResponse,
   CommentType,
-  CaseStatuses,
 } from '../../../../case/common/api';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { ConnectorTypes } from '../../../../case/common/api/connectors';
@@ -205,7 +204,7 @@ export const basicCommentSnake: CommentResponse = {
 
 export const basicCaseSnake: CaseResponse = {
   ...basicCase,
-  status: CaseStatuses.open as CaseStatus,
+  status: CaseStatuses.open,
   closed_at: null,
   closed_by: null,
   comments: [basicCommentSnake],

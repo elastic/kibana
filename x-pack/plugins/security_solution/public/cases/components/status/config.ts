@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CaseStatus } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import * as i18n from './translations';
 
 type Statuses = Record<
-  CaseStatus,
+  CaseStatuses,
   {
     color: string;
     label: string;
@@ -25,7 +25,7 @@ type Statuses = Record<
 >;
 
 export const statuses: Statuses = {
-  open: {
+  [CaseStatuses.open]: {
     color: 'primary',
     label: i18n.OPEN,
     actionBar: {
@@ -39,7 +39,7 @@ export const statuses: Statuses = {
       title: i18n.OPEN_CASES,
     },
   },
-  'in-progress': {
+  [CaseStatuses['in-progress']]: {
     color: 'warning',
     label: i18n.IN_PROGRESS,
     actionBar: {
@@ -53,7 +53,7 @@ export const statuses: Statuses = {
       title: i18n.IN_PROGRESS_CASES,
     },
   },
-  closed: {
+  [CaseStatuses.closed]: {
     color: 'default',
     label: i18n.CLOSED,
     actionBar: {

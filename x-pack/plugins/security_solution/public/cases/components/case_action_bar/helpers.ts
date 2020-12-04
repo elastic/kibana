@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaseStatuses, CaseStatus } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import { Case } from '../../containers/types';
 import { statuses } from '../status';
 
@@ -20,4 +20,4 @@ export const getStatusDate = (theCase: Case): string | null => {
   return null;
 };
 
-export const getStatusTitle = (status: CaseStatus) => statuses[status].actionBar.title;
+export const getStatusTitle = (status: CaseStatuses) => statuses[status].actionBar.title;

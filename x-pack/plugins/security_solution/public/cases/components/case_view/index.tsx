@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 
-import { CaseStatus } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import { Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
@@ -161,7 +161,7 @@ export const CaseComponent = React.memo<CaseProps>(
             });
             break;
           case 'status':
-            const statusUpdate = getTypedPayload<CaseStatus>(value);
+            const statusUpdate = getTypedPayload<CaseStatuses>(value);
             if (caseData.status !== value) {
               updateCaseProperty({
                 fetchCaseUserActions,
@@ -244,7 +244,7 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const changeStatus = useCallback(
-      (status: CaseStatus) =>
+      (status: CaseStatuses) =>
         onUpdateField({
           key: 'status',
           value: status,
