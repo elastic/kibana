@@ -14,7 +14,13 @@ import { OperationDefinition } from '../index';
 import { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { IndexPattern } from '../../../types';
-import { Query, esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
+import {
+  AggFunctionsMapping,
+  Query,
+  esKuery,
+  esQuery,
+} from '../../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
 
 const generateId = htmlIdGenerator();
@@ -110,19 +116,16 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
     };
   },
 
-  toEsAggsConfig: (column, columnId, indexPattern) => {
+  toEsAggsFn: (column, columnId, indexPattern) => {
     const validFilters = column.params.filters?.filter((f: Filter) =>
       isQueryValid(f.input, indexPattern)
     );
-    return {
+    return buildExpressionFunction<AggFunctionsMapping['aggFilters']>('aggFilters', {
       id: columnId,
       enabled: true,
-      type: 'filters',
       schema: 'segment',
-      params: {
-        filters: validFilters?.length > 0 ? validFilters : [defaultFilter],
-      },
-    };
+      filters: JSON.stringify(validFilters?.length > 0 ? validFilters : [defaultFilter]),
+    }).toAst();
   },
 
   paramEditor: ({ state, setState, currentColumn, layerId, data }) => {

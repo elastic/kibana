@@ -74,22 +74,22 @@ describe('last_value', () => {
     };
   });
 
-  describe('toEsAggsConfig', () => {
+  describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
       const lastValueColumn = state.layers.first.columns.col2 as LastValueIndexPatternColumn;
-      const esAggsConfig = lastValueOperation.toEsAggsConfig(
+      const esAggsFn = lastValueOperation.toEsAggsFn(
         { ...lastValueColumn, params: { ...lastValueColumn.params } },
         'col1',
         {} as IndexPattern
       );
-      expect(esAggsConfig).toEqual(
+      expect(esAggsFn).toEqual(
         expect.objectContaining({
-          params: expect.objectContaining({
-            aggregate: 'concat',
-            field: 'a',
-            size: 1,
-            sortField: 'datefield',
-            sortOrder: 'desc',
+          arguments: expect.objectContaining({
+            aggregate: ['concat'],
+            field: ['a'],
+            size: [1],
+            sortField: ['datefield'],
+            sortOrder: ['desc'],
           }),
         })
       );

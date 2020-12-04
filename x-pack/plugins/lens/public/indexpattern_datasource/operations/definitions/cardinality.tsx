@@ -5,6 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
@@ -75,16 +77,14 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
           : undefined,
     };
   },
-  toEsAggsConfig: (column, columnId) => ({
-    id: columnId,
-    enabled: true,
-    type: OPERATION_TYPE,
-    schema: 'metric',
-    params: {
+  toEsAggsFn: (column, columnId) => {
+    return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {
+      id: columnId,
+      enabled: true,
+      schema: 'metric',
       field: column.sourceField,
-      missing: 0,
-    },
-  }),
+    }).toAst();
+  },
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,

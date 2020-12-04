@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import { getInvalidFieldMessage } from './helpers';
 import {
@@ -21,6 +22,13 @@ type MetricColumn<T> = FormattedIndexPatternColumn &
   FieldBasedIndexPatternColumn & {
     operationType: T;
   };
+
+const typeToFn: Record<string, string> = {
+  min: 'aggMin',
+  max: 'aggMax',
+  avg: 'aggAvg',
+  sum: 'aggSum',
+};
 
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
@@ -94,16 +102,14 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
-    toEsAggsConfig: (column, columnId, _indexPattern) => ({
-      id: columnId,
-      enabled: true,
-      type: column.operationType,
-      schema: 'metric',
-      params: {
+    toEsAggsFn: (column, columnId, _indexPattern) => {
+      return buildExpressionFunction(typeToFn[type], {
+        id: columnId,
+        enabled: true,
+        schema: 'metric',
         field: column.sourceField,
-        missing: 0,
-      },
-    }),
+      }).toAst();
+    },
     getErrorMessage: (layer, columnId, indexPattern) =>
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   } as OperationDefinition<T, 'field'>;

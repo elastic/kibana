@@ -16,6 +16,8 @@ import {
   EuiButtonEmpty,
   EuiText,
 } from '@elastic/eui';
+import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { IndexPatternColumn } from '../../../indexpattern';
 import { updateColumnParam, isReferenced } from '../../layer_helpers';
 import { DataType } from '../../../../types';
@@ -114,28 +116,25 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
-  toEsAggsConfig: (column, columnId, _indexPattern) => {
-    return {
+  toEsAggsFn: (column, columnId, _indexPattern) => {
+    return buildExpressionFunction<AggFunctionsMapping['aggTerms']>('aggTerms', {
       id: columnId,
       enabled: true,
-      type: 'terms',
       schema: 'segment',
-      params: {
-        field: column.sourceField,
-        orderBy:
-          column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
-        order: column.params.orderDirection,
-        size: column.params.size,
-        otherBucket: Boolean(column.params.otherBucket),
-        otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
-          defaultMessage: 'Other',
-        }),
-        missingBucket: column.params.otherBucket && column.params.missingBucket,
-        missingBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.missingLabel', {
-          defaultMessage: '(missing value)',
-        }),
-      },
-    };
+      field: column.sourceField,
+      orderBy:
+        column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
+      order: column.params.orderDirection,
+      size: column.params.size,
+      otherBucket: Boolean(column.params.otherBucket),
+      otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
+        defaultMessage: 'Other',
+      }),
+      missingBucket: column.params.otherBucket && column.params.missingBucket,
+      missingBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.missingLabel', {
+        defaultMessage: '(missing value)',
+      }),
+    }).toAst();
   },
   getDefaultLabel: (column, indexPattern) =>
     ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),

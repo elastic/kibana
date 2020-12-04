@@ -324,8 +324,65 @@ describe('IndexPattern Data Source', () => {
           "chain": Array [
             Object {
               "arguments": Object {
-                "aggConfigs": Array [
-                  "[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]",
+                "aggs": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "enabled": Array [
+                            true,
+                          ],
+                          "id": Array [
+                            "col1",
+                          ],
+                          "schema": Array [
+                            "metric",
+                          ],
+                        },
+                        "function": "aggCount",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "drop_partials": Array [
+                            false,
+                          ],
+                          "enabled": Array [
+                            true,
+                          ],
+                          "extended_bounds": Array [
+                            "{}",
+                          ],
+                          "field": Array [
+                            "timestamp",
+                          ],
+                          "id": Array [
+                            "col2",
+                          ],
+                          "interval": Array [
+                            "1d",
+                          ],
+                          "min_doc_count": Array [
+                            0,
+                          ],
+                          "schema": Array [
+                            "segment",
+                          ],
+                          "useNormalizedEsInterval": Array [
+                            true,
+                          ],
+                        },
+                        "function": "aggDateHistogram",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
                 ],
                 "index": Array [
                   Object {

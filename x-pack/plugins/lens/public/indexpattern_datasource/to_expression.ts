@@ -12,6 +12,7 @@ import {
   buildExpression,
   buildExpressionFunction,
   ExpressionAstExpression,
+  ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '../../../../../src/plugins/expressions/public';
 import { IndexPatternColumn } from './indexpattern';
@@ -32,14 +33,16 @@ function getExpressionForLayer(
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
 
   if (columnEntries.length) {
-    const aggs: unknown[] = [];
+    const aggs: ExpressionAstExpressionBuilder[] = [];
     const expressions: ExpressionAstFunction[] = [];
     columnEntries.forEach(([colId, col]) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input === 'fullReference') {
         expressions.push(...def.toExpression(layer, colId, indexPattern));
       } else {
-        aggs.push(def.toEsAggsConfig(col, colId, indexPattern));
+        aggs.push(
+          buildExpression({ type: 'expression', chain: [def.toEsAggsFn(col, colId, indexPattern)] })
+        );
       }
     });
 
@@ -152,10 +155,10 @@ function getExpressionForLayer(
               { id: indexPattern.id }
             ),
           ]),
+          aggs,
           metricsAtAllLevels: false,
           partialRows: false,
           timeFields: allDateHistogramFields,
-          aggConfigs: JSON.stringify(aggs),
         }).toAst(),
         {
           type: 'function',
