@@ -563,7 +563,7 @@ describe('#bulkGet', () => {
   });
 
   test(`adds audit event when successful`, async () => {
-    const apiCallReturnValue = { saved_objects: [], foo: 'bar' };
+    const apiCallReturnValue = { saved_objects: [obj1, obj2], foo: 'bar' };
     clientOpts.baseClient.bulkGet.mockReturnValue(apiCallReturnValue as any);
     const objects = [obj1, obj2];
     const options = { namespace };

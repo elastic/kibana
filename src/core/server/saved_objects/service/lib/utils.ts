@@ -80,7 +80,7 @@ export class SavedObjectsUtils {
   }
 
   /**
-   * Validates that a saved object ID matches UUID format.
+   * Validates that a saved object ID has been randomly generated.
    *
    * @param {string} id The ID of a saved object.
    * @todo Use `uuid.validate` once upgraded to v5.3+

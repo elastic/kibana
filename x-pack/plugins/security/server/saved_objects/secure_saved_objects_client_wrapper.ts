@@ -294,14 +294,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const response = await this.baseClient.bulkGet<T>(objects, options);
 
-    objects.forEach(({ type, id }) =>
-      this.auditLogger.log(
-        savedObjectEvent({
-          action: SavedObjectAction.GET,
-          savedObject: { type, id },
-        })
-      )
-    );
+    response.saved_objects.forEach(({ error, type, id }) => {
+      if (!error) {
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.GET,
+            savedObject: { type, id },
+          })
+        );
+      }
+    });
 
     return await this.redactSavedObjectsNamespaces(response, [options.namespace]);
   }

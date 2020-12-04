@@ -392,14 +392,16 @@ export class ActionsClient {
     const bulkGetOpts = actionSavedObjectsIds.map((id) => ({ id, type: 'action' }));
     const bulkGetResult = await this.unsecuredSavedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
 
-    ids.forEach((id) =>
-      this.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.GET,
-          savedObject: { type: 'action', id },
-        })
-      )
-    );
+    bulkGetResult.saved_objects.forEach(({ id, error }) => {
+      if (!error && this.auditLogger) {
+        this.auditLogger.log(
+          connectorAuditEvent({
+            action: ConnectorAuditAction.GET,
+            savedObject: { type: 'action', id },
+          })
+        );
+      }
+    });
 
     for (const action of bulkGetResult.saved_objects) {
       if (action.error) {
