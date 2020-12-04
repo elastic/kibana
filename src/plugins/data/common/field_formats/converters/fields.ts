@@ -17,38 +17,12 @@
  * under the License.
  */
 
-import { FieldFormatInstanceType } from '../types';
+import { SourceFormat } from './source';
+import { FIELD_FORMAT_IDS } from '../types';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 
-import {
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  StringFormat,
-  TruncateFormat,
-  UrlFormat,
-  FieldsFormat,
-} from '../converters';
-
-export const baseFormatters: FieldFormatInstanceType[] = [
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  StringFormat,
-  TruncateFormat,
-  UrlFormat,
-  FieldsFormat,
-];
+export class FieldsFormat extends SourceFormat {
+  static id = FIELD_FORMAT_IDS.FIELDS;
+  static title = 'fields';
+  static fieldType = KBN_FIELD_TYPES._SOURCE;
+}

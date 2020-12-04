@@ -67,6 +67,7 @@ export enum FIELD_FORMAT_IDS {
   STRING = 'string',
   TRUNCATE = 'truncate',
   URL = 'url',
+  FIELDS = 'fields',
 }
 
 export interface FieldFormatConfig {

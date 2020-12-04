@@ -99,9 +99,6 @@ export class IndexPattern implements IIndexPattern {
     // set values
     this.id = spec.id;
     this.fieldFormatMap = spec.fieldFormats || {};
-    this.fieldFormatMap.fields = this.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES._SOURCE, [
-      ES_FIELD_TYPES._SOURCE,
-    ]);
 
     this.version = spec.version;
 
@@ -348,6 +345,5 @@ export class IndexPattern implements IIndexPattern {
     if (formatSpec?.id) {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }
-    return formatSpec;
   }
 }
