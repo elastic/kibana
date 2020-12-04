@@ -235,6 +235,7 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   privileges: {
     delete_index: true,
   },
+  hidden: false,
   ...dataStream,
 });
 
