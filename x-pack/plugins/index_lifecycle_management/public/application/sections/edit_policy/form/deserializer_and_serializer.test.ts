@@ -229,8 +229,8 @@ describe('deserializer and serializer', () => {
     serializer = createSerializer(policy);
     formInternal = deserializer(formInternalPolicy);
 
-    // simulate no fields being configured in the UI. Note, we are not disabling these phases,
-    // just not setting in field values in them so the object is not built up in the internal form.
+    // Simulate no action fields being configured in the UI. _Note_, we are not disabling these phases.
+    // We are not setting any action field values in them so the action object will not be present.
     delete (formInternal.phases.hot as any).actions;
     delete (formInternal.phases.warm as any).actions;
     delete (formInternal.phases.cold as any).actions;
@@ -239,10 +239,11 @@ describe('deserializer and serializer', () => {
     expect(serializer(formInternal)).toEqual({
       name: 'minimalPolicy',
       phases: {
+        // Age is a required value for warm, cold and delete.
         hot: { min_age: '0ms', actions: {} },
         warm: { min_age: '1d', actions: {} },
         cold: { min_age: '2d', actions: {} },
-        delete: { min_age: '3d', actions: {} },
+        delete: { min_age: '3d', actions: { delete: {} } },
       },
     });
   });

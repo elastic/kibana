@@ -153,8 +153,9 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
      * DELETE PHASE SERIALIZATION
      */
     if (_meta.delete.enabled) {
-      draft.phases.delete!.actions = draft.phases.delete?.actions ?? {};
       const deletePhase = draft.phases.delete!;
+      deletePhase.actions = deletePhase.actions ?? {};
+      deletePhase.actions.delete = deletePhase.actions.delete ?? {};
       if (updatedPolicy.phases.delete?.min_age) {
         deletePhase.min_age = `${updatedPolicy.phases.delete!.min_age}${_meta.delete.minAgeUnit}`;
       }
