@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../__mocks__/kea.mock';
+import '../../__mocks__/shallow_useeffect.mock';
+
+import { setMockActions, setMockValues } from '../../__mocks__';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -11,41 +16,49 @@ import { EuiPanel } from '@elastic/eui';
 
 import { IndexingStatusContent } from './indexing_status_content';
 import { IndexingStatusErrors } from './indexing_status_errors';
-import { IndexingStatusFetcher } from './indexing_status_fetcher';
 import { IndexingStatus } from './indexing_status';
 
 describe('IndexingStatus', () => {
   const getItemDetailPath = jest.fn();
-  const getStatusPath = jest.fn();
   const onComplete = jest.fn();
   const setGlobalIndexingStatus = jest.fn();
+  const fetchIndexingStatus = jest.fn();
 
   const props = {
     percentageComplete: 50,
     numDocumentsWithErrors: 1,
     activeReindexJobId: 12,
     viewLinkPath: '/path',
+    statusPath: '/other_path',
     itemId: '1',
     getItemDetailPath,
-    getStatusPath,
     onComplete,
     setGlobalIndexingStatus,
   };
 
-  it('renders', () => {
-    const wrapper = shallow(<IndexingStatus {...props} />);
-    const fetcher = wrapper.find(IndexingStatusFetcher).prop('children')(
-      props.percentageComplete,
-      props.numDocumentsWithErrors
-    );
+  beforeEach(() => {
+    setMockActions({ fetchIndexingStatus });
+  });
 
-    expect(shallow(fetcher).find(EuiPanel)).toHaveLength(1);
-    expect(shallow(fetcher).find(IndexingStatusContent)).toHaveLength(1);
+  it('renders', () => {
+    setMockValues({
+      percentageComplete: 50,
+      numDocumentsWithErrors: 0,
+    });
+    const wrapper = shallow(<IndexingStatus {...props} />);
+
+    expect(wrapper.find(EuiPanel)).toHaveLength(1);
+    expect(wrapper.find(IndexingStatusContent)).toHaveLength(1);
+    expect(fetchIndexingStatus).toHaveBeenCalled();
   });
 
   it('renders errors', () => {
-    const wrapper = shallow(<IndexingStatus {...props} percentageComplete={100} />);
-    const fetcher = wrapper.find(IndexingStatusFetcher).prop('children')(100, 1);
-    expect(shallow(fetcher).find(IndexingStatusErrors)).toHaveLength(1);
+    setMockValues({
+      percentageComplete: 100,
+      numDocumentsWithErrors: 1,
+    });
+    const wrapper = shallow(<IndexingStatus {...props} />);
+
+    expect(wrapper.find(IndexingStatusErrors)).toHaveLength(1);
   });
 });
