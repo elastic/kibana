@@ -15,7 +15,7 @@ Metric to track once this property changes
 
 ```typescript
 metric?: {
-        type: UiStatsMetricType;
+        type: UiCounterMetricType;
         name: string;
     };
 ```

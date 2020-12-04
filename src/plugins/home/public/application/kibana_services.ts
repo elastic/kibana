@@ -27,7 +27,7 @@ import {
   IUiSettingsClient,
   ApplicationStart,
 } from 'kibana/public';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { TelemetryPluginStart } from '../../../telemetry/public';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { TutorialService } from '../services/tutorials';
@@ -48,7 +48,7 @@ export interface HomeKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];
   banners: OverlayStart['banners'];
-  trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
+  trackUiMetric: (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void;
   getBasePath: () => string;
   docLinks: DocLinksStart;
   addBasePath: (url: string) => string;

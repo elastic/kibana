@@ -92,6 +92,16 @@ const originalPolicy: SerializedPolicy = {
   },
 };
 
+const originalMinimalPolicy: SerializedPolicy = {
+  name: 'minimalPolicy',
+  phases: {
+    hot: { min_age: '0ms', actions: {} },
+    warm: { min_age: '1d', actions: {} },
+    cold: { min_age: '2d', actions: {} },
+    delete: { min_age: '3d', actions: {} },
+  },
+};
+
 describe('deserializer and serializer', () => {
   let policy: SerializedPolicy;
   let serializer: ReturnType<typeof createSerializer>;
@@ -197,5 +207,30 @@ describe('deserializer and serializer', () => {
     const result = serializer(formInternal);
 
     expect(result.phases.warm!.min_age).toBeUndefined();
+  });
+
+  it('correctly serializes a minimal policy', () => {
+    policy = cloneDeep(originalMinimalPolicy);
+    const formInternalPolicy = cloneDeep(originalMinimalPolicy);
+    serializer = createSerializer(policy);
+    formInternal = deserializer(formInternalPolicy);
+
+    // Simulate no action fields being configured in the UI. _Note_, we are not disabling these phases.
+    // We are not setting any action field values in them so the action object will not be present.
+    delete (formInternal.phases.hot as any).actions;
+    delete (formInternal.phases.warm as any).actions;
+    delete (formInternal.phases.cold as any).actions;
+    delete (formInternal.phases.delete as any).actions;
+
+    expect(serializer(formInternal)).toEqual({
+      name: 'minimalPolicy',
+      phases: {
+        // Age is a required value for warm, cold and delete.
+        hot: { min_age: '0ms', actions: {} },
+        warm: { min_age: '1d', actions: {} },
+        cold: { min_age: '2d', actions: {} },
+        delete: { min_age: '3d', actions: { delete: {} } },
+      },
+    });
   });
 });
