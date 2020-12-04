@@ -1,10 +1,7 @@
 import co.elastic.teamcity.common.requireAgent
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.notifications
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.ScriptBuildStep
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
-import jetbrains.buildServer.configs.kotlin.v2019_2.ui.insert
-import projects.kibanaConfiguration
 
 fun BuildFeatures.junit(dirs: String = "target/**/TEST-*.xml") {
   feature {
@@ -15,7 +12,7 @@ fun BuildFeatures.junit(dirs: String = "target/**/TEST-*.xml") {
 }
 
 fun BuildType.kibanaAgent(size: String) {
-  requireAgent(StandardAgents[size])
+  requireAgent(StandardAgents[size]!!)
 }
 
 fun BuildType.kibanaAgent(size: Int) {
