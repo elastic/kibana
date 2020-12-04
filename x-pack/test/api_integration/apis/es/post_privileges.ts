@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   describe('post_privileges', () => {
     it('should allow privileges to be updated', async () => {
-      const es = getService('legacyEs');
+      const es = getService('es');
       const application = 'foo';
-      const response = await es.shield.postPrivileges({
+      const response = await es.security.putPrivileges({
         body: {
           [application]: {
             all: {
@@ -29,7 +30,7 @@ export default function ({ getService }) {
         },
       });
 
-      expect(response).to.eql({
+      expect(response.body).to.eql({
         foo: {
           all: { created: true },
           read: { created: true },
@@ -40,7 +41,7 @@ export default function ({ getService }) {
       // 1. Not specifying the "all" privilege that we created above
       // 2. Specifying a different collection of "read" actions
       // 3. Adding a new "other" privilege
-      const updateResponse = await es.shield.postPrivileges({
+      const updateResponse = await es.security.putPrivileges({
         body: {
           [application]: {
             read: {
@@ -59,15 +60,15 @@ export default function ({ getService }) {
         },
       });
 
-      expect(updateResponse).to.eql({
+      expect(updateResponse.body).to.eql({
         foo: {
           other: { created: true },
           read: { created: false },
         },
       });
 
-      const retrievedPrivilege = await es.shield.getPrivilege({ privilege: application });
-      expect(retrievedPrivilege).to.eql({
+      const retrievedPrivilege = await es.security.getPrivileges({ application });
+      expect(retrievedPrivilege.body).to.eql({
         foo: {
           // "all" is maintained even though the subsequent update did not specify this privilege
           all: {
