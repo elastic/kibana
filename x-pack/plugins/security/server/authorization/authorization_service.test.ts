@@ -55,7 +55,7 @@ afterEach(() => {
 });
 
 it(`#setup returns exposed services`, () => {
-  const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
   const mockGetSpacesService = jest
     .fn()
     .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() });
@@ -64,10 +64,11 @@ it(`#setup returns exposed services`, () => {
   const mockCoreSetup = coreMock.createSetup();
 
   const authorizationService = new AuthorizationService();
+  const getClusterClient = () => Promise.resolve(mockClusterClient);
   const authz = authorizationService.setup({
     http: mockCoreSetup.http,
     capabilities: mockCoreSetup.capabilities,
-    clusterClient: mockClusterClient,
+    getClusterClient,
     license: mockLicense,
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
@@ -84,7 +85,7 @@ it(`#setup returns exposed services`, () => {
   expect(authz.checkPrivilegesWithRequest).toBe(mockCheckPrivilegesWithRequest);
   expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(
     authz.actions,
-    mockClusterClient,
+    getClusterClient,
     authz.applicationName
   );
 
@@ -119,14 +120,14 @@ describe('#start', () => {
   beforeEach(() => {
     statusSubject = new Subject<OnlineStatusRetryScheduler>();
 
-    const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
     const mockCoreSetup = coreMock.createSetup();
 
     const authorizationService = new AuthorizationService();
     authorizationService.setup({
       http: mockCoreSetup.http,
       capabilities: mockCoreSetup.capabilities,
-      clusterClient: mockClusterClient,
+      getClusterClient: () => Promise.resolve(mockClusterClient),
       license: licenseMock.create(),
       loggers: loggingSystemMock.create(),
       kibanaIndexName,
@@ -190,7 +191,7 @@ describe('#start', () => {
 });
 
 it('#stop unsubscribes from license and ES updates.', async () => {
-  const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
   const statusSubject = new Subject<OnlineStatusRetryScheduler>();
   const mockCoreSetup = coreMock.createSetup();
 
@@ -198,7 +199,7 @@ it('#stop unsubscribes from license and ES updates.', async () => {
   authorizationService.setup({
     http: mockCoreSetup.http,
     capabilities: mockCoreSetup.capabilities,
-    clusterClient: mockClusterClient,
+    getClusterClient: () => Promise.resolve(mockClusterClient),
     license: licenseMock.create(),
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
