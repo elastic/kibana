@@ -47,7 +47,6 @@ export interface ActionGroupWithMessageVariables extends ActionGroup {
 export interface ActionAccordionFormProps {
   actions: AlertAction[];
   defaultActionGroupId: string;
-  recoveredActionGroupId: string;
   actionGroups?: ActionGroupWithMessageVariables[];
   defaultActionMessage?: string;
   setActionIdByIndex: (id: string, index: number) => void;
@@ -60,6 +59,7 @@ export interface ActionAccordionFormProps {
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   getDefaultActionParams?: DefaultActionParamsGetter;
+  isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -70,7 +70,6 @@ interface ActiveActionConnectorState {
 export const ActionForm = ({
   actions,
   defaultActionGroupId,
-  recoveredActionGroupId,
   setActionIdByIndex,
   setActionGroupIdByIndex,
   setActions,
@@ -83,6 +82,7 @@ export const ActionForm = ({
   setHasActionsWithBrokenConnector,
   actionTypeRegistry,
   getDefaultActionParams,
+  isActionGroupDisabledForActionType,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -343,11 +343,11 @@ export const ActionForm = ({
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}
-              recoveredActionGroupId={recoveredActionGroupId}
               messageVariables={messageVariables}
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
               defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}
+              isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
               onAddConnector={() => {
                 setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });

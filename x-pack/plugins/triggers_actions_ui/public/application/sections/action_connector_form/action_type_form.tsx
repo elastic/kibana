@@ -27,11 +27,7 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 import { pick } from 'lodash';
-import {
-  AlertActionParam,
-  RecoveredActionGroup,
-  isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerts/common';
+import { AlertActionParam } from '../../../../../alerts/common';
 import {
   IErrorObject,
   AlertAction,
@@ -64,10 +60,10 @@ export type ActionTypeFormProps = {
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
   defaultParams: DefaultActionParams;
+  isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
-  | 'recoveredActionGroupId'
   | 'actionGroups'
   | 'setActionGroupIdByIndex'
   | 'setActionParamsProperty'
@@ -95,11 +91,11 @@ export const ActionTypeForm = ({
   connectors,
   defaultActionGroupId,
   defaultActionMessage,
-  recoveredActionGroupId,
   messageVariables,
   actionGroups,
   setActionGroupIdByIndex,
   actionTypeRegistry,
+  isActionGroupDisabledForActionType,
   defaultParams,
 }: ActionTypeFormProps) => {
   const {
@@ -151,12 +147,20 @@ export const ActionTypeForm = ({
 
   const actionType = actionTypesIndex[actionItem.actionTypeId];
 
-  const isActionGroupDisabledForActionType = (actionGroupId: string): boolean => {
-    return isActionGroupDisabledForActionTypeId(
-      actionGroupId === recoveredActionGroupId ? RecoveredActionGroup.id : actionGroupId,
-      actionItem.actionTypeId
-    );
-  };
+  const actionGroupDisplay = (
+    actionGroupId: string,
+    actionGroupName: string,
+    actionTypeId: string
+  ): string =>
+    isActionGroupDisabledForActionType
+      ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
+        ? `${actionGroupName} (Not Currently Supported)`
+        : actionGroupName
+      : actionGroupName;
+  const isActionGroupDisabled = (actionGroupId: string, actionTypeId: string): boolean =>
+    isActionGroupDisabledForActionType
+      ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
+      : false;
 
   const optionsList = connectors
     .filter(
@@ -204,10 +208,8 @@ export const ActionTypeForm = ({
                   data-test-subj={`addNewActionConnectorActionGroup-${index}`}
                   options={actionGroups.map(({ id: value, name }) => ({
                     value,
-                    inputDisplay: isActionGroupDisabledForActionType(value)
-                      ? `${name} (Not Currently Supported)`
-                      : name,
-                    disabled: isActionGroupDisabledForActionType(value),
+                    inputDisplay: actionGroupDisplay(value, name, actionItem.actionTypeId),
+                    disabled: isActionGroupDisabled(value, actionItem.actionTypeId),
                     'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
                   }))}
                   valueOfSelected={selectedActionGroup.id}

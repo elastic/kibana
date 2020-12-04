@@ -58,6 +58,7 @@ import {
   AlertActionParam,
   ALERTS_FEATURE_ID,
   RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId,
 } from '../../../../../alerts/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
@@ -163,9 +164,6 @@ export const AlertForm = ({
     alert.throttle ? getDurationUnitValue(alert.throttle) : 'm'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
-  const [recoveredActionGroupId, setRecoveredActionGroupId] = useState<string | undefined>(
-    undefined
-  );
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | null>(null);
 
   const [availableAlertTypes, setAvailableAlertTypes] = useState<
@@ -179,18 +177,6 @@ export const AlertForm = ({
   const [solutions, setSolutions] = useState<Map<string, string> | undefined>(undefined);
   const [solutionsFilter, setSolutionFilter] = useState<string[]>([]);
 
-  const setActionGroupIds = useCallback(
-    (alertTypeId: string | undefined) => {
-      if (alertTypeId && alertTypesIndex && alertTypesIndex.has(alertTypeId)) {
-        setDefaultActionGroupId(alertTypesIndex.get(alertTypeId)!.defaultActionGroupId);
-        setRecoveredActionGroupId(
-          alertTypesIndex.get(alertTypeId)!.recoveryActionGroup?.id || RecoveredActionGroup.id
-        );
-      }
-    },
-    [alertTypesIndex]
-  );
-
   // load alert types
   useEffect(() => {
     (async () => {
@@ -200,8 +186,10 @@ export const AlertForm = ({
         for (const alertTypeItem of alertTypesResult) {
           index.set(alertTypeItem.id, alertTypeItem);
         }
+        if (alert.alertTypeId && index.has(alert.alertTypeId)) {
+          setDefaultActionGroupId(index.get(alert.alertTypeId)!.defaultActionGroupId);
+        }
         setAlertTypesIndex(index);
-        setActionGroupIds(alert.alertTypeId);
 
         const availableAlertTypesResult = getAvailableAlertTypes(alertTypesResult);
         setAvailableAlertTypes(availableAlertTypesResult);
@@ -238,8 +226,10 @@ export const AlertForm = ({
 
   useEffect(() => {
     setAlertTypeModel(alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null);
-    setActionGroupIds(alert.alertTypeId);
-  }, [alert, alert.alertTypeId, alertTypesIndex, alertTypeRegistry, setActionGroupIds]);
+    if (alert.alertTypeId && alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)) {
+      setDefaultActionGroupId(alertTypesIndex.get(alert.alertTypeId)!.defaultActionGroupId);
+    }
+  }, [alert, alert.alertTypeId, alertTypesIndex, alertTypeRegistry]);
 
   const setAlertProperty = useCallback(
     <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {
@@ -328,6 +318,18 @@ export const AlertForm = ({
 
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
 
+  const isActionGroupDisabledForActionType = useCallback(
+    (alertType: AlertType, actionGroupId: string, actionTypeId: string): boolean => {
+      return isActionGroupDisabledForActionTypeId(
+        actionGroupId === alertType?.recoveryActionGroup?.id
+          ? RecoveredActionGroup.id
+          : actionGroupId,
+        actionTypeId
+      );
+    },
+    []
+  );
+
   const AlertParamsExpressionComponent = alertTypeModel
     ? alertTypeModel.alertParamsExpression
     : null;
@@ -403,7 +405,9 @@ export const AlertForm = ({
                     setActions([]);
                     setAlertTypeModel(item.alertTypeItem);
                     setAlertProperty('params', {});
-                    setActionGroupIds(item.id);
+                    if (alertTypesIndex && alertTypesIndex.has(item.id)) {
+                      setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
+                    }
                   }}
                 />
               </Fragment>
@@ -497,7 +501,6 @@ export const AlertForm = ({
       ) : null}
       {canShowActions &&
       defaultActionGroupId &&
-      recoveredActionGroupId &&
       alertTypeModel &&
       alert.alertTypeId &&
       selectedAlertType ? (
@@ -507,7 +510,9 @@ export const AlertForm = ({
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
           messageVariables={selectedAlertType.actionVariables}
           defaultActionGroupId={defaultActionGroupId}
-          recoveredActionGroupId={recoveredActionGroupId}
+          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
+            isActionGroupDisabledForActionType(selectedAlertType, actionGroupId, actionTypeId)
+          }
           actionGroups={selectedAlertType.actionGroups.map((actionGroup) =>
             actionGroup.id === selectedAlertType.recoveryActionGroup.id
               ? {
