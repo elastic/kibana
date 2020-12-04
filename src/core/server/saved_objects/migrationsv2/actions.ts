@@ -296,13 +296,11 @@ const waitForTask = (
     })
     .then((res) => {
       const body = res.body;
+      const failures = body.response?.failures ?? [];
       return Either.right({
         completed: body.completed,
         error: Option.fromNullable(body.error),
-        failures:
-          (body.response.failures ?? []).length > 0
-            ? Option.some(body.response.failures)
-            : Option.none,
+        failures: failures.length > 0 ? Option.some(failures) : Option.none,
         description: body.task.description,
       });
     })
@@ -433,7 +431,11 @@ export const waitForReindexTask = flow(
       | RetryableEsClientError,
       'reindex_succeeded'
     > => {
-      const failureIsAWriteBlock = ({ type, reason }: { type: string; reason: string }) =>
+      const failureIsAWriteBlock = ({
+        cause: { type, reason },
+      }: {
+        cause: { type: string; reason: string };
+      }) =>
         type === 'cluster_block_exception' &&
         reason.match(/index \[.+] blocked by: \[FORBIDDEN\/8\/index write \(api\)\]/);
 
@@ -451,7 +453,7 @@ export const waitForReindexTask = flow(
           return TaskEither.left({ type: 'target_index_had_write_block' as const });
         } else {
           throw new Error(
-            'Reindex failed with the following failures:\n' + JSON.stringify(res.failures)
+            'Reindex failed with the following failures:\n' + JSON.stringify(res.failures.value)
           );
         }
       } else {
@@ -461,10 +463,14 @@ export const waitForReindexTask = flow(
   )
 );
 
-export const waitForUpdateByQeuryTask = flow(
+export const waitForUpdateByQueryTask = flow(
   waitForTask,
   TaskEither.chain(
     (res): TaskEither.TaskEither<RetryableEsClientError, 'update_by_query_succeeded'> => {
+      // We don't catch or type failures/errors because they should never
+      // occur in our migration algorithm and we don't have any business logic
+      // for dealing with it. If something happens we'll just crash and try
+      // again.
       if (Option.isSome(res.failures)) {
         throw new Error(
           'update_by_query failed with the following failures:\n' +

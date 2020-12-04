@@ -17,10 +17,12 @@
  * under the License.
  */
 
-describe('Actions', () => {
-  describe('fetchAliases', () => {
-    test.todo('calls client.indices.getAlias');
-    test.todo('returns response on success');
-    test.todo('returns error on failure');
+describe('actions', () => {
+  describe('catchRetryableEsClientErrors returns left retryable_es_client_error for', () => {
+    it.todo('NoLivingConnectionsError');
+    it.todo('ConnectionError');
+    it.todo('TimeoutError');
+    it.todo('ResponseError of type snapshot_in_progress_exception');
+    it.todo('ResponseError with retryable status code'); // 503,401,403,408,410
   });
 });

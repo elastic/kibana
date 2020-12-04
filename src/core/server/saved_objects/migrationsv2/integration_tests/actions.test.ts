@@ -22,8 +22,24 @@ import { InternalCoreStart } from '../../../internal_types';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import { SavedObjectsRawDoc } from '../../serialization';
-import { bulkIndex, createIndex, search, SearchResponse, updateAliases } from '../actions';
+import {
+  bulkIndex,
+  cloneIndex,
+  createIndex,
+  fetchIndices,
+  reindex,
+  search,
+  SearchResponse,
+  setWriteBlock,
+  updateAliases,
+  waitForReindexTask,
+  ReindexResponse,
+  waitForUpdateByQueryTask,
+  updateByQuery,
+  UpdateByQueryResponse,
+} from '../actions';
 import * as Either from 'fp-ts/lib/Either';
+import * as Option from 'fp-ts/lib/Option';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -49,7 +65,18 @@ describe('migration actions', () => {
 
     // Create test fixture data:
     await createIndex(client, 'existing_index_1', { dynamic: true as any, properties: {} })();
+    const sourceDocs = ([
+      { _source: { title: 'doc 1' } },
+      { _source: { title: 'doc 2' } },
+      { _source: { title: 'doc 3' } },
+      { _source: { title: 'doc 4' } },
+    ] as unknown) as SavedObjectsRawDoc[];
+    await bulkIndex(client, 'existing_index_1', sourceDocs)();
+
     await createIndex(client, 'existing_index_2', { properties: {} })();
+    await createIndex(client, 'existing_index_with_write_block', { properties: {} })();
+    await bulkIndex(client, 'existing_index_with_write_block', sourceDocs)();
+    await setWriteBlock(client, 'existing_index_with_write_block')();
     await updateAliases(client, [
       { add: { index: 'existing_index_2', alias: 'existing_index_2_alias' } },
     ])();
@@ -60,39 +87,178 @@ describe('migration actions', () => {
     await root.shutdown();
   });
 
-  // move to unit test?
-  describe('catchRetryableEsClientErrors returns left retryable_es_client_error for', () => {
-    it.todo('NoLivingConnectionsError');
-    it.todo('ConnectionError');
-    it.todo('TimeoutError');
-    it.todo('ResponseError of type snapshot_in_progress_exception');
-    it.todo('ResponseError with retryable status code'); // 503,401,403,408,410
-  });
-
   describe('fetchIndices', () => {
-    it.todo("returns right empty record if some indices weren't found");
-    it.todo('returns right record with found indices');
+    it('returns right empty record if no indices were found', async () => {
+      const task = fetchIndices(client, ['no_such_index']);
+      return expect(task()).resolves.toMatchInlineSnapshot(`
+                Object {
+                  "_tag": "Right",
+                  "right": Object {},
+                }
+              `);
+    });
+    it('returns right record with found indices', async () => {
+      const res = (await fetchIndices(client, [
+        'no_such_index',
+        'existing_index_1',
+      ])()) as Either.Right<unknown>;
+
+      return expect(res.right).toEqual(
+        expect.objectContaining({
+          existing_index_1: {
+            aliases: {},
+            mappings: expect.anything(),
+            settings: expect.anything(),
+          },
+        })
+      );
+    });
   });
 
   describe('setWriteBlock', () => {
-    it.todo('returns left index_not_found_exception when the index does not exist');
+    it('returns left index_not_found_exception when the index does not exist', () => {
+      const task = setWriteBlock(client, 'no_such_index');
+      return expect(task()).resolves.toMatchInlineSnapshot(`
+                Object {
+                  "_tag": "Left",
+                  "left": Object {
+                    "type": "index_not_found_exception",
+                  },
+                }
+              `);
+    });
   });
 
   describe('cloneIndex', () => {
-    it.todo(
-      'returns right after waiting for index status to be green if clone target already existed'
-    );
+    afterAll(async () => {
+      await client.indices.delete({ index: 'yellow_then_green_index' });
+    });
+    it('returns right after waiting for index status to be green if clone target already existed', async () => {
+      // Create a yellow index
+      await client.indices.create({
+        index: 'yellow_then_green_index',
+        body: {
+          mappings: { properties: {} },
+          settings: {
+            // Allocate 1 replica so that this index stays yellow
+            number_of_replicas: '1',
+          },
+        },
+      });
+
+      // Call clone even though the index already exists
+      const cloneIndexPromise = cloneIndex(client, 'existing_index_1', 'yellow_then_green_index')();
+      let indexGreen = false;
+
+      setTimeout(() => {
+        client.indices.putSettings({
+          body: {
+            index: {
+              number_of_replicas: 0,
+            },
+          },
+        });
+        indexGreen = true;
+      }, 10);
+
+      return cloneIndexPromise.then((res) => {
+        // Assert that the promise didn't resolve before the index became green
+        expect(indexGreen).toBe(true);
+        expect(res).toMatchInlineSnapshot(`
+          Object {
+            "_tag": "Right",
+            "right": Object {
+              "acknowledged": true,
+              "shardsAcknowledged": true,
+            },
+          }
+        `);
+      });
+    });
   });
 
   describe('waitForReindexTask', () => {
-    it.todo('returns left index_not_found_exception');
-    it.todo('returns left target_index_had_write_block if all failures are due to a write block');
+    it('returns left index_not_found_exception if source index does not exist', async () => {
+      const res = (await reindex(
+        client,
+        'no_such_index',
+        'reindex_target',
+        Option.none
+      )()) as Either.Right<ReindexResponse>;
+      const task = waitForReindexTask(client, res.right.taskId, '10s');
+      expect(task()).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "index": "no_such_index",
+            "type": "index_not_found_exception",
+          },
+        }
+      `);
+    });
+    it('returns left target_index_had_write_block if all failures are due to a write block', async () => {
+      const res = (await reindex(
+        client,
+        'existing_index_1',
+        'existing_index_with_write_block',
+        Option.none
+      )()) as Either.Right<ReindexResponse>;
+
+      const task = waitForReindexTask(client, res.right.taskId, '10s');
+
+      return expect(task()).resolves.toMatchInlineSnapshot(`
+                Object {
+                  "_tag": "Left",
+                  "left": Object {
+                    "type": "target_index_had_write_block",
+                  },
+                }
+              `);
+    });
   });
 
   describe('waitForUpdateByQueryTask', () => {
-    it.todo('throws if there are failures');
-    it.todo('throws if there is an error');
-    it.todo('returns right when successful');
+    it('rejects if there are failures', async () => {
+      const res = (await updateByQuery(
+        client,
+        'existing_index_with_write_block'
+      )()) as Either.Right<UpdateByQueryResponse>;
+
+      const task = waitForUpdateByQueryTask(client, res.right.taskId, '10s');
+
+      expect(task()).rejects.toMatchInlineSnapshot(`
+        [Error: update_by_query failed with the following failures:
+        [{"index":"existing_index_with_write_block","id":"aCKULnYBw5My2Z741pIM","cause":{"type":"cluster_block_exception","reason":"index [existing_index_with_write_block] blocked by: [FORBIDDEN/8/index write (api)];"},"status":403},{"index":"existing_index_with_write_block","id":"aSKULnYBw5My2Z741pIM","cause":{"type":"cluster_block_exception","reason":"index [existing_index_with_write_block] blocked by: [FORBIDDEN/8/index write (api)];"},"status":403},{"index":"existing_index_with_write_block","id":"aiKULnYBw5My2Z741pIM","cause":{"type":"cluster_block_exception","reason":"index [existing_index_with_write_block] blocked by: [FORBIDDEN/8/index write (api)];"},"status":403},{"index":"existing_index_with_write_block","id":"ayKULnYBw5My2Z741pIM","cause":{"type":"cluster_block_exception","reason":"index [existing_index_with_write_block] blocked by: [FORBIDDEN/8/index write (api)];"},"status":403}]]
+      `);
+    });
+    it('rejects if there is an error', async () => {
+      const res = (await updateByQuery(
+        client,
+        'no_such_index'
+      )()) as Either.Right<UpdateByQueryResponse>;
+
+      const task = waitForUpdateByQueryTask(client, res.right.taskId, '10s');
+
+      expect(task()).rejects.toMatchInlineSnapshot(`
+        [Error: update_by_query failed with the following error:
+        {"type":"index_not_found_exception","reason":"no such index [no_such_index]","resource.type":"index_or_alias","resource.id":"no_such_index","index_uuid":"_na_","index":"no_such_index"}]
+      `);
+    });
+    it('returns right when successful', async () => {
+      const res = (await updateByQuery(
+        client,
+        'existing_index_1'
+      )()) as Either.Right<UpdateByQueryResponse>;
+
+      const task = waitForUpdateByQueryTask(client, res.right.taskId, '10s');
+
+      expect(task()).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Right",
+          "right": "update_by_query_succeeded",
+        }
+      `);
+    });
   });
 
   describe('updateAliases', () => {
@@ -246,16 +412,6 @@ describe('migration actions', () => {
   });
 
   describe('bulkIndex', () => {
-    beforeAll(async () => {
-      const sourceDocs = ([
-        { _source: { title: 'doc 1' } },
-        { _source: { title: 'doc 2' } },
-        { _source: { title: 'doc 3' } },
-        { _source: { title: 'doc 4' } },
-      ] as unknown) as SavedObjectsRawDoc[];
-      await bulkIndex(client, 'existing_index_1', sourceDocs)();
-    });
-
     it('returns right when documents do not yet exist in the index', () => {
       const newDocs = ([
         { _source: { title: 'doc 5' } },
