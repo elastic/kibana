@@ -139,6 +139,7 @@ export const SIGNALS_INDEX_KEY = 'signalsIndex';
 export const DETECTION_ENGINE_SIGNALS_URL = `${DETECTION_ENGINE_URL}/signals`;
 export const DETECTION_ENGINE_SIGNALS_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/status`;
 export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/search`;
+export const DETECTION_ENGINE_MIGRATE_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/migrate`;
 
 /**
  * Common naming convention for an unauthenticated user
