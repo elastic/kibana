@@ -31,6 +31,14 @@ describe('Runtime field editor', () => {
 
   const lastOnChangeCall = (): FormState[] => onChange.mock.calls[onChange.mock.calls.length - 1];
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     onChange = jest.fn();
   });
@@ -46,7 +54,7 @@ describe('Runtime field editor', () => {
     const defaultValue: RuntimeField = {
       name: 'foo',
       type: 'date',
-      script: 'test=123',
+      script: { source: 'test=123' },
     };
     testBed = setup({ onChange, defaultValue, docLinks });
 
@@ -67,5 +75,76 @@ describe('Runtime field editor', () => {
     lastState = lastOnChangeCall()[0];
     expect(lastState.isValid).toBe(true);
     expect(lastState.isSubmitted).toBe(true);
+  });
+
+  test('should accept a list of existing concrete fields and display a callout when shadowing one of the fields', async () => {
+    const existingConcreteFields = ['myConcreteField'];
+
+    testBed = setup({ onChange, docLinks, ctx: { existingConcreteFields } });
+
+    const { form, component, exists } = testBed;
+
+    expect(exists('shadowingFieldCallout')).toBe(false);
+
+    await act(async () => {
+      form.setInputValue('nameField.input', existingConcreteFields[0]);
+    });
+    component.update();
+
+    expect(exists('shadowingFieldCallout')).toBe(true);
+  });
+
+  describe('validation', () => {
+    test('should accept an optional list of existing runtime fields and prevent creating duplicates', async () => {
+      const existingRuntimeFieldNames = ['myRuntimeField'];
+
+      testBed = setup({ onChange, docLinks, ctx: { namesNotAllowed: existingRuntimeFieldNames } });
+
+      const { form, component } = testBed;
+
+      await act(async () => {
+        form.setInputValue('nameField.input', existingRuntimeFieldNames[0]);
+        form.setInputValue('scriptField', 'echo("hello")');
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(1000); // Make sure our debounced error message is in the DOM
+      });
+
+      await act(async () => {
+        await lastOnChangeCall()[0].submit();
+      });
+
+      component.update();
+
+      expect(lastOnChangeCall()[0].isValid).toBe(false);
+      expect(form.getErrorsMessages()).toEqual(['There is already a field with this name.']);
+    });
+
+    test('should not count the default value as a duplicate', async () => {
+      const existingRuntimeFieldNames = ['myRuntimeField'];
+
+      const defaultValue: RuntimeField = {
+        name: 'myRuntimeField',
+        type: 'boolean',
+        script: { source: 'emit("hello"' },
+      };
+
+      testBed = setup({
+        defaultValue,
+        onChange,
+        docLinks,
+        ctx: { namesNotAllowed: existingRuntimeFieldNames },
+      });
+
+      const { form } = testBed;
+
+      await act(async () => {
+        await lastOnChangeCall()[0].submit();
+      });
+
+      expect(lastOnChangeCall()[0].isValid).toBe(true);
+      expect(form.getErrorsMessages()).toEqual([]);
+    });
   });
 });
