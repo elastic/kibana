@@ -229,7 +229,7 @@ describe('deserializer and serializer', () => {
         hot: { min_age: '0ms', actions: {} },
         warm: { min_age: '1d', actions: {} },
         cold: { min_age: '2d', actions: {} },
-        delete: { min_age: '3d', actions: {} },
+        delete: { min_age: '3d', actions: { delete: {} } },
       },
     });
   });
