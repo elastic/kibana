@@ -10797,7 +10797,6 @@
     "xpack.lens.shared.nestedLegendLabel": "ネスト済み",
     "xpack.lens.sugegstion.refreshSuggestionLabel": "更新",
     "xpack.lens.suggestion.refreshSuggestionTooltip": "選択したビジュアライゼーションに基づいて、候補を更新します。",
-    "xpack.lens.suggestions.currentVisLabel": "現在",
     "xpack.lens.visTypeAlias.title": "レンズビジュアライゼーション",
     "xpack.lens.visTypeAlias.type": "レンズ",
     "xpack.lens.xyChart.addLayer": "レイヤーを追加",
