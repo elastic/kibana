@@ -20,6 +20,7 @@ import {
   NewResolverTree,
   ResolverSchema,
 } from '../../common/endpoint/types';
+import { Tree } from '../../common/endpoint/generate_data';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -253,6 +254,26 @@ export interface NodeEventsInCategoryState {
 }
 
 /**
+ * Return structure for the mock DAL returned by this file.
+ */
+export interface GeneratedTreeMetadata {
+  /**
+   * The `_id` of the document being analyzed.
+   */
+  databaseDocumentID: string;
+  /**
+   * This field holds the nodes created by the resolver generator that make up a resolver graph.
+   */
+  generatedTree: Tree;
+  /**
+   * The nodes in this tree are equivalent to those in the generatedTree field. This nodes
+   * are just structured in a way that they match the NewResolverTree type. This helps with the
+   * Data Access Layer that is expecting to return a NewResolverTree type.
+   */
+  formattedTree: NewResolverTree;
+}
+
+/**
  * The state of the process cubes in the graph. Loading indicates that we haven't received the node data yet
  * to determine whether it is a running or terminated process.
  */
@@ -278,11 +299,6 @@ export interface NodeData {
    */
   status: NodeDataStatus;
 }
-
-/**
- * Convenience type for map of node ID to it's data.
- */
-export type IDToNodeInfo = Map<string, NodeData>;
 
 /**
  * State for `data` reducer which handles receiving Resolver data from the back-end.
@@ -372,7 +388,7 @@ export interface DataState {
    *
    * If a node ID exists in the map it means that node came into view in the graph.
    */
-  readonly nodeData?: IDToNodeInfo;
+  readonly nodeData?: Map<string, NodeData>;
 }
 
 /**

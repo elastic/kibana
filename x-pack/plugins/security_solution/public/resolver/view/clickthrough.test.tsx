@@ -229,7 +229,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
     });
   });
 
-  describe('when navigating to a node that is not loaded and then back to the process node list', () => {
+  describe('when navigating to a node that is not loaded', () => {
     beforeEach(async () => {
       // If the camera has not moved it will return a node with ID 2kt059pl3i, this is the first node with the state
       // loading that is outside of the initial loaded view
@@ -246,7 +246,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
       const loadingNode = await getLoadingNodeInList();
 
       if (!loadingNode) {
-        throw new Error("Unable to find a node without it's node data");
+        throw new Error('Unable to find a node without its node data');
       }
       loadingNode.simulate('click', { button: 0 });
       // the time here is equivalent to the animation duration in the camera reducer

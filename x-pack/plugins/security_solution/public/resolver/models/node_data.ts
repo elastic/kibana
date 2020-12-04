@@ -6,7 +6,7 @@
 
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
-import { FetchedNodeData, IDToNodeInfo, NodeData } from '../types';
+import { FetchedNodeData, NodeData } from '../types';
 import { isTerminatedProcess } from './process_event';
 
 /**
@@ -16,9 +16,9 @@ import { isTerminatedProcess } from './process_event';
  * @param requestedNodes a set of IDs that are being requested
  */
 export function setRequestedNodes(
-  storedNodeInfo: IDToNodeInfo = new Map<string, NodeData>(),
+  storedNodeInfo = new Map<string, NodeData>(),
   requestedNodes: Set<string>
-): IDToNodeInfo {
+): Map<string, NodeData> {
   const requestedNodesArray = Array.from(requestedNodes);
   return new Map<string, NodeData>([
     ...storedNodeInfo,
@@ -36,9 +36,9 @@ export function setRequestedNodes(
  * @param errorNodes a set of IDs we requested from the backend that returned a failure
  */
 export function setErrorNodes(
-  storedNodeInfo: IDToNodeInfo = new Map<string, NodeData>(),
+  storedNodeInfo = new Map<string, NodeData>(),
   errorNodes: Set<string>
-): IDToNodeInfo {
+): Map<string, NodeData> {
   const errorNodesArray = Array.from(errorNodes);
   return new Map<string, NodeData>([
     ...storedNodeInfo,
@@ -56,9 +56,9 @@ export function setErrorNodes(
  * @param nodeID the ID to remove from state to mark it to be reloaded in the middleware.
  */
 export function setReloadedNodes(
-  storedNodeInfo: IDToNodeInfo = new Map<string, NodeData>(),
+  storedNodeInfo: Map<string, NodeData> = new Map<string, NodeData>(),
   nodeID: string
-): IDToNodeInfo {
+): Map<string, NodeData> {
   const newData = new Map<string, NodeData>([...storedNodeInfo]);
   newData.delete(nodeID);
   return newData;
@@ -104,11 +104,11 @@ export function updateWithReceivedNodes({
   requestedNodes,
   numberOfRequestedEvents,
 }: {
-  storedNodeInfo: IDToNodeInfo | undefined;
+  storedNodeInfo: Map<string, NodeData> | undefined;
   receivedEvents: SafeResolverEvent[];
   requestedNodes: Set<string>;
   numberOfRequestedEvents: number;
-}): IDToNodeInfo {
+}): Map<string, NodeData> {
   const copiedMap = new Map<string, NodeData>([...storedNodeInfo]);
   const reachedLimit = receivedEvents.length >= numberOfRequestedEvents;
   const receivedNodes: Map<string, FetchedNodeData> = groupByID(receivedEvents);
@@ -137,27 +137,6 @@ export function updateWithReceivedNodes({
   }
 
   return copiedMap;
-}
-
-/**
- * Checks to see if a set of node IDs exists in state's node data.
- *
- * @param baseNodes the node data map from state
- * @param nodesToCheck a set of node IDs
- */
-export function idsNotInBase(
-  baseNodes: IDToNodeInfo | undefined,
-  nodesToCheck: Set<string>
-): Set<string> {
-  const result = new Set<string>();
-
-  for (const id of nodesToCheck.values()) {
-    if (!baseNodes || !baseNodes.has(id)) {
-      result.add(id);
-    }
-  }
-
-  return result;
 }
 
 /**

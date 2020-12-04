@@ -117,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
             }),
             indexPatterns: [eventsIndexPattern],
             // these times are taken from the es archiver data endpoint/pipeline/dns for this specific event
-            timerange: {
+            timeRange: {
               from: '2020-10-01T13:50:15.14364600Z',
               to: '2020-10-01T13:50:15.14364600Z',
             },
@@ -143,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
             }),
             indexPatterns: [eventsIndexPattern],
             // these times are taken from the es archiver data endpoint/pipeline/dns for this specific event
-            timerange: {
+            timeRange: {
               from: '2020-10-01T13:50:15.44516300Z',
               to: '2020-10-01T13:50:15.44516300Z',
             },

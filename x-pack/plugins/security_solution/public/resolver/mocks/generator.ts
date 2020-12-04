@@ -24,9 +24,9 @@ import * as eventModel from '../../../common/endpoint/models/event';
 /**
  * A structure for holding the generated tree.
  */
-export interface GeneratedTreeResponse {
-  genTree: Tree;
-  tree: NewResolverTree;
+interface GeneratedTreeResponse {
+  generatedTree: Tree;
+  formattedTree: NewResolverTree;
   allNodes: Map<string, TreeNode>;
 }
 
@@ -39,8 +39,14 @@ export interface GeneratedTreeResponse {
  * @param treeOptions options for how the tree should be generated, like number of ancestors, descendants, etc
  */
 export function generateTree(treeOptions?: TreeOptions): GeneratedTreeResponse {
+  /**
+   * The parameter to EndpointDocGenerator is used as a seed for the random number generated used internally by the
+   * object. This means that the generator will return the same generated tree (ids, names, structure, etc) each
+   * time the doc generate is used in tests. This way we can rely on the generate returning consistent responses
+   * for our tests. The results won't be unpredictable and they will not result in flaky tests.
+   */
   const generator = new EndpointDocGenerator('resolver');
-  const genTree = generator.generateTree({
+  const generatedTree = generator.generateTree({
     ...treeOptions,
     // Force the tree generation to not randomize the number of children per node, it will always be the max specified
     // in the passed in options
@@ -48,14 +54,14 @@ export function generateTree(treeOptions?: TreeOptions): GeneratedTreeResponse {
   });
 
   const allNodes = new Map([
-    [genTree.origin.id, genTree.origin],
-    ...genTree.children,
-    ...genTree.ancestry,
+    [generatedTree.origin.id, generatedTree.origin],
+    ...generatedTree.children,
+    ...generatedTree.ancestry,
   ]);
   return {
     allNodes,
-    genTree,
-    tree: formatTree(genTree),
+    generatedTree,
+    formattedTree: formatTree(generatedTree),
   };
 }
 

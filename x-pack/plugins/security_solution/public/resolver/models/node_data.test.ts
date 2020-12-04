@@ -5,9 +5,8 @@
  */
 
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
-import { IDToNodeInfo } from '../types';
+import { NodeData } from '../types';
 import {
-  idsNotInBase,
   setErrorNodes,
   setReloadedNodes,
   setRequestedNodes,
@@ -17,7 +16,7 @@ import {
 describe('node data model', () => {
   const generator = new EndpointDocGenerator('resolver');
   describe('creates a copy of the map', () => {
-    const original: IDToNodeInfo = new Map();
+    const original: Map<string, NodeData> = new Map();
 
     it('creates a copy when using setRequestedNodes', () => {
       expect(setRequestedNodes(original, new Set()) === original).toBeFalsy();
@@ -44,7 +43,7 @@ describe('node data model', () => {
   });
 
   it('overwrites the existing entries and creates new ones when calling setRequestedNodes', () => {
-    const state: IDToNodeInfo = new Map([
+    const state: Map<string, NodeData> = new Map([
       ['1', { events: [generator.generateEvent()], status: 'running', eventType: ['start'] }],
     ]);
 
@@ -57,7 +56,7 @@ describe('node data model', () => {
   });
 
   it('overwrites the existing entries and creates new ones when calling setErrorNodes', () => {
-    const state: IDToNodeInfo = new Map([
+    const state: Map<string, NodeData> = new Map([
       ['1', { events: [generator.generateEvent()], status: 'running', eventType: ['start'] }],
     ]);
 
@@ -69,22 +68,9 @@ describe('node data model', () => {
     );
   });
 
-  describe('idsNotInBase', () => {
-    it('marks all ids as not in the base state when the state is undefined', () => {
-      expect(idsNotInBase(undefined, new Set(['1', '2']))).toEqual(new Set(['1', '2']));
-    });
-
-    it('only includes ids that are not in the base state', () => {
-      const state: IDToNodeInfo = new Map([
-        ['1', { events: [generator.generateEvent()], status: 'error', eventType: ['start'] }],
-      ]);
-      expect(idsNotInBase(state, new Set(['1', '2', '3']))).toEqual(new Set(['2', '3']));
-    });
-  });
-
   describe('setReloadedNodes', () => {
     it('removes the id from the map', () => {
-      const state: IDToNodeInfo = new Map([['1', { events: [], status: 'error' }]]);
+      const state: Map<string, NodeData> = new Map([['1', { events: [], status: 'error' }]]);
       expect(setReloadedNodes(state, '1')).toEqual(new Map());
     });
   });
@@ -92,7 +78,7 @@ describe('node data model', () => {
   describe('updateWithReceivedNodes', () => {
     const node1Events = [generator.generateEvent({ entityID: '1', eventType: ['start'] })];
     const node2Events = [generator.generateEvent({ entityID: '2', eventType: ['start'] })];
-    const state: IDToNodeInfo = new Map([
+    const state: Map<string, NodeData> = new Map([
       ['1', { events: node1Events, status: 'error' }],
       ['2', { events: node2Events, status: 'error' }],
     ]);
