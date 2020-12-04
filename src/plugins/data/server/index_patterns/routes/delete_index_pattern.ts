@@ -19,7 +19,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../core/server';
-import { assertIndexPatternsContext } from './util/assert_index_patterns_context';
 import { handleErrors } from './util/handle_errors';
 import type { IndexPatternsServiceProvider } from '../index_patterns_service';
 
@@ -43,25 +42,23 @@ export const registerDeleteIndexPatternRoute = (
       },
     },
     router.handleLegacyErrors(
-      handleErrors(
-        assertIndexPatternsContext(async (ctx, req, res) => {
-          const savedObjectsClient = ctx.core.savedObjects.client;
-          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-          const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
-            savedObjectsClient,
-            elasticsearchClient
-          );
-          const id = req.params.id;
+      handleErrors(async (ctx, req, res) => {
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+          savedObjectsClient,
+          elasticsearchClient
+        );
+        const id = req.params.id;
 
-          await indexPatternsService.delete(id);
+        await indexPatternsService.delete(id);
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-          });
-        })
-      )
+        return res.ok({
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      })
     )
   );
 };

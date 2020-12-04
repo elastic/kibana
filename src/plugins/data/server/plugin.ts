@@ -94,28 +94,7 @@ export class DataServerPlugin
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
-
     this.indexPatterns.setup(core, { expressions });
-    core.http.registerRouteHandlerContext(
-      'indexPatterns',
-      async (context): Promise<Partial<IndexPatternsRequestHandlerContext>> => {
-        try {
-          const savedObjectsClient = context.core.savedObjects.client;
-          const elasticsearchClient = context.core.elasticsearch.client.asCurrentUser;
-
-          const indexPatterns = await this.indexPatterns.createIndexPatternsService(
-            savedObjectsClient,
-            elasticsearchClient
-          );
-
-          return {
-            indexPatterns,
-          };
-        } catch {
-          return {};
-        }
-      }
-    );
 
     core.uiSettings.register(getUiSettings());
 

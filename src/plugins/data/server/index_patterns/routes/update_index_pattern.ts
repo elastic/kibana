@@ -19,7 +19,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../core/server';
-import { assertIndexPatternsContext } from './util/assert_index_patterns_context';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, serializedFieldFormatSchema } from './util/schemas';
 import type { IndexPatternsServiceProvider } from '../index_patterns_service';
@@ -65,103 +64,101 @@ export const registerUpdateIndexPatternRoute = (
       },
     },
     router.handleLegacyErrors(
-      handleErrors(
-        assertIndexPatternsContext(async (ctx, req, res) => {
-          const savedObjectsClient = ctx.core.savedObjects.client;
-          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-          const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
-            savedObjectsClient,
-            elasticsearchClient
+      handleErrors(async (ctx, req, res) => {
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+          savedObjectsClient,
+          elasticsearchClient
+        );
+        const id = req.params.id;
+
+        const indexPattern = await indexPatternsService.get(id);
+
+        const {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          refresh_fields = true,
+          index_pattern: {
+            title,
+            timeFieldName,
+            intervalName,
+            sourceFilters,
+            fieldFormats,
+            type,
+            typeMeta,
+            fields,
+          },
+        } = req.body;
+
+        let changeCount = 0;
+        let doRefreshFields = false;
+
+        if (title !== undefined && title !== indexPattern.title) {
+          changeCount++;
+          indexPattern.title = title;
+        }
+
+        if (timeFieldName !== undefined && timeFieldName !== indexPattern.timeFieldName) {
+          changeCount++;
+          indexPattern.timeFieldName = timeFieldName;
+        }
+
+        if (intervalName !== undefined && intervalName !== indexPattern.intervalName) {
+          changeCount++;
+          indexPattern.intervalName = intervalName;
+        }
+
+        if (sourceFilters !== undefined) {
+          changeCount++;
+          indexPattern.sourceFilters = sourceFilters;
+        }
+
+        if (fieldFormats !== undefined) {
+          changeCount++;
+          indexPattern.fieldFormatMap = fieldFormats;
+        }
+
+        if (type !== undefined) {
+          changeCount++;
+          indexPattern.type = type;
+        }
+
+        if (typeMeta !== undefined) {
+          changeCount++;
+          indexPattern.typeMeta = typeMeta;
+        }
+
+        if (fields !== undefined) {
+          changeCount++;
+          doRefreshFields = true;
+          indexPattern.fields.replaceAll(
+            Object.values(fields || {}).map((field) => ({
+              ...field,
+              aggregatable: true,
+              searchable: true,
+            }))
           );
-          const id = req.params.id;
+        }
 
-          const indexPattern = await indexPatternsService.get(id);
+        if (changeCount < 1) {
+          throw new Error('Index pattern change set is empty.');
+        }
 
-          const {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            refresh_fields = true,
-            index_pattern: {
-              title,
-              timeFieldName,
-              intervalName,
-              sourceFilters,
-              fieldFormats,
-              type,
-              typeMeta,
-              fields,
-            },
-          } = req.body;
+        await indexPatternsService.updateSavedObject(indexPattern);
 
-          let changeCount = 0;
-          let doRefreshFields = false;
+        if (doRefreshFields && refresh_fields) {
+          await indexPatternsService.refreshFields(indexPattern);
+        }
 
-          if (title !== undefined && title !== indexPattern.title) {
-            changeCount++;
-            indexPattern.title = title;
-          }
-
-          if (timeFieldName !== undefined && timeFieldName !== indexPattern.timeFieldName) {
-            changeCount++;
-            indexPattern.timeFieldName = timeFieldName;
-          }
-
-          if (intervalName !== undefined && intervalName !== indexPattern.intervalName) {
-            changeCount++;
-            indexPattern.intervalName = intervalName;
-          }
-
-          if (sourceFilters !== undefined) {
-            changeCount++;
-            indexPattern.sourceFilters = sourceFilters;
-          }
-
-          if (fieldFormats !== undefined) {
-            changeCount++;
-            indexPattern.fieldFormatMap = fieldFormats;
-          }
-
-          if (type !== undefined) {
-            changeCount++;
-            indexPattern.type = type;
-          }
-
-          if (typeMeta !== undefined) {
-            changeCount++;
-            indexPattern.typeMeta = typeMeta;
-          }
-
-          if (fields !== undefined) {
-            changeCount++;
-            doRefreshFields = true;
-            indexPattern.fields.replaceAll(
-              Object.values(fields || {}).map((field) => ({
-                ...field,
-                aggregatable: true,
-                searchable: true,
-              }))
-            );
-          }
-
-          if (changeCount < 1) {
-            throw new Error('Index pattern change set is empty.');
-          }
-
-          await indexPatternsService.updateSavedObject(indexPattern);
-
-          if (doRefreshFields && refresh_fields) {
-            await indexPatternsService.refreshFields(indexPattern);
-          }
-
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-              index_pattern: indexPattern.toSpec(),
-            }),
-          });
-        })
-      )
+        return res.ok({
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            index_pattern: indexPattern.toSpec(),
+          }),
+        });
+      })
     )
   );
 };

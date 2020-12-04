@@ -20,7 +20,6 @@
 import { schema } from '@kbn/config-schema';
 import { IndexPatternSpec } from 'src/plugins/data/common';
 import { IRouter } from '../../../../../core/server';
-import { assertIndexPatternsContext } from './util/assert_index_patterns_context';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, serializedFieldFormatSchema } from './util/schemas';
 import type { IndexPatternsServiceProvider } from '../index_patterns_service';
@@ -69,31 +68,29 @@ export const registerCreateIndexPatternRoute = (
       },
     },
     router.handleLegacyErrors(
-      handleErrors(
-        assertIndexPatternsContext(async (ctx, req, res) => {
-          const savedObjectsClient = ctx.core.savedObjects.client;
-          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-          const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
-            savedObjectsClient,
-            elasticsearchClient
-          );
-          const body = req.body;
-          const indexPattern = await indexPatternsService.createAndSave(
-            body.index_pattern as IndexPatternSpec,
-            body.override,
-            !body.refresh_fields
-          );
+      handleErrors(async (ctx, req, res) => {
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+          savedObjectsClient,
+          elasticsearchClient
+        );
+        const body = req.body;
+        const indexPattern = await indexPatternsService.createAndSave(
+          body.index_pattern as IndexPatternSpec,
+          body.override,
+          !body.refresh_fields
+        );
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-              index_pattern: indexPattern.toSpec(),
-            }),
-          });
-        })
-      )
+        return res.ok({
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            index_pattern: indexPattern.toSpec(),
+          }),
+        });
+      })
     )
   );
 };

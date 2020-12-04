@@ -20,7 +20,6 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../../core/server';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
-import { assertIndexPatternsContext } from '../util/assert_index_patterns_context';
 import { handleErrors } from '../util/handle_errors';
 import type { IndexPatternsServiceProvider } from '../../index_patterns_service';
 
@@ -48,38 +47,36 @@ export const registerGetScriptedFieldRoute = (
       },
     },
     router.handleLegacyErrors(
-      handleErrors(
-        assertIndexPatternsContext(async (ctx, req, res) => {
-          const savedObjectsClient = ctx.core.savedObjects.client;
-          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-          const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
-            savedObjectsClient,
-            elasticsearchClient
-          );
-          const id = req.params.id;
-          const name = req.params.name;
+      handleErrors(async (ctx, req, res) => {
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+          savedObjectsClient,
+          elasticsearchClient
+        );
+        const id = req.params.id;
+        const name = req.params.name;
 
-          const indexPattern = await indexPatternsService.get(id);
-          const field = indexPattern.fields.getByName(name);
+        const indexPattern = await indexPatternsService.get(id);
+        const field = indexPattern.fields.getByName(name);
 
-          if (!field) {
-            throw new ErrorIndexPatternFieldNotFound(id, name);
-          }
+        if (!field) {
+          throw new ErrorIndexPatternFieldNotFound(id, name);
+        }
 
-          if (!field.scripted) {
-            throw new Error('Only scripted fields can be retrieved.');
-          }
+        if (!field.scripted) {
+          throw new Error('Only scripted fields can be retrieved.');
+        }
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-              field: field.toSpec(),
-            }),
-          });
-        })
-      )
+        return res.ok({
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            field: field.toSpec(),
+          }),
+        });
+      })
     )
   );
 };

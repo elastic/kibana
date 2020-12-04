@@ -19,7 +19,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../../core/server';
-import { assertIndexPatternsContext } from '../util/assert_index_patterns_context';
 import { handleErrors } from '../util/handle_errors';
 import { fieldSpecSchema } from '../util/schemas';
 import type { IndexPatternsServiceProvider } from '../../index_patterns_service';
@@ -48,57 +47,55 @@ export const registerPutScriptedFieldRoute = (
       },
     },
     router.handleLegacyErrors(
-      handleErrors(
-        assertIndexPatternsContext(async (ctx, req, res) => {
-          const savedObjectsClient = ctx.core.savedObjects.client;
-          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-          const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
-            savedObjectsClient,
-            elasticsearchClient
-          );
-          const id = req.params.id;
-          const {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            refresh_fields = true,
-            field,
-          } = req.body;
+      handleErrors(async (ctx, req, res) => {
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+          savedObjectsClient,
+          elasticsearchClient
+        );
+        const id = req.params.id;
+        const {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          refresh_fields = true,
+          field,
+        } = req.body;
 
-          if (!field.scripted) {
-            throw new Error('Only scripted fields can be put.');
-          }
+        if (!field.scripted) {
+          throw new Error('Only scripted fields can be put.');
+        }
 
-          const indexPattern = await indexPatternsService.get(id);
+        const indexPattern = await indexPatternsService.get(id);
 
-          const oldFieldObject = indexPattern.fields.getByName(field.name);
-          if (!!oldFieldObject) {
-            indexPattern.fields.remove(oldFieldObject);
-          }
+        const oldFieldObject = indexPattern.fields.getByName(field.name);
+        if (!!oldFieldObject) {
+          indexPattern.fields.remove(oldFieldObject);
+        }
 
-          indexPattern.fields.add({
-            ...field,
-            aggregatable: true,
-            searchable: true,
-          });
+        indexPattern.fields.add({
+          ...field,
+          aggregatable: true,
+          searchable: true,
+        });
 
-          await indexPatternsService.updateSavedObject(indexPattern);
-          if (refresh_fields) {
-            await indexPatternsService.refreshFields(indexPattern);
-          }
+        await indexPatternsService.updateSavedObject(indexPattern);
+        if (refresh_fields) {
+          await indexPatternsService.refreshFields(indexPattern);
+        }
 
-          const fieldObject = indexPattern.fields.getByName(field.name);
-          if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
+        const fieldObject = indexPattern.fields.getByName(field.name);
+        if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-              field: fieldObject.toSpec(),
-              index_pattern: indexPattern.toSpec(),
-            }),
-          });
-        })
-      )
+        return res.ok({
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            field: fieldObject.toSpec(),
+            index_pattern: indexPattern.toSpec(),
+          }),
+        });
+      })
     )
   );
 };
