@@ -274,8 +274,12 @@ export interface GeneratedTreeMetadata {
 }
 
 /**
- * The state of the process cubes in the graph. Loading indicates that we haven't received the node data yet
- * to determine whether it is a running or terminated process.
+ * The state of the process cubes in the graph.
+ *
+ * 'running' if the process represented by the node is still running.
+ * 'loading' if we don't have the data yet to determine if the node is running or terminated.
+ * 'terminated' if the process represented by the node is terminated.
+ * 'error' if we were unable to retrieve data associated with the node.
  */
 export type NodeDataStatus = 'running' | 'loading' | 'terminated' | 'error';
 

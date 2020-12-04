@@ -18,7 +18,15 @@ import * as eventModel from '../../../../common/endpoint/models/event';
 import { generateTree } from '../../mocks/generator';
 
 /**
- * Creates a DAL based on a resolver generator tree.
+ * This file can be used to create a mock data access layer that leverages a generated tree using the
+ * EndpointDocGenerator class. The advantage of using this mock is that it gives us a lot of control how we want the
+ * tree to look (ancestors, descendants, generations, related events, etc).
+ *
+ * The data access layer is mainly useful for testing the nodeData state within resolver.
+ */
+
+/**
+ * Creates a Data Access Layer based on a resolver generator tree.
  *
  * @param treeOptions options for generating a resolver tree, these are passed to the resolver generator
  * @param dalOverrides a DAL to override the functions in this mock, this allows extra functionality to be specified in the tests

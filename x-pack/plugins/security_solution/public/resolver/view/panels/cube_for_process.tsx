@@ -31,10 +31,7 @@ export const CubeForProcess = memo(function ({
 }: {
   'data-test-subj'?: string;
   /**
-   * 'running' if the process represented by the node is still running.
-   * 'loading' if we don't have the data yet to determine if the node is running or terminated.
-   * 'terminated' if the process represented by the node is terminated.
-   * 'error' if we were unable to retrieve data associated with the node.
+   * The state of the process's node data (for endpoint the process's lifecycle events)
    */
   state: NodeDataStatus;
   /** The css size (px, em, etc...) for the width and height of the svg cube. Defaults to 2.15em */
