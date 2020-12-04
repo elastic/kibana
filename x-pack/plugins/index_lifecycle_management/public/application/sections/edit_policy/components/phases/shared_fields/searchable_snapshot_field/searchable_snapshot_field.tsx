@@ -159,7 +159,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
                         target="_blank"
                       >
                         {i18n.translate(
-                          'xpack.indexLifecycleMgmt.editPolicy.createSearchableSnapshotLink',
+                          'xpack.indexLifecycleMgmt.editPolicy.createSnapshotRepositoryLink',
                           {
                             defaultMessage: 'create a new snapshot repository',
                           }
