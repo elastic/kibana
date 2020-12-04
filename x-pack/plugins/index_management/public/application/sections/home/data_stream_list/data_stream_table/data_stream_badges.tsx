@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiBadge } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/target/types/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DataStream } from '../../../../../../common';
 import { isFleetManaged } from '../../../../lib/data_streams';
 
