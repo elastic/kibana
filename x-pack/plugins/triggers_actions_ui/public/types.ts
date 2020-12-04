@@ -171,8 +171,8 @@ export interface AlertTypeParamsExpressionProps<
   defaultActionGroupId: string;
   actionGroups: ActionGroup[];
   metadata?: MetaData;
-  charts?: ChartsPluginSetup;
-  data?: DataPublicPluginStart;
+  charts: ChartsPluginSetup;
+  data: DataPublicPluginStart;
 }
 
 export interface AlertTypeModel<AlertParamsType = any> {

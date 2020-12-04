@@ -94,8 +94,8 @@ interface Props {
     [key: string]: Comparator;
   };
   refreshRateInMilliseconds?: number;
-  charts?: ChartsPluginSetup;
-  dataFieldsFormats?: FieldFormatsStart;
+  charts: ChartsPluginSetup;
+  dataFieldsFormats: FieldFormatsStart;
 }
 
 const DEFAULT_REFRESH_RATE = 5000;

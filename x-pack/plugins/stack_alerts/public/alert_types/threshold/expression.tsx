@@ -24,6 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
+import { HttpSetup } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
   firstFieldOption,
@@ -66,6 +67,10 @@ const expressionFieldsWithValidation = [
   'timeWindowSize',
 ];
 
+interface KibanaDeps {
+  http: HttpSetup;
+}
+
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
   AlertTypeParamsExpressionProps<IndexThresholdAlertParams>
 > = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, charts, data }) => {
@@ -83,7 +88,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     timeWindowUnit,
   } = alertParams;
 
-  const { http } = useKibana().services;
+  const { http } = useKibana<KibanaDeps>().services;
 
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState([]);
@@ -123,7 +128,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     });
 
     if (index && index.length > 0) {
-      const currentEsFields = await getFields(http!, index);
+      const currentEsFields = await getFields(http, index);
       const timeFields = getTimeFieldOptions(currentEsFields);
 
       setEsFields(currentEsFields);

@@ -8,6 +8,7 @@ import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { HttpSetup } from 'kibana/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
 import { ES_GEO_SHAPE_TYPES, GeoThresholdAlertParams } from '../../types';
@@ -28,6 +29,10 @@ interface Props {
   data: DataPublicPluginStart;
 }
 
+interface KibanaDeps {
+  http: HttpSetup;
+}
+
 export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   alertParams,
   errors,
@@ -40,7 +45,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
 }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];
-  const { http } = useKibana().services;
+  const { http } = useKibana<KibanaDeps>().services;
   const IndexPatternSelect = (data.ui && data.ui.IndexPatternSelect) || null;
   const { boundaryGeoField } = alertParams;
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -113,7 +118,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
           value={boundaryIndexPattern.id}
           IndexPatternSelectComponent={IndexPatternSelect}
           indexPatternService={data.indexPatterns}
-          http={http!}
+          http={http}
           includedGeoTypes={ES_GEO_SHAPE_TYPES}
         />
       </EuiFormRow>

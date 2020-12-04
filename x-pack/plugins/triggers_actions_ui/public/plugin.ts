@@ -43,16 +43,16 @@ export interface TriggersAndActionsUIPublicPluginStart {
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   getAddConnectorFlyout: (
     props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
-  ) => ReactElement<ConnectorAddFlyoutProps> | null;
+  ) => ReactElement<ConnectorAddFlyoutProps>;
   getEditConnectorFlyout: (
     props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>
-  ) => ReactElement<ConnectorEditFlyoutProps> | null;
+  ) => ReactElement<ConnectorEditFlyoutProps>;
   getAddAlertFlyout: (
     props: Omit<AlertAddProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
-  ) => ReactElement<AlertAddProps> | null;
+  ) => ReactElement<AlertAddProps>;
   getEditAlertFlyout: (
     props: Omit<AlertEditProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
-  ) => ReactElement<AlertEditProps> | null;
+  ) => ReactElement<AlertEditProps>;
 }
 
 interface PluginsSetup {

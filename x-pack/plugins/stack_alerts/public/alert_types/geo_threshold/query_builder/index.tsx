@@ -104,10 +104,6 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<
     delayOffsetWithUnits,
   } = alertParams;
 
-  if (!data) {
-    throw new Error('KibanaContext has not been initalized correctly.');
-  }
-
   const [indexPattern, _setIndexPattern] = useState<IIndexPattern>({
     id: '',
     fields: [],
