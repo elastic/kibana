@@ -108,7 +108,6 @@ export const SourceSettings: React.FC = () => {
   return (
     <>
       <ViewContentHeader title="Source settings" />
-      <EuiSpacer />
       <ContentSection
         title="Content source name"
         description="Customize the name of this content source."

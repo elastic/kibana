@@ -471,7 +471,6 @@ export const Overview: React.FC = () => {
   return (
     <>
       <ViewContentHeader title="Source overview" />
-      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" direction="column">
