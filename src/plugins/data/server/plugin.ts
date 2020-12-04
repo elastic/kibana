@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ConfigSchema } from '../config';
@@ -95,7 +95,7 @@ export class DataServerPlugin
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
 
-    this.indexPatterns.setup(core);
+    this.indexPatterns.setup(core, { expressions });
     core.http.registerRouteHandlerContext(
       'indexPatterns',
       async (context): Promise<Partial<IndexPatternsRequestHandlerContext>> => {

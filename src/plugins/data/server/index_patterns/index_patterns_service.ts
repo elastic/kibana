@@ -25,11 +25,14 @@ import {
   SavedObjectsClientContract,
   ElasticsearchClient,
 } from 'kibana/server';
+import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+import { DataPluginStartDependencies, DataPluginStart } from '../plugin';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 import { IndexPatternsService as IndexPatternsCommonService } from '../../common/index_patterns';
 import { FieldFormatsStart } from '../field_formats';
+import { getIndexPatternLoad } from './expressions';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
@@ -39,6 +42,10 @@ export interface IndexPatternsServiceStart {
     savedObjectsClient: SavedObjectsClientContract,
     elasticsearchClient: ElasticsearchClient
   ) => Promise<IndexPatternsCommonService>;
+}
+
+export interface IndexPatternsServiceSetupDeps {
+  expressions: ExpressionsServerSetup;
 }
 
 export interface IndexPatternsServiceStartDeps {
@@ -51,11 +58,16 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
   private fieldFormats?: FieldFormatsStart;
   private logger?: Logger;
 
-  public setup(core: CoreSetup) {
+  public setup(
+    core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
+    { expressions }: IndexPatternsServiceSetupDeps
+  ) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
 
     registerRoutes(core.http);
+
+    expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
   }
 
   public start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps) {
