@@ -12,7 +12,7 @@ import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ValidationResult, Alert } from '../../../types';
 import { AlertForm } from './alert_form';
 import { coreMock } from 'src/core/public/mocks';
-import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -82,6 +82,7 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
+          recoveryActionGroup: RecoveredActionGroup,
           producer: ALERTS_FEATURE_ID,
           authorizedConsumers: {
             [ALERTS_FEATURE_ID]: { read: true, all: true },
@@ -203,6 +204,7 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
+          recoveryActionGroup: RecoveredActionGroup,
           producer: ALERTS_FEATURE_ID,
           authorizedConsumers: {
             [ALERTS_FEATURE_ID]: { read: true, all: true },
@@ -219,6 +221,7 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
+          recoveryActionGroup: RecoveredActionGroup,
           producer: 'test',
           authorizedConsumers: {
             [ALERTS_FEATURE_ID]: { read: true, all: true },
