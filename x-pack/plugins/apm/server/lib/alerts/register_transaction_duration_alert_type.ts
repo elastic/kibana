@@ -23,6 +23,7 @@ import { getDurationFormatter } from '../../../common/utils/formatters';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
+import { alertingEsClient } from './alerting_es_client';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -120,10 +121,7 @@ export function registerTransactionDurationAlertType({
         },
       };
 
-      const response: ESSearchResponse<
-        unknown,
-        typeof searchParams
-      > = await services.callCluster('search', searchParams);
+      const response = await alertingEsClient(services, searchParams);
 
       if (!response.aggregations) {
         return;
