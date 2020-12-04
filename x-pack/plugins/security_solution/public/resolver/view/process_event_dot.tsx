@@ -67,6 +67,14 @@ const StyledDescriptionText = styled.div<StyledDescriptionText>`
   z-index: 45;
 `;
 
+interface StyledEuiButtonContent {
+  readonly isShowingIcon: boolean;
+}
+
+const StyledEuiButtonContent = styled.span<StyledEuiButtonContent>`
+  padding: ${(props) => (props.isShowingIcon ? '0px' : '0 12px')};
+`;
+
 const StyledOuterGroup = styled.g<{ isNodeLoading: boolean }>`
   fill: none;
   pointer-events: visiblePainted;
@@ -132,7 +140,7 @@ const UnstyledProcessEventDot = React.memo(
     /**
      * The unique identifier for the node based on a datasource id
      */
-    nodeID: string | undefined;
+    nodeID: string;
     /**
      * projectionMatrix which can be used to convert `position` to screen coordinates.
      */
@@ -143,9 +151,6 @@ const UnstyledProcessEventDot = React.memo(
      */
     timeAtRender: number;
   }) => {
-    if (nodeID === undefined) {
-      throw new Error('Tried to render a node with no ID');
-    }
     const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
     // This should be unique to each instance of Resolver
     const htmlIDPrefix = `resolver:${resolverComponentInstanceID}`;
@@ -315,9 +320,6 @@ const UnstyledProcessEventDot = React.memo(
     );
 
     const nodeName = nodeModel.nodeName(node);
-    const euiTextClassName = classNames('euiButton__content', {
-      euiButtonReload: nodeState === 'error' || nodeState === 'loading',
-    });
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     /**
@@ -462,7 +464,9 @@ const UnstyledProcessEventDot = React.memo(
               data-test-subj="resolver:node:primary-button"
               data-test-resolver-node-id={nodeID}
             >
-              <span className={euiTextClassName}>
+              <StyledEuiButtonContent
+                isShowingIcon={nodeState === 'loading' || nodeState === 'error'}
+              >
                 <span className="euiButton__text" data-test-subj={'euiButton__text'}>
                   {i18n.translate('xpack.securitySolution.resolver.node_button_name', {
                     defaultMessage: `{nodeState, select, error {Reload {nodeName}} other {{nodeName}}}`,
@@ -472,7 +476,7 @@ const UnstyledProcessEventDot = React.memo(
                     },
                   })}
                 </span>
-              </span>
+              </StyledEuiButtonContent>
             </EuiButton>
           </div>
           <EuiFlexGroup
@@ -541,10 +545,6 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
 
   & .euiButton {
     width: fit-content;
-  }
-
-  & .euiButtonReload {
-    padding: 0px;
   }
 
   & .euiSelectableList-bordered {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
 /* eslint-disable react/button-has-type */
 
 import React, { useCallback, useMemo, useContext, useState, HTMLAttributes } from 'react';
@@ -28,10 +29,10 @@ import { StyledDescriptionList } from './panels/styles';
 import { CubeForProcess } from './panels/cube_for_process';
 import { GeneratedText } from './generated_text';
 
-interface StyledGraphControls {
-  graphControlsBackground: string;
-  graphControlsIconColor: string;
-  graphControlsBorderColor: string;
+interface StyledGraphControlProps {
+  backgroundColor: string;
+  iconColor: string;
+  borderColor: string;
 }
 
 const StyledGraphControlsWrapper = styled.div`
@@ -48,7 +49,12 @@ const StyledGraphControlsColumn = styled.div`
   }
 `;
 
-const StyledEuiButtonIcon = styled(EuiButtonIcon)`
+const StyledEuiButtonIcon = styled(EuiButtonIcon)<StyledGraphControlProps>`
+  background-color: ${(props) => props.backgroundColor};
+  color: ${(props) => props.iconColor};
+  border-color: ${(props) => props.borderColor};
+  border-width: 1px;
+  border-style: solid;
   border-radius: 4px;
   width: 40px;
   height: 40px;
@@ -58,12 +64,12 @@ const StyledEuiButtonIcon = styled(EuiButtonIcon)`
   }
 `;
 
-const StyledGraphControls = styled.div<StyledGraphControls>`
+const StyledGraphControls = styled.div<Partial<StyledGraphControlProps>>`
   position: absolute;
   top: 5px;
   right: 5px;
   background-color: transparent;
-  color: ${(props) => props.graphControlsIconColor};
+  color: ${(props) => props.iconColor};
 
   .zoom-controls {
     display: flex;
@@ -161,229 +167,34 @@ export const GraphControls = React.memo(
       });
     }, [dispatch, timestamp]);
 
-    const sourceAndSchema = useSelector(selectors.resolverTreeSourceAndSchema);
-
-    // This defines the schema that is visualized in the (i) popover
-    const schemaListItems = [
-      {
-        title: i18n.translate('xpack.securitySolution.resolver.graphControls.schemaSource', {
-          defaultMessage: 'source',
-        }),
-        description: <GeneratedText>{sourceAndSchema?.dataSource ?? 'Unknown'}</GeneratedText>,
-      },
-      {
-        title: i18n.translate('xpack.securitySolution.resolver.graphControls.schemaID', {
-          defaultMessage: 'id',
-        }),
-        description: <GeneratedText>{sourceAndSchema?.schema.id ?? 'Unknown'}</GeneratedText>,
-      },
-      {
-        title: i18n.translate('xpack.securitySolution.resolver.graphControls.schemaEdge', {
-          defaultMessage: 'edge',
-        }),
-        description: <GeneratedText>{sourceAndSchema?.schema.parent ?? 'Unknown'}</GeneratedText>,
-      },
-    ];
-
-    // This defines the cube legend that allows users to identify the meaning of the cubes within this context
-    // Should be updated to be dynamic if and when non process based resolvers are possible
-    const legendListItems = [
-      {
-        title: (
-          <CubeForProcess
-            size="2.5em"
-            data-test-subj="resolver:node-detail:title-icon"
-            state="running"
-          />
-        ),
-        description: (
-          <GeneratedText>
-            {i18n.translate('xpack.securitySolution.resolver.graphControls.runningProcessCube', {
-              defaultMessage: 'Running Process',
-            })}
-          </GeneratedText>
-        ),
-      },
-      {
-        title: (
-          <CubeForProcess
-            size="2.5em"
-            data-test-subj="resolver:node-detail:title-icon"
-            state="terminated"
-          />
-        ),
-        description: (
-          <GeneratedText>
-            {i18n.translate('xpack.securitySolution.resolver.graphControls.terminatedProcessCube', {
-              defaultMessage: 'Terminated Process',
-            })}
-          </GeneratedText>
-        ),
-      },
-      {
-        title: (
-          <CubeForProcess
-            size="2.5em"
-            data-test-subj="resolver:node-detail:title-icon"
-            state="loading"
-          />
-        ),
-        description: (
-          <GeneratedText>
-            {i18n.translate('xpack.securitySolution.resolver.graphControls.currentlyLoadingCube', {
-              defaultMessage: 'Loading Process',
-            })}
-          </GeneratedText>
-        ),
-      },
-      {
-        title: (
-          <CubeForProcess
-            size="2.5em"
-            data-test-subj="resolver:node-detail:title-icon"
-            state="error"
-          />
-        ),
-        description: (
-          <GeneratedText>
-            {i18n.translate('xpack.securitySolution.resolver.graphControls.errorCube', {
-              defaultMessage: 'Error',
-            })}
-          </GeneratedText>
-        ),
-      },
-    ];
-
-    const popoverButtonStyles = {
-      background: colorMap.graphControlsBackground,
-      borderColor: colorMap.graphControlsBorderColor,
-      borderWidth: '1px',
-      borderStyle: 'solid',
-    };
-
     return (
       <StyledGraphControls
         className={className}
-        graphControlsBackground={colorMap.graphControlsBackground}
-        graphControlsIconColor={colorMap.graphControls}
-        graphControlsBorderColor={colorMap.graphControlsBorderColor}
+        iconColor={colorMap.graphControls}
         data-test-subj="resolver:graph-controls"
       >
         <StyledGraphControlsWrapper>
           <StyledGraphControlsColumn>
-            <EuiPopover
-              ownFocus
-              onScroll={closePopover}
-              repositionOnScroll={false}
-              onClick={() => setActivePopover('schemaInfo')}
-              button={
-                <StyledEuiButtonIcon
-                  size="m"
-                  title="Schema Info"
-                  aria-label="Schema Info"
-                  iconType="iInCircle"
-                  style={popoverButtonStyles}
-                />
-              }
+            <SchemaInformation
+              closePopover={closePopover}
               isOpen={activePopover === 'schemaInfo'}
+              setActivePopover={setActivePopover}
+            />
+            <CubeLegend
               closePopover={closePopover}
-              anchorPosition="leftCenter"
-            >
-              <EuiPopoverTitle>
-                {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaInfoTitle', {
-                  defaultMessage: 'PROCESS TREE',
-                })}
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.securitySolution.resolver.graphControls.schemaInfoTooltip',
-                    {
-                      defaultMessage: 'These are the fields used to create the process tree',
-                    }
-                  )}
-                  position="right"
-                />
-              </EuiPopoverTitle>
-              <div style={{ width: '256px' }}>
-                <StyledDescriptionList
-                  data-test-subj="resolver:schema-info"
-                  type="column"
-                  align="left"
-                  titleProps={
-                    {
-                      'data-test-subj': 'resolver:schema-info:title',
-                      className: 'schema-info-desc-title',
-                      style: { width: '30%' },
-                      // Casting this to allow data attribute
-                    } as HTMLAttributes<HTMLElement>
-                  }
-                  descriptionProps={
-                    {
-                      'data-test-subj': 'resolver:schema-info:description',
-                      className: 'schema-info-description',
-                      style: { width: '70%' },
-                    } as HTMLAttributes<HTMLElement>
-                  }
-                  compressed
-                  listItems={schemaListItems}
-                />
-              </div>
-            </EuiPopover>
-            <EuiPopover
-              ownFocus
-              button={
-                <StyledEuiButtonIcon
-                  size="m"
-                  title="Nodes Legend"
-                  aria-label="Nodes Legend"
-                  iconType="node"
-                  style={popoverButtonStyles}
-                />
-              }
-              onScroll={closePopover}
-              repositionOnScroll={false}
-              onClick={() => setActivePopover('nodesLegend')}
               isOpen={activePopover === 'nodesLegend'}
-              closePopover={closePopover}
-              anchorPosition="leftCenter"
-            >
-              <EuiPopoverTitle>
-                {i18n.translate('xpack.securitySolution.resolver.graphControls.nodeLegend', {
-                  defaultMessage: 'LEGEND',
-                })}
-              </EuiPopoverTitle>
-              <div style={{ width: '212px' }}>
-                <StyledDescriptionList
-                  data-test-subj="resolver:graph-controls:legend"
-                  type="column"
-                  align="left"
-                  titleProps={
-                    {
-                      'data-test-subj': 'resolver:graph-controls:legend:title',
-                      className: 'legend-desc-title',
-                      style: { width: '20%' },
-                      // Casting this to allow data attribute
-                    } as HTMLAttributes<HTMLElement>
-                  }
-                  descriptionProps={
-                    {
-                      'data-test-subj': 'resolver:graph-controls:legend:description',
-                      className: 'legend-description',
-                      style: { width: '80%', lineHeight: '2em' }, // lineHeight to align center vertically
-                    } as HTMLAttributes<HTMLElement>
-                  }
-                  compressed
-                  listItems={legendListItems}
-                />
-              </div>
-            </EuiPopover>
+              setActivePopover={setActivePopover}
+            />
           </StyledGraphControlsColumn>
-          <div className="graph-controls__column">
+          <StyledGraphControlsColumn>
             <EuiPanel className="panning-controls" paddingSize="none" hasShadow>
               <div className="panning-controls-top">
                 <button
                   className="north-button"
                   data-test-subj="resolver:graph-controls:north-button"
-                  title="North"
+                  title={i18n.translate('xpack.securitySolution.resolver.graphControls.north', {
+                    defaultMessage: 'North',
+                  })}
                   onClick={handleNorth}
                 >
                   <EuiIcon type="arrowUp" />
@@ -393,7 +204,9 @@ export const GraphControls = React.memo(
                 <button
                   className="west-button"
                   data-test-subj="resolver:graph-controls:west-button"
-                  title="West"
+                  title={i18n.translate('xpack.securitySolution.resolver.graphControls.west', {
+                    defaultMessage: 'West',
+                  })}
                   onClick={handleWest}
                 >
                   <EuiIcon type="arrowLeft" />
@@ -401,7 +214,9 @@ export const GraphControls = React.memo(
                 <button
                   className="center-button"
                   data-test-subj="resolver:graph-controls:center-button"
-                  title="Center"
+                  title={i18n.translate('xpack.securitySolution.resolver.graphControls.center', {
+                    defaultMessage: 'Center',
+                  })}
                   onClick={handleCenterClick}
                 >
                   <EuiIcon type="bullseye" />
@@ -409,7 +224,9 @@ export const GraphControls = React.memo(
                 <button
                   className="east-button"
                   data-test-subj="resolver:graph-controls:east-button"
-                  title="East"
+                  title={i18n.translate('xpack.securitySolution.resolver.graphControls.east', {
+                    defaultMessage: 'East',
+                  })}
                   onClick={handleEast}
                 >
                   <EuiIcon type="arrowRight" />
@@ -419,7 +236,9 @@ export const GraphControls = React.memo(
                 <button
                   className="south-button"
                   data-test-subj="resolver:graph-controls:south-button"
-                  title="South"
+                  title={i18n.translate('xpack.securitySolution.resolver.graphControls.south', {
+                    defaultMessage: 'South',
+                  })}
                   onClick={handleSouth}
                 >
                   <EuiIcon type="arrowDown" />
@@ -428,7 +247,9 @@ export const GraphControls = React.memo(
             </EuiPanel>
             <EuiPanel className="zoom-controls" paddingSize="none" hasShadow>
               <button
-                title="Zoom In"
+                title={i18n.translate('xpack.securitySolution.resolver.graphControls.zoomIn', {
+                  defaultMessage: 'Zoom In',
+                })}
                 data-test-subj="resolver:graph-controls:zoom-in"
                 onClick={handleZoomInClick}
               >
@@ -444,16 +265,263 @@ export const GraphControls = React.memo(
                 onChange={handleZoomAmountChange}
               />
               <button
-                title="Zoom Out"
+                title={i18n.translate('xpack.securitySolution.resolver.graphControls.zoomOut', {
+                  defaultMessage: 'Zoom Out',
+                })}
                 data-test-subj="resolver:graph-controls:zoom-out"
                 onClick={handleZoomOutClick}
               >
                 <EuiIcon type="minusInCircle" />
               </button>
             </EuiPanel>
-          </div>
+          </StyledGraphControlsColumn>
         </StyledGraphControlsWrapper>
       </StyledGraphControls>
     );
   }
 );
+
+const SchemaInformation = ({
+  closePopover,
+  setActivePopover,
+  isOpen,
+}: {
+  closePopover: () => void;
+  setActivePopover: (value: 'schemaInfo' | null) => void;
+  isOpen: boolean;
+}) => {
+  const colorMap = useColors();
+  const sourceAndSchema = useSelector(selectors.resolverTreeSourceAndSchema);
+  const setAsActivePopover = useCallback(() => setActivePopover('schemaInfo'), [setActivePopover]);
+
+  // This defines the schema that is visualized in the (i) popover
+  const schemaListItems = [
+    {
+      title: i18n.translate('xpack.securitySolution.resolver.graphControls.schemaSource', {
+        defaultMessage: 'source',
+      }),
+      description: <GeneratedText>{sourceAndSchema?.dataSource ?? 'Unknown'}</GeneratedText>,
+    },
+    {
+      title: i18n.translate('xpack.securitySolution.resolver.graphControls.schemaID', {
+        defaultMessage: 'id',
+      }),
+      description: <GeneratedText>{sourceAndSchema?.schema.id ?? 'Unknown'}</GeneratedText>,
+    },
+    {
+      title: i18n.translate('xpack.securitySolution.resolver.graphControls.schemaEdge', {
+        defaultMessage: 'edge',
+      }),
+      description: <GeneratedText>{sourceAndSchema?.schema.parent ?? 'Unknown'}</GeneratedText>,
+    },
+  ];
+
+  const schemaInfoButtonTitle = i18n.translate(
+    'xpack.securitySolution.resolver.graphControls.schemaInfoButtonTitle',
+    {
+      defaultMessage: 'Schema Information',
+    }
+  );
+
+  return (
+    <EuiPopover
+      ownFocus
+      onScroll={closePopover}
+      repositionOnScroll={false}
+      onClick={setAsActivePopover}
+      button={
+        <StyledEuiButtonIcon
+          size="m"
+          title={schemaInfoButtonTitle}
+          aria-label={schemaInfoButtonTitle}
+          iconType="iInCircle"
+          backgroundColor={colorMap.graphControlsBackground}
+          iconColor={colorMap.graphControls}
+          borderColor={colorMap.graphControlsBorderColor}
+        />
+      }
+      isOpen={isOpen}
+      closePopover={closePopover}
+      anchorPosition="leftCenter"
+    >
+      <EuiPopoverTitle style={{ textTransform: 'uppercase' }}>
+        {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaInfoTitle', {
+          defaultMessage: 'process tree',
+        })}
+        <EuiIconTip
+          content={i18n.translate(
+            'xpack.securitySolution.resolver.graphControls.schemaInfoTooltip',
+            {
+              defaultMessage: 'These are the fields used to create the process tree',
+            }
+          )}
+          position="right"
+        />
+      </EuiPopoverTitle>
+      <div style={{ width: '256px' }}>
+        <StyledDescriptionList
+          data-test-subj="resolver:schema-info"
+          type="column"
+          align="left"
+          titleProps={
+            {
+              'data-test-subj': 'resolver:schema-info:title',
+              style: { width: '30%' },
+              // Casting this to allow data attribute
+            } as HTMLAttributes<HTMLElement>
+          }
+          descriptionProps={
+            {
+              'data-test-subj': 'resolver:schema-info:description',
+              style: { width: '70%' },
+            } as HTMLAttributes<HTMLElement>
+          }
+          compressed
+          listItems={schemaListItems}
+        />
+      </div>
+    </EuiPopover>
+  );
+};
+
+const CubeLegend = ({
+  closePopover,
+  setActivePopover,
+  isOpen,
+}: {
+  closePopover: () => void;
+  setActivePopover: (value: 'nodesLegend') => void;
+  isOpen: boolean;
+}) => {
+  // This component defines the cube legend that allows users to identify the meaning of the cubes
+  // Should be updated to be dynamic if and when non process based resolvers are possible
+  const setAsActivePopover = useCallback(() => setActivePopover('nodesLegend'), [setActivePopover]);
+  const colorMap = useColors();
+
+  const legendListItems = [
+    {
+      title: (
+        <CubeForProcess
+          size="2.5em"
+          data-test-subj="resolver:node-detail:title-icon"
+          state="running"
+        />
+      ),
+      description: (
+        <GeneratedText>
+          {i18n.translate('xpack.securitySolution.resolver.graphControls.runningProcessCube', {
+            defaultMessage: 'Running Process',
+          })}
+        </GeneratedText>
+      ),
+    },
+    {
+      title: (
+        <CubeForProcess
+          size="2.5em"
+          data-test-subj="resolver:node-detail:title-icon"
+          state="terminated"
+        />
+      ),
+      description: (
+        <GeneratedText>
+          {i18n.translate('xpack.securitySolution.resolver.graphControls.terminatedProcessCube', {
+            defaultMessage: 'Terminated Process',
+          })}
+        </GeneratedText>
+      ),
+    },
+    {
+      title: (
+        <CubeForProcess
+          size="2.5em"
+          data-test-subj="resolver:node-detail:title-icon"
+          state="loading"
+        />
+      ),
+      description: (
+        <GeneratedText>
+          {i18n.translate('xpack.securitySolution.resolver.graphControls.currentlyLoadingCube', {
+            defaultMessage: 'Loading Process',
+          })}
+        </GeneratedText>
+      ),
+    },
+    {
+      title: (
+        <CubeForProcess
+          size="2.5em"
+          data-test-subj="resolver:node-detail:title-icon"
+          state="error"
+        />
+      ),
+      description: (
+        <GeneratedText>
+          {i18n.translate('xpack.securitySolution.resolver.graphControls.errorCube', {
+            defaultMessage: 'Error',
+          })}
+        </GeneratedText>
+      ),
+    },
+  ];
+
+  const nodesLegendButtonTitle = i18n.translate(
+    'xpack.securitySolution.resolver.graphControls.nodesLegendButtonTitle',
+    {
+      defaultMessage: 'Nodes Legend',
+    }
+  );
+
+  return (
+    <EuiPopover
+      ownFocus
+      button={
+        <StyledEuiButtonIcon
+          size="m"
+          title={nodesLegendButtonTitle}
+          aria-label={nodesLegendButtonTitle}
+          iconType="node"
+          backgroundColor={colorMap.graphControlsBackground}
+          iconColor={colorMap.graphControls}
+          borderColor={colorMap.graphControlsBorderColor}
+        />
+      }
+      onScroll={closePopover}
+      repositionOnScroll={false}
+      onClick={setAsActivePopover}
+      isOpen={isOpen}
+      closePopover={closePopover}
+      anchorPosition="leftCenter"
+    >
+      <EuiPopoverTitle style={{ textTransform: 'uppercase' }}>
+        {i18n.translate('xpack.securitySolution.resolver.graphControls.nodeLegend', {
+          defaultMessage: 'legend',
+        })}
+      </EuiPopoverTitle>
+      <div style={{ width: '212px' }}>
+        <StyledDescriptionList
+          data-test-subj="resolver:graph-controls:legend"
+          type="column"
+          align="left"
+          titleProps={
+            {
+              'data-test-subj': 'resolver:graph-controls:legend:title',
+              className: 'legend-desc-title',
+              style: { width: '20%' },
+              // Casting this to allow data attribute
+            } as HTMLAttributes<HTMLElement>
+          }
+          descriptionProps={
+            {
+              'data-test-subj': 'resolver:graph-controls:legend:description',
+              className: 'legend-description',
+              style: { width: '80%', lineHeight: '2.2em' }, // lineHeight to align center vertically
+            } as HTMLAttributes<HTMLElement>
+          }
+          compressed
+          listItems={legendListItems}
+        />
+      </div>
+    </EuiPopover>
+  );
+};
