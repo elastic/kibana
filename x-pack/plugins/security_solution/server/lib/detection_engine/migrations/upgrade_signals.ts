@@ -5,6 +5,9 @@
  */
 
 import { ElasticsearchClient } from 'src/core/server';
+import { createSignalsUpgradeIndex } from './create_signals_upgrade_index';
+import { getMigrationStatus } from './get_migration_status';
+import { indexNeedsUpgrade, signalsNeedUpgrade } from './helpers';
 
 export const upgradeSignals = async ({
   esClient,
@@ -15,13 +18,16 @@ export const upgradeSignals = async ({
   index: string;
   version: number;
 }): Promise<string> => {
-  const destinationIndexName = `${index}-r${version}`;
-  await esClient.indices.create({ index: destinationIndexName });
+  const upgradeIndex = await createSignalsUpgradeIndex({
+    esClient,
+    index,
+    version,
+  });
 
   // TODO batch size?
   const response = await esClient.reindex<{ task: string }>({
     body: {
-      dest: { index: destinationIndexName },
+      dest: { index: upgradeIndex },
       source: { index },
     },
     refresh: true,

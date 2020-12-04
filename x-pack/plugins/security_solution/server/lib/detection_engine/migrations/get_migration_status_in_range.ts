@@ -19,12 +19,12 @@ export const getMigrationStatusInRange = async ({
   from: string;
 }): Promise<MigrationStatus[]> => {
   const signalsAliases = await getSignalsIndexAliases({ esClient, index });
-  const potentialIndicesToMigrate = signalsAliases
+  const nonWriteIndices = signalsAliases
     .filter((alias) => !alias.isWriteIndex)
     .map((alias) => alias.name);
   const indicesInRange = await getSignalsIndicesInRange({
     esClient,
-    index: potentialIndicesToMigrate,
+    index: nonWriteIndices,
     from,
   });
 

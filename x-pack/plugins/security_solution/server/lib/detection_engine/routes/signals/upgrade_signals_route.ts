@@ -11,6 +11,8 @@ import { DETECTION_ENGINE_UPGRADE_SIGNALS_URL } from '../../../../../common/cons
 import { upgradeSignals } from '../../migrations/upgrade_signals';
 import { buildSiemResponse, transformError } from '../utils';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
+import { getMigrationStatus } from '../../migrations/get_migration_status';
+import { indexNeedsUpgrade, signalsNeedUpgrade } from '../../migrations/helpers';
 
 export const upgradeSignalsRoute = (router: IRouter) => {
   router.post(
@@ -36,16 +38,26 @@ export const upgradeSignalsRoute = (router: IRouter) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
+        const migrationStatuses = await getMigrationStatus({ esClient, index: indices });
+
         // TODO parallelize
         const tasks = await Promise.all(
           indices.map(async (index) => {
-            const taskId = await upgradeSignals({
-              esClient,
-              index,
-              version: SIGNALS_TEMPLATE_VERSION,
-            });
+            const status = migrationStatuses.find(({ name }) => name === index);
+            if (
+              indexNeedsUpgrade({ status, version: SIGNALS_TEMPLATE_VERSION }) ||
+              signalsNeedUpgrade({ status, version: SIGNALS_TEMPLATE_VERSION })
+            ) {
+              const taskId = await upgradeSignals({
+                esClient,
+                index,
+                version: SIGNALS_TEMPLATE_VERSION,
+              });
 
-            return { index, id: taskId };
+              return { index, id: taskId };
+            } else {
+              return { index, id: null };
+            }
           })
         );
 

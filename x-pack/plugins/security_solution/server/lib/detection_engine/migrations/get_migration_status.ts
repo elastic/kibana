@@ -5,11 +5,7 @@
  */
 
 import { ElasticsearchClient } from 'src/core/server';
-
-interface Bucket {
-  key: number;
-  doc_count: number;
-}
+import { Bucket, MigrationStatus } from './types';
 
 interface MigrationStatusSearchResponse {
   aggregations: {
@@ -31,13 +27,6 @@ interface IndexMappingsResponse {
   [indexName: string]: { mappings: { _meta: { version: number } } };
 }
 
-export interface MigrationStatus {
-  name: string;
-  version: number;
-  migration_versions: Bucket[];
-  schema_versions: Bucket[];
-}
-
 export const getMigrationStatus = async ({
   esClient,
   index,
@@ -45,6 +34,10 @@ export const getMigrationStatus = async ({
   esClient: ElasticsearchClient;
   index: string[];
 }): Promise<MigrationStatus[]> => {
+  if (index.length === 0) {
+    return [];
+  }
+
   const { body: indexVersions } = await esClient.indices.getMapping<IndexMappingsResponse>({
     index,
   });

@@ -42,10 +42,9 @@ export const finalizeSignalsUpgradeRoute = (router: IRouter) => {
         }
 
         const { body: task } = await esClient.tasks.get<TaskResponse>({ task_id: taskId });
-        console.log('response', JSON.stringify(task, null, 2));
 
         if (!task.completed) {
-          return response.ok({ body: { task_id: taskId } });
+          return response.ok({ body: { completed: false, task_id: taskId } });
         }
 
         // TODO

@@ -25,6 +25,10 @@ export const getSignalsIndicesInRange = async ({
   index: string[];
   from: string;
 }): Promise<string[]> => {
+  if (index.length === 0) {
+    return [];
+  }
+
   const response = await esClient.search<IndexesResponse>({
     index,
     body: {
