@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SendToBackgroundProvider } from './send_to_background';
+import { services as functionalServices } from '../../functional/services';
+import { SendToBackgroundProvider } from './send_to_background';
+
+export const services = {
+  ...functionalServices,
+  sendToBackground: SendToBackgroundProvider,
+};
