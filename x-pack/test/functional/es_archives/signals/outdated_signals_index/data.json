@@ -5,7 +5,7 @@
     "index": ".siem-signals-default-outdated",
     "source": {
       "@timestamp": "2020-10-20T00:00:00.000Z",
-      "signal": { "_meta": { "schema_version": 3 } }
+      "signal": { "_meta": { "version": 3 } }
     },
     "type": "_doc"
   }

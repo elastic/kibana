@@ -46,7 +46,7 @@ export const migrateSignals = async ({
                 if (ctx._source.signal._meta == null) {
                   ctx._source.signal._meta = [:];
                 }
-                ctx._source.signal._meta.schema_version = params.version;
+                ctx._source.signal._meta.version = params.version;
               `,
         params: {
           version,

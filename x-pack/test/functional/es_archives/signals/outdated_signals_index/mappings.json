@@ -19,10 +19,7 @@
           "properties": {
             "_meta": {
               "properties": {
-                "schema_version": {
-                  "type": "long"
-                },
-                "migration_version": {
+                "version": {
                   "type": "long"
                 }
               }
@@ -35,9 +32,7 @@
       "index": {
         "lifecycle": {
           "indexing_complete": true
-        },
-        "number_of_replicas": "1",
-        "number_of_shards": "1"
+        }
       }
     }
   }

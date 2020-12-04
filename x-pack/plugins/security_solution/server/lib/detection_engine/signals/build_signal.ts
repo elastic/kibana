@@ -75,7 +75,7 @@ export const removeClashes = (doc: BaseSignalHit): BaseSignalHit => {
  */
 export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal => {
   const _meta = {
-    schema_version: SIGNALS_TEMPLATE_VERSION,
+    version: SIGNALS_TEMPLATE_VERSION,
   };
   const removedClashes = docs.map(removeClashes);
   const parents = removedClashes.map(buildParent);

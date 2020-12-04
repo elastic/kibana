@@ -5,10 +5,7 @@
         "properties": {
           "_meta": {
             "properties": {
-              "schema_version": {
-                "type": "long"
-              },
-              "migration_version": {
+              "version": {
                 "type": "long"
               }
             }

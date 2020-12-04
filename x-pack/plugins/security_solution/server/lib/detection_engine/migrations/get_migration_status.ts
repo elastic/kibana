@@ -12,10 +12,7 @@ interface MigrationStatusSearchResponse {
     signals_indices: {
       buckets: Array<{
         key: string;
-        migration_version: {
-          buckets: Bucket[];
-        };
-        schema_version: {
+        signal_versions: {
           buckets: Bucket[];
         };
       }>;
@@ -67,15 +64,9 @@ export const getMigrationStatus = async ({
             field: '_index',
           },
           aggs: {
-            migration_version: {
+            signal_versions: {
               terms: {
-                field: 'signal._meta.migration_version',
-                missing: 0,
-              },
-            },
-            schema_version: {
-              terms: {
-                field: 'signal._meta.schema_version',
+                field: 'signal._meta.version',
                 missing: 0,
               },
             },
@@ -94,8 +85,7 @@ export const getMigrationStatus = async ({
       {
         name: indexName,
         version: indexVersion,
-        migration_versions: bucket.migration_version.buckets,
-        schema_versions: bucket.schema_version.buckets,
+        signal_versions: bucket.signal_versions.buckets,
       },
     ];
   }, []);

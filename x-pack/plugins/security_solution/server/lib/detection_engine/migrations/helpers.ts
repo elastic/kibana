@@ -46,8 +46,8 @@ export const signalsNeedMigration = ({
   version: number;
 }): boolean =>
   !!status &&
-  status.schema_versions.some((schemaVersion) => {
+  status.signal_versions.some((signalVersion) => {
     return (
-      schemaVersion.doc_count > 0 && isOutdated({ current: schemaVersion.key, target: version })
+      signalVersion.doc_count > 0 && isOutdated({ current: signalVersion.key, target: version })
     );
   });

@@ -151,8 +151,7 @@ export interface Ancestor {
 
 export interface Signal {
   _meta?: {
-    migration_version?: number;
-    schema_version: number;
+    version: number;
   };
   rule: RulesSchema;
   // DEPRECATED: use parents instead of parent

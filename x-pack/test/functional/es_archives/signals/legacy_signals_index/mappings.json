@@ -22,9 +22,7 @@
       "index": {
         "lifecycle": {
           "indexing_complete": true
-        },
-        "number_of_replicas": "1",
-        "number_of_shards": "1"
+        }
       }
     }
   }

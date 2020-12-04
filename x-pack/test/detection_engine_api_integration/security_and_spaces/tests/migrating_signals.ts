@@ -93,13 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             name: legacySignalsIndexName,
             version: 1,
-            migration_versions: [
-              {
-                doc_count: 1,
-                key: 0,
-              },
-            ],
-            schema_versions: [
+            signal_versions: [
               {
                 doc_count: 1,
                 key: 0,
@@ -109,13 +103,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             name: outdatedIndexName,
             version: 3,
-            migration_versions: [
-              {
-                doc_count: 1,
-                key: 0,
-              },
-            ],
-            schema_versions: [
+            signal_versions: [
               {
                 doc_count: 1,
                 key: 3,
@@ -193,7 +181,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(migrationResults.hits.hits).length(1);
         const migratedSignal = migrationResults.hits.hits[0]._source.signal;
-        expect(migratedSignal._meta.schema_version).to.equal(SIGNALS_TEMPLATE_VERSION);
+        expect(migratedSignal._meta.version).to.equal(SIGNALS_TEMPLATE_VERSION);
       });
 
       it('returns null tokens for indexes that were specified but not migrated', async () => {
