@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
-import { DETECTION_ENGINE_MIGRATE_SIGNALS_URL } from '../../../../../common/constants';
-import { getMigrationStatusInRange } from '../../migrations/get_migration_status_in_range';
-import { buildSiemResponse, transformError } from '../utils';
+import { schema } from '@kbn/config-schema';
 
-export const getMigrationStatusRoute = (router: IRouter) => {
-  router.get(
+import { IRouter } from 'src/core/server';
+import { DETECTION_ENGINE_UPGRADE_SIGNALS_URL } from '../../../../../common/constants';
+import { upgradeSignals } from '../../migrations/upgrade_signals';
+import { buildSiemResponse, transformError } from '../utils';
+import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
+
+export const upgradeSignalsRoute = (router: IRouter) => {
+  router.post(
     {
-      path: DETECTION_ENGINE_MIGRATE_SIGNALS_URL,
-      validate: false,
+      path: DETECTION_ENGINE_UPGRADE_SIGNALS_URL,
+      // TODO io-ts
+      validate: {
+        body: schema.object({ index: schema.arrayOf(schema.string()) }),
+      },
       options: {
         tags: ['access:securitySolution'],
       },
@@ -21,6 +27,7 @@ export const getMigrationStatusRoute = (router: IRouter) => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const indices = request.body.index;
 
       // TODO permissions check
       try {
@@ -29,11 +36,20 @@ export const getMigrationStatusRoute = (router: IRouter) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const from = 'now-500d'; // TODO make a parameter
-        const signalsIndex = appClient.getSignalsIndex();
-        const indices = await getMigrationStatusInRange({ esClient, from, index: signalsIndex });
+        // TODO parallelize
+        const tasks = await Promise.all(
+          indices.map(async (index) => {
+            const taskId = await upgradeSignals({
+              esClient,
+              index,
+              version: SIGNALS_TEMPLATE_VERSION,
+            });
 
-        return response.ok({ body: { indices } });
+            return { index, id: taskId };
+          })
+        );
+
+        return response.ok({ body: { tasks } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

@@ -4,16 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
+import { ReindexResponse } from 'elasticsearch';
+
 import { IRouter } from 'src/core/server';
-import { DETECTION_ENGINE_MIGRATE_SIGNALS_URL } from '../../../../../common/constants';
-import { getMigrationStatusInRange } from '../../migrations/get_migration_status_in_range';
+import { DETECTION_ENGINE_FINALIZE_SIGNALS_UPGRADE_URL } from '../../../../../common/constants';
 import { buildSiemResponse, transformError } from '../utils';
 
-export const getMigrationStatusRoute = (router: IRouter) => {
-  router.get(
+interface TaskResponse {
+  completed: boolean;
+  response?: ReindexResponse;
+  task: unknown;
+}
+
+export const finalizeSignalsUpgradeRoute = (router: IRouter) => {
+  router.post(
     {
-      path: DETECTION_ENGINE_MIGRATE_SIGNALS_URL,
-      validate: false,
+      path: DETECTION_ENGINE_FINALIZE_SIGNALS_UPGRADE_URL,
+      // TODO io-ts
+      validate: {
+        body: schema.object({ task_id: schema.string() }),
+      },
       options: {
         tags: ['access:securitySolution'],
       },
@@ -21,6 +32,7 @@ export const getMigrationStatusRoute = (router: IRouter) => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const { task_id: taskId } = request.body;
 
       // TODO permissions check
       try {
@@ -29,11 +41,19 @@ export const getMigrationStatusRoute = (router: IRouter) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const from = 'now-500d'; // TODO make a parameter
-        const signalsIndex = appClient.getSignalsIndex();
-        const indices = await getMigrationStatusInRange({ esClient, from, index: signalsIndex });
+        const { body: task } = await esClient.tasks.get<TaskResponse>({ task_id: taskId });
+        console.log('response', JSON.stringify(task, null, 2));
 
-        return response.ok({ body: { indices } });
+        if (!task.completed) {
+          return response.ok({ body: { task_id: taskId } });
+        }
+
+        // TODO
+        // verify docs match
+        // update_by_query for signal.schema_version
+        // update aliases
+
+        return response.ok({ body: {} });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

@@ -39,6 +39,8 @@ import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/install_prepacked_timelines_route';
 import { getTimelineRoute } from '../lib/timeline/routes/get_timeline_route';
+import { upgradeSignalsRoute } from '../lib/detection_engine/routes/signals/upgrade_signals_route';
+import { finalizeSignalsUpgradeRoute } from '../lib/detection_engine/routes/signals/finalize_signals_upgrade_route';
 
 export const initRoutes = (
   router: IRouter,
@@ -82,6 +84,8 @@ export const initRoutes = (
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
   getMigrationStatusRoute(router);
+  upgradeSignalsRoute(router);
+  finalizeSignalsUpgradeRoute(router);
   setSignalsStatusRoute(router);
   querySignalsRoute(router);
 
