@@ -10803,7 +10803,6 @@
     "xpack.lens.shared.nestedLegendLabel": "嵌套",
     "xpack.lens.sugegstion.refreshSuggestionLabel": "刷新",
     "xpack.lens.suggestion.refreshSuggestionTooltip": "基于选定可视化刷新建议。",
-    "xpack.lens.suggestions.currentVisLabel": "当前",
     "xpack.lens.visTypeAlias.title": "Lens 可视化",
     "xpack.lens.visTypeAlias.type": "Lens",
     "xpack.lens.xyChart.addLayer": "添加图层",
