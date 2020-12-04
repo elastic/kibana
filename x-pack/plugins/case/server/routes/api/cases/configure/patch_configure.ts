@@ -57,18 +57,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
         const { username, full_name, email } = await caseService.getUser({ request, response });
 
         const updateDate = new Date().toISOString();
-        const patch = await caseConfigureService.patch({
-          client,
-          caseConfigureId: myCaseConfigure.saved_objects[0].id,
-          updatedAttributes: {
-            ...queryWithoutVersion,
-            ...(connector != null
-              ? { connector: transformCaseConnectorToEsConnector(connector) }
-              : {}),
-            updated_at: updateDate,
-            updated_by: { email, full_name, username },
-          },
-        });
+
         let mappings: ConnectorMappingsAttributes[] = [];
         if (connector != null) {
           if (!context.case) {
@@ -86,7 +75,18 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
             connectorType: connector.type,
           });
         }
-
+        const patch = await caseConfigureService.patch({
+          client,
+          caseConfigureId: myCaseConfigure.saved_objects[0].id,
+          updatedAttributes: {
+            ...queryWithoutVersion,
+            ...(connector != null
+              ? { connector: transformCaseConnectorToEsConnector(connector) }
+              : {}),
+            updated_at: updateDate,
+            updated_by: { email, full_name, username },
+          },
+        });
         return response.ok({
           body: CaseConfigureResponseRt.encode({
             ...myCaseConfigure.saved_objects[0].attributes,

@@ -301,6 +301,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
           }
         } catch (error) {
           if (!didCancel) {
+            setConnector(state.currentConfiguration.connector);
             setPersistLoading(false);
             errorToToaster({
               title: i18n.ERROR_TITLE,
@@ -316,8 +317,16 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
         abortCtrl.abort();
       };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state.version]
+    [
+      dispatchToaster,
+      setClosureType,
+      setConnector,
+      setCurrentConfiguration,
+      setMappings,
+      setPersistLoading,
+      setVersion,
+      state,
+    ]
   );
 
   useEffect(() => {

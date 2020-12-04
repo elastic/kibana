@@ -58,6 +58,12 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
         const { email, full_name, username } = await caseService.getUser({ request, response });
 
         const creationDate = new Date().toISOString();
+        const mappings = await caseClient.getMappings({
+          actionsClient,
+          caseClient,
+          connectorId: query.connector.id,
+          connectorType: query.connector.type,
+        });
         const post = await caseConfigureService.post({
           client,
           attributes: {
@@ -68,12 +74,6 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
             updated_at: null,
             updated_by: null,
           },
-        });
-        const mappings = await caseClient.getMappings({
-          actionsClient,
-          caseClient,
-          connectorId: query.connector.id,
-          connectorType: query.connector.type,
         });
 
         return response.ok({
