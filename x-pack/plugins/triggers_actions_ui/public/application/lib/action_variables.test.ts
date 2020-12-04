@@ -231,7 +231,7 @@ describe('transformActionVariables', () => {
     `);
   });
 
-  test('should return useWithTripleBracesInTemplates with action variables if specified', async () => {
+  test('should return useWithTripleBracesInTemplates with action variables if specified', () => {
     const alertType = getAlertType({
       context: [
         { name: 'fooC', description: 'fooC-description', useWithTripleBracesInTemplates: true },

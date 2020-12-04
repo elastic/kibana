@@ -25,7 +25,7 @@ describe('TextAreaWithMessageVariables', () => {
 
   beforeEach(() => jest.resetAllMocks());
 
-  test('renders variables with double braces by default', async () => {
+  test('renders variables with double braces by default', () => {
     const wrapper = mountWithIntl(<TextAreaWithMessageVariables {...props} />);
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
