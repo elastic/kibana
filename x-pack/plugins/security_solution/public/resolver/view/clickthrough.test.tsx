@@ -212,121 +212,39 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
 });
 
 describe('Resolver, when using a generated tree with 20 generations, 4 children per child, and 10 ancestors', () => {
-  beforeEach(async () => {
-    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = generateTreeWithDAL({
-      ancestors: 3,
-      children: 3,
-      generations: 4,
-    });
-    // save a reference to the `_id` supported by the mock data layer
-    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
-    // create a resolver simulator, using the data access layer and an arbitrary component instance ID
-    simulator = new Simulator({
-      databaseDocumentID,
-      dataAccessLayer,
-      resolverComponentInstanceID,
-      indices: [],
-    });
-  });
-
-  describe('when navigating to a node that is not loaded and then back to the process node list', () => {
-    beforeEach(async () => {
-      // If the camera has not moved it will return a node with ID 2kt059pl3i, this is the first node with the state
-      // loading that is outside of the initial loaded view
-      const getLoadingNodeInList = async () => {
-        return (
-          await simulator.resolveWrapper(() =>
-            simulator.testSubject('resolver:node-list:node-link')
-          )
+  const findAndClickFirstLoadingNodeInPanel = async (graphSimulator: Simulator) => {
+    // If the camera has not moved it will return a node with ID 2kt059pl3i, this is the first node with the state
+    // loading that is outside of the initial loaded view
+    const getLoadingNodeInList = async () => {
+      return (
+        await graphSimulator.resolveWrapper(() =>
+          graphSimulator.testSubject('resolver:node-list:node-link')
         )
-          ?.findWhere((wrapper) => wrapper.prop('data-test-node-state') === 'loading')
-          ?.first();
-      };
+      )
+        ?.findWhere((wrapper) => wrapper.prop('data-test-node-state') === 'loading')
+        ?.first();
+    };
 
-      const loadingNode = await getLoadingNodeInList();
+    const loadingNode = await getLoadingNodeInList();
 
-      if (!loadingNode) {
-        throw new Error("Unable to find a node without it's node data");
-      }
-      loadingNode.simulate('click', { button: 0 });
-      // the time here is equivalent to the animation duration in the camera reducer
-      simulator.runAnimationFramesTimeFromNow(1000);
+    if (!loadingNode) {
+      throw new Error("Unable to find a node without it's node data");
+    }
+    loadingNode.simulate('click', { button: 0 });
+    // the time here is equivalent to the animation duration in the camera reducer
+    graphSimulator.runAnimationFramesTimeFromNow(1000);
+  };
 
-      await simulator.resolveWrapper(() => simulator.selectedProcessNode('2kt059pl3i'));
-    });
+  const firstLoadingNodeInList: (graphSimulator: Simulator) => Promise<ReactWrapper | undefined> = (
+    graphSimulator: Simulator
+  ) =>
+    graphSimulator.resolveWrapper(() =>
+      graphSimulator.selectedProcessNode(firstLoadingNodeInListID)
+    );
 
-    it('should mark the node as terminated in the node list', async () => {
-      const getNodeInPanelList = async () => {
-        return (
-          await simulator.resolveWrapper(() =>
-            simulator.testSubject('resolver:node-list:node-link')
-          )
-        )
-          ?.findWhere((wrapper) => wrapper.prop('data-test-node-id') === '2kt059pl3i')
-          ?.first();
-      };
-
-      const breadcrumbs = await simulator.resolve(
-        'resolver:node-detail:breadcrumbs:node-list-link'
-      );
-
-      // navigate back to the node list in the panel
-      if (breadcrumbs) {
-        breadcrumbs.simulate('click', { button: 0 });
-      }
-
-      // check that the panel displays the node as terminated as well
-      await expect(
-        simulator.map(async () => ({
-          nodeState: (await getNodeInPanelList())?.prop('data-test-node-state'),
-        }))
-      ).toYieldEqualTo({
-        nodeState: 'terminated',
-      });
-    });
-  });
-
-  describe('when clicking on a node in the panel whose node data has not yet been loaded', () => {
-    beforeEach(async () => {
-      // If the camera has not moved it will return a node with ID 2kt059pl3i, this is the first node with the state
-      // loading that is outside of the initial loaded view
-      const getLoadingNodeInList = async () => {
-        return (
-          await simulator.resolveWrapper(() =>
-            simulator.testSubject('resolver:node-list:node-link')
-          )
-        )
-          ?.findWhere((wrapper) => wrapper.prop('data-test-node-state') === 'loading')
-          ?.first();
-      };
-
-      const loadingNode = await getLoadingNodeInList();
-
-      if (!loadingNode) {
-        throw new Error("Unable to find a node without it's node data");
-      }
-      loadingNode.simulate('click', { button: 0 });
-      // the time here is equivalent to the animation duration in the camera reducer
-      simulator.runAnimationFramesTimeFromNow(1000);
-    });
-
-    it('should load the node data', async () => {
-      const node: () => Promise<ReactWrapper | undefined> = () =>
-        simulator.resolveWrapper(() => simulator.selectedProcessNode('2kt059pl3i'));
-
-      await expect(
-        simulator.map(async () => ({
-          nodeState: (await node())?.prop('data-test-resolver-node-state'),
-        }))
-      ).toYieldEqualTo({
-        nodeState: 'terminated',
-      });
-    });
-  });
-});
-
-describe('Resolver, when using a generated tree with 20 generations, 4 children per child, and 10 ancestors, that returns an error state for node data', () => {
+  const firstLoadingNodeInListID = '2kt059pl3i';
   let generatorDAL: DataAccessLayer;
+
   beforeEach(async () => {
     const { metadata: dataAccessLayerMetadata, dataAccessLayer } = generateTreeWithDAL({
       ancestors: 3,
@@ -339,9 +257,12 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
     databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
   });
 
-  describe('when clicking on a node in the panel whose node data has not yet been loaded', () => {
-    let throwError = true;
+  describe('when clicking on a node in the panel whose node data has not yet been loaded and using a data access layer that returns an error for the clicked node', () => {
+    let throwError: boolean;
     beforeEach(async () => {
+      // all the tests in this describe block will receive an error when loading data for the firstLoadingNodeInListID
+      // unless the tests explicitly sets this flag to false
+      throwError = true;
       const nodeDataError = ({
         ids,
         timeRange,
@@ -353,14 +274,17 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
         indexPatterns: string[];
         limit: number;
       }): Promise<SafeResolverEvent[]> => {
-        if (throwError && ids.includes('2kt059pl3i')) {
-          throw new Error('fake error');
+        if (throwError && ids.includes(firstLoadingNodeInListID)) {
+          throw new Error(
+            'simulated error for retrieving first loading node in the process node list'
+          );
         }
 
         return generatorDAL.nodeData({ ids, timeRange, indexPatterns, limit });
       };
 
-      // create a resolver simulator, using the data access layer and an arbitrary component instance ID
+      // create a simulator using most of the generator's data access layer, but let's use our nodeDataError
+      // so we can simulator an error when loading data
       simulator = new Simulator({
         databaseDocumentID,
         dataAccessLayer: { ...generatorDAL, nodeData: nodeDataError },
@@ -368,66 +292,114 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
         indices: [],
       });
 
-      // If the camera has not moved it will return a node with ID 2kt059pl3i, this is the first node with the state
-      // loading that is outside of the initial loaded view
-      const getLoadingNodeInList = async () => {
-        return (
-          await simulator.resolveWrapper(() =>
-            simulator.testSubject('resolver:node-list:node-link')
-          )
-        )
-          ?.findWhere((wrapper) => wrapper.prop('data-test-node-state') === 'loading')
-          ?.first();
-      };
-
-      const loadingNode = await getLoadingNodeInList();
-
-      if (!loadingNode) {
-        throw new Error("Unable to find a node without it's node data");
-      }
-      loadingNode.simulate('click', { button: 0 });
-      // the time here is equivalent to the animation duration in the camera reducer
-      simulator.runAnimationFramesTimeFromNow(1000);
+      await findAndClickFirstLoadingNodeInPanel(simulator);
     });
 
     it('should receive an error while loading the node data', async () => {
       throwError = true;
-      const node: () => Promise<ReactWrapper | undefined> = () =>
-        simulator.resolveWrapper(() => simulator.selectedProcessNode('2kt059pl3i'));
 
       await expect(
         simulator.map(async () => ({
-          nodeState: (await node())?.prop('data-test-resolver-node-state'),
+          nodeState: (await firstLoadingNodeInList(simulator))?.prop(
+            'data-test-resolver-node-state'
+          ),
         }))
       ).toYieldEqualTo({
         nodeState: 'error',
       });
     });
 
-    it('should load data after receiving an error', async () => {
-      throwError = true;
-      // ensure that the node is in view
-      const node: () => Promise<ReactWrapper | undefined> = () =>
-        simulator.resolveWrapper(() => simulator.selectedProcessNode('2kt059pl3i'));
+    describe('when completing the navigation to the node that is in an error state and clicking the reload data button', () => {
+      beforeEach(async () => {
+        throwError = true;
+        // ensure that the node is in view
+        await firstLoadingNodeInList(simulator);
+        // at this point the node's state should be error
 
-      // at this point the node's state should be error
+        // don't throw an error now, so we can test that the reload button actually loads the data correctly
+        throwError = false;
+        const firstLoadingNodeInListButton = await simulator.resolveWrapper(() =>
+          simulator.processNodePrimaryButton(firstLoadingNodeInListID)
+        );
+        // Click the primary button to reload the node's data
+        if (firstLoadingNodeInListButton) {
+          firstLoadingNodeInListButton.simulate('click', { button: 0 });
+        }
+      });
 
-      throwError = false;
-      const button = await simulator.resolveWrapper(() =>
-        simulator.processNodePrimaryButton('2kt059pl3i')
-      );
-      // Click the primary button to reload the node's data
-      if (button) {
-        button.simulate('click', { button: 0 });
-      }
+      it('should load data after receiving an error', async () => {
+        // we should receive the node's data now so we'll know that it is terminated
+        await expect(
+          simulator.map(async () => ({
+            nodeState: (await firstLoadingNodeInList(simulator))?.prop(
+              'data-test-resolver-node-state'
+            ),
+          }))
+        ).toYieldEqualTo({
+          nodeState: 'terminated',
+        });
+      });
+    });
+  });
 
-      // we should receive the node's data now so we'll know that it is terminated
+  describe('when clicking on a node in the process panel that is not loaded', () => {
+    beforeEach(async () => {
+      simulator = new Simulator({
+        databaseDocumentID,
+        dataAccessLayer: generatorDAL,
+        resolverComponentInstanceID,
+        indices: [],
+      });
+
+      await findAndClickFirstLoadingNodeInPanel(simulator);
+    });
+
+    it('should load the node data for the process and mark the process node as terminated in the graph', async () => {
       await expect(
         simulator.map(async () => ({
-          nodeState: (await node())?.prop('data-test-resolver-node-state'),
+          nodeState: (await firstLoadingNodeInList(simulator))?.prop(
+            'data-test-resolver-node-state'
+          ),
         }))
       ).toYieldEqualTo({
         nodeState: 'terminated',
+      });
+    });
+
+    describe('when finishing the navigation to the node that is not loaded and navigating back to the process list in the panel', () => {
+      beforeEach(async () => {
+        // make sure the node is in view
+        await firstLoadingNodeInList(simulator);
+
+        const breadcrumbs = await simulator.resolve(
+          'resolver:node-detail:breadcrumbs:node-list-link'
+        );
+
+        // navigate back to the node list in the panel
+        if (breadcrumbs) {
+          breadcrumbs.simulate('click', { button: 0 });
+        }
+      });
+
+      it('should load the node data and mark it as terminated in the node list', async () => {
+        const getNodeInPanelList = async () => {
+          return (
+            await simulator.resolveWrapper(() =>
+              simulator.testSubject('resolver:node-list:node-link')
+            )
+          )
+            ?.findWhere((wrapper) => wrapper.prop('data-test-node-id') === firstLoadingNodeInListID)
+            ?.first();
+        };
+
+        // check that the panel displays the node as terminated as well
+        await expect(
+          simulator.map(async () => ({
+            nodeState: (await getNodeInPanelList())?.prop('data-test-node-state'),
+          }))
+        ).toYieldEqualTo({
+          nodeState: 'terminated',
+        });
       });
     });
   });

@@ -4,34 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Tree, TreeOptions } from '../../../../common/endpoint/generate_data';
-import { DataAccessLayer, TimeRange } from '../../types';
+import { TreeOptions } from '../../../../common/endpoint/generate_data';
+import { DataAccessLayer, GeneratedTreeMetadata, TimeRange } from '../../types';
 
 import {
   ResolverRelatedEvents,
   ResolverEntityIndex,
   SafeResolverEvent,
   ResolverNode,
-  NewResolverTree,
   ResolverSchema,
 } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { generateTree } from '../../mocks/generator';
 
 /**
- * Return structure for the mock DAL returned by this file.
+ * This file can be used to create a mock data access layer that leverages a generated tree using the
+ * EndpointDocGenerator class. The advantage of using this mock is that it gives us a lot of control how we want the
+ * tree to look (ancestors, descendants, generations, related events, etc).
+ *
+ * The data access layer is mainly useful for testing the nodeData state within resolver.
  */
-export interface Metadata {
-  /**
-   * The `_id` of the document being analyzed.
-   */
-  databaseDocumentID: string;
-  genTree: Tree;
-  tree: NewResolverTree;
-}
 
 /**
- * Creates a DAL based on a resolver generator tree.
+ * Creates a Data Access Layer based on a resolver generator tree.
  *
  * @param treeOptions options for generating a resolver tree, these are passed to the resolver generator
  * @param dalOverrides a DAL to override the functions in this mock, this allows extra functionality to be specified in the tests
@@ -41,14 +36,20 @@ export function generateTreeWithDAL(
   dalOverrides?: DataAccessLayer
 ): {
   dataAccessLayer: DataAccessLayer;
-  metadata: Metadata;
+  metadata: GeneratedTreeMetadata;
 } {
-  const { allNodes, genTree, tree } = generateTree(treeOptions);
+  /**
+   * The generateTree function uses a static seed for the random number generated used internally by the
+   * function. This means that the generator will return the same generated tree (ids, names, structure, etc) each
+   * time the doc generate is used in tests. This way we can rely on the generate returning consistent responses
+   * for our tests. The results won't be unpredictable and they will not result in flaky tests.
+   */
+  const { allNodes, generatedTree, formattedTree } = generateTree(treeOptions);
 
-  const metadata: Metadata = {
+  const metadata: GeneratedTreeMetadata = {
     databaseDocumentID: '_id',
-    genTree,
-    tree,
+    generatedTree,
+    formattedTree,
   };
 
   const defaultDAL: DataAccessLayer = {
@@ -166,7 +167,7 @@ export function generateTreeWithDAL(
       ancestors: number;
       descendants: number;
     }): Promise<ResolverNode[]> {
-      return tree.nodes;
+      return formattedTree.nodes;
     },
 
     /**
@@ -182,7 +183,7 @@ export function generateTreeWithDAL(
             ancestry: 'process.Ext.ancestry',
             name: 'process.name',
           },
-          id: genTree.origin.id,
+          id: generatedTree.origin.id,
         },
       ];
     },

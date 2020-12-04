@@ -31,7 +31,7 @@ export function CurrentRelatedEventFetcher(
     const state = api.getState();
 
     const newParams = selectors.panelViewAndParameters(state);
-    const dbParams = selectors.treeParametersToFetch(state);
+    const indices = selectors.treeParameterIndices(state);
 
     const oldParams = last;
     last = newParams;
@@ -64,7 +64,7 @@ export function CurrentRelatedEventFetcher(
           eventCategory: [currentEventCategory],
           eventTimestamp: currentEventTimestamp,
           eventID: currentEventID,
-          indexPatterns: dbParams?.indices ?? [],
+          indexPatterns: indices,
           timeRange,
         });
       } catch (error) {

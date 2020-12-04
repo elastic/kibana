@@ -7,6 +7,7 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiInMemoryTable, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../../shared_imports';
@@ -54,7 +55,8 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
               {...reactRouterNavigate(
                 history,
                 getTemplateDetailsLink(name, Boolean(item._kbnMeta.isLegacy)),
-                () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
+                () =>
+                  uiMetricService.trackMetric(METRIC_TYPE.CLICK, UIM_TEMPLATE_SHOW_DETAILS_CLICK)
               )}
               data-test-subj="templateDetailsLink"
             >

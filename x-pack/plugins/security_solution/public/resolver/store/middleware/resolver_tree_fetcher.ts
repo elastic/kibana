@@ -66,7 +66,7 @@ export function ResolverTreeFetcher(
       try {
         const matchingEntities: ResolverEntityIndex = await dataAccessLayer.entities({
           _id: databaseParameters.databaseDocumentID,
-          indices: databaseParameters.indices ?? [],
+          indices: databaseParameters.indices,
           signal: lastRequestAbortController.signal,
         });
         if (matchingEntities.length < 1) {
@@ -83,7 +83,7 @@ export function ResolverTreeFetcher(
           dataId: entityIDToFetch,
           schema: dataSourceSchema,
           timeRange,
-          indices: databaseParameters.indices ?? [],
+          indices: databaseParameters.indices,
           ancestors: numberOfAncestors,
           descendants: numberOfDescendants,
         });

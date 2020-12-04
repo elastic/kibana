@@ -17,7 +17,6 @@ import {
   VisibleEntites,
   TreeFetcherParameters,
   IsometricTaxiLayout,
-  IDToNodeInfo,
   NodeData,
   NodeDataStatus,
 } from '../../types';
@@ -113,7 +112,7 @@ export const originID: (state: DataState) => string | undefined = createSelector
  * Returns a data structure for accessing events for specific nodes in a graph. For Endpoint graphs these nodes will be
  * process lifecycle events.
  */
-const nodeData = (state: DataState): IDToNodeInfo | undefined => {
+const nodeData = (state: DataState): Map<string, NodeData> | undefined => {
   return state.nodeData;
 };
 
@@ -297,6 +296,13 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
     return null;
   }
 }
+
+/**
+ * The indices to use for the requests with the backend.
+ */
+export const treeParamterIndices = createSelector(treeParametersToFetch, (parameters) => {
+  return parameters?.indices ?? [];
+});
 
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
