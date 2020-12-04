@@ -130,7 +130,7 @@ const ArrayValue = (props: MoreProps) => {
   return (
     <>
       {!isExpanded && (
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize={'xs'} responsive={false} alignItems={'baseline'} wrap={true}>
           <EuiFlexItem grow={false}>
             {first(values)}
             {' ... '}
@@ -155,7 +155,7 @@ const ArrayValue = (props: MoreProps) => {
           ))}
           <EuiLink onClick={collapse}>
             {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
-              defaultMessage: 'See less',
+              defaultMessage: 'Show less',
             })}
           </EuiLink>
         </div>
