@@ -17,6 +17,7 @@ import { TaskStatus } from '../../../../task_manager/server';
 import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { RecoveredActionGroup } from '../../../common';
 
 jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -751,6 +752,7 @@ describe('create()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
       validate: {
         params: schema.object({
           param1: schema.string(),

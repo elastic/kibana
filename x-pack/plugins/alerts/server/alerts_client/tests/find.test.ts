@@ -17,6 +17,7 @@ import { ActionsAuthorization } from '../../../../actions/server';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { RecoveredActionGroup } from '../../../common';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -55,6 +56,7 @@ describe('find()', () => {
   const listedTypes = new Set([
     {
       actionGroups: [],
+      recoveryActionGroup: RecoveredActionGroup,
       actionVariables: undefined,
       defaultActionGroupId: 'default',
       id: 'myType',
@@ -111,6 +113,7 @@ describe('find()', () => {
           id: 'myType',
           name: 'Test',
           actionGroups: [{ id: 'default', name: 'Default' }],
+          recoveryActionGroup: RecoveredActionGroup,
           defaultActionGroupId: 'default',
           producer: 'alerts',
           authorizedConsumers: {
