@@ -46,7 +46,7 @@ export const toExpressionAst = (vis: Vis<TagCloudVisParams>, params: BuildPipeli
     ]),
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: false,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
+    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
   });
 
   const schemas = getVisSchemas(vis, params);

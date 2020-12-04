@@ -29,7 +29,6 @@ import { BasicVislibParams } from './types';
 
 /**
  * Get esaggs expressions function
- * TODO: replace this with vis.data.aggs!.toExpressionAst();
  * @param vis
  */
 export function getEsaggsFn(vis: Vis<PieVisParams> | Vis<BasicVislibParams>) {
@@ -41,6 +40,6 @@ export function getEsaggsFn(vis: Vis<PieVisParams> | Vis<BasicVislibParams>) {
     ]),
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: false,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
+    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
   });
 }

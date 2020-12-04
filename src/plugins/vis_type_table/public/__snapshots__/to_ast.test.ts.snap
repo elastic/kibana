@@ -5,9 +5,7 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "aggConfigs": Array [
-          "[]",
-        ],
+        "aggs": Array [],
         "index": Array [
           Object {
             "chain": Array [
@@ -53,9 +51,7 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "aggConfigs": Array [
-          "[]",
-        ],
+        "aggs": Array [],
         "index": Array [
           Object {
             "chain": Array [

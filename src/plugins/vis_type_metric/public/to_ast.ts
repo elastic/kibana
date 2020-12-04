@@ -38,7 +38,6 @@ const prepareDimension = (params: SchemaConfig) => {
 };
 
 export const toExpressionAst = (vis: Vis, params: any) => {
-  // soon this becomes: const esaggs = vis.data.aggs!.toExpressionAst();
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: buildExpression([
       buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
@@ -47,7 +46,7 @@ export const toExpressionAst = (vis: Vis, params: any) => {
     ]),
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: vis.params.showPartialRows || false,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
+    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
   });
 
   const schemas = getVisSchemas(vis, params);
