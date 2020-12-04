@@ -138,7 +138,7 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
 function parseAndVerifyReadme(paths: string[], pkgName: string, pkgVersion: string): string | null {
   const readmeRelPath = `/docs/README.md`;
   const readmePath = `${pkgName}-${pkgVersion}${readmeRelPath}`;
-  return paths.includes(readmePath) ? `/package/${pkgName}/${pkgVersion}/docs/README.md` : null;
+  return paths.includes(readmePath) ? `/package/${pkgName}/${pkgVersion}${readmeRelPath}` : null;
 }
 function parseAndVerifyDataStreams(
   paths: string[],
