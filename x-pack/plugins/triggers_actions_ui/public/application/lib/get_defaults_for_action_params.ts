@@ -8,21 +8,19 @@ import { AlertActionParam } from '../../../../alerts/common';
 import { EventActionOptions } from '../components/builtin_action_types/types';
 import { AlertProvidedActionVariables } from './action_variables';
 
-export type DefaultActionParamsGetter = ReturnType<typeof getDefaultsForActionParams>;
-export type DefaultActionParams = ReturnType<DefaultActionParamsGetter>;
+export type DefaultActionParams = Record<string, AlertActionParam> | undefined;
 export const getDefaultsForActionParams = (
-  isRecoveryActionGroup: (actionGroupId: string) => boolean
-) => (
   actionTypeId: string,
-  actionGroupId: string
-): Record<string, AlertActionParam> | undefined => {
+  actionGroupId: string,
+  isRecoveryActionGroup: boolean
+): DefaultActionParams => {
   switch (actionTypeId) {
     case '.pagerduty':
       const pagerDutyDefaults = {
         dedupKey: `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`,
         eventAction: EventActionOptions.TRIGGER,
       };
-      if (isRecoveryActionGroup(actionGroupId)) {
+      if (isRecoveryActionGroup) {
         pagerDutyDefaults.eventAction = EventActionOptions.RESOLVE;
       }
       return pagerDutyDefaults;
