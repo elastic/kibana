@@ -28,6 +28,7 @@ interface GetSignalsIndices {
   from: string;
 }
 
+// TODO: exclude write index ?
 export const getSignalsIndices = async ({
   esClient,
   from,
