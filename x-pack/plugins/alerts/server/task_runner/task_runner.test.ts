@@ -26,13 +26,14 @@ import { alertsMock, alertsClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { Alert, ResolvedActionGroup } from '../../common';
+import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
 const alertType = {
   id: 'test',
   name: 'My test alert',
-  actionGroups: [{ id: 'default', name: 'Default' }, ResolvedActionGroup],
+  actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
   defaultActionGroupId: 'default',
+  recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
 };
@@ -114,7 +115,7 @@ describe('Task Runner', () => {
         },
       },
       {
-        group: ResolvedActionGroup.id,
+        group: RecoveredActionGroup.id,
         id: '2',
         actionTypeId: 'action',
         params: {
@@ -517,7 +518,7 @@ describe('Task Runner', () => {
     `);
   });
 
-  test('fire resolved actions for execution for the alertInstances which is in the resolved state', async () => {
+  test('fire recovered actions for execution for the alertInstances which is in the recovered state', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
 
@@ -541,6 +542,109 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
+      Object {
+        "1": Object {
+          "meta": Object {
+            "lastScheduledActions": Object {
+              "date": 1970-01-01T00:00:00.000Z,
+              "group": "default",
+            },
+          },
+          "state": Object {
+            "bar": false,
+          },
+        },
+      }
+    `);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
+    expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "apiKey": "MTIzOmFiYw==",
+          "id": "2",
+          "params": Object {
+            "isResolved": true,
+          },
+          "source": Object {
+            "source": Object {
+              "id": "1",
+              "type": "alert",
+            },
+            "type": "SAVED_OBJECT",
+          },
+          "spaceId": undefined,
+        },
+      ]
+    `);
+  });
+
+  test('fire actions under a custom recovery group when specified on an alert type for alertInstances which are in the recovered state', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+
+    const recoveryActionGroup = {
+      id: 'customRecovered',
+      name: 'Custom Recovered',
+    };
+    const alertTypeWithCustomRecovery = {
+      ...alertType,
+      recoveryActionGroup,
+      actionGroups: [{ id: 'default', name: 'Default' }, recoveryActionGroup],
+    };
+
+    alertTypeWithCustomRecovery.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertTypeWithCustomRecovery,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': { meta: {}, state: { bar: false } },
+            '2': { meta: {}, state: { bar: false } },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: 'action',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: recoveryActionGroup.id,
+          id: '2',
+          actionTypeId: 'action',
+          params: {
+            isResolved: true,
+          },
+        },
+      ],
+    });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
@@ -650,7 +754,7 @@ describe('Task Runner', () => {
         Array [
           Object {
             "event": Object {
-              "action": "resolved-instance",
+              "action": "recovered-instance",
             },
             "kibana": Object {
               "alerting": Object {
@@ -666,7 +770,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' resolved instance: '2'",
+            "message": "test:1: 'alert-name' instance '2' has recovered",
           },
         ],
         Array [

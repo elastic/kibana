@@ -64,6 +64,5 @@ export interface TimeseriesVisProps {
   ) => void;
   uiState: PersistedState;
   visData: TimeseriesVisData;
-  dateFormat: string;
   getConfig: IUiSettingsClient['get'];
 }

@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResolvedActionGroup } from '../../../../alerts/common';
+import { RecoveredActionGroup } from '../../../../alerts/common';
 import { AlertProvidedActionVariables } from './action_variables';
 import { getDefaultsForActionParams } from './get_defaults_for_action_params';
 
 describe('getDefaultsForActionParams', () => {
   test('pagerduty defaults', async () => {
-    expect(getDefaultsForActionParams('.pagerduty', 'test')).toEqual({
+    expect(getDefaultsForActionParams('.pagerduty', 'test', false)).toEqual({
       dedupKey: `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`,
       eventAction: 'trigger',
     });
   });
 
-  test('pagerduty defaults for resolved action group', async () => {
-    expect(getDefaultsForActionParams('.pagerduty', ResolvedActionGroup.id)).toEqual({
+  test('pagerduty defaults for recovered action group', async () => {
+    expect(getDefaultsForActionParams('.pagerduty', RecoveredActionGroup.id, true)).toEqual({
       dedupKey: `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`,
       eventAction: 'resolve',
     });

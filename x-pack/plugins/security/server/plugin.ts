@@ -141,6 +141,12 @@ export class Plugin {
       .pipe(first())
       .toPromise();
 
+    // A subset of `start` services we need during `setup`.
+    const startServicesPromise = core.getStartServices().then(([coreServices, depsServices]) => ({
+      elasticsearch: coreServices.elasticsearch,
+      features: depsServices.features,
+    }));
+
     this.securityLicenseService = new SecurityLicenseService();
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
@@ -200,7 +206,8 @@ export class Plugin {
     const authz = this.authorizationService.setup({
       http: core.http,
       capabilities: core.capabilities,
-      clusterClient,
+      getClusterClient: () =>
+        startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       license,
       loggers: this.initializerContext.logger,
       kibanaIndexName: legacyConfig.kibana.index,
@@ -230,16 +237,13 @@ export class Plugin {
       basePath: core.http.basePath,
       httpResources: core.http.resources,
       logger: this.initializerContext.logger.get('routes'),
-      clusterClient,
       config,
       authc: this.authc,
       authz,
       license,
       session,
       getFeatures: () =>
-        core
-          .getStartServices()
-          .then(([, { features: featuresStart }]) => featuresStart.getKibanaFeatures()),
+        startServicesPromise.then((services) => services.features.getKibanaFeatures()),
       getFeatureUsageService: this.getFeatureUsageService,
     });
 
@@ -277,10 +281,14 @@ export class Plugin {
       featureUsage: licensing.featureUsage,
     });
 
-    const { clusterClient, watchOnlineStatus$ } = this.elasticsearchService.start();
+    const { watchOnlineStatus$ } = this.elasticsearchService.start();
 
     this.sessionManagementService.start({ online$: watchOnlineStatus$(), taskManager });
-    this.authorizationService.start({ features, clusterClient, online$: watchOnlineStatus$() });
+    this.authorizationService.start({
+      features,
+      clusterClient: core.elasticsearch.client,
+      online$: watchOnlineStatus$(),
+    });
   }
 
   public stop() {

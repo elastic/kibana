@@ -23,7 +23,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggFilters';
+export const aggFiltersFnName = 'aggFilters';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.FILTERS>;
@@ -31,10 +31,15 @@ type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.FILTERS>;
 type Arguments = Assign<AggArgs, { filters?: string }>;
 
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggFiltersFnName,
+  Input,
+  Arguments,
+  Output
+>;
 
 export const aggFilters = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggFiltersFnName,
   help: i18n.translate('data.search.aggs.function.buckets.filters.help', {
     defaultMessage: 'Generates a serialized agg config for a Filter agg',
   }),
