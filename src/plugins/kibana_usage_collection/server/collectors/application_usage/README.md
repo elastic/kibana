@@ -30,7 +30,7 @@ This collection occurs by default for every application registered via the menti
 
 In order to keep the count of the events, this collector uses 3 Saved Objects:
 
-1. `application_usage_transactional`: It stores each individually reported event. Grouped by `timestamp` and `appId`. The reason for having these documents instead of editing `application_usage_daily` documents on very report is to provide faster response to the requests to `/api/ui_metric/report` (creating new documents instead of finding and editing existing ones) and to avoid conflicts when multiple users reach to the API concurrently.
+1. `application_usage_transactional`: It stores each individually reported event. Grouped by `timestamp` and `appId`. The reason for having these documents instead of editing `application_usage_daily` documents on very report is to provide faster response to the requests to `/api/ui_counters/_report` (creating new documents instead of finding and editing existing ones) and to avoid conflicts when multiple users reach to the API concurrently.
 2. `application_usage_daily`: Periodically, documents from `application_usage_transactional` are aggregated to daily summaries and deleted. Also grouped by `timestamp` and `appId`.
 3. `application_usage_totals`: It stores the sum of all the events older than 90 days old, grouped by `appId`.
 
