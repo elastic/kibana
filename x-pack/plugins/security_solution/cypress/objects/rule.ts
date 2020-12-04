@@ -20,7 +20,7 @@ interface MitreAttackTechnique {
   subtechniques: string[];
 }
 
-interface Mitre {
+export interface Mitre {
   tactic: string;
   techniques: MitreAttackTechnique[];
 }

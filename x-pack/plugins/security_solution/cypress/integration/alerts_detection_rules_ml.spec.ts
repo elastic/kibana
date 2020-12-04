@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { machineLearningRule, totalNumberOfPrebuiltRulesInEsArchive } from '../objects/rule';
 
 import {
@@ -67,17 +68,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = machineLearningRule.referenceUrls.join('');
 const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
 const expectedTags = machineLearningRule.tags.join('');
-const expectedMitre = machineLearningRule.mitre
-  .map(
-    (mitre) =>
-      mitre.tactic +
-      mitre.techniques
-        .map((technique) => {
-          return technique.name + technique.subtechniques.join('');
-        })
-        .join('')
-  )
-  .join('');
+const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
 const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
 
 describe('Detection rules, machine learning', () => {
