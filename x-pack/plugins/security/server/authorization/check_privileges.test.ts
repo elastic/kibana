@@ -21,10 +21,12 @@ const mockActions = {
 const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const createMockClusterClient = (response: any) => {
-  const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-  mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(response);
+  const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+  mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+    body: response,
+  } as any);
 
-  const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
   mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
   return { mockClusterClient, mockScopedClusterClient };
@@ -45,7 +47,7 @@ describe('#atSpace', () => {
     );
     const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
       mockActions,
-      mockClusterClient,
+      () => Promise.resolve(mockClusterClient),
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -70,7 +72,7 @@ describe('#atSpace', () => {
     }));
 
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.hasPrivileges', {
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
       body: {
         cluster: options.elasticsearchPrivileges?.cluster,
         index: expectedIndexPrivilegePayload,
@@ -891,7 +893,7 @@ describe('#atSpaces', () => {
     );
     const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
       mockActions,
-      mockClusterClient,
+      () => Promise.resolve(mockClusterClient),
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -916,7 +918,7 @@ describe('#atSpaces', () => {
     }));
 
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.hasPrivileges', {
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
       body: {
         cluster: options.elasticsearchPrivileges?.cluster,
         index: expectedIndexPrivilegePayload,
@@ -2095,7 +2097,7 @@ describe('#globally', () => {
     );
     const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
       mockActions,
-      mockClusterClient,
+      () => Promise.resolve(mockClusterClient),
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -2120,7 +2122,7 @@ describe('#globally', () => {
     }));
 
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.hasPrivileges', {
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
       body: {
         cluster: options.elasticsearchPrivileges?.cluster,
         index: expectedIndexPrivilegePayload,

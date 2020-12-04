@@ -20,6 +20,7 @@ interface TransformActionParamsOptions {
   tags?: string[];
   alertInstanceId: string;
   alertActionGroup: string;
+  alertActionGroupName: string;
   actionParams: AlertActionParams;
   alertParams: AlertTypeParams;
   state: AlertInstanceState;
@@ -33,6 +34,7 @@ export function transformActionParams({
   tags,
   alertInstanceId,
   alertActionGroup,
+  alertActionGroupName,
   context,
   actionParams,
   state,
@@ -51,6 +53,7 @@ export function transformActionParams({
       tags,
       alertInstanceId,
       alertActionGroup,
+      alertActionGroupName,
       context,
       date: new Date().toISOString(),
       state,
