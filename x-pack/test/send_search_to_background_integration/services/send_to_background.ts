@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { FtrProviderContext } from '../ftr_provider_context';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
 const SEND_TO_BACKGROUND_TEST_SUBJ = 'backgroundSessionIndicator';
 const SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ = 'backgroundSessionIndicatorPopoverContainer';
