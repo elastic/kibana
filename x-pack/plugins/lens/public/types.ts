@@ -607,6 +607,11 @@ export interface Visualization<T = unknown> {
    * The frame calls this function to display warnings about visualization
    */
   getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
+
+  /**
+   * On Edit events the frame will call this to know what's going to be the next visualization state
+   */
+  onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
 }
 
 export interface LensFilterEvent {

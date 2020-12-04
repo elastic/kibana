@@ -219,19 +219,16 @@ export function WorkspacePanel({
         });
       }
       if (isLensEditEvent(event)) {
-        if (event.data.action === 'sort' && activeVisualization?.id) {
+        if (activeVisualization?.onEditAction) {
           dispatch({
             type: 'UPDATE_VISUALIZATION_STATE',
             visualizationId: activeVisualization.id,
-            newState: {
-              ...(visualizationState as object),
-              sorting: { columnId: event.data.columnId, direction: event.data.direction },
-            },
+            updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
           });
         }
       }
     },
-    [plugins.uiActions, dispatch, activeVisualization?.id, visualizationState]
+    [plugins.uiActions, dispatch, activeVisualization]
   );
 
   useEffect(() => {

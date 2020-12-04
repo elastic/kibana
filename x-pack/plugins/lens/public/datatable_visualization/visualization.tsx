@@ -24,7 +24,7 @@ export interface DatatableVisualizationState {
   layers: LayerState[];
   sorting?: {
     columnId: string | undefined;
-    direction: 'asc' | 'desc';
+    direction: 'asc' | 'desc' | 'none';
   };
 }
 
@@ -252,6 +252,19 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
 
   getErrorMessages(state, frame) {
     return undefined;
+  },
+
+  onEditAction(state, event) {
+    if (event.data.action !== 'sort') {
+      return state;
+    }
+    return {
+      ...state,
+      sorting: {
+        columnId: event.data.columnId,
+        direction: event.data.direction,
+      },
+    };
   },
 };
 
