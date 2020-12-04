@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PainlessLang, PainlessContext, PainlessAutocompleteField } from '@kbn/monaco';
+import { PainlessLang, PainlessContext } from '@kbn/monaco';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,6 +38,11 @@ export interface FormState {
   submit: FormHook<RuntimeField>['submit'];
 }
 
+interface Field {
+  name: string;
+  type: string;
+}
+
 export interface Props {
   links: {
     runtimePainless: string;
@@ -54,10 +59,9 @@ export interface Props {
      * An array of existing concrete fields. If the user gives a name to the runtime
      * field that matches one of the concrete fields, a callout will be displayed
      * to indicate that this runtime field will shadow the concrete field.
+     * It is also used to provide the list of field autocomplete suggestions to the code editor.
      */
-    existingConcreteFields?: string[];
-    /** An array of fields to provide autocompletion for */
-    fieldsToAutocomplete?: PainlessAutocompleteField[];
+    existingConcreteFields?: Field[];
   };
 }
 
@@ -130,33 +134,33 @@ const RuntimeFieldFormComp = ({
   defaultValue,
   onChange,
   links,
-  ctx: { namesNotAllowed, existingConcreteFields = [], fieldsToAutocomplete } = {},
+  ctx: { namesNotAllowed, existingConcreteFields = [] } = {},
 }: Props) => {
+  const typeFieldConfig = schema.type as FieldConfig<RuntimeType, RuntimeField>;
+
+  const [painlessContext, setPainlessContext] = useState<PainlessContext>(
+    mapReturnTypeToPainlessContext(typeFieldConfig!.defaultValue!)
+  );
   const { form } = useForm<RuntimeField>({ defaultValue, schema });
   const { submit, isValid: isFormValid, isSubmitted } = form;
-
-  const [{ type: runtimeType }] = useFormData({ form, watch: 'type' });
+  const [{ name }] = useFormData<RuntimeField>({ form, watch: 'name' });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, defaultValue);
 
-  const [painlessContext, setPainlessContext] = useState<PainlessContext>('painless_test');
+  const onTypeChange = useCallback((newType: Array<EuiComboBoxOptionOption<RuntimeType>>) => {
+    setPainlessContext(mapReturnTypeToPainlessContext(newType[0]!.value!));
+  }, []);
+
+  const suggestionProvider = PainlessLang.getSuggestionProvider(
+    painlessContext,
+    existingConcreteFields
+  );
 
   useEffect(() => {
     if (onChange) {
       onChange({ isValid: isFormValid, isSubmitted, submit });
     }
   }, [onChange, isFormValid, isSubmitted, submit]);
-
-  useEffect(() => {
-    if (runtimeType?.length) {
-      setPainlessContext(mapReturnTypeToPainlessContext(runtimeType[0]!.value as RuntimeType));
-    }
-  }, [setPainlessContext, runtimeType]);
-
-  const suggestionProvider = PainlessLang.getSuggestionProvider(
-    painlessContext,
-    fieldsToAutocomplete
-  );
 
   return (
     <Form form={form} className="runtimeFieldEditor_form">
@@ -180,7 +184,10 @@ const RuntimeFieldFormComp = ({
 
         {/* Return type */}
         <EuiFlexItem>
-          <UseField<EuiComboBoxOptionOption[]> path="type">
+          <UseField<Array<EuiComboBoxOptionOption<RuntimeType>>>
+            path="type"
+            onChange={onTypeChange}
+          >
             {({ label, value, setValue }) => {
               if (value === undefined) {
                 return null;
@@ -220,7 +227,7 @@ const RuntimeFieldFormComp = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {existingConcreteFields.includes(name) && (
+      {existingConcreteFields.find((field) => field.name === name) && (
         <>
           <EuiSpacer />
           <EuiCallOut
