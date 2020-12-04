@@ -5,9 +5,10 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }) {
-  const es = getService('legacyEs');
+export default function ({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const supertest = getService('supertest');
   const config = getService('config');
   const basic = config.get('esTestCluster.license') === 'basic';
@@ -56,7 +57,7 @@ export default function ({ getService }) {
           })
           .expect(204);
 
-        const role = await es.shield.getRole({ name: 'role_with_privileges' });
+        const { body: role } = await es.security.getRole({ name: 'role_with_privileges' });
         expect(role).to.eql({
           role_with_privileges: {
             cluster: ['manage'],
@@ -121,7 +122,7 @@ export default function ({ getService }) {
 
     describe('Update Role', () => {
       it('should update a role with elasticsearch, kibana and other applications privileges', async () => {
-        await es.shield.putRole({
+        await es.security.putRole({
           name: 'role_to_update',
           body: {
             cluster: ['monitor'],
@@ -184,7 +185,7 @@ export default function ({ getService }) {
           })
           .expect(204);
 
-        const role = await es.shield.getRole({ name: 'role_to_update' });
+        const { body: role } = await es.security.getRole({ name: 'role_to_update' });
         expect(role).to.eql({
           role_to_update: {
             cluster: ['manage'],
@@ -225,7 +226,7 @@ export default function ({ getService }) {
 
       it(`should ${basic ? 'not' : ''} update a role adding DLS and TLS priviledges
       when using ${basic ? 'basic' : 'trial'} license`, async () => {
-        await es.shield.putRole({
+        await es.security.putRole({
           name: 'role_to_update_with_dls_fls',
           body: {
             cluster: ['monitor'],
@@ -261,7 +262,7 @@ export default function ({ getService }) {
           })
           .expect(basic ? 403 : 204);
 
-        const role = await es.shield.getRole({ name: 'role_to_update_with_dls_fls' });
+        const { body: role } = await es.security.getRole({ name: 'role_to_update_with_dls_fls' });
 
         expect(role.role_to_update_with_dls_fls.cluster).to.eql(basic ? ['monitor'] : ['manage']);
         expect(role.role_to_update_with_dls_fls.run_as).to.eql(
@@ -278,7 +279,7 @@ export default function ({ getService }) {
 
     describe('Get Role', () => {
       it('should get roles', async () => {
-        await es.shield.putRole({
+        await es.security.putRole({
           name: 'role_to_get',
           body: {
             cluster: ['manage'],
@@ -378,24 +379,30 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .expect(204);
 
-        const emptyRole = await es.shield.getRole({ name: 'empty_role', ignore: [404] });
+        const { body: emptyRole } = await es.security.getRole(
+          { name: 'empty_role' },
+          { ignore: [404] }
+        );
         expect(emptyRole).to.eql({});
-        const roleWithPrivileges = await es.shield.getRole({
-          name: 'role_with_privileges',
-          ignore: [404],
-        });
+        const { body: roleWithPrivileges } = await es.security.getRole(
+          { name: 'role_with_privileges' },
+          { ignore: [404] }
+        );
         expect(roleWithPrivileges).to.eql({});
-        const roleWithPriviledgesDlsFls = await es.shield.getRole({
-          name: 'role_with_privileges_dls_fls',
-          ignore: [404],
-        });
-        expect(roleWithPriviledgesDlsFls).to.eql({});
-        const roleToUpdate = await es.shield.getRole({ name: 'role_to_update', ignore: [404] });
+        const { body: roleWithPrivilegesDlsFls } = await es.security.getRole(
+          { name: 'role_with_privileges_dls_fls' },
+          { ignore: [404] }
+        );
+        expect(roleWithPrivilegesDlsFls).to.eql({});
+        const { body: roleToUpdate } = await es.security.getRole(
+          { name: 'role_to_update' },
+          { ignore: [404] }
+        );
         expect(roleToUpdate).to.eql({});
-        const roleToUpdateWithDlsFls = await es.shield.getRole({
-          name: 'role_to_update_with_dls_fls',
-          ignore: [404],
-        });
+        const { body: roleToUpdateWithDlsFls } = await es.security.getRole(
+          { name: 'role_to_update_with_dls_fls' },
+          { ignore: [404] }
+        );
         expect(roleToUpdateWithDlsFls).to.eql({});
       });
     });

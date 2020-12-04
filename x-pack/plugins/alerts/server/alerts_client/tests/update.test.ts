@@ -11,6 +11,7 @@ import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
 import { IntervalSchedule, InvalidatePendingApiKey } from '../../types';
+import { RecoveredActionGroup } from '../../../common';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
@@ -97,6 +98,7 @@ describe('update()', () => {
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
       async executor() {},
       producer: 'alerts',
     });
@@ -676,6 +678,7 @@ describe('update()', () => {
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -1021,6 +1024,7 @@ describe('update()', () => {
         name: 'Test',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
+        recoveryActionGroup: RecoveredActionGroup,
         async executor() {},
         producer: 'alerts',
       });
