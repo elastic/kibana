@@ -19,7 +19,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiIconTip, EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
 import {
@@ -37,11 +37,9 @@ interface DiscoverFieldDetailsProps {
   indexPattern: IndexPattern;
   details: FieldDetails;
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
-  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   showFooter?: boolean;
 }
-
-export type { DiscoverFieldDetailsProps };
 
 export function DiscoverFieldDetails({
   field,
@@ -73,7 +71,7 @@ export function DiscoverFieldDetails({
         setShowVisualizeLink(false);
       }
     );
-  }, [field, indexPattern.id, details, details.columns]);
+  }, [field, indexPattern.id, details.columns]);
 
   const handleVisualizeLinkClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     // regular link click. let the uiActions code handle the navigation and show popup if needed
