@@ -6,6 +6,7 @@
 
 import { RegistryPolicyTemplate } from './epm';
 
+// Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
   format_version: string;
   name: string;
