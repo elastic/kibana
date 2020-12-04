@@ -9,7 +9,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { AddMessageVariables } from './add_message_variables';
 
 describe('AddMessageVariables', () => {
-  test('renders variables with double brances by default', async () => {
+  test('renders variables with double brances by default', () => {
     const onSelectEventHandler = jest.fn();
     const wrapper = mountWithIntl(
       <AddMessageVariables
@@ -31,7 +31,7 @@ describe('AddMessageVariables', () => {
     ).toEqual('{{myVar}}');
   });
 
-  test('renders variables with tripple braces when specified', async () => {
+  test('renders variables with tripple braces when specified', () => {
     const onSelectEventHandler = jest.fn();
     const wrapper = mountWithIntl(
       <AddMessageVariables
@@ -54,7 +54,7 @@ describe('AddMessageVariables', () => {
     ).toEqual('{{{myVar}}}');
   });
 
-  test('onSelectEventHandler is called with proper action variable', async () =>{
+  test('onSelectEventHandler is called with proper action variable', () => {
     const onSelectEventHandler = jest.fn();
     const wrapper = mountWithIntl(
       <AddMessageVariables
@@ -75,7 +75,10 @@ describe('AddMessageVariables', () => {
     );
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-1"]').first().simulate('click');
+    wrapper
+      .find('[data-test-subj="variableMenuButton-1-templated-name"]')
+      .first()
+      .simulate('click');
 
     expect(onSelectEventHandler).toHaveBeenCalledTimes(1);
     expect(onSelectEventHandler).toHaveBeenCalledWith({
