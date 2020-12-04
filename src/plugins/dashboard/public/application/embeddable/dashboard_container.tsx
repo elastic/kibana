@@ -20,21 +20,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { RefreshInterval, TimeRange, Query, Filter } from 'src/plugins/data/public';
 import uuid from 'uuid';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { CoreStart, IUiSettingsClient } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+
+import { UiActionsStart } from '../../services/ui_actions';
+import { RefreshInterval, TimeRange, Query, Filter } from '../../services/data';
 import {
+  ViewMode,
   Container,
+  PanelState,
+  IEmbeddable,
   ContainerInput,
   EmbeddableInput,
-  ViewMode,
-  EmbeddableFactory,
-  IEmbeddable,
   EmbeddableStart,
-  PanelState,
-} from '../../../../embeddable/public';
+  EmbeddableOutput,
+  EmbeddableFactory,
+  EmbeddableStateTransfer,
+} from '../../services/embeddable';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
@@ -43,10 +46,9 @@ import {
   KibanaContextProvider,
   KibanaReactContext,
   KibanaReactContextValue,
-} from '../../../../kibana_react/public';
+} from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
-import { EmbeddableStateTransfer, EmbeddableOutput } from '../../../../embeddable/public';
 import { DashboardCapabilities } from '../types';
 
 export interface DashboardContainerInput extends ContainerInput {

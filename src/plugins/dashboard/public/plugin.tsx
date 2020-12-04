@@ -20,47 +20,46 @@
 import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
 
 import {
   App,
-  AppMountParameters,
-  AppUpdater,
+  Plugin,
   CoreSetup,
   CoreStart,
-  Plugin,
+  AppUpdater,
+  ScopedHistory,
+  AppMountParameters,
+  DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   SavedObjectsClientContract,
-  ScopedHistory,
 } from 'src/core/public';
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+
+import { createKbnUrlTracker } from './services/kibana_utils';
+import { UsageCollectionSetup } from './services/usage_collection';
+import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
+import { KibanaLegacySetup, KibanaLegacyStart } from './services/kibana_legacy';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
+import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
+import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from './services/data';
+import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from './services/share';
+import type { SavedObjectTaggingOssPluginStart } from './services/saved_objects_tagging_oss';
+import {
+  getSavedObjectFinder,
+  SavedObjectLoader,
+  SavedObjectsStart,
+} from './services/saved_objects';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
   EmbeddableStart,
   PANEL_NOTIFICATION_TRIGGER,
-} from '../../embeddable/public';
-import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
-import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
-import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
-
-import { Start as InspectorStartContract } from '../../inspector/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
-import {
-  getSavedObjectFinder,
-  SavedObjectLoader,
-  SavedObjectsStart,
-} from '../../saved_objects/public';
+} from './services/embeddable';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
-} from '../../kibana_react/public';
-import { createKbnUrlTracker } from '../../kibana_utils/public';
-import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
-import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
+} from './services/kibana_react';
 
 import {
   ACTION_CLONE_PANEL,
@@ -100,6 +99,7 @@ import {
   ExportContext,
   ExportCSVAction,
 } from './application/actions/export_csv_action';
+import { dashboardFeatureCatalog } from './dashboard_strings';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -350,15 +350,9 @@ export class DashboardPlugin
     if (home) {
       home.featureCatalogue.register({
         id: DashboardConstants.DASHBOARD_ID,
-        title: i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
-          defaultMessage: 'Dashboard',
-        }),
-        subtitle: i18n.translate('dashboard.featureCatalogue.dashboardSubtitle', {
-          defaultMessage: 'Analyze data in dashboards.',
-        }),
-        description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
-          defaultMessage: 'Display and share a collection of visualizations and saved searches.',
-        }),
+        title: dashboardFeatureCatalog.getTitle(),
+        subtitle: dashboardFeatureCatalog.getSubtitle(),
+        description: dashboardFeatureCatalog.getDescription(),
         icon: 'dashboardApp',
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
         showOnHomePage: false,

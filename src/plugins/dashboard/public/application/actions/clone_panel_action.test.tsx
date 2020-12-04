@@ -30,8 +30,8 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../../../embeddable/public/lib/test_samples';
-import { ErrorEmbeddable, IContainer, isErrorEmbeddable } from '../../../../embeddable/public';
+} from '../../services/embeddable_test_samples';
+import { ErrorEmbeddable, IContainer, isErrorEmbeddable } from '../../services/embeddable';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(

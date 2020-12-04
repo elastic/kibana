@@ -24,23 +24,23 @@ import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter } from 'react-router-dom';
 
-import { DashboardApp } from './dashboard_app';
 import { DashboardListing } from './listing';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { DashboardApp } from './dashboard_app';
+import { addHelpMenuToAppChrome } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
+import { dashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
+import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from './types';
 import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies } from '../plugin';
 
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../../../kibana_utils/public';
-import { dashboardPageTitle, dashboardReadonlyBadge } from './dashboard_strings';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
+import { KibanaContextProvider } from '../services/kibana_react';
 import {
   AppMountParameters,
   CoreSetup,
   PluginInitializerContext,
   ScopedHistory,
-} from '../../../../core/public';
-import { addHelpMenuToAppChrome } from './lib';
-import { createDashboardEditUrl, DashboardConstants } from '..';
+} from '../services/core';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',

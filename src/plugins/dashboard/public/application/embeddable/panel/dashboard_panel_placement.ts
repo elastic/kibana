@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { PanelNotFoundError } from '../../../../../embeddable/public';
+import { PanelNotFoundError } from '../../../services/embeddable';
 import { GridData } from '../../../../common';
 import { DashboardPanelState, DASHBOARD_GRID_COLUMN_COUNT } from '..';
 

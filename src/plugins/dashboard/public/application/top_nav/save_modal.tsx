@@ -21,8 +21,8 @@ import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 
-import type { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
-import { SavedObjectSaveModal } from '../../../../saved_objects/public';
+import type { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
+import { SavedObjectSaveModal } from '../../services/saved_objects';
 import { DashboardSaveOptions } from '../types';
 
 interface Props {

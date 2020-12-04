@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '../../../embeddable/public';
+import { ViewMode } from './services/embeddable';
 
 /**
  * @param title {string} the current title of the dashboard
@@ -57,6 +57,134 @@ export function getDashboardTitle(
   return displayTitle;
 }
 
+/*
+  Plugin
+*/
+
+export const dashboardBreadcrumb = i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
+  defaultMessage: 'Dashboard',
+});
+
+export const dashboardPageTitle = i18n.translate('dashboard.dashboardPageTitle', {
+  defaultMessage: 'Dashboards',
+});
+
+export const dashboardFeatureCatalog = {
+  getTitle: () =>
+    i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
+      defaultMessage: 'Dashboard',
+    }),
+  getSubtitle: () =>
+    i18n.translate('dashboard.featureCatalogue.dashboardSubtitle', {
+      defaultMessage: 'Analyze data in dashboards.',
+    }),
+  getDescription: () =>
+    i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
+      defaultMessage: 'Display and share a collection of visualizations and saved searches.',
+    }),
+};
+
+/*
+  Actions
+*/
+export const dashboardAddToLibraryAction = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.AddToLibrary', {
+      defaultMessage: 'Add to library',
+    }),
+  getSuccessMessage: (panelTitle: string) =>
+    i18n.translate('dashboard.panel.addToLibrary.successMessage', {
+      defaultMessage: `Panel {panelTitle} was added to the visualize library`,
+      values: { panelTitle },
+    }),
+};
+
+export const dashboardClonePanelAction = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.clonePanel', {
+      defaultMessage: 'Clone panel',
+    }),
+  getClonedTag: () =>
+    i18n.translate('dashboard.panel.title.clonedTag', {
+      defaultMessage: 'copy',
+    }),
+  getSuccessMessage: () =>
+    i18n.translate('dashboard.panel.clonedToast', {
+      defaultMessage: 'Cloned panel',
+    }),
+};
+
+export const dashboardExpandPanelAction = {
+  getMinimizeTitle: () =>
+    i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.expandedDisplayName', {
+      defaultMessage: 'Minimize',
+    }),
+  getMaximizeTitle: () =>
+    i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.notExpandedDisplayName', {
+      defaultMessage: 'Maximize panel',
+    }),
+};
+
+export const dashboardExportCsvAction = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.actions.DownloadCreateDrilldownAction.displayName', {
+      defaultMessage: 'Download as CSV',
+    }),
+  getUntitledFilename: () =>
+    i18n.translate('dashboard.actions.downloadOptionsUnsavedFilename', {
+      defaultMessage: 'unsaved',
+    }),
+};
+
+export const dashboardUnlinkFromLibraryAction = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.unlinkFromLibrary', {
+      defaultMessage: 'Unlink from library',
+    }),
+  getSuccessMessage: (panelTitle: string) =>
+    i18n.translate('dashboard.panel.unlinkFromLibrary.successMessage', {
+      defaultMessage: `Panel {panelTitle} is no longer connected to the visualize library`,
+      values: { panelTitle },
+    }),
+};
+
+export const dashboardLibraryNotification = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.LibraryNotification', {
+      defaultMessage: 'Visualize Library Notification',
+    }),
+  getTooltip: () =>
+    i18n.translate('dashboard.panel.libraryNotification.toolTip', {
+      defaultMessage:
+        'Editing this panel might affect other dashboards. To change to this panel only, unlink it from the library.',
+    }),
+  getPopoverAriaLabel: () =>
+    i18n.translate('dashboard.panel.libraryNotification.ariaLabel', {
+      defaultMessage: 'View library information and unlink this panel',
+    }),
+};
+
+export const dashboardReplacePanelAction = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.removePanel.replacePanel', {
+      defaultMessage: 'Replace panel',
+    }),
+  getSuccessMessage: (savedObjectName: string) =>
+    i18n.translate('dashboard.addPanel.savedObjectAddedToContainerSuccessMessageTitle', {
+      defaultMessage: '{savedObjectName} was added',
+      values: {
+        savedObjectName,
+      },
+    }),
+  getNoMatchingObjectsMessage: () =>
+    i18n.translate('dashboard.addPanel.noMatchingObjectsMessage', {
+      defaultMessage: 'No matching objects found.',
+    }),
+};
+
+/*
+  Dashboard Editor
+*/
 export const shareModalStrings = {
   topMenuCheckbox: () =>
     i18n.translate('dashboard.embedUrlParamExtension.topMenu', {
@@ -80,38 +208,9 @@ export const shareModalStrings = {
     }),
 };
 
-export const dashboardBreadcrumb = i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
-  defaultMessage: 'Dashboard',
-});
-
-export const dashboardPageTitle = i18n.translate('dashboard.dashboardPageTitle', {
-  defaultMessage: 'Dashboards',
-});
-
 export const dashboard60Warning = i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
   defaultMessage: 'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
 });
-
-export const dashboardListingTable = {
-  entityName: i18n.translate('dashboard.listing.table.entityName', {
-    defaultMessage: 'dashboard',
-  }),
-  entityNamePlural: i18n.translate('dashboard.listing.table.entityNamePlural', {
-    defaultMessage: 'dashboards',
-  }),
-  tableListTitle: i18n.translate('dashboard.listing.dashboardsTitle', {
-    defaultMessage: 'Dashboards',
-  }),
-  tableCaption: i18n.translate('dashboard.listing.dashboardsTitle', {
-    defaultMessage: 'Dashboards',
-  }),
-  titleColumnName: i18n.translate('dashboard.listing.table.titleColumnName', {
-    defaultMessage: 'Title',
-  }),
-  descriptionColumnName: i18n.translate('dashboard.listing.table.descriptionColumnName', {
-    defaultMessage: 'Description',
-  }),
-};
 
 export const dashboardReadonlyBadge = {
   text: i18n.translate('dashboard.badge.readOnly.text', {
@@ -146,7 +245,9 @@ export const leaveConfirmStrings = {
   }),
 };
 
-// Empty Screen
+/*
+  Empty Screen
+*/
 export const emptyScreenStrings = {
   // Readonly Mode
   emptyDashboardTitle: i18n.translate('dashboard.emptyDashboardTitle', {
@@ -204,4 +305,28 @@ export const emptyScreenStrings = {
       defaultMessage: 'Create new visualization button',
     }
   ),
+};
+
+/*
+  Dashboard Listing Page
+*/
+export const dashboardListingTable = {
+  entityName: i18n.translate('dashboard.listing.table.entityName', {
+    defaultMessage: 'dashboard',
+  }),
+  entityNamePlural: i18n.translate('dashboard.listing.table.entityNamePlural', {
+    defaultMessage: 'dashboards',
+  }),
+  tableListTitle: i18n.translate('dashboard.listing.dashboardsTitle', {
+    defaultMessage: 'Dashboards',
+  }),
+  tableCaption: i18n.translate('dashboard.listing.dashboardsTitle', {
+    defaultMessage: 'Dashboards',
+  }),
+  titleColumnName: i18n.translate('dashboard.listing.table.titleColumnName', {
+    defaultMessage: 'Title',
+  }),
+  descriptionColumnName: i18n.translate('dashboard.listing.table.descriptionColumnName', {
+    defaultMessage: 'Description',
+  }),
 };

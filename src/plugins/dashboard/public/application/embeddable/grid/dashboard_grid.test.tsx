@@ -26,12 +26,12 @@ import { skip } from 'rxjs/operators';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
-import { KibanaContextProvider } from '../../../../../kibana_react/public';
+import { KibanaContextProvider } from '../../../services/kibana_react';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../../../embeddable/public/lib/test_samples';
+} from '../../../services/embeddable_test_samples';
 import { coreMock, uiSettingsServiceMock } from '../../../../../../core/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;

@@ -22,25 +22,26 @@ import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { DashboardSavedObject } from '../..';
-import { IndexPattern, SavedQuery, TimefilterContract } from '../../../../data/public';
 
+import { useKibana } from '../../services/kibana_react';
+import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
   EmbeddableFactoryNotFoundError,
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
-} from '../../../../embeddable/public';
-import { useKibana } from '../../../../kibana_react/public';
+} from '../../services/embeddable';
 import {
   getSavedObjectFinder,
   SavedObjectSaveOpts,
   SaveResult,
   showSaveModal,
-} from '../../../../saved_objects/public';
+} from '../../services/saved_objects';
+
 import { NavAction } from '../../types';
+import { DashboardSavedObject } from '../..';
 import { DashboardStateManager } from '../dashboard_state_manager';
-import { leaveConfirmStrings } from '../dashboard_strings';
+import { leaveConfirmStrings } from '../../dashboard_strings';
 import { saveDashboard } from '../lib';
 import {
   DashboardAppServices,

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { IEmbeddable } from '../../../../embeddable/public';
-import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
+import { dashboardExpandPanelAction } from '../../dashboard_strings';
+import { IEmbeddable } from '../../services/embeddable';
+import { ActionByType, IncompatibleActionError } from '../../services/ui_actions';
 import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
@@ -59,12 +59,8 @@ export class ExpandPanelAction implements ActionByType<typeof ACTION_EXPAND_PANE
     }
 
     return isExpanded(embeddable)
-      ? i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.expandedDisplayName', {
-          defaultMessage: 'Minimize',
-        })
-      : i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.notExpandedDisplayName', {
-          defaultMessage: 'Maximize panel',
-        });
+      ? dashboardExpandPanelAction.getMinimizeTitle()
+      : dashboardExpandPanelAction.getMaximizeTitle();
   }
 
   public getIconType({ embeddable }: ExpandPanelActionContext) {

@@ -17,17 +17,22 @@
  * under the License.
  */
 
+import React from 'react';
+import { mount } from 'enzyme';
+
 import { findTestSubject, nextTick } from '@kbn/test/jest';
 import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { I18nProvider } from '@kbn/i18n/react';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+
+import { KibanaContextProvider } from '../../services/kibana_react';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddablePanel,
   isErrorEmbeddable,
   ViewMode,
-} from '../../../../embeddable/public';
+} from '../../services/embeddable';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
@@ -36,7 +41,7 @@ import {
   EMPTY_EMBEDDABLE,
   ContactCardEmbeddableOutput,
   createEditModeAction,
-} from '../../../../embeddable/public/lib/test_samples';
+} from '../../services/embeddable_test_samples';
 import {
   applicationServiceMock,
   coreMock,
@@ -44,9 +49,6 @@ import {
 } from '../../../../../core/public/mocks';
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { uiActionsPluginMock } from '../../../../ui_actions/public/mocks';
-import React from 'react';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
-import { mount } from 'enzyme';
 
 const options: DashboardContainerServices = {
   application: {} as any,

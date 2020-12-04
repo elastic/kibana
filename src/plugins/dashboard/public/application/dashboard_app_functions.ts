@@ -21,6 +21,7 @@ import { History } from 'history';
 
 import _, { uniqBy } from 'lodash';
 import deepEqual from 'fast-deep-equal';
+import { merge, Observable, pipe } from 'rxjs';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -30,26 +31,27 @@ import {
   startWith,
   switchMap,
 } from 'rxjs/operators';
-import { merge, Observable, pipe } from 'rxjs';
-import { DashboardStateManager } from './dashboard_state_manager';
-import { getQueryParams } from '../../../kibana_utils/public';
+
 import { DashboardCapabilities } from './types';
+import { DashboardConstants } from '../dashboard_constants';
+import { DashboardStateManager } from './dashboard_state_manager';
+import { convertSavedDashboardPanelToPanelState } from '../../common/embeddable/embeddable_saved_object_converters';
+import {
+  DashboardPanelState,
+  DashboardContainer,
+  DashboardContainerInput,
+  SavedDashboardPanel,
+} from '.';
+
+import { getQueryParams } from '../services/kibana_utils';
+import { EmbeddablePackageState, isErrorEmbeddable, ViewMode } from '../services/embeddable';
 import {
   esFilters,
   FilterManager,
   IndexPattern,
   IndexPatternsContract,
   QueryStart,
-} from '../../../data/public';
-import { EmbeddablePackageState, isErrorEmbeddable, ViewMode } from '../../../embeddable/public';
-import { DashboardPanelState } from '.';
-import { convertSavedDashboardPanelToPanelState } from '../../common/embeddable/embeddable_saved_object_converters';
-import {
-  DashboardConstants,
-  DashboardContainer,
-  DashboardContainerInput,
-  SavedDashboardPanel,
-} from '..';
+} from '../services/data';
 
 export const getChangesFromAppStateForContainerState = ({
   dashboardContainer,

@@ -26,10 +26,10 @@ import {
   isErrorEmbeddable,
   openAddPanelFlyout,
   EmbeddableFactoryNotFoundError,
-} from '../../../../../embeddable/public';
+} from '../../../services/embeddable';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
-import { context } from '../../../../../kibana_react/public';
+import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
 export interface DashboardViewportProps {

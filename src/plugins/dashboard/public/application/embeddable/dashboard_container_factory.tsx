@@ -19,13 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { ScopedHistory } from 'src/core/public';
-import { EmbeddableFactory } from '../../../../embeddable/public';
 import {
-  ContainerOutput,
-  EmbeddableFactoryDefinition,
-  ErrorEmbeddable,
   Container,
-} from '../../../../embeddable/public';
+  ErrorEmbeddable,
+  ContainerOutput,
+  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
+} from '../../services/embeddable';
 import {
   DashboardContainer,
   DashboardContainerInput,

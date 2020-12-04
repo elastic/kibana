@@ -17,60 +17,63 @@
  * under the License.
  */
 
-import React, { useEffect, useCallback, useState } from 'react';
-import { History } from 'history';
-import ReactDOM from 'react-dom';
 import _ from 'lodash';
-
+import ReactDOM from 'react-dom';
+import { History } from 'history';
 import { map } from 'rxjs/operators';
 import { merge, Subscription } from 'rxjs';
 import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
-import { SavedObject } from '../../../saved_objects/public';
-import { DashboardStateManager } from './dashboard_state_manager';
-import {
-  createKbnUrlStateStorage,
-  removeQueryParam,
-  SavedObjectNotFound,
-  withNotifyOnErrors,
-} from '../../../kibana_utils/public';
-import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from './types';
+import React, { useEffect, useCallback, useState } from 'react';
+
+import { DASHBOARD_CONTAINER_TYPE } from '.';
 import { useKibana } from '../../../kibana_react/public';
 import { DashboardSavedObject } from '../saved_dashboards';
+import { DashboardConstants } from '../dashboard_constants';
+import { DashboardTopNav } from './top_nav/dashboard_top_nav';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
+import { DashboardStateManager } from './dashboard_state_manager';
+import { DashboardContainer, DashboardContainerInput } from './embeddable';
+import { createSessionRestorationDataProvider } from './lib/session_restoration';
+import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from './types';
 import {
-  connectToQueryState,
+  getDashboardTitle,
+  dashboard60Warning,
+  leaveConfirmStrings,
+  dashboardBreadcrumb,
+} from '../dashboard_strings';
+import {
+  getInputSubscription,
+  getOutputSubscription,
+  getFiltersSubscription,
+  getSearchSessionIdFromURL,
+  getDashboardContainerInput,
+  getChangesFromAppStateForContainerState,
+} from './dashboard_app_functions';
+
+import { SavedObject } from '../services/saved_objects';
+import type { TagDecoratedSavedObject } from '../services/saved_objects_tagging_oss';
+import {
+  removeQueryParam,
+  withNotifyOnErrors,
+  SavedObjectNotFound,
+  createKbnUrlStateStorage,
+} from '../services/kibana_utils';
+import {
   esFilters,
-  IndexPattern,
   QueryState,
+  IndexPattern,
+  connectToQueryState,
   syncQueryStateWithUrl,
-} from '../../../data/public';
+} from '../services/data';
 import {
+  ViewMode,
   ContainerOutput,
-  EmbeddableFactoryNotFoundError,
   EmbeddableInput,
   ErrorEmbeddable,
   isErrorEmbeddable,
-  ViewMode,
-} from '../../../embeddable/public';
-import { DASHBOARD_CONTAINER_TYPE } from '.';
-import { DashboardTopNav } from './top_nav/dashboard_top_nav';
-import {
-  dashboard60Warning,
-  dashboardBreadcrumb,
-  getDashboardTitle,
-  leaveConfirmStrings,
-} from './dashboard_strings';
-import type { TagDecoratedSavedObject } from '../../../saved_objects_tagging_oss/public';
-import {
-  getChangesFromAppStateForContainerState,
-  getDashboardContainerInput,
-  getFiltersSubscription,
-  getInputSubscription,
-  getOutputSubscription,
-  getSearchSessionIdFromURL,
-} from './dashboard_app_functions';
-import { createSessionRestorationDataProvider } from './lib/session_restoration';
-import { DashboardConstants, DashboardContainer, DashboardContainerInput } from '..';
+  EmbeddableFactoryNotFoundError,
+} from '../services/embeddable';
+
 export interface DashboardAppComponentState {
   dashboardStateManager?: DashboardStateManager;
   dashboardContainer?: DashboardContainer;

@@ -30,14 +30,14 @@ import {
   isErrorEmbeddable,
   ReferenceOrValueEmbeddable,
   ViewMode,
-} from '../../../../embeddable/public';
+} from '../../services/embeddable';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../../../embeddable/public/lib/test_samples';
+} from '../../services/embeddable_test_samples';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(

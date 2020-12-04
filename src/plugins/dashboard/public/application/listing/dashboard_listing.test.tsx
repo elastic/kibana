@@ -25,14 +25,15 @@ import {
   SimpleSavedObject,
 } from '../../../../../core/public';
 
-import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../../../saved_objects/public';
-import { IndexPatternsContract, SavedQueryService } from '../../../../data/public';
+import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
+import { IndexPatternsContract, SavedQueryService } from '../../services/data';
+import { NavigationPublicPluginStart } from '../../services/navigation';
+import { KibanaContextProvider } from '../../services/kibana_react';
+import { createKbnUrlStateStorage } from '../../services/kibana_utils';
+
 import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
-import { NavigationPublicPluginStart } from '../../../../navigation/public';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
-import { createKbnUrlStateStorage } from '../../../../kibana_utils/public';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { DashboardAppServices, DashboardCapabilities } from '../types';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';

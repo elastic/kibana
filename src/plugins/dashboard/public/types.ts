@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { Query, Filter } from 'src/plugins/data/public';
 import { SavedObject as SavedObjectType, SavedObjectAttributes } from 'src/core/public';
-import { ViewMode } from '../../embeddable/public';
+import { Query, Filter } from './services/data';
+import { ViewMode } from './services/embeddable';
 
 import { SavedDashboardPanel } from '../common/types';
 export { SavedDashboardPanel };

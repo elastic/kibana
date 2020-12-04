@@ -22,14 +22,14 @@ import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { isErrorEmbeddable } from '../../../../embeddable/public';
+import { isErrorEmbeddable } from '../../services/embeddable';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../../../embeddable/public/lib/test_samples';
+} from '../../services/embeddable_test_samples';
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();

@@ -19,7 +19,7 @@
 
 import { CoreStart } from 'kibana/public';
 
-import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../../../embeddable/public';
+import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../services/embeddable';
 import { DashboardContainer } from '../../application/embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../../application/test_helpers';
 import {
@@ -28,7 +28,7 @@ import {
   ContactCardEmbeddableOutput,
   ContactCardExportableEmbeddableFactory,
   CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
-} from '../../../../embeddable/public/lib/test_samples';
+} from '../../services/embeddable_test_samples';
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { ExportCSVAction } from './export_csv_action';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';

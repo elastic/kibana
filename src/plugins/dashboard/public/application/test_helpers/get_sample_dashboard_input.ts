@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ViewMode, EmbeddableInput } from '../../../../embeddable/public';
+import { ViewMode, EmbeddableInput } from '../../services/embeddable';
 import { DashboardContainerInput, DashboardPanelState } from '../embeddable';
 
 export function getSampleDashboardInput(

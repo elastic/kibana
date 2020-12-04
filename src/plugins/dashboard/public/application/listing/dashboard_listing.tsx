@@ -17,17 +17,19 @@
  * under the License.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
-import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { syncQueryStateWithUrl } from '../../../../data/public';
-import { DashboardAppServices, DashboardRedirect } from '../types';
-import { IKbnUrlStateStorage } from '../../../../kibana_utils/public';
-import { TableListView, useKibana } from '../../../../kibana_react/public';
-import { dashboardBreadcrumb, dashboardListingTable } from '../dashboard_strings';
-import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
-import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
+import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
+
 import { attemptLoadDashboardByTitle } from '../lib';
+import { DashboardAppServices, DashboardRedirect } from '../types';
+import { dashboardBreadcrumb, dashboardListingTable } from '../../dashboard_strings';
+import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
+
+import { syncQueryStateWithUrl } from '../../services/data';
+import { IKbnUrlStateStorage } from '../../services/kibana_utils';
+import { TableListView, useKibana } from '../../services/kibana_react';
+import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 
 export interface DashboardListingProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;

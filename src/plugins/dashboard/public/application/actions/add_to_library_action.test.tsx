@@ -17,13 +17,15 @@
  * under the License.
  */
 
+import { AddToLibraryAction } from '.';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
 
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
-import { AddToLibraryAction } from '.';
+
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+
 import {
   EmbeddableInput,
   ErrorEmbeddable,
@@ -31,14 +33,14 @@ import {
   isErrorEmbeddable,
   ReferenceOrValueEmbeddable,
   ViewMode,
-} from '../../../../embeddable/public';
+} from '../../services/embeddable';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../../../embeddable/public/lib/test_samples';
+} from '../../services/embeddable_test_samples';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(

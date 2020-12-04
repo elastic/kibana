@@ -25,9 +25,6 @@ export {
   DashboardContainerInput,
   DashboardContainerFactoryDefinition,
   DASHBOARD_CONTAINER_TYPE,
-  // Types below here can likely be made private when dashboard app moved into this NP plugin.
-  DEFAULT_PANEL_WIDTH,
-  DEFAULT_PANEL_HEIGHT,
 } from './application';
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 

@@ -29,7 +29,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { IUiSettingsClient, HttpStart } from 'kibana/public';
-import { emptyScreenStrings as constants } from '../../dashboard_strings';
+import { emptyScreenStrings as constants } from '../../../dashboard_strings';
 
 export interface DashboardEmptyScreenProps {
   showLinkToVisualize: boolean;

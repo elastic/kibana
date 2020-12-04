@@ -18,14 +18,16 @@
  */
 
 import { createBrowserHistory } from 'history';
-import { DashboardStateManager } from './dashboard_state_manager';
 import { getSavedDashboardMock } from './test_helpers';
-import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
-import { ViewMode } from 'src/plugins/embeddable/public';
-import { createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 import { DashboardContainer, DashboardContainerInput } from '.';
+import { DashboardStateManager } from './dashboard_state_manager';
 import { DashboardContainerServices } from './embeddable/dashboard_container';
-import { embeddablePluginMock } from '../../../embeddable/public/mocks';
+
+import { ViewMode } from '../services/embeddable';
+import { createKbnUrlStateStorage } from '../services/kibana_utils';
+import { InputTimeRange, TimefilterContract, TimeRange } from '../services/data';
+
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 describe('DashboardState', function () {
   let dashboardState: DashboardStateManager;

@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject, SavedObjectsStart } from '../../../../plugins/saved_objects/public';
+import { EmbeddableStart } from '../services/embeddable';
+import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
+import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
 
-import { Filter, ISearchSource, Query, RefreshInterval } from '../../../../plugins/data/public';
 import { createDashboardEditUrl } from '../dashboard_constants';
-import { EmbeddableStart } from '../../../embeddable/public';
-import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
+
+import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 
 export interface DashboardSavedObject extends SavedObject {
   id?: string;

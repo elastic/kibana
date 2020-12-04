@@ -17,20 +17,18 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { Observable, Subscription } from 'rxjs';
 import { Moment } from 'moment';
+import { i18n } from '@kbn/i18n';
 import { History } from 'history';
+import { Observable, Subscription } from 'rxjs';
 
-import { Filter, Query, TimefilterContract as Timefilter } from 'src/plugins/data/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import type { SavedObjectTagDecoratorTypeGuard } from 'src/plugins/saved_objects_tagging_oss/public';
-import { migrateLegacyQuery } from './lib/migrate_legacy_query';
-
-import { ViewMode } from '../../../../plugins/embeddable/public';
-import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
 import { FilterUtils } from './lib/filter_utils';
+import { DashboardContainer } from './embeddable';
+import { DashboardSavedObject } from '../saved_dashboards';
+import { migrateLegacyQuery } from './lib/migrate_legacy_query';
+import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
+import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/embeddable_saved_object_converters';
 import {
   DashboardAppState,
   DashboardAppStateDefaults,
@@ -38,16 +36,18 @@ import {
   DashboardAppStateTransitions,
   SavedDashboardPanel,
 } from '../types';
+
+import { ViewMode } from '../services/embeddable';
+import { UsageCollectionSetup } from '../services/usage_collection';
+import { Filter, Query, TimefilterContract as Timefilter } from '../services/data';
+import type { SavedObjectTagDecoratorTypeGuard } from '../services/saved_objects_tagging_oss';
 import {
   createStateContainer,
   IKbnUrlStateStorage,
   ISyncStateRef,
   ReduxLikeStateContainer,
   syncState,
-} from '../../../kibana_utils/public';
-import { DashboardSavedObject } from '../saved_dashboards';
-import { DashboardContainer } from './embeddable';
-import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/embeddable_saved_object_converters';
+} from '../services/kibana_utils';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the

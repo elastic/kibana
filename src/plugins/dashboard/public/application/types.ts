@@ -26,13 +26,13 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 
-import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
-import { DataPublicPluginStart, IndexPatternsContract } from '../../../data/public';
-import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
-import { NavigationPublicPluginStart } from '../../../navigation/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { EmbeddableStart } from '../../../embeddable/public';
-import { SharePluginStart } from '../../../share/public';
+import { SharePluginStart } from '../services/share';
+import { EmbeddableStart } from '../services/embeddable';
+import { UsageCollectionSetup } from '../services/usage_collection';
+import { NavigationPublicPluginStart } from '../services/navigation';
+import { SavedObjectsTaggingApi } from '../services/saved_objects_tagging_oss';
+import { DataPublicPluginStart, IndexPatternsContract } from '../services/data';
+import { SavedObjectLoader, SavedObjectsStart } from '../services/saved_objects';
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =

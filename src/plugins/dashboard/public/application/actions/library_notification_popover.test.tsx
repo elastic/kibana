@@ -30,14 +30,14 @@ import { CoreStart } from '../../../../../core/public';
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiPopover } from '@elastic/eui';
-import { isErrorEmbeddable } from '../../../../embeddable/public';
+import { isErrorEmbeddable } from '../../services/embeddable';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   ContactCardEmbeddable,
-} from '../../../../embeddable/public/lib/test_samples';
+} from '../../services/embeddable_test_samples';
 
 describe('LibraryNotificationPopover', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();

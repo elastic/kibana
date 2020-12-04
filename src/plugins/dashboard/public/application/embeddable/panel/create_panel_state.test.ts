@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EmbeddableInput } from '../../../../../embeddable/public';
+import { EmbeddableInput } from '../../../services/embeddable';
 import { CONTACT_CARD_EMBEDDABLE } from '../../../../../embeddable/public/lib/test_samples';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';

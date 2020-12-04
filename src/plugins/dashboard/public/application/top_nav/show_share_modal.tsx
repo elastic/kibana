@@ -21,11 +21,11 @@ import { EuiCheckboxGroup } from '@elastic/eui';
 import React from 'react';
 import { ReactElement, useState } from 'react';
 import { DashboardSavedObject } from '../..';
-import { setStateToKbnUrl, unhashUrl } from '../../../../kibana_utils/public';
-import { SharePluginStart } from '../../../../share/public';
+import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
+import { SharePluginStart } from '../../services/share';
 import { dashboardUrlParams } from '../dashboard_router';
 import { DashboardStateManager } from '../dashboard_state_manager';
-import { shareModalStrings } from '../dashboard_strings';
+import { shareModalStrings } from '../../dashboard_strings';
 import { DashboardCapabilities } from '../types';
 
 const showFilterBarId = 'showFilterBar';
