@@ -52,9 +52,9 @@ import {
   correlationsForFailedTransactionsRoute,
 } from './correlations';
 import {
-  transactionGroupsBreakdownRoute,
-  transactionChartsRoute,
-  transactionDistributionRoute,
+  transactionsChartsBreakdownRoute,
+  transactionsChartsRoute,
+  transactionsChartsDistributionRoute,
   transactionsGroupsRoute,
   transactionSampleForGroupRoute,
   transactionGroupsErrorRateRoute,
@@ -153,9 +153,9 @@ const createApmApi = () => {
     .add(rootTransactionByTraceIdRoute)
 
     // Transactions
-    .add(transactionGroupsBreakdownRoute)
-    .add(transactionChartsRoute)
-    .add(transactionDistributionRoute)
+    .add(transactionsChartsBreakdownRoute)
+    .add(transactionsChartsRoute)
+    .add(transactionsChartsDistributionRoute)
     .add(transactionsGroupsRoute)
     .add(transactionSampleForGroupRoute)
     .add(transactionGroupsErrorRateRoute)

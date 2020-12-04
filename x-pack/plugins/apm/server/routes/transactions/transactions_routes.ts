@@ -63,7 +63,7 @@ export const transactionsGroupsRoute = createRoute({
  * - Throughput: /transactions/charts/throughput
  * - anomalies: /transactions/charts/anomaly
  */
-export const transactionChartsRoute = createRoute({
+export const transactionsChartsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transactions/charts',
   params: t.type({
     path: t.type({
@@ -108,8 +108,7 @@ export const transactionChartsRoute = createRoute({
   },
 });
 
-// TODO: write API tests
-export const transactionDistributionRoute = createRoute({
+export const transactionsChartsDistributionRoute = createRoute({
   endpoint:
     'GET /api/apm/services/{serviceName}/transactions/charts/distribution',
   params: t.type({
@@ -156,8 +155,8 @@ export const transactionDistributionRoute = createRoute({
   },
 });
 
-export const transactionGroupsBreakdownRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/transaction_groups/breakdown',
+export const transactionsChartsBreakdownRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/transaction/charts/breakdown',
   params: t.type({
     path: t.type({
       serviceName: t.string,
