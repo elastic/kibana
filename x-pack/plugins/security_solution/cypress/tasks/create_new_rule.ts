@@ -117,9 +117,9 @@ export const fillAboutRule = (
   rule.mitre.forEach((mitre, tacticIndex) => {
     cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).eq(tacticIndex).click({ force: true });
     cy.contains(MITRE_TACTIC, mitre.tactic).click();
-    cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click({ force: true });
 
     mitre.techniques.forEach((technique) => {
+      cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click({ force: true });
       cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).eq(techniqueIndex).click({ force: true });
       cy.contains(MITRE_TACTIC, technique.name).click();
 
@@ -131,10 +131,6 @@ export const fillAboutRule = (
         cy.contains(MITRE_TACTIC, subtechnique).click();
         subtechniqueInputIndex++;
       });
-
-      if (techniqueIndex < mitre.techniques.length - 1) {
-        cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click({ force: true });
-      }
       techniqueIndex++;
     });
 
@@ -191,22 +187,26 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
     cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
   });
 
-  rule.mitre.forEach((mitre, index) => {
-    cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).eq(index).click({ force: true });
+  let techniqueIndex = 0;
+  let subtechniqueInputIndex = 0;
+  rule.mitre.forEach((mitre, tacticIndex) => {
+    cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).eq(tacticIndex).click({ force: true });
     cy.contains(MITRE_TACTIC, mitre.tactic).click();
 
     mitre.techniques.forEach((technique) => {
-      cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).eq(index).click({ force: true });
+      cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click({ force: true });
+      cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).eq(techniqueIndex).click({ force: true });
       cy.contains(MITRE_TACTIC, technique.name).click();
 
       technique.subtechniques.forEach((subtechnique) => {
-        cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN).eq(index).click({ force: true });
+        cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).eq(techniqueIndex).click({ force: true });
+        cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN)
+          .eq(subtechniqueInputIndex)
+          .click({ force: true });
         cy.contains(MITRE_TACTIC, subtechnique).click();
-
-        cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).click({ force: true });
+        subtechniqueInputIndex++;
       });
-
-      cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).click({ force: true });
+      techniqueIndex++;
     });
 
     cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).click({ force: true });
