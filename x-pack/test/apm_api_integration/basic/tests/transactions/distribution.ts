@@ -16,7 +16,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
 
-  const url = `/api/apm/services/opbeans-java/transaction_groups/distribution?${qs.stringify({
+  const url = `/api/apm/services/opbeans-java/transactions/charts/distribution?${qs.stringify({
     start: metadata.start,
     end: metadata.end,
     uiFilters: encodeURIComponent('{}'),
