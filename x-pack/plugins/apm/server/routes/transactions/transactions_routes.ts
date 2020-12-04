@@ -19,6 +19,7 @@ import { getErrorRate } from '../../lib/transaction_groups/get_error_rate';
 
 /**
  * Returns a list of transactions grouped by name
+ * //TODO: delete this once we moved away from the old table in the transaction overview page. It should be replaced by /transactions/groups/overview/
  */
 export const transactionsGroupsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups',
@@ -187,8 +188,9 @@ export const transactionsChartsBreakdownRoute = createRoute({
   },
 });
 
-export const transactionGroupsErrorRateRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/transaction_groups/error_rate',
+export const transactionsChartsErrorRateRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',
   params: t.type({
     path: t.type({
       serviceName: t.string,

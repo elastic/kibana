@@ -55,8 +55,8 @@ import {
   transactionsChartsBreakdownRoute,
   transactionsChartsRoute,
   transactionsChartsDistributionRoute,
+  transactionsChartsErrorRateRoute,
   transactionsGroupsRoute,
-  transactionGroupsErrorRateRoute,
 } from './transactions/transactions_routes';
 import {
   errorGroupsLocalFiltersRoute,
@@ -155,8 +155,8 @@ const createApmApi = () => {
     .add(transactionsChartsBreakdownRoute)
     .add(transactionsChartsRoute)
     .add(transactionsChartsDistributionRoute)
+    .add(transactionsChartsErrorRateRoute)
     .add(transactionsGroupsRoute)
-    .add(transactionGroupsErrorRateRoute)
 
     // UI filters
     .add(errorGroupsLocalFiltersRoute)
