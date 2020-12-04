@@ -12,6 +12,8 @@ import { useLinks } from '../../hooks';
 
 interface ScreenshotProps {
   images: ScreenshotItem[];
+  packageName: string;
+  version: string;
 }
 
 const getHorizontalPadding = (styledProps: any): number =>
@@ -38,8 +40,8 @@ const NestedEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 export function Screenshots(props: ScreenshotProps) {
-  const { toImage } = useLinks();
-  const { images } = props;
+  const { toPackageImage } = useLinks();
+  const { images, packageName, version } = props;
 
   // for now, just get first image
   const image = images[0];
@@ -72,7 +74,7 @@ export function Screenshots(props: ScreenshotProps) {
               set image to same width.  Will need to update if size changes.
             */}
           <EuiImage
-            url={toImage(image.path || image.src)}
+            url={toPackageImage(image, packageName, version)}
             alt="screenshot image preview"
             size="l"
             allowFullScreen

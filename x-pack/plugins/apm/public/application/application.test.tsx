@@ -41,7 +41,7 @@ describe('renderApp', () => {
     const plugins = {
       licensing: { license$: new Observable() },
       triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
-      usageCollection: { reportUiStats: () => {} },
+      usageCollection: { reportUiCounter: () => {} },
       data: {
         query: {
           timefilter: {
