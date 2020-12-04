@@ -276,7 +276,7 @@ export function updateLayerOrder(newLayerOrder: number[]) {
   };
 }
 
-export function updateMetricsProp(layerId, value) {
+export function updateMetricsProp(layerId: string, value: unknown) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState

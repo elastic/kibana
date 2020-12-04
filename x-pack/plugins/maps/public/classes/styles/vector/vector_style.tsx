@@ -17,7 +17,6 @@ import {
   LAYER_STYLE_TYPE,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   STYLE_TYPE,
-  TOP_TERM_PERCENTAGE_SUFFIX,
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
@@ -44,6 +43,7 @@ import {
   ColorDynamicOptions,
   ColorStaticOptions,
   ColorStylePropertyDescriptor,
+  DynamicStyleProperties,
   DynamicStylePropertyOptions,
   IconDynamicOptions,
   IconStaticOptions,
@@ -280,17 +280,16 @@ export class VectorStyle implements IVectorStyle {
         if (!isFieldDataTypeCompatible) {
           return;
         }
-        const newFieldDescriptor = rectifyFieldDescriptor(nextField as IESAggField, {
-          origin: previousField.getOrigin(),
-          name: previousField.getName(),
-        });
         hasChanges = true;
-        updatedProperties[invalidStyleName] = {
-          ...originalProperties[invalidStyleName],
+        (updatedProperties[invalidStyleName] as DynamicStyleProperties) = {
+          type: STYLE_TYPE.DYNAMIC,
           options: {
             ...originalProperties[invalidStyleName].options,
-            field: newFieldDescriptor,
-          },
+            field: rectifyFieldDescriptor(nextField as IESAggField, {
+              origin: previousField.getOrigin(),
+              name: previousField.getName(),
+            }),
+          } as DynamicStylePropertyOptions,
         };
       }
     });
