@@ -311,9 +311,8 @@ export class AnalyticsManager {
 
         details[previousNodeId] = data;
       } catch (error) {
-        if (error.statusCode === 404) {
-          // fail silently if job doesn't exist
-        } else {
+        // fail silently if job doesn't exist
+        if (error.statusCode !== 404) {
           throw error.body ?? error;
         }
       }

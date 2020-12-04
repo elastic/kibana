@@ -159,7 +159,7 @@ export const Controls: FC<Props> = ({
     };
   }, [cy, deselect]);
 
-  useEffect(() => {
+  useEffect(
     function updateElementsOnClose() {
       if (isModalVisible === false && deleteItem === true) {
         let destIndexNode;
@@ -171,10 +171,9 @@ export const Controls: FC<Props> = ({
         updateElements(nodeId, nodeLabel, destIndexNode);
         setShowFlyout(false);
       }
-    }
-
-    updateElementsOnClose();
-  }, [isModalVisible, deleteItem]);
+    },
+    [isModalVisible, deleteItem]
+  );
 
   if (showFlyout === false) {
     return null;

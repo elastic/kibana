@@ -172,9 +172,9 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }} ref={ref}>
+      <div style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) - 20 }} ref={ref}>
         <Cytoscape
-          height={height}
+          height={height - 20}
           elements={elements}
           width={width}
           style={cytoscapeDivStyle}
