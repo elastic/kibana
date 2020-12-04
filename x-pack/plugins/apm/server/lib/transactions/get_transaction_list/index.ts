@@ -5,12 +5,12 @@
  */
 
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { transactionFetcher, Options } from '../fetcher';
+import { transactionGroupsFetcher, Options } from '../fetcher';
 
 export async function getTransactionList(
   options: Options,
   setup: Setup & SetupTimeRange
 ) {
   const bucketSize = setup.config['xpack.apm.ui.transactionGroupBucketSize'];
-  return await transactionFetcher(options, setup, bucketSize);
+  return await transactionGroupsFetcher(options, setup, bucketSize);
 }

@@ -39,7 +39,7 @@ interface TopTraceOptions {
 
 export type Options = TopTransactionOptions | TopTraceOptions;
 
-export type ESResponse = PromiseReturnType<typeof transactionFetcher>;
+export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
 
 export type TransactionRequestBase = ReturnType<
   typeof getTransactionGroupsProjection
@@ -93,7 +93,7 @@ function getItemsWithRelativeImpact(
   return itemsWithRelativeImpact;
 }
 
-export async function transactionFetcher(
+export async function transactionGroupsFetcher(
   options: Options,
   setup: TransactionSetup,
   bucketSize: number
@@ -170,24 +170,26 @@ export async function transactionFetcher(
   const defaultServiceName =
     options.type === 'top_transactions' ? options.serviceName : undefined;
 
-  const itemsWithKeys: Transaction[] = itemsWithRelativeImpact.map((item) => {
-    let transactionName: string;
-    let serviceName: string;
+  const itemsWithKeys: TransactionGroup[] = itemsWithRelativeImpact.map(
+    (item) => {
+      let transactionName: string;
+      let serviceName: string;
 
-    if (typeof item.key === 'string') {
-      transactionName = item.key;
-      serviceName = defaultServiceName!;
-    } else {
-      transactionName = item.key[TRANSACTION_NAME];
-      serviceName = item.key[SERVICE_NAME];
+      if (typeof item.key === 'string') {
+        transactionName = item.key;
+        serviceName = defaultServiceName!;
+      } else {
+        transactionName = item.key[TRANSACTION_NAME];
+        serviceName = item.key[SERVICE_NAME];
+      }
+
+      return {
+        ...item,
+        transactionName,
+        serviceName,
+      };
     }
-
-    return {
-      ...item,
-      transactionName,
-      serviceName,
-    };
-  });
+  );
 
   return {
     items: take(
@@ -202,7 +204,7 @@ export async function transactionFetcher(
   };
 }
 
-interface Transaction {
+interface TransactionGroup {
   key: string | Record<'service.name' | 'transaction.name', string>;
   serviceName: string;
   transactionName: string;
