@@ -22,6 +22,8 @@ import {
   coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
+import { usageStatsClientMock } from '../../../usage_stats/usage_stats_client.mock';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { ObjectType } from '@kbn/config-schema';
@@ -82,6 +84,11 @@ describe('copy to space', () => {
       basePath: httpService.basePath,
     });
 
+    const usageStatsClient = usageStatsClientMock.create();
+    const usageStatsServicePromise = Promise.resolve(
+      usageStatsServiceMock.createSetupContract(usageStatsClient)
+    );
+
     const clientServiceStart = clientService.start(coreStart);
 
     const spacesServiceStart = service.start({
@@ -95,6 +102,7 @@ describe('copy to space', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       getSpacesService: () => spacesServiceStart,
+      usageStatsServicePromise,
     });
 
     const [
@@ -113,6 +121,7 @@ describe('copy to space', () => {
         routeHandler: resolveRouteHandler,
       },
       savedObjectsRepositoryMock,
+      usageStatsClient,
     };
   };
 
@@ -133,6 +142,27 @@ describe('copy to space', () => {
       expect(response.status).toEqual(403);
       expect(response.payload).toEqual({
         message: 'License is invalid for spaces',
+      });
+    });
+
+    it(`records usageStats data`, async () => {
+      const createNewCopies = Symbol();
+      const overwrite = Symbol();
+      const payload = { spaces: ['a-space'], objects: [], createNewCopies, overwrite };
+
+      const { copyToSpace, usageStatsClient } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      await copyToSpace.routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      expect(usageStatsClient.incrementCopySavedObjects).toHaveBeenCalledWith({
+        headers: request.headers,
+        createNewCopies,
+        overwrite,
       });
     });
 
@@ -269,6 +299,25 @@ describe('copy to space', () => {
       expect(response.status).toEqual(403);
       expect(response.payload).toEqual({
         message: 'License is invalid for spaces',
+      });
+    });
+
+    it(`records usageStats data`, async () => {
+      const createNewCopies = Symbol();
+      const payload = { retries: {}, objects: [], createNewCopies };
+
+      const { resolveConflicts, usageStatsClient } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        body: payload,
+        method: 'post',
+      });
+
+      await resolveConflicts.routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+      expect(usageStatsClient.incrementResolveCopySavedObjectsErrors).toHaveBeenCalledWith({
+        headers: request.headers,
+        createNewCopies,
       });
     });
 
