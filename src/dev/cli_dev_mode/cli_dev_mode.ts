@@ -126,9 +126,6 @@ export class CliDevMode {
       ignore: ignorePaths,
     });
 
-    const proxyTargetHost = `${this.basePathProxy?.host}:${options.basePathProxy?.targetPort}`;
-    const publicHost = `${this.basePathProxy?.host}:${options.basePathProxy?.port}`;
-
     this.devServer = new DevServer({
       log: this.log,
       watcher: this.watcher,
@@ -145,8 +142,14 @@ export class CliDevMode {
             ]
           : []),
       ],
-      mapLogLine(line) {
-        return line.split(proxyTargetHost).join(publicHost);
+      mapLogLine: (line) => {
+        if (!this.basePathProxy) {
+          return line;
+        }
+
+        return line
+          .split(`${this.basePathProxy.host}:${this.basePathProxy.targetPort}`)
+          .join(`${this.basePathProxy.host}:${this.basePathProxy.port}`);
       },
     });
 
