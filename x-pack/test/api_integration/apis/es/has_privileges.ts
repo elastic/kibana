@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const application = 'has_privileges_test';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   describe('has_privileges', () => {
     before(async () => {
-      const es = getService('legacyEs');
+      const es = getService('es');
 
-      await es.shield.postPrivileges({
+      await es.security.putPrivileges({
         body: {
           [application]: {
             read: {
@@ -25,7 +26,7 @@ export default function ({ getService }) {
         },
       });
 
-      await es.shield.putRole({
+      await es.security.putRole({
         name: 'hp_read_user',
         body: {
           cluster: [],
@@ -40,7 +41,7 @@ export default function ({ getService }) {
         },
       });
 
-      await es.shield.putUser({
+      await es.security.putUser({
         username: 'testuser',
         body: {
           password: 'testpassword',
@@ -51,7 +52,9 @@ export default function ({ getService }) {
       });
     });
 
-    function createHasPrivilegesRequest(privileges) {
+    function createHasPrivilegesRequest(
+      privileges: string[]
+    ): Promise<{ body: Record<string, unknown> }> {
       const supertest = getService('esSupertestWithoutAuth');
       return supertest
         .post(`/_security/user/_has_privileges`)
@@ -105,8 +108,8 @@ export default function ({ getService }) {
       });
 
       // Create privilege
-      const es = getService('legacyEs');
-      await es.shield.postPrivileges({
+      const es = getService('es');
+      await es.security.putPrivileges({
         body: {
           [application]: {
             read: {
