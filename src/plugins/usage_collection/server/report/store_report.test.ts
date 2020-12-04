@@ -76,22 +76,19 @@ describe('store_report', () => {
       1,
       'ui-metric',
       'test-app-name:test-event-name',
-      'count',
-      { incrementBy: 3 }
+      [{ fieldName: 'count', incrementBy: 3 }]
     );
     expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
       2,
       'ui-counter',
       `test-app-name:${date}:${METRIC_TYPE.LOADED}:test-event-name`,
-      'count',
-      { incrementBy: 1 }
+      [{ fieldName: 'count', incrementBy: 1 }]
     );
     expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
       3,
       'ui-counter',
       `test-app-name:${date}:${METRIC_TYPE.CLICK}:test-event-name`,
-      'count',
-      { incrementBy: 2 }
+      [{ fieldName: 'count', incrementBy: 2 }]
     );
     expect(savedObjectClient.bulkCreate).toHaveBeenNthCalledWith(1, [
       {

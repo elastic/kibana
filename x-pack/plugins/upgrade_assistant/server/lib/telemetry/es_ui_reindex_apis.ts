@@ -23,11 +23,9 @@ async function incrementUIReindexOptionCounter({
 }: IncrementUIReindexOptionDependencies) {
   const internalRepository = savedObjects.createInternalRepository();
 
-  await internalRepository.incrementCounter(
-    UPGRADE_ASSISTANT_TYPE,
-    UPGRADE_ASSISTANT_DOC_ID,
-    `ui_reindex.${uiReindexOptionCounter}`
-  );
+  await internalRepository.incrementCounter(UPGRADE_ASSISTANT_TYPE, UPGRADE_ASSISTANT_DOC_ID, [
+    `ui_reindex.${uiReindexOptionCounter}`,
+  ]);
 }
 
 type UpsertUIReindexOptionDepencies = UIReindex & { savedObjects: SavedObjectsServiceStart };

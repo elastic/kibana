@@ -46,26 +46,26 @@ export function mergeTransactionGroupData({
     const timeseriesBuckets = groupBucket?.timeseries.buckets ?? [];
 
     return timeseriesBuckets.reduce(
-      (prev, point) => {
+      (acc, point) => {
         return {
-          ...prev,
+          ...acc,
           latency: {
-            ...prev.latency,
-            timeseries: prev.latency.timeseries.concat({
+            ...acc.latency,
+            timeseries: acc.latency.timeseries.concat({
               x: point.key,
               y: point.avg_latency.value,
             }),
           },
           throughput: {
-            ...prev.throughput,
-            timeseries: prev.throughput.timeseries.concat({
+            ...acc.throughput,
+            timeseries: acc.throughput.timeseries.concat({
               x: point.key,
               y: point.transaction_count.value / deltaAsMinutes,
             }),
           },
           errorRate: {
-            ...prev.errorRate,
-            timeseries: prev.errorRate.timeseries.concat({
+            ...acc.errorRate,
+            timeseries: acc.errorRate.timeseries.concat({
               x: point.key,
               y:
                 point.transaction_count.value > 0

@@ -300,7 +300,11 @@ export const getXyVisualization = ({
 
   getLayerContextMenuIcon({ state, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
-    return visualizationTypes.find((t) => t.id === layer?.seriesType)?.icon;
+    const visualizationType = visualizationTypes.find((t) => t.id === layer?.seriesType);
+    return {
+      icon: visualizationType?.icon || 'gear',
+      label: visualizationType?.label || '',
+    };
   },
 
   renderLayerContextMenu(domElement, props) {

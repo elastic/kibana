@@ -59,9 +59,9 @@ export async function storeReport(
         };
       })
       .map(async ({ savedObjectId, incrementBy }) => {
-        return await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count', {
-          incrementBy,
-        });
+        return await internalRepository.incrementCounter('ui-metric', savedObjectId, [
+          { fieldName: 'count', incrementBy },
+        ]);
       })
       .value(),
     // UI Counters
@@ -69,9 +69,9 @@ export async function storeReport(
       const { appName, eventName, total, type } = metric;
       const savedObjectId = `${appName}:${date}:${type}:${eventName}`;
       return [
-        await internalRepository.incrementCounter('ui-counter', savedObjectId, 'count', {
-          incrementBy: total,
-        }),
+        await internalRepository.incrementCounter('ui-counter', savedObjectId, [
+          { fieldName: 'count', incrementBy: total },
+        ]),
       ];
     }),
     // Application Usage

@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
-import { EuiHealth, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { Agent } from '../../../types';
 
 interface Props {
@@ -13,79 +13,52 @@ interface Props {
 }
 
 const Status = {
-  Online: (
-    <EuiHealth color="success">
-      <FormattedMessage id="xpack.fleet.agentHealth.onlineStatusText" defaultMessage="Online" />
-    </EuiHealth>
+  Healthy: (
+    <EuiBadge color="secondary">
+      <FormattedMessage id="xpack.fleet.agentHealth.healthyStatusText" defaultMessage="Healthy" />
+    </EuiBadge>
   ),
   Offline: (
-    <EuiHealth color="subdued">
+    <EuiBadge color="default">
       <FormattedMessage id="xpack.fleet.agentHealth.offlineStatusText" defaultMessage="Offline" />
-    </EuiHealth>
+    </EuiBadge>
   ),
   Inactive: (
-    <EuiHealth color="subdued">
-      <FormattedMessage id="xpack.fleet.agentHealth.inactiveStatusText" defaultMessage="Inactive" />
-    </EuiHealth>
+    <EuiBadge color="default">
+      <FormattedMessage id="xpack.fleet.agentHealth.offlineStatusText" defaultMessage="Offline" />
+    </EuiBadge>
   ),
-  Warning: (
-    <EuiHealth color="warning">
-      <FormattedMessage id="xpack.fleet.agentHealth.warningStatusText" defaultMessage="Error" />
-    </EuiHealth>
-  ),
-  Error: (
-    <EuiHealth color="danger">
-      <FormattedMessage id="xpack.fleet.agentHealth.errorStatusText" defaultMessage="Error" />
-    </EuiHealth>
-  ),
-  Degraded: (
-    <EuiHealth color="danger">
-      <FormattedMessage id="xpack.fleet.agentHealth.degradedStatusText" defaultMessage="Degraded" />
-    </EuiHealth>
-  ),
-  Enrolling: (
-    <EuiHealth color="warning">
+  Unhealthy: (
+    <EuiBadge color="warning">
       <FormattedMessage
-        id="xpack.fleet.agentHealth.enrollingStatusText"
-        defaultMessage="Enrolling"
+        id="xpack.fleet.agentHealth.inactiveStatusText"
+        defaultMessage="Unhealthy"
       />
-    </EuiHealth>
+    </EuiBadge>
   ),
-  Unenrolling: (
-    <EuiHealth color="warning">
-      <FormattedMessage
-        id="xpack.fleet.agentHealth.unenrollingStatusText"
-        defaultMessage="Unenrolling"
-      />
-    </EuiHealth>
-  ),
-  Upgrading: (
-    <EuiHealth color="warning">
+  Updating: (
+    <EuiBadge color="primary">
       <FormattedMessage id="xpack.fleet.agentHealth.updatingStatusText" defaultMessage="Updating" />
-    </EuiHealth>
+    </EuiBadge>
   ),
 };
 
 function getStatusComponent(agent: Agent): React.ReactElement {
   switch (agent.status) {
+    case 'warning':
     case 'error':
-      return Status.Error;
     case 'degraded':
-      return Status.Degraded;
+      return Status.Unhealthy;
     case 'inactive':
       return Status.Inactive;
     case 'offline':
       return Status.Offline;
-    case 'warning':
-      return Status.Warning;
     case 'unenrolling':
-      return Status.Unenrolling;
     case 'enrolling':
-      return Status.Enrolling;
     case 'updating':
-      return Status.Upgrading;
+      return Status.Updating;
     default:
-      return Status.Online;
+      return Status.Healthy;
   }
 }
 

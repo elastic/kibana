@@ -22,6 +22,7 @@ export {
   NewPackagePolicyInputStream,
   PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
+  PackagePolicyPackage,
   Output,
   DataStream,
   // API schema - misc setup, status

@@ -1374,10 +1374,10 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.7.0"
 
-"@elastic/charts@24.0.0":
-  version "24.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-24.0.0.tgz#7b97b00a3dc873f46f764de0f28573e236b76aa7"
-  integrity sha512-ZFIdHcU48Wes7eb1R+48L7xLH4p7D9oSdkoX/iuwt+znD353UhiYK9u+dbrpMXeOMtFYt7dktzVAbouHcJCZPA==
+"@elastic/charts@24.2.0":
+  version "24.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-24.2.0.tgz#c670315b74184c463e6ad4015cf89c196bd5eb58"
+  integrity sha512-zIuHQIgrVdS0j9PLwS0hrshkjQyxwr//oFSXGppzCUUQouG56TE0cCol20v4u/0dZFVmJc6vAotSzz4er5O39Q==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -4625,6 +4625,13 @@
   integrity sha512-X+RcMQCqPlQo8zPT6cUFTd/PoYBShMQlHUeOXf05jWlfYnvLuRmluB9z+2EsOKFgUzqzZve5brx+gnFxBaHEUw==
   dependencies:
     "@types/jquery" "*"
+
+"@types/fs-extra@^8.0.0":
+  version "8.1.1"
+  resolved "https://registry.yarnpkg.com/@types/fs-extra/-/fs-extra-8.1.1.tgz#1e49f22d09aa46e19b51c0b013cb63d0d923a068"
+  integrity sha512-TcUlBem321DFQzBNuz8p0CLLKp0VvF/XH9E4KHNmgwyp4E3AfgI5cjiIVZWlbfThBop2qxFIh4+LeY6hVWWZ2w==
+  dependencies:
+    "@types/node" "*"
 
 "@types/geojson@*", "@types/geojson@7946.0.7":
   version "7946.0.7"
@@ -11938,6 +11945,22 @@ dotignore@^0.1.2:
   dependencies:
     minimatch "^3.0.4"
 
+dpdm@3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/dpdm/-/dpdm-3.5.0.tgz#414402f21928694bc86cfe8e3583dc8fc97d013e"
+  integrity sha512-bff2gDpYyzmIOMwRp0Bsk0T4e/qgLRCeuGHZYEsJV0LRzuTUkXirCiLcme7Ebu/LVoQ8yAKiody5/1e51tsmFw==
+  dependencies:
+    "@types/fs-extra" "^8.0.0"
+    "@types/glob" "^7.1.1"
+    "@types/yargs" "^13.0.0"
+    chalk "^2.4.2"
+    fs-extra "^8.1.0"
+    glob "^7.1.4"
+    ora "^4.0.3"
+    tslib "^1.10.0"
+    typescript "^3.5.3"
+    yargs "^13.3.0"
+
 dtrace-provider@~0.8:
   version "0.8.8"
   resolved "https://registry.yarnpkg.com/dtrace-provider/-/dtrace-provider-0.8.8.tgz#2996d5490c37e1347be263b423ed7b297fb0d97e"
@@ -14122,6 +14145,15 @@ fs-extra@^7.0.0, fs-extra@^7.0.1, fs-extra@~7.0.1:
   integrity sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==
   dependencies:
     graceful-fs "^4.1.2"
+    jsonfile "^4.0.0"
+    universalify "^0.1.0"
+
+fs-extra@^8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-8.1.0.tgz#49d43c45a88cd9677668cb7be1b46efdb8d2e1c0"
+  integrity sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g==
+  dependencies:
+    graceful-fs "^4.2.0"
     jsonfile "^4.0.0"
     universalify "^0.1.0"
 
@@ -21330,7 +21362,7 @@ ora@^3.0.0:
     strip-ansi "^5.2.0"
     wcwidth "^1.0.1"
 
-ora@^4.0.4:
+ora@^4.0.3, ora@^4.0.4:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/ora/-/ora-4.1.1.tgz#566cc0348a15c36f5f0e979612842e02ba9dddbc"
   integrity sha512-sjYP8QyVWBpBZWD6Vr1M/KwknSw6kJOz41tvGMlwWeClHBtYKTbHMki1PsLZnxKpXMPbTKv9b3pjQu3REib96A==
@@ -27632,7 +27664,7 @@ typescript-tuple@^2.2.1:
   dependencies:
     typescript-compare "^0.0.2"
 
-typescript@4.1.2, typescript@^3.0.3, typescript@^3.2.2, typescript@^3.3.3333, typescript@^3.4.5, typescript@~3.7.2:
+typescript@4.1.2, typescript@^3.0.3, typescript@^3.2.2, typescript@^3.3.3333, typescript@^3.4.5, typescript@^3.5.3, typescript@~3.7.2:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.1.2.tgz#6369ef22516fe5e10304aae5a5c4862db55380e9"
   integrity sha512-thGloWsGH3SOxv1SoY7QojKi0tc+8FnOmiarEGMbd/lar7QOEd3hvlx3Fp5y6FlDUGl9L+pd4n2e+oToGMmhRQ==

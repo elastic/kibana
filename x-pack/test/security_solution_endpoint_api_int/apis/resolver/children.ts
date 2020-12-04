@@ -53,6 +53,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         startEvent = generator.generateEvent({
+          timestamp: (timestampSafeVersion(infoEvent) ?? 0) + 100,
           parentEntityID: entityIDSafeVersion(infoEvent),
           ancestry: createAncestryArray([infoEvent, origin]),
           eventType: ['start'],
@@ -60,6 +61,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         execEvent = generator.generateEvent({
+          timestamp: (timestampSafeVersion(startEvent) ?? 0) + 100,
           parentEntityID: entityIDSafeVersion(startEvent),
           ancestry: createAncestryArray([startEvent, infoEvent]),
           eventType: ['change'],
@@ -107,6 +109,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         infoEvent = generator.generateEvent({
+          timestamp: (timestampSafeVersion(startEvent) ?? 0) + 100,
           parentEntityID: entityIDSafeVersion(origin),
           ancestry: createAncestryArray([origin]),
           entityID: entityIDSafeVersion(startEvent),
@@ -115,6 +118,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         execEvent = generator.generateEvent({
+          timestamp: (timestampSafeVersion(infoEvent) ?? 0) + 100,
           parentEntityID: entityIDSafeVersion(origin),
           ancestry: createAncestryArray([origin]),
           eventType: ['change'],

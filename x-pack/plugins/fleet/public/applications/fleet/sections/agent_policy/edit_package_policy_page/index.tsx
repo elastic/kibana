@@ -305,20 +305,23 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
             validationResults={validationResults!}
           />
 
-          <StepConfigurePackagePolicy
-            from={'edit'}
-            packageInfo={packageInfo}
-            packagePolicy={packagePolicy}
-            packagePolicyId={packagePolicyId}
-            updatePackagePolicy={updatePackagePolicy}
-            validationResults={validationResults!}
-            submitAttempted={formState === 'INVALID'}
-          />
+          {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
+          {!ExtensionView && (
+            <StepConfigurePackagePolicy
+              from={'edit'}
+              packageInfo={packageInfo}
+              packagePolicy={packagePolicy}
+              packagePolicyId={packagePolicyId}
+              updatePackagePolicy={updatePackagePolicy}
+              validationResults={validationResults!}
+              submitAttempted={formState === 'INVALID'}
+            />
+          )}
 
-          {packagePolicy.policy_id &&
+          {ExtensionView &&
+            packagePolicy.policy_id &&
             packagePolicy.package?.name &&
-            originalPackagePolicy &&
-            ExtensionView && (
+            originalPackagePolicy && (
               <ExtensionWrapper>
                 <ExtensionView
                   policy={originalPackagePolicy}

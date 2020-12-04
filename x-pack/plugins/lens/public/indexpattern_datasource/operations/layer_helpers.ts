@@ -22,6 +22,7 @@ import type {
 import { getSortScoreByPriority } from './operations';
 import { mergeLayer } from '../state_helpers';
 import { generateId } from '../../id_generator';
+import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
 
 interface ColumnChange {
   op: OperationType;
@@ -208,8 +209,7 @@ export function replaceColumn({
     let tempLayer = { ...layer };
 
     if (previousDefinition.input === 'fullReference') {
-      // @ts-expect-error references are not statically analyzed
-      previousColumn.references.forEach((id: string) => {
+      (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
         tempLayer = deleteColumn({ layer: tempLayer, columnId: id });
       });
     }
@@ -237,11 +237,8 @@ export function replaceColumn({
     }
 
     if (operationDefinition.input === 'none') {
-      const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
-      if (previousColumn.customLabel) {
-        newColumn.customLabel = true;
-        newColumn.label = previousColumn.label;
-      }
+      let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
+      newColumn = adjustLabel(newColumn, previousColumn);
 
       const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
       return {
@@ -255,12 +252,8 @@ export function replaceColumn({
       throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
     }
 
-    const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
-
-    if (previousColumn.customLabel) {
-      newColumn.customLabel = true;
-      newColumn.label = previousColumn.label;
-    }
+    let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
+    newColumn = adjustLabel(newColumn, previousColumn);
 
     const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
     return {
@@ -277,12 +270,7 @@ export function replaceColumn({
     // Same operation, new field
     const newColumn = operationDefinition.onFieldChange(previousColumn, field);
 
-    if (previousColumn.customLabel) {
-      newColumn.customLabel = true;
-      newColumn.label = previousColumn.label;
-    }
-
-    const newColumns = { ...layer.columns, [columnId]: newColumn };
+    const newColumns = { ...layer.columns, [columnId]: adjustLabel(newColumn, previousColumn) };
     return {
       ...layer,
       columnOrder: getColumnOrder({ ...layer, columns: newColumns }),
@@ -291,6 +279,16 @@ export function replaceColumn({
   } else {
     throw new Error('nothing changed');
   }
+}
+
+function adjustLabel(newColumn: IndexPatternColumn, previousColumn: IndexPatternColumn) {
+  const adjustedColumn = { ...newColumn };
+  if (previousColumn.customLabel) {
+    adjustedColumn.customLabel = true;
+    adjustedColumn.label = previousColumn.label;
+  }
+
+  return adjustedColumn;
 }
 
 function addBucket(

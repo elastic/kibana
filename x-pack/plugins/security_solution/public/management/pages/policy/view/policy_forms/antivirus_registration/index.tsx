@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 
+import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { isAntivirusRegistrationEnabled } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { ConfigForm } from '../../components/config_form';
@@ -36,7 +37,7 @@ export const AntivirusRegistrationForm = memo(() => {
           defaultMessage: 'Register as anti-virus',
         }
       )}
-      supportedOss={['windows']}
+      supportedOss={[OperatingSystem.WINDOWS]}
     >
       <EuiText size="s">
         {i18n.translate(

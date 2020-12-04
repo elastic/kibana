@@ -187,6 +187,9 @@
 /x-pack/test/saved_object_tagging/ @elastic/kibana-core
 /packages/kbn-config-schema/ @elastic/kibana-core
 /packages/kbn-std/ @elastic/kibana-core
+/packages/kbn-config/ @elastic/kibana-core
+/packages/kbn-logging/ @elastic/kibana-core
+/packages/kbn-legacy-logging/ @elastic/kibana-core
 /src/legacy/server/config/ @elastic/kibana-core
 /src/legacy/server/http/ @elastic/kibana-core
 /src/legacy/server/logging/ @elastic/kibana-core

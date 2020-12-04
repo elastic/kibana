@@ -46,7 +46,7 @@ export function TransactionCharts({
 }: TransactionChartProps) {
   const { transactionType } = urlParams;
 
-  const { responseTimeSeries, tpmSeries } = charts;
+  const { responseTimeSeries, tpmSeries, anomalySeries } = charts;
 
   const { formatter, toggleSerie } = useFormatter(responseTimeSeries);
 
@@ -79,6 +79,7 @@ export function TransactionCharts({
                   id="transactionDuration"
                   timeseries={responseTimeSeries || []}
                   yLabelFormat={getResponseTimeTickFormatter(formatter)}
+                  anomalySeries={anomalySeries}
                   onToggleLegend={(serie) => {
                     if (serie) {
                       toggleSerie(serie);

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import {
   SignalSourceHit,
   SignalSearchResponse,
@@ -189,9 +190,25 @@ export const sampleDocNoSortId = (
   sort: [],
 });
 
-export const sampleDocSeverity = (
-  severity?: Array<string | number | null> | string | number | null
-): SignalSourceHit => ({
+export const sampleDocSeverity = (severity?: unknown, fieldName?: string): SignalSourceHit => {
+  const doc = {
+    _index: 'myFakeSignalIndex',
+    _type: 'doc',
+    _score: 100,
+    _version: 1,
+    _id: sampleIdGuid,
+    _source: {
+      someKey: 'someValue',
+      '@timestamp': '2020-04-20T21:27:45+0000',
+    },
+    sort: [],
+  };
+
+  set(doc._source, fieldName ?? 'event.severity', severity);
+  return doc;
+};
+
+export const sampleDocRiskScore = (riskScore?: unknown): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
@@ -201,7 +218,7 @@ export const sampleDocSeverity = (
     someKey: 'someValue',
     '@timestamp': '2020-04-20T21:27:45+0000',
     event: {
-      severity: severity ?? 100,
+      risk: riskScore,
     },
   },
   sort: [],

@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { PainlessLang } from '@kbn/monaco';
+import { PainlessLang, PainlessContext } from '@kbn/monaco';
+
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   code: string;
   onChange: (code: string) => void;
+  context: PainlessContext;
 }
 
-export function Editor({ code, onChange }: Props) {
+export function Editor({ code, onChange, context }: Props) {
+  const suggestionProvider = PainlessLang.getSuggestionProvider(context);
+
   return (
     <CodeEditor
       languageId={PainlessLang.ID}
@@ -21,6 +25,7 @@ export function Editor({ code, onChange }: Props) {
       height="100%"
       value={code}
       onChange={onChange}
+      suggestionProvider={suggestionProvider}
       options={{
         fontSize: 12,
         minimap: {
@@ -30,6 +35,9 @@ export function Editor({ code, onChange }: Props) {
         wordWrap: 'on',
         wrappingIndent: 'indent',
         automaticLayout: true,
+        suggest: {
+          snippetsPreventQuickSuggestions: false,
+        },
       }}
     />
   );
