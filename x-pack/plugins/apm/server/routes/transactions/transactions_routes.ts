@@ -22,7 +22,7 @@ import { rangeRt, uiFiltersRt } from '../default_api_types';
  * Returns a list of transactions grouped by name
  * //TODO: delete this once we moved away from the old table in the transaction overview page. It should be replaced by /transactions/groups/overview/
  */
-export const transactionsGroupsRoute = createRoute({
+export const transactionGroupsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups',
   params: t.type({
     path: t.type({
@@ -58,7 +58,7 @@ export const transactionsGroupsRoute = createRoute({
   },
 });
 
-export const transactionsGroupsOverviewRoute = createRoute({
+export const transactionGroupsOverviewRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups/overview',
   params: t.type({
     path: t.type({ serviceName: t.string }),
@@ -114,7 +114,7 @@ export const transactionsGroupsOverviewRoute = createRoute({
  * - Throughput: /transactions/charts/throughput
  * - anomalies: /transactions/charts/anomaly
  */
-export const transactionsChartsRoute = createRoute({
+export const transactionChartsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transactions/charts',
   params: t.type({
     path: t.type({
@@ -159,7 +159,7 @@ export const transactionsChartsRoute = createRoute({
   },
 });
 
-export const transactionsChartsDistributionRoute = createRoute({
+export const transactionChartsDistributionRoute = createRoute({
   endpoint:
     'GET /api/apm/services/{serviceName}/transactions/charts/distribution',
   params: t.type({
@@ -206,7 +206,7 @@ export const transactionsChartsDistributionRoute = createRoute({
   },
 });
 
-export const transactionsChartsBreakdownRoute = createRoute({
+export const transactionChartsBreakdownRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transaction/charts/breakdown',
   params: t.type({
     path: t.type({
@@ -238,7 +238,7 @@ export const transactionsChartsBreakdownRoute = createRoute({
   },
 });
 
-export const transactionsChartsErrorRateRoute = createRoute({
+export const transactionChartsErrorRateRoute = createRoute({
   endpoint:
     'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',
   params: t.type({
