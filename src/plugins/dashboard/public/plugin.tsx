@@ -21,6 +21,8 @@ import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import {
   App,
   Plugin,
@@ -32,9 +34,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   SavedObjectsClientContract,
-} from 'src/core/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+} from '../../../core/public';
 
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
