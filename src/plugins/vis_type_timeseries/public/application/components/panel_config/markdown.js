@@ -334,7 +334,6 @@ MarkdownPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  dateFormat: PropTypes.string,
 };
 
 export const MarkdownPanelConfig = injectI18n(MarkdownPanelConfigUi);
