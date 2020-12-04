@@ -33,6 +33,8 @@ import { AliasAction } from './actions';
 import { ControlState, stateActionMachine } from './state_action_machine';
 import { SavedObjectsRawDoc, SavedObjectsSerializer } from '..';
 
+const MAX_RETRY_ATTEMPTS = 10;
+
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
   indexPrefix: string;
@@ -288,7 +290,7 @@ export type ResponseType<ControlState extends AllActionStates> = Await<
 >;
 
 const delayRetryState = <S extends State>(state: S, left: Actions.RetryableEsClientError): S => {
-  if (state.retryCount === 5) {
+  if (state.retryCount === MAX_RETRY_ATTEMPTS) {
     return {
       ...state,
       controlState: 'FATAL',
@@ -299,7 +301,7 @@ const delayRetryState = <S extends State>(state: S, left: Actions.RetryableEsCli
     };
   } else {
     const retryCount = state.retryCount + 1;
-    const retryDelay = 1000 * Math.pow(2, retryCount); // 2s, 4s, 8s, 16s, 32s, 64s
+    const retryDelay = 1000 * Math.min(Math.pow(2, retryCount), 64); // 2s, 4s, 8s, 16s, 32s, 64s, 64s, 64s ...
 
     return {
       ...state,
@@ -311,7 +313,9 @@ const delayRetryState = <S extends State>(state: S, left: Actions.RetryableEsCli
           level: 'error',
           message:
             chalk.red('ERROR: ') +
-            `Action failed with '${left.message}'. Retrying attempt ${retryCount} out of 5 in ${
+            `Action failed with '${
+              left.message
+            }'. Retrying attempt ${retryCount} out of ${MAX_RETRY_ATTEMPTS} in ${
               retryDelay / 1000
             } seconds.`,
         },

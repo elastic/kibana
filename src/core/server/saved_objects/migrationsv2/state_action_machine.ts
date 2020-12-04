@@ -76,8 +76,9 @@ export async function stateActionMachine<
 
     controlStateStepCounter =
       newState.controlState === state.controlState ? controlStateStepCounter + 1 : 0;
-    if (controlStateStepCounter === 10) {
-      throw new Error("Control state didn't change after 10 steps aborting.");
+    if (controlStateStepCounter === 50) {
+      // This is just a fail-safe to ensure we don't get stuck in an infinite loop
+      throw new Error("Control state didn't change after 50 steps aborting.");
     }
 
     // Get ready for the next step

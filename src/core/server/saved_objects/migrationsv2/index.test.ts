@@ -78,32 +78,55 @@ describe('migrations v2', () => {
         message: 'snapshot_in_progress_exception',
       };
       test('sets retryCount, exponential retryDelay if an action fails with a RetryableEsClientError', () => {
-        state = model(state, Either.left(retryableError));
-
-        expect(state.retryCount).toEqual(1);
-        expect(state.retryDelay).toEqual(2000);
-
-        state = model(state, Either.left(retryableError));
-
-        expect(state.retryCount).toEqual(2);
-        expect(state.retryDelay).toEqual(4000);
-
-        state = model(state, Either.left(retryableError));
-
-        expect(state.retryCount).toEqual(3);
-        expect(state.retryDelay).toEqual(8000);
-
-        state = model(state, Either.left(retryableError));
-
-        expect(state.retryCount).toEqual(4);
-        expect(state.retryDelay).toEqual(16000);
-
-        state = model(state, Either.left(retryableError));
-
-        expect(state.retryCount).toEqual(5);
-        expect(state.retryDelay).toEqual(32000);
-
-        state = model(state, Either.left(retryableError));
+        const states = new Array(10).fill(1).map(() => {
+          state = model(state, Either.left(retryableError));
+          return state;
+        });
+        const retryState = states.map(({ retryCount, retryDelay }) => ({ retryCount, retryDelay }));
+        expect(retryState).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "retryCount": 1,
+              "retryDelay": 2000,
+            },
+            Object {
+              "retryCount": 2,
+              "retryDelay": 4000,
+            },
+            Object {
+              "retryCount": 3,
+              "retryDelay": 8000,
+            },
+            Object {
+              "retryCount": 4,
+              "retryDelay": 16000,
+            },
+            Object {
+              "retryCount": 5,
+              "retryDelay": 32000,
+            },
+            Object {
+              "retryCount": 6,
+              "retryDelay": 64000,
+            },
+            Object {
+              "retryCount": 7,
+              "retryDelay": 64000,
+            },
+            Object {
+              "retryCount": 8,
+              "retryDelay": 64000,
+            },
+            Object {
+              "retryCount": 9,
+              "retryDelay": 64000,
+            },
+            Object {
+              "retryCount": 10,
+              "retryDelay": 64000,
+            },
+          ]
+        `);
       });
 
       test('resets retryCount, retryDelay when an action succeeds', () => {
@@ -123,9 +146,9 @@ describe('migrations v2', () => {
         expect(newState.retryDelay).toEqual(0);
       });
 
-      test('terminates to FATAL after 5 retries', () => {
+      test('terminates to FATAL after 10 retries', () => {
         const newState = model(
-          { ...state, ...{ retryCount: 5, retryDelay: 32000 } },
+          { ...state, ...{ retryCount: 10, retryDelay: 64000 } },
           Either.left(retryableError)
         );
 
