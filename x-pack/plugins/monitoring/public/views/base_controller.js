@@ -163,12 +163,12 @@ export class MonitoringViewBaseController {
       if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
         promises.push(updateSetupModeData());
       }
-      this.updateDataPromise = new PromiseWithCancel(Promise.all(promises));
+      this.updateDataPromise = new PromiseWithCancel(Promise.allSettled(promises));
       return this.updateDataPromise.promise().then(([pageData, alerts]) => {
         $scope.$apply(() => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
-          $scope.pageData = this.data = pageData; // update the view's data with the fetch result
-          $scope.alerts = this.alerts = alerts;
+          $scope.pageData = this.data = pageData.value; // update the view's data with the fetch result
+          $scope.alerts = this.alerts = alerts.value || {};
         });
       });
     };

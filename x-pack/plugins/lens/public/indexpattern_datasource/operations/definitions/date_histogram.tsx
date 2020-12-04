@@ -23,6 +23,7 @@ import { updateColumnParam } from '../layer_helpers';
 import { OperationDefinition } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternAggRestrictions, search } from '../../../../../../../src/plugins/data/public';
+import { getInvalidFieldMessage } from './helpers';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -46,6 +47,8 @@ export const dateHistogramOperation: OperationDefinition<
   }),
   input: 'field',
   priority: 5, // Highest priority level used
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'date' &&

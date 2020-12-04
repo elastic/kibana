@@ -88,13 +88,13 @@ function LayerPanels(
   const layerIds = activeVisualization.getLayerIds(visualizationState);
 
   return (
-    <EuiForm className="lnsConfigPanel" tabIndex={-1}>
+    <EuiForm className="lnsConfigPanel">
       {layerIds.map((layerId, index) => (
         <LayerPanel
           {...props}
           key={layerId}
           layerId={layerId}
-          dataTestSubj={`lns-layerPanel-${index}`}
+          index={index}
           visualizationState={visualizationState}
           updateVisualization={setVisualizationState}
           updateDatasource={updateDatasource}
