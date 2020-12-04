@@ -17,12 +17,77 @@
  * under the License.
  */
 
+import { catchRetryableEsClientErrors } from './actions';
+import { errors as esErrors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
+
 describe('actions', () => {
   describe('catchRetryableEsClientErrors returns left retryable_es_client_error for', () => {
-    it.todo('NoLivingConnectionsError');
-    it.todo('ConnectionError');
-    it.todo('TimeoutError');
-    it.todo('ResponseError of type snapshot_in_progress_exception');
-    it.todo('ResponseError with retryable status code'); // 503,401,403,408,410
+    it('NoLivingConnectionsError', async () => {
+      const error = new esErrors.NoLivingConnectionsError(
+        'reason',
+        elasticsearchClientMock.createApiResponse()
+      );
+      expect(
+        ((await Promise.reject(error).catch(catchRetryableEsClientErrors)) as any).left
+      ).toMatchObject({
+        message: 'reason',
+        type: 'retryable_es_client_error',
+      });
+    });
+
+    it('ConnectionError', async () => {
+      const error = new esErrors.ConnectionError(
+        'reason',
+        elasticsearchClientMock.createApiResponse()
+      );
+      expect(
+        ((await Promise.reject(error).catch(catchRetryableEsClientErrors)) as any).left
+      ).toMatchObject({
+        message: 'reason',
+        type: 'retryable_es_client_error',
+      });
+    });
+    it('TimeoutError', async () => {
+      const error = new esErrors.TimeoutError(
+        'reason',
+        elasticsearchClientMock.createApiResponse()
+      );
+      expect(
+        ((await Promise.reject(error).catch(catchRetryableEsClientErrors)) as any).left
+      ).toMatchObject({
+        message: 'reason',
+        type: 'retryable_es_client_error',
+      });
+    });
+    it('ResponseError of type snapshot_in_progress_exception', async () => {
+      const error = new esErrors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          body: { error: { type: 'snapshot_in_progress_exception' } },
+        })
+      );
+      expect(
+        ((await Promise.reject(error).catch(catchRetryableEsClientErrors)) as any).left
+      ).toMatchObject({
+        message: 'snapshot_in_progress_exception',
+        type: 'retryable_es_client_error',
+      });
+    });
+    it('ResponseError with retryable status code', async () => {
+      const statusCodes = [503, 401, 403, 408, 410];
+      statusCodes.map(async (status) => {
+        const error = new esErrors.ResponseError(
+          elasticsearchClientMock.createApiResponse({
+            statusCode: status,
+          })
+        );
+        expect(
+          ((await Promise.reject(error).catch(catchRetryableEsClientErrors)) as any).left
+        ).toMatchObject({
+          message: 'reason',
+          type: 'retryable_es_client_error',
+        });
+      });
+    });
   });
 });

@@ -719,7 +719,7 @@ export const nextActionMap = (
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
       Actions.updateAndPickupMappings(client, state.target, state.targetMappings),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
-      Actions.waitForUpdateByQeuryTask(client, state.updateTargetMappingsTaskId, '60s'),
+      Actions.waitForUpdateByQueryTask(client, state.updateTargetMappingsTaskId, '60s'),
     OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>
       Actions.search(client, state.target, state.outdatedDocumentsQuery),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
