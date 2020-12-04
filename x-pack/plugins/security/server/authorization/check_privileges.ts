@@ -47,7 +47,8 @@ export function checkPrivilegesWithRequestFactory(
         : [];
       const allApplicationPrivileges = uniq([actions.version, actions.login, ...kibanaPrivileges]);
 
-      const { body: hasPrivilegesResponse } = await (await getClusterClient())
+      const clusterClient = await getClusterClient();
+      const { body: hasPrivilegesResponse } = await clusterClient
         .asScoped(request)
         .asCurrentUser.security.hasPrivileges<HasPrivilegesResponse>({
           body: {
