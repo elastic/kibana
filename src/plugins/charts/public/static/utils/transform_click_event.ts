@@ -41,6 +41,7 @@ export const getFilterFromChartClickEventFn = (
   negate: boolean = false
 ) => (points: Array<[GeometryValue, XYChartSeriesIdentifier]>): ClickTriggerEvent => {
   const data: ValueClickContext['data']['data'] = [];
+  const seenKeys = new Set<string>();
 
   points.forEach((point) => {
     const [geometry, { yAccessor, splitAccessors }] = point;
@@ -61,12 +62,24 @@ export const getFilterFromChartClickEventFn = (
     });
 
     data.push(
-      ...columnIndices.map((column) => ({
-        table,
-        column,
-        row: rowIndex,
-        value: null,
-      }))
+      ...columnIndices
+        .map((column) => ({
+          table,
+          column,
+          row: rowIndex,
+          value: null,
+        }))
+        .filter((column) => {
+          // filter duplicate values when multiple geoms are highlighted
+          const key = `column:${column},row:${rowIndex}`;
+          if (seenKeys.has(key)) {
+            return false;
+          }
+
+          seenKeys.add(key);
+
+          return true;
+        })
     );
   });
 
