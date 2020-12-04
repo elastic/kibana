@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { PingType } from '../ping/ping';
+import { PingType, TlsType } from '../ping/ping';
 
 export const StateType = t.intersection([
   t.type({
@@ -33,10 +33,7 @@ export const StateType = t.intersection([
     ]),
   }),
   t.partial({
-    tls: t.partial({
-      not_after: t.union([t.string, t.null]),
-      not_before: t.union([t.string, t.null]),
-    }),
+    tls: TlsType,
     observer: t.type({
       geo: t.type({
         name: t.array(t.string),
@@ -79,7 +76,6 @@ export type MonitorSummary = t.TypeOf<typeof MonitorSummaryType>;
 
 export const MonitorSummariesResultType = t.type({
   summaries: t.array(MonitorSummaryType),
-  totalMonitors: t.number,
 });
 
 export type MonitorSummariesResult = t.TypeOf<typeof MonitorSummariesResultType>;
@@ -89,6 +85,9 @@ export const FetchMonitorStatesQueryArgsType = t.intersection([
     pagination: t.string,
     filters: t.string,
     statusFilter: t.string,
+    sortField: t.string,
+    sortDirection: t.string,
+    pageIndex: t.number,
   }),
   t.type({
     dateRangeStart: t.string,

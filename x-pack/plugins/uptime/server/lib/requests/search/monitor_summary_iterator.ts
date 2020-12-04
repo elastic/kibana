@@ -21,7 +21,6 @@ export type ChunkFetcher = (
 // Result of fetching more results from the search.
 export interface ChunkResult {
   monitorSummaries: MonitorSummary[];
-  totalMonitors: number;
 }
 
 /**
@@ -80,7 +79,6 @@ export class MonitorSummaryIterator {
 
     return {
       monitorSummaries,
-      totalMonitors: this.totalResults,
     };
   }
 
@@ -135,11 +133,7 @@ export class MonitorSummaryIterator {
     // If we've hit the end of the stream searchAfter will be empty
     results.monitorSummaries.forEach((ms: MonitorSummary) => this.buffer.push(ms));
 
-    this.totalResults = results.totalMonitors;
-
-    if (this.chunkPageIndex * CHUNK_SIZE > this.totalResults) {
-      this.endOfResults = true;
-    }
+    this.endOfResults = results.monitorSummaries.length === 0;
 
     return {
       gotHit: results.monitorSummaries.length > 0,
@@ -154,5 +148,4 @@ export class MonitorSummaryIterator {
 
 export interface MonitorSummariesPage {
   monitorSummaries: MonitorSummary[];
-  totalMonitors: number;
 }

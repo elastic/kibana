@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import { get } from 'lodash';
 import { QueryContext } from './query_context';
+import { Ping } from '../../../../common/runtime_types/ping';
 
 /**
  * This is the first phase of the query. In it, we find all monitor IDs that have ever matched the given filters.
@@ -22,15 +21,13 @@ export const findPotentialMatches = async (
   const { body: queryResult } = await query(queryContext, size, index);
   const monitorIds: string[] = [];
 
-  get<any>(queryResult, 'hits.hits', []).forEach((b: any) => {
-    const monitorId = b._source.monitor.id;
+  queryResult.hits.hits.forEach((b) => {
+    const monitorId = (b._source as Ping).monitor.id;
     monitorIds.push(monitorId);
   });
 
   return {
     monitorIds,
-    searchAfter: queryResult.aggregations?.monitors?.after_key,
-    totalMonitors: queryResult.aggregations?.totalMonitors?.value ?? 33,
   };
 };
 
@@ -80,12 +77,5 @@ const queryBody = async (queryContext: QueryContext, size: number, index: number
       field: 'monitor.id',
     },
     _source: 'monitor.id',
-    // aggs: {
-    //   totalMonitors: {
-    //     cardinality: {
-    //       field: 'monitor.id',
-    //     },
-    //   },
-    // },
   };
 };

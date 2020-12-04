@@ -17,8 +17,6 @@ export interface MonitorList {
 
 export const initialState: MonitorList = {
   list: {
-    nextPagePagination: null,
-    prevPagePagination: null,
     summaries: [],
   },
   loading: false,

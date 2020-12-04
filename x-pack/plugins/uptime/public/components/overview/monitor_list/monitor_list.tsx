@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiBasicTable, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiBasicTable,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  Direction,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
@@ -22,10 +29,36 @@ import { EnableMonitorAlert } from './columns/enable_alert';
 import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 
+interface Page {
+  index: number;
+  size: number;
+}
+
+export type MonitorFields =
+  | 'sha256'
+  | 'sha1'
+  | 'issuer'
+  | 'common_name'
+  | 'monitors'
+  | 'not_after'
+  | 'not_before';
+
+interface Sort {
+  field: MonitorFields;
+  direction: Direction;
+}
+
 interface Props extends MonitorListProps {
   pageSize: number;
+  total: number;
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
+  pageIndex: number;
+  setPageIndex: (val: number) => void;
+  sortField: MonitorFields;
+  setSortField: (val: string) => void;
+  sortDirection: string;
+  setSortDirection: (val: string) => void;
 }
 
 export const noItemsMessage = (loading: boolean, filters?: string) => {
@@ -36,7 +69,6 @@ export const noItemsMessage = (loading: boolean, filters?: string) => {
 export const MonitorListComponent: ({
   filters,
   monitorList: { list, error, loading },
-  linkParameters,
   pageSize,
   setPageSize,
   pageIndex,
@@ -45,10 +77,10 @@ export const MonitorListComponent: ({
   setSortField,
   sortDirection,
   setSortDirection,
+  total,
 }: Props) => any = ({
   filters,
   monitorList: { list, error, loading },
-  linkParameters,
   pageSize,
   setPageSize,
   pageIndex,
@@ -57,6 +89,7 @@ export const MonitorListComponent: ({
   setSortField,
   sortDirection,
   setSortDirection,
+  total,
 }) => {
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
@@ -109,9 +142,10 @@ export const MonitorListComponent: ({
       field: 'url.full',
       name: URL_LABEL,
       width: '40%',
-      render: (url: string) => (
-        <EuiLink href={url} target="_blank" color="text" external>
-          {url}
+      sortable: true,
+      render: (url: string, { state }: MonitorSummary) => (
+        <EuiLink href={state.url.full} target="_blank" color="text" external>
+          {state.url.full}
         </EuiLink>
       ),
     },
@@ -121,7 +155,7 @@ export const MonitorListComponent: ({
       name: labels.TLS_COLUMN_LABEL,
       sortable: true,
       render: (_val: X509Expiry, { state }: MonitorSummary) => (
-        <CertStatusColumn expiry={state.tls?.server.x509} />
+        <CertStatusColumn expiry={state.tls?.server?.x509!} />
       ),
     },
     {
@@ -180,8 +214,8 @@ export const MonitorListComponent: ({
     },
   };
 
-  const onTableChange = ({ page = {}, sort = {} }) => {
-    const { field: sortFieldN, direction: sortDirectionN } = sort;
+  const onTableChange = ({ page, sort }: { page: Page; sort: Sort }) => {
+    const { field: sortFieldN, direction: sortDirectionN } = sort ?? {};
 
     setSortField(sortFieldN);
     setSortDirection(sortDirectionN);
@@ -207,7 +241,7 @@ export const MonitorListComponent: ({
         columns={columns}
         tableLayout={'auto'}
         sorting={sorting}
-        pagination={{ totalItemCount: list.totalMonitors ?? 0, pageSize, pageIndex }}
+        pagination={{ totalItemCount: total ?? 0, pageSize, pageIndex }}
         onChange={onTableChange}
       />
     </EuiPanel>

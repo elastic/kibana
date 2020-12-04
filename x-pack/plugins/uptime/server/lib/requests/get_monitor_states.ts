@@ -8,7 +8,6 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorSummariesResult } from '../../../common/runtime_types';
 import { QueryContext } from './search';
 import { HistogramPoint, Histogram } from '../../../common/runtime_types';
-import { fetchChunk } from './search/fetch_chunk';
 import { MonitorSummaryIterator } from './search/monitor_summary_iterator';
 
 export interface GetMonitorStatesParams {
@@ -51,11 +50,10 @@ export const getMonitorStates: UMElasticsearchQueryFn<
     sortDirection
   );
 
-  const iterator = new MonitorSummaryIterator(queryContext);
+  const iterator = new MonitorSummaryIterator(queryContext, [], pageSize * pageIndex);
   const page = await iterator.nextPage(pageSize);
 
   return {
-    totalMonitors: page.totalMonitors,
     summaries: page.monitorSummaries,
   };
 };

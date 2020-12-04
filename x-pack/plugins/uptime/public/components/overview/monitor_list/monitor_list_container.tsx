@@ -7,7 +7,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getMonitorList } from '../../../state/actions';
-import { monitorListSelector } from '../../../state/selectors';
+import { monitorListSelector, snapshotDataSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
 import { useUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
@@ -42,6 +42,8 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const monitorList = useSelector(monitorListSelector);
+
+  const { count } = useSelector(snapshotDataSelector);
 
   useEffect(() => {
     dispatch(
@@ -84,6 +86,7 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
         setSortField,
         sortDirection,
         setSortDirection,
+        total: !statusFilter ? count?.total ?? 0 : statusFilter === 'up' ? count.up : count.down,
       }}
     />
   );
