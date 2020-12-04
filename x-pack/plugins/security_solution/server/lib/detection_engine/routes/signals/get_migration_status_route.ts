@@ -6,6 +6,8 @@
 
 import { IRouter } from 'src/core/server';
 import { DETECTION_ENGINE_MIGRATE_SIGNALS_URL } from '../../../../../common/constants';
+import { getMigrationStatusSchema } from '../../../../../common/detection_engine/schemas/request/get_migration_status_schema';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { getIndexAliases } from '../../index/get_index_aliases';
 import { getMigrationStatus } from '../../migrations/get_migration_status';
 import { getSignalsIndicesInRange } from '../../migrations/get_signals_indices_in_range';
@@ -15,7 +17,9 @@ export const getMigrationStatusRoute = (router: IRouter) => {
   router.get(
     {
       path: DETECTION_ENGINE_MIGRATE_SIGNALS_URL,
-      validate: false,
+      validate: {
+        query: buildRouteValidation(getMigrationStatusSchema),
+      },
       options: {
         tags: ['access:securitySolution'],
       },
@@ -24,14 +28,13 @@ export const getMigrationStatusRoute = (router: IRouter) => {
       const siemResponse = buildSiemResponse(response);
       const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-      // TODO permissions check
       try {
         const appClient = context.securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const from = 'now-500d'; // TODO make a parameter
+        const { from } = request.query;
 
         const signalsAlias = appClient.getSignalsIndex();
         const indexAliases = await getIndexAliases({ alias: signalsAlias, esClient });
