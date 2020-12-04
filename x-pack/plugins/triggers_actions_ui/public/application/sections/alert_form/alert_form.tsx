@@ -63,6 +63,7 @@ import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilitie
 import { SolutionFilter } from './solution_filter';
 import './alert_form.scss';
 import { recoveredActionGroupMessage } from '../../constants';
+import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 
 const ENTER_KEY = 13;
 
@@ -181,9 +182,10 @@ export const AlertForm = ({
   const setActionGroupIds = useCallback(
     (alertTypeId: string | undefined) => {
       if (alertTypeId && alertTypesIndex && alertTypesIndex.has(alertTypeId)) {
-        const selectedAlert = alertTypesIndex.get(alertTypeId)!;
-        setDefaultActionGroupId(selectedAlert.defaultActionGroupId);
-        setRecoveredActionGroupId(selectedAlert.recoveryActionGroup?.id || RecoveredActionGroup.id);
+        setDefaultActionGroupId(alertTypesIndex.get(alertTypeId)!.defaultActionGroupId);
+        setRecoveredActionGroupId(
+          alertTypesIndex.get(alertTypeId)!.recoveryActionGroup?.id || RecoveredActionGroup.id
+        );
       }
     },
     [alertTypesIndex]
@@ -514,6 +516,9 @@ export const AlertForm = ({
                   defaultActionMessage: recoveredActionGroupMessage,
                 }
               : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
+          )}
+          getDefaultActionParams={getDefaultsForActionParams(
+            (actionGroupId) => actionGroupId === selectedAlertType.recoveryActionGroup.id
           )}
           setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
           setActionGroupIdByIndex={(group: string, index: number) =>

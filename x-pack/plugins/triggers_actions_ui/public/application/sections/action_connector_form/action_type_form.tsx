@@ -48,7 +48,6 @@ import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './act
 import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
-import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -64,6 +63,7 @@ export type ActionTypeFormProps = {
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
+  defaultParams: DefaultActionParams;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -100,6 +100,7 @@ export const ActionTypeForm = ({
   actionGroups,
   setActionGroupIdByIndex,
   actionTypeRegistry,
+  defaultParams,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -107,9 +108,6 @@ export const ActionTypeForm = ({
   const [isOpen, setIsOpen] = useState(true);
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
   const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
-  const getDefaultActionParams = getDefaultsForActionParams(
-    (actionGroupId) => actionGroupId === recoveredActionGroupId
-  );
   const selectedActionGroup =
     actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
 
@@ -117,15 +115,13 @@ export const ActionTypeForm = ({
     setAvailableActionVariables(
       messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
     );
-
-    const defaultParams = getDefaultActionParams(actionItem.actionTypeId, actionItem.group);
     if (defaultParams) {
       for (const [key, paramValue] of Object.entries(defaultParams)) {
         setActionParamsProperty(key, paramValue, index);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionItem.group]);
+  }, [actionItem.group, defaultParams]);
 
   const canSave = hasSaveActionsCapability(capabilities);
   const getSelectedOptions = (actionItemId: string) => {
