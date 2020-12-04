@@ -6,6 +6,7 @@
 
 /* eslint-disable no-console */
 
+import { omit } from 'lodash';
 import chalk from 'chalk';
 import {
   LegacyAPICaller,
@@ -27,12 +28,12 @@ export async function callClientWithDebug({
   operationName: string;
   params: Record<string, any>;
   debug: boolean;
-  request: KibanaRequest;
+  request: KibanaRequest & { _debugQueries?: Array<Record<string, any>> };
 }) {
   const startTime = process.hrtime();
 
   let res: any;
-  let esError = null;
+  let esError = undefined as (Error & { response?: unknown }) | undefined;
   try {
     res = await apiCaller(operationName, params);
   } catch (e) {
@@ -41,27 +42,23 @@ export async function callClientWithDebug({
   }
 
   if (debug) {
-    const highlightColor = esError ? 'bgRed' : 'inverse';
     const diff = process.hrtime(startTime);
-    const duration = `${Math.round(diff[0] * 1000 + diff[1] / 1e6)}ms`;
-    const routeInfo = `${request.route.method.toUpperCase()} ${
-      request.route.path
-    }`;
+    const duration = Math.round(diff[0] * 1000 + diff[1] / 1e6);
 
-    console.log(
-      chalk.bold[highlightColor](`=== Debug: ${routeInfo} (${duration}) ===`)
-    );
+    outputToConsole({ operationName, params, request, esError, duration });
 
-    if (operationName === 'search') {
-      console.log(`GET ${params.index}/_${operationName}`);
-      console.log(formatObj(params.body));
-    } else {
-      console.log(chalk.bold('ES operation:'), operationName);
+    // TODO: add check to verify that the user is superuser or equivalent
+    const isSuperuser = true;
+    if (isSuperuser) {
+      request._debugQueries = request._debugQueries ?? [];
 
-      console.log(chalk.bold('ES query:'));
-      console.log(formatObj(params));
+      request._debugQueries.push({
+        duration,
+        operationName,
+        params: omit(params, 'headers'),
+        esError: esError?.response ?? esError?.message,
+      });
     }
-    console.log(`\n`);
   }
 
   if (esError) {
@@ -69,4 +66,38 @@ export async function callClientWithDebug({
   }
 
   return res;
+}
+
+function outputToConsole({
+  operationName,
+  params,
+  request,
+  esError,
+  duration,
+}: {
+  operationName: string;
+  params: Record<string, any>;
+  request: KibanaRequest;
+  esError?: Error;
+  duration: number;
+}): void {
+  const highlightColor = esError ? 'bgRed' : 'inverse';
+  const routeInfo = `${request.route.method.toUpperCase()} ${
+    request.route.path
+  }`;
+
+  console.log(
+    chalk.bold[highlightColor](`=== Debug: ${routeInfo} (${duration}ms) ===`)
+  );
+
+  if (operationName === 'search') {
+    console.log(`GET ${params.index}/_${operationName}`);
+    console.log(formatObj(params.body));
+  } else {
+    console.log(chalk.bold('ES operation:'), operationName);
+
+    console.log(chalk.bold('ES query:'));
+    console.log(formatObj(params));
+  }
+  console.log(`\n`);
 }

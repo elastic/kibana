@@ -17,7 +17,9 @@ export const observabilityOverviewHasDataRoute = createRoute({
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return await hasData({ setup });
+    return {
+      hasData: await hasData({ setup }),
+    };
   },
 });
 

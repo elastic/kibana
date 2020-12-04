@@ -25,6 +25,8 @@ export interface RouteParams {
   body?: any;
 }
 
+export type HandlerReturn = Record<string, any> | void;
+
 type WithoutIncompatibleMethods<T extends t.Any> = Omit<
   T,
   'encode' | 'asEncoder'
@@ -34,7 +36,7 @@ export type RouteParamsRT = WithoutIncompatibleMethods<t.Type<RouteParams>>;
 
 export type RouteHandler<
   TParamsRT extends RouteParamsRT | undefined,
-  TReturn
+  TReturn extends HandlerReturn
 > = (kibanaContext: {
   context: APMRequestHandlerContext<
     (TParamsRT extends RouteParamsRT ? t.TypeOf<TParamsRT> : {}) & {
@@ -56,7 +58,7 @@ interface RouteOptions {
 export interface Route<
   TEndpoint extends string,
   TRouteParamsRT extends RouteParamsRT | undefined,
-  TReturn
+  TReturn extends HandlerReturn
 > {
   endpoint: TEndpoint;
   options: RouteOptions;
@@ -88,8 +90,8 @@ export interface ServerAPI<TRouteState extends RouteState> {
   _S: TRouteState;
   add<
     TEndpoint extends string,
-    TRouteParamsRT extends RouteParamsRT | undefined = undefined,
-    TReturn = unknown
+    TReturn extends HandlerReturn,
+    TRouteParamsRT extends RouteParamsRT | undefined = undefined
   >(
     route:
       | Route<TEndpoint, TRouteParamsRT, TReturn>

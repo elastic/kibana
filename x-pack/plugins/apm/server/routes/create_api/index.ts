@@ -9,7 +9,11 @@ import { schema } from '@kbn/config-schema';
 import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
-import { KibanaResponseFactory, RouteRegistrar } from 'src/core/server';
+import {
+  KibanaRequest,
+  KibanaResponseFactory,
+  RouteRegistrar,
+} from 'src/core/server';
 import { merge } from '../../../common/runtime_types/merge';
 import { strictKeysRt } from '../../../common/runtime_types/strict_keys_rt';
 import { APMConfig } from '../..';
@@ -123,12 +127,15 @@ export function createApi() {
                 },
               });
 
-              return response.ok({ body: data as any });
-            } catch (error) {
-              if (Boom.isBoom(error)) {
-                return convertBoomToKibanaResponse(error, response);
+              const apmDebug = request._debugQueries;
+              const body = { ...data } as any;
+              if (apmDebug) {
+                body._debugQueries = apmDebug;
               }
-              throw error;
+
+              return response.ok({ body });
+            } catch (error) {
+              return convertErrorToKibanaResponse(error, request, response);
             }
           }
         );
@@ -139,11 +146,20 @@ export function createApi() {
   return api;
 }
 
-function convertBoomToKibanaResponse(
-  error: Boom,
+async function convertErrorToKibanaResponse(
+  error: Boom | Error,
+  request: KibanaRequest & { _debugQueries?: Record<string, unknown> },
   response: KibanaResponseFactory
 ) {
-  const opts = { body: error.message };
+  const opts = { body: { message: error.message } };
+  if (request._debugQueries) {
+    opts.body.attributes = { _debugQueries: request._debugQueries };
+  }
+
+  if (!Boom.isBoom(error)) {
+    return response.internalError(opts);
+  }
+
   switch (error.output.statusCode) {
     case 404:
       return response.notFound(opts);
