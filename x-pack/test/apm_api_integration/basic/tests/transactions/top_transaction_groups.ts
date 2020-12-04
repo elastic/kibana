@@ -29,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when data is not loaded ', () => {
       it('handles empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
+          `/api/apm/services/opbeans-node/transactions/groups?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
         );
 
         expect(response.status).to.be(200);
@@ -44,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         await esArchiver.load(archiveName);
         response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
+          `/api/apm/services/opbeans-node/transactions/groups?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
         );
       });
       after(() => esArchiver.unload(archiveName));
