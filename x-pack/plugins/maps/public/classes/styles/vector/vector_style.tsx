@@ -244,7 +244,8 @@ export class VectorStyle implements IVectorStyle {
   async _updateFieldsInDescriptor(
     nextFields: IField[],
     styleFieldsHelper: StyleFieldsHelper,
-    previousFields: IField[]
+    previousFields: IField[],
+    mapColors: string[]
   ) {
     const originalProperties = this.getRawProperties();
     const invalidStyleNames: VECTOR_STYLES[] = (Object.keys(
@@ -294,18 +295,28 @@ export class VectorStyle implements IVectorStyle {
       }
     });
 
-    return {
+    // return {
+    //   hasChanges,
+    //   nextStyleDescriptor: VectorStyle.createDescriptor(updatedProperties, this.isTimeAware()),
+    // };
+
+    return this._deleteFieldsFromDescriptorAndUpdateStyling(
+      nextFields,
+      updatedProperties,
       hasChanges,
-      nextStyleDescriptor: VectorStyle.createDescriptor(updatedProperties, this.isTimeAware()),
-    };
+      styleFieldsHelper,
+      mapColors
+    );
   }
 
   async _deleteFieldsFromDescriptorAndUpdateStyling(
     nextFields: IField[],
+    originalProperties: VectorStylePropertiesDescriptor,
+    hasChanges: boolean,
     styleFieldsHelper: StyleFieldsHelper,
     mapColors: string[]
   ) {
-    const originalProperties = this.getRawProperties();
+    // const originalProperties = this.getRawProperties();
     const updatedProperties = {} as VectorStylePropertiesDescriptor;
 
     const dynamicProperties = (Object.keys(originalProperties) as VECTOR_STYLES[]).filter((key) => {
@@ -364,8 +375,13 @@ export class VectorStyle implements IVectorStyle {
       };
     } else {
       return {
-        hasChanges: false,
-        nextStyleDescriptor: { ...this._descriptor },
+        hasChanges,
+        nextStyleDescriptor: VectorStyle.createDescriptor(
+          {
+            ...originalProperties,
+          },
+          this.isTimeAware()
+        ),
       };
     }
   }
@@ -390,10 +406,17 @@ export class VectorStyle implements IVectorStyle {
 
     return previousFields.length === nextFields.length
       ? // Field-config changed
-        await this._updateFieldsInDescriptor(nextFields, styleFieldsHelper, previousFields)
+        await this._updateFieldsInDescriptor(
+          nextFields,
+          styleFieldsHelper,
+          previousFields,
+          mapColors
+        )
       : // Deletions or additions
         await this._deleteFieldsFromDescriptorAndUpdateStyling(
           nextFields,
+          this.getRawProperties(),
+          false,
           styleFieldsHelper,
           mapColors
         );
