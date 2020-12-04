@@ -74,6 +74,14 @@ export const treeRequestParametersToAbort = composeSelectors(
   dataSelectors.treeRequestParametersToAbort
 );
 
+/**
+ * This should be the siem default indices to pass to the backend for querying data.
+ */
+export const treeParameterIndices = composeSelectors(
+  dataStateSelector,
+  dataSelectors.treeParamterIndices
+);
+
 export const resolverComponentInstanceID = composeSelectors(
   dataStateSelector,
   dataSelectors.resolverComponentInstanceID

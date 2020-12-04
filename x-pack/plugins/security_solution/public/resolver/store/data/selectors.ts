@@ -297,6 +297,13 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
   }
 }
 
+/**
+ * The indices to use for the requests with the backend.
+ */
+export const treeParamterIndices = createSelector(treeParametersToFetch, (parameters) => {
+  return parameters?.indices ?? [];
+});
+
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
   originID,
