@@ -8,14 +8,12 @@ import React, { memo, useCallback } from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Signal } from '../../../../server/lib/detection_engine/signals/types';
-
+import { Alert } from '../case_view';
 import * as i18n from './translations';
 
 interface UserActionShowAlertProps {
   id: string;
-  alert: Signal;
+  alert: Alert;
   onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
@@ -24,9 +22,9 @@ const UserActionShowAlertComponent = ({
   alert,
   onShowAlertDetails,
 }: UserActionShowAlertProps) => {
-  const onClick = useCallback(() => onShowAlertDetails(alert.rule.id, alert.rule.output_index), [
-    alert.rule.id,
-    alert.rule.output_index,
+  const onClick = useCallback(() => onShowAlertDetails(alert._id, alert._index), [
+    alert._id,
+    alert._index,
     onShowAlertDetails,
   ]);
   return (

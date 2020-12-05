@@ -89,6 +89,11 @@ export interface CaseProps extends Props {
   updateCase: (newCase: Case) => void;
 }
 
+export type Alert = {
+  _id: string;
+  _index: string;
+} & Signal;
+
 export const CaseComponent = React.memo<CaseProps>(
   ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
     const dispatch = useDispatch();
@@ -127,19 +132,18 @@ export const CaseComponent = React.memo<CaseProps>(
       unknown
     >(alertsQuery, selectedPatterns[0]);
 
-    const alerts: Record<string, Signal> = useMemo(
-      () =>
-        alertsData?.hits.hits.reduce(
-          (acc, { _id, _source }) => ({
-            ...acc,
-            [_id]: {
-              ..._source,
-            },
-          }),
-          {}
-        ) ?? [],
-      [alertsData?.hits.hits]
-    );
+    const alerts =
+      alertsData?.hits.hits.reduce<Record<string, Alert>>(
+        (acc, { _id, _index, _source }) => ({
+          ...acc,
+          [_id]: {
+            _id,
+            _index,
+            ..._source.signal,
+          },
+        }),
+        {}
+      ) ?? {};
 
     // Update Fields
     const onUpdateField = useCallback(

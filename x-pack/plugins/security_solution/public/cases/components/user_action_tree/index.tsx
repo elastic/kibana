@@ -18,8 +18,6 @@ import styled from 'styled-components';
 
 import * as i18n from './translations';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Signal } from '../../../../server/lib/detection_engine/signals/types';
 import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
@@ -27,7 +25,7 @@ import { AddComment, AddCommentRefObject } from '../add_comment';
 import { ActionConnector, CommentType } from '../../../../../case/common/api/cases';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
-import { OnUpdateFields } from '../case_view';
+import { Alert, OnUpdateFields } from '../case_view';
 import {
   getConnectorLabelTitle,
   getLabelTitle,
@@ -53,7 +51,7 @@ export interface UserActionTreeProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
-  alerts: Record<string, Signal>;
+  alerts: Record<string, Alert>;
   onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
