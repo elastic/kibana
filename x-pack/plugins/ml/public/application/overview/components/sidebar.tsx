@@ -24,7 +24,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
   } = useMlKibana();
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-  const docsLink = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/xpack-ml.html`;
+  const docsLink = getDocLinks().links.ml.guide;
   const transformsLink = `${basePath.get()}/app/management/data/transform`;
 
   return (
