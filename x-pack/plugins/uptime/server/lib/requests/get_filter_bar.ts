@@ -46,7 +46,7 @@ export const combineRangeWithFilters = (
 };
 
 export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFilters> = async ({
-  uptimeESClient,
+  uptimeEsClient,
   dateRangeStart,
   dateRangeEnd,
   search,
@@ -72,7 +72,7 @@ export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFi
 
   const {
     body: { aggregations },
-  } = await uptimeESClient.search({ body: searchBody });
+  } = await uptimeEsClient.search({ body: searchBody });
 
   const { tags, locations, ports, schemes } = aggregations ?? {};
 

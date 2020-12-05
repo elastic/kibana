@@ -20,11 +20,11 @@ export const createGetMonitorDurationRoute: UMRestApiRouteFactory = (libs: UMSer
       dateEnd: schema.string(),
     }),
   },
-  handler: async ({ uptimeESClient, request }): Promise<any> => {
+  handler: async ({ uptimeEsClient, request }): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
 
     return await libs.requests.getMonitorDurationChart({
-      uptimeESClient,
+      uptimeEsClient,
       monitorId,
       dateStart,
       dateEnd,

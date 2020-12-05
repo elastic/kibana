@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { AlertExecutionStatusErrorReasons } from '../../../../../plugins/alerts/common';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -49,7 +50,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
       executionStatus = await waitForStatus(alertId, new Set(['error']));
       expect(executionStatus.error).to.be.ok();
-      expect(executionStatus.error.reason).to.be('decrypt');
+      expect(executionStatus.error.reason).to.be(AlertExecutionStatusErrorReasons.Decrypt);
       expect(executionStatus.error.message).to.be('Unable to decrypt attribute "apiKey"');
     });
   });

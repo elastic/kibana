@@ -42,7 +42,7 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
 
   constructor(protected readonly params: Params) {}
 
-  protected abstract async getUrl(context: Context): Promise<KibanaURL>;
+  protected abstract getUrl(context: Context): Promise<KibanaURL>;
 
   public async isCompatible({ embeddable }: Context): Promise<boolean> {
     if (!embeddable) return false;

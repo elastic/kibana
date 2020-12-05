@@ -91,6 +91,43 @@ describe('getDateMetaByDatatableColumn', () => {
     });
   });
 
+  it('throws if unable to resolve interval', async () => {
+    await expect(
+      getDateMetaByDatatableColumn(params)({
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          source: 'esaggs',
+          sourceParams: {
+            type: BUCKET_TYPES.DATE_HISTOGRAM,
+            params: {
+              time_zone: 'UTC',
+              interval: 'auto',
+            },
+          },
+        },
+      })
+    ).rejects.toBeDefined();
+
+    await expect(
+      getDateMetaByDatatableColumn(params)({
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          source: 'esaggs',
+          sourceParams: {
+            type: BUCKET_TYPES.DATE_HISTOGRAM,
+            params: {
+              time_zone: 'UTC',
+            },
+          },
+        },
+      })
+    ).rejects.toBeDefined();
+  });
+
   it('returns resolved auto interval', async () => {
     expect(
       await getDateMetaByDatatableColumn(params)({
@@ -106,8 +143,8 @@ describe('getDateMetaByDatatableColumn', () => {
               interval: 'auto',
             },
             appliedTimeRange: {
-              from: 'now-5d',
-              to: 'now',
+              from: '2020-10-05T00:00:00.000Z',
+              to: '2020-10-10T00:00:00.000Z',
             },
           },
         },

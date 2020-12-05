@@ -6,7 +6,7 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
-import { AlertCluster, AlertCpuUsageNodeStats } from '../../alerts/types';
+import { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/alerts';
 
 interface NodeBucketESResponse {
   key: string;

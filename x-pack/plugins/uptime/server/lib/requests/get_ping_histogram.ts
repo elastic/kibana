@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMElasticsearchQueryFn } from '../adapters';
 import { getFilterClause } from '../helper';
 import { HistogramResult, HistogramQueryResult } from '../../../common/runtime_types';
 import { QUERY } from '../../../common/constants';
 import { getHistogramInterval } from '../helper/get_histogram_interval';
+import { UMElasticsearchQueryFn } from '../adapters/framework';
 
 export interface GetPingHistogramParams {
   /** @member dateRangeStart timestamp bounds */
@@ -26,7 +26,7 @@ export interface GetPingHistogramParams {
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
-> = async ({ uptimeESClient, from, to, filters, monitorId, bucketSize }) => {
+> = async ({ uptimeEsClient, from, to, filters, monitorId, bucketSize }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
   if (monitorId) {
@@ -50,7 +50,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
       timeseries: {
         date_histogram: {
           field: '@timestamp',
-          fixed_interval: bucketSize || minInterval + '1ms',
+          fixed_interval: bucketSize || minInterval + 'ms',
           missing: 0,
         },
         aggs: {
@@ -73,7 +73,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
     },
   };
 
-  const { body: result } = await uptimeESClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search({ body: params });
   const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets ?? [];
   const histogram = buckets.map((bucket) => {
     const x: number = bucket.key;

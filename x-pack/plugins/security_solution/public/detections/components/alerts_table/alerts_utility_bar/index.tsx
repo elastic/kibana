@@ -195,6 +195,8 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
                 </UtilityBarAction>
 
                 <UtilityBarAction
+                  aria-label="selectAllAlerts"
+                  dataTestSubj="selectAllAlertsButton"
                   iconType={showClearSelection ? 'cross' : 'pagesSelect'}
                   onClick={() => {
                     if (!showClearSelection) {

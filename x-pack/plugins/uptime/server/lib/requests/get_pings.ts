@@ -52,7 +52,7 @@ const REMOVE_NON_SUMMARY_BROWSER_CHECKS = {
 };
 
 export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = async ({
-  uptimeESClient,
+  uptimeEsClient,
   dateRange: { from, to },
   index,
   monitorId,
@@ -94,7 +94,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
       hits: { hits, total },
       aggregations: aggs,
     },
-  } = await uptimeESClient.search({ body: searchBody });
+  } = await uptimeEsClient.search({ body: searchBody });
 
   const locations = aggs?.locations ?? { buckets: [{ key: 'N/A', doc_count: 0 }] };
 

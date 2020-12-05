@@ -24,6 +24,7 @@ import { AggTypesDependencies } from '../agg_types';
 import { BaseAggParams } from '../types';
 
 import { BucketAggType } from './bucket_agg_type';
+import { aggRangeFnName } from './range_fn';
 import { RangeKey } from './range_key';
 import { createFilterRange } from './create_filter/range';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -50,6 +51,7 @@ export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDepend
 
   return new BucketAggType({
     name: BUCKET_TYPES.RANGE,
+    expressionName: aggRangeFnName,
     title: rangeTitle,
     createFilter: createFilterRange(getFieldFormatsStart),
     makeLabel(aggConfig) {

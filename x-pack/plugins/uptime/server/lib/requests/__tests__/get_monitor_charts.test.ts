@@ -13,10 +13,10 @@ describe('ElasticsearchMonitorsAdapter', () => {
   it('getMonitorChartsData will provide expected filters', async () => {
     expect.assertions(2);
 
-    const { esClient: mockEsClient, uptimeESClient } = getUptimeESMockClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     await getMonitorDurationChart({
-      uptimeESClient,
+      uptimeEsClient,
       monitorId: 'fooID',
       dateStart: 'now-15m',
       dateEnd: 'now',
@@ -33,13 +33,13 @@ describe('ElasticsearchMonitorsAdapter', () => {
   });
 
   it('inserts empty buckets for missing data', async () => {
-    const { esClient: mockEsClient, uptimeESClient } = getUptimeESMockClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce(mockChartsData as any);
 
     expect(
       await getMonitorDurationChart({
-        uptimeESClient,
+        uptimeEsClient,
         monitorId: 'id',
         dateStart: 'now-15m',
         dateEnd: 'now',

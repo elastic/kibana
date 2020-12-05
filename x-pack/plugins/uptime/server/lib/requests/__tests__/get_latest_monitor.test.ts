@@ -19,6 +19,11 @@ describe('getLatestMonitor', () => {
           bool: {
             filter: [
               {
+                exists: {
+                  field: 'summary',
+                },
+              },
+              {
                 range: {
                   '@timestamp': {
                     gte: 'now-1h',
@@ -64,12 +69,12 @@ describe('getLatestMonitor', () => {
   });
 
   it('returns data in expected shape', async () => {
-    const { esClient: mockEsClient, uptimeESClient } = getUptimeESMockClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
 
     const result = await getLatestMonitor({
-      uptimeESClient,
+      uptimeEsClient,
       dateStart: 'now-1h',
       dateEnd: 'now',
       monitorId: 'testMonitor',

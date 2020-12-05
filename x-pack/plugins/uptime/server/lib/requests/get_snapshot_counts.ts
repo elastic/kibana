@@ -16,13 +16,13 @@ export interface GetSnapshotCountParams {
 }
 
 export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Snapshot> = async ({
-  uptimeESClient,
+  uptimeEsClient,
   dateRangeStart,
   dateRangeEnd,
   filters,
 }): Promise<Snapshot> => {
   const context = new QueryContext(
-    uptimeESClient,
+    uptimeEsClient,
     dateRangeStart,
     dateRangeEnd,
     CONTEXT_DEFAULTS.CURSOR_PAGINATION,

@@ -7,7 +7,7 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorLocations, MonitorLocation } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
-import { SortOptions } from '../../../../apm/typings/elasticsearch/aggregations';
+import { SortOptions } from '../../../../../typings/elasticsearch';
 
 /**
  * Fetch data for the monitor page title.
@@ -24,7 +24,7 @@ export interface GetMonitorLocationsParams {
 export const getMonitorLocations: UMElasticsearchQueryFn<
   GetMonitorLocationsParams,
   MonitorLocations
-> = async ({ uptimeESClient, monitorId, dateStart, dateEnd }) => {
+> = async ({ uptimeEsClient, monitorId, dateStart, dateEnd }) => {
   const sortOptions: SortOptions = [
     {
       '@timestamp': {
@@ -90,7 +90,7 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
     },
   };
 
-  const { body: result } = await uptimeESClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search({ body: params });
 
   const locations = result?.aggregations?.location?.buckets ?? [];
 

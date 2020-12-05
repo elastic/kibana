@@ -24,7 +24,7 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
   options: {
     tags: ['access:uptime-read'],
   },
-  handler: async ({ uptimeESClient, request }): Promise<any> => {
+  handler: async ({ uptimeEsClient, request }): Promise<any> => {
     const {
       dateRangeStart,
       dateRangeEnd,
@@ -43,7 +43,7 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
       nextPagePagination,
       prevPagePagination,
     } = await libs.requests.getMonitorStates({
-      uptimeESClient,
+      uptimeEsClient,
       dateRangeStart,
       dateRangeEnd,
       pagination: decodedPagination,

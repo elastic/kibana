@@ -24,7 +24,9 @@ import {
   KBN_FIELD_TYPES,
 } from '../../../../../../../src/plugins/data/public';
 
+import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { extractErrorMessage } from '../../../../common/util/errors';
+import { FeatureImportance, TopClasses } from '../../../../common/types/feature_importance';
 
 import {
   BASIC_NUMERICAL_TYPES,
@@ -158,6 +160,90 @@ export const getDataGridSchemaFromKibanaFieldType = (
   return schema;
 };
 
+const getClassName = (className: string, isClassTypeBoolean: boolean) => {
+  if (isClassTypeBoolean) {
+    return className === 'true';
+  }
+
+  return className;
+};
+/**
+ * Helper to transform feature importance flattened fields with arrays back to object structure
+ *
+ * @param row - EUI data grid data row
+ * @param mlResultsField - Data frame analytics results field
+ * @returns nested object structure of feature importance values
+ */
+export const getFeatureImportance = (
+  row: Record<string, any>,
+  mlResultsField: string,
+  isClassTypeBoolean = false
+): FeatureImportance[] => {
+  const featureNames: string[] | undefined =
+    row[`${mlResultsField}.feature_importance.feature_name`];
+  const classNames: string[] | undefined =
+    row[`${mlResultsField}.feature_importance.classes.class_name`];
+  const classImportance: number[] | undefined =
+    row[`${mlResultsField}.feature_importance.classes.importance`];
+
+  if (featureNames === undefined) {
+    return [];
+  }
+
+  // return object structure for classification job
+  if (classNames !== undefined && classImportance !== undefined) {
+    const overallClassNames = classNames?.slice(0, classNames.length / featureNames.length);
+
+    return featureNames.map((fName, index) => {
+      const offset = overallClassNames.length * index;
+      const featureClassImportance = classImportance.slice(
+        offset,
+        offset + overallClassNames.length
+      );
+      return {
+        feature_name: fName,
+        classes: overallClassNames.map((fClassName, fIndex) => {
+          return {
+            class_name: getClassName(fClassName, isClassTypeBoolean),
+            importance: featureClassImportance[fIndex],
+          };
+        }),
+      };
+    });
+  }
+
+  // return object structure for regression job
+  const importance: number[] = row[`${mlResultsField}.feature_importance.importance`];
+  return featureNames.map((fName, index) => ({
+    feature_name: fName,
+    importance: importance[index],
+  }));
+};
+
+/**
+ * Helper to transforms top classes flattened fields with arrays back to object structure
+ *
+ * @param row - EUI data grid data row
+ * @param mlResultsField - Data frame analytics results field
+ * @returns nested object structure of feature importance values
+ */
+export const getTopClasses = (row: Record<string, any>, mlResultsField: string): TopClasses => {
+  const classNames: string[] | undefined = row[`${mlResultsField}.top_classes.class_name`];
+  const classProbabilities: number[] | undefined =
+    row[`${mlResultsField}.top_classes.class_probability`];
+  const classScores: number[] | undefined = row[`${mlResultsField}.top_classes.class_score`];
+
+  if (classNames === undefined || classProbabilities === undefined || classScores === undefined) {
+    return [];
+  }
+
+  return classNames.map((className, index) => ({
+    class_name: className,
+    class_probability: classProbabilities[index],
+    class_score: classScores[index],
+  }));
+};
+
 export const useRenderCellValue = (
   indexPattern: IndexPattern | undefined,
   pagination: IndexPagination,
@@ -205,6 +291,15 @@ export const useRenderCellValue = (
           // Try if the field name is available as is.
           if (item.hasOwnProperty(cId)) {
             return item[cId];
+          }
+
+          // For classification and regression results, we need to treat some fields with a custom transform.
+          if (cId === `${resultsField}.feature_importance`) {
+            return getFeatureImportance(fullItem, resultsField ?? DEFAULT_RESULTS_FIELD);
+          }
+
+          if (cId === `${resultsField}.top_classes`) {
+            return getTopClasses(fullItem, resultsField ?? DEFAULT_RESULTS_FIELD);
           }
 
           // Try if the field name is available as a nested field.
@@ -320,11 +415,20 @@ export const showDataGridColumnChartErrorMessageToast = (
 // helper function to transform { [key]: [val] } => { [key]: val }
 // for when `fields` is used in es.search since response is always an array of values
 // since response always returns an array of values for each field
-export const getProcessedFields = (originalObj: object) => {
+export const getProcessedFields = (originalObj: object, omitBy?: (key: string) => boolean) => {
   const obj: { [key: string]: any } = { ...originalObj };
   for (const key of Object.keys(obj)) {
-    if (Array.isArray(obj[key]) && obj[key].length === 1) {
-      obj[key] = obj[key][0];
+    // if no conditional is included, process everything
+    if (omitBy === undefined) {
+      if (Array.isArray(obj[key]) && obj[key].length === 1) {
+        obj[key] = obj[key][0];
+      }
+    } else {
+      // else only process the fields for things users don't want to omit
+      if (omitBy(key) === false)
+        if (Array.isArray(obj[key]) && obj[key].length === 1) {
+          obj[key] = obj[key][0];
+        }
     }
   }
   return obj;

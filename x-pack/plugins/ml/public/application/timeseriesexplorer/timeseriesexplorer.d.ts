@@ -6,7 +6,7 @@
 
 import { FC } from 'react';
 
-import { getDateFormatTz, TimeRangeBounds } from '../explorer/explorer_utils';
+import { TimeRangeBounds } from '../explorer/explorer_utils';
 
 declare const TimeSeriesExplorer: FC<{
   appStateHandler: (action: string, payload: any) => void;
@@ -16,9 +16,9 @@ declare const TimeSeriesExplorer: FC<{
   lastRefresh: number;
   selectedJobId: string;
   selectedDetectorIndex: number;
-  selectedEntities: any[];
+  selectedEntities: Record<string, string> | undefined;
   selectedForecastId?: string;
   tableInterval: string;
   tableSeverity: number;
-  zoom?: { from: string; to: string };
+  zoom?: { from?: string; to?: string };
 }>;

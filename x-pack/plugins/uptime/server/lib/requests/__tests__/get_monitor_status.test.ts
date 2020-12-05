@@ -5,7 +5,7 @@
  */
 
 import { getMonitorStatus } from '../get_monitor_status';
-import { getUptimeClientFromESMock, setupMockEsCompositeQuery } from './helper';
+import { getUptimeESMockClient, setupMockEsCompositeQuery } from './helper';
 
 export interface BucketItemCriteria {
   monitorId: string;
@@ -76,8 +76,11 @@ describe('getMonitorStatus', () => {
         minimum_should_match: 1,
       },
     };
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
     await getMonitorStatus({
-      ...getUptimeClientFromESMock(esMock),
+      uptimeEsClient,
       filters: exampleFilter,
       locations: [],
       numTimes: 5,
@@ -191,8 +194,11 @@ describe('getMonitorStatus', () => {
       [],
       genBucketItem
     );
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
     await getMonitorStatus({
-      ...getUptimeClientFromESMock(esMock),
+      uptimeEsClient,
       locations: ['fairbanks', 'harrisburg'],
       numTimes: 1,
       timerange: {
@@ -347,8 +353,11 @@ describe('getMonitorStatus', () => {
         },
       },
     };
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
     await getMonitorStatus({
-      ...getUptimeClientFromESMock(esMock),
+      uptimeEsClient,
       ...clientParameters,
     });
     expect(esMock.search).toHaveBeenCalledTimes(1);
@@ -491,8 +500,11 @@ describe('getMonitorStatus', () => {
         },
       },
     };
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
     await getMonitorStatus({
-      ...getUptimeClientFromESMock(esMock),
+      uptimeEsClient,
       ...clientParameters,
     });
     expect(esMock.search).toHaveBeenCalledTimes(1);
@@ -610,8 +622,11 @@ describe('getMonitorStatus', () => {
         to: 'now-2m',
       },
     };
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
     const result = await getMonitorStatus({
-      ...getUptimeClientFromESMock(esMock),
+      uptimeEsClient,
       ...clientParameters,
     });
     expect(esMock.search).toHaveBeenCalledTimes(1);
@@ -787,8 +802,11 @@ describe('getMonitorStatus', () => {
       criteria,
       genBucketItem
     );
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
     const result = await getMonitorStatus({
-      ...getUptimeClientFromESMock(esMock),
+      uptimeEsClient,
       locations: [],
       numTimes: 5,
       timerange: {

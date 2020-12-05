@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/alert_type_registry.mock';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
@@ -12,7 +12,7 @@ import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/ap
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import React from 'react';
-import { Expressions, AlertContextMeta, ExpressionRow } from './expression';
+import { Expressions, AlertContextMeta, ExpressionRow, defaultExpression } from './expression';
 import { act } from 'react-dom/test-utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
@@ -105,6 +105,7 @@ describe('Expression', () => {
         threshold: [],
         timeSize: 1,
         timeUnit: 'm',
+        customMetric: defaultExpression.customMetric,
       },
     ]);
   });
@@ -155,6 +156,7 @@ describe('ExpressionRow', () => {
         alertsContextMetadata={{
           customMetrics: [],
         }}
+        fields={[{ name: 'some.system.field', type: 'bzzz' }]}
       />
     );
 

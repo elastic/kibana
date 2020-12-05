@@ -18,7 +18,9 @@
  */
 
 import { NameList } from 'elasticsearch';
-import { Filter, IndexPattern, Query } from '../..';
+import { Query } from '../..';
+import { Filter } from '../../es_query';
+import { IndexPattern } from '../../index_patterns';
 import { SearchSource } from './search_source';
 
 /**
@@ -57,6 +59,13 @@ export interface SortDirectionNumeric {
 
 export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
 
+interface SearchField {
+  [key: string]: SearchFieldValue;
+}
+
+// @internal
+export type SearchFieldValue = string | SearchField;
+
 /**
  * search source fields
  */
@@ -84,7 +93,16 @@ export interface SearchSourceFields {
   size?: number;
   source?: NameList;
   version?: boolean;
-  fields?: NameList;
+  /**
+   * Retrieve fields via the search Fields API
+   */
+  fields?: SearchFieldValue[];
+  /**
+   * Retreive fields directly from _source (legacy behavior)
+   *
+   * @deprecated It is recommended to use `fields` wherever possible.
+   */
+  fieldsFromSource?: NameList;
   /**
    * {@link IndexPatternService}
    */

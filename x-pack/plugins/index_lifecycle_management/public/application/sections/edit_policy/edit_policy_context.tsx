@@ -5,10 +5,16 @@
  */
 
 import React, { createContext, ReactChild, useContext } from 'react';
-import { SerializedPolicy } from '../../../../common/types';
+import { ApplicationStart } from 'kibana/public';
 
-interface EditPolicyContextValue {
-  originalPolicy: SerializedPolicy;
+import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
+
+export interface EditPolicyContextValue {
+  isNewPolicy: boolean;
+  policy: SerializedPolicy;
+  existingPolicies: PolicyFromES[];
+  getUrlForApp: ApplicationStart['getUrlForApp'];
+  policyName?: string;
 }
 
 const EditPolicyContext = createContext<EditPolicyContextValue>(null as any);

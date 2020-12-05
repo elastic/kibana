@@ -32,13 +32,13 @@ import {
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
   getDetails,
+  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
   REFERENCE_URLS_DETAILS,
   RISK_SCORE_DETAILS,
-  RULE_ABOUT_DETAILS_HEADER_TOGGLE,
   RULE_NAME_HEADER,
   RULE_TYPE_DETAILS,
   RUNS_EVERY_DETAILS,
@@ -137,12 +137,16 @@ describe('Detection rules, EQL', () => {
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', eqlRule.severity);
       getDetails(RISK_SCORE_DETAILS).should('have.text', eqlRule.riskScore);
-      getDetails(REFERENCE_URLS_DETAILS).should('have.text', expectedUrls);
+      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      });
       getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
-      getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
+      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      });
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
     });
-    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+    cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));

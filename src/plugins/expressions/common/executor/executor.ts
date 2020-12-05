@@ -32,7 +32,7 @@ import { typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
 import { getByAlias } from '../util';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState } from '../../../kibana_utils/common';
+import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
 import { ExpressionExecutionParams } from '../service';
 
 export interface ExpressionExecOptions {
@@ -89,7 +89,7 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
 }
 
 export class Executor<Context extends Record<string, unknown> = Record<string, unknown>>
-  implements PersistableState<ExpressionAstExpression> {
+  implements PersistableStateService<ExpressionAstExpression> {
   static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
     state?: ExecutorState<Ctx>
   ): Executor<Ctx> {
@@ -247,6 +247,15 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     });
 
     return telemetryData;
+  }
+
+  public migrate(ast: SerializableState, version: string) {
+    return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
+      if (!fn.migrations[version]) return link;
+      const updatedAst = fn.migrations[version](link) as ExpressionAstFunction;
+      link.arguments = updatedAst.arguments;
+      link.type = updatedAst.type;
+    });
   }
 
   public fork(): Executor<Context> {

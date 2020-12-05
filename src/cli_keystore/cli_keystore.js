@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
-import { Keystore } from '../legacy/server/keystore';
+import { Keystore } from '../cli/keystore';
 
 import { createCli } from './create';
 import { listCli } from './list';
@@ -29,9 +29,7 @@ import { addCli } from './add';
 import { removeCli } from './remove';
 import { getKeystore } from './get_keystore';
 
-const argv = process.env.kbnWorkerArgv
-  ? JSON.parse(process.env.kbnWorkerArgv)
-  : process.argv.slice();
+const argv = process.argv.slice();
 const program = new Command('bin/kibana-keystore');
 
 program

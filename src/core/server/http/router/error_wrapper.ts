@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { RequestHandlerWrapper } from './router';
 
 export const wrapErrors: RequestHandlerWrapper = (handler) => {

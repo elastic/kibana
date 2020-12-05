@@ -5,7 +5,7 @@
  */
 import { ValuesType } from 'utility-types';
 import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
-import { AggregationOptionsByType } from '../../../../typings/elasticsearch/aggregations';
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { TelemetryTask } from '.';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';

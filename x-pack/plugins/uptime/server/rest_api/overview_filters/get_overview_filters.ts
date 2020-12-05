@@ -28,7 +28,7 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
       tags: arrayOrStringType,
     }),
   },
-  handler: async ({ uptimeESClient, request, response }): Promise<any> => {
+  handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, locations, schemes, search, ports, tags } = request.query;
 
     let parsedSearch: Record<string, any> | undefined;
@@ -41,7 +41,7 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
     }
 
     return await libs.requests.getFilterBar({
-      uptimeESClient,
+      uptimeEsClient,
       dateRangeStart,
       dateRangeEnd,
       search: parsedSearch,

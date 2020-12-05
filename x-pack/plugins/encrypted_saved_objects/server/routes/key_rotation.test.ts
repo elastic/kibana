@@ -57,24 +57,24 @@ describe('Key rotation routes', () => {
       const queryValidator = (routeConfig.validate as any).query as Type<any>;
       expect(
         queryValidator.validate({
-          batchSize: 100,
+          batch_size: 100,
           type: 'some-type',
         })
       ).toEqual({
-        batchSize: 100,
+        batch_size: 100,
         type: 'some-type',
       });
-      expect(queryValidator.validate({ batchSize: 1 })).toEqual({ batchSize: 1 });
-      expect(queryValidator.validate({ batchSize: 10000 })).toEqual({ batchSize: 10000 });
-      expect(queryValidator.validate({})).toEqual({ batchSize: 10000 });
+      expect(queryValidator.validate({ batch_size: 1 })).toEqual({ batch_size: 1 });
+      expect(queryValidator.validate({ batch_size: 10000 })).toEqual({ batch_size: 10000 });
+      expect(queryValidator.validate({})).toEqual({ batch_size: 10000 });
 
-      expect(() => queryValidator.validate({ batchSize: 0 })).toThrowErrorMatchingInlineSnapshot(
-        `"[batchSize]: Value must be equal to or greater than [1]."`
+      expect(() => queryValidator.validate({ batch_size: 0 })).toThrowErrorMatchingInlineSnapshot(
+        `"[batch_size]: Value must be equal to or greater than [1]."`
       );
       expect(() =>
-        queryValidator.validate({ batchSize: 10001 })
+        queryValidator.validate({ batch_size: 10001 })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[batchSize]: Value must be equal to or lower than [10000]."`
+        `"[batch_size]: Value must be equal to or lower than [10000]."`
       );
 
       expect(() => queryValidator.validate({ type: 100 })).toThrowErrorMatchingInlineSnapshot(
@@ -106,7 +106,7 @@ describe('Key rotation routes', () => {
       const unhandledException = new Error('Something went wrong.');
       mockEncryptionKeyRotationService.rotate.mockRejectedValue(unhandledException);
 
-      const mockRequest = httpServerMock.createKibanaRequest({ query: { batchSize: 1234 } });
+      const mockRequest = httpServerMock.createKibanaRequest({ query: { batch_size: 1234 } });
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
       expect(response.status).toBe(500);
@@ -117,7 +117,7 @@ describe('Key rotation routes', () => {
     });
 
     it('returns whatever `rotate` returns.', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({ query: { batchSize: 1234 } });
+      const mockRequest = httpServerMock.createKibanaRequest({ query: { batch_size: 1234 } });
       mockEncryptionKeyRotationService.rotate.mockResolvedValue({
         total: 3,
         successful: 6,
@@ -132,7 +132,7 @@ describe('Key rotation routes', () => {
     });
 
     it('returns 429 if called while rotation is in progress.', async () => {
-      const mockRequest = httpServerMock.createKibanaRequest({ query: { batchSize: 1234 } });
+      const mockRequest = httpServerMock.createKibanaRequest({ query: { batch_size: 1234 } });
       mockEncryptionKeyRotationService.rotate.mockResolvedValue({
         total: 3,
         successful: 6,

@@ -11,6 +11,7 @@ import {
   GetTrustedAppsRequestSchema,
   PostTrustedAppCreateRequestSchema,
 } from '../schema/trusted_apps';
+import { OperatingSystem } from './os';
 
 /** API request params for deleting Trusted App entry */
 export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequestSchema.params>;
@@ -32,33 +33,41 @@ export interface PostTrustedAppCreateResponse {
   data: TrustedApp;
 }
 
-export interface MacosLinuxConditionEntry {
-  field: 'process.hash.*' | 'process.executable.caseless';
+export enum ConditionEntryField {
+  HASH = 'process.hash.*',
+  PATH = 'process.executable.caseless',
+  SIGNER = 'process.Ext.code_signature',
+}
+
+export interface ConditionEntry<T extends ConditionEntryField> {
+  field: T;
   type: 'match';
   operator: 'included';
   value: string;
 }
 
-export type WindowsConditionEntry =
-  | MacosLinuxConditionEntry
-  | (Omit<MacosLinuxConditionEntry, 'field'> & {
-      field: 'process.code_signature';
-    });
+export type MacosLinuxConditionEntry = ConditionEntry<
+  ConditionEntryField.HASH | ConditionEntryField.PATH
+>;
+export type WindowsConditionEntry = ConditionEntry<
+  ConditionEntryField.HASH | ConditionEntryField.PATH | ConditionEntryField.SIGNER
+>;
+
+export interface MacosLinuxConditionEntries {
+  os: OperatingSystem.LINUX | OperatingSystem.MAC;
+  entries: MacosLinuxConditionEntry[];
+}
+
+export interface WindowsConditionEntries {
+  os: OperatingSystem.WINDOWS;
+  entries: WindowsConditionEntry[];
+}
 
 /** Type for a new Trusted App Entry */
 export type NewTrustedApp = {
   name: string;
   description?: string;
-} & (
-  | {
-      os: 'linux' | 'macos';
-      entries: MacosLinuxConditionEntry[];
-    }
-  | {
-      os: 'windows';
-      entries: WindowsConditionEntry[];
-    }
-);
+} & (MacosLinuxConditionEntries | WindowsConditionEntries);
 
 /** A trusted app entry */
 export type TrustedApp = NewTrustedApp & {

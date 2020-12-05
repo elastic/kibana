@@ -40,7 +40,7 @@ export const getMonitorStates: UMElasticsearchQueryFn<
   GetMonitorStatesParams,
   MonitorSummariesResult
 > = async ({
-  uptimeESClient,
+  uptimeEsClient,
   dateRangeStart,
   dateRangeEnd,
   pagination,
@@ -52,7 +52,7 @@ export const getMonitorStates: UMElasticsearchQueryFn<
   statusFilter = statusFilter === null ? undefined : statusFilter;
 
   const queryContext = new QueryContext(
-    uptimeESClient,
+    uptimeEsClient,
     dateRangeStart,
     dateRangeEnd,
     pagination,
@@ -146,7 +146,7 @@ export const getHistogramForMonitors = async (
       },
     },
   };
-  const result = await queryContext.search({ body: params });
+  const { body: result } = await queryContext.search({ body: params });
 
   const histoBuckets: any[] = result.aggregations?.histogram.buckets ?? [];
   const simplified = histoBuckets.map((histoBucket: any): { timestamp: number; byId: any } => {

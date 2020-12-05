@@ -20,7 +20,7 @@ import {
   TBT_LABEL,
   TBT_TOOLTIP,
 } from './translations';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
 import { UXMetrics } from '../../../../../../observability/public';
 
@@ -55,7 +55,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
     (callApmApi) => {
       if (uxQuery) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/long-task-metrics',
+          endpoint: 'GET /api/apm/rum-client/long-task-metrics',
           params: {
             query: {
               ...uxQuery,

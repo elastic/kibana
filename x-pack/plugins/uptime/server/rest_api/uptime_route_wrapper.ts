@@ -22,7 +22,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
 
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
-    const uptimeESClient = createUptimeESClient({
+    const uptimeEsClient = createUptimeESClient({
       dynamicSettings,
       request,
       esClient: esClient.asCurrentUser,
@@ -30,7 +30,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
 
     try {
       const res = await uptimeRoute.handler({
-        uptimeESClient,
+        uptimeEsClient,
         savedObjectsClient,
         context,
         request,

@@ -13,40 +13,14 @@ import { useRelatedEventByCategoryNavigation } from './use_related_event_by_cate
 import { useColors } from './use_colors';
 
 /**
- * i18n-translated titles for submenus and identifiers for display of states:
- *   initialMenuStatus: submenu before it has been opened / requested data
- *   menuError: if the submenu requested data, but received an error
- */
-export const subMenuAssets = {
-  initialMenuStatus: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.relatedNotRetrieved',
-    {
-      defaultMessage: 'Related Events have not yet been retrieved.',
-    }
-  ),
-  menuError: i18n.translate('xpack.securitySolution.endpoint.resolver.relatedRetrievalError', {
-    defaultMessage: 'There was an error retrieving related events.',
-  }),
-  relatedEvents: {
-    title: i18n.translate('xpack.securitySolution.endpoint.resolver.relatedEvents', {
-      defaultMessage: 'Events',
-    }),
-  },
-};
-
-interface ResolverSubmenuOption {
-  optionTitle: string;
-  action: () => unknown;
-  prefix?: number | JSX.Element;
-}
-
-/**
  * Until browser support accomodates the `notation="compact"` feature of Intl.NumberFormat...
  * exported for testing
  * @param num The number to format
  * @returns [mantissa ("12" in "12k+"), Scalar of compact notation (k,M,B,T), remainder indicator ("+" in "12k+")]
  */
-export function compactNotationParts(num: number): [number, string, string] {
+export function compactNotationParts(
+  num: number
+): [mantissa: number, compactNotation: string, remainderIndicator: string] {
   if (!Number.isFinite(num)) {
     return [num, '', ''];
   }
@@ -84,8 +58,6 @@ export function compactNotationParts(num: number): [number, string, string] {
   const prefix = prefixMap.get(scale) ?? '';
   return [Math.floor(num / scale), prefix, (num / scale) % 1 > Number.EPSILON ? hasRemainder : ''];
 }
-
-export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
 
 /**
  * A Submenu that displays a collection of "pills" for each related event

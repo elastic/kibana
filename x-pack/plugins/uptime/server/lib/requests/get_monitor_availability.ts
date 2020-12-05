@@ -6,8 +6,8 @@
 
 import { UMElasticsearchQueryFn } from '../adapters';
 import { GetMonitorAvailabilityParams, Ping } from '../../../common/runtime_types';
-import { SortOptions } from '../../../../apm/typings/elasticsearch/aggregations';
 import { AfterKey } from './get_monitor_status';
+import { SortOptions } from '../../../../../typings/elasticsearch';
 
 export interface AvailabilityKey {
   monitorId: string;
@@ -36,7 +36,7 @@ export const formatBuckets = async (buckets: any[]): Promise<GetMonitorAvailabil
 export const getMonitorAvailability: UMElasticsearchQueryFn<
   GetMonitorAvailabilityParams,
   GetMonitorAvailabilityResult[]
-> = async ({ uptimeESClient, range, rangeUnit, threshold: thresholdString, filters }) => {
+> = async ({ uptimeEsClient, range, rangeUnit, threshold: thresholdString, filters }) => {
   const queryResults: Array<Promise<GetMonitorAvailabilityResult[]>> = [];
   let afterKey: AfterKey;
 
@@ -77,7 +77,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
         monitors: {
           composite: {
             size: 2000,
-            // ...(afterKey ? { after: afterKey } : {}),
+            ...(afterKey ? { after: afterKey } : {}),
             sources: [
               {
                 monitorId: {
@@ -146,7 +146,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
       },
     };
 
-    const { body: result } = await uptimeESClient.search({ body: esParams });
+    const { body: result } = await uptimeEsClient.search({ body: esParams });
 
     afterKey = result?.aggregations?.monitors?.after_key as AfterKey;
 

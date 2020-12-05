@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
-import { CommonAlertParamDetails } from '../../../common/types';
+import { CommonAlertParamDetails } from '../../../common/types/alerts';
 import { AlertParamDuration } from '../flyout_expressions/alert_param_duration';
 import { AlertParamType } from '../../../common/enums';
 import { AlertParamPercentage } from '../flyout_expressions/alert_param_percentage';
@@ -26,7 +26,7 @@ export const Expression: React.FC<Props> = (props) => {
     const details = paramDetails[alertParamName];
     const value = alertParams[alertParamName];
 
-    switch (details.type) {
+    switch (details?.type) {
       case AlertParamType.Duration:
         return (
           <AlertParamDuration

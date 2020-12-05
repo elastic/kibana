@@ -103,9 +103,10 @@ describe('status check alert', () => {
               "from": "now-15m",
               "to": "now",
             },
-            "uptimeESClient": Object {
+            "uptimeEsClient": Object {
               "baseESClient": [MockFunction],
               "count": [Function],
+              "getSavedObjectsClient": [Function],
               "search": [Function],
             },
           },
@@ -157,9 +158,10 @@ describe('status check alert', () => {
               "from": "now-15m",
               "to": "now",
             },
-            "uptimeESClient": Object {
+            "uptimeEsClient": Object {
               "baseESClient": [MockFunction],
               "count": [Function],
+              "getSavedObjectsClient": [Function],
               "search": [Function],
             },
           },
@@ -495,9 +497,10 @@ describe('status check alert', () => {
               "from": "now-15m",
               "to": "now",
             },
-            "uptimeESClient": Object {
+            "uptimeEsClient": Object {
               "baseESClient": [MockFunction],
               "count": [Function],
+              "getSavedObjectsClient": [Function],
               "search": [Function],
             },
           },
@@ -601,9 +604,10 @@ describe('status check alert', () => {
               "from": "now-30h",
               "to": "now",
             },
-            "uptimeESClient": Object {
+            "uptimeEsClient": Object {
               "baseESClient": [MockFunction],
               "count": [Function],
+              "getSavedObjectsClient": [Function],
               "search": [Function],
             },
           },
@@ -750,21 +754,16 @@ describe('status check alert', () => {
       expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": Object {
-              "baseESClient": [MockFunction],
-              "count": [Function],
-              "search": [Function],
-            },
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":12349}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":5601}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":443}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"observer.geo.name\\":\\"harrisburg\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"monitor.type\\":\\"http\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"unsecured\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"containers\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"tags\\":\\"org:google\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}]}}]}}",
             "range": 35,
             "rangeUnit": "d",
             "threshold": "99.34",
+            "uptimeEsClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "getSavedObjectsClient": [Function],
+              "search": [Function],
+            },
           },
         ]
       `);
@@ -809,21 +808,16 @@ describe('status check alert', () => {
       expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": Object {
-              "baseESClient": [MockFunction],
-              "count": [Function],
-              "search": [Function],
-            },
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": "{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"ur.port\\"}}],\\"minimum_should_match\\":1}}",
             "range": 23,
             "rangeUnit": "w",
             "threshold": "90",
+            "uptimeEsClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "getSavedObjectsClient": [Function],
+              "search": [Function],
+            },
           },
         ]
       `);
@@ -857,21 +851,16 @@ describe('status check alert', () => {
       expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": Object {
-              "baseESClient": [MockFunction],
-              "count": [Function],
-              "search": [Function],
-            },
-            "dynamicSettings": Object {
-              "certAgeThreshold": 730,
-              "certExpirationThreshold": 30,
-              "defaultConnectors": Array [],
-              "heartbeatIndices": "heartbeat-8*",
-            },
             "filters": undefined,
             "range": 23,
             "rangeUnit": "w",
             "threshold": "90",
+            "uptimeEsClient": Object {
+              "baseESClient": [MockFunction],
+              "count": [Function],
+              "getSavedObjectsClient": [Function],
+              "search": [Function],
+            },
           },
         ]
       `);
@@ -1209,10 +1198,10 @@ describe('status check alert', () => {
     it('creates a set of unique IDs from a list of composite unique objects', () => {
       expect(getUniqueIdsByLoc(downItems, availItems)).toEqual(
         new Set<string>([
-          'firstharrisburg',
-          'firstfairbanks',
-          'secondharrisburg',
-          'secondfairbanks',
+          'first-harrisburg',
+          'first-fairbanks',
+          'second-harrisburg',
+          'second-fairbanks',
         ])
       );
     });

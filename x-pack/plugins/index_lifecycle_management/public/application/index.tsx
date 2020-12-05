@@ -12,7 +12,9 @@ import { CloudSetup } from '../../../cloud/public';
 
 import { KibanaContextProvider } from '../shared_imports';
 
-import { App } from './app';
+import { AppWithRouter } from './app';
+
+import { BreadcrumbService } from './services/breadcrumbs';
 
 export const renderApp = (
   element: Element,
@@ -20,12 +22,17 @@ export const renderApp = (
   history: ScopedHistory,
   navigateToApp: ApplicationStart['navigateToApp'],
   getUrlForApp: ApplicationStart['getUrlForApp'],
+  breadcrumbService: BreadcrumbService,
   cloud?: CloudSetup
 ): UnmountCallback => {
   render(
     <I18nContext>
-      <KibanaContextProvider services={{ cloud }}>
-        <App history={history} navigateToApp={navigateToApp} getUrlForApp={getUrlForApp} />
+      <KibanaContextProvider services={{ cloud, breadcrumbService }}>
+        <AppWithRouter
+          history={history}
+          navigateToApp={navigateToApp}
+          getUrlForApp={getUrlForApp}
+        />
       </KibanaContextProvider>
     </I18nContext>,
     element

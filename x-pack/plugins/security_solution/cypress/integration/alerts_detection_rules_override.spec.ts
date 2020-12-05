@@ -34,6 +34,7 @@ import {
   DETAILS_TITLE,
   FALSE_POSITIVES_DETAILS,
   getDetails,
+  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
@@ -41,7 +42,6 @@ import {
   REFERENCE_URLS_DETAILS,
   RISK_SCORE_DETAILS,
   RISK_SCORE_OVERRIDE_DETAILS,
-  RULE_ABOUT_DETAILS_HEADER_TOGGLE,
   RULE_NAME_HEADER,
   RULE_NAME_OVERRIDE_DETAILS,
   RULE_TYPE_DETAILS,
@@ -142,9 +142,13 @@ describe('Detection rules, override', () => {
         `${newOverrideRule.riskOverride}signal.rule.risk_score`
       );
       getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', newOverrideRule.nameOverride);
-      getDetails(REFERENCE_URLS_DETAILS).should('have.text', expectedUrls);
+      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      });
       getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
-      getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
+      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      });
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
       getDetails(TIMESTAMP_OVERRIDE_DETAILS).should('have.text', newOverrideRule.timestampOverride);
       cy.contains(DETAILS_TITLE, 'Severity override')
@@ -160,7 +164,7 @@ describe('Detection rules, override', () => {
           });
         });
     });
-    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+    cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));

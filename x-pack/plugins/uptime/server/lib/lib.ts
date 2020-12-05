@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
 import chalk from 'chalk';
-import { ElasticsearchClient, KibanaRequest } from 'kibana/server';
 import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
-import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
-import { DynamicSettings } from '../../common/runtime_types';
+import { savedObjectsAdapter } from './saved_objects';
+import { ESSearchResponse } from '../../../../typings/elasticsearch';
 
 export interface UMDomainLibs {
   requests: UptimeRequests;
@@ -37,11 +37,11 @@ export type UptimeESClient = ReturnType<typeof createUptimeESClient>;
 export function createUptimeESClient({
   esClient,
   request,
-  dynamicSettings,
+  savedObjectsClient,
 }: {
   esClient: ElasticsearchClient;
   request?: KibanaRequest;
-  dynamicSettings?: DynamicSettings;
+  savedObjectsClient: SavedObjectsClientContract;
 }) {
   const { _debug = false } = (request?.query as { _debug: boolean }) ?? {};
 
@@ -50,6 +50,9 @@ export function createUptimeESClient({
     async search<TParams>(params: TParams): Promise<{ body: ESSearchResponse<unknown, TParams> }> {
       let res: any;
       let esError: any;
+      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+        savedObjectsClient!
+      );
 
       const esParams = { index: dynamicSettings!.heartbeatIndices, ...params };
 
@@ -72,6 +75,10 @@ export function createUptimeESClient({
       let res: any;
       let esError: any;
 
+      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+        savedObjectsClient!
+      );
+
       const esParams = { index: dynamicSettings!.heartbeatIndices, ...params };
 
       try {
@@ -89,6 +96,9 @@ export function createUptimeESClient({
       }
 
       return res;
+    },
+    getSavedObjectsClient() {
+      return savedObjectsClient;
     },
   };
 }

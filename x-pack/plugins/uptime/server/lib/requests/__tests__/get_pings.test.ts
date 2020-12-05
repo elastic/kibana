@@ -87,12 +87,12 @@ describe('getAll', () => {
   });
 
   it('returns data in the appropriate shape', async () => {
-    const { esClient: mockEsClient, uptimeESClient } = getUptimeESMockClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
 
     const result = await getPings({
-      uptimeESClient,
+      uptimeEsClient,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
       size: 12,
@@ -110,12 +110,12 @@ describe('getAll', () => {
   });
 
   it('creates appropriate sort and size parameters', async () => {
-    const { esClient: mockEsClient, uptimeESClient } = getUptimeESMockClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
 
     await getPings({
-      uptimeESClient,
+      uptimeEsClient,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
       size: 12,
@@ -190,12 +190,12 @@ describe('getAll', () => {
   });
 
   it('omits the sort param when no sort passed', async () => {
-    const { esClient: mockEsClient, uptimeESClient } = getUptimeESMockClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
 
     await getPings({
-      uptimeESClient,
+      uptimeEsClient,
       dateRange: { from: 'now-1h', to: 'now' },
       size: 12,
     });
@@ -268,12 +268,12 @@ describe('getAll', () => {
   });
 
   it('omits the size param when no size passed', async () => {
-    const { esClient: mockEsClient, uptimeESClient } = getUptimeESMockClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
 
     await getPings({
-      uptimeESClient,
+      uptimeEsClient,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'desc',
     });
@@ -346,12 +346,12 @@ describe('getAll', () => {
   });
 
   it('adds a filter for monitor ID', async () => {
-    const { esClient: mockEsClient, uptimeESClient } = getUptimeESMockClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
 
     await getPings({
-      uptimeESClient,
+      uptimeEsClient,
       dateRange: { from: 'now-1h', to: 'now' },
       monitorId: 'testmonitorid',
     });
@@ -429,12 +429,12 @@ describe('getAll', () => {
   });
 
   it('adds a filter for monitor status', async () => {
-    const { esClient: mockEsClient, uptimeESClient } = getUptimeESMockClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
 
     await getPings({
-      uptimeESClient,
+      uptimeEsClient,
       dateRange: { from: 'now-1h', to: 'now' },
       status: 'down',
     });

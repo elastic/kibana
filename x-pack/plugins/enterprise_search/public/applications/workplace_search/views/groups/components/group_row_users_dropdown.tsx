@@ -13,7 +13,7 @@ import { EuiLoadingContent, EuiButtonEmpty } from '@elastic/eui';
 import { GroupsLogic } from '../groups_logic';
 import { FilterableUsersPopover } from './filterable_users_popover';
 
-interface IGroupRowUsersDropdownProps {
+interface GroupRowUsersDropdownProps {
   isPopoverOpen: boolean;
   numOptions: number;
   groupId: string;
@@ -21,7 +21,7 @@ interface IGroupRowUsersDropdownProps {
   closePopover(): void;
 }
 
-export const GroupRowUsersDropdown: React.FC<IGroupRowUsersDropdownProps> = ({
+export const GroupRowUsersDropdown: React.FC<GroupRowUsersDropdownProps> = ({
   isPopoverOpen,
   numOptions,
   groupId,

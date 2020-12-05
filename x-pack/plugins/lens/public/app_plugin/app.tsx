@@ -11,6 +11,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -19,13 +20,13 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   OnSaveProps,
   checkForDuplicateTitle,
-  SavedObjectSaveModalOrigin,
 } from '../../../../../src/plugins/saved_objects/public';
 import { injectFilterReferences } from '../persistence';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   esFilters,
+  exporters,
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   syncQueryStateWithUrl,
@@ -33,6 +34,7 @@ import {
 import { LENS_EMBEDDABLE_TYPE, getFullPath } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
 import { getLensTopNavConfig } from './lens_top_nav';
+import { TagEnhancedSavedObjectSaveModalOrigin } from './tags_saved_object_save_modal_origin_wrapper';
 import {
   LensByReferenceInput,
   LensEmbeddableInput,
@@ -59,6 +61,7 @@ export function App({
     notifications,
     attributeService,
     savedObjectsClient,
+    savedObjectsTagging,
     getOriginatingAppName,
 
     // Temporarily required until the 'by value' paradigm is default.
@@ -69,7 +72,11 @@ export function App({
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
       query: data.query.queryString.getQuery(),
-      filters: data.query.filterManager.getFilters(),
+      // Do not use app-specific filters from previous app,
+      // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
+      filters: !initialContext
+        ? data.query.filterManager.getGlobalFilters()
+        : data.query.filterManager.getFilters(),
       isLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
       dateRange: {
@@ -350,17 +357,24 @@ export function App({
       returnToOrigin: boolean;
       onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
       newDescription?: string;
+      newTags?: string[];
     },
     options: { saveToLibrary: boolean }
   ) => {
     if (!lastKnownDoc) {
       return;
     }
+
+    let references = lastKnownDoc.references;
+    if (savedObjectsTagging && saveProps.newTags) {
+      references = savedObjectsTagging.ui.updateTagsReferences(references, saveProps.newTags);
+    }
+
     const docToSave = {
       ...getLastKnownDocWithoutPinnedFilters()!,
       description: saveProps.newDescription,
-      savedObjectId: saveProps.newCopyOnSave ? undefined : lastKnownDoc.savedObjectId,
       title: saveProps.newTitle,
+      references,
     };
 
     // Required to serialize filters in by value mode until
@@ -375,25 +389,31 @@ export function App({
 
     const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
     const originalSavedObjectId = (originalInput as LensByReferenceInput)?.savedObjectId;
-    if (options.saveToLibrary && !originalInput) {
-      await checkForDuplicateTitle(
-        {
-          ...docToSave,
-          copyOnSave: saveProps.newCopyOnSave,
-          lastSavedTitle: lastKnownDoc.title,
-          getEsType: () => 'lens',
-          getDisplayName: () =>
-            i18n.translate('xpack.lens.app.saveModalType', {
-              defaultMessage: 'Lens visualization',
-            }),
-        },
-        saveProps.isTitleDuplicateConfirmed,
-        saveProps.onTitleDuplicate,
-        {
-          savedObjectsClient,
-          overlays,
-        }
-      );
+    if (options.saveToLibrary) {
+      try {
+        await checkForDuplicateTitle(
+          {
+            id: originalSavedObjectId,
+            title: docToSave.title,
+            copyOnSave: saveProps.newCopyOnSave,
+            lastSavedTitle: lastKnownDoc.title,
+            getEsType: () => 'lens',
+            getDisplayName: () =>
+              i18n.translate('xpack.lens.app.saveModalType', {
+                defaultMessage: 'Lens visualization',
+              }),
+          },
+          saveProps.isTitleDuplicateConfirmed,
+          saveProps.onTitleDuplicate,
+          {
+            savedObjectsClient,
+            overlays,
+          }
+        );
+      } catch (e) {
+        // ignore duplicate title failure, user notified in save modal
+        return;
+      }
     }
     try {
       const newInput = (await attributeService.wrapAttributes(
@@ -453,11 +473,6 @@ export function App({
       // eslint-disable-next-line no-console
       console.dir(e);
       trackUiEvent('save_failed');
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.lens.app.docSavingError', {
-          defaultMessage: 'Error saving document',
-        })
-      );
       setState((s) => ({ ...s, isSaveModalVisible: false }));
     }
   };
@@ -465,16 +480,50 @@ export function App({
   const { TopNavMenu } = navigation.ui;
 
   const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
+  const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
+    defaultMessage: 'unsaved',
+  });
   const topNavConfig = getLensTopNavConfig({
     showSaveAndReturn: Boolean(
       state.isLinkedToOriginatingApp &&
         // Temporarily required until the 'by value' paradigm is default.
         (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
     ),
+    enableExportToCSV: Boolean(
+      state.isSaveable && state.activeData && Object.keys(state.activeData).length
+    ),
     isByValueMode: getIsByValueMode(),
     showCancel: Boolean(state.isLinkedToOriginatingApp),
     savingPermitted,
     actions: {
+      exportToCSV: () => {
+        if (!state.activeData) {
+          return;
+        }
+        const datatables = Object.values(state.activeData);
+        const content = datatables.reduce<Record<string, { content: string; type: string }>>(
+          (memo, datatable, i) => {
+            // skip empty datatables
+            if (datatable) {
+              const postFix = datatables.length > 1 ? `-${i + 1}` : '';
+
+              memo[`${lastKnownDoc?.title || unsavedTitle}${postFix}.csv`] = {
+                content: exporters.datatableToCSV(datatable, {
+                  csvSeparator: uiSettings.get('csv:separator', ','),
+                  quoteValues: uiSettings.get('csv:quoteValues', true),
+                  formatFactory: data.fieldFormats.deserialize,
+                }),
+                type: exporters.CSV_MIME_TYPE,
+              };
+            }
+            return memo;
+          },
+          {}
+        );
+        if (content) {
+          downloadMultipleAs(content);
+        }
+      },
       saveAndReturn: () => {
         if (savingPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.
@@ -507,6 +556,11 @@ export function App({
       },
     },
   });
+
+  const tagsIds =
+    state.persistedDoc && savedObjectsTagging
+      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
+      : [];
 
   return (
     <>
@@ -591,12 +645,15 @@ export function App({
               onError,
               showNoDataPopover,
               initialContext,
-              onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {
+              onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
                 if (isSaveable !== state.isSaveable) {
                   setState((s) => ({ ...s, isSaveable }));
                 }
                 if (!_.isEqual(state.persistedDoc, doc)) {
                   setState((s) => ({ ...s, lastKnownDoc: doc }));
+                }
+                if (!_.isEqual(state.activeData, activeData)) {
+                  setState((s) => ({ ...s, activeData }));
                 }
 
                 // Update the cached index patterns if the user made a change to any of them
@@ -623,7 +680,9 @@ export function App({
         )}
       </div>
       {lastKnownDoc && state.isSaveModalVisible && (
-        <SavedObjectSaveModalOrigin
+        <TagEnhancedSavedObjectSaveModalOrigin
+          savedObjectsTagging={savedObjectsTagging}
+          initialTags={tagsIds}
           originatingApp={incomingState?.originatingApp}
           onSave={(props) => runSave(props, { saveToLibrary: true })}
           onClose={() => {

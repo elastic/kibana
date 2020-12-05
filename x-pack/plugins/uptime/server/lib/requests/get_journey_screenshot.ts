@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { ESSearchBody } from '../../../../apm/typings/elasticsearch';
+import { ESSearchBody } from '../../../../../typings/elasticsearch';
 
 interface GetJourneyScreenshotParams {
   checkGroup: string;
@@ -15,7 +15,7 @@ interface GetJourneyScreenshotParams {
 export const getJourneyScreenshot: UMElasticsearchQueryFn<
   GetJourneyScreenshotParams,
   any
-> = async ({ uptimeESClient, checkGroup, stepIndex }) => {
+> = async ({ uptimeEsClient, checkGroup, stepIndex }) => {
   const params: ESSearchBody = {
     query: {
       bool: {
@@ -40,7 +40,7 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
     },
     _source: ['synthetics.blob'],
   };
-  const { body: result } = await uptimeESClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search({ body: params });
   if (!Array.isArray(result?.hits?.hits) || result.hits.hits.length < 1) {
     return null;
   }

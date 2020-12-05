@@ -18,7 +18,7 @@ import { UptimeESClient } from '../../lib';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
   params: {
-    uptimeESClient: UptimeESClient;
+    uptimeEsClient: UptimeESClient;
     esClient?: IScopedClusterClient;
   } & P
 ) => Promise<R>;

@@ -135,7 +135,6 @@ export const WaffleInventorySwitcher: React.FC = () => {
       isOpen={isOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      withTitle
       anchorPosition="downLeft"
     >
       <EuiContextMenu initialPanelId="firstPanel" panels={panels} />

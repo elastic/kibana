@@ -7,7 +7,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useUpdateRule, ReturnUpdateRule } from './use_update_rule';
-import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/update_rules_schema.mock';
+import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 
 jest.mock('./api');
 

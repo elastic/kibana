@@ -26,22 +26,24 @@ import { i18n } from '@kbn/i18n';
 import { Option, none, some } from 'fp-ts/lib/Option';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
 import { TestConnectorForm } from './test_connector_form';
-import { ActionConnector, IErrorObject } from '../../../types';
+import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { updateActionConnector, executeAction } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import {
   ActionTypeExecutorResult,
   isActionTypeExecutorResult,
 } from '../../../../../actions/common';
 import './connector_edit_flyout.scss';
+import { useKibana } from '../../../common/lib/kibana';
 
-export interface ConnectorEditProps {
+export interface ConnectorEditFlyoutProps {
   initialConnector: ActionConnector;
-  editFlyoutVisible: boolean;
-  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   tab?: EditConectorTabs;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export enum EditConectorTabs {
@@ -51,19 +53,18 @@ export enum EditConectorTabs {
 
 export const ConnectorEditFlyout = ({
   initialConnector,
-  editFlyoutVisible,
-  setEditFlyoutVisibility,
+  onClose,
   tab = EditConectorTabs.Configuration,
-}: ConnectorEditProps) => {
+  reloadConnectors,
+  consumer,
+  actionTypeRegistry,
+}: ConnectorEditFlyoutProps) => {
   const {
     http,
-    toastNotifications,
-    capabilities,
-    actionTypeRegistry,
-    reloadConnectors,
+    notifications: { toasts },
     docLinks,
-    consumer,
-  } = useActionsConnectorsContext();
+    application: { capabilities },
+  } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
 
   const [{ connector }, dispatch] = useReducer(connectorReducer, {
@@ -86,16 +87,12 @@ export const ConnectorEditFlyout = ({
   const [isExecutingAction, setIsExecutinAction] = useState<boolean>(false);
 
   const closeFlyout = useCallback(() => {
-    setEditFlyoutVisibility(false);
     setConnector('connector', { ...initialConnector, secrets: {} });
     setHasChanges(false);
     setTestExecutionResult(none);
+    onClose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setEditFlyoutVisibility]);
-
-  if (!editFlyoutVisible) {
-    return null;
-  }
+  }, [onClose]);
 
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
   const errorsInConnectorConfig = (!connector.isPreconfigured
@@ -111,7 +108,7 @@ export const ConnectorEditFlyout = ({
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await updateActionConnector({ http, connector, id: connector.id })
       .then((savedConnector) => {
-        toastNotifications.addSuccess(
+        toasts.addSuccess(
           i18n.translate(
             'xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText',
             {
@@ -125,7 +122,7 @@ export const ConnectorEditFlyout = ({
         return savedConnector;
       })
       .catch((errorRes) => {
-        toastNotifications.addDanger(
+        toasts.addDanger(
           errorRes.body?.message ??
             i18n.translate(
               'xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText',
@@ -260,9 +257,6 @@ export const ConnectorEditFlyout = ({
                 dispatch(changes);
               }}
               actionTypeRegistry={actionTypeRegistry}
-              http={http}
-              docLinks={docLinks}
-              capabilities={capabilities}
               consumer={consumer}
             />
           ) : (
@@ -295,6 +289,7 @@ export const ConnectorEditFlyout = ({
             onExecutAction={onExecutAction}
             isExecutingAction={isExecutingAction}
             executionResult={testExecutionResult}
+            actionTypeRegistry={actionTypeRegistry}
           />
         )}
       </EuiFlyoutBody>

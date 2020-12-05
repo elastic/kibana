@@ -5,7 +5,6 @@
  */
 
 import { CoreStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
-import angular from 'angular';
 import { Observable } from 'rxjs';
 import { HttpRequestInit } from '../../../../src/core/public';
 import { MonitoringStartPluginDependencies } from './types';

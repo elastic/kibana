@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlexItem, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 import {
@@ -17,49 +17,48 @@ import {
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
-import { ActionType, ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
-import { TypeRegistry } from '../../type_registry';
 import './connector_add_modal.scss';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
+import {
+  ActionType,
+  ActionConnector,
+  IErrorObject,
+  ActionTypeRegistryContract,
+} from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
-  addModalVisible: boolean;
-  setAddModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
-  http: HttpSetup;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
-  capabilities: ApplicationStart['capabilities'];
-  docLinks: DocLinksStart;
   consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export const ConnectorAddModal = ({
   actionType,
-  addModalVisible,
-  setAddModalVisibility,
+  onClose,
   postSaveEventHandler,
-  http,
-  toastNotifications,
-  actionTypeRegistry,
-  capabilities,
-  docLinks,
   consumer,
+  actionTypeRegistry,
 }: ConnectorAddModalProps) => {
+  const {
+    http,
+    notifications: { toasts },
+    application: { capabilities },
+  } = useKibana().services;
   let hasErrors = false;
-  const initialConnector = {
-    actionTypeId: actionType.id,
-    config: {},
-    secrets: {},
-  } as ActionConnector;
+  const initialConnector = useMemo(
+    () => ({
+      actionTypeId: actionType.id,
+      config: {},
+      secrets: {},
+    }),
+    [actionType.id]
+  );
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -75,14 +74,11 @@ export const ConnectorAddModal = ({
   >(undefined);
 
   const closeModal = useCallback(() => {
-    setAddModalVisibility(false);
     setConnector(initialConnector);
     setServerError(undefined);
-  }, [initialConnector, setAddModalVisibility]);
+    onClose();
+  }, [initialConnector, onClose]);
 
-  if (!addModalVisible) {
-    return null;
-  }
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
   const errors = {
     ...actionTypeModel?.validateConnector(connector).errors,
@@ -93,8 +89,8 @@ export const ConnectorAddModal = ({
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
       .then((savedConnector) => {
-        if (toastNotifications) {
-          toastNotifications.addSuccess(
+        if (toasts) {
+          toasts.addSuccess(
             i18n.translate(
               'xpack.triggersActionsUI.sections.addModalConnectorForm.updateSuccessNotificationText',
               {
@@ -149,9 +145,6 @@ export const ConnectorAddModal = ({
             serverError={serverError}
             errors={errors}
             actionTypeRegistry={actionTypeRegistry}
-            docLinks={docLinks}
-            http={http}
-            capabilities={capabilities}
             consumer={consumer}
           />
         </EuiModalBody>

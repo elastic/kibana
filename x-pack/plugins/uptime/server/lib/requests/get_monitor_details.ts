@@ -5,27 +5,24 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { DynamicSettings, MonitorDetails, Ping } from '../../../common/runtime_types';
+import { MonitorDetails, Ping } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
 import { UptimeESClient } from '../lib';
-import { ESSearchBody } from '../../../../apm/typings/elasticsearch';
+import { ESSearchBody } from '../../../../../typings/elasticsearch';
 
 export interface GetMonitorDetailsParams {
   monitorId: string;
   dateStart: string;
   dateEnd: string;
   alertsClient: any;
-  dynamicSettings: DynamicSettings;
 }
 
 const getMonitorAlerts = async ({
-  uptimeESClient,
+  uptimeEsClient,
   alertsClient,
   monitorId,
-  dynamicSettings,
 }: {
-  uptimeESClient: UptimeESClient;
-  dynamicSettings: any;
+  uptimeEsClient: UptimeESClient;
   alertsClient: any;
   monitorId: string;
 }) => {
@@ -69,15 +66,14 @@ const getMonitorAlerts = async ({
       },
     };
 
-    const parsedFilters = await formatFilterString({
-      uptimeESClient,
-      dynamicSettings,
-      filters: currAlert.params.filters,
-      search: currAlert.params.search,
-    });
+    const parsedFilters = await formatFilterString(
+      uptimeEsClient,
+      currAlert.params.filters,
+      currAlert.params.search
+    );
     esParams.query.bool = Object.assign({}, esParams.query.bool, parsedFilters?.bool);
 
-    const { body: result } = await uptimeESClient.search({ body: esParams });
+    const { body: result } = await uptimeEsClient.search({ body: esParams });
 
     if (result.hits.total.value > 0) {
       monitorAlerts.push(currAlert);
@@ -89,7 +85,7 @@ const getMonitorAlerts = async ({
 export const getMonitorDetails: UMElasticsearchQueryFn<
   GetMonitorDetailsParams,
   MonitorDetails
-> = async ({ uptimeESClient, dynamicSettings, monitorId, dateStart, dateEnd, alertsClient }) => {
+> = async ({ uptimeEsClient, monitorId, dateStart, dateEnd, alertsClient }) => {
   const queryFilters: any = [
     {
       range: {
@@ -130,14 +126,13 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
     ],
   };
 
-  const { body: result } = await uptimeESClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search({ body: params });
 
   const data = result.hits.hits[0]?._source as Ping & { '@timestamp': string };
 
   const errorTimestamp: string | undefined = data?.['@timestamp'];
   const monAlerts = await getMonitorAlerts({
-    uptimeESClient,
-    dynamicSettings,
+    uptimeEsClient,
     alertsClient,
     monitorId,
   });

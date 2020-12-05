@@ -19,14 +19,9 @@
 
 import { ParsedUsageCollection } from './ts_parser';
 
-export type AllowedSchemaTypes =
-  | 'keyword'
-  | 'text'
-  | 'number'
-  | 'boolean'
-  | 'long'
-  | 'date'
-  | 'float';
+export type AllowedSchemaNumberTypes = 'long' | 'integer' | 'short' | 'byte' | 'double' | 'float';
+
+export type AllowedSchemaTypes = AllowedSchemaNumberTypes | 'keyword' | 'text' | 'boolean' | 'date';
 
 export function compatibleSchemaTypes(type: AllowedSchemaTypes | 'array') {
   switch (type) {
@@ -36,9 +31,12 @@ export function compatibleSchemaTypes(type: AllowedSchemaTypes | 'array') {
       return 'string';
     case 'boolean':
       return 'boolean';
-    case 'number':
-    case 'float':
     case 'long':
+    case 'integer':
+    case 'short':
+    case 'byte':
+    case 'double':
+    case 'float':
       return 'number';
     case 'array':
       return 'array';

@@ -26,6 +26,10 @@ export function getFailedShards(err: IEsError) {
   return failedShards ? failedShards[0] : undefined;
 }
 
+export function getTopLevelCause(err: IEsError) {
+  return err.body?.attributes?.error;
+}
+
 export function getRootCause(err: IEsError) {
   return getFailedShards(err)?.reason;
 }

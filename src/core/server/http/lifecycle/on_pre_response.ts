@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import { Lifecycle, Request, ResponseObject, ResponseToolkit as HapiResponseToolkit } from 'hapi';
-import Boom from 'boom';
+import {
+  Lifecycle,
+  Request,
+  ResponseObject,
+  ResponseToolkit as HapiResponseToolkit,
+} from '@hapi/hapi';
+import Boom from '@hapi/boom';
 import { Logger } from '../../logging';
 
 import { HapiResponseAdapter, KibanaRequest, ResponseHeaders } from '../router';

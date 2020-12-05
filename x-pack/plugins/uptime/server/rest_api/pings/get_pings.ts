@@ -27,7 +27,7 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
       status: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ uptimeESClient, request, response }): Promise<any> => {
+  handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
     const { from, to, ...optional } = request.query;
     const params = GetPingsParamsType.decode({ dateRange: { from, to }, ...optional });
     if (isLeft(params)) {
@@ -37,7 +37,7 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
     }
 
     return await libs.requests.getPings({
-      uptimeESClient,
+      uptimeEsClient,
       ...params.right,
     });
   },

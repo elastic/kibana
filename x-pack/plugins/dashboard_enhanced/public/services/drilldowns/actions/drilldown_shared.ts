@@ -12,8 +12,9 @@ import {
 } from '../../../../../../../src/plugins/ui_actions/public';
 
 /**
- * We know that VALUE_CLICK_TRIGGER and SELECT_RANGE_TRIGGER are also triggering APPLY_FILTER_TRIGGER
- * This function appends APPLY_FILTER_TRIGGER to list of triggers if VALUE_CLICK_TRIGGER or SELECT_RANGE_TRIGGER
+ * We know that VALUE_CLICK_TRIGGER and SELECT_RANGE_TRIGGER are also triggering APPLY_FILTER_TRIGGER.
+ * This function appends APPLY_FILTER_TRIGGER to the list of triggers if either VALUE_CLICK_TRIGGER
+ * or SELECT_RANGE_TRIGGER was executed.
  *
  * TODO: this probably should be part of uiActions infrastructure,
  * but dynamic implementation of nested trigger doesn't allow to statically express such relations

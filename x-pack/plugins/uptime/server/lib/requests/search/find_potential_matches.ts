@@ -35,7 +35,11 @@ export const findPotentialMatches = async (
 const query = async (queryContext: QueryContext, searchAfter: any, size: number) => {
   const body = await queryBody(queryContext, searchAfter, size);
 
-  return await queryContext.search({ body });
+  const params = {
+    body,
+  };
+
+  return await queryContext.search(params);
 };
 
 const queryBody = async (queryContext: QueryContext, searchAfter: any, size: number) => {

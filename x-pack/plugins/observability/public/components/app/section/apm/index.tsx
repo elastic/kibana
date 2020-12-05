@@ -12,17 +12,17 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useHasData } from '../../../../hooks/use_has_data';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
 
 interface Props {
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
   bucketSize?: string;
 }
 
@@ -30,25 +30,36 @@ function formatTpm(value?: number) {
   return numeral(value).format('0.00a');
 }
 
-export function APMSection({ absoluteTime, relativeTime, bucketSize }: Props) {
+export function APMSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
+  const chartTheme = useChartTheme();
   const history = useHistory();
+  const { forceUpdate, hasData } = useHasData();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
-  const { start, end } = absoluteTime;
-  const { data, status } = useFetcher(() => {
-    if (start && end && bucketSize) {
-      return getDataHandler('apm')?.fetchData({
-        absoluteTime: { start, end },
-        relativeTime,
-        bucketSize,
-      });
-    }
-  }, [start, end, bucketSize, relativeTime]);
+  const { data, status } = useFetcher(
+    () => {
+      if (bucketSize) {
+        return getDataHandler('apm')?.fetchData({
+          absoluteTime: { start: absoluteStart, end: absoluteEnd },
+          relativeTime: { start: relativeStart, end: relativeEnd },
+          bucketSize,
+        });
+      }
+    },
+    // Absolute times shouldn't be used here, since it would refetch on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [bucketSize, relativeStart, relativeEnd, forceUpdate]
+  );
+
+  if (!hasData.apm?.hasData) {
+    return null;
+  }
 
   const { appLink, stats, series } = data || {};
 
-  const min = moment.utc(absoluteTime.start).valueOf();
-  const max = moment.utc(absoluteTime.end).valueOf();
+  const min = moment.utc(absoluteStart).valueOf();
+  const max = moment.utc(absoluteEnd).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 
@@ -93,7 +104,7 @@ export function APMSection({ absoluteTime, relativeTime, bucketSize }: Props) {
       <ChartContainer isInitialLoad={isLoading && !data}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-          theme={useChartTheme()}
+          theme={chartTheme}
           showLegend={false}
           xDomain={{ min, max }}
         />

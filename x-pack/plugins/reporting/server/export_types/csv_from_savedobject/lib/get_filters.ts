@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import moment from 'moment-timezone';
 import { TimeRangeParams } from '../../common';
 import { Filter, QueryFilter, SavedSearchObjectAttributes, SearchSourceFilter } from '../types';

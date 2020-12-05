@@ -18,23 +18,21 @@ export interface GetLatestMonitorParams {
   monitorId?: string | null;
 
   observerLocation?: string;
-
-  status?: string;
 }
 
 // Get The monitor latest state sorted by timestamp with date range
 export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Ping> = async ({
-  uptimeESClient,
+  uptimeEsClient,
   dateStart,
   dateEnd,
   monitorId,
   observerLocation,
-  status,
 }) => {
   const params = {
     query: {
       bool: {
         filter: [
+          { exists: { field: 'summary' } },
           {
             range: {
               '@timestamp': {
@@ -43,7 +41,6 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
               },
             },
           },
-          ...(status ? [{ term: { 'monitor.status': status } }] : []),
           ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
           ...(observerLocation ? [{ term: { 'observer.geo.name': observerLocation } }] : []),
         ],
@@ -56,7 +53,7 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
     },
   };
 
-  const { body: result } = await uptimeESClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search({ body: params });
 
   const doc = result.hits?.hits?.[0];
   const docId = doc?._id ?? '';

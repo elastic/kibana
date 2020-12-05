@@ -10,7 +10,7 @@ import {
   AvailabilityKey,
   getMonitorAvailability,
 } from '../get_monitor_availability';
-import { getUptimeClientFromESMock, setupMockEsCompositeQuery } from './helper';
+import { getUptimeESMockClient, setupMockEsCompositeQuery } from './helper';
 import { GetMonitorAvailabilityParams, makePing, Ping } from '../../../../common/runtime_types';
 
 interface AvailabilityTopHit {
@@ -108,8 +108,11 @@ describe('monitor availability', () => {
         "minimum_should_match": 1
       }
     }`;
+
+      const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
       await getMonitorAvailability({
-        ...getUptimeClientFromESMock(esMock),
+        uptimeEsClient,
         filters: exampleFilter,
         range: 2,
         rangeUnit: 'w',
@@ -285,8 +288,11 @@ describe('monitor availability', () => {
         rangeUnit: 'd',
         threshold: '69',
       };
+
+      const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
       const result = await getMonitorAvailability({
-        ...getUptimeClientFromESMock(esMock),
+        uptimeEsClient,
         ...clientParameters,
       });
       expect(esMock.search).toHaveBeenCalledTimes(1);
@@ -507,8 +513,10 @@ describe('monitor availability', () => {
         ],
         genBucketItem
       );
+      const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
       const result = await getMonitorAvailability({
-        ...getUptimeClientFromESMock(esMock),
+        uptimeEsClient,
         range: 3,
         rangeUnit: 'M',
         threshold: '98',
@@ -749,6 +757,10 @@ describe('monitor availability', () => {
                     },
                   },
                   "composite": Object {
+                    "after": Object {
+                      "location": "harrisburg",
+                      "monitorId": "baz",
+                    },
                     "size": 2000,
                     "sources": Array [
                       Object {
@@ -805,8 +817,11 @@ describe('monitor availability', () => {
         ],
         genBucketItem
       );
+
+      const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
       await getMonitorAvailability({
-        ...getUptimeClientFromESMock(esMock),
+        uptimeEsClient,
         range: 3,
         rangeUnit: 's',
         threshold: '99',
