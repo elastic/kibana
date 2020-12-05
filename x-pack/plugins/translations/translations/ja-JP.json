@@ -1459,8 +1459,6 @@
     "discover.docViews.table.filterForValueButtonTooltip": "値でフィルター",
     "discover.docViews.table.filterOutValueButtonAriaLabel": "値を除外",
     "discover.docViews.table.filterOutValueButtonTooltip": "値を除外",
-    "discover.docViews.table.noCachedMappingForThisFieldAriaLabel": "警告",
-    "discover.docViews.table.noCachedMappingForThisFieldTooltip": "このフィールドのキャッシュされたマッピングがありません。管理 > インデックスパターンページからフィールドリストを更新してください",
     "discover.docViews.table.tableTitle": "表",
     "discover.docViews.table.toggleColumnInTableButtonAriaLabel": "表の列を切り替える",
     "discover.docViews.table.toggleColumnInTableButtonTooltip": "表の列を切り替える",
