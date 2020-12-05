@@ -186,7 +186,7 @@ describe('migration actions', () => {
         Option.none
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
-      expect(task()).resolves.toMatchInlineSnapshot(`
+      return expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
           "left": Object {
@@ -226,10 +226,11 @@ describe('migration actions', () => {
 
       const task = waitForUpdateByQueryTask(client, res.right.taskId, '10s');
 
-      expect(task()).rejects.toMatchInlineSnapshot(`
-        [Error: update_by_query failed with the following failures:
-        [{"index":"existing_index_with_write_block","id":"aCKULnYBw5My2Z741pIM","cause":{"type":"cluster_block_exception","reason":"index [existing_index_with_write_block] blocked by: [FORBIDDEN/8/index write (api)];"},"status":403},{"index":"existing_index_with_write_block","id":"aSKULnYBw5My2Z741pIM","cause":{"type":"cluster_block_exception","reason":"index [existing_index_with_write_block] blocked by: [FORBIDDEN/8/index write (api)];"},"status":403},{"index":"existing_index_with_write_block","id":"aiKULnYBw5My2Z741pIM","cause":{"type":"cluster_block_exception","reason":"index [existing_index_with_write_block] blocked by: [FORBIDDEN/8/index write (api)];"},"status":403},{"index":"existing_index_with_write_block","id":"ayKULnYBw5My2Z741pIM","cause":{"type":"cluster_block_exception","reason":"index [existing_index_with_write_block] blocked by: [FORBIDDEN/8/index write (api)];"},"status":403}]]
-      `);
+      // We can't do a snapshot match because the response includes an index
+      // id which ES assigns dynamically
+      return expect(task()).rejects.toMatchObject({
+        message: /update_by_query failed with the following failures:\n\[\{\"index\":\"existing_index_with_write_block\"/,
+      });
     });
     it('rejects if there is an error', async () => {
       const res = (await updateByQuery(
@@ -239,7 +240,7 @@ describe('migration actions', () => {
 
       const task = waitForUpdateByQueryTask(client, res.right.taskId, '10s');
 
-      expect(task()).rejects.toMatchInlineSnapshot(`
+      return expect(task()).rejects.toMatchInlineSnapshot(`
         [Error: update_by_query failed with the following error:
         {"type":"index_not_found_exception","reason":"no such index [no_such_index]","resource.type":"index_or_alias","resource.id":"no_such_index","index_uuid":"_na_","index":"no_such_index"}]
       `);
@@ -252,7 +253,7 @@ describe('migration actions', () => {
 
       const task = waitForUpdateByQueryTask(client, res.right.taskId, '10s');
 
-      expect(task()).resolves.toMatchInlineSnapshot(`
+      return expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
           "right": "update_by_query_succeeded",
