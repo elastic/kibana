@@ -25,6 +25,8 @@ const moduleIds = [
   'nginx_ecs',
   'sample_data_ecommerce',
   'sample_data_weblogs',
+  'security_linux',
+  'security_windows',
   'siem_auditbeat',
   'siem_auditbeat_auth',
   'siem_cloudtrail',
@@ -32,8 +34,6 @@ const moduleIds = [
   'siem_winlogbeat',
   'siem_winlogbeat_auth',
   'uptime_heartbeat',
-  'security_linux',
-  'security_windows',
 ];
 
 export default ({ getService }: FtrProviderContext) => {
