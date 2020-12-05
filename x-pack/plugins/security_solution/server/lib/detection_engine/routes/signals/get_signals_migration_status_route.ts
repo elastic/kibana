@@ -11,6 +11,8 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { getIndexAliases } from '../../index/get_index_aliases';
 import { getMigrationStatus } from '../../migrations/get_migration_status';
 import { getSignalsIndicesInRange } from '../../migrations/get_signals_indices_in_range';
+import { indexIsOutdated } from '../../migrations/helpers';
+import { getTemplateVersion } from '../index/check_template_version';
 import { buildSiemResponse, transformError } from '../utils';
 
 export const getSignalsMigrationStatusRoute = (router: IRouter) => {
@@ -37,6 +39,7 @@ export const getSignalsMigrationStatusRoute = (router: IRouter) => {
         const { from } = request.query;
 
         const signalsAlias = appClient.getSignalsIndex();
+        const currentVersion = await getTemplateVersion({ alias: signalsAlias, esClient });
         const indexAliases = await getIndexAliases({ alias: signalsAlias, esClient });
         const nonWriteIndices = indexAliases
           .filter((indexAlias) => !indexAlias.isWriteIndex)
@@ -47,8 +50,12 @@ export const getSignalsMigrationStatusRoute = (router: IRouter) => {
           from,
         });
         const migrationStatuses = await getMigrationStatus({ esClient, index: indicesInRange });
+        const enrichedStatuses = migrationStatuses.map((status) => ({
+          ...status,
+          is_outdated: indexIsOutdated({ status, version: currentVersion }),
+        }));
 
-        return response.ok({ body: { indices: migrationStatuses } });
+        return response.ok({ body: { indices: enrichedStatuses } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

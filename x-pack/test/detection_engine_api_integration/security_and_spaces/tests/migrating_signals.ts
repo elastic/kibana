@@ -92,23 +92,25 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.indices).to.eql([
           {
             name: legacySignalsIndexName,
-            version: 1,
+            is_outdated: true,
             signal_versions: [
               {
                 doc_count: 1,
                 key: 0,
               },
             ],
+            version: 1,
           },
           {
+            is_outdated: true,
             name: outdatedIndexName,
-            version: 3,
             signal_versions: [
               {
                 doc_count: 1,
                 key: 3,
               },
             ],
+            version: 3,
           },
         ]);
 

@@ -30,24 +30,33 @@ export const decodeMigrationToken = (token: string): MigrationDetails => {
 export const isOutdated = ({ current, target }: { current: number; target: number }): boolean =>
   current < target;
 
-export const indexNeedsMigration = ({
+const mappingsAreOutdated = ({
   status,
   version,
 }: {
-  status?: MigrationStatus;
+  status: MigrationStatus;
   version: number;
-}): boolean => !!status && isOutdated({ current: status.version, target: version });
+}): boolean => isOutdated({ current: status.version, target: version });
 
-export const signalsNeedMigration = ({
+const signalsAreOutdated = ({
+  status,
+  version,
+}: {
+  status: MigrationStatus;
+  version: number;
+}): boolean =>
+  status.signal_versions.some((signalVersion) => {
+    return (
+      signalVersion.doc_count > 0 && isOutdated({ current: signalVersion.key, target: version })
+    );
+  });
+
+export const indexIsOutdated = ({
   status,
   version,
 }: {
   status?: MigrationStatus;
   version: number;
 }): boolean =>
-  !!status &&
-  status.signal_versions.some((signalVersion) => {
-    return (
-      signalVersion.doc_count > 0 && isOutdated({ current: signalVersion.key, target: version })
-    );
-  });
+  status != null &&
+  (mappingsAreOutdated({ status, version }) || signalsAreOutdated({ status, version }));

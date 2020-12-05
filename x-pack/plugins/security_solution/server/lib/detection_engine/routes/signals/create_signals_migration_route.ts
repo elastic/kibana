@@ -12,11 +12,7 @@ import { migrateSignals } from '../../migrations/migrate_signals';
 import { buildSiemResponse, transformError } from '../utils';
 import { getTemplateVersion } from '../index/check_template_version';
 import { getMigrationStatus } from '../../migrations/get_migration_status';
-import {
-  encodeMigrationToken,
-  indexNeedsMigration,
-  signalsNeedMigration,
-} from '../../migrations/helpers';
+import { encodeMigrationToken, indexIsOutdated } from '../../migrations/helpers';
 
 export const createSignalsMigrationRoute = (router: IRouter) => {
   router.post(
@@ -50,10 +46,7 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
         const migrationResults = await Promise.all(
           indices.map(async (index) => {
             const status = migrationStatuses.find(({ name }) => name === index);
-            if (
-              indexNeedsMigration({ status, version: currentVersion }) ||
-              signalsNeedMigration({ status, version: currentVersion })
-            ) {
+            if (indexIsOutdated({ status, version: currentVersion })) {
               const migrationDetails = await migrateSignals({
                 esClient,
                 index,
