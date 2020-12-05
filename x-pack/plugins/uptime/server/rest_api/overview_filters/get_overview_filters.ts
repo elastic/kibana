@@ -26,6 +26,7 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
       schemes: arrayOrStringType,
       ports: arrayOrStringType,
       tags: arrayOrStringType,
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {

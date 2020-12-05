@@ -55,6 +55,7 @@ export function createUptimeESClient({
       );
 
       const esParams = { index: dynamicSettings!.heartbeatIndices, ...params };
+      const startTime = process.hrtime();
 
       try {
         res = await esClient.search(esParams);
@@ -62,7 +63,7 @@ export function createUptimeESClient({
         esError = e;
       }
       if (_debug && request) {
-        debugESCall({ request, esError, operationName: 'search', params: esParams });
+        debugESCall({ startTime, request, esError, operationName: 'search', params: esParams });
       }
 
       if (esError) {
@@ -80,6 +81,7 @@ export function createUptimeESClient({
       );
 
       const esParams = { index: dynamicSettings!.heartbeatIndices, ...params };
+      const startTime = process.hrtime();
 
       try {
         res = await esClient.search(esParams);
@@ -88,7 +90,7 @@ export function createUptimeESClient({
       }
 
       if (_debug && request) {
-        debugESCall({ request, esError, operationName: 'count', params: esParams });
+        debugESCall({ startTime, request, esError, operationName: 'count', params: esParams });
       }
 
       if (esError) {
@@ -106,7 +108,7 @@ export function createUptimeESClient({
 /* eslint-disable no-console */
 
 function formatObj(obj: Record<string, any>) {
-  return JSON.stringify(obj, null, 2);
+  return JSON.stringify(obj);
 }
 
 export function debugESCall({
@@ -114,14 +116,14 @@ export function debugESCall({
   params,
   request,
   esError,
+  startTime,
 }: {
   operationName: string;
   params: Record<string, any>;
   request: KibanaRequest;
   esError: any;
+  startTime: [number, number];
 }) {
-  const startTime = process.hrtime();
-
   const highlightColor = esError ? 'bgRed' : 'inverse';
   const diff = process.hrtime(startTime);
   const duration = `${Math.round(diff[0] * 1000 + diff[1] / 1e6)}ms`;

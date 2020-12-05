@@ -19,6 +19,7 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
       pagination: schema.maybe(schema.string()),
       statusFilter: schema.maybe(schema.string()),
       pageSize: schema.number(),
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
   options: {

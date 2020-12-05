@@ -6,7 +6,6 @@
 
 import { UMKibanaRouteWrapper } from './types';
 import { createUptimeESClient } from '../lib/lib';
-import { savedObjectsAdapter } from '../lib/saved_objects';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaResponse } from '../../../../../src/core/server/http/router';
@@ -20,11 +19,9 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
     const { client: esClient } = context.core.elasticsearch;
     const { client: savedObjectsClient } = context.core.savedObjects;
 
-    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
-
     const uptimeEsClient = createUptimeESClient({
-      dynamicSettings,
       request,
+      savedObjectsClient,
       esClient: esClient.asCurrentUser,
     });
 
@@ -35,7 +32,6 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
         context,
         request,
         response,
-        dynamicSettings,
       });
 
       if (res instanceof KibanaResponse) {

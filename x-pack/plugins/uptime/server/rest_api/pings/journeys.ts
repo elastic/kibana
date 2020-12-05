@@ -14,6 +14,7 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
   validate: {
     params: schema.object({
       checkGroup: schema.string(),
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request }): Promise<any> => {

@@ -14,18 +14,16 @@ export const createRouteWithAuth = (
   const restRoute = routeCreator(libs);
   const { handler, method, path, options, ...rest } = restRoute;
   const licenseCheckHandler: UMRouteHandler = async ({
-    uptimeESClient,
+    uptimeEsClient,
     context,
     request,
     response,
     savedObjectsClient,
-    dynamicSettings,
   }) => {
     const { statusCode, message } = libs.license(context.licensing.license);
     if (statusCode === 200) {
       return handler({
-        uptimeESClient,
-        dynamicSettings,
+        uptimeEsClient,
         context,
         request,
         response,

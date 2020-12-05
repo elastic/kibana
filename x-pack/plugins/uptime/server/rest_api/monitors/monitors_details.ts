@@ -17,6 +17,7 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
       monitorId: schema.string(),
       dateStart: schema.maybe(schema.string()),
       dateEnd: schema.maybe(schema.string()),
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, dynamicSettings, context, request }): Promise<any> => {
