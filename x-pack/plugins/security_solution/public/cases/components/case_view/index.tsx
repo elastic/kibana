@@ -40,6 +40,10 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { BaseSignalHit } from '../../../../server/lib/detection_engine/signals/types';
+import { buildAlertsQuery, getRuleIdsFromComments } from './helpers';
 import { StatusActionButton } from '../status/button';
 
 import * as i18n from './translations';
@@ -97,6 +101,32 @@ export const CaseComponent = React.memo<CaseProps>(
     const { isLoading, updateKey, updateCaseProperty } = useUpdateCase({
       caseId,
     });
+
+    const alertsQuery = useMemo(() => buildAlertsQuery(getRuleIdsFromComments(caseData.comments)), [
+      caseData.comments,
+    ]);
+
+    const { loading: isLoadingSignalIndex, signalIndexName } = useSignalIndex();
+    const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<BaseSignalHit, unknown>(
+      alertsQuery,
+      signalIndexName
+    );
+
+    const alerts = useMemo(
+      () =>
+        alertsData?.hits.hits.reduce(
+          (acc, { _id, _index, _source }) => ({
+            ...acc,
+            [_id]: {
+              id: _id,
+              index: _index,
+              ..._source,
+            },
+          }),
+          {}
+        ) ?? [],
+      [alertsData?.hits.hits]
+    );
 
     // Update Fields
     const onUpdateField = useCallback(
@@ -266,10 +296,10 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     useEffect(() => {
-      if (initLoadingData && !isLoadingUserActions) {
+      if (initLoadingData && !isLoadingUserActions && !isLoadingSignalIndex && !isLoadingAlerts) {
         setInitLoadingData(false);
       }
-    }, [initLoadingData, isLoadingUserActions]);
+    }, [initLoadingData, isLoadingAlerts, isLoadingSignalIndex, isLoadingUserActions]);
 
     const backOptions = useMemo(
       () => ({
@@ -327,6 +357,7 @@ export const CaseComponent = React.memo<CaseProps>(
                       onUpdateField={onUpdateField}
                       updateCase={updateCase}
                       userCanCrud={userCanCrud}
+                      alerts={alerts}
                     />
                     <MyEuiHorizontalRule margin="s" />
                     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">

@@ -32,17 +32,13 @@ import {
   getPushedServiceLabelTitle,
   getPushInfo,
   getUpdateAction,
-  buildAlertsQuery,
-  getRuleIdsFromComments,
+  getAlertComment,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
-import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { BaseSignalHit } from '../../../../server/lib/detection_engine/signals/types';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -55,6 +51,7 @@ export interface UserActionTreeProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
+  alerts: Record<string, unknown>;
 }
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -83,6 +80,13 @@ const MyEuiCommentList = styled(EuiCommentList)`
         display: none;
       }
     }
+
+    & .comment-alert .euiCommentEvent {
+      background-color: ${theme.eui.euiColorLightestShade};
+      border: ${theme.eui.euiFlyoutBorder};
+      padding: 10px;
+      border-radius: ${theme.eui.paddingSizes.xs};
+    }
   `}
 `;
 
@@ -101,6 +105,7 @@ export const UserActionTree = React.memo(
     onUpdateField,
     updateCase,
     userCanCrud,
+    alerts,
   }: UserActionTreeProps) => {
     const { commentId } = useParams<{ commentId?: string }>();
     const handlerTimeoutId = useRef(0);
@@ -110,24 +115,6 @@ export const UserActionTree = React.memo(
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
-    const alertsQuery = useMemo(() => buildAlertsQuery(getRuleIdsFromComments(caseData.comments)), [
-      caseData.comments,
-    ]);
-
-    const { loading: isLoadingSignalIndex, signalIndexName } = useSignalIndex();
-    const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<BaseSignalHit, unknown>(
-      alertsQuery,
-      signalIndexName
-    );
-    const alerts = useMemo(
-      () =>
-        alertsData?.hits.hits.map(({ _id, _index, _source }) => ({
-          id: _id,
-          index: _index,
-          ..._source,
-        })) ?? [],
-      [alertsData?.hits.hits]
-    );
 
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
@@ -341,7 +328,7 @@ export const UserActionTree = React.memo(
                   },
                 ];
               } else if (comment != null && comment.type === CommentType.alert) {
-                return comments;
+                return [...comments, getAlertComment({ action, alert: alerts[comment.alertId] })];
               }
             }
 
@@ -438,6 +425,7 @@ export const UserActionTree = React.memo(
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         userCanCrud,
+        alerts,
       ]
     );
 

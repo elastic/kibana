@@ -10,10 +10,9 @@ import React from 'react';
 import {
   CaseFullExternalService,
   ActionConnector,
-  CommentType,
   CaseStatuses,
 } from '../../../../../case/common/api';
-import { CaseUserActions, Comment } from '../../containers/types';
+import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
 import { Tags } from '../tag_list/tags';
@@ -184,24 +183,29 @@ export const getUpdateAction = ({
   ),
 });
 
-export const getRuleIdsFromComments = (comments: Comment[]) =>
-  comments.reduce<string[]>((ruleIds, comment: Comment) => {
-    if (comment.type === CommentType.alert) {
-      return [...ruleIds, comment.alertId];
-    }
-
-    return ruleIds;
-  }, []);
-
-export const buildAlertsQuery = (ruleIds: string[]) => ({
-  query: {
-    bool: {
-      filter: {
-        bool: {
-          should: ruleIds.map((_id) => ({ match: { _id } })),
-          minimum_should_match: 1,
-        },
-      },
-    },
-  },
+export const getAlertComment = ({
+  action,
+  alert,
+}: {
+  action: CaseUserActions;
+}): EuiCommentProps => ({
+  username: (
+    <UserActionUsernameWithAvatar
+      username={action.actionBy.username}
+      fullName={action.actionBy.fullName}
+    />
+  ),
+  className: 'comment-alert',
+  type: 'update',
+  event: `${i18n.ALERT_COMMENT_LABEL_TITLE} ${alert?.signal.rule.name ?? ''}`,
+  'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+  timelineIcon: 'bell',
+  actions: (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <UserActionCopyLink id={action.actionId} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ),
 });
