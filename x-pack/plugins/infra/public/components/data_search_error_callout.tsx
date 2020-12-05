@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import {
   AbortedRequestSearchStrategyError,
@@ -28,19 +28,15 @@ export const DataSearchErrorCallout: React.FC<{
       ))}
       {onRetry ? (
         <EuiButton color={calloutColor} size="s" onClick={onRetry}>
-          {loadingErrorRetryButtonLabel}
+          <FormattedMessage
+            id="xpack.infra.dataSearch.loadingErrorRetryButtonLabel"
+            defaultMessage="Retry"
+          />
         </EuiButton>
       ) : null}
     </EuiCallOut>
   );
 };
-
-const loadingErrorRetryButtonLabel = i18n.translate(
-  'xpack.infra.dataSearch.loadingErrorRetryButtonLabel',
-  {
-    defaultMessage: 'Retry',
-  }
-);
 
 const DataSearchErrorMessage: React.FC<{ error: SearchStrategyError }> = ({ error }) => {
   if (error.type === 'aborted') {
@@ -55,7 +51,13 @@ const DataSearchErrorMessage: React.FC<{ error: SearchStrategyError }> = ({ erro
 
 const AbortedRequestErrorMessage: React.FC<{
   error?: AbortedRequestSearchStrategyError;
-}> = ({}) => <p>{abortedRequestErrorMessage}</p>;
+}> = ({}) => (
+  <FormattedMessage
+    tagName="p"
+    id="xpack.infra.dataSearch.abortedRequestErrorMessage"
+    defaultMessage="The request was aborted."
+  />
+);
 
 const GenericErrorMessage: React.FC<{ error: GenericSearchStrategyError }> = ({ error }) => (
   <p>{error.message}</p>
@@ -64,14 +66,13 @@ const GenericErrorMessage: React.FC<{ error: GenericSearchStrategyError }> = ({ 
 const ShardFailureErrorMessage: React.FC<{ error: ShardFailureSearchStrategyError }> = ({
   error,
 }) => (
-  <p>
-    {error.shardInfo.index}: {error.message}
-  </p>
-);
-
-const abortedRequestErrorMessage = i18n.translate(
-  'xpack.infra.dataSearch.abortedRequestErrorMessage',
-  {
-    defaultMessage: 'The request was aborted.',
-  }
+  <FormattedMessage
+    tagName="p"
+    id="xpack.infra.dataSearch.shardFailureErrorMessage"
+    defaultMessage="Index {indexName}: {errorMessage}"
+    values={{
+      indexName: error.shardInfo.index,
+      errorMessage: error.message,
+    }}
+  />
 );
