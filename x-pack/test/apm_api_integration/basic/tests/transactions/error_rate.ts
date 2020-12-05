@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-java/transaction_groups/error_rate?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/services/opbeans-java/transactions/charts/error_rate?start=${start}&end=${end}&uiFilters=${uiFilters}`
         );
         expect(response.status).to.be(200);
 
@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
         before(async () => {
           const response = await supertest.get(
-            `/api/apm/services/opbeans-java/transaction_groups/error_rate?start=${start}&end=${end}&uiFilters=${uiFilters}`
+            `/api/apm/services/opbeans-java/transactions/charts/error_rate?start=${start}&end=${end}&uiFilters=${uiFilters}`
           );
           errorRateResponse = response.body;
         });
