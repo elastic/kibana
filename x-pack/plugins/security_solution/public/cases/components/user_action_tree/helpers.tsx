@@ -7,21 +7,37 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps } from '@elastic/eui';
 import React from 'react';
 
-import { CaseFullExternalService, ActionConnector } from '../../../../../case/common/api';
+import {
+  CaseFullExternalService,
+  ActionConnector,
+  CaseStatuses,
+} from '../../../../../case/common/api';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
 import { Tags } from '../tag_list/tags';
-import * as i18n from '../case_view/translations';
 import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionCopyLink } from './user_action_copy_link';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
+import { Status, statuses } from '../status';
+import * as i18n from '../case_view/translations';
 
 interface LabelTitle {
   action: CaseUserActions;
   field: string;
 }
+
+const getStatusTitle = (status: CaseStatuses) => {
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems={'center'}>
+      <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <Status type={status} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const getLabelTitle = ({ action, field }: LabelTitle) => {
   if (field === 'tags') {
@@ -33,9 +49,12 @@ export const getLabelTitle = ({ action, field }: LabelTitle) => {
   } else if (field === 'description' && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`;
   } else if (field === 'status' && action.action === 'update') {
-    return `${
-      action.newValue === 'open' ? i18n.REOPENED_CASE.toLowerCase() : i18n.CLOSED_CASE.toLowerCase()
-    } ${i18n.CASE}`;
+    if (!Object.prototype.hasOwnProperty.call(statuses, action.newValue ?? '')) {
+      return '';
+    }
+
+    // The above check ensures that the newValue is of type CaseStatuses.
+    return getStatusTitle(action.newValue as CaseStatuses);
   } else if (field === 'comment' && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
   }
@@ -120,6 +139,16 @@ export const getPushInfo = (
         parsedConnectorName: 'none',
       };
 
+const getUpdateActionIcon = (actionField: string): string => {
+  if (actionField === 'tags') {
+    return 'tag';
+  } else if (actionField === 'status') {
+    return 'folderClosed';
+  }
+
+  return 'dot';
+};
+
 export const getUpdateAction = ({
   action,
   label,
@@ -139,7 +168,7 @@ export const getUpdateAction = ({
   event: label,
   'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-  timelineIcon: action.action === 'add' || action.action === 'delete' ? 'tag' : 'dot',
+  timelineIcon: getUpdateActionIcon(action.actionField[0]),
   actions: (
     <EuiFlexGroup>
       <EuiFlexItem>

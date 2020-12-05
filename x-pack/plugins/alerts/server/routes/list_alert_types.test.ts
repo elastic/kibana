@@ -10,6 +10,7 @@ import { mockLicenseState } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
+import { RecoveredActionGroup } from '../../common';
 
 const alertsClient = alertsClientMock.create();
 
@@ -44,6 +45,7 @@ describe('listAlertTypesRoute', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
           context: [],
@@ -75,6 +77,10 @@ describe('listAlertTypesRoute', () => {
             "id": "1",
             "name": "name",
             "producer": "test",
+            "recoveryActionGroup": Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
           },
         ],
       }
@@ -109,6 +115,7 @@ describe('listAlertTypesRoute', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
           context: [],
@@ -159,6 +166,7 @@ describe('listAlertTypesRoute', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
           context: [],

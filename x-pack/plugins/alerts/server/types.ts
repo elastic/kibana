@@ -97,6 +97,7 @@ export interface AlertType<
   };
   actionGroups: ActionGroup[];
   defaultActionGroupId: ActionGroup['id'];
+  recoveryActionGroup?: ActionGroup;
   executor: ({
     services,
     params,

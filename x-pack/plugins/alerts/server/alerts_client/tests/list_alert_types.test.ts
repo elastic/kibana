@@ -13,6 +13,7 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup } from './lib';
+import { RecoveredActionGroup } from '../../../common';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -51,6 +52,7 @@ describe('listAlertTypes', () => {
     actionVariables: undefined,
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    recoveryActionGroup: RecoveredActionGroup,
     id: 'alertingAlertType',
     name: 'alertingAlertType',
     producer: 'alerts',
@@ -60,6 +62,7 @@ describe('listAlertTypes', () => {
     actionVariables: undefined,
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    recoveryActionGroup: RecoveredActionGroup,
     id: 'myAppAlertType',
     name: 'myAppAlertType',
     producer: 'myApp',
@@ -99,6 +102,7 @@ describe('listAlertTypes', () => {
         actionVariables: undefined,
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
         id: 'myType',
         name: 'myType',
         producer: 'myApp',
@@ -109,6 +113,7 @@ describe('listAlertTypes', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
         producer: 'alerts',
       },
     ]);
@@ -124,6 +129,7 @@ describe('listAlertTypes', () => {
           actionGroups: [{ id: 'default', name: 'Default' }],
           defaultActionGroupId: 'default',
           minimumLicenseRequired: 'basic',
+          recoveryActionGroup: RecoveredActionGroup,
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },

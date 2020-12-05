@@ -16,6 +16,7 @@ import { AlertsAuthorization, WriteOperations, ReadOperations } from './alerts_a
 import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import uuid from 'uuid';
+import { RecoveredActionGroup } from '../../common';
 
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
@@ -173,6 +174,7 @@ beforeEach(() => {
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'myApp',
   }));
@@ -536,6 +538,7 @@ describe('AlertsAuthorization', () => {
       actionVariables: undefined,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'alerts',
@@ -545,6 +548,7 @@ describe('AlertsAuthorization', () => {
       actionVariables: undefined,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
@@ -554,6 +558,7 @@ describe('AlertsAuthorization', () => {
       actionVariables: undefined,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'mySecondAppAlertType',
       name: 'mySecondAppAlertType',
       producer: 'myApp',
@@ -829,6 +834,7 @@ describe('AlertsAuthorization', () => {
       actionVariables: undefined,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'myOtherApp',
@@ -838,6 +844,7 @@ describe('AlertsAuthorization', () => {
       actionVariables: undefined,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
@@ -886,6 +893,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -912,6 +923,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -978,6 +993,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -1000,6 +1019,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1061,6 +1084,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1151,6 +1178,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -1173,6 +1204,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1247,6 +1282,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);

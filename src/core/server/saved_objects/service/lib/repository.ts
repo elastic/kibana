@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
-import uuid from 'uuid';
+import { omit, isObject } from 'lodash';
 import {
   ElasticsearchClient,
   DeleteDocumentResponse,
@@ -136,6 +135,16 @@ export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedOb
 /**
  * @public
  */
+export interface SavedObjectsIncrementCounterField {
+  /** The field name to increment the counter by.*/
+  fieldName: string;
+  /** The number to increment the field by (defaults to 1).*/
+  incrementBy?: number;
+}
+
+/**
+ * @public
+ */
 export class SavedObjectsRepository {
   private _migrator: IKibanaMigrator;
   private _index: string;
@@ -235,7 +244,7 @@ export class SavedObjectsRepository {
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
     const {
-      id,
+      id = SavedObjectsUtils.generateId(),
       migrationVersion,
       overwrite = false,
       references = [],
@@ -356,7 +365,9 @@ export class SavedObjectsRepository {
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
 
-      if (object.id == null) object.id = uuid.v1();
+      if (object.id == null) {
+        object.id = SavedObjectsUtils.generateId();
+      }
 
       return {
         tag: 'Right' as 'Right',
@@ -1524,7 +1535,7 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Increments all the specified counter fields by one. Creates the document
+   * Increments all the specified counter fields (by one by default). Creates the document
    * if one doesn't exist for the given id.
    *
    * @remarks
@@ -1558,30 +1569,47 @@ export class SavedObjectsRepository {
    *
    * @param type - The type of saved object whose fields should be incremented
    * @param id - The id of the document whose fields should be incremented
-   * @param counterFieldNames - An array of field names to increment
+   * @param counterFields - An array of field names to increment or an array of {@link SavedObjectsIncrementCounterField}
    * @param options - {@link SavedObjectsIncrementCounterOptions}
    * @returns The saved object after the specified fields were incremented
    */
   async incrementCounter<T = unknown>(
     type: string,
     id: string,
-    counterFieldNames: string[],
+    counterFields: Array<string | SavedObjectsIncrementCounterField>,
     options: SavedObjectsIncrementCounterOptions = {}
   ): Promise<SavedObject<T>> {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
     }
-    const isArrayOfStrings =
-      Array.isArray(counterFieldNames) &&
-      !counterFieldNames.some((field) => typeof field !== 'string');
-    if (!isArrayOfStrings) {
-      throw new Error('"counterFieldNames" argument must be an array of strings');
+
+    const isArrayOfCounterFields =
+      Array.isArray(counterFields) &&
+      counterFields.every(
+        (field) =>
+          typeof field === 'string' || (isObject(field) && typeof field.fieldName === 'string')
+      );
+
+    if (!isArrayOfCounterFields) {
+      throw new Error(
+        '"counterFields" argument must be of type Array<string | { incrementBy?: number; fieldName: string }>'
+      );
     }
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
     const { migrationVersion, refresh = DEFAULT_REFRESH_SETTING, initialize = false } = options;
+
+    const normalizedCounterFields = counterFields.map((counterField) => {
+      const fieldName = typeof counterField === 'string' ? counterField : counterField.fieldName;
+      const incrementBy = typeof counterField === 'string' ? 1 : counterField.incrementBy || 1;
+
+      return {
+        fieldName,
+        incrementBy: initialize ? 0 : incrementBy,
+      };
+    });
     const namespace = normalizeNamespace(options.namespace);
 
     const time = this._getCurrentTime();
@@ -1594,13 +1622,15 @@ export class SavedObjectsRepository {
       savedObjectNamespaces = await this.preflightGetNamespaces(type, id, namespace);
     }
 
+    // attributes: { [counterFieldName]: incrementBy },
     const migrated = this._migrator.migrateDocument({
       id,
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      attributes: counterFieldNames.reduce((acc, counterFieldName) => {
-        acc[counterFieldName] = initialize ? 0 : 1;
+      attributes: normalizedCounterFields.reduce((acc, counterField) => {
+        const { fieldName, incrementBy } = counterField;
+        acc[fieldName] = incrementBy;
         return acc;
       }, {} as Record<string, number>),
       migrationVersion,
@@ -1617,22 +1647,29 @@ export class SavedObjectsRepository {
       body: {
         script: {
           source: `
-              for (counterFieldName in params.counterFieldNames) {
+              for (int i = 0; i < params.counterFieldNames.length; i++) {
+                def counterFieldName = params.counterFieldNames[i];
+                def count = params.counts[i];
+
                 if (ctx._source[params.type][counterFieldName] == null) {
-                  ctx._source[params.type][counterFieldName] = params.count;
+                  ctx._source[params.type][counterFieldName] = count;
                 }
                 else {
-                  ctx._source[params.type][counterFieldName] += params.count;
+                  ctx._source[params.type][counterFieldName] += count;
                 }
               }
               ctx._source.updated_at = params.time;
             `,
           lang: 'painless',
           params: {
-            count: initialize ? 0 : 1,
+            counts: normalizedCounterFields.map(
+              (normalizedCounterField) => normalizedCounterField.incrementBy
+            ),
+            counterFieldNames: normalizedCounterFields.map(
+              (normalizedCounterField) => normalizedCounterField.fieldName
+            ),
             time,
             type,
-            counterFieldNames,
           },
         },
         upsert: raw._source,

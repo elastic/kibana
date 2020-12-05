@@ -21,6 +21,10 @@ const alertType: AlertType = {
   ],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  recoveryActionGroup: {
+    id: 'recovered',
+    name: 'Recovered',
+  },
   executor: jest.fn(),
   producer: 'alerts',
 };

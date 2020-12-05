@@ -35,6 +35,10 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           params: [],
           context: [],
         },
+        recoveryActionGroup: {
+          id: 'recovered',
+          name: 'Recovered',
+        },
         producer: 'alertsFixture',
         minimumLicenseRequired: 'basic',
       });

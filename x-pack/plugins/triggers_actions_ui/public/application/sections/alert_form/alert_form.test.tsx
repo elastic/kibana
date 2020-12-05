@@ -13,7 +13,7 @@ import { ValidationResult, Alert } from '../../../types';
 import { AlertForm } from './alert_form';
 import { AlertsContextProvider } from '../../context/alerts_context';
 import { coreMock } from 'src/core/public/mocks';
-import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '../../../../../alerts/common';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -86,6 +86,7 @@ describe('alert_form', () => {
           ],
           defaultActionGroupId: 'testActionGroup',
           minimumLicenseRequired: 'basic',
+          recoveryActionGroup: RecoveredActionGroup,
           producer: ALERTS_FEATURE_ID,
           authorizedConsumers: {
             [ALERTS_FEATURE_ID]: { read: true, all: true },
@@ -220,6 +221,7 @@ describe('alert_form', () => {
           ],
           defaultActionGroupId: 'testActionGroup',
           minimumLicenseRequired: 'basic',
+          recoveryActionGroup: RecoveredActionGroup,
           producer: ALERTS_FEATURE_ID,
           authorizedConsumers: {
             [ALERTS_FEATURE_ID]: { read: true, all: true },
@@ -237,6 +239,7 @@ describe('alert_form', () => {
           ],
           defaultActionGroupId: 'testActionGroup',
           minimumLicenseRequired: 'basic',
+          recoveryActionGroup: RecoveredActionGroup,
           producer: 'test',
           authorizedConsumers: {
             [ALERTS_FEATURE_ID]: { read: true, all: true },
