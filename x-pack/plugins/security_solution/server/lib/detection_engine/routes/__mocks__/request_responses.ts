@@ -28,9 +28,9 @@ import { RuleNotificationAlertType } from '../../notifications/types';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
-import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],

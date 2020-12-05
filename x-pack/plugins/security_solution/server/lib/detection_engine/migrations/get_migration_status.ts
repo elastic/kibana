@@ -5,24 +5,7 @@
  */
 
 import { ElasticsearchClient } from 'src/core/server';
-import { Bucket, MigrationStatus } from './types';
-
-interface MigrationStatusSearchResponse {
-  aggregations: {
-    signals_indices: {
-      buckets: Array<{
-        key: string;
-        signal_versions: {
-          buckets: Bucket[];
-        };
-      }>;
-    };
-  };
-}
-
-interface IndexMappingsResponse {
-  [indexName: string]: { mappings: { _meta: { version: number } } };
-}
+import { IndexMappingsResponse, MigrationStatus, MigrationStatusSearchResponse } from './types';
 
 /**
  * Retrieves a breakdown of information relevant to the migration of each

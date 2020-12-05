@@ -18,7 +18,6 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
   router.post(
     {
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
-      // TODO add reindex parameters
       validate: {
         body: buildRouteValidation(createSignalsMigrationSchema),
       },
@@ -29,7 +28,7 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const indices = request.body.index;
+      const { index: indices, ...reindexOptions } = request.body;
 
       try {
         const appClient = context.securitySolution?.getAppClient();
@@ -51,6 +50,7 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
                 esClient,
                 index,
                 version: currentVersion,
+                reindexOptions,
               });
               const migrationToken = encodeMigrationToken(migrationDetails);
 

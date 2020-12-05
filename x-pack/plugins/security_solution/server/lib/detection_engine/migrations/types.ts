@@ -20,3 +20,20 @@ export interface MigrationDetails {
   sourceIndex: string;
   taskId: string;
 }
+
+export interface MigrationStatusSearchResponse {
+  aggregations: {
+    signals_indices: {
+      buckets: Array<{
+        key: string;
+        signal_versions: {
+          buckets: Bucket[];
+        };
+      }>;
+    };
+  };
+}
+
+export interface IndexMappingsResponse {
+  [indexName: string]: { mappings: { _meta: { version: number } } };
+}

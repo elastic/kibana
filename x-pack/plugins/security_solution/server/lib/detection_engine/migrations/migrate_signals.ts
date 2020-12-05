@@ -5,6 +5,7 @@
  */
 
 import { ElasticsearchClient } from 'src/core/server';
+import { SignalsReindexOptions } from '../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
 import { createSignalsMigrationIndex } from './create_signals_migration_index';
 import { MigrationDetails } from './types';
 
@@ -16,6 +17,7 @@ import { MigrationDetails } from './types';
  * @param esClient An {@link ElasticsearchClient}
  * @param index name of the concrete signals index to be migrated
  * @param version version of the current signals template/mappings
+ * @param reindexOptions object containing reindex options {@link SignalsReindexOptions}
  *
  * @returns identifying information representing the {@link MigrationDetails}
  * @throws if elasticsearch returns an error
@@ -23,10 +25,12 @@ import { MigrationDetails } from './types';
 export const migrateSignals = async ({
   esClient,
   index,
+  reindexOptions,
   version,
 }: {
   esClient: ElasticsearchClient;
   index: string;
+  reindexOptions: SignalsReindexOptions;
   version: number;
 }): Promise<MigrationDetails> => {
   const migrationIndex = await createSignalsMigrationIndex({
@@ -35,11 +39,12 @@ export const migrateSignals = async ({
     version,
   });
 
-  // TODO batch size?
+  const { size, ...reindexQueryOptions } = reindexOptions;
+
   const response = await esClient.reindex<{ task: string }>({
     body: {
       dest: { index: migrationIndex },
-      source: { index },
+      source: { index, size },
       script: {
         lang: 'painless',
         source: `
@@ -53,6 +58,7 @@ export const migrateSignals = async ({
         },
       },
     },
+    ...reindexQueryOptions,
     refresh: true,
     wait_for_completion: false,
   });

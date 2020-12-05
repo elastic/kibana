@@ -7,11 +7,23 @@
 import * as t from 'io-ts';
 
 import { index } from '../common/schemas';
+import { PositiveInteger, PositiveIntegerGreaterThanZero } from '../types';
 
-export const createSignalsMigrationSchema = t.exact(
-  t.type({
-    index,
-  })
-);
+export const signalsReindexOptions = t.partial({
+  requests_per_second: t.number,
+  size: PositiveIntegerGreaterThanZero,
+  slices: PositiveInteger,
+});
+
+export type SignalsReindexOptions = t.TypeOf<typeof signalsReindexOptions>;
+
+export const createSignalsMigrationSchema = t.intersection([
+  t.exact(
+    t.type({
+      index,
+    })
+  ),
+  t.exact(signalsReindexOptions),
+]);
 
 export type CreateSignalsMigrationSchema = t.TypeOf<typeof createSignalsMigrationSchema>;
