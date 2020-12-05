@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { APMConfig } from '../..';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
