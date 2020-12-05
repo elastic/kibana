@@ -206,11 +206,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [loadingSourcerer, combinedQueries, start, end]
   );
 
-  const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const timelineQueryFields = useMemo(() => {
+    const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
     const columnFields = columnsHeader.map((c) => c.id);
+
     return [...columnFields, ...requiredFieldsForActions];
-  }, [columnsHeader]);
+  }, [columns]);
+
   const timelineQuerySortField = useMemo(
     () => ({
       field: sort.columnId,

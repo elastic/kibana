@@ -222,7 +222,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => (
     <EuiFlexItem grow={1}>{/* KPIs PLACEHOLDER */}</EuiFlexItem>
 
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <AddToFavoritesButton timelineId={timelineId} />
         </EuiFlexItem>

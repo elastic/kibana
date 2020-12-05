@@ -89,7 +89,9 @@ const ActiveTimelineTab: React.FC<BasicTimelineTab & { activeTimelineTab: Timeli
         <HideShowContainer $isVisible={TimelineTabs.query === activeTimelineTab}>
           <QueryTab timelineId={timelineId} />
         </HideShowContainer>
-        {activeTimelineTab !== TimelineTabs.query && getTab(activeTimelineTab)}
+        <HideShowContainer $isVisible={TimelineTabs.query !== activeTimelineTab}>
+          {activeTimelineTab !== TimelineTabs.query && getTab(activeTimelineTab)}
+        </HideShowContainer>
       </>
     );
   }

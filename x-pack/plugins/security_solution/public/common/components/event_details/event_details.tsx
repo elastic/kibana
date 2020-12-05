@@ -86,10 +86,7 @@ const EventDetailsComponent: React.FC<Props> = ({
     [browserFields, data, id, timelineId]
   );
 
-  const selectedTab = useMemo(() => (view === EventsViewType.tableView ? tabs[0] : tabs[1]), [
-    tabs,
-    view,
-  ]);
+  const selectedTab = view === EventsViewType.tableView ? tabs[0] : tabs[1];
 
   return (
     <StyledEuiTabbedContent

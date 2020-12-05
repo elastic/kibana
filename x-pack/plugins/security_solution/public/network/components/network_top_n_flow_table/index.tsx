@@ -112,16 +112,17 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
     [sort, dispatch, type, tableType]
   );
 
-  const field = useMemo(
-    () =>
-      sort.field === NetworkTopTablesFields.bytes_out ||
-      sort.field === NetworkTopTablesFields.bytes_in
-        ? `node.network.${sort.field}`
-        : `node.${flowTargeted}.${sort.field}`,
-    [flowTargeted, sort.field]
+  const sorting = useMemo(
+    () => ({
+      field:
+        sort.field === NetworkTopTablesFields.bytes_out ||
+        sort.field === NetworkTopTablesFields.bytes_in
+          ? `node.network.${sort.field}`
+          : `node.${flowTargeted}.${sort.field}`,
+      direction: sort.direction,
+    }),
+    [flowTargeted, sort]
   );
-
-  const sorting = useMemo(() => ({ field, direction: sort.direction }), [field, sort.direction]);
 
   const updateActivePage = useCallback(
     (newPage) =>

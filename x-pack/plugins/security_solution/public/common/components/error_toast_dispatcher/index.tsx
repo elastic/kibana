@@ -39,7 +39,7 @@ const ErrorToastDispatcherComponent: React.FC<OwnProps> = ({ toastLifeTimeMs = 5
       }
       dispatch(appActions.removeError({ id }));
     });
-  });
+  }, [dispatch, dispatchToaster, errors, toastLifeTimeMs, toasts]);
 
   return null;
 };

@@ -92,23 +92,19 @@ export const EventFieldsBrowser = React.memo<Props>(
 
     const toggleColumn = useCallback(
       (column: ColumnHeaderOptions) => {
-        const exists = columnHeaders.findIndex((c) => c.id === column.id) !== -1;
-
-        if (!exists) {
+        if (columnHeaders.some((c) => c.id === column.id)) {
+          dispatch(
+            timelineActions.removeColumn({
+              columnId: column.id,
+              id: timelineId,
+            })
+          );
+        } else {
           dispatch(
             timelineActions.upsertColumn({
               column,
               id: timelineId,
               index: 1,
-            })
-          );
-        }
-
-        if (exists) {
-          dispatch(
-            timelineActions.removeColumn({
-              columnId: column.id,
-              id: timelineId,
             })
           );
         }
