@@ -5,6 +5,7 @@
  */
 
 import { useCallback, useReducer } from 'react';
+import { CaseStatuses } from '../../../../case/common/api';
 import {
   displaySuccessToast,
   errorToToaster,
@@ -86,7 +87,7 @@ export const useUpdateCases = (): UseUpdateCases => {
             caseTitle: resultCount === 1 ? firstTitle : '',
           };
           const message =
-            resultCount && patchResponse[0].status === 'open'
+            resultCount && patchResponse[0].status === CaseStatuses.open
               ? i18n.REOPENED_CASES(messageArgs)
               : i18n.CLOSED_CASES(messageArgs);
 
