@@ -107,7 +107,7 @@ export function registerTransactionErrorRateAlertType({
             },
           },
           aggs: {
-            erroneous_transactions: {
+            failed_transactions: {
               filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
             },
             services: {
@@ -138,11 +138,11 @@ export function registerTransactionErrorRateAlertType({
         return;
       }
 
-      const errornousTransactionsCount =
-        response.aggregations.erroneous_transactions.doc_count;
+      const failedTransactionCount =
+        response.aggregations.failed_transactions.doc_count;
       const totalTransactionCount = response.hits.total.value;
       const transactionErrorRate =
-        (errornousTransactionsCount / totalTransactionCount) * 100;
+        (failedTransactionCount / totalTransactionCount) * 100;
 
       if (transactionErrorRate > alertParams.threshold) {
         function scheduleAction({
