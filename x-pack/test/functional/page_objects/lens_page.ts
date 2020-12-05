@@ -118,7 +118,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (!opts.keepOpen) {
-        this.closeDimensionEditor();
+        await this.closeDimensionEditor();
       }
     },
 
@@ -206,6 +206,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async closeDimensionEditor() {
       await retry.try(async () => {
         await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
       });
     },
 
