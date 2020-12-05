@@ -15,9 +15,14 @@ import {
 import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
 import { SearchStrategyError } from '../../common/search_strategies/common/errors';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
-import { tapUnsubscribe, useObservable, useObservableState } from '../utils/use_observable';
+import {
+  tapUnsubscribe,
+  useLatest,
+  useObservable,
+  useObservableState,
+} from '../utils/use_observable';
 
-interface DataSearchRequestDescriptor<Request extends IKibanaSearchRequest, RawResponse> {
+export interface DataSearchRequestDescriptor<Request extends IKibanaSearchRequest, RawResponse> {
   request: Request;
   options: ISearchOptions;
   response$: Observable<IKibanaSearchResponse<RawResponse>>;
@@ -123,17 +128,20 @@ export const useLatestPartialDataSearchRequest = <
   initialResponse: InitialResponse,
   projectResponse: (rawResponse: RawResponse) => { data: Response; errors?: SearchStrategyError[] }
 ) => {
+  const latestInitialResponse = useLatest(initialResponse);
+  const latestProjectResponse = useLatest(projectResponse);
+
   const latestResponse$: Observable<
     DataSearchResponseDescriptor<Request, Response | InitialResponse>
   > = useObservable(
     (inputs$) =>
       inputs$.pipe(
-        switchMap(([currentRequests$, currentProjectResponse, currentInitialResponse]) =>
+        switchMap(([currentRequests$]) =>
           currentRequests$.pipe(
-            switchMap(({ abortController, options, request, response$ }) => {
-              return response$.pipe(
+            switchMap(({ abortController, options, request, response$ }) =>
+              response$.pipe(
                 map((response) => {
-                  const { data, errors = [] } = currentProjectResponse(response.rawResponse);
+                  const { data, errors = [] } = latestProjectResponse.current(response.rawResponse);
                   return {
                     abortController,
                     options,
@@ -153,7 +161,7 @@ export const useLatestPartialDataSearchRequest = <
                   options,
                   request,
                   response: {
-                    data: currentInitialResponse,
+                    data: latestInitialResponse.current,
                     errors: [],
                     isPartial: true,
                     isRunning: true,
@@ -167,7 +175,7 @@ export const useLatestPartialDataSearchRequest = <
                     options,
                     request,
                     response: {
-                      data: currentInitialResponse,
+                      data: latestInitialResponse.current,
                       errors: [
                         error instanceof AbortError
                           ? {
@@ -185,12 +193,12 @@ export const useLatestPartialDataSearchRequest = <
                     },
                   })
                 )
-              );
-            })
+              )
+            )
           )
         )
       ),
-    [requests$, projectResponse, initialResponse] as const
+    [requests$] as const
   );
 
   const { latestValue } = useObservableState(latestResponse$, undefined);

@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { BehaviorSubject, Observable, PartialObserver, Subscription } from 'rxjs';
 
-const useLatest = <Value>(value: Value) => {
+export const useLatest = <Value>(value: Value) => {
   const valueRef = useRef(value);
   valueRef.current = value;
   return valueRef;
