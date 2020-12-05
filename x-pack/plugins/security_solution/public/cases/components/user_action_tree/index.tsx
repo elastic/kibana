@@ -18,6 +18,8 @@ import styled from 'styled-components';
 
 import * as i18n from './translations';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Signal } from '../../../../server/lib/detection_engine/signals/types';
 import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
@@ -51,7 +53,7 @@ export interface UserActionTreeProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
-  alerts: Record<string, unknown>;
+  alerts: Record<string, Signal>;
   onShowAlertDetails: (alertId: string, index: string) => void;
 }
 

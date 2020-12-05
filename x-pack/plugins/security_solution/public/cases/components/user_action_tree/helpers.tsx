@@ -12,6 +12,8 @@ import {
   ActionConnector,
   CaseStatuses,
 } from '../../../../../case/common/api';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Signal } from '../../../../server/lib/detection_engine/signals/types';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
@@ -22,7 +24,7 @@ import { UserActionCopyLink } from './user_action_copy_link';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { Status, statuses } from '../status';
 import { UserActionShowAlert } from './user_action_show_alert';
-import * as i18n from '../case_view/translations';
+import * as i18n from './translations';
 
 interface LabelTitle {
   action: CaseUserActions;
@@ -190,7 +192,7 @@ export const getAlertComment = ({
   onShowAlertDetails,
 }: {
   action: CaseUserActions;
-  alert: unknown;
+  alert: Signal;
   onShowAlertDetails: (alertId: string, index: string) => void;
 }): EuiCommentProps => ({
   username: (
@@ -201,7 +203,7 @@ export const getAlertComment = ({
   ),
   className: 'comment-alert',
   type: 'update',
-  event: `${i18n.ALERT_COMMENT_LABEL_TITLE} ${alert?.signal.rule.name ?? ''}`,
+  event: `${i18n.ALERT_COMMENT_LABEL_TITLE} ${alert.rule.name}`,
   'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
   timelineIcon: 'bell',

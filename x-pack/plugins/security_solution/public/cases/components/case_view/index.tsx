@@ -43,7 +43,8 @@ import {
 } from '../configure_cases/utils';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { BaseSignalHit } from '../../../../server/lib/detection_engine/signals/types';
+import { SignalHit, Signal } from '../../../../server/lib/detection_engine/signals/types';
+import { BaseHit } from '../../../../common/detection_engine/types';
 import { buildAlertsQuery, getRuleIdsFromComments } from './helpers';
 import { EventDetailsFlyout } from '../../../common/components/events_viewer/event_details_flyout';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
@@ -121,19 +122,17 @@ export const CaseComponent = React.memo<CaseProps>(
       SourcererScopeName.detections
     );
 
-    const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<BaseSignalHit, unknown>(
-      alertsQuery,
-      selectedPatterns[0]
-    );
+    const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<
+      BaseHit<SignalHit>,
+      unknown
+    >(alertsQuery, selectedPatterns[0]);
 
-    const alerts = useMemo(
+    const alerts: Record<string, Signal> = useMemo(
       () =>
         alertsData?.hits.hits.reduce(
-          (acc, { _id, _index, _source }) => ({
+          (acc, { _id, _source }) => ({
             ...acc,
             [_id]: {
-              id: _id,
-              index: _index,
               ..._source,
             },
           }),
