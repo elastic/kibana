@@ -54,7 +54,7 @@ export function updateSearchSource(
     .setField('sort', usedSort)
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
-  if (useNewFieldsApi && (columns.length === 0 || columns.includes('fields'))) {
+  if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
     searchSource.setField('fields', ['*']);
   } else {

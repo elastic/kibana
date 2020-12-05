@@ -177,26 +177,29 @@ export function DiscoverSidebar({
     return result;
   }, [fields]);
 
-  const getMultiFields = () => {
+  const multiFields = useMemo(() => {
     if (!useNewFieldsApi || !fields) {
       return undefined;
     }
     const map = new Map();
     fields.forEach((field) => {
       const parent = field.spec?.subType?.multi?.parent;
-      if (parent) {
-        if (!map.has(parent)) {
-          map.set(parent, []);
-        }
-        const value = map.get(parent);
-        value.push(field);
-        map.set(parent, value);
+      if (!parent) {
+        return;
       }
+      if (!map.has(parent)) {
+        map.set(parent, []);
+      }
+      const multiField = {
+        field,
+        isSelected: selectedFields.includes(field),
+      };
+      const value = map.get(parent);
+      value.push(multiField);
+      map.set(parent, value);
     });
     return map;
-  };
-
-  const multiFields = getMultiFields();
+  }, [fields, useNewFieldsApi, selectedFields]);
 
   if (!selectedIndexPattern || !fields) {
     return null;

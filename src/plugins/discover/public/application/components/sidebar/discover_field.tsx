@@ -71,7 +71,7 @@ export interface DiscoverFieldProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 
-  multiFields?: IndexPatternField[];
+  multiFields?: Array<{ field: IndexPatternField, isSelected: boolean }>;
 }
 
 export function DiscoverField({
@@ -100,8 +100,8 @@ export function DiscoverField({
 
   const [infoIsOpen, setOpen] = useState(false);
 
-  const toggleDisplay = (f: IndexPatternField) => {
-    if (selected) {
+  const toggleDisplay = (f: IndexPatternField, isSelected: boolean) => {
+    if (isSelected) {
       onRemoveField(f.name);
     } else {
       onAddField(f.name);
@@ -153,8 +153,8 @@ export function DiscoverField({
   const actionBtnClassName = classNames('dscSidebarItem__action', {
     ['dscSidebarItem__mobile']: alwaysShowActionButton,
   });
-  const getActionButton = (indexPatternField: IndexPatternField, isSelected?: boolean) => {
-    if (indexPatternField.name !== '_source' && !isSelected) {
+  const getActionButton = (f: IndexPatternField, isSelected?: boolean) => {
+    if (f.name !== '_source' && !isSelected) {
       return (
         <EuiToolTip
           delay="long"
@@ -171,14 +171,14 @@ export function DiscoverField({
               }
               ev.preventDefault();
               ev.stopPropagation();
-              toggleDisplay(indexPatternField);
+              toggleDisplay(f, false);
             }}
-            data-test-subj={`fieldToggle-${indexPatternField.name}`}
+            data-test-subj={`fieldToggle-${f.name}`}
             aria-label={addLabelAria}
           />
         </EuiToolTip>
       );
-    } else if (indexPatternField.name !== '_source' && isSelected) {
+    } else if (f.name !== '_source' && isSelected) {
       return (
         <EuiToolTip
           delay="long"
@@ -196,9 +196,9 @@ export function DiscoverField({
               }
               ev.preventDefault();
               ev.stopPropagation();
-              toggleDisplay(indexPatternField);
+              toggleDisplay(f, isSelected);
             }}
-            data-test-subj={`fieldToggle-${indexPatternField.name}`}
+            data-test-subj={`fieldToggle-${f.name}`}
             aria-label={removeLabelAria}
           />
         </EuiToolTip>
@@ -235,16 +235,16 @@ export function DiscoverField({
             })}
           </h5>
         </EuiTitle>
-        {multiFields.map((multiField) => (
+        {multiFields.map((entry) => (
           <FieldButton
             size="s"
             className="dscSidebarItem"
             isActive={false}
             onClick={() => {}}
-            dataTestSubj={`field-${multiField.name}-showDetails`}
-            fieldIcon={getDscFieldIcon(multiField)}
-            fieldAction={getActionButton(multiField, false)}
-            fieldName={getFieldName(multiField)}
+            dataTestSubj={`field-${entry.field.name}-showDetails`}
+            fieldIcon={getDscFieldIcon(entry.field)}
+            fieldAction={getActionButton(entry.field, entry.isSelected)}
+            fieldName={getFieldName(entry.field)}
           />
         ))}
       </React.Fragment>
