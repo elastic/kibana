@@ -24,6 +24,8 @@ export {
   shouldDeleteChildFieldsAfterTypeChange,
   canUseMappingsEditor,
   stripUndefinedValues,
+  normalizeRuntimeFields,
+  deNormalizeRuntimeFields,
 } from './utils';
 
 export * from './serializers';
