@@ -18,6 +18,7 @@ import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup
 import signalsPolicy from './signals_policy.json';
 import { templateNeedsUpdate } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
+import { isOutdated } from '../../migrations/helpers';
 
 export const createIndexRoute = (router: IRouter) => {
   router.post(
@@ -81,7 +82,7 @@ export const createDetectionIndex = async (
   const indexExists = await getIndexExists(callCluster, index);
   if (indexExists) {
     const indexVersion = await getIndexVersion(callCluster, index);
-    if ((indexVersion ?? 0) < SIGNALS_TEMPLATE_VERSION) {
+    if (isOutdated({ current: indexVersion, target: SIGNALS_TEMPLATE_VERSION })) {
       await callCluster('indices.rollover', { alias: index });
     }
   } else {
