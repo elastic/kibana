@@ -13,13 +13,15 @@ import {
   EuiCommentProps,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
 
 import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
+import { getRuleDetailsUrl, useFormatUrl } from '../../../common/components/link_to';
+import { SecurityPageName } from '../../../app/types';
 import { useCurrentUser } from '../../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
 import { ActionConnector, CommentType } from '../../../../../case/common/api/cases';
@@ -114,6 +116,8 @@ export const UserActionTree = React.memo(
     onShowAlertDetails,
   }: UserActionTreeProps) => {
     const { commentId } = useParams<{ commentId?: string }>();
+    const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+    const history = useHistory();
     const handlerTimeoutId = useRef(0);
     const addCommentRef = useRef<AddCommentRefObject>(null);
     const [initLoading, setInitLoading] = useState(true);
@@ -334,9 +338,11 @@ export const UserActionTree = React.memo(
                   },
                 ];
               } else if (comment != null && comment.type === CommentType.alert) {
+                const alert = alerts[comment.alertId];
+                const alertUrl = formatUrl(getRuleDetailsUrl(alert.rule.id));
                 return [
                   ...comments,
-                  getAlertComment({ action, alert: alerts[comment.alertId], onShowAlertDetails }),
+                  getAlertComment({ action, alert, alertUrl, onShowAlertDetails, history }),
                 ];
               }
             }
@@ -436,6 +442,8 @@ export const UserActionTree = React.memo(
         userCanCrud,
         alerts,
         onShowAlertDetails,
+        formatUrl,
+        history,
       ]
     );
 

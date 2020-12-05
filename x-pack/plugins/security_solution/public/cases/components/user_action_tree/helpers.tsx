@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps } from '@elastic/eui';
+import { History } from 'history';
 
 import {
   CaseFullExternalService,
@@ -188,38 +189,57 @@ export const getUpdateAction = ({
 export const getAlertComment = ({
   action,
   alert,
+  alertUrl,
   onShowAlertDetails,
+  history,
 }: {
   action: CaseUserActions;
   alert: Alert | undefined;
+  alertUrl: string;
+  history: History;
   onShowAlertDetails: (alertId: string, index: string) => void;
-}): EuiCommentProps => ({
-  username: (
-    <UserActionUsernameWithAvatar
-      username={action.actionBy.username}
-      fullName={action.actionBy.fullName}
-    />
-  ),
-  className: 'comment-alert',
-  type: 'update',
-  event: `${i18n.ALERT_COMMENT_LABEL_TITLE} ${alert?.rule?.name ?? ''}`,
-  'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
-  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-  timelineIcon: 'bell',
-  actions: (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <UserActionCopyLink id={action.actionId} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {alert != null && (
-          <UserActionShowAlert
-            id={action.actionId}
-            alert={alert}
-            onShowAlertDetails={onShowAlertDetails}
-          />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ),
-});
+}): EuiCommentProps => {
+  const eventLabel = `${i18n.ALERT_COMMENT_LABEL_TITLE}`;
+  const ruleName = alert?.rule?.name ?? '';
+  // TODO: Convert event to component so you can use useCallback
+  const onLinkClick = (ev: { preventDefault: () => void }) => {
+    ev.preventDefault();
+    history.push(alertUrl ?? '');
+  };
+
+  return {
+    username: (
+      <UserActionUsernameWithAvatar
+        username={action.actionBy.username}
+        fullName={action.actionBy.fullName}
+      />
+    ),
+    className: 'comment-alert',
+    type: 'update',
+    event: (
+      <>
+        {`${eventLabel} `}
+        <EuiLink onClick={onLinkClick}>{ruleName}</EuiLink>
+      </>
+    ),
+    'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+    timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+    timelineIcon: 'bell',
+    actions: (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UserActionCopyLink id={action.actionId} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {alert != null && (
+            <UserActionShowAlert
+              id={action.actionId}
+              alert={alert}
+              onShowAlertDetails={onShowAlertDetails}
+            />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  };
+};
