@@ -8,44 +8,40 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { Direction } from '../../../graphql/types';
-import {
-  defaultHeaders,
-  mockTimelineData,
-  mockIndexPattern,
-  mockIndexNames,
-} from '../../../common/mock';
-import '../../../common/mock/match_media';
-import { TestProviders } from '../../../common/mock/test_providers';
+import { Direction } from '../../../../graphql/types';
+import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
+import '../../../../common/mock/match_media';
+import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { TimelineComponent, Props as TimelineComponentProps } from './timeline';
-import { Sort } from './body/sort';
-import { mockDataProviders } from './data_providers/mock/mock_data_providers';
-import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
-import { useTimelineEvents } from '../../containers/index';
-import { useTimelineEventsDetails } from '../../containers/details/index';
+import { QueryTabContentComponent, Props as QueryTabContentComponentProps } from './index';
+import { Sort } from '../body/sort';
+import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
+import { useMountAppended } from '../../../../common/utils/use_mount_appended';
+import { TimelineId, TimelineStatus } from '../../../../../common/types/timeline';
+import { useTimelineEvents } from '../../../containers/index';
+import { useTimelineEventsDetails } from '../../../containers/details/index';
+import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 
-jest.mock('../../containers/index', () => ({
+jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
 }));
-jest.mock('../../containers/details/index', () => ({
+jest.mock('../../../containers/details/index', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
-jest.mock('./body/events/index', () => ({
+jest.mock('../body/events/index', () => ({
   // eslint-disable-next-line react/display-name
   Events: () => <></>,
 }));
-jest.mock('../../../common/lib/kibana');
-jest.mock('./properties/properties_right');
+
+jest.mock('../../../../common/containers/sourcerer');
+
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
-
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-jest.mock('../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
@@ -65,16 +61,15 @@ jest.mock('../../../common/lib/kibana', () => {
     useGetUserSavedObjectPermissions: jest.fn(),
   };
 });
+
 describe('Timeline', () => {
-  let props = {} as TimelineComponentProps;
+  let props = {} as QueryTabContentComponentProps;
   const sort: Sort = {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   };
   const startDate = '2018-03-23T18:49:23.132Z';
   const endDate = '2018-03-24T03:33:52.253Z';
-
-  const indexPattern = mockIndexPattern;
 
   const mount = useMountAppended();
 
@@ -91,34 +86,27 @@ describe('Timeline', () => {
     ]);
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
 
+    (useSourcererScope as jest.Mock).mockReturnValue(mockSourcererScope);
+
     props = {
-      browserFields: mockBrowserFields,
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
-      docValueFields: [],
       end: endDate,
+      eventType: 'all',
+      showEventDetails: false,
       filters: [],
-      id: TimelineId.test,
-      indexNames: mockIndexNames,
-      indexPattern,
+      timelineId: TimelineId.test,
       isLive: false,
-      isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
-      kqlMode: 'search' as TimelineComponentProps['kqlMode'],
+      kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
-      loadingSourcerer: false,
-      onChangeItemsPerPage: jest.fn(),
-      onClose: jest.fn(),
-      show: true,
       showCallOutUnauthorizedMsg: false,
       sort,
       start: startDate,
       status: TimelineStatus.active,
-      timelineType: TimelineType.default,
       timerangeKind: 'absolute',
-      toggleColumn: jest.fn(),
-      usersViewing: ['elastic'],
+      updateEventTypeAndIndexesName: jest.fn(),
     };
   });
 
@@ -126,39 +114,27 @@ describe('Timeline', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <TimelineComponent {...props} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('QueryTabContentComponent')).toMatchSnapshot();
     });
 
     test('it renders the timeline header', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
     });
 
-    test('it renders the title field', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <TimelineComponent {...props} />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find('[data-test-subj="timeline-title"]').first().props().placeholder
-      ).toContain('Untitled timeline');
-    });
-
     test('it renders the timeline table', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -166,9 +142,16 @@ describe('Timeline', () => {
     });
 
     test('it does NOT render the timeline table when the source is loading', () => {
+      (useSourcererScope as jest.Mock).mockReturnValue({
+        browserFields: {},
+        docValueFields: [],
+        loading: true,
+        indexPattern: {},
+        selectedPatterns: [],
+      });
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} loadingSourcerer={true} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -178,7 +161,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when start is empty', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} start={''} />
+          <QueryTabContentComponent {...props} start={''} />
         </TestProviders>
       );
 
@@ -188,7 +171,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when end is empty', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} end={''} />
+          <QueryTabContentComponent {...props} end={''} />
         </TestProviders>
       );
 
@@ -198,7 +181,7 @@ describe('Timeline', () => {
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -208,7 +191,7 @@ describe('Timeline', () => {
     it('it shows the timeline footer', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineComponent {...props} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 

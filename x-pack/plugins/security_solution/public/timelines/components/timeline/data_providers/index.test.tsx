@@ -4,20 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { DataProviders } from '.';
-import { DataProvider } from './data_provider';
-import { mockDataProviders } from './mock/mock_data_providers';
 import { ManageGlobalTimeline, getTimelineDefaults } from '../../manage_timeline';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public/query/filter_manager';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
+
+jest.mock('../../../../common/hooks/use_selector', () => {
+  const actual = jest.requireActual('../../../../common/hooks/use_selector');
+  return {
+    ...actual,
+    useDeepEqualSelector: jest.fn().mockReturnValue([]),
+  };
+});
 
 const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 describe('DataProviders', () => {
@@ -33,27 +38,21 @@ describe('DataProviders', () => {
           filterManager,
         },
       };
-      const wrapper = shallow(
+      const wrapper = mount(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DataProviders
-              browserFields={{}}
-              data-test-subj="dataProviders-container"
-              dataProviders={mockDataProviders}
-              timelineId="foo"
-            />
+            <DataProviders data-test-subj="dataProviders-container" timelineId="foo" />
           </ManageGlobalTimeline>
         </TestProviders>
       );
-      expect(wrapper.find(`[data-test-subj="dataProviders-container"]`).dive()).toMatchSnapshot();
+      expect(wrapper.find(`[data-test-subj="dataProviders-container"]`)).toBeTruthy();
+      expect(wrapper.find(`[date-test-subj="drop-target-data-providers"]`)).toBeTruthy();
     });
 
     test('it should render a placeholder when there are zero data providers', () => {
-      const dataProviders: DataProvider[] = [];
-
       const wrapper = mount(
         <TestProviders>
-          <DataProviders browserFields={{}} timelineId="foo" dataProviders={dataProviders} />
+          <DataProviders timelineId="foo" />
         </TestProviders>
       );
 
@@ -63,14 +62,12 @@ describe('DataProviders', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <DataProviders browserFields={{}} timelineId="foo" dataProviders={mockDataProviders} />
+          <DataProviders timelineId="foo" />
         </TestProviders>
       );
 
-      mockDataProviders.forEach((dataProvider) =>
-        expect(wrapper.text()).toContain(
-          dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
-        )
+      expect(wrapper.find('[data-test-subj="empty"]').last().text()).toEqual(
+        'Drop anythinghighlightedhere to build anORquery+ Add field'
       );
     });
   });
