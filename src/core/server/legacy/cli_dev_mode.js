@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { startRepl } from '../../../cli/repl';
+export { CliDevMode } from '../../../dev/cli_dev_mode';
