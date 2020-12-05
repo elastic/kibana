@@ -63,7 +63,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     [field.setValue, actions]
   );
 
-  const setAlertProperty = useCallback(
+  const setAlertActionsProperty = useCallback(
     (updatedActions: AlertAction[]) => field.setValue(updatedActions),
     [field]
   );
@@ -119,7 +119,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         messageVariables={messageVariables}
         defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
         setActionIdByIndex={setActionIdByIndex}
-        setAlertProperty={setAlertProperty}
+        setActions={setAlertActionsProperty}
         setActionParamsProperty={setActionParamsProperty}
         actionTypeRegistry={actionTypeRegistry}
         actionTypes={supportedActionTypes}

@@ -9,7 +9,7 @@ import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { HeaderMenuPortal } from '../../../../../observability/public';
 import { ActionMenu } from '../../../application/action_menu';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { EnvironmentFilter } from '../EnvironmentFilter';
 
 const HeaderFlexGroup = styled(EuiFlexGroup)`

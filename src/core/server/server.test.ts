@@ -185,6 +185,7 @@ test(`doesn't setup core services if config validation fails`, async () => {
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
+  expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
   expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
   expect(mockRenderingService.setup).not.toHaveBeenCalled();
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
