@@ -24,7 +24,7 @@ const ItemRow = styled.div`
 
 const SubduedDescriptionListTitle = styled(EuiDescriptionListTitle)`
   &&& {
-    color: ${({ theme }) => theme.eui.textColors.subdued};
+    color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   }
 `;
 

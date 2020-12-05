@@ -227,6 +227,7 @@ describe('url state', () => {
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
 
+    waitForTimelineChanges();
     addNameToTimeline(timeline.title);
     waitForTimelineChanges();
 
@@ -240,7 +241,7 @@ describe('url state', () => {
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE).should('be.visible');
       cy.get(TIMELINE_TITLE).should('be.visible');
-      cy.get(TIMELINE_TITLE).should('have.attr', 'value', timeline.title);
+      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
     });
   });
 });
