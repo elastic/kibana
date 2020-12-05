@@ -52,6 +52,7 @@ export interface UserActionTreeProps {
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
   alerts: Record<string, unknown>;
+  onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -87,6 +88,10 @@ const MyEuiCommentList = styled(EuiCommentList)`
       padding: 10px;
       border-radius: ${theme.eui.paddingSizes.xs};
     }
+
+    & .comment-alert .euiCommentEvent__headerData {
+      flex-grow: 1;
+    }
   `}
 `;
 
@@ -106,6 +111,7 @@ export const UserActionTree = React.memo(
     updateCase,
     userCanCrud,
     alerts,
+    onShowAlertDetails,
   }: UserActionTreeProps) => {
     const { commentId } = useParams<{ commentId?: string }>();
     const handlerTimeoutId = useRef(0);
@@ -328,7 +334,10 @@ export const UserActionTree = React.memo(
                   },
                 ];
               } else if (comment != null && comment.type === CommentType.alert) {
-                return [...comments, getAlertComment({ action, alert: alerts[comment.alertId] })];
+                return [
+                  ...comments,
+                  getAlertComment({ action, alert: alerts[comment.alertId], onShowAlertDetails }),
+                ];
               }
             }
 
@@ -426,6 +435,7 @@ export const UserActionTree = React.memo(
         selectedOutlineCommentId,
         userCanCrud,
         alerts,
+        onShowAlertDetails,
       ]
     );
 

@@ -40,3 +40,10 @@ export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
     defaultMessage: 'added an alert from',
   }
 );
+
+export const SHOW_ALERT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.case.caseView.showAlertTooltip',
+  {
+    defaultMessage: 'Show alert details',
+  }
+);

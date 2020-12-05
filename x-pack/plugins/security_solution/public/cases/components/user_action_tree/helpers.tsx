@@ -21,6 +21,7 @@ import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionCopyLink } from './user_action_copy_link';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { Status, statuses } from '../status';
+import { UserActionShowAlert } from './user_action_show_alert';
 import * as i18n from '../case_view/translations';
 
 interface LabelTitle {
@@ -186,8 +187,11 @@ export const getUpdateAction = ({
 export const getAlertComment = ({
   action,
   alert,
+  onShowAlertDetails,
 }: {
   action: CaseUserActions;
+  alert: unknown;
+  onShowAlertDetails: (alertId: string, index: string) => void;
 }): EuiCommentProps => ({
   username: (
     <UserActionUsernameWithAvatar
@@ -205,6 +209,13 @@ export const getAlertComment = ({
     <EuiFlexGroup>
       <EuiFlexItem>
         <UserActionCopyLink id={action.actionId} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <UserActionShowAlert
+          id={action.actionId}
+          alert={alert}
+          onShowAlertDetails={onShowAlertDetails}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   ),
