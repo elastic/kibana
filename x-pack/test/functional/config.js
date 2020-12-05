@@ -412,6 +412,25 @@ export default async function ({ readConfigFile }) {
             },
           ],
         },
+        manage_rollups_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_rollup'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['read', 'delete', 'create_index', 'view_index_metadata'],
+              },
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
 
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
