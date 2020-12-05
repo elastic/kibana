@@ -10,7 +10,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiProgress,
   EuiSpacer,
   EuiTextColor,
   EuiTitle,
