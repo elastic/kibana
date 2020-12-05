@@ -144,6 +144,7 @@ describe('register()', () => {
       },
       executor: jest.fn(),
       producer: 'alerts',
+      minimumLicenseRequired: 'basic' as LicenseType,
     };
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register(alertType);
@@ -180,6 +181,7 @@ describe('register()', () => {
         name: 'Back To Awesome',
       },
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic' as LicenseType,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -316,6 +318,7 @@ describe('get()', () => {
         "defaultActionGroupId": "default",
         "executor": [MockFunction],
         "id": "test",
+        "minimumLicenseRequired": "basic",
         "name": "Test",
         "producer": "alerts",
         "recoveryActionGroup": Object {

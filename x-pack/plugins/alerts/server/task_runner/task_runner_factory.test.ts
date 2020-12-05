@@ -16,13 +16,14 @@ import {
 import { actionsMock } from '../../../actions/server/mocks';
 import { alertsMock, alertsClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { LicenseType } from '../../../licensing/server';
 
 const alertType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
-  minimumLicenseRequired: 'basic',
+  minimumLicenseRequired: 'basic' as LicenseType,
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',

@@ -891,6 +891,7 @@ describe('AlertsAuthorization', () => {
                   },
                   "defaultActionGroupId": "default",
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
                   "recoveryActionGroup": Object {
@@ -921,6 +922,7 @@ describe('AlertsAuthorization', () => {
                   },
                   "defaultActionGroupId": "default",
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
                   "recoveryActionGroup": Object {
@@ -991,6 +993,7 @@ describe('AlertsAuthorization', () => {
                   },
                   "defaultActionGroupId": "default",
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
                   "recoveryActionGroup": Object {
@@ -1017,6 +1020,7 @@ describe('AlertsAuthorization', () => {
                   },
                   "defaultActionGroupId": "default",
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
                   "recoveryActionGroup": Object {
@@ -1082,6 +1086,7 @@ describe('AlertsAuthorization', () => {
                   },
                   "defaultActionGroupId": "default",
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
                   "recoveryActionGroup": Object {
@@ -1176,6 +1181,7 @@ describe('AlertsAuthorization', () => {
                   },
                   "defaultActionGroupId": "default",
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
                   "recoveryActionGroup": Object {
@@ -1202,6 +1208,7 @@ describe('AlertsAuthorization', () => {
                   },
                   "defaultActionGroupId": "default",
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
                   "recoveryActionGroup": Object {
@@ -1280,6 +1287,7 @@ describe('AlertsAuthorization', () => {
                   },
                   "defaultActionGroupId": "default",
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
                   "recoveryActionGroup": Object {

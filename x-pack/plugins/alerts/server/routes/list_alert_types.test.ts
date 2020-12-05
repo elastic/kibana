@@ -75,6 +75,7 @@ describe('listAlertTypesRoute', () => {
             "authorizedConsumers": Object {},
             "defaultActionGroupId": "default",
             "id": "1",
+            "minimumLicenseRequired": "basic",
             "name": "name",
             "producer": "test",
             "recoveryActionGroup": Object {

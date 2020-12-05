@@ -6,7 +6,7 @@
 
 import { CoreSetup } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { times } from 'lodash';
+import { curry, times } from 'lodash';
 import { LicenseType } from '../../../../../../../plugins/licensing/public';
 import { ES_TEST_INDEX_NAME } from '../../../../lib';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
@@ -50,53 +50,55 @@ function getAlwaysFiringAlertType() {
       params: [{ name: 'instanceParamsValue', description: 'the instance params value' }],
       context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
     },
-    async executor(alertExecutorOptions) {
-      const {
-        services,
-        params,
-        state,
-        alertId,
-        spaceId,
-        namespace,
-        name,
-        tags,
-        createdBy,
-        updatedBy,
-      } = alertExecutorOptions;
-      let group: string | null = 'default';
-      const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
-
-      if (params.groupsToScheduleActionsInSeries) {
-        const index = state.groupInSeriesIndex || 0;
-        group = params.groupsToScheduleActionsInSeries[index];
-      }
-
-      if (group) {
-        services
-          .alertInstanceFactory('1')
-          .replaceState({ instanceStateValue: true })
-          .scheduleActions(group, {
-            instanceContextValue: true,
-          });
-      }
-      await services.scopedClusterClient.index({
-        index: params.index,
-        refresh: 'wait_for',
-        body: {
-          state,
-          params,
-          reference: params.reference,
-          source: 'alert:test.always-firing',
-          alertInfo,
-        },
-      });
-      return {
-        globalStateValue: true,
-        groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
-      };
-    },
+    executor: curry(alwaysFiringExecutor)(),
   };
-  return result;
+  return (result as unknown) as AlertType;
+}
+
+async function alwaysFiringExecutor(alertExecutorOptions: any) {
+  const {
+    services,
+    params,
+    state,
+    alertId,
+    spaceId,
+    namespace,
+    name,
+    tags,
+    createdBy,
+    updatedBy,
+  } = alertExecutorOptions;
+  let group: string | null = 'default';
+  const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
+
+  if (params.groupsToScheduleActionsInSeries) {
+    const index = state.groupInSeriesIndex || 0;
+    group = params.groupsToScheduleActionsInSeries[index];
+  }
+
+  if (group) {
+    services
+      .alertInstanceFactory('1')
+      .replaceState({ instanceStateValue: true })
+      .scheduleActions(group, {
+        instanceContextValue: true,
+      });
+  }
+  await services.scopedClusterClient.index({
+    index: params.index,
+    refresh: 'wait_for',
+    body: {
+      state,
+      params,
+      reference: params.reference,
+      source: 'alert:test.always-firing',
+      alertInfo,
+    },
+  });
+  return {
+    globalStateValue: true,
+    groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+  };
 }
 
 function getCumulativeFiringAlertType() {
@@ -134,7 +136,7 @@ function getCumulativeFiringAlertType() {
       };
     },
   };
-  return result;
+  return result as AlertType;
 }
 
 function getNeverFiringAlertType() {
@@ -177,7 +179,7 @@ function getNeverFiringAlertType() {
       };
     },
   };
-  return result;
+  return (result as unknown) as AlertType;
 }
 
 function getFailingAlertType() {
@@ -215,7 +217,7 @@ function getFailingAlertType() {
       throw new Error('Failed to execute alert type');
     },
   };
-  return result;
+  return (result as unknown) as AlertType;
 }
 
 function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
@@ -307,7 +309,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
       });
     },
   };
-  return result;
+  return (result as unknown) as AlertType;
 }
 
 function getValidationAlertType() {
@@ -332,7 +334,7 @@ function getValidationAlertType() {
     },
     async executor() {},
   };
-  return result;
+  return (result as unknown) as AlertType;
 }
 
 function getPatternFiringAlertType() {
@@ -393,7 +395,7 @@ function getPatternFiringAlertType() {
       };
     },
   };
-  return result;
+  return (result as unknown) as AlertType;
 }
 
 export function defineAlertTypes(

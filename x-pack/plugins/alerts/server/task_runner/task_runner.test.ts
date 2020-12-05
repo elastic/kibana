@@ -28,12 +28,13 @@ import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
+import { LicenseType } from '../../../licensing/server';
 const alertType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
   defaultActionGroupId: 'default',
-  minimumLicenseRequired: 'basic',
+  minimumLicenseRequired: 'basic' as LicenseType,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',

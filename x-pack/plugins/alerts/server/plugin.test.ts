@@ -81,7 +81,6 @@ describe('Alerting Plugin', () => {
       };
 
       beforeEach(async () => {
-        setup = await plugin.setup(coreSetup, pluginsSetup);
         coreSetup = coreMock.createSetup();
         pluginsSetup = {
           taskManager: taskManagerMock.createSetup(),
@@ -91,6 +90,7 @@ describe('Alerting Plugin', () => {
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
         };
+        setup = await plugin.setup(coreSetup, pluginsSetup);
       });
 
       it('should throw error when license type is invalid', async () => {
