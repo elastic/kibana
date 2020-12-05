@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { Observable, of, Subject, Subscriber, TeardownLogic } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
@@ -35,11 +35,7 @@ describe('useDataSearch hook', () => {
 
     const getRequest = jest.fn((_firstArgument: string, _secondArgument: string) => null);
 
-    const {
-      result: {
-        current: { search },
-      },
-    } = renderHook(
+    const { result } = renderHook(
       () =>
         useDataSearch({
           getRequest,
@@ -50,7 +46,7 @@ describe('useDataSearch hook', () => {
     );
 
     act(() => {
-      search('first', 'second');
+      result.current.search('first', 'second');
     });
 
     expect(getRequest).toHaveBeenLastCalledWith('first', 'second');
@@ -83,11 +79,7 @@ describe('useDataSearch hook', () => {
       },
     }));
 
-    const {
-      result: {
-        current: { search, requests$ },
-      },
-    } = renderHook(
+    const { result } = renderHook(
       () =>
         useDataSearch({
           getRequest,
@@ -101,10 +93,10 @@ describe('useDataSearch hook', () => {
     expect(dataMock.search.search).not.toHaveBeenCalled();
 
     // execute requests$ observable
-    const firstRequestPromise = requests$.pipe(take(1)).toPromise();
+    const firstRequestPromise = result.current.requests$.pipe(take(1)).toPromise();
 
     act(() => {
-      search('first', 'second');
+      result.current.search('first', 'second');
     });
 
     const firstRequest = await firstRequestPromise;
@@ -154,11 +146,7 @@ describe('useDataSearch hook', () => {
       },
     }));
 
-    const {
-      result: {
-        current: { search, requests$ },
-      },
-    } = renderHook(
+    const { result } = renderHook(
       () =>
         useDataSearch({
           getRequest,
@@ -172,10 +160,10 @@ describe('useDataSearch hook', () => {
     expect(dataMock.search.search).not.toHaveBeenCalled();
 
     // execute requests$ observable
-    const firstRequestPromise = requests$.pipe(take(1)).toPromise();
+    const firstRequestPromise = result.current.requests$.pipe(take(1)).toPromise();
 
     act(() => {
-      search('first', 'second');
+      result.current.search('first', 'second');
     });
 
     const firstRequest = await firstRequestPromise;
@@ -198,22 +186,104 @@ describe('useDataSearch hook', () => {
 });
 
 describe('useLatestPartialDataSearchRequest hook', () => {
-  it("subscribes to the latest request's response observable", async () => {
+  it("subscribes to the latest request's response observable", () => {
+    const firstRequest = {
+      abortController: new AbortController(),
+      options: {},
+      request: { params: 'firstRequestParam' },
+      response$: new Subject<IKibanaSearchResponse<string>>(),
+    };
+
+    const secondRequest = {
+      abortController: new AbortController(),
+      options: {},
+      request: { params: 'secondRequestParam' },
+      response$: new Subject<IKibanaSearchResponse<string>>(),
+    };
+
     const requests$ = new Subject<
       DataSearchRequestDescriptor<IKibanaSearchRequest<string>, string>
     >();
 
-    const {
-      result: {
-        current: {},
-      },
-    } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLatestPartialDataSearchRequest(requests$, 'initial', (response) => ({
         data: `projection of ${response}`,
       }))
     );
 
-    requests$.next(defer());
+    expect(result).toHaveProperty('current.isRequestRunning', false);
+    expect(result).toHaveProperty('current.latestResponseData', undefined);
+
+    // first request is started
+    act(() => {
+      requests$.next(firstRequest);
+    });
+
+    expect(result).toHaveProperty('current.isRequestRunning', true);
+    expect(result).toHaveProperty('current.latestResponseData', 'initial');
+
+    // first response of the first request arrives
+    act(() => {
+      firstRequest.response$.next({ rawResponse: 'request-1-response-1', isRunning: true });
+    });
+
+    expect(result).toHaveProperty('current.isRequestRunning', true);
+    expect(result).toHaveProperty(
+      'current.latestResponseData',
+      'projection of request-1-response-1'
+    );
+
+    // second request is started before the second response of the first request arrives
+    act(() => {
+      requests$.next(secondRequest);
+      secondRequest.response$.next({ rawResponse: 'request-2-response-1', isRunning: true });
+    });
+
+    expect(result).toHaveProperty('current.isRequestRunning', true);
+    expect(result).toHaveProperty(
+      'current.latestResponseData',
+      'projection of request-2-response-1'
+    );
+
+    // second response of the second request arrives
+    act(() => {
+      secondRequest.response$.next({ rawResponse: 'request-2-response-2', isRunning: false });
+    });
+
+    expect(result).toHaveProperty('current.isRequestRunning', false);
+    expect(result).toHaveProperty(
+      'current.latestResponseData',
+      'projection of request-2-response-2'
+    );
+  });
+
+  it("unsubscribes from the latest request's response observable on unmount", () => {
+    const onUnsubscribe = jest.fn();
+
+    const firstRequest = {
+      abortController: new AbortController(),
+      options: {},
+      request: { params: 'firstRequestParam' },
+      response$: new Observable<IKibanaSearchResponse<string>>(() => {
+        return onUnsubscribe;
+      }),
+    };
+
+    const requests$ = of<DataSearchRequestDescriptor<IKibanaSearchRequest<string>, string>>(
+      firstRequest
+    );
+
+    const { unmount } = renderHook(() =>
+      useLatestPartialDataSearchRequest(requests$, 'initial', (response) => ({
+        data: `projection of ${response}`,
+      }))
+    );
+
+    expect(onUnsubscribe).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(onUnsubscribe).toHaveBeenCalled();
   });
 });
 
@@ -222,28 +292,4 @@ const createDataPluginMock = () => {
     search: ISearchStart & { search: jest.MockedFunction<ISearchGeneric> };
   };
   return dataMock;
-};
-
-const createSpyObservable = <T extends any>(
-  subscribe: (subscriber: Subscriber<T>) => TeardownLogic
-): Observable<T> & {
-  onSubscribe: jest.Mock;
-  onUnsubscribe: jest.Mock;
-} => {
-  const onSubscribe = jest.fn();
-  const onUnsubscribe = jest.fn();
-  const observable = new Observable<T>((subscriber) => {
-    onSubscribe();
-    const teardownLogic = subscribe(subscriber);
-
-    return () => {
-      onUnsubscribe();
-      teardownLogic();
-    };
-  });
-
-  return Object.assign(observable, {
-    onSubscribe,
-    onUnsubscribe,
-  });
 };
