@@ -46,10 +46,6 @@ class TimeseriesVisualization extends Component {
   dateFormat = this.props.getConfig('dateFormat');
 
   xAxisFormatter = (interval) => (val) => {
-    if (!this.scaledDataFormat || !this.dateFormat) {
-      return val;
-    }
-
     const formatter = createXaxisFormatter(interval, this.scaledDataFormat, this.dateFormat);
     return formatter(val);
   };

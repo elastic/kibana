@@ -38,7 +38,7 @@ export const ShareToSpaceForm = (props: Props) => {
           title={
             <FormattedMessage
               id="xpack.spaces.management.shareToSpace.shareWarningTitle"
-              defaultMessage="Editing a shared object applies the changes in all spaces"
+              defaultMessage="Editing a shared object applies the changes in every space"
             />
           }
           color="warning"
