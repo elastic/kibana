@@ -78,8 +78,7 @@ test('Updates the embeddable title when given', async () => {
   // Recreating the container should preserve the custom title.
   const containerClone = createHelloWorldContainer(container.getInput());
   // Need to wait for the container to tell us the embeddable has been loaded.
-  const subscription = containerClone.getOutput$().pipe(first()).toPromise();
-  await subscription;
+  await containerClone.getOutput$().pipe(first()).toPromise();
 
   expect(containerClone.getOutput().embeddableLoaded[embeddable.id]).toBeTruthy();
   expect(embeddable.getInput().title).toBe('What is up?');

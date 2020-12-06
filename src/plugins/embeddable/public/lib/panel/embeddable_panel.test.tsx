@@ -77,8 +77,7 @@ test('HelloWorldContainer initializes embeddables', async () => {
     { getEmbeddableFactory } as any
   );
 
-  const subscription = container.getOutput$().pipe(first()).toPromise;
-  await subscription;
+  await container.getOutput$().pipe(first()).toPromise();
 
   expect(container.getOutput().embeddableLoaded['123']).toBeTruthy();
   const embeddable = container.getChild<ContactCardEmbeddable>('123');

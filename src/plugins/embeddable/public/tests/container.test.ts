@@ -173,8 +173,7 @@ test('Container.removeEmbeddable removes and cleans up', async () => {
   embeddable.updateInput({ lastName: 'Z' });
 
   container.removeEmbeddable(embeddable.id);
-  const promise = container.getOutput$().pipe(first()).toPromise();
-  await promise;
+  await container.getOutput$().pipe(first()).toPromise();
 
   const noFind = container.getChild<ContactCardEmbeddable>(embeddable.id);
   expect(noFind).toBeUndefined();
@@ -396,8 +395,7 @@ test(`Can subscribe to children embeddable updates`, async () => {
 
   embeddable.updateInput({ nameTitle: 'Dr.' });
 
-  const promise = embeddable.getInput$().pipe(first()).toPromise();
-  await promise;
+  await embeddable.getInput$().pipe(first()).toPromise();
 
   expect(embeddable.getInput().nameTitle).toEqual('Dr.');
 });
@@ -414,15 +412,13 @@ test('Test nested reactions', async () => {
 
   embeddable.updateInput({ nameTitle: 'Dr.' });
 
-  const embeddablePromise = embeddable.getInput$().pipe(first()).toPromise();
-  await embeddablePromise;
+  await embeddable.getInput$().pipe(first()).toPromise();
 
   expect(embeddable.getInput().nameTitle).toEqual('Dr.');
 
   container.updateInput({ viewMode: ViewMode.EDIT });
 
-  const containerPromise: any = container.getInput$().pipe(first()).toPromise();
-  await containerPromise;
+  await container.getInput$().pipe(first()).toPromise();
 
   const embeddableNameTitle = embeddable.getInput().nameTitle;
   const viewMode = container.getInput().viewMode;
@@ -621,8 +617,7 @@ test('container stores ErrorEmbeddables when a factory for a child cannot be fou
     viewMode: ViewMode.EDIT,
   });
 
-  const promise = container.getOutput$().pipe(first()).toPromise();
-  await promise;
+  await container.getOutput$().pipe(first()).toPromise();
 
   expect(container.getOutput().embeddableLoaded['123']).toBeTruthy();
   const child = container.getChild('123');
@@ -641,8 +636,7 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
     viewMode: ViewMode.EDIT,
   });
 
-  const promise = container.getOutput$().pipe(first()).toPromise();
-  await promise;
+  await container.getOutput$().pipe(first()).toPromise();
 
   expect(container.getOutput().embeddableLoaded['123']).toBeTruthy();
   const child = container.getChild('123');
@@ -661,8 +655,7 @@ test('ErrorEmbeddables get updated when parent does', async () => {
     viewMode: ViewMode.EDIT,
   });
 
-  const promise = container.getOutput$().pipe(first()).toPromise();
-  await promise;
+  await container.getOutput$().pipe(first()).toPromise();
 
   expect(container.getOutput().embeddableLoaded['123']).toBeTruthy();
 

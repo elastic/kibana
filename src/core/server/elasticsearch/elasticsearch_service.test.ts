@@ -232,8 +232,7 @@ describe('#setup', () => {
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
-    const promise = setupContract.esNodesCompatibility$.pipe(first()).toPromise();
-    await promise;
+    await setupContract.esNodesCompatibility$.pipe(first()).toPromise();
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
   });
@@ -248,8 +247,7 @@ describe('#setup', () => {
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
-    const sub = setupContract.esNodesCompatibility$.pipe(first()).toPromise();
-    await sub;
+    await setupContract.esNodesCompatibility$.pipe(first()).toPromise();
 
     await delay(100);
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
@@ -353,6 +351,8 @@ describe('#stop', () => {
   });
 
   it('stops pollEsNodeVersions even if there are active subscriptions', async () => {
+    expect.assertions(2);
+
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
@@ -360,8 +360,8 @@ describe('#stop', () => {
 
     const setupContract = await elasticsearchService.setup(setupDeps);
 
-    const promise = setupContract.esNodesCompatibility$.pipe(first()).toPromise();
-    await promise;
+    await setupContract.esNodesCompatibility$.pipe(first()).toPromise();
+
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
 
     await elasticsearchService.stop();
