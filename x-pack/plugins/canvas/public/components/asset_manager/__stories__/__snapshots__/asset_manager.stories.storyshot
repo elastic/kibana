@@ -302,7 +302,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   className="canvasAsset__thumb canvasCheckered"
                 >
                   <figure
-                    className="euiImage canvasAsset__img "
+                    className="euiImage canvasAsset__img euiImage--original"
                   >
                     <img
                       alt="Asset thumbnail"
@@ -469,7 +469,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   className="canvasAsset__thumb canvasCheckered"
                 >
                   <figure
-                    className="euiImage canvasAsset__img "
+                    className="euiImage canvasAsset__img euiImage--original"
                   >
                     <img
                       alt="Asset thumbnail"
