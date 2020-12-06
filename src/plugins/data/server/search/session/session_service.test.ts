@@ -19,6 +19,8 @@
 
 import { coreMock } from 'src/core/server/mocks';
 import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { of } from 'rxjs';
+import type { SearchStrategyDependencies } from '../types';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { BackgroundSessionStatus } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
@@ -94,6 +96,7 @@ describe('BackgroundSessionService', () => {
     return fakeMap;
   };
 
+  const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
   const mockSavedObject: SavedObject = {
     id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
     type: BACKGROUND_SESSION_TYPE,
@@ -116,9 +119,13 @@ describe('BackgroundSessionService', () => {
     service = new BackgroundSessionService(mockLogger);
   });
 
-  it('save throws if `name` is not provided', () => {
-    const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
+  it('search throws if `name` is not provided', () => {
+    expect(() => service.save(sessionId, {}, { savedObjectsClient })).rejects.toMatchInlineSnapshot(
+      `[Error: Name is required]`
+    );
+  });
 
+  it('save throws if `name` is not provided', () => {
     expect(() => service.save(sessionId, {}, { savedObjectsClient })).rejects.toMatchInlineSnapshot(
       `[Error: Name is required]`
     );
@@ -127,7 +134,6 @@ describe('BackgroundSessionService', () => {
   it('get calls saved objects client', async () => {
     savedObjectsClient.get.mockResolvedValue(mockSavedObject);
 
-    const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const response = await service.get(sessionId, { savedObjectsClient });
 
     expect(response).toBe(mockSavedObject);
@@ -164,7 +170,6 @@ describe('BackgroundSessionService', () => {
     };
     savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
 
-    const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const attributes = { name: 'new_name' };
     const response = await service.update(sessionId, attributes, { savedObjectsClient });
 
@@ -179,11 +184,80 @@ describe('BackgroundSessionService', () => {
   it('delete calls saved objects client', async () => {
     savedObjectsClient.delete.mockResolvedValue({});
 
-    const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const response = await service.delete(sessionId, { savedObjectsClient });
 
     expect(response).toEqual({});
     expect(savedObjectsClient.delete).toHaveBeenCalledWith(BACKGROUND_SESSION_TYPE, sessionId);
+  });
+
+  describe('search', () => {
+    const mockSearch = jest.fn().mockReturnValue(of({}));
+    const mockStrategy = { search: mockSearch };
+    const mockDeps = {} as SearchStrategyDependencies;
+
+    beforeEach(() => {
+      mockSearch.mockClear();
+    });
+
+    it('searches using the original request if not restoring', async () => {
+      const searchRequest = { params: {} };
+      const options = { sessionId, isStored: false, isRestore: false };
+
+      await service.search(mockStrategy, searchRequest, options, mockDeps).toPromise();
+
+      expect(mockSearch).toBeCalledWith(searchRequest, options, mockDeps);
+    });
+
+    it('searches using the original request if `id` is provided', async () => {
+      const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+      const searchRequest = { id: searchId, params: {} };
+      const options = { sessionId, isStored: true, isRestore: true };
+
+      await service.search(mockStrategy, searchRequest, options, mockDeps).toPromise();
+
+      expect(mockSearch).toBeCalledWith(searchRequest, options, mockDeps);
+    });
+
+    it('searches by looking up an `id` if restoring and `id` is not provided', async () => {
+      const searchRequest = { params: {} };
+      const options = { sessionId, isStored: true, isRestore: true };
+      const spyGetId = jest.spyOn(service, 'getId').mockResolvedValueOnce('my_id');
+
+      await service.search(mockStrategy, searchRequest, options, mockDeps).toPromise();
+
+      expect(mockSearch).toBeCalledWith({ ...searchRequest, id: 'my_id' }, options, mockDeps);
+
+      spyGetId.mockRestore();
+    });
+
+    it('calls `trackId` once if the response contains an `id` and not restoring', async () => {
+      const searchRequest = { params: {} };
+      const options = { sessionId, isStored: false, isRestore: false };
+      const spyTrackId = jest.spyOn(service, 'trackId').mockResolvedValue();
+      mockSearch.mockReturnValueOnce(of({ id: 'my_id' }, { id: 'my_id' }));
+
+      await service.search(mockStrategy, searchRequest, options, mockDeps).toPromise();
+
+      expect(spyTrackId).toBeCalledTimes(1);
+      expect(spyTrackId).toBeCalledWith(searchRequest, 'my_id', options, mockDeps);
+
+      spyTrackId.mockRestore();
+    });
+
+    it('does not call `trackId` if restoring', async () => {
+      const searchRequest = { params: {} };
+      const options = { sessionId, isStored: true, isRestore: true };
+      const spyGetId = jest.spyOn(service, 'getId').mockResolvedValueOnce('my_id');
+      const spyTrackId = jest.spyOn(service, 'trackId').mockResolvedValue();
+      mockSearch.mockReturnValueOnce(of({ id: 'my_id' }));
+
+      await service.search(mockStrategy, searchRequest, options, mockDeps).toPromise();
+
+      expect(spyTrackId).not.toBeCalled();
+
+      spyGetId.mockRestore();
+      spyTrackId.mockRestore();
+    });
   });
 
   describe('trackId', () => {
@@ -191,7 +265,6 @@ describe('BackgroundSessionService', () => {
       const searchRequest = { params: {} };
       const requestHash = createRequestHash(searchRequest.params);
       const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
-      const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
       const isStored = false;
       const name = 'my saved background search session';
       const appId = 'my_app_id';
@@ -243,7 +316,6 @@ describe('BackgroundSessionService', () => {
       const searchRequest = { params: {} };
       const requestHash = createRequestHash(searchRequest.params);
       const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
-      const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
       const isStored = true;
 
       await service.trackId(
@@ -270,7 +342,6 @@ describe('BackgroundSessionService', () => {
 
     it('throws if there is not a saved object', () => {
       const searchRequest = { params: {} };
-      const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
 
       expect(() =>
         service.getId(searchRequest, { sessionId, isStored: false }, { savedObjectsClient })
@@ -281,7 +352,6 @@ describe('BackgroundSessionService', () => {
 
     it('throws if not restoring a saved session', () => {
       const searchRequest = { params: {} };
-      const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
 
       expect(() =>
         service.getId(
@@ -298,7 +368,6 @@ describe('BackgroundSessionService', () => {
       const searchRequest = { params: {} };
       const requestHash = createRequestHash(searchRequest.params);
       const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
-      const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
       const mockSession = {
         id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
         type: BACKGROUND_SESSION_TYPE,

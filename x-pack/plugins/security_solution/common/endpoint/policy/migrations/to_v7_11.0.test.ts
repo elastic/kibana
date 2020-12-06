@@ -12,6 +12,7 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
   const migration = migratePackagePolicyToV7110;
   it('adds malware notification checkbox and optional message and adds AV registration config', () => {
     const doc: SavedObjectUnsanitizedDoc<PackagePolicy> = {
+      id: 'mock-saved-object-id',
       attributes: {
         name: 'Some Policy Name',
         package: {
@@ -100,11 +101,13 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
         ],
       },
       type: ' nested',
+      id: 'mock-saved-object-id',
     });
   });
 
   it('does not modify non-endpoint package policies', () => {
     const doc: SavedObjectUnsanitizedDoc<PackagePolicy> = {
+      id: 'mock-saved-object-id',
       attributes: {
         name: 'Some Policy Name',
         package: {
@@ -164,6 +167,7 @@ describe('7.11.0 Endpoint Package Policy migration', () => {
         ],
       },
       type: ' nested',
+      id: 'mock-saved-object-id',
     });
   });
 });

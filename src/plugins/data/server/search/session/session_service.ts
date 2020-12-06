@@ -18,6 +18,8 @@
  */
 
 import moment, { Moment } from 'moment';
+import { from } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import {
   CoreStart,
   KibanaRequest,
@@ -29,12 +31,15 @@ import {
 } from '../../../../../core/server';
 import {
   BackgroundSessionSavedObjectAttributes,
+  BackgroundSessionStatus,
   IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchOptions,
   SearchSessionFindOptions,
-  BackgroundSessionStatus,
+  tapFirst,
 } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
+import { ISearchStrategy, SearchStrategyDependencies } from '../types';
 import { createRequestHash } from './utils';
 
 const DEFAULT_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
@@ -181,6 +186,32 @@ export class BackgroundSessionService {
   public stop = () => {
     clearInterval(this.monitorInterval);
     this.sessionSearchMap.clear();
+  };
+
+  public search = <Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(
+    strategy: ISearchStrategy<Request, Response>,
+    searchRequest: Request,
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => {
+    // If this is a restored background search session, look up the ID using the provided sessionId
+    const getSearchRequest = async () =>
+      !options.isRestore || searchRequest.id
+        ? searchRequest
+        : {
+            ...searchRequest,
+            id: await this.getId(searchRequest, options, deps),
+          };
+
+    return from(getSearchRequest()).pipe(
+      switchMap((request) => strategy.search(request, options, deps)),
+      tapFirst((response) => {
+        if (searchRequest.id || !options.sessionId || !response.id || options.isRestore) return;
+        this.trackId(searchRequest, response.id, options, {
+          savedObjectsClient: deps.savedObjectsClient,
+        });
+      })
+    );
   };
 
   // TODO: Generate the `userId` from the realm type/realm name/username
@@ -334,10 +365,6 @@ export class BackgroundSessionService {
         update: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
           this.update(sessionId, attributes, deps),
         delete: (sessionId: string) => this.delete(sessionId, deps),
-        trackId: (searchRequest: IKibanaSearchRequest, searchId: string, options: ISearchOptions) =>
-          this.trackId(searchRequest, searchId, options, deps),
-        getId: (searchRequest: IKibanaSearchRequest, options: ISearchOptions) =>
-          this.getId(searchRequest, options, deps),
       };
     };
   };
