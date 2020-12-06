@@ -10,7 +10,7 @@ import {
   InstallSource,
   PackageAssetReference,
   MAX_TIME_COMPLETE_INSTALL,
-  PACKAGE_ASSETS_INDEX_NAME,
+  ASSETS_SAVED_OBJECT_TYPE,
 } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
@@ -29,7 +29,7 @@ import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets } from './remove';
 import { installTransform } from '../elasticsearch/transform/install';
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
-import { saveArchiveEntriesToES } from '../archive/save_to_es';
+import { saveArchiveEntries } from '../archive/save_to_es';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path
@@ -184,16 +184,18 @@ export async function _installPackage({
   if (installKibanaAssetsError) throw installKibanaAssetsError;
   await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
 
-  const packageAssetResults = await saveArchiveEntriesToES({
-    callCluster,
+  const packageAssetResults = await saveArchiveEntries({
+    savedObjectsClient,
     paths,
     packageInfo,
     installSource,
   });
-  const packageAssetRefs: PackageAssetReference[] = packageAssetResults.items.map((result) => ({
-    id: result.index._id,
-    type: PACKAGE_ASSETS_INDEX_NAME,
-  }));
+  const packageAssetRefs: PackageAssetReference[] = packageAssetResults.saved_objects.map(
+    (result) => ({
+      id: result.id,
+      type: ASSETS_SAVED_OBJECT_TYPE,
+    })
+  );
 
   // update to newly installed version when all assets are successfully installed
   if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);

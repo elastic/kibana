@@ -8,7 +8,7 @@
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
 import {
-  PACKAGE_ASSETS_INDEX_NAME,
+  ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
   defaultPackages,
@@ -302,7 +302,7 @@ export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
 };
 
 export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
-  type: typeof PACKAGE_ASSETS_INDEX_NAME;
+  type: typeof ASSETS_SAVED_OBJECT_TYPE;
 };
 
 export type RequiredPackage = typeof requiredPackages;

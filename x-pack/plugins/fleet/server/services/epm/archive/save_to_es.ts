@@ -8,32 +8,21 @@ import { extname } from 'path';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import uuidv5 from 'uuid/v5';
+import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
 import {
-  PACKAGE_ASSETS_INDEX_NAME,
+  ASSETS_SAVED_OBJECT_TYPE,
   InstallablePackage,
   InstallSource,
   PackageAssetReference,
 } from '../../../../common';
-import { CallESAsCurrentUser } from '../../../types';
-import { appContextService } from '../../../services';
 import { getArchiveEntry } from './index';
 
 // uuid v5 requires a SHA-1 UUID as a namespace
-// used to ensure consistent ids when given the same inputs
+// used to ensure same input produces the same id
 const ID_NAMESPACE = '71403015-cdd5-404b-a5da-6c43f35cad84';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
-
-const packageAssetMappings = {
-  package_name: { type: 'keyword' },
-  package_version: { type: 'keyword' },
-  install_source: { type: 'keyword' },
-  asset_path: { type: 'keyword' },
-  media_type: { type: 'keyword' },
-  data_utf8: { type: 'text', index: false },
-  data_base64: { type: 'binary' },
-};
 
 export interface PackageAsset {
   package_name: string;
@@ -43,66 +32,6 @@ export interface PackageAsset {
   media_type: string;
   data_utf8: string;
   data_base64: string;
-}
-
-export const ensurePackagesIndex = async (opts: { callCluster: CallESAsCurrentUser }) => {
-  const { callCluster } = opts;
-  const logger = appContextService.getLogger();
-  const indexExists = await callCluster('indices.exists', { index: PACKAGE_ASSETS_INDEX_NAME });
-  if (!indexExists) {
-    try {
-      const clientParams = {
-        index: PACKAGE_ASSETS_INDEX_NAME,
-        body: {
-          mappings: {
-            properties: packageAssetMappings,
-          },
-        },
-      };
-      await callCluster('indices.create', clientParams);
-    } catch (putErr) {
-      logger.error(`${PACKAGE_ASSETS_INDEX_NAME} could not be created`);
-    }
-  }
-};
-
-export const saveArchiveEntriesToES = async (opts: {
-  callCluster: CallESAsCurrentUser;
-  paths: string[];
-  packageInfo: InstallablePackage;
-  installSource: InstallSource;
-}) => {
-  const { callCluster, paths, packageInfo, installSource } = opts;
-  await ensurePackagesIndex({ callCluster });
-  const bulkBody = await createBulkBody({ paths, packageInfo, installSource });
-  const results: BulkResponse = await callCluster('bulk', { body: bulkBody });
-  return results;
-};
-
-export async function createBulkBody(opts: {
-  paths: string[];
-  packageInfo: InstallablePackage;
-  installSource: InstallSource;
-}) {
-  const { paths, packageInfo, installSource } = opts;
-  const bulkBody = await Promise.all(
-    paths.map(async (path) => {
-      const buffer = getArchiveEntry(path);
-      if (!buffer) throw new Error(`Could not find ArchiveEntry at ${path}`);
-      const { name, version } = packageInfo;
-      const doc = await archiveEntryToESDocument({ path, buffer, name, version, installSource });
-      const action = {
-        index: {
-          _index: PACKAGE_ASSETS_INDEX_NAME,
-          _id: uuidv5(doc.asset_path, ID_NAMESPACE),
-        },
-      };
-
-      return [action, doc];
-    })
-  );
-
-  return bulkBody.flat();
 }
 
 export async function archiveEntryToESDocument(opts: {
@@ -144,48 +73,49 @@ export async function archiveEntryToESDocument(opts: {
   };
 }
 
-export async function removeArchiveEntriesFromES(opts: {
-  callCluster: CallESAsCurrentUser;
+export async function removeArchiveEntries(opts: {
+  savedObjectsClient: SavedObjectsClientContract;
   refs: PackageAssetReference[];
 }) {
-  const bulkBody = opts.refs.map(({ id }) => {
-    return {
-      delete: { _index: PACKAGE_ASSETS_INDEX_NAME, _id: id },
-    };
-  });
-  const results: BulkResponse = await opts.callCluster('bulk', { body: bulkBody });
+  const { savedObjectsClient, refs } = opts;
+  const results = await Promise.all(
+    refs.map((ref) => savedObjectsClient.delete(ASSETS_SAVED_OBJECT_TYPE, ref.id))
+  );
   return results;
 }
 
-// based on plugins/security_solution/server/lib/detection_engine/signals/types.ts
-// ideally we use proper/official types
-type BulkItem = Record<
-  'create' | 'delete' | 'index' | 'update',
-  {
-    _index: string;
-    _type?: string;
-    _id: string;
-    _version: number;
-    result?: 'created' | 'deleted' | 'updated';
-    _shards?: {
-      total: number;
-      successful: number;
-      failed: number;
-    };
-    _seq_no?: number;
-    _primary_term?: number;
-    status: number;
-    error?: {
-      type: string;
-      reason: string;
-      index_uuid?: string;
-      shard: string;
-      index: string;
-    };
-  }
->;
-interface BulkResponse {
-  took: number;
-  errors: boolean;
-  items: BulkItem[];
+export async function saveArchiveEntries(opts: {
+  savedObjectsClient: SavedObjectsClientContract;
+  paths: string[];
+  packageInfo: InstallablePackage;
+  installSource: InstallSource;
+}) {
+  const { savedObjectsClient, paths, packageInfo, installSource } = opts;
+  const bulkBody = await Promise.all(
+    paths.map((path) => {
+      const buffer = getArchiveEntry(path);
+      if (!buffer) throw new Error(`Could not find ArchiveEntry at ${path}`);
+      const { name, version } = packageInfo;
+      return archiveEntryToBulkCreateObject({ path, buffer, name, version, installSource });
+    })
+  );
+
+  const results = await savedObjectsClient.bulkCreate<PackageAsset>(bulkBody);
+  return results;
+}
+
+export async function archiveEntryToBulkCreateObject(opts: {
+  path: string;
+  buffer: Buffer;
+  name: string;
+  version: string;
+  installSource: InstallSource;
+}): Promise<SavedObjectsBulkCreateObject<PackageAsset>> {
+  const { path, buffer, name, version, installSource } = opts;
+  const doc = await archiveEntryToESDocument({ path, buffer, name, version, installSource });
+  return {
+    id: uuidv5(doc.asset_path, ID_NAMESPACE),
+    type: ASSETS_SAVED_OBJECT_TYPE,
+    attributes: doc,
+  };
 }
