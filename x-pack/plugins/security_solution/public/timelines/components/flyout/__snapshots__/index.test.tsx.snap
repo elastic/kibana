@@ -3,10 +3,5 @@
 exports[`Flyout rendering it renders correctly against snapshot 1`] = `
 <Flyout
   timelineId="test"
-  usersViewing={
-    Array [
-      "elastic",
-    ]
-  }
 />
 `;
