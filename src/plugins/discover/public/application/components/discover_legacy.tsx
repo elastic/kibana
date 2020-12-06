@@ -165,24 +165,32 @@ export function DiscoverLegacy({
       : undefined;
   const contentCentered = resultState === 'uninitialized';
 
+  const removeElFromColumns = (el: string, columns: string[]) => {
+    const index = columns.indexOf(el);
+    return columns.splice(index, 1);
+  };
+
+  const getDefaultColumns = (column: string, cols: string[]) => {
+    let columns = [...cols];
+    const index = columns.indexOf(column);
+    if (index !== -1) {
+      columns = removeElFromColumns(column, columns);
+    }
+    if (columns.length === 0) {
+      const defaultColumn = column === '_source' ? 'fields' : '_source';
+      columns = [defaultColumn];
+    }
+    return columns;
+  };
+
   const getDisplayColumns = () => {
     if (!state.columns) {
       return [];
     }
-    const columns = [...state.columns];
-    if (useNewFieldsApi && columns) {
-      const indexOfSource = columns.indexOf('_source');
-      if (indexOfSource !== -1 && columns.splice(indexOfSource, 1).length > 0) {
-        return columns.splice(indexOfSource, 1);
-      } else if (
-        columns.length === 0 ||
-        (indexOfSource !== -1 && columns.splice(indexOfSource, 1).length === 0)
-      ) {
-        return ['fields'];
-      }
-      return columns;
+    if (useNewFieldsApi) {
+      return getDefaultColumns('_source', state.columns);
     }
-    return columns;
+    return getDefaultColumns('fields', state.columns);
   };
 
   return (

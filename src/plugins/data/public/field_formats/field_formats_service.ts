@@ -34,6 +34,7 @@ export class FieldFormatsService {
     });
 
     const getConfig = core.uiSettings.get.bind(core.uiSettings);
+
     this.fieldFormatsRegistry.init(
       getConfig,
       {

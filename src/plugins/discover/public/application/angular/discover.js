@@ -413,16 +413,28 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
   setBreadcrumbsTitle(savedSearch, chrome);
 
+  function removeElFromColumns(el, columns) {
+    const index = columns.indexOf(el);
+    if (index !== -1 && columns.splice(index, 1).length > 0) {
+      return columns.splice(index, 1);
+    }
+    return columns;
+  }
+
+  function removeSourceFromColumns(columns) {
+    return removeElFromColumns('_source', columns);
+  }
+
+  function removeFieldsFromColumns(columns) {
+    return removeElFromColumns('fields', columns);
+  }
+
   function getDefaultColumns() {
     const columns = [...savedSearch.columns];
     if ($scope.useNewFieldsApi) {
-      const indexOfSource = columns.indexOf('_source');
-      if (indexOfSource !== -1 && columns.splice(indexOfSource, 1).length > 0) {
-        return columns.splice(indexOfSource, 1).length > 0;
-      }
-      return columns;
+      return removeSourceFromColumns(columns);
     } else if (columns.length > 0) {
-      return columns;
+      return removeFieldsFromColumns(columns);
     }
     return config.get(DEFAULT_COLUMNS_SETTING).slice();
   }
@@ -677,7 +689,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
     $scope.hits = resp.hits.total;
     $scope.rows = resp.hits.hits.map((hit) => {
-      if ($scope.useNewFieldsApi && $scope.state.columns.length === 0) {
+      if ($scope.useNewFieldsApi) {
         const fields = {};
         Object.keys(hit.fields)
           .splice(0, FIRST_N_COLUMNS_FROM_FIELDS_RESPONSE)
