@@ -381,6 +381,7 @@ describe('list()', () => {
           },
           "defaultActionGroupId": "testActionGroup",
           "id": "test",
+          "minimumLicenseRequired": "basic",
           "name": "Test",
           "producer": "alerts",
           "recoveryActionGroup": Object {
