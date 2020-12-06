@@ -59,7 +59,8 @@ export function updateSearchSource(
     searchSource.setField('fields', ['*']);
   } else {
     searchSource.removeField('fields');
-    searchSource.setField('fieldsFromSource', ['*']);
+    const fieldNames = indexPattern.fields.map((field) => field.name);
+    searchSource.setField('fieldsFromSource', fieldNames);
   }
   return searchSource;
 }
