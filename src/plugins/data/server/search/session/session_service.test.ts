@@ -41,13 +41,13 @@ describe('BackgroundSessionService', () => {
   const MOCK_KEY_HASH = '608de49a4600dbb5b173492759792e4a';
 
   const createMockInternalSavedObjectClient = (
-    bulkGetSpy?: jest.SpyInstance<any>,
+    findSpy?: jest.SpyInstance<any>,
     bulkUpdateSpy?: jest.SpyInstance<any>
   ) => {
     Object.defineProperty(service, 'internalSavedObjectsClient', {
       get: () => {
-        const bulkGet =
-          bulkGetSpy ||
+        const find =
+          findSpy ||
           (() => {
             return {
               saved_objects: [
@@ -73,7 +73,7 @@ describe('BackgroundSessionService', () => {
             };
           });
         return {
-          bulkGet,
+          find,
           bulkUpdate,
         };
       },
@@ -199,6 +199,11 @@ describe('BackgroundSessionService', () => {
       const created = new Date().toISOString();
       const expires = new Date().toISOString();
 
+      const mockIdMapping = createMockIdMapping([]);
+      Object.defineProperty(service, 'sessionSearchMap', {
+        get: () => mockIdMapping,
+      });
+
       await service.trackId(
         searchRequest,
         searchId,
@@ -223,12 +228,15 @@ describe('BackgroundSessionService', () => {
           initialState: {},
           restoreState: {},
           status: BackgroundSessionStatus.IN_PROGRESS,
-          idMapping: { [requestHash]: searchId },
+          idMapping: {},
           appId,
           urlGeneratorId,
+          sessionId,
         },
         { id: sessionId }
       );
+
+      expect(mockIdMapping.get(sessionId)!.ids.get(requestHash)).toBe(searchId);
     });
 
     it('updates saved object when `isStored` is `true`', async () => {
@@ -368,7 +376,7 @@ describe('BackgroundSessionService', () => {
       expect(deleteSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should bot fetch when no IDs are mapped', async () => {
+    it('should not fetch when no IDs are mapped', async () => {
       const bulkGetSpy = jest.fn().mockResolvedValueOnce({ saved_objects: [] });
       createMockInternalSavedObjectClient(bulkGetSpy);
 
@@ -382,24 +390,26 @@ describe('BackgroundSessionService', () => {
         get: () => mockIdMapping,
       });
 
-      const bulkGetSpy = jest.fn().mockResolvedValueOnce({ saved_objects: [] });
+      const findSpy = jest.fn().mockResolvedValueOnce({ saved_objects: [] });
       const bulkUpdateSpy = jest.fn().mockResolvedValueOnce({ saved_objects: [] });
-      createMockInternalSavedObjectClient(bulkGetSpy, bulkUpdateSpy);
+      createMockInternalSavedObjectClient(findSpy, bulkUpdateSpy);
 
       jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
-      expect(bulkGetSpy).toHaveBeenCalledTimes(1);
+      expect(findSpy).toHaveBeenCalledTimes(1);
       expect(bulkUpdateSpy).not.toHaveBeenCalled();
     });
 
-    it('should update saved objects if they are found, and delete ids on success', async () => {
+    it('should update saved objects if they are found, and delete session on success', async () => {
       const mockIdMapping = createMockIdMapping([[MOCK_KEY_HASH, MOCK_ASYNC_ID]], undefined, 1);
       const mockMapDeleteSpy = jest.fn();
-      mockIdMapping.get(MOCK_SESSION_ID)!.ids.delete = mockMapDeleteSpy;
+      const mockSessionDeleteSpy = jest.fn();
+      mockIdMapping.delete = mockMapDeleteSpy;
+      mockIdMapping.get(MOCK_SESSION_ID)!.ids.delete = mockSessionDeleteSpy;
       Object.defineProperty(service, 'sessionSearchMap', {
         get: () => mockIdMapping,
       });
 
-      const bulkGetSpy = jest.fn().mockResolvedValueOnce({
+      const findSpy = jest.fn().mockResolvedValueOnce({
         saved_objects: [
           {
             id: MOCK_SESSION_ID,
@@ -424,7 +434,7 @@ describe('BackgroundSessionService', () => {
           },
         ],
       });
-      createMockInternalSavedObjectClient(bulkGetSpy, bulkUpdateSpy);
+      createMockInternalSavedObjectClient(findSpy, bulkUpdateSpy);
 
       jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
 
@@ -432,23 +442,25 @@ describe('BackgroundSessionService', () => {
       jest.useRealTimers();
       await new Promise((r) => setTimeout(r, 15));
 
-      expect(bulkGetSpy).toHaveBeenCalledTimes(1);
+      expect(findSpy).toHaveBeenCalledTimes(1);
       expect(bulkUpdateSpy).toHaveBeenCalledTimes(1);
-      expect(mockMapDeleteSpy).toHaveBeenCalledTimes(2);
-      expect(mockMapDeleteSpy).toBeCalledWith('b');
-      expect(mockMapDeleteSpy).toBeCalledWith(MOCK_KEY_HASH);
-      expect(mockIdMapping.get(MOCK_SESSION_ID)?.retryCount).toBe(0);
+      expect(mockSessionDeleteSpy).toHaveBeenCalledTimes(2);
+      expect(mockSessionDeleteSpy).toBeCalledWith('b');
+      expect(mockSessionDeleteSpy).toBeCalledWith(MOCK_KEY_HASH);
+      expect(mockMapDeleteSpy).toBeCalledTimes(1);
     });
 
     it('should update saved objects if they are found, and increase retryCount on error', async () => {
       const mockIdMapping = createMockIdMapping([[MOCK_KEY_HASH, MOCK_ASYNC_ID]]);
       const mockMapDeleteSpy = jest.fn();
-      mockIdMapping.get(MOCK_SESSION_ID)!.ids.delete = mockMapDeleteSpy;
+      const mockSessionDeleteSpy = jest.fn();
+      mockIdMapping.delete = mockMapDeleteSpy;
+      mockIdMapping.get(MOCK_SESSION_ID)!.ids.delete = mockSessionDeleteSpy;
       Object.defineProperty(service, 'sessionSearchMap', {
         get: () => mockIdMapping,
       });
 
-      const bulkGetSpy = jest.fn().mockResolvedValueOnce({
+      const findSpy = jest.fn().mockResolvedValueOnce({
         saved_objects: [
           {
             id: MOCK_SESSION_ID,
@@ -468,7 +480,7 @@ describe('BackgroundSessionService', () => {
           },
         ],
       });
-      createMockInternalSavedObjectClient(bulkGetSpy, bulkUpdateSpy);
+      createMockInternalSavedObjectClient(findSpy, bulkUpdateSpy);
 
       jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
 
@@ -476,10 +488,11 @@ describe('BackgroundSessionService', () => {
       jest.useRealTimers();
       await new Promise((r) => setTimeout(r, 15));
 
-      expect(bulkGetSpy).toHaveBeenCalledTimes(1);
+      expect(findSpy).toHaveBeenCalledTimes(1);
       expect(bulkUpdateSpy).toHaveBeenCalledTimes(1);
+      expect(mockSessionDeleteSpy).not.toHaveBeenCalled();
       expect(mockMapDeleteSpy).not.toHaveBeenCalled();
-      expect(mockIdMapping.get(MOCK_SESSION_ID)?.retryCount).toBe(1);
+      expect(mockIdMapping.get(MOCK_SESSION_ID)!.retryCount).toBe(1);
     });
   });
 });

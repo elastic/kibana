@@ -83,15 +83,16 @@ export class BackgroundSessionService {
    * context of a user's session.
    */
   private async getAllMappedSavedObjects() {
-    const activeMappingIds = Array.from(this.sessionSearchMap.keys()).map((sessionId) => {
-      return {
-        id: sessionId,
-        type: BACKGROUND_SESSION_TYPE,
-      };
+    const activeMappingIds = Array.from(this.sessionSearchMap.keys())
+      .map((sessionId) => `"${sessionId}"`)
+      .join(' | ');
+    const res = await this.internalSavedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
+      type: BACKGROUND_SESSION_TYPE,
+      search: activeMappingIds,
+      searchFields: ['sessionId'],
+      namespaces: ['*'],
     });
-    const res = await this.internalSavedObjectsClient.bulkGet<BackgroundSessionSavedObjectAttributes>(
-      activeMappingIds
-    );
+    this.logger.debug(`getAllMappedSavedObjects | Got ${res.saved_objects.length} items`);
     return res.saved_objects;
   }
 
@@ -127,11 +128,16 @@ export class BackgroundSessionService {
           // Retry next time
           sessionInfo.retryCount++;
         } else if (updatedSavedObject.attributes.idMapping) {
-          // Delete the ids that we just saved, avoiding a potential new ids being lost (?)
+          // Delete the ids that we just saved, avoiding a potential new ids being lost.
           Object.keys(updatedSavedObject.attributes.idMapping).forEach((key) => {
             sessionInfo.ids.delete(key);
           });
-          sessionInfo.retryCount = 0;
+          // If the session object is empty, delete it as well
+          if (!sessionInfo.ids.entries.length) {
+            this.sessionSearchMap.delete(updatedSavedObject.id);
+          } else {
+            sessionInfo.retryCount = 0;
+          }
         }
       });
     } catch (e) {
@@ -199,6 +205,7 @@ export class BackgroundSessionService {
     this.logger.debug(`save. Saving ${sessionId}.`);
 
     const attributes = {
+      sessionId,
       name,
       created,
       expires,
