@@ -7,6 +7,7 @@
 import { CoreStart, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { from, Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import { TaskManagerSetupContract, TaskManagerStartContract } from 'x-pack/plugins/task_manager/server';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,

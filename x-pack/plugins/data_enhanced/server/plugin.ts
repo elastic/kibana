@@ -5,6 +5,7 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from 'x-pack/plugins/task_manager/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -19,15 +20,21 @@ import {
   enhancedEsSearchStrategyProvider,
   eqlSearchStrategyProvider,
 } from './search';
+import { registerBackgroundSessionsTask, scheduleBackgroundSessionsTasks } from './search/session';
 import { getUiSettings } from './ui_settings';
 
 interface SetupDependencies {
   data: DataPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  taskManager: TaskManagerSetupContract;
+}
+interface StartDependencies {
+  taskManager: TaskManagerStartContract;
 }
 
 export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDependencies> {
   private readonly logger: Logger;
+  private sessionService!: BackgroundSessionService;
 
   constructor(private initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('data_enhanced');
@@ -53,18 +60,23 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
       eqlSearchStrategyProvider(this.logger)
     );
 
+    this.sessionService = new BackgroundSessionService();
+
     deps.data.__enhance({
       search: {
         defaultStrategy: ENHANCED_ES_SEARCH_STRATEGY,
-        sessionService: new BackgroundSessionService(),
+        sessionService: this.sessionService,
       },
     });
 
     const router = core.http.createRouter();
     registerSessionRoutes(router);
+    registerBackgroundSessionsTask(core, deps.taskManager, this.logger);
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart, { taskManager }: StartDependencies) {
+    scheduleBackgroundSessionsTasks(taskManager, this.logger);
+  }
 
   public stop() {}
 }
