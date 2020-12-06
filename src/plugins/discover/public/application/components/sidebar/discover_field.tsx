@@ -71,7 +71,7 @@ export interface DiscoverFieldProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 
-  multiFields?: Array<{ field: IndexPatternField, isSelected: boolean }>;
+  multiFields?: Array<{ field: IndexPatternField; isSelected: boolean }>;
 }
 
 export function DiscoverField({
