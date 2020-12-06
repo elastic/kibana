@@ -13,18 +13,18 @@ export interface PackageSpecManifest {
   title: string;
   description: string;
   version: string;
-  license: 'basic';
-  type: 'integration';
+  license?: 'basic';
+  type?: 'integration';
   release: 'experimental' | 'beta' | 'ga';
-  categories: Array<PackageSpecCategory | undefined>;
-  conditions: PackageSpecConditions;
+  categories?: Array<PackageSpecCategory | undefined>;
+  conditions?: PackageSpecConditions;
   icons?: PackageSpecIcon[];
   screenshots?: PackageSpecScreenshot[];
   policy_templates?: RegistryPolicyTemplate[];
   owner: { github: string };
 }
 
-type PackageSpecCategory =
+export type PackageSpecCategory =
   | 'aws'
   | 'azure'
   | 'cloud'
@@ -49,21 +49,21 @@ type PackageSpecCategory =
   | 'version_control'
   | 'web';
 
-type PackageSpecConditions = Record<
+export type PackageSpecConditions = Record<
   'kibana',
   {
     version: string;
   }
 >;
 
-interface PackageSpecIcon {
+export interface PackageSpecIcon {
   src: string;
   title?: string;
   size?: string;
   type?: string;
 }
 
-interface PackageSpecScreenshot {
+export interface PackageSpecScreenshot {
   src: string;
   title: string;
   size?: string;
