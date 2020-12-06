@@ -8,7 +8,6 @@ import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { isThresholdRule } from '../../../../../common/detection_engine/utils';
 import {
   RuleStepProps,
   RuleStep,
@@ -75,7 +74,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
   const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
 
-  const canUseExceptions = defineRuleData?.ruleType && !isThresholdRule(defineRuleData.ruleType);
+  const canUseExceptions = defineRuleData?.ruleType;
 
   const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
