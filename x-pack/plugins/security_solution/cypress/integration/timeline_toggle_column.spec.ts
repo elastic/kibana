@@ -16,6 +16,7 @@ import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
 import {
   checkIdToggleField,
+  closeTimeline,
   createNewTimeline,
   dragAndDropIdToggleFieldToTimeline,
   expandFirstTimelineEventDetails,
@@ -42,6 +43,7 @@ describe('toggle column in timeline', () => {
 
   afterEach(() => {
     createNewTimeline();
+    closeTimeline();
   });
 
   it('displays a checked Toggle field checkbox for `@timestamp`, a default timeline column', () => {

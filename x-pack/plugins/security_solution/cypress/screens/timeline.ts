@@ -23,8 +23,6 @@ export const CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-${id}"]`;
 };
 
-export const CLOSE_NOTES_BTN = '[data-test-subj="notesModal"] .euiButtonIcon';
-
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
 export const COMBO_BOX = '.euiComboBoxOption__content';
@@ -37,6 +35,8 @@ export const DRAGGABLE_HEADER =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"] [data-test-subj="draggable-header"]';
 
 export const FAVORITE_TIMELINE = '[data-test-subj="timeline-favorite-filled-star"]';
+
+export const GRAPH_TAB_BUTTON = '[data-test-subj="timelineTabs-graph"]';
 
 export const HEADER = '[data-test-subj="header"]';
 
@@ -54,7 +54,7 @@ export const NOTES = '[data-test-subj="note-card-body"]';
 
 export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 
-export const NOTES_BUTTON = '[data-test-subj="timeline-notes-button-large"]';
+export const NOTES_TAB_BUTTON = '[data-test-subj="timelineTabs-notes"]';
 
 export const NOTES_COUNT = '[data-test-subj="timeline-notes-count"]';
 
@@ -64,6 +64,8 @@ export const OPEN_TIMELINE_TEMPLATE_ICON =
   '[data-test-subj="open-timeline-modal-body-filter-template"]';
 
 export const PIN_EVENT = '[data-test-subj="pin"]';
+
+export const PINNED_TAB_BUTTON = '[data-test-subj="timelineTabs-pinned"]';
 
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 
@@ -92,7 +94,7 @@ export const TIMELINE_DATA_PROVIDERS_EMPTY =
 
 export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 
-export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="timeline-description-input"]';
+export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="timeline-description-textarea"]';
 
 export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContainer"]';
 
@@ -137,3 +139,5 @@ export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
 export const TIMELINE_EDIT_MODAL_OPEN_BUTTON = '[data-test-subj="save-timeline-button-icon"]';
 
 export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
+
+export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';

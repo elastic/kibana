@@ -9,8 +9,8 @@ import {
   FAVORITE_TIMELINE,
   LOCKED_ICON,
   NOTES,
-  NOTES_BUTTON,
-  NOTES_COUNT,
+  NOTES_TAB_BUTTON,
+  // NOTES_COUNT,
   NOTES_TEXT_AREA,
   PIN_EVENT,
   TIMELINE_DESCRIPTION,
@@ -32,7 +32,6 @@ import {
   addFilter,
   addNameToTimeline,
   addNotesToTimeline,
-  closeNotes,
   closeTimeline,
   createNewTimeline,
   markAsFavorite,
@@ -65,7 +64,6 @@ describe('Timelines', () => {
 
       addDescriptionToTimeline(timeline.description);
       addNotesToTimeline(timeline.notes);
-      closeNotes();
       markAsFavorite();
       waitForTimelineChanges();
       createNewTimeline();
@@ -81,14 +79,14 @@ describe('Timelines', () => {
       openTimeline(timelineId);
 
       cy.get(FAVORITE_TIMELINE).should('exist');
-      cy.get(TIMELINE_TITLE).should('have.attr', 'value', timeline.title);
-      cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', timeline.description);
+      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
+      cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description);
       cy.get(TIMELINE_QUERY).should('have.text', timeline.query);
       // Comments this assertion until we agreed what to do with the filters.
       // cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
-      cy.get(NOTES_COUNT).should('have.text', '1');
+      // cy.get(NOTES_COUNT).should('have.text', '1');
       cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
-      cy.get(NOTES_BUTTON).click();
+      cy.get(NOTES_TAB_BUTTON).click();
       cy.get(NOTES_TEXT_AREA).should('exist');
       cy.get(NOTES).should('have.text', timeline.notes);
     });
