@@ -46,7 +46,7 @@ const TimelineSavingProgressComponent: React.FC<Props> = ({ timelineId }) => {
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isSaving
   );
 
-  return isSaving && <EuiProgress size="s" color="primary" position="absolute" />;
+  return isSaving ? <EuiProgress size="s" color="primary" position="absolute" /> : null;
 };
 
 const TimelineSavingProgress = React.memo(TimelineSavingProgressComponent);
