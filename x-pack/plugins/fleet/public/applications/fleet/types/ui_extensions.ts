@@ -19,9 +19,7 @@ export interface UIExtensionsStorage {
  * UI Component Extension is used on the pages displaying the ability to edit an
  * Integration Policy
  */
-export type PackagePolicyEditExtensionComponent = ComponentType<
-  PackagePolicyEditExtensionComponentProps
->;
+export type PackagePolicyEditExtensionComponent = ComponentType<PackagePolicyEditExtensionComponentProps>;
 
 export interface PackagePolicyEditExtensionComponentProps {
   /** The current integration policy being edited */
@@ -30,13 +28,17 @@ export interface PackagePolicyEditExtensionComponentProps {
   newPolicy: NewPackagePolicy;
   /**
    * A callback that should be executed anytime a change to the Integration Policy needs to
-   * be reported back to the Fleet Policy Edit page
+   * be reported back to the Fleet Policy Edit page.
+   *
+   * **NOTE:**
+   * this callback will be recreated everytime the policy data changes, thus logic around its
+   * invocation should take that into consideration in order to avoid an endless loop.
    */
   onChange: (opts: {
     /** is current form state is valid */
     isValid: boolean;
     /** The updated Integration Policy to be merged back and included in the API call */
-    updatedPolicy: NewPackagePolicy;
+    updatedPolicy: Partial<NewPackagePolicy>;
   }) => void;
 }
 
@@ -51,9 +53,7 @@ export interface PackagePolicyEditExtension {
  * UI Component Extension is used on the pages displaying the ability to Create an
  * Integration Policy
  */
-export type PackagePolicyCreateExtensionComponent = ComponentType<
-  PackagePolicyCreateExtensionComponentProps
->;
+export type PackagePolicyCreateExtensionComponent = ComponentType<PackagePolicyCreateExtensionComponentProps>;
 
 export interface PackagePolicyCreateExtensionComponentProps {
   /** The integration policy being created */

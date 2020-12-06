@@ -2,7 +2,6 @@
 [[managing-alerts-and-actions]]
 == Alerts and Actions
 
-beta[]
 
 The *Alerts and Actions* UI lets you <<alert-management, see and control all the alerts>> in a space, and provides tools to <<connector-management, create and manage connectors>> so that alerts can trigger actions like notification, indexing, and ticketing.
 

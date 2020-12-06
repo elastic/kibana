@@ -16,6 +16,7 @@ export const AlertAttributesExcludedFromAAD = [
   'muteAll',
   'mutedInstanceIds',
   'updatedBy',
+  'updatedAt',
   'executionStatus',
 ];
 
@@ -28,6 +29,7 @@ export type AlertAttributesExcludedFromAADType =
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'updatedBy'
+  | 'updatedAt'
   | 'executionStatus';
 
 export function setupSavedObjects(

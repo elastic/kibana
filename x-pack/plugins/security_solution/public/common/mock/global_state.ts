@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMELINE_WIDTH } from '../../timelines/components/timeline/body/constants';
 import {
   Direction,
   FlowTarget,
@@ -31,6 +30,7 @@ import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
 import { mockIndexPattern } from './index_pattern';
+import { TimelineTabs } from '../../timelines/store/timeline/model';
 
 export const mockGlobalState: State = {
   app: {
@@ -203,6 +203,7 @@ export const mockGlobalState: State = {
     },
     timelineById: {
       test: {
+        activeTab: TimelineTabs.query,
         deletedEventIds: [],
         id: 'test',
         savedObjectId: null,
@@ -213,6 +214,7 @@ export const mockGlobalState: State = {
         description: '',
         eventIdToNoteIds: {},
         excludedRowRendererIds: [],
+        expandedEvent: {},
         highlightedDropAndProviderId: '',
         historyIds: [],
         isFavorite: false,
@@ -220,7 +222,7 @@ export const mockGlobalState: State = {
         isSelectAllChecked: false,
         isLoading: false,
         kqlMode: 'filter',
-        kqlQuery: { filterQuery: null, filterQueryDraft: null },
+        kqlQuery: { filterQuery: null },
         loadingEventIds: [],
         title: '',
         timelineType: TimelineType.default,
@@ -238,7 +240,6 @@ export const mockGlobalState: State = {
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
         sort: { columnId: '@timestamp', sortDirection: Direction.desc },
-        width: DEFAULT_TIMELINE_WIDTH,
         isSaving: false,
         version: null,
         status: TimelineStatus.active,

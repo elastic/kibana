@@ -32,8 +32,20 @@ describe('transformActionVariables', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
+        },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
         },
       ]
     `);
@@ -67,8 +79,20 @@ describe('transformActionVariables', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
+        },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
         },
         Object {
           "description": "foo-description",
@@ -110,8 +134,20 @@ describe('transformActionVariables', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
+        },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
         },
         Object {
           "description": "foo-description",
@@ -156,8 +192,20 @@ describe('transformActionVariables', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
+        },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
         },
         Object {
           "description": "fooC-description",
@@ -191,6 +239,7 @@ function getAlertType(actionVariables: ActionVariables): AlertType {
     actionVariables,
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     authorizedConsumers: {},
     producer: ALERTS_FEATURE_ID,
   };

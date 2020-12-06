@@ -18,6 +18,7 @@ jest.mock('../../../shared/flash_messages', () => ({
 import { setQueuedErrorMessage } from '../../../shared/flash_messages';
 
 import { Loading } from '../../../shared/loading';
+import { EngineOverview } from '../engine_overview';
 
 import { EngineRouter } from './';
 
@@ -71,7 +72,7 @@ describe('EngineRouter', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="EngineOverviewTODO"]')).toHaveLength(1);
+    expect(wrapper.find(EngineOverview)).toHaveLength(1);
   });
 
   it('renders an analytics view', () => {

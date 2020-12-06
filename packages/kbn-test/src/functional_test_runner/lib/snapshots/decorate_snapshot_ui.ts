@@ -24,7 +24,6 @@ import {
   addSerializer,
 } from 'jest-snapshot';
 import path from 'path';
-import expect from '@kbn/expect';
 import prettier from 'prettier';
 import babelTraverse from '@babel/traverse';
 import { flatten, once } from 'lodash';
@@ -197,6 +196,7 @@ function getSnapshotState(file: string, test: Test, updateSnapshots: boolean) {
     path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
     {
       updateSnapshot: updateSnapshots ? 'all' : 'new',
+      // @ts-expect-error
       getPrettier: () => prettier,
       getBabelTraverse: () => babelTraverse,
     }
@@ -227,7 +227,9 @@ function expectToMatchSnapshot(snapshotContext: SnapshotContext, received: any) 
   const matcher = toMatchSnapshot.bind(snapshotContext as any);
   const result = matcher(received);
 
-  expect(result.pass).to.eql(true, result.message());
+  if (!result.pass) {
+    throw new Error(result.message());
+  }
 }
 
 function expectToMatchInlineSnapshot(
@@ -239,5 +241,7 @@ function expectToMatchInlineSnapshot(
 
   const result = arguments.length === 2 ? matcher(received) : matcher(received, _actual);
 
-  expect(result.pass).to.eql(true, result.message());
+  if (!result.pass) {
+    throw new Error(result.message());
+  }
 }

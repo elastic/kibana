@@ -50,12 +50,7 @@ export function createApi() {
             ? routeOrFactoryFn(core)
             : routeOrFactoryFn;
 
-        const {
-          params,
-          endpoint,
-          options = { tags: ['access:apm'] },
-          handler,
-        } = route;
+        const { params, endpoint, options, handler } = route;
 
         const [method, path] = endpoint.split(' ');
 

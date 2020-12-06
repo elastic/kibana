@@ -10,9 +10,10 @@ import { DataProvider } from '../../components/timeline/data_providers/data_prov
 import { Sort } from '../../components/timeline/body/sort';
 import { PinnedEvent } from '../../../graphql/types';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import { SerializedFilterQuery } from '../../../common/store/types';
 import type {
   TimelineEventsType,
+  TimelineExpandedEvent,
   TimelineType,
   TimelineStatus,
   RowRendererId,
@@ -42,7 +43,16 @@ export interface ColumnHeaderOptions {
   width: number;
 }
 
+export enum TimelineTabs {
+  query = 'query',
+  graph = 'graph',
+  notes = 'notes',
+  pinned = 'pinned',
+}
+
 export interface TimelineModel {
+  /** The selected tab to displayed in the timeline */
+  activeTab: TimelineTabs;
   /** The columns displayed in the timeline */
   columns: ColumnHeaderOptions[];
   /** The sources of the event data shown in the timeline */
@@ -57,6 +67,7 @@ export interface TimelineModel {
   eventIdToNoteIds: Record<string, string[]>;
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
+  expandedEvent: TimelineExpandedEvent;
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
@@ -86,7 +97,6 @@ export interface TimelineModel {
   /** the KQL query in the KQL bar */
   kqlQuery: {
     filterQuery: SerializedFilterQuery | null;
-    filterQueryDraft: KueryFilterQuery | null;
   };
   /** Title */
   title: string;
@@ -117,8 +127,8 @@ export interface TimelineModel {
   sort: Sort;
   /** status: active | draft */
   status: TimelineStatus;
-  /** Persists the UI state (width) of the timeline flyover */
-  width: number;
+  /** updated saved object timestamp */
+  updated?: number;
   /** timeline is saving */
   isSaving: boolean;
   isLoading: boolean;
@@ -128,6 +138,7 @@ export interface TimelineModel {
 export type SubsetTimelineModel = Readonly<
   Pick<
     TimelineModel,
+    | 'activeTab'
     | 'columns'
     | 'dataProviders'
     | 'deletedEventIds'
@@ -135,6 +146,7 @@ export type SubsetTimelineModel = Readonly<
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
+    | 'expandedEvent'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
@@ -159,7 +171,6 @@ export type SubsetTimelineModel = Readonly<
     | 'show'
     | 'showCheckboxes'
     | 'sort'
-    | 'width'
     | 'isSaving'
     | 'isLoading'
     | 'savedObjectId'
@@ -169,6 +180,7 @@ export type SubsetTimelineModel = Readonly<
 >;
 
 export interface TimelineUrl {
+  activeTab?: TimelineTabs;
   id: string;
   isOpen: boolean;
   graphEventId?: string;

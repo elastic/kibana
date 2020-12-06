@@ -30,6 +30,7 @@ interface Props {
   fieldMapping?: FieldMapping;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
+  className?: string;
 }
 
 export function FieldName({
@@ -37,6 +38,7 @@ export function FieldName({
   fieldMapping,
   fieldType,
   fieldIconProps,
+  className,
   scripted = false,
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
@@ -45,7 +47,7 @@ export function FieldName({
   const tooltip = displayName !== fieldName ? `${fieldName} (${displayName})` : fieldName;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexGroup className={className} alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <FieldIcon type={fieldType} label={typeName} scripted={scripted} {...fieldIconProps} />
       </EuiFlexItem>

@@ -7,8 +7,6 @@
 import { EuiButtonIcon, EuiOverlayMask, EuiModal, EuiToolTip } from '@elastic/eui';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { timelineActions } from '../../../store/timeline';
 import { NOTES_PANEL_WIDTH } from '../properties/notes_size';
 
 import { TimelineTitleAndDescription } from './title_and_description';
@@ -25,26 +23,6 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
     const onToggleSaveTimeline = useCallback(() => {
       setShowSaveTimelineOverlay((prevShowSaveTimelineOverlay) => !prevShowSaveTimelineOverlay);
     }, [setShowSaveTimelineOverlay]);
-
-    const dispatch = useDispatch();
-    const updateTitle = useCallback(
-      ({ id, title, disableAutoSave }: { id: string; title: string; disableAutoSave?: boolean }) =>
-        dispatch(timelineActions.updateTitle({ id, title, disableAutoSave })),
-      [dispatch]
-    );
-
-    const updateDescription = useCallback(
-      ({
-        id,
-        description,
-        disableAutoSave,
-      }: {
-        id: string;
-        description: string;
-        disableAutoSave?: boolean;
-      }) => dispatch(timelineActions.updateDescription({ id, description, disableAutoSave })),
-      [dispatch]
-    );
 
     const saveTimelineButtonIcon = useMemo(
       () => (
@@ -70,8 +48,6 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
             <TimelineTitleAndDescription
               timelineId={timelineId}
               toggleSaveTimeline={onToggleSaveTimeline}
-              updateTitle={updateTitle}
-              updateDescription={updateDescription}
             />
           </EuiModal>
         </EuiOverlayMask>

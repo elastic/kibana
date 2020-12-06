@@ -39,6 +39,12 @@ export const backgroundSessionMapping: SavedObjectsType = {
       status: {
         type: 'keyword',
       },
+      appId: {
+        type: 'keyword',
+      },
+      urlGeneratorId: {
+        type: 'keyword',
+      },
       initialState: {
         type: 'object',
         enabled: false,
