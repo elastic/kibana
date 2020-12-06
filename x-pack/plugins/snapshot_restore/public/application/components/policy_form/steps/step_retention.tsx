@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiFieldNumber,
   EuiSelect,
+  EuiCode,
 } from '@elastic/eui';
 
 import { SlmPolicyPayload } from '../../../../../common/types';
