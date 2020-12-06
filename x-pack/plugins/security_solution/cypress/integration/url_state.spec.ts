@@ -227,9 +227,7 @@ describe('url state', () => {
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
 
-    waitForTimelineChanges();
     addNameToTimeline(timeline.title);
-    waitForTimelineChanges();
 
     cy.wait('@timeline').then(({ response }) => {
       closeTimeline();
