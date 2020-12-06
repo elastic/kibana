@@ -127,10 +127,19 @@ function parseAndVerifyArchive(paths: string[]): ArchivePackage {
 
   parsed.data_streams = parseAndVerifyDataStreams(paths, parsed.name, parsed.version);
   parsed.policy_templates = parseAndVerifyPolicyTemplates(manifest);
+  // add readme if exists
+  const readme = parseAndVerifyReadme(paths, parsed.name, parsed.version);
+  if (readme) {
+    parsed.readme = readme;
+  }
 
   return parsed;
 }
-
+function parseAndVerifyReadme(paths: string[], pkgName: string, pkgVersion: string): string | null {
+  const readmeRelPath = `/docs/README.md`;
+  const readmePath = `${pkgName}-${pkgVersion}${readmeRelPath}`;
+  return paths.includes(readmePath) ? `/package/${pkgName}/${pkgVersion}${readmeRelPath}` : null;
+}
 function parseAndVerifyDataStreams(
   paths: string[],
   pkgName: string,

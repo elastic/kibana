@@ -12,7 +12,7 @@ import { maybe } from '../../common/utils/maybe';
 import { APIReturnType } from '../services/rest/createCallApmApi';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 
-type APIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups/distribution'>;
+type APIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/distribution'>;
 
 const INITIAL_DATA = {
   buckets: [] as APIResponse['buckets'],
@@ -38,7 +38,7 @@ export function useTransactionDistributionFetcher() {
       if (serviceName && start && end && transactionType && transactionName) {
         const response = await callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transaction_groups/distribution',
+            'GET /api/apm/services/{serviceName}/transactions/charts/distribution',
           params: {
             path: {
               serviceName,

@@ -21,8 +21,7 @@ export function useTransactionChartsFetcher() {
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          endpoint:
-            'GET /api/apm/services/{serviceName}/transaction_groups/charts',
+          endpoint: 'GET /api/apm/services/{serviceName}/transactions/charts',
           params: {
             path: { serviceName },
             query: {
