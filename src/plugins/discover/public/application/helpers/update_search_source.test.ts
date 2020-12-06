@@ -75,5 +75,6 @@ describe('updateSearchSource', () => {
     expect(result.getField('index')).toEqual(indexPatternMock);
     expect(result.getField('size')).toEqual(sampleSize);
     expect(result.getField('fields')).toEqual(['*']);
+    expect(result.getField('fieldsFromSource')).toBe(undefined);
   });
 });
