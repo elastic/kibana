@@ -312,23 +312,26 @@ export interface UpdateByQueryResponse {
 }
 
 /**
- * Perform an update by query operation. Returns a task ID which can be
+ * Pickup updated mappings by performing an update by query operation on all
+ * documents in the index. Returns a task ID which can be
  * tracked for progress.
  *
- * @remarks This action uses `conflicts: 'proceed'` allowing several Kibana
- * instances to run this in parralel. To reduce unecessary writes, scripts
- * should set `ctx.op = "noop"` when a document is read that was already
- * updated.
+ * @remarks When mappings are updated to add a field which previously wasn't
+ * mapped Elasticsearch won't automatically add existing documents to it's
+ * internal search indices. So search results on this field won't return any
+ * existing documents. By running an update by query we essentially refresh
+ * these the internal search indices for all existing documents.
+ * This action uses `conflicts: 'proceed'` allowing several Kibana instances
+ * to run this in parralel.
  *
  * @param client
  * @param index
  * @param targetIndex
  * @param script
  */
-export const updateByQuery = (
+export const pickupUpdatedMappings = (
   client: ElasticsearchClient,
-  index: string,
-  script?: string
+  index: string
 ): TaskEither.TaskEither<RetryableEsClientError, UpdateByQueryResponse> => () => {
   return client
     .updateByQuery({
@@ -340,17 +343,8 @@ export const updateByQuery = (
       // Update documents in batches of 100 documents at a time
       // TODO: profile performance to see how much difference `scroll_size` makes
       scroll_size: 100,
-      body: {
-        script:
-          script != null
-            ? {
-                source: script,
-                lang: 'painless',
-              }
-            : undefined,
-      },
-      // force a refresh so that we can query the updated index after the
-      // operation completes
+      // force a refresh so that we can query the updated index immediately
+      // after the operation completes
       refresh: true,
       // Create a task and return task id instead of blocking until complete
       wait_for_completion: false,
@@ -463,25 +457,26 @@ export const waitForReindexTask = flow(
   )
 );
 
-export const waitForUpdateByQueryTask = flow(
+export const waitForPickupUpdatedMappingsTask = flow(
   waitForTask,
   TaskEither.chain(
-    (res): TaskEither.TaskEither<RetryableEsClientError, 'update_by_query_succeeded'> => {
+    (res): TaskEither.TaskEither<RetryableEsClientError, 'pickup_updated_mappings_succeeded'> => {
       // We don't catch or type failures/errors because they should never
       // occur in our migration algorithm and we don't have any business logic
       // for dealing with it. If something happens we'll just crash and try
       // again.
       if (Option.isSome(res.failures)) {
         throw new Error(
-          'update_by_query failed with the following failures:\n' +
+          'pickupUpdatedMappings task failed with the following failures:\n' +
             JSON.stringify(res.failures.value)
         );
       } else if (Option.isSome(res.error)) {
         throw new Error(
-          'update_by_query failed with the following error:\n' + JSON.stringify(res.error.value)
+          'pickupUpdatedMappings task failed with the following error:\n' +
+            JSON.stringify(res.error.value)
         );
       } else {
-        return TaskEither.right('update_by_query_succeeded' as const);
+        return TaskEither.right('pickup_updated_mappings_succeeded' as const);
       }
     }
   )
@@ -657,7 +652,7 @@ export interface UpdateAndPickupMappingsResponse {
 }
 
 /**
- * Updates an index's mappings and runs an update_by_query so that the mapping
+ * Updates an index's mappings and runs an pickupUpdatedMappings task so that the mapping
  * changes are "picked up". Returns a taskId to track progress.
  *
  * @param client
@@ -689,15 +684,15 @@ export const updateAndPickupMappings = (
   return pipe(
     putMappingTask,
     TaskEither.chain((res) => {
-      return updateByQuery(client, index);
+      return pickupUpdatedMappings(client, index);
     })
   );
 };
 export interface SearchResponse {
-  hits: SavedObjectsRawDoc[];
+  outdatedDocuments: SavedObjectsRawDoc[];
 }
 
-export const search = (
+export const searchForOutdatedDocuments = (
   client: ElasticsearchClient,
   index: string,
   query: Record<string, unknown>
@@ -726,9 +721,12 @@ export const search = (
         query,
       },
       // Don't return partial results if timeouts or shard failures are
-      // encountered. Set explicitly to avoid users overriding the
-      // search.default_allow_partial_results cluster setting to false.
-      allow_partial_search_results: true,
+      // encountered. This is important because 0 search hits is interpreted as
+      // there being no more outdated documents left that require
+      // transformation. Although the default is `false`, we set this
+      // explicitly to avoid users overriding the
+      // search.default_allow_partial_results cluster setting to true.
+      allow_partial_search_results: false,
       // Improve performance by not calculating the total number of hits
       // matching the query.
       track_total_hits: false,
@@ -740,7 +738,7 @@ export const search = (
         'hits.hits._primary_term',
       ],
     })
-    .then((res) => Either.right({ hits: res.body.hits?.hits ?? [] }))
+    .then((res) => Either.right({ outdatedDocuments: res.body.hits?.hits ?? [] }))
     .catch(catchRetryableEsClientErrors);
 };
 

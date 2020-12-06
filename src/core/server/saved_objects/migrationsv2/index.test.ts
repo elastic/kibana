@@ -584,7 +584,7 @@ describe('migrations v2', () => {
         };
         test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> OUTDATED_DOCUMENTS_SEARCH', () => {
           const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.right(
-            'update_by_query_succeeded'
+            'pickup_updated_mappings_succeeded'
           );
           const newState = model(
             updateTargetMappingsWaitForTaskState,
@@ -604,11 +604,15 @@ describe('migrations v2', () => {
           target: '.kibana_7.11.0_001',
         };
         test('OUTDATED_DOCUMENTS_SEARCH -> OUTDATED_DOCUMENTS_TRANSFORM if some outdated documents were found', () => {
-          const hits = ([Symbol('raw saved object doc')] as unknown) as SavedObjectsRawDoc[];
-          const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH'> = Either.right({ hits });
+          const outdatedDocuments = ([
+            Symbol('raw saved object doc'),
+          ] as unknown) as SavedObjectsRawDoc[];
+          const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH'> = Either.right({
+            outdatedDocuments,
+          });
           const newState = model(outdatedDocumentsSourchState, res) as OutdatedDocumentsTransform;
           expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_TRANSFORM');
-          expect(newState.outdatedDocuments).toEqual(hits);
+          expect(newState.outdatedDocuments).toEqual(outdatedDocuments);
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
         });
@@ -620,7 +624,9 @@ describe('migrations v2', () => {
               versionIndexReadyActions: Option.some(aliasActions),
             },
           };
-          const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH'> = Either.right({ hits: [] });
+          const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH'> = Either.right({
+            outdatedDocuments: [],
+          });
           const newState = model(
             outdatedDocumentsSourchStateWithSomeVersionIndexReadyActions,
             res
@@ -631,7 +637,9 @@ describe('migrations v2', () => {
           expect(newState.retryDelay).toEqual(0);
         });
         test('OUTDATED_DOCUMENTS_SEARCH -> DONE if none outdated documents were found and none versionIndexReadyActions', () => {
-          const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH'> = Either.right({ hits: [] });
+          const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH'> = Either.right({
+            outdatedDocuments: [],
+          });
           const newState = model(outdatedDocumentsSourchState, res);
           expect(newState.controlState).toEqual('DONE');
           expect(newState.retryCount).toEqual(0);
@@ -639,14 +647,16 @@ describe('migrations v2', () => {
         });
       });
       describe('OUTDATED_DOCUMENTS_TRANSFORM', () => {
-        const hits = ([Symbol('raw saved object doc')] as unknown) as SavedObjectsRawDoc[];
+        const outdatedDocuments = ([
+          Symbol('raw saved object doc'),
+        ] as unknown) as SavedObjectsRawDoc[];
         const outdatedDocumentsTransformState: OutdatedDocumentsTransform = {
           ...baseState,
           controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
           versionIndexReadyActions: Option.none,
           source: Option.some('.kibana') as Option.Some<string>,
           target: '.kibana_7.11.0_001',
-          outdatedDocuments: hits,
+          outdatedDocuments,
         };
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH if action succeeds', () => {
           const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right(

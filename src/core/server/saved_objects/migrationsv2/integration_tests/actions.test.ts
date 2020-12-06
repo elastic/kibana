@@ -28,14 +28,14 @@ import {
   createIndex,
   fetchIndices,
   reindex,
-  search,
+  searchForOutdatedDocuments,
   SearchResponse,
   setWriteBlock,
   updateAliases,
   waitForReindexTask,
   ReindexResponse,
-  waitForUpdateByQueryTask,
-  updateByQuery,
+  waitForPickupUpdatedMappingsTask,
+  pickupUpdatedMappings,
   UpdateByQueryResponse,
 } from '../actions';
 import * as Either from 'fp-ts/lib/Either';
@@ -219,44 +219,44 @@ describe('migration actions', () => {
 
   describe('waitForUpdateByQueryTask', () => {
     it('rejects if there are failures', async () => {
-      const res = (await updateByQuery(
+      const res = (await pickupUpdatedMappings(
         client,
         'existing_index_with_write_block'
       )()) as Either.Right<UpdateByQueryResponse>;
 
-      const task = waitForUpdateByQueryTask(client, res.right.taskId, '10s');
+      const task = waitForPickupUpdatedMappingsTask(client, res.right.taskId, '10s');
 
       // We can't do a snapshot match because the response includes an index
       // id which ES assigns dynamically
       return expect(task()).rejects.toMatchObject({
-        message: /update_by_query failed with the following failures:\n\[\{\"index\":\"existing_index_with_write_block\"/,
+        message: /pickupUpdatedMappings task failed with the following failures:\n\[\{\"index\":\"existing_index_with_write_block\"/,
       });
     });
     it('rejects if there is an error', async () => {
-      const res = (await updateByQuery(
+      const res = (await pickupUpdatedMappings(
         client,
         'no_such_index'
       )()) as Either.Right<UpdateByQueryResponse>;
 
-      const task = waitForUpdateByQueryTask(client, res.right.taskId, '10s');
+      const task = waitForPickupUpdatedMappingsTask(client, res.right.taskId, '10s');
 
       return expect(task()).rejects.toMatchInlineSnapshot(`
-        [Error: update_by_query failed with the following error:
+        [Error: pickupUpdatedMappings task failed with the following error:
         {"type":"index_not_found_exception","reason":"no such index [no_such_index]","resource.type":"index_or_alias","resource.id":"no_such_index","index_uuid":"_na_","index":"no_such_index"}]
       `);
     });
     it('returns right when successful', async () => {
-      const res = (await updateByQuery(
+      const res = (await pickupUpdatedMappings(
         client,
         'existing_index_1'
       )()) as Either.Right<UpdateByQueryResponse>;
 
-      const task = waitForUpdateByQueryTask(client, res.right.taskId, '10s');
+      const task = waitForPickupUpdatedMappingsTask(client, res.right.taskId, '10s');
 
       return expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
-          "right": "update_by_query_succeeded",
+          "right": "pickup_updated_mappings_succeeded",
         }
       `);
     });
@@ -428,11 +428,11 @@ describe('migration actions', () => {
               `);
     });
     it('returns right even if there were some version_conflict_engine_exception', async () => {
-      const existingDocs = ((await search(
+      const existingDocs = ((await searchForOutdatedDocuments(
         client,
         'existing_index_1',
         undefined as any
-      )()) as Either.Right<SearchResponse>).right.hits;
+      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
 
       const task = bulkIndex(client, 'existing_index_1', [
         ...existingDocs,

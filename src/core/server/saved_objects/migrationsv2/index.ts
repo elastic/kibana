@@ -637,7 +637,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     return stateP;
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
     const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isRight(res) && res.right === 'update_by_query_succeeded') {
+    if (Either.isRight(res) && res.right === 'pickup_updated_mappings_succeeded') {
       return {
         ...stateP,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH',
@@ -652,11 +652,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res)) {
       // If outdated documents were found, transform them
-      if (res.right.hits.length > 0) {
+      if (res.right.outdatedDocuments.length > 0) {
         return {
           ...stateP,
           controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
-          outdatedDocuments: res.right.hits,
+          outdatedDocuments: res.right.outdatedDocuments,
         };
       } else {
         // If there are no more results we have transformed all outdated
@@ -719,9 +719,9 @@ export const nextActionMap = (
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
       Actions.updateAndPickupMappings(client, state.target, state.targetMappings),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
-      Actions.waitForUpdateByQueryTask(client, state.updateTargetMappingsTaskId, '60s'),
+      Actions.waitForPickupUpdatedMappingsTask(client, state.updateTargetMappingsTaskId, '60s'),
     OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>
-      Actions.search(client, state.target, state.outdatedDocumentsQuery),
+      Actions.searchForOutdatedDocuments(client, state.target, state.outdatedDocumentsQuery),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
       pipe(
         TaskEither.tryCatch(
