@@ -31,12 +31,7 @@ import { openAllHosts } from '../tasks/hosts/main';
 import { waitForIpsTableToBeLoaded } from '../tasks/network/flows';
 import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../tasks/security_header';
 import { openTimelineUsingToggle } from '../tasks/security_main';
-import {
-  addNameToTimeline,
-  closeTimeline,
-  populateTimeline,
-  waitForTimelineChanges,
-} from '../tasks/timeline';
+import { addNameToTimeline, closeTimeline, populateTimeline } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../urls/state';
