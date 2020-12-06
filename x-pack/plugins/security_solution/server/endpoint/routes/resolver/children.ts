@@ -6,6 +6,7 @@
 
 import { RequestHandler, Logger } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
+import { eventsIndexPattern, alertsIndexPattern } from '../../../../common/endpoint/constants';
 import { validateChildren } from '../../../../common/endpoint/schema/resolver';
 import { Fetcher } from './utils/fetch';
 import { EndpointAppContext } from '../../types';
@@ -17,17 +18,14 @@ export function handleChildren(
   return async (context, req, res) => {
     const {
       params: { id },
-      query: { children, generations, afterChild, legacyEndpointID: endpointID },
+      query: { children, afterChild, legacyEndpointID: endpointID },
     } = req;
     try {
-      const indexRetriever = endpointAppContext.service.getIndexPatternRetriever();
-      const indexPattern = await indexRetriever.getEventIndexPattern(context);
-
       const client = context.core.elasticsearch.legacy.client;
-      const fetcher = new Fetcher(client, id, indexPattern, endpointID);
+      const fetcher = new Fetcher(client, id, eventsIndexPattern, alertsIndexPattern, endpointID);
 
       return res.ok({
-        body: await fetcher.children(children, generations, afterChild),
+        body: await fetcher.children(children, afterChild),
       });
     } catch (err) {
       log.warn(err);

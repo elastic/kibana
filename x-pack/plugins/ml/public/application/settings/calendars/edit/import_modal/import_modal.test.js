@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ImportModal } from './import_modal';
 
@@ -51,7 +51,7 @@ describe('ImportModal', () => {
     instance.setState(testState);
     wrapper.update();
     expect(wrapper.state('selectedEvents').length).toBe(2);
-    const deleteButton = wrapper.find('[data-test-subj="mlEventDelete"]');
+    const deleteButton = wrapper.find('[data-test-subj="mlCalendarEventDeleteButton"]');
     const button = deleteButton.find('EuiButtonEmpty').first();
     button.simulate('click');
 

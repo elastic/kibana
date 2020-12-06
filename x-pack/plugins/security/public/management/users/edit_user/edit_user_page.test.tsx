@@ -5,8 +5,7 @@
  */
 
 import { act } from '@testing-library/react';
-import { ScopedHistory } from 'kibana/public';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { EditUserPage } from './edit_user_page';
 import React from 'react';
 import { User, Role } from '../../../../common/model';
@@ -16,7 +15,7 @@ import { mockAuthenticatedUser } from '../../../../common/model/authenticated_us
 import { securityMock } from '../../../mocks';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 
 const createUser = (username: string, roles = ['idk', 'something']) => {
   const user: User = {
@@ -104,7 +103,7 @@ function expectMissingSaveButton(wrapper: ReactWrapper<any, any>) {
 }
 
 describe('EditUserPage', () => {
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const history = scopedHistoryMock.create();
 
   it('allows reserved users to be viewed', async () => {
     const user = createUser('reserved_user');

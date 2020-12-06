@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { shallow } from 'enzyme';
+
+import '../../mock/match_media';
 import {
   getRowItemDraggables,
   getRowItemOverflow,
   getRowItemDraggable,
   OverflowFieldComponent,
 } from './helpers';
-import React from 'react';
-import { shallow } from 'enzyme';
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
 import { useMountAppended } from '../../utils/use_mount_appended';
-
 describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];
   const mount = useMountAppended();

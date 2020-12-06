@@ -11,7 +11,6 @@ import {
   registerProviderActionsRoute,
   isProviderActionRegisteredRoute,
   getProviderActionsRoute,
-  getLoggerRoute,
   isIndexingEntriesRoute,
   isEventLogServiceLoggingEntriesRoute,
   isEventLogServiceEnabledRoute,
@@ -44,7 +43,7 @@ export class EventLogFixturePlugin
     core.savedObjects.registerType({
       name: 'event_log_test',
       hidden: false,
-      namespaceType: 'agnostic',
+      namespaceType: 'single',
       mappings: {
         properties: {},
       },
@@ -56,7 +55,6 @@ export class EventLogFixturePlugin
     registerProviderActionsRoute(router, eventLog, this.logger);
     isProviderActionRegisteredRoute(router, eventLog, this.logger);
     getProviderActionsRoute(router, eventLog, this.logger);
-    getLoggerRoute(router, eventLog, this.logger);
     isIndexingEntriesRoute(router, eventLog, this.logger);
     isEventLogServiceLoggingEntriesRoute(router, eventLog, this.logger);
     isEventLogServiceEnabledRoute(router, eventLog, this.logger);

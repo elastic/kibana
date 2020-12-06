@@ -67,11 +67,14 @@ export const readRulesRoute = (router: IRouter) => {
             search: rule.id,
             searchFields: ['alertId'],
           });
-          const [validated, errors] = transformValidate(
-            rule,
-            ruleActions,
-            ruleStatuses.saved_objects[0]
-          );
+          const [currentStatus] = ruleStatuses.saved_objects;
+          if (currentStatus != null && rule.executionStatus.status === 'error') {
+            currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
+            currentStatus.attributes.lastFailureAt = rule.executionStatus.lastExecutionDate.toISOString();
+            currentStatus.attributes.statusDate = rule.executionStatus.lastExecutionDate.toISOString();
+            currentStatus.attributes.status = 'failed';
+          }
+          const [validated, errors] = transformValidate(rule, ruleActions, currentStatus);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

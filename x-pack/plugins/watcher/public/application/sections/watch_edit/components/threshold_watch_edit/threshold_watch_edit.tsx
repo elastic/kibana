@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import {
   EuiButton,
@@ -480,7 +481,6 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     setAggTypePopoverOpen(false);
                   }}
                   ownFocus
-                  withTitle
                   anchorPosition="downLeft"
                 >
                   <div>
@@ -629,7 +629,6 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     setGroupByPopoverOpen(false);
                   }}
                   ownFocus
-                  withTitle
                   anchorPosition="downLeft"
                 >
                   <div>
@@ -742,7 +741,6 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     setWatchThresholdPopoverOpen(false);
                   }}
                   ownFocus
-                  withTitle
                   anchorPosition="downLeft"
                 >
                   <div>
@@ -828,7 +826,6 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     setWatchDurationPopoverOpen(false);
                   }}
                   ownFocus
-                  withTitle
                   anchorPosition="downLeft"
                 >
                   <div>
@@ -899,7 +896,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   data-test-subj="saveWatchButton"
                   type="submit"
                   iconType="check"
-                  isDisabled={hasErrors || hasActionErrors}
+                  disabled={hasErrors || hasActionErrors}
                   isLoading={isSaving}
                   onClick={async () => {
                     setIsSaving(true);

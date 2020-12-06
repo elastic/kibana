@@ -9,7 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { ConditionalToolTip } from './conditional_tooltip';
+import { first } from 'lodash';
 import { euiStyled } from '../../../../../../../observability/public';
 import {
   InfraWaffleMapBounds,
@@ -17,11 +17,14 @@ import {
   InfraWaffleMapOptions,
 } from '../../../../../lib/lib';
 import { colorFromValue } from '../../lib/color_from_value';
-import { NodeContextMenu } from './node_context_menu';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { NodeContextPopover } from '../node_details/overlay';
+
+import { NodeContextMenu } from './node_context_menu';
 
 const initialState = {
   isPopoverOpen: false,
+  isOverlayOpen: false,
 };
 
 type State = Readonly<typeof initialState>;
@@ -41,7 +44,7 @@ export const Node = class extends React.PureComponent<Props, State> {
   public render() {
     const { nodeType, node, options, squareSize, bounds, formatter, currentTime } = this.props;
     const { isPopoverOpen } = this.state;
-    const { metric } = node;
+    const metric = first(node.metrics);
     const valueMode = squareSize > 70;
     const ellipsisMode = squareSize > 30;
     const rawValue = (metric && metric.value) || 0;
@@ -51,21 +54,18 @@ export const Node = class extends React.PureComponent<Props, State> {
       defaultMessage: '{nodeName}, click to open menu',
       values: { nodeName: node.name },
     });
+
     return (
-      <NodeContextMenu
-        node={node}
-        nodeType={nodeType}
-        isPopoverOpen={isPopoverOpen}
-        closePopover={this.closePopover}
-        options={options}
-        currentTime={currentTime}
-        popoverPosition="downCenter"
-      >
-        <ConditionalToolTip
-          delay="regular"
-          hidden={isPopoverOpen}
-          position="top"
-          content={`${node.name} | ${value}`}
+      <>
+        <NodeContextMenu
+          node={node}
+          nodeType={nodeType}
+          isPopoverOpen={isPopoverOpen}
+          closePopover={this.closePopover}
+          options={options}
+          currentTime={currentTime}
+          popoverPosition="downCenter"
+          openNewOverlay={this.toggleNewOverlay}
         >
           <NodeContainer
             data-test-subj="nodeContainer"
@@ -89,13 +89,33 @@ export const Node = class extends React.PureComponent<Props, State> {
               </SquareInner>
             </SquareOuter>
           </NodeContainer>
-        </ConditionalToolTip>
-      </NodeContextMenu>
+        </NodeContextMenu>
+        <NodeContextPopover
+          node={node}
+          nodeType={nodeType}
+          isOpen={this.state.isOverlayOpen}
+          options={options}
+          currentTime={currentTime}
+          onClose={this.toggleNewOverlay}
+        />
+      </>
     );
   }
 
   private togglePopover = () => {
-    this.setState((prevState) => ({ isPopoverOpen: !prevState.isPopoverOpen }));
+    const { nodeType } = this.props;
+    if (nodeType === 'host') {
+      this.toggleNewOverlay();
+    } else {
+      this.setState((prevState) => ({ isPopoverOpen: !prevState.isPopoverOpen }));
+    }
+  };
+
+  private toggleNewOverlay = () => {
+    this.setState((prevState) => ({
+      isPopoverOpen: !prevState.isOverlayOpen === true ? false : prevState.isPopoverOpen,
+      isOverlayOpen: !prevState.isOverlayOpen,
+    }));
   };
 
   private closePopover = () => {
@@ -152,8 +172,8 @@ const ValueInner = euiStyled.button`
   border: none;
   &:focus {
     outline: none !important;
-    border: ${(params) => params.theme.eui.euiFocusRingSize} solid
-      ${(params) => params.theme.eui.euiFocusRingColor};
+    border: ${(params) => params.theme?.eui.euiFocusRingSize} solid
+      ${(params) => params.theme?.eui.euiFocusRingColor};
     box-shadow: none;
   }
 `;

@@ -37,7 +37,6 @@ export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes
       };
       fetchData();
     },
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [type, kibana.services.savedObjects]
   );
 
@@ -49,7 +48,7 @@ export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes
     const objects = await savedObjectsClient.find<SavedObjectType>({
       type,
     });
-    return objects.savedObjects.filter((o) => o.attributes.name === name).length > 0;
+    return objects.savedObjects.find((o) => o.attributes.name === name);
   };
 
   return {

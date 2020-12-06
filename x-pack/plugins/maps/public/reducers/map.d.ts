@@ -42,6 +42,8 @@ export type MapContext = {
 };
 
 export type MapSettings = {
+  autoFitToDataBounds: boolean;
+  backgroundColor: string;
   initialLocation: INITIAL_LOCATION;
   fixedLocation: {
     lat: number;

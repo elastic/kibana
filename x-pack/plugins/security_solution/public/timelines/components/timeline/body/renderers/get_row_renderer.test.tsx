@@ -8,14 +8,18 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../../../common/test_utils';
+import '../../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import { Ecs } from '../../../../../graphql/types';
+import { Ecs } from '../../../../../../common/ecs';
 import { mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
 import { rowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
+
+jest.mock('../../../../../common/components/link_to');
 
 describe('get_column_renderer', () => {
   let nonSuricata: Ecs;
@@ -72,7 +76,7 @@ describe('get_column_renderer', () => {
         <span>{row}</span>
       </TestProviders>
     );
-    expect(wrapper.text()).toContain(
+    expect(removeExternalLinkText(wrapper.text())).toContain(
       '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
     );
   });
@@ -90,7 +94,7 @@ describe('get_column_renderer', () => {
         <span>{row}</span>
       </TestProviders>
     );
-    expect(wrapper.text()).toContain(
+    expect(removeExternalLinkText(wrapper.text())).toContain(
       '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
     );
   });
@@ -108,7 +112,7 @@ describe('get_column_renderer', () => {
         <span>{row}</span>
       </TestProviders>
     );
-    expect(wrapper.text()).toContain(
+    expect(removeExternalLinkText(wrapper.text())).toContain(
       'C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'
     );
   });

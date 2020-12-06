@@ -6,12 +6,23 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['visualize', 'header', 'maps']);
+
+  const security = getService('security');
 
   describe('visualize create menu', () => {
     before(async () => {
+      await security.testUser.setRoles(
+        ['test_logstash_reader', 'global_maps_all', 'geoshape_data_reader', 'global_visualize_all'],
+        false
+      );
+
       await PageObjects.visualize.navigateToNewVisualization();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('should show maps application in create menu', async () => {
@@ -20,6 +31,7 @@ export default function ({ getPageObjects }) {
     });
 
     it('should not show legacy region map visualizion in create menu', async () => {
+      await PageObjects.visualize.clickAggBasedVisualizations();
       const hasLegecyViz = await PageObjects.visualize.hasRegionMap();
       expect(hasLegecyViz).to.equal(false);
     });
@@ -30,6 +42,7 @@ export default function ({ getPageObjects }) {
     });
 
     it('should take users to Maps application when Maps is clicked', async () => {
+      await PageObjects.visualize.goBackToGroups();
       await PageObjects.visualize.clickMapsApp();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.maps.waitForLayersToLoad();

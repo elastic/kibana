@@ -16,26 +16,29 @@ import farequoteJobCapsEmpty from './__mocks__/results/farequote_job_caps_empty.
 import cloudwatchJobCaps from './__mocks__/results/cloudwatch_rollup_job_caps.json';
 
 describe('job_service - job_caps', () => {
-  let callWithRequestNonRollupMock: jest.Mock;
-  let callWithRequestRollupMock: jest.Mock;
+  let mlClusterClientNonRollupMock: any;
+  let mlClusterClientRollupMock: any;
   let savedObjectsClientMock: any;
 
   beforeEach(() => {
-    callWithRequestNonRollupMock = jest.fn((action: string) => {
-      switch (action) {
-        case 'fieldCaps':
-          return farequoteFieldCaps;
-      }
-    });
+    const asNonRollupMock = {
+      fieldCaps: jest.fn(() => ({ body: farequoteFieldCaps })),
+    };
 
-    callWithRequestRollupMock = jest.fn((action: string) => {
-      switch (action) {
-        case 'fieldCaps':
-          return cloudwatchFieldCaps;
-        case 'ml.rollupIndexCapabilities':
-          return Promise.resolve(rollupCaps);
-      }
-    });
+    mlClusterClientNonRollupMock = {
+      asCurrentUser: asNonRollupMock,
+      asInternalUser: asNonRollupMock,
+    };
+
+    const callAsRollupMock = {
+      fieldCaps: jest.fn(() => ({ body: cloudwatchFieldCaps })),
+      rollup: { getRollupIndexCaps: jest.fn(() => Promise.resolve({ body: rollupCaps })) },
+    };
+
+    mlClusterClientRollupMock = {
+      asCurrentUser: callAsRollupMock,
+      asInternalUser: callAsRollupMock,
+    };
 
     savedObjectsClientMock = {
       async find() {
@@ -45,42 +48,38 @@ describe('job_service - job_caps', () => {
   });
 
   describe('farequote newJobCaps()', () => {
-    it('can get job caps for index pattern', async (done) => {
+    it('can get job caps for index pattern', async () => {
       const indexPattern = 'farequote-*';
       const isRollup = false;
-      const { newJobCaps } = newJobCapsProvider(callWithRequestNonRollupMock);
+      const { newJobCaps } = newJobCapsProvider(mlClusterClientNonRollupMock);
       const response = await newJobCaps(indexPattern, isRollup, savedObjectsClientMock);
       expect(response).toEqual(farequoteJobCaps);
-      done();
     });
 
-    it('can get rollup job caps for non rollup index pattern', async (done) => {
+    it('can get rollup job caps for non rollup index pattern', async () => {
       const indexPattern = 'farequote-*';
       const isRollup = true;
-      const { newJobCaps } = newJobCapsProvider(callWithRequestNonRollupMock);
+      const { newJobCaps } = newJobCapsProvider(mlClusterClientNonRollupMock);
       const response = await newJobCaps(indexPattern, isRollup, savedObjectsClientMock);
       expect(response).toEqual(farequoteJobCapsEmpty);
-      done();
     });
   });
 
   describe('cloudwatch newJobCaps()', () => {
-    it('can get rollup job caps for rollup index pattern', async (done) => {
+    it('can get rollup job caps for rollup index pattern', async () => {
       const indexPattern = 'cloud_roll_index';
       const isRollup = true;
-      const { newJobCaps } = newJobCapsProvider(callWithRequestRollupMock);
+      const { newJobCaps } = newJobCapsProvider(mlClusterClientRollupMock);
       const response = await newJobCaps(indexPattern, isRollup, savedObjectsClientMock);
       expect(response).toEqual(cloudwatchJobCaps);
-      done();
     });
 
-    it('can get non rollup job caps for rollup index pattern', async (done) => {
+    it('can get non rollup job caps for rollup index pattern', async () => {
       const indexPattern = 'cloud_roll_index';
       const isRollup = false;
-      const { newJobCaps } = newJobCapsProvider(callWithRequestRollupMock);
+      const { newJobCaps } = newJobCapsProvider(mlClusterClientRollupMock);
       const response = await newJobCaps(indexPattern, isRollup, savedObjectsClientMock);
       expect(response).not.toEqual(cloudwatchJobCaps);
-      done();
     });
   });
 });

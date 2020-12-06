@@ -5,11 +5,11 @@
  */
 
 import url from 'url';
-import { useApmPluginContext } from './useApmPluginContext';
+import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
 export function useKibanaUrl(
   /** The path to the plugin */ path: string,
-  /** The hash path */ hash: string
+  /** The hash path */ hash?: string
 ) {
   const { core } = useApmPluginContext();
   return url.format({

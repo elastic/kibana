@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { euiStyled } from '../../../../../observability/public';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
@@ -37,6 +37,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     surroundingLogsId,
     setSurroundingLogsId,
     flyoutItem,
+    flyoutError,
     isLoading,
   } = useContext(LogFlyoutState.Context);
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
@@ -57,6 +58,18 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
 
   const [, { setContextEntry }] = useContext(ViewLogInContext.Context);
 
+  const setFilter = useCallback(
+    (filter, flyoutItemId, timeKey) => {
+      applyLogFilterQuery(filter);
+      if (timeKey) {
+        jumpToTargetPosition(timeKey);
+      }
+      setSurroundingLogsId(flyoutItemId);
+      stopLiveStreaming();
+    },
+    [applyLogFilterQuery, jumpToTargetPosition, setSurroundingLogsId, stopLiveStreaming]
+  );
+
   return (
     <>
       <WithLogTextviewUrlState />
@@ -65,14 +78,10 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <PageViewLogInContext />
       {flyoutVisible ? (
         <LogEntryFlyout
-          setFilter={applyLogFilterQuery}
-          setTarget={(timeKey, flyoutItemId) => {
-            jumpToTargetPosition(timeKey);
-            setSurroundingLogsId(flyoutItemId);
-            stopLiveStreaming();
-          }}
+          setFilter={setFilter}
           setFlyoutVisibility={setFlyoutVisibility}
           flyoutItem={flyoutItem}
+          flyoutError={flyoutError}
           loading={isLoading}
         />
       ) : null}

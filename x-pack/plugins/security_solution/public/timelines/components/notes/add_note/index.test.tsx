@@ -4,38 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
+import { TestProviders } from '../../../../common/mock';
 import { AddNote } from '.';
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 describe('AddNote', () => {
   const note = 'The contents of a new note';
+  const props = {
+    associateNote: jest.fn(),
+    newNote: note,
+    onCancelAddNote: jest.fn(),
+    updateNewNote: jest.fn(),
+  };
 
   test('renders correctly', () => {
-    const wrapper = shallow(
-      <AddNote
-        associateNote={jest.fn()}
-        getNewNoteId={jest.fn()}
-        newNote={note}
-        onCancelAddNote={jest.fn()}
-        updateNewNote={jest.fn()}
-        updateNote={jest.fn()}
-      />
+    const wrapper = mount(
+      <TestProviders>
+        <AddNote {...props} />
+      </TestProviders>
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('AddNote').exists()).toBeTruthy();
   });
 
   test('it renders the Cancel button when onCancelAddNote is provided', () => {
     const wrapper = mount(
-      <AddNote
-        associateNote={jest.fn()}
-        getNewNoteId={jest.fn()}
-        newNote={note}
-        onCancelAddNote={jest.fn()}
-        updateNewNote={jest.fn()}
-        updateNote={jest.fn()}
-      />
+      <TestProviders>
+        <AddNote {...props} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="cancel"]').exists()).toEqual(true);
@@ -43,16 +50,15 @@ describe('AddNote', () => {
 
   test('it invokes onCancelAddNote when the Cancel button is clicked', () => {
     const onCancelAddNote = jest.fn();
+    const testProps = {
+      ...props,
+      onCancelAddNote,
+    };
 
     const wrapper = mount(
-      <AddNote
-        associateNote={jest.fn()}
-        getNewNoteId={jest.fn()}
-        newNote={note}
-        onCancelAddNote={onCancelAddNote}
-        updateNewNote={jest.fn()}
-        updateNote={jest.fn()}
-      />
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="cancel"]').first().simulate('click');
@@ -62,16 +68,15 @@ describe('AddNote', () => {
 
   test('it does NOT invoke associateNote when the Cancel button is clicked', () => {
     const associateNote = jest.fn();
+    const testProps = {
+      ...props,
+      associateNote,
+    };
 
     const wrapper = mount(
-      <AddNote
-        associateNote={associateNote}
-        getNewNoteId={jest.fn()}
-        newNote={note}
-        onCancelAddNote={jest.fn()}
-        updateNewNote={jest.fn()}
-        updateNote={jest.fn()}
-      />
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="cancel"]').first().simulate('click');
@@ -80,14 +85,14 @@ describe('AddNote', () => {
   });
 
   test('it does NOT render the Cancel button when onCancelAddNote is NOT provided', () => {
+    const testProps = {
+      ...props,
+      onCancelAddNote: undefined,
+    };
     const wrapper = mount(
-      <AddNote
-        associateNote={jest.fn()}
-        getNewNoteId={jest.fn()}
-        newNote={note}
-        updateNewNote={jest.fn()}
-        updateNote={jest.fn()}
-      />
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="cancel"]').exists()).toEqual(false);
@@ -95,31 +100,27 @@ describe('AddNote', () => {
 
   test('it renders the contents of the note', () => {
     const wrapper = mount(
-      <AddNote
-        associateNote={jest.fn()}
-        getNewNoteId={jest.fn()}
-        newNote={note}
-        onCancelAddNote={jest.fn()}
-        updateNewNote={jest.fn()}
-        updateNote={jest.fn()}
-      />
+      <TestProviders>
+        <AddNote {...props} />
+      </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="add-a-note"]').first().text()).toEqual(note);
+    expect(
+      wrapper.find('[data-test-subj="add-a-note"] .euiMarkdownEditorDropZone').first().text()
+    ).toEqual(note);
   });
 
   test('it invokes associateNote when the Add Note button is clicked', () => {
     const associateNote = jest.fn();
-
+    const testProps = {
+      ...props,
+      newNote: note,
+      associateNote,
+    };
     const wrapper = mount(
-      <AddNote
-        associateNote={associateNote}
-        getNewNoteId={jest.fn()}
-        newNote={note}
-        onCancelAddNote={jest.fn()}
-        updateNewNote={jest.fn()}
-        updateNote={jest.fn()}
-      />
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
@@ -127,37 +128,31 @@ describe('AddNote', () => {
     expect(associateNote).toBeCalled();
   });
 
-  test('it invokes getNewNoteId when the Add Note button is clicked', () => {
-    const getNewNoteId = jest.fn();
+  // test('it invokes getNewNoteId when the Add Note button is clicked', () => {
+  //   const getNewNoteId = jest.fn();
+  //   const testProps = {
+  //     ...props,
+  //     getNewNoteId,
+  //   };
 
-    const wrapper = mount(
-      <AddNote
-        associateNote={jest.fn()}
-        getNewNoteId={getNewNoteId}
-        newNote={note}
-        onCancelAddNote={jest.fn()}
-        updateNewNote={jest.fn()}
-        updateNote={jest.fn()}
-      />
-    );
+  //   const wrapper = mount(<AddNote {...testProps} />);
 
-    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
+  //   wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
-    expect(getNewNoteId).toBeCalled();
-  });
+  //   expect(getNewNoteId).toBeCalled();
+  // });
 
   test('it invokes updateNewNote when the Add Note button is clicked', () => {
     const updateNewNote = jest.fn();
+    const testProps = {
+      ...props,
+      updateNewNote,
+    };
 
     const wrapper = mount(
-      <AddNote
-        associateNote={jest.fn()}
-        getNewNoteId={jest.fn()}
-        newNote={note}
-        onCancelAddNote={jest.fn()}
-        updateNewNote={updateNewNote}
-        updateNote={jest.fn()}
-      />
+      <TestProviders>
+        <AddNote {...testProps} />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
@@ -166,57 +161,14 @@ describe('AddNote', () => {
   });
 
   test('it invokes updateNote when the Add Note button is clicked', () => {
-    const updateNote = jest.fn();
-
     const wrapper = mount(
-      <AddNote
-        associateNote={jest.fn()}
-        getNewNoteId={jest.fn()}
-        newNote={note}
-        onCancelAddNote={jest.fn()}
-        updateNewNote={jest.fn()}
-        updateNote={updateNote}
-      />
+      <TestProviders>
+        <AddNote {...props} />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
-    expect(updateNote).toBeCalled();
-  });
-
-  test('it does NOT display the markdown formatting hint when a note has NOT been entered', () => {
-    const wrapper = mount(
-      <AddNote
-        associateNote={jest.fn()}
-        getNewNoteId={jest.fn()}
-        newNote={''}
-        onCancelAddNote={jest.fn()}
-        updateNewNote={jest.fn()}
-        updateNote={jest.fn()}
-      />
-    );
-
-    expect(wrapper.find('[data-test-subj="markdown-hint"]').first()).toHaveStyleRule(
-      'visibility',
-      'hidden'
-    );
-  });
-
-  test('it displays the markdown formatting hint when a note has been entered', () => {
-    const wrapper = mount(
-      <AddNote
-        associateNote={jest.fn()}
-        getNewNoteId={jest.fn()}
-        newNote={'We should see a formatting hint now'}
-        onCancelAddNote={jest.fn()}
-        updateNewNote={jest.fn()}
-        updateNote={jest.fn()}
-      />
-    );
-
-    expect(wrapper.find('[data-test-subj="markdown-hint"]').first()).toHaveStyleRule(
-      'visibility',
-      'inline'
-    );
+    expect(mockDispatch).toBeCalled();
   });
 });

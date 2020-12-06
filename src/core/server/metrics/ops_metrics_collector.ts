@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { Server as HapiServer } from 'hapi';
+import { Server as HapiServer } from '@hapi/hapi';
 import {
   ProcessMetricsCollector,
   OsMetricsCollector,
+  OpsMetricsCollectorOptions,
   ServerMetricsCollector,
   MetricsCollector,
 } from './collectors';
@@ -31,9 +32,9 @@ export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
   private readonly osCollector: OsMetricsCollector;
   private readonly serverCollector: ServerMetricsCollector;
 
-  constructor(server: HapiServer) {
+  constructor(server: HapiServer, opsOptions: OpsMetricsCollectorOptions) {
     this.processCollector = new ProcessMetricsCollector();
-    this.osCollector = new OsMetricsCollector();
+    this.osCollector = new OsMetricsCollector(opsOptions);
     this.serverCollector = new ServerMetricsCollector(server);
   }
 
@@ -44,6 +45,7 @@ export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
       this.serverCollector.collect(),
     ]);
     return {
+      collected_at: new Date(),
       process,
       os,
       ...server,

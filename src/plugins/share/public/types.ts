@@ -18,7 +18,8 @@
  */
 
 import { ComponentType } from 'react';
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 
 /**
  * @public
@@ -53,9 +54,10 @@ export interface ShareContext {
  * used to order the individual items in a flat list returned by all registered
  * menu providers.
  * */
-export interface ShareContextMenuPanelItem extends Omit<EuiContextMenuPanelItemDescriptor, 'name'> {
+export interface ShareContextMenuPanelItem
+  extends Omit<EuiContextMenuPanelItemDescriptorEntry, 'name'> {
   name: string; // EUI will accept a `ReactNode` for the `name` prop, but `ShareContentMenu` assumes a `string`.
-  sortOrder: number;
+  sortOrder?: number;
 }
 
 /**

@@ -8,6 +8,8 @@ import React, { Fragment } from 'react';
 import { EuiInMemoryTable, EuiButton, EuiSpacer, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIdentifier } from '../setup_mode/formatting';
+import { isSetupModeFeatureEnabled } from '../../lib/setup_mode';
+import { SetupModeFeature } from '../../../common/enums';
 
 export function EuiMonitoringTable({
   rows: items,
@@ -45,7 +47,7 @@ export function EuiMonitoringTable({
   });
 
   let footerContent = null;
-  if (setupMode && setupMode.enabled) {
+  if (setupMode && isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
     footerContent = (
       <Fragment>
         <EuiSpacer size="m" />

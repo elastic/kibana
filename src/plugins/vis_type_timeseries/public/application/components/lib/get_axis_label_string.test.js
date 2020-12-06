@@ -19,8 +19,6 @@
 
 import { getAxisLabelString } from './get_axis_label_string';
 
-jest.mock('ui/new_platform');
-
 describe('getAxisLabelString(interval)', () => {
   test('should return a valid label for 10 seconds', () => {
     expect(getAxisLabelString(10000)).toEqual('per 10 seconds');

@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { APMLink, APMLinkExtendProps } from './APMLink';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 
 interface Props extends APMLinkExtendProps {
@@ -13,11 +13,11 @@ interface Props extends APMLinkExtendProps {
   serviceNodeName: string;
 }
 
-const ServiceNodeMetricOverviewLink = ({
+function ServiceNodeMetricOverviewLink({
   serviceName,
   serviceNodeName,
   ...rest
-}: Props) => {
+}: Props) {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(
@@ -37,6 +37,6 @@ const ServiceNodeMetricOverviewLink = ({
       {...rest}
     />
   );
-};
+}
 
 export { ServiceNodeMetricOverviewLink };

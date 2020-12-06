@@ -5,6 +5,13 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
+import { PLUGIN_ID } from '../constants/app';
+import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
+
+export const apmUserMlCapabilities = {
+  canGetJobs: false,
+  canAccessML: false,
+};
 
 export const userMlCapabilities = {
   canAccessML: false,
@@ -53,6 +60,7 @@ export const adminMlCapabilities = {
 export type UserMlCapabilities = typeof userMlCapabilities;
 export type AdminMlCapabilities = typeof adminMlCapabilities;
 export type MlCapabilities = UserMlCapabilities & AdminMlCapabilities;
+export type MlCapabilitiesKey = keyof MlCapabilities;
 
 export const basicLicenseMlCapabilities = ['canAccessML', 'canFindFileStructure'] as Array<
   keyof MlCapabilities
@@ -66,18 +74,59 @@ export function getDefaultCapabilities(): MlCapabilities {
 }
 
 export function getPluginPrivileges() {
+  const apmUserMlCapabilitiesKeys = Object.keys(apmUserMlCapabilities);
   const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
   const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
-  const allMlCapabilities = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
+  const allMlCapabilitiesKeys = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
+  // TODO: include ML in base privileges for the `8.0` release: https://github.com/elastic/kibana/issues/71422
+  const savedObjects = [
+    'index-pattern',
+    'dashboard',
+    'search',
+    'visualization',
+    ML_SAVED_OBJECT_TYPE,
+  ];
+  const privilege = {
+    app: [PLUGIN_ID, 'kibana'],
+    excludeFromBasePrivileges: true,
+    management: {
+      insightsAndAlerting: ['jobsListLink'],
+    },
+    catalogue: [PLUGIN_ID],
+  };
 
   return {
-    user: {
-      ui: userMlCapabilitiesKeys,
-      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
-    },
     admin: {
-      ui: allMlCapabilities,
-      api: allMlCapabilities.map((k) => `ml:${k}`),
+      ...privilege,
+      api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
+      ui: allMlCapabilitiesKeys,
+      savedObject: {
+        all: savedObjects,
+        read: savedObjects,
+      },
+    },
+    user: {
+      ...privilege,
+      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      catalogue: [PLUGIN_ID],
+      management: { insightsAndAlerting: [] },
+      ui: userMlCapabilitiesKeys,
+      savedObject: {
+        all: [],
+        read: savedObjects,
+      },
+    },
+    apmUser: {
+      excludeFromBasePrivileges: true,
+      app: [],
+      catalogue: [],
+      savedObject: {
+        all: [],
+        read: [ML_SAVED_OBJECT_TYPE],
+      },
+      api: apmUserMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      ui: apmUserMlCapabilitiesKeys,
     },
   };
 }

@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import './_paginate.scss';
 import paginateControlsTemplate from './paginate_controls.html';
 
 export function PaginateDirectiveProvider($parse, $compile) {
@@ -75,30 +76,30 @@ export function PaginateDirectiveProvider($parse, $compile) {
       self.init = function () {
         self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
 
-        $scope.$watchMulti(['paginate.perPage', self.perPageProp, self.otherWidthGetter], function (
-          vals,
-          oldVals
-        ) {
-          const intChanges = vals[0] !== oldVals[0];
+        $scope.$watchMulti(
+          ['paginate.perPage', self.perPageProp, self.otherWidthGetter],
+          function (vals, oldVals) {
+            const intChanges = vals[0] !== oldVals[0];
 
-          if (intChanges) {
-            if (!setPerPage(self.perPage)) {
-              // if we are not able to set the external value,
-              // render now, otherwise wait for the external value
-              // to trigger the watcher again
-              self.renderList();
+            if (intChanges) {
+              if (!setPerPage(self.perPage)) {
+                // if we are not able to set the external value,
+                // render now, otherwise wait for the external value
+                // to trigger the watcher again
+                self.renderList();
+              }
+              return;
             }
-            return;
-          }
 
-          self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
-          if (self.perPage == null) {
-            self.perPage = ALL;
-            return;
-          }
+            self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
+            if (self.perPage == null) {
+              self.perPage = ALL;
+              return;
+            }
 
-          self.renderList();
-        });
+            self.renderList();
+          }
+        );
 
         $scope.$watch('page', self.changePage);
         $scope.$watchCollection(self.getList, function (list) {

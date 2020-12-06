@@ -61,7 +61,7 @@ export function getLastRecovery(req, esIndexPattern) {
     ignoreUnavailable: true,
     body: {
       _source: ['index_recovery.shards'],
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({ type: 'index_recovery', start, end, clusterUuid, metric }),
     },
   };

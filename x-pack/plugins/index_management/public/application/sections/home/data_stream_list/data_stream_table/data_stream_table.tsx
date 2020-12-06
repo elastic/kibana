@@ -4,20 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiLink,
+  EuiBadge,
+  EuiToolTip,
+} from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { DataStream } from '../../../../../../common/types';
-import { reactRouterNavigate } from '../../../../../shared_imports';
-import { encodePathForReactRouter } from '../../../../services/routing';
+import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
+import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
+import { isManagedByIngestManager } from '../../../../lib/data_streams';
+import { DataHealth } from '../../../../components';
+import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
+import { humanizeTimeStamp } from '../humanize_time_stamp';
 
 interface Props {
   dataStreams?: DataStream[];
-  reload: () => {};
+  reload: UseRequestResponse['resendRequest'];
   history: ScopedHistory;
+  includeStats: boolean;
   filters?: string;
 }
 
@@ -26,55 +38,134 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   reload,
   history,
   filters,
+  includeStats,
 }) => {
-  const columns: Array<EuiBasicTableColumn<DataStream>> = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.nameColumnTitle', {
-        defaultMessage: 'Name',
+  const [selection, setSelection] = useState<DataStream[]>([]);
+  const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
+
+  const columns: Array<EuiBasicTableColumn<DataStream>> = [];
+
+  columns.push({
+    field: 'name',
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.nameColumnTitle', {
+      defaultMessage: 'Name',
+    }),
+    truncateText: true,
+    sortable: true,
+    render: (name: DataStream['name'], dataStream: DataStream) => {
+      return (
+        <Fragment>
+          <EuiLink
+            data-test-subj="nameLink"
+            {...reactRouterNavigate(history, getDataStreamDetailsLink(name))}
+          >
+            {name}
+          </EuiLink>
+          {isManagedByIngestManager(dataStream) ? (
+            <Fragment>
+              &nbsp;
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.idxMgmt.dataStreamList.table.managedDataStreamTooltip',
+                  {
+                    defaultMessage: 'Created and managed by Fleet',
+                  }
+                )}
+              >
+                <EuiBadge color="hollow">
+                  <FormattedMessage
+                    id="xpack.idxMgmt.dataStreamList.table.managedDataStreamBadge"
+                    defaultMessage="Managed"
+                  />
+                </EuiBadge>
+              </EuiToolTip>
+            </Fragment>
+          ) : null}
+        </Fragment>
+      );
+    },
+  });
+
+  columns.push({
+    field: 'health',
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.healthColumnTitle', {
+      defaultMessage: 'Health',
+    }),
+    truncateText: true,
+    sortable: true,
+    render: (health: DataStream['health']) => {
+      return <DataHealth health={health} />;
+    },
+  });
+
+  if (includeStats) {
+    columns.push({
+      field: 'maxTimeStamp',
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnTitle', {
+        defaultMessage: 'Last updated',
+      }),
+      width: '300px',
+      truncateText: true,
+      sortable: true,
+      render: (maxTimeStamp: DataStream['maxTimeStamp']) =>
+        maxTimeStamp
+          ? humanizeTimeStamp(maxTimeStamp)
+          : i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnNoneMessage', {
+              defaultMessage: 'Never',
+            }),
+    });
+
+    columns.push({
+      field: 'storageSize',
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
+        defaultMessage: 'Storage size',
       }),
       truncateText: true,
       sortable: true,
-      // TODO: Render as a link to open the detail panel
-    },
-    {
-      field: 'indices',
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indicesColumnTitle', {
-        defaultMessage: 'Indices',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (indices: DataStream['indices'], dataStream) => (
-        <EuiLink
-          data-test-subj="indicesLink"
-          {...reactRouterNavigate(history, {
-            pathname: '/indices',
-            search: `includeHiddenIndices=true&filter=data_stream=${encodePathForReactRouter(
-              dataStream.name
-            )}`,
-          })}
-        >
-          {indices.length}
-        </EuiLink>
-      ),
-    },
-    {
-      field: 'timeStampField',
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.timeStampFieldColumnTitle', {
-        defaultMessage: 'Timestamp field',
-      }),
-      truncateText: true,
-      sortable: true,
-    },
-    {
-      field: 'generation',
-      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.generationFieldColumnTitle', {
-        defaultMessage: 'Generation',
-      }),
-      truncateText: true,
-      sortable: true,
-    },
-  ];
+    });
+  }
+
+  columns.push({
+    field: 'indices',
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indicesColumnTitle', {
+      defaultMessage: 'Indices',
+    }),
+    truncateText: true,
+    sortable: true,
+    render: (indices: DataStream['indices'], dataStream) => (
+      <EuiLink
+        data-test-subj="indicesLink"
+        {...reactRouterNavigate(history, getIndexListUri(`data_stream="${dataStream.name}"`, true))}
+      >
+        {indices.length}
+      </EuiLink>
+    ),
+  });
+
+  columns.push({
+    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionColumnTitle', {
+      defaultMessage: 'Actions',
+    }),
+    actions: [
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteText', {
+          defaultMessage: 'Delete',
+        }),
+        description: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteDescription', {
+          defaultMessage: 'Delete this data stream',
+        }),
+        icon: 'trash',
+        color: 'danger',
+        type: 'icon',
+        onClick: ({ name }: DataStream) => {
+          setDataStreamsToDelete([name]);
+        },
+        isPrimary: true,
+        'data-test-subj': 'deleteDataStream',
+        available: ({ privileges: { delete_index: deleteIndex } }: DataStream) => deleteIndex,
+      },
+    ],
+  });
 
   const pagination = {
     initialPageSize: 20,
@@ -88,12 +179,30 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     },
   } as const;
 
+  const selectionConfig = {
+    onSelectionChange: setSelection,
+  };
+
   const searchConfig = {
     query: filters,
     box: {
       incremental: true,
     },
-    toolsLeft: undefined /* TODO: Actions menu */,
+    toolsLeft:
+      selection.length > 0 &&
+      selection.every((dataStream: DataStream) => dataStream.privileges.delete_index) ? (
+        <EuiButton
+          data-test-subj="deleteDataStreamsButton"
+          onClick={() => setDataStreamsToDelete(selection.map(({ name }: DataStream) => name))}
+          color="danger"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.dataStreamList.table.deleteDataStreamsButtonLabel"
+            defaultMessage="Delete {count, plural, one {data stream} other {data streams} }"
+            values={{ count: selection.length }}
+          />
+        </EuiButton>
+      ) : undefined,
     toolsRight: [
       <EuiButton
         color="secondary"
@@ -112,6 +221,18 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
 
   return (
     <>
+      {dataStreamsToDelete && dataStreamsToDelete.length > 0 ? (
+        <DeleteDataStreamConfirmationModal
+          onClose={(data) => {
+            if (data && data.hasDeletedDataStreams) {
+              reload();
+            } else {
+              setDataStreamsToDelete([]);
+            }
+          }}
+          dataStreams={dataStreamsToDelete}
+        />
+      ) : null}
       <EuiInMemoryTable
         items={dataStreams || []}
         itemId="name"
@@ -119,6 +240,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         search={searchConfig}
         sorting={sorting}
         isSelectable={true}
+        selection={selectionConfig}
         pagination={pagination}
         rowProps={() => ({
           'data-test-subj': 'row',

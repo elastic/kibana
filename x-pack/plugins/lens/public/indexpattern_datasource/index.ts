@@ -6,9 +6,8 @@
 
 import { CoreSetup } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { getIndexPatternDatasource } from './indexpattern';
-import { renameColumns } from './rename_columns';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -19,6 +18,7 @@ export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
   data: DataPublicPluginSetup;
   editorFrame: EditorFrameSetup;
+  charts: ChartsPluginSetup;
 }
 
 export interface IndexPatternDatasourceStartPlugins {
@@ -30,18 +30,30 @@ export class IndexPatternDatasource {
 
   setup(
     core: CoreSetup<IndexPatternDatasourceStartPlugins>,
-    { expressions, editorFrame }: IndexPatternDatasourceSetupPlugins
+    { expressions, editorFrame, charts }: IndexPatternDatasourceSetupPlugins
   ) {
-    expressions.registerFunction(renameColumns);
-
-    editorFrame.registerDatasource(
-      core.getStartServices().then(([coreStart, { data }]) =>
-        getIndexPatternDatasource({
+    editorFrame.registerDatasource(async () => {
+      const {
+        getIndexPatternDatasource,
+        renameColumns,
+        formatColumn,
+        counterRate,
+        getTimeScaleFunction,
+        getSuffixFormatter,
+      } = await import('../async_services');
+      return core.getStartServices().then(([coreStart, { data }]) => {
+        data.fieldFormats.register([getSuffixFormatter(data.fieldFormats.deserialize)]);
+        expressions.registerFunction(getTimeScaleFunction(data));
+        expressions.registerFunction(counterRate);
+        expressions.registerFunction(renameColumns);
+        expressions.registerFunction(formatColumn);
+        return getIndexPatternDatasource({
           core: coreStart,
           storage: new Storage(localStorage),
           data,
-        })
-      ) as Promise<Datasource>
-    );
+          charts,
+        });
+      }) as Promise<Datasource>;
+    });
   }
 }

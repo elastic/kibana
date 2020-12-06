@@ -10,55 +10,59 @@ import { AppMountParameters, Plugin } from 'src/core/public';
 import { PluginInitializerContext } from 'kibana/public';
 
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { initAngularBootstrap } from '../../../../src/plugins/kibana_legacy/public';
+import {
+  initAngularBootstrap,
+  KibanaLegacyStart,
+} from '../../../../src/plugins/kibana_legacy/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 import { toggleNavLink } from './services/toggle_nav_link';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
+  HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { ConfigSchema } from '../config';
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 
 export interface GraphPluginSetupDependencies {
-  licensing: LicensingPluginSetup;
   home?: HomePublicPluginSetup;
 }
 
 export interface GraphPluginStartDependencies {
   navigation: NavigationStart;
+  licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
   savedObjects: SavedObjectsStart;
+  kibanaLegacy: KibanaLegacyStart;
+  home?: HomePublicPluginStart;
 }
 
 export class GraphPlugin
   implements Plugin<void, void, GraphPluginSetupDependencies, GraphPluginStartDependencies> {
-  private licensing: LicensingPluginSetup | null = null;
-
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
-  setup(
-    core: CoreSetup<GraphPluginStartDependencies>,
-    { licensing, home }: GraphPluginSetupDependencies
-  ) {
-    this.licensing = licensing;
-
+  setup(core: CoreSetup<GraphPluginStartDependencies>, { home }: GraphPluginSetupDependencies) {
     if (home) {
       home.featureCatalogue.register({
         id: 'graph',
         title: 'Graph',
+        subtitle: i18n.translate('xpack.graph.pluginSubtitle', {
+          defaultMessage: 'Reveal patterns and relationships.',
+        }),
         description: i18n.translate('xpack.graph.pluginDescription', {
           defaultMessage: 'Surface and analyze relevant relationships in your Elasticsearch data.',
         }),
         icon: 'graphApp',
         path: '/app/graph',
-        showOnHomePage: true,
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
+        solutionId: 'kibana',
+        order: 600,
       });
     }
 
@@ -70,7 +74,7 @@ export class GraphPlugin
       title: 'Graph',
       order: 6000,
       appRoute: '/app/graph',
-      euiIconType: 'graphApp',
+      euiIconType: 'logoKibana',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
@@ -81,10 +85,11 @@ export class GraphPlugin
         return renderApp({
           ...params,
           pluginInitializerContext: this.initializerContext,
-          licensing,
+          licensing: pluginsStart.licensing,
           core: coreStart,
           navigation: pluginsStart.navigation,
           data: pluginsStart.data,
+          kibanaLegacy: pluginsStart.kibanaLegacy,
           savedObjectsClient: coreStart.savedObjects.client,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
@@ -103,12 +108,13 @@ export class GraphPlugin
     });
   }
 
-  start(core: CoreStart) {
-    if (this.licensing === null) {
-      throw new Error('Start called before setup');
-    }
-    this.licensing.license$.subscribe((license) => {
-      toggleNavLink(checkLicense(license), core.chrome.navLinks);
+  start(core: CoreStart, { home, licensing }: GraphPluginStartDependencies) {
+    licensing.license$.subscribe((license) => {
+      const licenseInformation = checkLicense(license);
+      toggleNavLink(licenseInformation, core.chrome.navLinks);
+      if (home && !licenseInformation.enableAppLink) {
+        home.featureCatalogue.removeFeature('graph');
+      }
     });
   }
 

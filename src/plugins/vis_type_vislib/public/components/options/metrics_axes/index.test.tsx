@@ -21,7 +21,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { IAggConfig, IAggType } from 'src/plugins/data/public';
-import { MetricsAxisOptions } from './index';
+import MetricsAxisOptions from './index';
 import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 import { Positions } from '../../../utils/collections';
@@ -133,34 +133,6 @@ describe('MetricsAxisOptions component', () => {
 
       const updatedSeries = [{ ...chart, data: { id: agg.id, label: agg.makeLabel() } }];
       expect(setValue).toHaveBeenCalledWith(SERIES_PARAMS, updatedSeries);
-    });
-
-    it('should update visType when one seriesParam', () => {
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
-      expect(defaultProps.vis.type.type).toBe(ChartTypes.AREA);
-
-      comp.setProps({
-        stateParams: {
-          ...defaultProps.stateParams,
-          seriesParams: [{ ...chart, type: ChartTypes.LINE }],
-        },
-      });
-
-      expect(defaultProps.vis.setState).toHaveBeenLastCalledWith({ type: ChartTypes.LINE });
-    });
-
-    it('should set histogram visType when multiple seriesParam', () => {
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
-      expect(defaultProps.vis.type.type).toBe(ChartTypes.AREA);
-
-      comp.setProps({
-        stateParams: {
-          ...defaultProps.stateParams,
-          seriesParams: [chart, { ...chart, type: ChartTypes.LINE }],
-        },
-      });
-
-      expect(defaultProps.vis.setState).toHaveBeenLastCalledWith({ type: ChartTypes.HISTOGRAM });
     });
   });
 

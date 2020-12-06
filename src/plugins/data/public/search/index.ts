@@ -17,43 +17,30 @@
  * under the License.
  */
 
-export * from './aggs';
 export * from './expressions';
-export * from './tabify';
 
-export { ISearchSetup, ISearchStart, ISearchStrategy } from './types';
-
-export {
-  ISearch,
-  ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
-  ISearchGeneric,
-} from './i_search';
-
-export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
-
-export { ISyncSearchRequest, SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
-export { esSearchStrategyProvider, getEsPreference } from './es_search';
-
-export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
+export { ISearchSetup, ISearchStart, ISearchStartSearchSource, SearchEnhancements } from './types';
 
 export {
-  SearchError,
-  FetchOptions,
-  SearchRequest,
-  SearchResponse,
-  getSearchErrorType,
+  ES_SEARCH_STRATEGY,
+  EsQuerySortValue,
+  extractReferences as extractSearchSourceReferences,
   getSearchParamsFromRequest,
-} from './fetch';
-
-export {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  injectReferences as injectSearchSourceReferences,
+  ISearchGeneric,
   ISearchSource,
+  parseSearchSourceJSON,
+  SearchError,
+  SearchRequest,
   SearchSource,
   SearchSourceDependencies,
   SearchSourceFields,
-  EsQuerySortValue,
   SortDirection,
+<<<<<<< HEAD
   extractReferences as extractSearchSourceReferences,
   injectReferences as injectSearchSourceReferences,
   parseSearchSourceJSON,
@@ -61,3 +48,18 @@ export {
 
 export { SearchInterceptor, SearchEventInfo } from './search_interceptor';
 export { RequestTimeoutError } from './request_timeout_error';
+=======
+} from '../../common/search';
+export {
+  SessionService,
+  ISessionService,
+  SearchSessionInfoProvider,
+  SessionState,
+  SessionsClient,
+  ISessionsClient,
+} from './session';
+export { getEsPreference } from './es_search';
+
+export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
+export * from './errors';
+>>>>>>> 058f28ab235a661cfa4b9168e97dd55026f54146

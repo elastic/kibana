@@ -11,7 +11,7 @@ import { isRetina } from '../../../meta';
 import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,
-} from '../../../connected_components/map/mb/utils'; //todo move this implementation
+} from '../../../connected_components/mb_map/utils'; //todo move this implementation
 
 const MB_STYLE_TYPE_TO_OPACITY = {
   fill: ['fill-opacity'],
@@ -276,5 +276,13 @@ export class VectorTileLayer extends TileLayer {
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
     });
+  }
+
+  areLabelsOnTop() {
+    return !!this._descriptor.areLabelsOnTop;
+  }
+
+  supportsLabelsOnTop() {
+    return true;
   }
 }

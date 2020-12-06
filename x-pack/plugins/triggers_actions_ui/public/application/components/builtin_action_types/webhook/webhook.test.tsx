@@ -28,7 +28,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('webhook connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when hasAuth is true and connector config is valid', () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -40,8 +40,37 @@ describe('webhook connector validation', () => {
       isPreconfigured: false,
       config: {
         method: 'PUT',
-        url: 'http:\\test',
+        url: 'http://test.com',
         headers: { 'content-type': 'text' },
+        hasAuth: true,
+      },
+    } as WebhookActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      errors: {
+        url: [],
+        method: [],
+        user: [],
+        password: [],
+      },
+    });
+  });
+
+  test('connector validation succeeds when hasAuth is false and connector config is valid', () => {
+    const actionConnector = {
+      secrets: {
+        user: '',
+        password: '',
+      },
+      id: 'test',
+      actionTypeId: '.webhook',
+      name: 'webhook',
+      isPreconfigured: false,
+      config: {
+        method: 'PUT',
+        url: 'http://test.com',
+        headers: { 'content-type': 'text' },
+        hasAuth: false,
       },
     } as WebhookActionConnector;
 
@@ -65,6 +94,7 @@ describe('webhook connector validation', () => {
       name: 'webhook',
       config: {
         method: 'PUT',
+        hasAuth: true,
       },
     } as WebhookActionConnector;
 
@@ -73,7 +103,33 @@ describe('webhook connector validation', () => {
         url: ['URL is required.'],
         method: [],
         user: [],
-        password: ['Password is required.'],
+        password: ['Password is required when username is used.'],
+      },
+    });
+  });
+
+  test('connector validation fails when url in config is not valid', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.webhook',
+      name: 'webhook',
+      config: {
+        method: 'PUT',
+        url: 'invalid.url',
+        hasAuth: true,
+      },
+    } as WebhookActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      errors: {
+        url: ['URL is invalid.'],
+        method: [],
+        user: [],
+        password: [],
       },
     });
   });

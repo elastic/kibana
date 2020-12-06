@@ -19,7 +19,7 @@
 import fs from 'fs';
 import { dirname, relative, resolve } from 'path';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { Lifecycle } from './lifecycle';
 

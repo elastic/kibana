@@ -8,10 +8,14 @@
 
 import React from 'react';
 import numeral from '@elastic/numeral';
-import { NetworkHttpEdges, NetworkHttpFields, NetworkHttpItem } from '../../../graphql/types';
+import {
+  NetworkHttpEdges,
+  NetworkHttpFields,
+  NetworkHttpItem,
+} from '../../../../common/search_strategy/security_solution/network';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { IPDetailsLink } from '../../../common/components/links';
+import { NetworkDetailsLink } from '../../../common/components/links';
 import { Columns } from '../../../common/components/paginated_table';
 
 import * as i18n from './translations';
@@ -98,7 +102,7 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
             attrName: 'source.ip',
             idPrefix: escapeDataProviderId(`${tableId}-table-lastSourceIp-${path}`),
             rowItem: lastSourceIp,
-            render: () => <IPDetailsLink ip={lastSourceIp} />,
+            render: () => <NetworkDetailsLink ip={lastSourceIp} />,
           })
         : getEmptyTagValue(),
   },

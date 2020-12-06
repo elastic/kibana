@@ -10,16 +10,17 @@ import { initGetSpaceApi } from './get';
 import { initGetAllSpacesApi } from './get_all';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
-import { SpacesServiceSetup } from '../../../spaces_service/spaces_service';
+import { SpacesServiceStart } from '../../../spaces_service';
+import { UsageStatsServiceSetup } from '../../../usage_stats';
 import { initCopyToSpacesApi } from './copy_to_space';
-import { initShareAddSpacesApi } from './share_add_spaces';
-import { initShareRemoveSpacesApi } from './share_remove_spaces';
+import { initShareToSpacesApi } from './share_to_space';
 
 export interface ExternalRouteDeps {
   externalRouter: IRouter;
   getStartServices: CoreSetup['getStartServices'];
   getImportExportObjectLimit: () => number;
-  spacesService: SpacesServiceSetup;
+  getSpacesService: () => SpacesServiceStart;
+  usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
   log: Logger;
 }
 
@@ -30,6 +31,5 @@ export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   initPostSpacesApi(deps);
   initPutSpacesApi(deps);
   initCopyToSpacesApi(deps);
-  initShareAddSpacesApi(deps);
-  initShareRemoveSpacesApi(deps);
+  initShareToSpacesApi(deps);
 }

@@ -46,6 +46,7 @@ import {
 } from '../../../../kibana_react/public';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
+import { EmbeddableStateTransfer, EmbeddableOutput } from '../../../../embeddable/public';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -57,7 +58,7 @@ export interface DashboardContainerInput extends ContainerInput {
   useMargins: boolean;
   title: string;
   description?: string;
-  isEmbeddedExternally: boolean;
+  isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
@@ -77,6 +78,7 @@ export interface InheritedChildInput extends IndexSignature {
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
   id: string;
+  searchSessionId?: string;
 }
 
 export interface DashboardContainerOptions {
@@ -98,9 +100,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public renderEmpty?: undefined | (() => React.ReactNode);
 
+  private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
+
   constructor(
     initialInput: DashboardContainerInput,
     private readonly options: DashboardContainerOptions,
+    stateTransfer?: EmbeddableStateTransfer,
     parent?: Container
   ) {
     super(
@@ -111,6 +116,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       options.embeddable.getEmbeddableFactory,
       parent
     );
+    this.embeddablePanel = options.embeddable.getEmbeddablePanel(stateTransfer);
   }
 
   protected createNewPanelState<
@@ -148,35 +154,86 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       placementMethod,
       placementArgs
     );
+
     this.updateInput({
       panels: {
         ...this.input.panels,
         [placeholderPanelState.explicitInput.id]: placeholderPanelState,
       },
     });
-    newStateComplete.then((newPanelState: Partial<PanelState>) => {
-      const finalPanels = { ...this.input.panels };
-      delete finalPanels[placeholderPanelState.explicitInput.id];
-      const newPanelId = newPanelState.explicitInput?.id
-        ? newPanelState.explicitInput.id
-        : uuid.v4();
-      finalPanels[newPanelId] = {
-        ...placeholderPanelState,
+
+    // wait until the placeholder is ready, then replace it with new panel
+    // this is useful as sometimes panels can load faster than the placeholder one (i.e. by value embeddables)
+    this.untilEmbeddableLoaded(originalPanelState.explicitInput.id)
+      .then(() => newStateComplete)
+      .then((newPanelState: Partial<PanelState>) =>
+        this.replacePanel(placeholderPanelState, newPanelState)
+      );
+  }
+
+  public replacePanel(
+    previousPanelState: DashboardPanelState<EmbeddableInput>,
+    newPanelState: Partial<PanelState>,
+    generateNewId?: boolean
+  ) {
+    let panels;
+    if (generateNewId) {
+      // replace panel can be called with generateNewId in order to totally destroy and recreate the embeddable
+      panels = { ...this.input.panels };
+      delete panels[previousPanelState.explicitInput.id];
+      const newId = uuid.v4();
+      panels[newId] = {
+        ...previousPanelState,
         ...newPanelState,
         gridData: {
-          ...placeholderPanelState.gridData,
-          i: newPanelId,
+          ...previousPanelState.gridData,
+          i: newId,
         },
         explicitInput: {
           ...newPanelState.explicitInput,
-          id: newPanelId,
+          id: newId,
         },
       };
-      this.updateInput({
-        panels: finalPanels,
-        lastReloadRequestTime: new Date().getTime(),
-      });
+    } else {
+      // Because the embeddable type can change, we have to operate at the container level here
+      panels = {
+        ...this.input.panels,
+        [previousPanelState.explicitInput.id]: {
+          ...previousPanelState,
+          ...newPanelState,
+          gridData: {
+            ...previousPanelState.gridData,
+          },
+          explicitInput: {
+            ...newPanelState.explicitInput,
+            id: previousPanelState.explicitInput.id,
+          },
+        },
+      };
+    }
+
+    return this.updateInput({
+      panels,
+      lastReloadRequestTime: new Date().getTime(),
     });
+  }
+
+  public async addOrUpdateEmbeddable<
+    EEI extends EmbeddableInput = EmbeddableInput,
+    EEO extends EmbeddableOutput = EmbeddableOutput,
+    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+  >(type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
+    const idToReplace = embeddableId || explicitInput.id;
+    if (idToReplace && this.input.panels[idToReplace]) {
+      return this.replacePanel(this.input.panels[idToReplace], {
+        type,
+        explicitInput: {
+          ...explicitInput,
+          id: idToReplace,
+        },
+      });
+    }
+    return this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
   }
 
   public render(dom: HTMLElement) {
@@ -186,7 +243,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           <DashboardViewport
             renderEmpty={this.renderEmpty}
             container={this}
-            PanelComponent={this.options.embeddable.EmbeddablePanel}
+            PanelComponent={this.embeddablePanel}
           />
         </KibanaContextProvider>
       </I18nProvider>,
@@ -195,7 +252,15 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
-    const { viewMode, refreshConfig, timeRange, query, hidePanelTitles, filters } = this.input;
+    const {
+      viewMode,
+      refreshConfig,
+      timeRange,
+      query,
+      hidePanelTitles,
+      filters,
+      searchSessionId,
+    } = this.input;
     return {
       filters,
       hidePanelTitles,
@@ -204,6 +269,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       refreshConfig,
       viewMode,
       id,
+      searchSessionId,
     };
   }
 }

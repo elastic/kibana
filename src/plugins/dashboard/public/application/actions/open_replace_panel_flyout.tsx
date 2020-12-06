@@ -60,7 +60,8 @@ export async function openReplacePanelFlyout(options: {
       />
     ),
     {
-      'data-test-subj': 'replacePanelFlyout',
+      'data-test-subj': 'dashboardReplacePanel',
+      ownFocus: true,
     }
   );
 }

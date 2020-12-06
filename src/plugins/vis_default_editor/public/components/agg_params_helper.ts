@@ -26,7 +26,7 @@ import {
   IAggType,
   IndexPattern,
   IndexPatternField,
-} from 'src/plugins/data/public';
+} from '../../../data/public';
 import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { AggTypeState, AggParamsState } from './agg_params_state';
@@ -87,13 +87,13 @@ function getAggParamsToRender({
       // should be refactored in the future to provide a more general way
       // for visualization to override some agg config settings
       if (agg.type.name === 'top_hits' && param.name === 'field') {
-        const allowStrings = _.get(schema, `aggSettings[${agg.type.name}].allowStrings`, false);
+        const allowStrings = get(schema, `aggSettings[${agg.type.name}].allowStrings`, false);
         if (!allowStrings) {
           availableFields = availableFields.filter((field) => field.type === 'number');
         }
       }
       fields = filterAggTypeFields(availableFields, agg);
-      indexedFields = groupAndSortBy(fields, 'type', 'name');
+      indexedFields = groupAndSortBy(fields, 'type', 'displayName', 'name');
 
       if (fields && !indexedFields.length && index > 0) {
         // don't draw the rest of the options if there are no indexed fields and it's an extra param (index > 0).
@@ -111,7 +111,11 @@ function getAggParamsToRender({
       const aggType = agg.type.type;
       const aggName = agg.type.name;
       const aggParams = get(aggParamsMap, [aggType, aggName], {});
-      paramEditor = get(aggParams, param.name) || get(aggParamsMap, ['common', param.type]);
+      paramEditor = get(aggParams, param.name);
+    }
+
+    if (!paramEditor) {
+      paramEditor = get(aggParamsMap, ['common', param.type]);
     }
 
     // show params with an editor component

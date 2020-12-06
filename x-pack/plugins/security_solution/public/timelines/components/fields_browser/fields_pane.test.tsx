@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import '../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
@@ -32,7 +33,6 @@ describe('FieldsPane', () => {
           searchInput=""
           selectedCategoryId={selectedCategory}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
       </TestProviders>
@@ -57,7 +57,6 @@ describe('FieldsPane', () => {
           searchInput=""
           selectedCategoryId={selectedCategory}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
       </TestProviders>
@@ -82,7 +81,6 @@ describe('FieldsPane', () => {
           searchInput={searchInput}
           selectedCategoryId=""
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
       </TestProviders>
@@ -107,7 +105,6 @@ describe('FieldsPane', () => {
           searchInput={searchInput}
           selectedCategoryId=""
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
       </TestProviders>

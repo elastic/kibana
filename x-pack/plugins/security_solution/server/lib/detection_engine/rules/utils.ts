@@ -29,11 +29,29 @@ import {
   TagsOrUndefined,
   ToOrUndefined,
   ThreatOrUndefined,
+  ThresholdOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
-  ListAndOrUndefined,
+  AuthorOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  LicenseOrUndefined,
+  RiskScoreMappingOrUndefined,
+  RuleNameOverrideOrUndefined,
+  SeverityMappingOrUndefined,
+  TimestampOverrideOrUndefined,
+  EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
+import {
+  ConcurrentSearchesOrUndefined,
+  ItemsPerSearchOrUndefined,
+  ListArrayOrUndefined,
+  ThreatFiltersOrUndefined,
+  ThreatIndexOrUndefined,
+  ThreatLanguageOrUndefined,
+  ThreatMappingOrUndefined,
+  ThreatQueryOrUndefined,
+} from '../../../../common/detection_engine/schemas/types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -49,11 +67,15 @@ export const calculateInterval = (
 };
 
 export interface UpdateProperties {
+  author: AuthorOrUndefined;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
   from: FromOrUndefined;
   query: QueryOrUndefined;
   language: LanguageOrUndefined;
+  license: LicenseOrUndefined;
   savedId: SavedIdOrUndefined;
   timelineId: TimelineIdOrUndefined;
   timelineTitle: TimelineTitleOrUndefined;
@@ -64,17 +86,29 @@ export interface UpdateProperties {
   interval: IntervalOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
   riskScore: RiskScoreOrUndefined;
+  riskScoreMapping: RiskScoreMappingOrUndefined;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndexOrUndefined;
   name: NameOrUndefined;
   severity: SeverityOrUndefined;
+  severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
   threat: ThreatOrUndefined;
+  threshold: ThresholdOrUndefined;
+  threatFilters: ThreatFiltersOrUndefined;
+  threatIndex: ThreatIndexOrUndefined;
+  threatQuery: ThreatQueryOrUndefined;
+  threatMapping: ThreatMappingOrUndefined;
+  threatLanguage: ThreatLanguageOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;
   references: ReferencesOrUndefined;
   note: NoteOrUndefined;
   version: VersionOrUndefined;
-  exceptionsList: ListAndOrUndefined;
+  exceptionsList: ListArrayOrUndefined;
   anomalyThreshold: AnomalyThresholdOrUndefined;
 }
 
@@ -102,15 +136,16 @@ export const calculateVersion = (
   // the version number if only the enabled/disabled flag is being set. Likewise if we get other
   // properties we are not expecting such as updatedAt we do not to cause a version number bump
   // on that either.
-  const removedNullValues = pickBy<UpdateProperties>(
-    (value: unknown) => value != null,
-    updateProperties
-  );
+  const removedNullValues = removeUndefined(updateProperties);
   if (isEmpty(removedNullValues)) {
     return currentVersion;
   } else {
     return currentVersion + 1;
   }
+};
+
+export const removeUndefined = (obj: object) => {
+  return pickBy((value: unknown) => value != null, obj);
 };
 
 export const calculateName = ({

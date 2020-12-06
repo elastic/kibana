@@ -8,14 +8,18 @@ import uuid from 'uuid';
 import React from 'react';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
 import minimatch from 'minimatch';
-import { IndexPatternMapping, SetQuery } from './types';
+import { IndexPatternMapping } from './types';
 import { getLayerList } from './map_config';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/public';
 import {
   MapEmbeddable,
-  RenderTooltipContentParams,
   MapEmbeddableInput,
-} from '../../../../../../legacy/plugins/maps/public';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/maps/public/embeddable';
+import {
+  RenderTooltipContentParams,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/maps/public/classes/tooltips/tooltip_property';
 import * as i18n from './translations';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import {
@@ -26,6 +30,7 @@ import {
   ErrorEmbeddable,
 } from '../../../../../../../src/plugins/embeddable/public';
 import { IndexPatternSavedObject } from '../../../common/hooks/types';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 /**
  * Creates MapEmbeddable with provided initial configuration
@@ -45,9 +50,9 @@ export const createEmbeddable = async (
   filters: Filter[],
   indexPatterns: IndexPatternMapping[],
   query: Query,
-  startDate: number,
-  endDate: number,
-  setQuery: SetQuery,
+  startDate: GlobalTimeArgs['from'],
+  endDate: GlobalTimeArgs['to'],
+  setQuery: GlobalTimeArgs['setQuery'],
   portalNode: PortalNode,
   embeddableApi: EmbeddableStart
 ): Promise<MapEmbeddable | ErrorEmbeddable> => {
@@ -63,6 +68,7 @@ export const createEmbeddable = async (
 
   const input: MapEmbeddableInput = {
     title: i18n.MAP_TITLE,
+    attributes: { title: '' },
     id: uuid.v4(),
     filters,
     hidePanelTitles: true,
@@ -109,8 +115,8 @@ export const createEmbeddable = async (
 
   if (!isErrorEmbeddable(embeddableObject)) {
     embeddableObject.setRenderTooltipContent(renderTooltipContent);
-    // @ts-ignore
-    await embeddableObject.setLayerList(getLayerList(indexPatterns));
+    // @ts-expect-error
+    embeddableObject.setLayerList(getLayerList(indexPatterns));
   }
 
   // Wire up to app refresh action
@@ -123,6 +129,9 @@ export const createEmbeddable = async (
 
   return embeddableObject;
 };
+
+// These patterns are overly greedy and must be excluded when matching against Security indexes.
+const ignoredIndexPatterns = ['*', '*:*'];
 
 /**
  * Returns kibanaIndexPatterns that wildcard match at least one of siemDefaultIndices
@@ -138,9 +147,21 @@ export const findMatchingIndexPatterns = ({
   siemDefaultIndices: string[];
 }): IndexPatternSavedObject[] => {
   try {
-    return kibanaIndexPatterns.filter((kip) =>
-      siemDefaultIndices.some((sdi) => minimatch(sdi, kip.attributes.title))
-    );
+    return kibanaIndexPatterns.filter((kip) => {
+      const pattern = kip.attributes.title;
+      return (
+        !ignoredIndexPatterns.includes(pattern) &&
+        siemDefaultIndices.some((sdi) => {
+          const splitPattern = pattern.split(',') ?? [];
+          return splitPattern.length > 1
+            ? splitPattern.some((p) => {
+                const isMatch = minimatch(sdi, p);
+                return isMatch && p.charAt(0) === '-' ? false : isMatch;
+              })
+            : minimatch(sdi, pattern);
+        })
+      );
+    });
   } catch {
     return [];
   }

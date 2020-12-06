@@ -19,10 +19,11 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { mapToObject } from '@kbn/std';
+
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { InternalHttpServiceSetup } from '../http';
@@ -33,9 +34,9 @@ import {
   InternalUiSettingsServiceStart,
   UiSettingsParams,
 } from './types';
-import { mapToObject } from '../../utils/';
 import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
+import { getCoreSettings } from './settings';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -60,6 +61,8 @@ export class UiSettingsService
 
     savedObjects.registerType(uiSettingsType);
     registerRoutes(http.createRouter(''));
+    this.register(getCoreSettings());
+
     const config = await this.config$.pipe(first()).toPromise();
     this.overrides = config.overrides;
 
@@ -106,15 +109,17 @@ export class UiSettingsService
 
   private validatesDefinitions() {
     for (const [key, definition] of this.uiSettingsDefaults) {
-      if (definition.schema) {
-        definition.schema.validate(definition.value, {}, `ui settings defaults [${key}]`);
+      if (!definition.schema) {
+        throw new Error(`Validation schema is not provided for [${key}] UI Setting`);
       }
+      definition.schema.validate(definition.value, {}, `ui settings defaults [${key}]`);
     }
   }
 
   private validatesOverrides() {
     for (const [key, value] of Object.entries(this.overrides)) {
       const definition = this.uiSettingsDefaults.get(key);
+      // overrides might contain UiSettings for a disabled plugin
       if (definition?.schema) {
         definition.schema.validate(value, {}, `ui settings overrides [${key}]`);
       }

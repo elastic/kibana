@@ -21,6 +21,7 @@ import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../management/public';
@@ -36,6 +37,10 @@ interface MountParams {
 
 let allowedObjectTypes: string[] | undefined;
 
+const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
+  defaultMessage: 'Saved Objects',
+});
+
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
 const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));
 export const mountManagementSection = async ({
@@ -43,11 +48,13 @@ export const mountManagementSection = async ({
   mountParams,
   serviceRegistry,
 }: MountParams) => {
-  const [coreStart, { data }, pluginStart] = await core.getStartServices();
+  const [coreStart, { data, savedObjectsTaggingOss }, pluginStart] = await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
   if (allowedObjectTypes === undefined) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
+
+  coreStart.chrome.docTitle.change(title);
 
   const capabilities = coreStart.application.capabilities;
 
@@ -82,9 +89,11 @@ export const mountManagementSection = async ({
               <Suspense fallback={<EuiLoadingSpinner />}>
                 <SavedObjectsTablePage
                   coreStart={coreStart}
+                  taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
                   dataStart={data}
                   serviceRegistry={serviceRegistry}
                   actionRegistry={pluginStart.actions}
+                  columnRegistry={pluginStart.columns}
                   allowedTypes={allowedObjectTypes}
                   setBreadcrumbs={setBreadcrumbs}
                 />

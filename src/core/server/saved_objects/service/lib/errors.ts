@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 // 400 - badRequest
 const CODE_BAD_REQUEST = 'SavedObjectsClient/badRequest';
@@ -33,6 +33,8 @@ const CODE_REQUEST_ENTITY_TOO_LARGE = 'SavedObjectsClient/requestEntityTooLarge'
 const CODE_NOT_FOUND = 'SavedObjectsClient/notFound';
 // 409 - Conflict
 const CODE_CONFLICT = 'SavedObjectsClient/conflict';
+// 429 - Too Many Requests
+const CODE_TOO_MANY_REQUESTS = 'SavedObjectsClient/tooManyRequests';
 // 400 - Es Cannot Execute Script
 const CODE_ES_CANNOT_EXECUTE_SCRIPT = 'SavedObjectsClient/esCannotExecuteScript';
 // 503 - Es Unavailable
@@ -152,14 +154,27 @@ export class SavedObjectsErrorHelpers {
     return decorate(error, CODE_CONFLICT, 409, reason);
   }
 
-  public static createConflictError(type: string, id: string) {
+  public static createConflictError(type: string, id: string, reason?: string) {
     return SavedObjectsErrorHelpers.decorateConflictError(
-      Boom.conflict(`Saved object [${type}/${id}] conflict`)
+      Boom.conflict(`Saved object [${type}/${id}] conflict`),
+      reason
     );
   }
 
   public static isConflictError(error: Error | DecoratedError) {
     return isSavedObjectsClientError(error) && error[code] === CODE_CONFLICT;
+  }
+
+  public static decorateTooManyRequestsError(error: Error, reason?: string) {
+    return decorate(error, CODE_TOO_MANY_REQUESTS, 429, reason);
+  }
+
+  public static createTooManyRequestsError(type: string, id: string) {
+    return SavedObjectsErrorHelpers.decorateTooManyRequestsError(Boom.tooManyRequests());
+  }
+
+  public static isTooManyRequestsError(error: Error | DecoratedError) {
+    return isSavedObjectsClientError(error) && error[code] === CODE_TOO_MANY_REQUESTS;
   }
 
   public static decorateEsCannotExecuteScriptError(error: Error, reason?: string) {

@@ -4,22 +4,13 @@
 
 ## getSearchParamsFromRequest() function
 
+
 <b>Signature:</b>
 
 ```typescript
 export declare function getSearchParamsFromRequest(searchRequest: SearchRequest, dependencies: {
-    injectedMetadata: CoreStart['injectedMetadata'];
-    uiSettings: IUiSettingsClient;
-}): {
-    rest_total_hits_as_int: boolean;
-    ignore_unavailable: boolean;
-    ignore_throttled: boolean;
-    max_concurrent_shard_requests: any;
-    preference: any;
-    timeout: string | undefined;
-    index: any;
-    body: any;
-};
+    getConfig: GetConfigFn;
+}): ISearchRequestParams;
 ```
 
 ## Parameters
@@ -27,18 +18,9 @@ export declare function getSearchParamsFromRequest(searchRequest: SearchRequest,
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  searchRequest | <code>SearchRequest</code> |  |
-|  dependencies | <code>{</code><br/><code>    injectedMetadata: CoreStart['injectedMetadata'];</code><br/><code>    uiSettings: IUiSettingsClient;</code><br/><code>}</code> |  |
+|  dependencies | <code>{</code><br/><code>    getConfig: GetConfigFn;</code><br/><code>}</code> |  |
 
 <b>Returns:</b>
 
-`{
-    rest_total_hits_as_int: boolean;
-    ignore_unavailable: boolean;
-    ignore_throttled: boolean;
-    max_concurrent_shard_requests: any;
-    preference: any;
-    timeout: string | undefined;
-    index: any;
-    body: any;
-}`
+`ISearchRequestParams`
 

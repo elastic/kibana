@@ -24,22 +24,17 @@ export const factory = (): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
       },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
+      },
       logging: {
-        stdout: 'debug',
         file: 'info',
       },
-      advanced: {
-        elasticsearch: {
-          indices: {
-            control: 'control-index',
-            event: 'event-index',
-            logging: 'logging-index',
-          },
-          kernel: {
-            connect: true,
-            process: true,
-          },
-        },
+      antivirus_registration: {
+        enabled: false,
       },
     },
     mac: {
@@ -49,24 +44,16 @@ export const factory = (): PolicyConfig => {
         network: true,
       },
       malware: {
-        mode: ProtectionModes.detect,
+        mode: ProtectionModes.prevent,
+      },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
       },
       logging: {
-        stdout: 'debug',
         file: 'info',
-      },
-      advanced: {
-        elasticsearch: {
-          indices: {
-            control: 'control-index',
-            event: 'event-index',
-            logging: 'logging-index',
-          },
-          kernel: {
-            connect: true,
-            process: true,
-          },
-        },
       },
     },
     linux: {
@@ -76,22 +63,13 @@ export const factory = (): PolicyConfig => {
         network: true,
       },
       logging: {
-        stdout: 'debug',
         file: 'info',
-      },
-      advanced: {
-        elasticsearch: {
-          indices: {
-            control: 'control-index',
-            event: 'event-index',
-            logging: 'logging-index',
-          },
-          kernel: {
-            connect: true,
-            process: true,
-          },
-        },
       },
     },
   };
 };
+
+/**
+ * Reflects what string the Endpoint will use when message field is default/empty
+ */
+export const DefaultMalwareMessage = 'Elastic Security { action } { filename }';

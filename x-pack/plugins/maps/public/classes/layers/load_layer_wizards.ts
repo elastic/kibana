@@ -5,11 +5,12 @@
  */
 
 import { registerLayerWizard } from './layer_wizard_registry';
-import { uploadLayerWizardConfig } from '../sources/client_file_source';
+import { uploadLayerWizardConfig } from './file_upload_wizard';
 // @ts-ignore
 import { esDocumentsLayerWizardConfig } from '../sources/es_search_source';
 // @ts-ignore
 import { clustersLayerWizardConfig, heatmapLayerWizardConfig } from '../sources/es_geo_grid_source';
+import { geoLineLayerWizardConfig } from '../sources/es_geo_line_source';
 // @ts-ignore
 import { point2PointLayerWizardConfig } from '../sources/es_pew_pew_source';
 // @ts-ignore
@@ -25,7 +26,8 @@ import { tmsLayerWizardConfig } from '../sources/xyz_tms_source';
 import { wmsLayerWizardConfig } from '../sources/wms_source';
 import { mvtVectorSourceWizardConfig } from '../sources/mvt_single_layer_vector_source';
 import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
-import { getEnableVectorTiles } from '../../kibana_services';
+import { SecurityLayerWizardConfig } from './solution_layers/security';
+import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
 
 let registered = false;
 export function registerLayerWizards() {
@@ -36,12 +38,15 @@ export function registerLayerWizards() {
   // Registration order determines display order
   registerLayerWizard(uploadLayerWizardConfig);
   registerLayerWizard(ObservabilityLayerWizardConfig);
+  registerLayerWizard(SecurityLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(esDocumentsLayerWizardConfig);
   // @ts-ignore
+  registerLayerWizard(choroplethLayerWizardConfig);
   registerLayerWizard(clustersLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(heatmapLayerWizardConfig);
+  registerLayerWizard(geoLineLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(point2PointLayerWizardConfig);
   // @ts-ignore
@@ -56,10 +61,6 @@ export function registerLayerWizards() {
   // @ts-ignore
   registerLayerWizard(wmsLayerWizardConfig);
 
-  if (getEnableVectorTiles()) {
-    // eslint-disable-next-line no-console
-    console.warn('Vector tiles are an experimental feature and should not be used in production.');
-    registerLayerWizard(mvtVectorSourceWizardConfig);
-  }
+  registerLayerWizard(mvtVectorSourceWizardConfig);
   registered = true;
 }

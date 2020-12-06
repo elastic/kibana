@@ -17,11 +17,19 @@ import {
   addQueryFields,
   addTimelineTitle,
   addMlFields,
+  addThreatMatchFields,
+  addEqlFields,
 } from './rules_schema';
 import { exactCheck } from '../../../exact_check';
 import { foldLeftRight, getPaths } from '../../../test_utils';
 import { TypeAndTimelineOnly } from './type_timeline_only_schema';
-import { getRulesSchemaMock, getRulesMlSchemaMock } from './rules_schema.mocks';
+import {
+  getRulesSchemaMock,
+  getRulesMlSchemaMock,
+  getThreatMatchingSchemaMock,
+  getRulesEqlSchemaMock,
+} from './rules_schema.mocks';
+import { ListArray } from '../types/lists';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
@@ -592,6 +600,49 @@ describe('rules_schema', () => {
       expect(getPaths(left(message.errors))).toEqual(['invalid keys "query,language"']);
       expect(message.schema).toEqual({});
     });
+
+    test('it validates a threat_match response', () => {
+      const payload = getThreatMatchingSchemaMock();
+
+      const dependents = getDependents(payload);
+      const decoded = dependents.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getThreatMatchingSchemaMock();
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it rejects a response with threat_match properties but type of "query"', () => {
+      const payload: RulesSchema = {
+        ...getThreatMatchingSchemaMock(),
+        type: 'query',
+      };
+
+      const dependents = getDependents(payload);
+      const decoded = dependents.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([
+        'invalid keys "threat_index,["index-123"],threat_mapping,[{"entries":[{"field":"host.name","type":"mapping","value":"host.name"}]}],threat_query,threat_filters,[{"bool":{"must":[{"query_string":{"query":"host.name: linux","analyze_wildcard":true,"time_zone":"Zulu"}}],"filter":[],"should":[],"must_not":[]}}]"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it validates an eql rule response', () => {
+      const payload = getRulesEqlSchemaMock();
+
+      const dependents = getDependents(payload);
+      const decoded = dependents.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getRulesEqlSchemaMock();
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
   });
 
   describe('addSavedId', () => {
@@ -632,8 +683,18 @@ describe('rules_schema', () => {
       expect(fields.length).toEqual(2);
     });
 
+    test('should return two fields for a rule of type "threshold"', () => {
+      const fields = addQueryFields({ type: 'threshold' });
+      expect(fields.length).toEqual(2);
+    });
+
     test('should return two fields for a rule of type "saved_query"', () => {
       const fields = addQueryFields({ type: 'saved_query' });
+      expect(fields.length).toEqual(2);
+    });
+
+    test('should return two fields for a rule of type "threat_match"', () => {
+      const fields = addQueryFields({ type: 'threat_match' });
       expect(fields.length).toEqual(2);
     });
   });
@@ -648,6 +709,75 @@ describe('rules_schema', () => {
     test('should return two fields for a rule of type "machine_learning"', () => {
       const fields = addMlFields({ type: 'machine_learning' });
       expect(fields.length).toEqual(2);
+    });
+  });
+
+  describe('exceptions_list', () => {
+    test('it should validate an empty array for "exceptions_list"', () => {
+      const payload = getRulesSchemaMock();
+      payload.exceptions_list = [];
+      const decoded = rulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getRulesSchemaMock();
+      expected.exceptions_list = [];
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should NOT validate when "exceptions_list" is not expected type', () => {
+      const payload: Omit<RulesSchema, 'exceptions_list'> & {
+        exceptions_list?: string;
+      } = { ...getRulesSchemaMock(), exceptions_list: 'invalid_data' };
+
+      const decoded = rulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "invalid_data" supplied to "exceptions_list"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it should default to empty array if "exceptions_list" is undefined ', () => {
+      const payload: Omit<RulesSchema, 'exceptions_list'> & {
+        exceptions_list?: ListArray;
+      } = getRulesSchemaMock();
+      payload.exceptions_list = undefined;
+
+      const decoded = rulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual({ ...payload, exceptions_list: [] });
+    });
+  });
+
+  describe('addThreatMatchFields', () => {
+    test('should return empty array if type is not "threat_match"', () => {
+      const fields = addThreatMatchFields({ type: 'query' });
+      const expected: t.Mixed[] = [];
+      expect(fields).toEqual(expected);
+    });
+
+    test('should return 8 fields for a rule of type "threat_match"', () => {
+      const fields = addThreatMatchFields({ type: 'threat_match' });
+      expect(fields.length).toEqual(8);
+    });
+  });
+
+  describe('addEqlFields', () => {
+    test('should return empty array if type is not "eql"', () => {
+      const fields = addEqlFields({ type: 'query' });
+      const expected: t.Mixed[] = [];
+      expect(fields).toEqual(expected);
+    });
+
+    test('should return 3 fields for a rule of type "eql"', () => {
+      const fields = addEqlFields({ type: 'eql' });
+      expect(fields.length).toEqual(3);
     });
   });
 });

@@ -6,9 +6,8 @@
 
 export const getTemplateListLink = () => `/templates`;
 
-export const getTemplateDetailsLink = (name: string, isLegacy?: boolean, withHash = false) => {
-  const baseUrl = `/templates/${encodePathForReactRouter(name)}`;
-  let url = withHash ? `#${baseUrl}` : baseUrl;
+export const getTemplateDetailsLink = (name: string, isLegacy?: boolean) => {
+  let url = `/templates/${encodeURIComponent(name)}`;
   if (isLegacy) {
     url = `${url}?legacy=${isLegacy}`;
   }
@@ -16,25 +15,41 @@ export const getTemplateDetailsLink = (name: string, isLegacy?: boolean, withHas
 };
 
 export const getTemplateEditLink = (name: string, isLegacy?: boolean) => {
-  return encodeURI(`/edit_template/${encodePathForReactRouter(name)}?legacy=${isLegacy === true}`);
+  let url = `/edit_template/${encodeURIComponent(name)}`;
+  if (isLegacy) {
+    url = `${url}?legacy=true`;
+  }
+  return encodeURI(url);
 };
 
 export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
-  return encodeURI(`/clone_template/${encodePathForReactRouter(name)}?legacy=${isLegacy === true}`);
-};
-
-export const decodePathFromReactRouter = (pathname: string): string => {
-  let decodedPath;
-  try {
-    decodedPath = decodeURI(pathname);
-    decodedPath = decodeURIComponent(decodedPath);
-  } catch (_error) {
-    decodedPath = decodeURIComponent(pathname);
+  let url = `/clone_template/${encodeURIComponent(name)}`;
+  if (isLegacy) {
+    url = `${url}?legacy=true`;
   }
-  return decodeURIComponent(decodedPath);
+  return encodeURI(url);
 };
 
-// Need to add some additonal encoding/decoding logic to work with React Router
-// For background, see: https://github.com/ReactTraining/history/issues/505
-export const encodePathForReactRouter = (pathname: string): string =>
-  encodeURIComponent(encodeURIComponent(pathname));
+export const getILMPolicyPath = (policyName: string) => {
+  return `/data/index_lifecycle_management/policies/edit/${encodeURIComponent(policyName)}`;
+};
+
+export const getIndexListUri = (filter?: string, includeHiddenIndices?: boolean) => {
+  const hiddenIndicesParam =
+    typeof includeHiddenIndices !== 'undefined' ? includeHiddenIndices : false;
+  if (filter) {
+    // React router tries to decode url params but it can't because the browser partially
+    // decodes them. So we have to encode both the URL and the filter to get it all to
+    // work correctly for filters with URL unsafe characters in them.
+    return encodeURI(
+      `/indices?includeHiddenIndices=${hiddenIndicesParam}&filter=${encodeURIComponent(filter)}`
+    );
+  }
+
+  // If no filter, URI is already safe so no need to encode.
+  return '/indices';
+};
+
+export const getDataStreamDetailsLink = (name: string) => {
+  return encodeURI(`/data_streams/${encodeURIComponent(name)}`);
+};

@@ -32,10 +32,5 @@ export interface PropertySpec {
   description: string;
   value?: string;
 }
-
-export enum ViewMode {
-  EDIT = 'edit',
-  VIEW = 'view',
-}
-
+export { ViewMode } from '../../common/types';
 export { Adapters };

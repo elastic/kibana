@@ -141,8 +141,15 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       });
     }
 
+    public async waitForRefreshButtonLoaded() {
+      await testSubjects.existOrFail('~mlRefreshJobListButton', { timeout: 10 * 1000 });
+      await testSubjects.existOrFail('mlRefreshJobListButton loaded', { timeout: 30 * 1000 });
+    }
+
     public async refreshJobList() {
-      await testSubjects.click('mlRefreshJobListButton');
+      await this.waitForRefreshButtonLoaded();
+      await testSubjects.click('~mlRefreshJobListButton');
+      await this.waitForRefreshButtonLoaded();
       await this.waitForJobsToLoad();
     }
 
@@ -151,12 +158,19 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 30 * 1000 });
     }
 
-    public async filterWithSearchString(filter: string) {
+    public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
       await this.waitForJobsToLoad();
       const searchBar = await testSubjects.find('mlJobListSearchBar');
       const searchBarInput = await searchBar.findByTagName('input');
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
+
+      const rows = await this.parseJobTable();
+      const filteredRows = rows.filter((row) => row.id === filter);
+      expect(filteredRows).to.have.length(
+        expectedRowCount,
+        `Filtered AD job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
+      );
     }
 
     public async assertJobRowFields(jobId: string, expectedRow: object) {
@@ -194,7 +208,93 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       }
     }
 
-    public async clickActionsMenu(jobId: string) {
+    public async assertJobActionSingleMetricViewerButtonEnabled(
+      jobId: string,
+      expectedValue: boolean
+    ) {
+      const isEnabled = await testSubjects.isEnabled(
+        this.rowSelector(jobId, 'mlOpenJobsInSingleMetricViewerButton')
+      );
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "open in single metric viewer" job action button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertJobActionAnomalyExplorerButtonEnabled(
+      jobId: string,
+      expectedValue: boolean
+    ) {
+      const isEnabled = await testSubjects.isEnabled(
+        this.rowSelector(jobId, 'mlOpenJobsInAnomalyExplorerButton')
+      );
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "open in anomaly explorer" job action button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertJobActionsMenuButtonEnabled(jobId: string, expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled(
+        this.rowSelector(jobId, 'euiCollapsedItemActionsButton')
+      );
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected actions menu button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertJobActionStartDatafeedButtonEnabled(jobId: string, expectedValue: boolean) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      const isEnabled = await testSubjects.isEnabled('mlActionButtonStartDatafeed');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "start datafeed" action button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertJobActionCloneJobButtonEnabled(jobId: string, expectedValue: boolean) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      const isEnabled = await testSubjects.isEnabled('mlActionButtonCloneJob');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "clone job" action button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertJobActionEditJobButtonEnabled(jobId: string, expectedValue: boolean) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      const isEnabled = await testSubjects.isEnabled('mlActionButtonEditJob');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "edit job" action button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertJobActionDeleteJobButtonEnabled(jobId: string, expectedValue: boolean) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      const isEnabled = await testSubjects.isEnabled('mlActionButtonDeleteJob');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "delete job" action button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async ensureJobActionsMenuOpen(jobId: string) {
       await retry.tryForTime(30 * 1000, async () => {
         if (!(await testSubjects.exists('mlActionButtonDeleteJob'))) {
           await testSubjects.click(this.rowSelector(jobId, 'euiCollapsedItemActionsButton'));
@@ -204,13 +304,13 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async clickCloneJobAction(jobId: string) {
-      await this.clickActionsMenu(jobId);
+      await this.ensureJobActionsMenuOpen(jobId);
       await testSubjects.click('mlActionButtonCloneJob');
       await testSubjects.existOrFail('~mlPageJobWizard');
     }
 
     public async clickDeleteJobAction(jobId: string) {
-      await this.clickActionsMenu(jobId);
+      await this.ensureJobActionsMenuOpen(jobId);
       await testSubjects.click('mlActionButtonDeleteJob');
       await testSubjects.existOrFail('mlDeleteJobConfirmModal');
     }
@@ -221,13 +321,138 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async clickOpenJobInSingleMetricViewerButton(jobId: string) {
-      await testSubjects.click(`~openJobsInSingleMetricViewer-${jobId}`);
+      await testSubjects.click(this.rowSelector(jobId, 'mlOpenJobsInSingleMetricViewerButton'));
       await testSubjects.existOrFail('~mlPageSingleMetricViewer');
     }
 
     public async clickOpenJobInAnomalyExplorerButton(jobId: string) {
-      await testSubjects.click(`~openJobsInSingleAnomalyExplorer-${jobId}`);
+      await testSubjects.click(this.rowSelector(jobId, 'mlOpenJobsInAnomalyExplorerButton'));
       await testSubjects.existOrFail('~mlPageAnomalyExplorer');
+    }
+
+    public async isJobRowSelected(jobId: string): Promise<boolean> {
+      return await testSubjects.isChecked(this.rowSelector(jobId, `checkboxSelectRow-${jobId}`));
+    }
+
+    public async assertJobRowSelected(jobId: string, expectedValue: boolean) {
+      const isSelected = await this.isJobRowSelected(jobId);
+      expect(isSelected).to.eql(
+        expectedValue,
+        `Expected job row for AD job '${jobId}' to be '${
+          expectedValue ? 'selected' : 'deselected'
+        }' (got '${isSelected ? 'selected' : 'deselected'}')`
+      );
+    }
+
+    public async selectJobRow(jobId: string) {
+      if ((await this.isJobRowSelected(jobId)) === false) {
+        await testSubjects.click(this.rowSelector(jobId, `checkboxSelectRow-${jobId}`));
+      }
+
+      await this.assertJobRowSelected(jobId, true);
+      await this.assertMultiSelectActionsAreaActive();
+    }
+
+    public async deselectJobRow(jobId: string) {
+      if ((await this.isJobRowSelected(jobId)) === true) {
+        await testSubjects.click(this.rowSelector(jobId, `checkboxSelectRow-${jobId}`));
+      }
+
+      await this.assertJobRowSelected(jobId, false);
+      await this.assertMultiSelectActionsAreaInactive();
+    }
+
+    public async assertMultiSelectActionsAreaActive() {
+      await testSubjects.existOrFail('mlADJobListMultiSelectActionsArea active');
+    }
+
+    public async assertMultiSelectActionsAreaInactive() {
+      await testSubjects.existOrFail('mlADJobListMultiSelectActionsArea inactive', {
+        allowHidden: true,
+      });
+    }
+
+    public async assertMultiSelectActionSingleMetricViewerButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled(
+        '~mlADJobListMultiSelectActionsArea > mlOpenJobsInSingleMetricViewerButton'
+      );
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected AD jobs multi select "open in single metric viewer" action button to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertMultiSelectActionAnomalyExplorerButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled(
+        '~mlADJobListMultiSelectActionsArea > mlOpenJobsInAnomalyExplorerButton'
+      );
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected AD jobs multi select "open in anomaly explorer" action button to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertMultiSelectActionEditJobGroupsButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled(
+        '~mlADJobListMultiSelectActionsArea > mlADJobListMultiSelectEditJobGroupsButton'
+      );
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected AD jobs multi select "edit job groups" action button to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertMultiSelectManagementActionsButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled(
+        '~mlADJobListMultiSelectActionsArea > mlADJobListMultiSelectManagementActionsButton'
+      );
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected AD jobs multi select "management actions" button to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertMultiSelectStartDatafeedActionButtonEnabled(expectedValue: boolean) {
+      await this.ensureMultiSelectManagementActionsMenuOpen();
+      const isEnabled = await testSubjects.isEnabled(
+        'mlADJobListMultiSelectStartDatafeedActionButton'
+      );
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected AD jobs multi select "management actions" button to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertMultiSelectDeleteJobActionButtonEnabled(expectedValue: boolean) {
+      await this.ensureMultiSelectManagementActionsMenuOpen();
+      const isEnabled = await testSubjects.isEnabled('mlADJobListMultiSelectDeleteJobActionButton');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected AD jobs multi select "management actions" button to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async ensureMultiSelectManagementActionsMenuOpen() {
+      await retry.tryForTime(30 * 1000, async () => {
+        if (!(await testSubjects.exists('mlADJobListMultiSelectDeleteJobActionButton'))) {
+          await testSubjects.click('mlADJobListMultiSelectManagementActionsButton');
+          await testSubjects.existOrFail('mlADJobListMultiSelectDeleteJobActionButton', {
+            timeout: 5000,
+          });
+        }
+      });
     }
   })();
 }

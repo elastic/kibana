@@ -8,6 +8,9 @@ import { has, isString } from 'lodash/fp';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { createMapStream, createFilterStream } from '@kbn/utils';
+
+import { formatErrors } from '../../../common/format_errors';
 import { importRuleValidateTypeDependents } from '../../../common/detection_engine/schemas/request/import_rules_type_dependents';
 import {
   ImportRulesSchemaDecoded,
@@ -15,7 +18,6 @@ import {
   ImportRulesSchema,
 } from '../../../common/detection_engine/schemas/request/import_rules_schema';
 import { exactCheck } from '../../../common/exact_check';
-import { createMapStream, createFilterStream } from '../../../../../../src/legacy/utils/streams';
 import { BadRequestError } from '../../lib/detection_engine/errors/bad_request_error';
 
 export interface RulesObjectsExportResultDetails {
@@ -47,7 +49,7 @@ export const validateRules = (): Transform => {
       const decoded = importRulesSchema.decode(obj);
       const checked = exactCheck(obj, decoded);
       const onLeft = (errors: t.Errors): BadRequestError | ImportRulesSchemaDecoded => {
-        return new BadRequestError(errors.join());
+        return new BadRequestError(formatErrors(errors).join());
       };
       const onRight = (schema: ImportRulesSchema): BadRequestError | ImportRulesSchemaDecoded => {
         const validationErrors = importRuleValidateTypeDependents(schema);

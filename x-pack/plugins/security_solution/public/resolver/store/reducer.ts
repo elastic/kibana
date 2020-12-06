@@ -3,48 +3,60 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { Reducer, combineReducers } from 'redux';
-import { htmlIdGenerator } from '@elastic/eui';
-import { animateProcessIntoView } from './methods';
+import { animatePanning } from './camera/methods';
+import { layout } from './selectors';
 import { cameraReducer } from './camera/reducer';
 import { dataReducer } from './data/reducer';
-import { ResolverState, ResolverAction, ResolverUIState } from '../types';
-import { uniquePidForProcess } from '../models/process_event';
-
-/**
- * Despite the name "generator", this function is entirely determinant
- * (i.e. it will return the same html id given the same prefix 'resolverNode'
- * and nodeId)
- */
-const resolverNodeIdGenerator = htmlIdGenerator('resolverNode');
+import { ResolverAction } from './actions';
+import { ResolverState, ResolverUIState } from '../types';
+import { nodePosition } from '../models/indexed_process_tree/isometric_taxi_layout';
 
 const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
-  uiState = { activeDescendantId: null, selectedDescendantId: null },
+  state = {
+    ariaActiveDescendant: null,
+    selectedNode: null,
+  },
   action
 ) => {
-  if (action.type === 'userFocusedOnResolverNode') {
-    return {
-      ...uiState,
-      activeDescendantId: action.payload.nodeId,
+  if (action.type === 'serverReturnedResolverData') {
+    const next: ResolverUIState = {
+      ...state,
+      ariaActiveDescendant: action.payload.result.entityID,
+      selectedNode: action.payload.result.entityID,
     };
+    return next;
+  } else if (action.type === 'userFocusedOnResolverNode') {
+    const next: ResolverUIState = {
+      ...state,
+      ariaActiveDescendant: action.payload,
+    };
+    return next;
   } else if (action.type === 'userSelectedResolverNode') {
-    return {
-      ...uiState,
-      selectedDescendantId: action.payload.nodeId,
+    const next: ResolverUIState = {
+      ...state,
+      selectedNode: action.payload,
     };
-  } else if (action.type === 'userBroughtProcessIntoView') {
-    /**
-     * This action has a process payload (instead of a processId), so we use
-     * `uniquePidForProcess` and `resolverNodeIdGenerator` to resolve the determinant
-     * html id of the node being brought into view.
-     */
-    const processNodeId = resolverNodeIdGenerator(uniquePidForProcess(action.payload.process));
-    return {
-      ...uiState,
-      activeDescendantId: processNodeId,
+    return next;
+  } else if (action.type === 'userBroughtNodeIntoView') {
+    const { nodeID } = action.payload;
+    const next: ResolverUIState = {
+      ...state,
+      // Select the node. NB: Animation is handled in the reducer as well.
+      ariaActiveDescendant: nodeID,
+      selectedNode: nodeID,
     };
+    return next;
+  } else if (action.type === 'appReceivedNewExternalProperties') {
+    const next: ResolverUIState = {
+      ...state,
+      locationSearch: action.payload.locationSearch,
+      resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
+    };
+    return next;
   } else {
-    return uiState;
+    return state;
   }
 };
 
@@ -53,11 +65,21 @@ const concernReducers = combineReducers({
   data: dataReducer,
   ui: uiReducer,
 });
+const animationDuration = 1000;
 
 export const resolverReducer: Reducer<ResolverState, ResolverAction> = (state, action) => {
   const nextState = concernReducers(state, action);
-  if (action.type === 'userBroughtProcessIntoView') {
-    return animateProcessIntoView(nextState, action.payload.time, action.payload.process);
+  if (action.type === 'userBroughtNodeIntoView') {
+    const position = nodePosition(layout(nextState), action.payload.nodeID);
+    if (position) {
+      const withAnimation: ResolverState = {
+        ...nextState,
+        camera: animatePanning(nextState.camera, action.payload.time, position, animationDuration),
+      };
+      return withAnimation;
+    } else {
+      return nextState;
+    }
   } else {
     return nextState;
   }

@@ -8,21 +8,21 @@ jest.mock('../routes');
 jest.mock('../usage');
 jest.mock('../browsers');
 jest.mock('../lib/create_queue');
-jest.mock('../lib/enqueue_job');
-jest.mock('../lib/validate');
 
-import { of } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { coreMock } from 'src/core/server/mocks';
+import _ from 'lodash';
+import * as Rx from 'rxjs';
 import { ReportingConfig, ReportingCore } from '../';
+import { featuresPluginMock } from '../../../features/server/mocks';
 import {
   chromium,
   HeadlessChromiumDriverFactory,
   initializeBrowserDriverFactory,
 } from '../browsers';
-import { ReportingInternalSetup } from '../core';
-import { ReportingPlugin } from '../plugin';
-import { ReportingSetupDeps, ReportingStartDeps } from '../types';
+import { ReportingConfigType } from '../config';
+import { ReportingInternalSetup, ReportingInternalStart } from '../core';
+import { ReportingStore } from '../lib';
+import { ReportingStartDeps } from '../types';
+import { createMockLevelLogger } from './create_mock_levellogger';
 
 (initializeBrowserDriverFactory as jest.Mock<
   Promise<HeadlessChromiumDriverFactory>
@@ -30,69 +30,119 @@ import { ReportingSetupDeps, ReportingStartDeps } from '../types';
 
 (chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
-const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
+const createMockPluginSetup = (
+  mockReportingCore: ReportingCore,
+  setupMock?: any
+): ReportingInternalSetup => {
   return {
+    features: featuresPluginMock.createSetup(),
+    elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
+    basePath: { set: jest.fn() },
+    router: setupMock.router,
     security: setupMock.security,
-    licensing: {
-      license$: of({ isAvailable: true, isActive: true, type: 'basic' }),
-    } as any,
-    usageCollection: {
-      makeUsageCollector: jest.fn(),
-      registerCollector: jest.fn(),
-    } as any,
+    licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
   };
 };
 
-export const createMockConfigSchema = (overrides?: any) => ({
-  index: '.reporting',
-  kibanaServer: {
-    hostname: 'localhost',
-    port: '80',
-  },
-  capture: {
-    browser: {
-      chromium: {
-        disableSandbox: true,
-      },
+const logger = createMockLevelLogger();
+
+const createMockPluginStart = (
+  mockReportingCore: ReportingCore,
+  startMock?: any
+): ReportingInternalStart => {
+  const store = new ReportingStore(mockReportingCore, logger);
+  return {
+    browserDriverFactory: startMock.browserDriverFactory,
+    esqueue: startMock.esqueue,
+    savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
+    uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
+    store,
+  };
+};
+
+interface ReportingConfigTestType {
+  index: string;
+  encryptionKey: string;
+  queue: Partial<ReportingConfigType['queue']>;
+  kibanaServer: Partial<ReportingConfigType['kibanaServer']>;
+  csv: Partial<ReportingConfigType['csv']>;
+  capture: any;
+  server?: any;
+}
+
+export const createMockConfigSchema = (
+  overrides: Partial<ReportingConfigTestType> = {}
+): ReportingConfigTestType => {
+  // deeply merge the defaults and the provided partial schema
+  return {
+    index: '.reporting',
+    encryptionKey: 'cool-encryption-key-where-did-you-find-it',
+    ...overrides,
+    kibanaServer: {
+      hostname: 'localhost',
+      port: 80,
+      ...overrides.kibanaServer,
     },
-  },
-  ...overrides,
-});
+    capture: {
+      browser: {
+        chromium: {
+          disableSandbox: true,
+        },
+      },
+      ...overrides.capture,
+    },
+    queue: {
+      timeout: 120000,
+      ...overrides.queue,
+    },
+    csv: {
+      ...overrides.csv,
+    },
+  };
+};
+
+export const createMockConfig = (
+  reportingConfig: Partial<ReportingConfigTestType>
+): ReportingConfig => {
+  const mockConfigGet = jest.fn().mockImplementation((...keys: string[]) => {
+    return _.get(reportingConfig, keys.join('.'));
+  });
+  return {
+    get: mockConfigGet,
+    kbnConfig: { get: mockConfigGet },
+  };
+};
 
 export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
   data: startMock.data,
 });
 
-const createMockReportingPlugin = async (config: ReportingConfig): Promise<ReportingPlugin> => {
-  const mockConfigSchema = createMockConfigSchema(config);
-  const plugin = new ReportingPlugin(coreMock.createPluginInitializerContext(mockConfigSchema));
-  const setupMock = coreMock.createSetup();
-  const coreStartMock = coreMock.createStart();
-  const startMock = {
-    ...coreStartMock,
-    data: { fieldFormats: {} },
-  };
-
-  plugin.setup(setupMock, createMockSetupDeps(setupMock));
-  await plugin.setup$.pipe(first()).toPromise();
-  plugin.start(startMock, createMockStartDeps(startMock));
-  await plugin.start$.pipe(first()).toPromise();
-
-  return plugin;
-};
-
 export const createMockReportingCore = async (
   config: ReportingConfig,
-  setupDepsMock?: ReportingInternalSetup
-): Promise<ReportingCore> => {
-  config = config || {};
-  const plugin = await createMockReportingPlugin(config);
-  const core = plugin.getReportingCore();
+  setupDepsMock: ReportingInternalSetup | undefined = undefined,
+  startDepsMock: ReportingInternalStart | undefined = undefined
+) => {
+  const mockReportingCore = {
+    getConfig: () => config,
+    getElasticsearchService: () => setupDepsMock?.elasticsearch,
+  } as ReportingCore;
 
-  if (setupDepsMock) {
-    // @ts-ignore overwriting private properties
-    core.pluginSetupDeps = setupDepsMock;
+  if (!setupDepsMock) {
+    setupDepsMock = createMockPluginSetup(mockReportingCore, {});
   }
+  if (!startDepsMock) {
+    startDepsMock = createMockPluginStart(mockReportingCore, {});
+  }
+
+  config = config || {};
+  const core = new ReportingCore(logger);
+
+  core.pluginSetup(setupDepsMock);
+  core.setConfig(config);
+  await core.pluginSetsUp();
+
+  core.pluginStart(startDepsMock);
+  await core.pluginStartsUp();
 
   return core;
 };

@@ -47,7 +47,7 @@ export class DeleteRuleModal extends Component {
             title={
               <FormattedMessage
                 id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleTitle"
-                defaultMessage="Delete rule"
+                defaultMessage="Delete rule?"
               />
             }
             onCancel={this.closeModal}
@@ -66,14 +66,7 @@ export class DeleteRuleModal extends Component {
               />
             }
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleDescription"
-                defaultMessage="Are you sure you want to delete this rule?"
-              />
-            </p>
-          </EuiConfirmModal>
+          />
         </EuiOverlayMask>
       );
     }

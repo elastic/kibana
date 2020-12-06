@@ -17,13 +17,16 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Trigger } from '.';
 
 export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
 export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
   id: VALUE_CLICK_TRIGGER,
-  // This is empty string to hide title of ui_actions context menu that appears
-  // when this trigger is executed.
-  title: '',
-  description: 'Value was clicked',
+  title: i18n.translate('uiActions.triggers.valueClickTitle', {
+    defaultMessage: 'Single click',
+  }),
+  description: i18n.translate('uiActions.triggers.valueClickDescription', {
+    defaultMessage: 'A data point click on the visualization',
+  }),
 };

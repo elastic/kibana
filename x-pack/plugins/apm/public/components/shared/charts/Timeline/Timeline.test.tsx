@@ -4,15 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
-import { StickyContainer } from 'react-sticky';
-import { mockMoment, toJson } from '../../../../utils/testHelpers';
+import {
+  disableConsoleWarning,
+  mountWithTheme,
+  mockMoment,
+  toJson,
+} from '../../../../utils/testHelpers';
 import { Timeline } from '.';
 
 describe('Timeline', () => {
+  let consoleMock: jest.SpyInstance;
+
   beforeAll(() => {
     mockMoment();
+    consoleMock = disableConsoleWarning('Warning: componentWill');
+  });
+
+  afterAll(() => {
+    consoleMock.mockRestore();
   });
 
   it('should render with data', () => {
@@ -50,11 +60,7 @@ describe('Timeline', () => {
       ],
     };
 
-    const wrapper = mount(
-      <StickyContainer>
-        <Timeline {...props} />
-      </StickyContainer>
-    );
+    const wrapper = mountWithTheme(<Timeline {...props} />);
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });
@@ -73,12 +79,7 @@ describe('Timeline', () => {
       },
     };
 
-    const mountTimeline = () =>
-      mount(
-        <StickyContainer>
-          <Timeline {...props} />
-        </StickyContainer>
-      );
+    const mountTimeline = () => mountWithTheme(<Timeline {...props} />);
 
     expect(mountTimeline).not.toThrow();
   });

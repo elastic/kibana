@@ -29,20 +29,12 @@ export const LOADING = i18n.translate('xpack.securitySolution.footer.loadingLabe
   defaultMessage: 'Loading',
 });
 
-export const LOAD_MORE = i18n.translate('xpack.securitySolution.footer.loadMoreLabel', {
-  defaultMessage: 'Load more',
-});
-
 export const TOTAL_COUNT_OF_EVENTS = i18n.translate(
   'xpack.securitySolution.footer.totalCountOfEvents',
   {
-    defaultMessage: 'events match the search criteria',
+    defaultMessage: 'events',
   }
 );
-
-export const UPDATED = i18n.translate('xpack.securitySolution.footer.updated', {
-  defaultMessage: 'Updated',
-});
 
 export const AUTO_REFRESH_ACTIVE = i18n.translate(
   'xpack.securitySolution.footer.autoRefreshActiveDescription',

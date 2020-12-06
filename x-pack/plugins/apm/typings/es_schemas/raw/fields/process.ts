@@ -5,8 +5,8 @@
  */
 
 export interface Process {
-  args: string[];
+  args?: string[];
   pid: number;
-  ppid: number;
-  title: string;
+  ppid?: number;
+  title?: string;
 }

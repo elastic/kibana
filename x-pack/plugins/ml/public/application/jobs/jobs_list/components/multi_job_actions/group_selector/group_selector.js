@@ -6,6 +6,8 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -25,9 +27,7 @@ import { ml } from '../../../../../services/ml_api_service';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
-import { mlMessageBarService } from '../../../../../components/messagebar';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { getToastNotificationService } from '../../../../../services/toast_notification_service';
 
 function createSelectedGroups(jobs, groups) {
   const jobIds = jobs.map((j) => j.id);
@@ -160,7 +160,7 @@ export class GroupSelector extends Component {
           // check success of each job update
           if (resp.hasOwnProperty(jobId)) {
             if (resp[jobId].success === false) {
-              mlMessageBarService.notify.error(resp[jobId].error);
+              getToastNotificationService().displayErrorToast(resp[jobId].error);
               success = false;
             }
           }
@@ -175,7 +175,7 @@ export class GroupSelector extends Component {
         }
       })
       .catch((error) => {
-        mlMessageBarService.notify.error(error);
+        getToastNotificationService().displayErrorToast(error);
         console.error(error);
       });
   };
@@ -219,6 +219,7 @@ export class GroupSelector extends Component {
           )}
           onClick={() => this.togglePopover()}
           disabled={this.canUpdateJob === false}
+          data-test-subj="mlADJobListMultiSelectEditJobGroupsButton"
         />
       </EuiToolTip>
     );

@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 import BroadcastChannel from 'broadcast-channel';
 import { CoreSetup } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { mockSecurityOssPlugin } from '../../../../src/plugins/security_oss/public/mocks';
 import { SessionTimeout } from './session';
 import { PluginStartDependencies, SecurityPlugin } from './plugin';
 
@@ -30,16 +31,21 @@ describe('Security Plugin', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
       expect(
         plugin.setup(
-          coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<
-            PluginStartDependencies
-          >,
-          { licensing: licensingMock.createSetup() }
+          coreMock.createSetup({
+            basePath: '/some-base-path',
+          }) as CoreSetup<PluginStartDependencies>,
+          {
+            licensing: licensingMock.createSetup(),
+            securityOss: mockSecurityOssPlugin.createSetup(),
+          }
         )
       ).toEqual({
         __legacyCompat: { logoutUrl: '/some-base-path/logout', tenant: '/some-base-path' },
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
+          isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
+          getType: expect.any(Function),
           getFeatures: expect.any(Function),
           features$: expect.any(Observable),
         },
@@ -58,6 +64,7 @@ describe('Security Plugin', () => {
 
       plugin.setup(coreSetupMock as CoreSetup<PluginStartDependencies>, {
         licensing: licensingMock.createSetup(),
+        securityOss: mockSecurityOssPlugin.createSetup(),
         management: managementSetupMock,
       });
 
@@ -65,7 +72,9 @@ describe('Security Plugin', () => {
       expect(setupManagementServiceMock).toHaveBeenCalledWith({
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
+          isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
+          getType: expect.any(Function),
           getFeatures: expect.any(Function),
           features$: expect.any(Observable),
         },
@@ -81,15 +90,21 @@ describe('Security Plugin', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(
         coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
-        { licensing: licensingMock.createSetup() }
+        { licensing: licensingMock.createSetup(), securityOss: mockSecurityOssPlugin.createSetup() }
       );
 
       expect(
         plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
+          securityOss: mockSecurityOssPlugin.createStart(),
           data: {} as DataPublicPluginStart,
           features: {} as FeaturesPluginStart,
         })
-      ).toBeUndefined();
+      ).toEqual({
+        navControlService: {
+          getUserMenuLinks$: expect.any(Function),
+          addUserMenuLinks: expect.any(Function),
+        },
+      });
     });
 
     it('starts Management Service if `management` plugin is available', () => {
@@ -106,18 +121,20 @@ describe('Security Plugin', () => {
         coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
         {
           licensing: licensingMock.createSetup(),
+          securityOss: mockSecurityOssPlugin.createSetup(),
           management: managementSetupMock,
         }
       );
 
-      plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
+      const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
+      plugin.start(coreStart, {
+        securityOss: mockSecurityOssPlugin.createStart(),
         data: {} as DataPublicPluginStart,
         features: {} as FeaturesPluginStart,
         management: managementStartMock,
       });
 
       expect(startManagementServiceMock).toHaveBeenCalledTimes(1);
-      expect(startManagementServiceMock).toHaveBeenCalledWith({ management: managementStartMock });
     });
   });
 
@@ -126,7 +143,7 @@ describe('Security Plugin', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
       plugin.setup(
         coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
-        { licensing: licensingMock.createSetup() }
+        { licensing: licensingMock.createSetup(), securityOss: mockSecurityOssPlugin.createSetup() }
       );
 
       expect(() => plugin.stop()).not.toThrow();
@@ -137,10 +154,11 @@ describe('Security Plugin', () => {
 
       plugin.setup(
         coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<PluginStartDependencies>,
-        { licensing: licensingMock.createSetup() }
+        { licensing: licensingMock.createSetup(), securityOss: mockSecurityOssPlugin.createSetup() }
       );
 
       plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
+        securityOss: mockSecurityOssPlugin.createStart(),
         data: {} as DataPublicPluginStart,
         features: {} as FeaturesPluginStart,
       });

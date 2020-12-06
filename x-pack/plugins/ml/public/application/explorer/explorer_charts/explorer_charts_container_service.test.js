@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { cloneDeep } from 'lodash';
 
 import mockAnomalyChartRecords from './__mocks__/mock_anomaly_chart_records.json';
 import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';
@@ -15,7 +15,7 @@ import mockSeriesPromisesResponse from './__mocks__/mock_series_promises_respons
 //
 // 'call anomalyChangeListener with actual series config'
 // This test uses the standard mocks and uses the data as is provided via the mock files.
-// The mocked services check for values in the data (e.g. 'mock-job-id', 'farequore-2017')
+// The mocked services check for values in the data (e.g. 'mock-job-id', 'farequote-2017')
 // and return the mock data from the files.
 //
 // 'filtering should skip values of null'
@@ -24,10 +24,10 @@ import mockSeriesPromisesResponse from './__mocks__/mock_series_promises_respons
 // suitable responses from the mocked services. The mocked services check against the
 // provided alternative values and return specific modified mock responses for the test case.
 
-const mockJobConfigClone = _.cloneDeep(mockJobConfig);
+const mockJobConfigClone = cloneDeep(mockJobConfig);
 
 // adjust mock data to tests against null/0 values
-const mockMetricClone = _.cloneDeep(mockSeriesPromisesResponse[0][0]);
+const mockMetricClone = cloneDeep(mockSeriesPromisesResponse[0][0]);
 mockMetricClone.results['1486712700000'] = null;
 mockMetricClone.results['1486713600000'] = 0;
 
@@ -88,11 +88,24 @@ jest.mock('../../util/string_utils', () => ({
   },
 }));
 
-jest.mock('../legacy_utils', () => ({
-  getChartContainerWidth() {
-    return 1140;
-  },
-}));
+jest.mock('../../util/dependency_cache', () => {
+  const dateMath = require('@elastic/datemath');
+  let _time = undefined;
+  const timefilter = {
+    setTime: (time) => {
+      _time = time;
+    },
+    getActiveBounds: () => {
+      return {
+        min: dateMath.parse(_time.from),
+        max: dateMath.parse(_time.to),
+      };
+    },
+  };
+  return {
+    getTimefilter: () => timefilter,
+  };
+});
 
 jest.mock('../explorer_dashboard_service', () => ({
   explorerService: {
@@ -100,8 +113,16 @@ jest.mock('../explorer_dashboard_service', () => ({
   },
 }));
 
+import moment from 'moment';
 import { anomalyDataChange, getDefaultChartsData } from './explorer_charts_container_service';
 import { explorerService } from '../explorer_dashboard_service';
+import { getTimefilter } from '../../util/dependency_cache';
+
+const timefilter = getTimefilter();
+timefilter.setTime({
+  from: moment(1486425600000).toISOString(), // Feb 07 2017
+  to: moment(1486857600000).toISOString(), // Feb 12 2017
+});
 
 describe('explorerChartsContainerService', () => {
   afterEach(() => {
@@ -109,7 +130,7 @@ describe('explorerChartsContainerService', () => {
   });
 
   test('call anomalyChangeListener with empty series config', (done) => {
-    anomalyDataChange([], 1486656000000, 1486670399999);
+    anomalyDataChange(1140, [], 1486656000000, 1486670399999);
 
     setImmediate(() => {
       expect(explorerService.setCharts.mock.calls.length).toBe(1);
@@ -122,7 +143,7 @@ describe('explorerChartsContainerService', () => {
   });
 
   test('call anomalyChangeListener with actual series config', (done) => {
-    anomalyDataChange(mockAnomalyChartRecords, 1486656000000, 1486670399999);
+    anomalyDataChange(1140, mockAnomalyChartRecords, 1486656000000, 1486670399999);
 
     setImmediate(() => {
       expect(explorerService.setCharts.mock.calls.length).toBe(2);
@@ -133,12 +154,12 @@ describe('explorerChartsContainerService', () => {
   });
 
   test('filtering should skip values of null', (done) => {
-    const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords).map((d) => {
+    const mockAnomalyChartRecordsClone = cloneDeep(mockAnomalyChartRecords).map((d) => {
       d.job_id = 'mock-job-id-distribution';
       return d;
     });
 
-    anomalyDataChange(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
+    anomalyDataChange(1140, mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
 
     setImmediate(() => {
       expect(explorerService.setCharts.mock.calls.length).toBe(2);
@@ -157,11 +178,11 @@ describe('explorerChartsContainerService', () => {
   });
 
   test('field value with trailing dot should not throw an error', (done) => {
-    const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords);
+    const mockAnomalyChartRecordsClone = cloneDeep(mockAnomalyChartRecords);
     mockAnomalyChartRecordsClone[1].partition_field_value = 'AAL.';
 
     expect(() => {
-      anomalyDataChange(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
+      anomalyDataChange(1140, mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
     }).not.toThrow();
 
     setImmediate(() => {

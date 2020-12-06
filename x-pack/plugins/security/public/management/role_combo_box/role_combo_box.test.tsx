@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 
 import { RoleComboBox } from '.';
 import { EuiComboBox } from '@elastic/eui';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 
 describe('RoleComboBox', () => {
   it('renders the provided list of roles via EuiComboBox options', () => {
@@ -105,6 +105,41 @@ describe('RoleComboBox', () => {
 
     wrapper.find(EuiComboBox).setState({ isListOpen: true });
 
-    expect(findTestSubject(wrapper, 'rolesDropdown-renderOption')).toMatchInlineSnapshot(`null`);
+    expect(findTestSubject(wrapper, 'rolesDropdown-renderOption')).toMatchInlineSnapshot(`
+      Array [
+        <div
+          className="euiText euiText--medium"
+          data-test-subj="rolesDropdown-renderOption"
+        >
+          <EuiTextColor
+            color="default"
+            component="div"
+          >
+            <div
+              className="euiTextColor euiTextColor--default"
+            >
+              role-1
+               
+            </div>
+          </EuiTextColor>
+        </div>,
+        <div
+          className="euiText euiText--medium"
+          data-test-subj="rolesDropdown-renderOption"
+        >
+          <EuiTextColor
+            color="default"
+            component="div"
+          >
+            <div
+              className="euiTextColor euiTextColor--default"
+            >
+              role-2
+               
+            </div>
+          </EuiTextColor>
+        </div>,
+      ]
+    `);
   });
 });

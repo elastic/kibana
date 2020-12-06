@@ -6,14 +6,30 @@
 /* eslint-disable react/display-name */
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
+
+import '../../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../../common/mock';
+
+import { CaseStatuses } from '../../../../../case/common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../containers/mock';
-import * as i18n from './translations';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { getKibanaConfigError, getLicenseError } from './helpers';
 import { connectorsMock } from '../../containers/configure/mock';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../../../common/components/link_to');
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/configure/api');
@@ -38,11 +54,15 @@ describe('usePushToService', () => {
     },
   };
   const defaultArgs = {
-    caseConnectorId: mockConnector.id,
-    caseConnectorName: mockConnector.name,
+    connector: {
+      id: mockConnector.id,
+      name: mockConnector.name,
+      type: ConnectorTypes.servicenow,
+      fields: null,
+    },
     caseId,
     caseServices,
-    caseStatus: 'open',
+    caseStatus: CaseStatuses.open,
     connectors: connectorsMock,
     updateCase,
     userCanCrud: true,
@@ -71,8 +91,12 @@ describe('usePushToService', () => {
       expect(postPushToService).toBeCalledWith({
         caseId,
         caseServices,
-        connectorId: mockConnector.id,
-        connectorName: mockConnector.name,
+        connector: {
+          fields: null,
+          id: 'servicenow-1',
+          name: 'My Connector',
+          type: ConnectorTypes.servicenow,
+        },
         updateCase,
       });
       expect(result.current.pushCallouts).toBeNull();
@@ -97,7 +121,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(getLicenseError().title);
+      expect(errorsMsg[0].id).toEqual('license-error');
     });
   });
 
@@ -119,7 +143,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(getKibanaConfigError().title);
+      expect(errorsMsg[0].id).toEqual('kibana-config-error');
     });
   });
 
@@ -130,7 +154,12 @@ describe('usePushToService', () => {
           usePushToService({
             ...defaultArgs,
             connectors: [],
-            caseConnectorId: 'none',
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
@@ -139,7 +168,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BY_NO_CONFIG_TITLE);
+      expect(errorsMsg[0].id).toEqual('connector-missing-error');
     });
   });
 
@@ -149,7 +178,12 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseConnectorId: 'none',
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
@@ -158,7 +192,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE);
+      expect(errorsMsg[0].id).toEqual('connector-not-selected-error');
     });
   });
 
@@ -168,7 +202,12 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseConnectorId: 'not-exist',
+            connector: {
+              id: 'not-exist',
+              name: 'not-exist',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
             isValidConnector: false,
           }),
         {
@@ -178,7 +217,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE);
+      expect(errorsMsg[0].id).toEqual('connector-deleted-error');
     });
   });
 
@@ -189,7 +228,12 @@ describe('usePushToService', () => {
           usePushToService({
             ...defaultArgs,
             connectors: [],
-            caseConnectorId: 'not-exist',
+            connector: {
+              id: 'not-exist',
+              name: 'not-exist',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
             isValidConnector: false,
           }),
         {
@@ -199,7 +243,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE);
+      expect(errorsMsg[0].id).toEqual('connector-deleted-error');
     });
   });
 
@@ -209,7 +253,7 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseStatus: 'closed',
+            caseStatus: CaseStatuses.closed,
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
@@ -218,7 +262,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE);
+      expect(errorsMsg[0].id).toEqual('closed-case-push-error');
     });
   });
 });

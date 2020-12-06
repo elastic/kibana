@@ -60,19 +60,15 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
 
   cls.addEndpointDescription = function (endpoint, description) {
     const copiedDescription = {};
-    _.extend(copiedDescription, description || {});
+    _.assign(copiedDescription, description || {});
     _.defaults(copiedDescription, {
       id: endpoint,
       patterns: [endpoint],
       methods: ['GET'],
     });
-    _.each(
-      copiedDescription.patterns,
-      function (p) {
-        this.urlPatternMatcher.addEndpoint(p, copiedDescription);
-      },
-      this
-    );
+    _.each(copiedDescription.patterns, (p) => {
+      this.urlPatternMatcher.addEndpoint(p, copiedDescription);
+    });
 
     copiedDescription.paramsAutocomplete = new UrlParams(copiedDescription.url_params);
     copiedDescription.bodyAutocompleteRootComponents = compileBodyDescription(

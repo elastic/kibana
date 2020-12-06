@@ -19,8 +19,8 @@
 
 import { flatten } from 'lodash';
 import { ShallowPromise } from '@kbn/utility-types';
-import { pick } from '.';
-import { CoreId, PluginOpaqueId } from '../server';
+import { pick } from '@kbn/std';
+import type { CoreId, PluginOpaqueId } from '../server';
 
 /**
  * Make all properties in T optional, except for the properties whose keys are in the union K

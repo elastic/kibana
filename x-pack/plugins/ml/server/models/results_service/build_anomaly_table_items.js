@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { sortBy, each } from 'lodash';
 import moment from 'moment-timezone';
 
 import {
@@ -55,7 +55,7 @@ export function buildAnomalyTableItems(anomalyRecords, aggregationInterval, date
 
     if (source.influencers !== undefined) {
       const influencers = [];
-      const sourceInfluencers = _.sortBy(source.influencers, 'influencer_field_name');
+      const sourceInfluencers = sortBy(source.influencers, 'influencer_field_name');
       sourceInfluencers.forEach((influencer) => {
         const influencerFieldName = influencer.influencer_field_name;
         influencer.influencer_field_values.forEach((influencerFieldValue) => {
@@ -172,10 +172,10 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
   // Flatten the aggregatedData to give a list of records with
   // the highest score per bucketed time / jobId / detectorIndex.
   const summaryRecords = [];
-  _.each(aggregatedData, (times, roundedTime) => {
-    _.each(times, (jobIds) => {
-      _.each(jobIds, (entityDetectors) => {
-        _.each(entityDetectors, (record) => {
+  each(aggregatedData, (times, roundedTime) => {
+    each(times, (jobIds) => {
+      each(jobIds, (entityDetectors) => {
+        each(entityDetectors, (record) => {
           summaryRecords.push({
             time: +roundedTime,
             source: record,

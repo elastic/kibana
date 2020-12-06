@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public/';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
+import { FleetSetup } from '../../../fleet/public';
+import { PLUGIN } from '../../common/constants';
 import { ExtensionsService } from '../services';
-import { IndexMgmtMetricsType } from '../types';
+import { StartDependencies } from '../types';
 import { AppDependencies } from './app_context';
 import { breadcrumbService } from './services/breadcrumbs';
 import { documentationService } from './services/documentation';
@@ -20,19 +23,29 @@ import { renderApp } from '.';
 interface InternalServices {
   httpService: HttpService;
   notificationService: NotificationService;
-  uiMetricService: UiMetricService<IndexMgmtMetricsType>;
+  uiMetricService: UiMetricService;
   extensionsService: ExtensionsService;
 }
 
 export async function mountManagementSection(
-  coreSetup: CoreSetup,
+  coreSetup: CoreSetup<StartDependencies>,
   usageCollection: UsageCollectionSetup,
   services: InternalServices,
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
+  fleet?: FleetSetup
 ) {
   const { element, setBreadcrumbs, history } = params;
-  const [core] = await coreSetup.getStartServices();
-  const { docLinks, fatalErrors, application } = core;
+  const [core, startDependencies] = await coreSetup.getStartServices();
+  const {
+    docLinks,
+    fatalErrors,
+    application,
+    chrome: { docTitle },
+    uiSettings,
+  } = core;
+
+  const { urlGenerators } = startDependencies.share;
+  docTitle.change(PLUGIN.getI18nName(i18n));
 
   breadcrumbService.setup(setBreadcrumbs);
   documentationService.setup(docLinks);
@@ -44,10 +57,20 @@ export async function mountManagementSection(
     },
     plugins: {
       usageCollection,
+      fleet,
     },
     services,
     history,
+    setBreadcrumbs,
+    uiSettings,
+    urlGenerators,
+    docLinks,
   };
 
-  return renderApp(element, { core, dependencies: appDependencies });
+  const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });
+
+  return () => {
+    docTitle.reset();
+    unmountAppCallback();
+  };
 }

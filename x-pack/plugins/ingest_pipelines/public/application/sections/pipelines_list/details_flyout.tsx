@@ -187,7 +187,6 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
                 closePopover={() => setShowPopover(false)}
                 button={managePipelineButton}
                 panelPaddingSize="none"
-                withTitle
                 repositionOnScroll
               >
                 <EuiContextMenu

@@ -19,7 +19,13 @@
 
 import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { isErrorEmbeddable, EmbeddableOutput, ContainerInput, ViewMode } from '../lib';
+import {
+  isErrorEmbeddable,
+  EmbeddableOutput,
+  ContainerInput,
+  ViewMode,
+  SavedObjectEmbeddableInput,
+} from '../lib';
 import {
   FilterableEmbeddableInput,
   FilterableEmbeddable,
@@ -31,7 +37,7 @@ import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact
 import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
 import {
   HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactory,
+  HelloWorldEmbeddableFactoryDefinition,
 } from '../../../../../examples/embeddable_examples/public';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 import {
@@ -43,7 +49,6 @@ import {
   FilterableContainer,
   FilterableContainerInput,
 } from '../lib/test_samples/embeddables/filterable_container';
-// eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { of } from './helpers';
@@ -61,7 +66,7 @@ async function creatHelloWorldContainerAndEmbeddable(
   const slowContactCardFactory = new SlowContactCardEmbeddableFactory({
     execAction: uiActions.executeTriggerActions,
   });
-  const helloWorldFactory = new HelloWorldEmbeddableFactory();
+  const helloWorldFactory = new HelloWorldEmbeddableFactoryDefinition();
 
   setup.registerEmbeddableFactory(filterableFactory.type, filterableFactory);
   setup.registerEmbeddableFactory(slowContactCardFactory.type, slowContactCardFactory);
@@ -82,6 +87,7 @@ async function creatHelloWorldContainerAndEmbeddable(
     getEmbeddableFactory: start.getEmbeddableFactory,
     panelComponent: testPanel,
   });
+
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -648,7 +654,7 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
     panels: {
       '123': {
         type: 'vis',
-        explicitInput: { id: '123', savedObjectId: '456' },
+        explicitInput: { id: '123', savedObjectId: '456' } as SavedObjectEmbeddableInput,
       },
     },
     viewMode: ViewMode.EDIT,
@@ -669,7 +675,7 @@ test('ErrorEmbeddables get updated when parent does', async (done) => {
     panels: {
       '123': {
         type: 'vis',
-        explicitInput: { id: '123', savedObjectId: '456' },
+        explicitInput: { id: '123', savedObjectId: '456' } as SavedObjectEmbeddableInput,
       },
     },
     viewMode: ViewMode.EDIT,
@@ -733,7 +739,7 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
     coreMock.createSetup(),
     coreMock.createStart()
   );
-  const factory = new HelloWorldEmbeddableFactory();
+  const factory = new HelloWorldEmbeddableFactoryDefinition();
   setup.registerEmbeddableFactory(factory.type, factory);
   const start = doStart();
   const testPanel = createEmbeddablePanelMock({

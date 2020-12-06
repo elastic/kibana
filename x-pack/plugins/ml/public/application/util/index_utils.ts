@@ -73,9 +73,12 @@ export function getIndexPatternIdFromName(name: string) {
   }
   return null;
 }
-
+export interface IndexPatternAndSavedSearch {
+  savedSearch: SavedSearchSavedObject | null;
+  indexPattern: IIndexPattern | null;
+}
 export async function getIndexPatternAndSavedSearch(savedSearchId: string) {
-  const resp: { savedSearch: SavedSearchSavedObject | null; indexPattern: IIndexPattern | null } = {
+  const resp: IndexPatternAndSavedSearch = {
     savedSearch: null,
     indexPattern: null,
   };
@@ -104,7 +107,11 @@ export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
 
 export function getIndexPatternById(id: string): Promise<IndexPattern> {
   if (indexPatternsContract !== null) {
-    return indexPatternsContract.get(id);
+    if (id) {
+      return indexPatternsContract.get(id);
+    } else {
+      return indexPatternsContract.create({});
+    }
   } else {
     throw new Error('Index patterns are not initialized!');
   }

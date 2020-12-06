@@ -17,10 +17,15 @@
  * under the License.
  */
 
-import { left, right, fromNullable } from './either';
-import { always, id, noop } from './utils';
+import * as Either from './either';
+import * as Maybe from './maybe';
+import { always, id, noop, pink } from './utils';
+import execa from 'execa';
+import { resolve } from 'path';
 
-const maybeTotal = (x) => (x === 'total' ? left(x) : right(x));
+const ROOT_DIR = resolve(__dirname, '../../../..');
+
+const maybeTotal = (x) => (x === 'total' ? Either.left(x) : Either.right(x));
 
 const trimLeftFrom = (text, x) => x.substr(x.indexOf(text));
 
@@ -54,13 +59,13 @@ const root = (urlBase) => (ts) => (testRunnerType) =>
   `${urlBase}/${ts}/${testRunnerType.toLowerCase()}-combined`;
 
 const prokForTotalsIndex = (mutateTrue) => (urlRoot) => (obj) =>
-  right(obj)
+  Either.right(obj)
     .map(mutateTrue)
     .map(always(`${urlRoot}/index.html`))
     .fold(noop, id);
 
 const prokForCoverageIndex = (root) => (mutateFalse) => (urlRoot) => (obj) => (siteUrl) =>
-  right(siteUrl)
+  Either.right(siteUrl)
     .map((x) => {
       mutateFalse(obj);
       return x;
@@ -82,26 +87,78 @@ export const staticSite = (urlBase) => (obj) => {
   return { ...obj, staticSiteUrl: prokForBoth() };
 };
 
+const leadingSlashRe = /^\//;
+export const maybeDropLeadingSlash = (x) =>
+  leadingSlashRe.test(x) ? Either.right(x) : Either.left(x);
+export const dropLeadingSlash = (x) => x.replace(leadingSlashRe, '');
+export const stripLeading = (x) => maybeDropLeadingSlash(x).fold(id, dropLeadingSlash);
+
 export const coveredFilePath = (obj) => {
   const { staticSiteUrl, COVERAGE_INGESTION_KIBANA_ROOT } = obj;
 
   const withoutCoveredFilePath = always(obj);
-  const leadingSlashRe = /^\//;
-  const maybeDropLeadingSlash = (x) => (leadingSlashRe.test(x) ? right(x) : left(x));
-  const dropLeadingSlash = (x) => x.replace(leadingSlashRe, '');
-  const dropRoot = (root) => (x) =>
-    maybeDropLeadingSlash(x.replace(root, '')).fold(id, dropLeadingSlash);
+  const dropRoot = (root) => (x) => stripLeading(x.replace(root, ''));
   return maybeTotal(staticSiteUrl)
     .map(dropRoot(COVERAGE_INGESTION_KIBANA_ROOT))
     .fold(withoutCoveredFilePath, (coveredFilePath) => ({ ...obj, coveredFilePath }));
 };
 
+const findTeam = (x) => x.match(/.+\s{1,3}(.+)$/, 'gm');
+export const pluckIndex = (idx) => (xs) => xs[idx];
+const pluckTeam = pluckIndex(1);
+
+export const teamAssignment = (teamAssignmentsPath) => (log) => async (obj) => {
+  const { coveredFilePath } = obj;
+  const isTotal = Either.fromNullable(obj.isTotal);
+
+  return isTotal.isRight() ? obj : await assignTeam(teamAssignmentsPath, coveredFilePath, log, obj);
+};
+export const last = (x) => {
+  const xs = x.split('\n');
+  const len = xs.length;
+
+  return len === 1 ? xs[0] : xs[len - 1];
+};
+async function assignTeam(teamAssignmentsPath, coveredFilePath, log, obj) {
+  const params = [coveredFilePath, teamAssignmentsPath];
+
+  let grepResponse;
+
+  try {
+    const { stdout } = await execa('grep', params, { cwd: ROOT_DIR });
+    grepResponse = stdout;
+  } catch (e) {
+    log.error(`\n!!! Unknown Team for path: \n\t\t${pink(coveredFilePath)}\n`);
+  }
+
+  return Either.fromNullable(grepResponse)
+    .map(last)
+    .map(findTeam)
+    .map(pluckTeam)
+    .fold(
+      () => ({ team: 'unknown', ...obj }),
+      (team) => ({ team, ...obj })
+    );
+}
+
 export const ciRunUrl = (obj) =>
-  fromNullable(process.env.CI_RUN_URL).fold(always(obj), (ciRunUrl) => ({ ...obj, ciRunUrl }));
+  Either.fromNullable(process.env.CI_RUN_URL).fold(always(obj), (ciRunUrl) => ({
+    ...obj,
+    ciRunUrl,
+  }));
 
 const size = 50;
-const truncateMsg = (msg) => (msg.length > size ? `${msg.slice(0, 50)}...` : msg);
-
+const truncateMsg = (msg) => {
+  const res = msg.length > size ? `${msg.slice(0, 50)}...` : msg;
+  return res;
+};
+const comparePrefix = () => 'https://github.com/elastic/kibana/compare';
+export const prokPrevious = (comparePrefixF) => (currentSha) => {
+  return Either.fromNullable(process.env.FETCHED_PREVIOUS).fold(
+    noop,
+    (previousSha) => `${comparePrefixF()}/${previousSha}...${currentSha}`
+  );
+};
 export const itemizeVcs = (vcsInfo) => (obj) => {
   const [branch, sha, author, commitMsg] = vcsInfo;
 
@@ -111,12 +168,22 @@ export const itemizeVcs = (vcsInfo) => (obj) => {
     author,
     vcsUrl: `https://github.com/elastic/kibana/commit/${sha}`,
   };
-  const res = fromNullable(commitMsg).fold(always({ ...obj, vcs }), (msg) => ({
-    ...obj,
-    vcs: { ...vcs, commitMsg: truncateMsg(msg) },
-  }));
 
-  return res;
+  const mutateVcs = (x) => (vcs.commitMsg = truncateMsg(x));
+  Maybe.fromNullable(commitMsg).map(mutateVcs);
+
+  const vcsCompareUrl = process.env.FETCHED_PREVIOUS
+    ? `${comparePrefix()}/${process.env.FETCHED_PREVIOUS}...${sha}`
+    : 'PREVIOUS SHA NOT PROVIDED';
+
+  const withPreviousR = () => ({
+    ...obj,
+    vcs: {
+      ...vcs,
+      vcsCompareUrl,
+    },
+  });
+  return withPreviousR();
 };
 export const testRunner = (obj) => {
   const { jsonSummaryPath } = obj;

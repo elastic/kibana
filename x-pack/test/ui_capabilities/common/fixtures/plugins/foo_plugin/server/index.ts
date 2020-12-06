@@ -14,16 +14,15 @@ interface SetupDeps {
 
 class FooPlugin implements Plugin {
   setup(core: CoreSetup, plugins: SetupDeps) {
-    plugins.features.registerFeature({
+    plugins.features.registerKibanaFeature({
       id: 'foo',
       name: 'Foo',
-      icon: 'upArrow',
-      navLinkId: 'foo_plugin',
-      app: ['kibana'],
+      category: { id: 'foo', label: 'foo' },
+      app: ['foo_plugin', 'kibana'],
       catalogue: ['foo'],
       privileges: {
         all: {
-          app: ['kibana'],
+          app: ['foo_plugin', 'kibana'],
           catalogue: ['foo'],
           savedObject: {
             all: ['foo'],
@@ -32,7 +31,7 @@ class FooPlugin implements Plugin {
           ui: ['create', 'edit', 'delete', 'show'],
         },
         read: {
-          app: ['kibana'],
+          app: ['foo_plugin', 'kibana'],
           catalogue: ['foo'],
           savedObject: {
             all: [],

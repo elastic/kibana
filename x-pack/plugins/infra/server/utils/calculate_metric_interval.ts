@@ -8,7 +8,7 @@
 import { findInventoryModel } from '../../common/inventory_models';
 // import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
 import { InventoryItemType } from '../../common/inventory_models/types';
-import { ESSearchClient } from '../lib/snapshot';
+import { ESSearchClient } from '../lib/metrics/types';
 
 interface Options {
   indexPattern: string;

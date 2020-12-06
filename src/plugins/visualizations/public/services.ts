@@ -26,6 +26,7 @@ import {
   IUiSettingsClient,
   OverlayStart,
   SavedObjectsStart,
+  DocLinksStart,
 } from '../../../core/public';
 import { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
@@ -60,6 +61,8 @@ export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');
 
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 
+export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('DocLinks');
+
 export const [getFilterManager, setFilterManager] = createGetterSetter<FilterManager>(
   'FilterManager'
 );
@@ -80,9 +83,10 @@ export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsSt
 
 export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UiActions');
 
-export const [getSavedVisualizationsLoader, setSavedVisualizationsLoader] = createGetterSetter<
-  SavedVisualizationsLoader
->('SavedVisualisationsLoader');
+export const [
+  getSavedVisualizationsLoader,
+  setSavedVisualizationsLoader,
+] = createGetterSetter<SavedVisualizationsLoader>('SavedVisualisationsLoader');
 
 export const [getAggs, setAggs] = createGetterSetter<DataPublicPluginStart['search']['aggs']>(
   'AggConfigs'

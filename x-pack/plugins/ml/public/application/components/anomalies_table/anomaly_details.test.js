@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import { AnomalyDetails } from './anomaly_details';
 
 const props = {
@@ -67,7 +67,7 @@ describe('AnomalyDetails', () => {
       tabIndex: 1,
     };
     const wrapper = shallowWithIntl(<AnomalyDetails {...categoryTabProps} />);
-    expect(wrapper.prop('initialSelectedTab').id).toBe('Category examples');
+    expect(wrapper.prop('initialSelectedTab').id).toBe('category-examples');
   });
 
   test('Renders with terms and regex when definition prop is not undefined', () => {

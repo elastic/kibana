@@ -7,17 +7,20 @@
 import React, { useEffect, useMemo } from 'react';
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
+import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { alertsDefaultModel } from './default_headers';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import * as i18n from './translations';
+import { useKibana } from '../../lib/kibana';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+
 export interface OwnProps {
-  end: number;
+  end: string;
   id: string;
-  start: number;
+  start: string;
 }
 
-const ALERTS_TABLE_ID = 'alerts-table';
 const defaultAlertsFilters: Filter[] = [
   {
     meta: {
@@ -52,31 +55,42 @@ const defaultAlertsFilters: Filter[] = [
 ];
 
 interface Props {
-  endDate: number;
-  startDate: number;
+  timelineId: TimelineIdLiteral;
+  endDate: string;
+  startDate: string;
   pageFilters?: Filter[];
 }
 
-const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters = [] }) => {
+const AlertsTableComponent: React.FC<Props> = ({
+  timelineId,
+  endDate,
+  startDate,
+  pageFilters = [],
+}) => {
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
+  const { filterManager } = useKibana().services.data.query;
   const { initializeTimeline } = useManageTimeline();
 
   useEffect(() => {
     initializeTimeline({
-      id: ALERTS_TABLE_ID,
+      id: timelineId,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
+      filterManager,
+      defaultModel: alertsDefaultModel,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       title: i18n.ALERTS_TABLE_TITLE,
       unit: i18n.UNIT,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   return (
     <StatefulEventsViewer
       pageFilters={alertsFilter}
       defaultModel={alertsDefaultModel}
       end={endDate}
-      id={ALERTS_TABLE_ID}
+      id={timelineId}
+      scopeId={SourcererScopeName.default}
       start={startDate}
     />
   );

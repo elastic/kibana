@@ -23,7 +23,13 @@ jest.mock('react-dom', () => ({
 jest.mock('../legacy_shims', () => {
   return {
     Legacy: {
-      shims: { getAngularInjector: () => ({ get: () => ({ get: () => 'utc' }) }) },
+      shims: {
+        getAngularInjector: () => ({ get: () => ({ get: () => 'utc' }) }),
+        toastNotifications: {
+          addDanger: jest.fn(),
+        },
+        I18nContext: '<div>',
+      },
     },
   };
 });
@@ -59,9 +65,6 @@ const angularStateMock = {
 
 // We are no longer waiting for setup mode data to be fetched when enabling
 // so we need to wait for the next tick for the async action to finish
-function waitForSetupModeData(action) {
-  process.nextTick(action);
-}
 
 function setModulesAndMocks() {
   jest.clearAllMocks().resetModules();
@@ -73,6 +76,10 @@ function setModulesAndMocks() {
   getSetupModeState = setupMode.getSetupModeState;
   updateSetupModeData = setupMode.updateSetupModeData;
   setSetupModeMenuItem = setupMode.setSetupModeMenuItem;
+}
+
+function waitForSetupModeData() {
+  return new Promise((resolve) => process.nextTick(resolve));
 }
 
 describe('setup_mode', () => {
@@ -96,22 +103,22 @@ describe('setup_mode', () => {
     });
 
     it('should enable toggle mode', async () => {
-      initSetupModeState(angularStateMock.scope, angularStateMock.injector);
-      await toggleSetupMode(true);
+      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      toggleSetupMode(true);
       expect(injectorModulesMock.globalState.inSetupMode).toBe(true);
     });
 
     it('should disable toggle mode', async () => {
-      initSetupModeState(angularStateMock.scope, angularStateMock.injector);
-      await toggleSetupMode(false);
+      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      toggleSetupMode(false);
       expect(injectorModulesMock.globalState.inSetupMode).toBe(false);
     });
 
     it('should set top nav config', async () => {
       const render = require('react-dom').render;
-      initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
       setSetupModeMenuItem();
-      await toggleSetupMode(true);
+      toggleSetupMode(true);
       expect(render.mock.calls.length).toBe(2);
     });
   });
@@ -121,7 +128,7 @@ describe('setup_mode', () => {
       data = {};
     });
 
-    it('should not fetch data if the user does not have sufficient permissions', async (done) => {
+    it('should not fetch data if the user does not have sufficient permissions', async () => {
       const addDanger = jest.fn();
       jest.doMock('../legacy_shims', () => ({
         Legacy: {
@@ -129,6 +136,7 @@ describe('setup_mode', () => {
             toastNotifications: {
               addDanger,
             },
+            I18nContext: '<div>',
           },
         },
       }));
@@ -138,20 +146,19 @@ describe('setup_mode', () => {
         },
       };
       setModulesAndMocks();
-      initSetupModeState(angularStateMock.scope, angularStateMock.injector);
-      await toggleSetupMode(true);
-      waitForSetupModeData(() => {
-        const state = getSetupModeState();
-        expect(state.enabled).toBe(false);
-        expect(addDanger).toHaveBeenCalledWith({
-          title: 'Setup mode is not available',
-          text: 'You do not have the necessary permissions to do this.',
-        });
-        done();
+      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      toggleSetupMode(true);
+      await waitForSetupModeData();
+
+      const state = getSetupModeState();
+      expect(state.enabled).toBe(false);
+      expect(addDanger).toHaveBeenCalledWith({
+        title: 'Setup mode is not available',
+        text: 'You do not have the necessary permissions to do this.',
       });
     });
 
-    it('should set the newly discovered cluster uuid', async (done) => {
+    it('should set the newly discovered cluster uuid', async () => {
       const clusterUuid = '1ajy';
       data = {
         _meta: {
@@ -166,15 +173,14 @@ describe('setup_mode', () => {
           },
         },
       };
-      initSetupModeState(angularStateMock.scope, angularStateMock.injector);
-      await toggleSetupMode(true);
-      waitForSetupModeData(() => {
-        expect(injectorModulesMock.globalState.cluster_uuid).toBe(clusterUuid);
-        done();
-      });
+      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      toggleSetupMode(true);
+      await waitForSetupModeData();
+
+      expect(injectorModulesMock.globalState.cluster_uuid).toBe(clusterUuid);
     });
 
-    it('should fetch data for a given cluster', async (done) => {
+    it('should fetch data for a given cluster', async () => {
       const clusterUuid = '1ajy';
       data = {
         _meta: {
@@ -190,22 +196,23 @@ describe('setup_mode', () => {
         },
       };
 
-      initSetupModeState(angularStateMock.scope, angularStateMock.injector);
-      await toggleSetupMode(true);
-      waitForSetupModeData(() => {
-        expect(injectorModulesMock.$http.post).toHaveBeenCalledWith(
-          `../api/monitoring/v1/setup/collection/cluster/${clusterUuid}`,
-          {
-            ccs: undefined,
-          }
-        );
-        done();
-      });
+      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      toggleSetupMode(true);
+      await waitForSetupModeData();
+
+      expect(injectorModulesMock.$http.post).toHaveBeenCalledWith(
+        `../api/monitoring/v1/setup/collection/cluster/${clusterUuid}`,
+        {
+          ccs: undefined,
+        }
+      );
     });
 
     it('should fetch data for a single node', async () => {
-      initSetupModeState(angularStateMock.scope, angularStateMock.injector);
-      await toggleSetupMode(true);
+      await initSetupModeState(angularStateMock.scope, angularStateMock.injector);
+      toggleSetupMode(true);
+      await waitForSetupModeData();
+
       injectorModulesMock.$http.post.mockClear();
       await updateSetupModeData('45asd');
       expect(injectorModulesMock.$http.post).toHaveBeenCalledWith(

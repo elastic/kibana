@@ -5,8 +5,9 @@
  */
 
 import { getPings } from '../get_pings';
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { getUptimeESMockClient } from './helper';
 
 describe('getAll', () => {
   let mockEsSearchResult: any;
@@ -49,15 +50,17 @@ describe('getAll', () => {
       },
     ];
     mockEsSearchResult = {
-      hits: {
-        total: {
-          value: mockHits.length,
+      body: {
+        hits: {
+          total: {
+            value: mockHits.length,
+          },
+          hits: mockHits,
         },
-        hits: mockHits,
-      },
-      aggregations: {
-        locations: {
-          buckets: [{ key: 'foo' }],
+        aggregations: {
+          locations: {
+            buckets: [{ key: 'foo' }],
+          },
         },
       },
     };
@@ -84,11 +87,12 @@ describe('getAll', () => {
   });
 
   it('returns data in the appropriate shape', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue(mockEsSearchResult);
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     const result = await getPings({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
       size: 12,
@@ -102,28 +106,28 @@ describe('getAll', () => {
     expect(pings[0].timestamp).toBe('2018-10-30T18:51:59.792Z');
     expect(pings[1].timestamp).toBe('2018-10-30T18:53:59.792Z');
     expect(pings[2].timestamp).toBe('2018-10-30T18:55:59.792Z');
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
   });
 
   it('creates appropriate sort and size parameters', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue(mockEsSearchResult);
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     await getPings({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
       size: 12,
     });
     set(expectedGetAllParams, 'body.sort[0]', { timestamp: { order: 'asc' } });
 
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "search",
         Object {
           "body": Object {
-            "aggregations": Object {
+            "aggs": Object {
               "locations": Object {
                 "terms": Object {
                   "field": "observer.geo.name",
@@ -141,6 +145,30 @@ describe('getAll', () => {
                         "gte": "now-1h",
                         "lte": "now",
                       },
+                    },
+                  },
+                ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
@@ -162,22 +190,22 @@ describe('getAll', () => {
   });
 
   it('omits the sort param when no sort passed', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue(mockEsSearchResult);
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     await getPings({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       dateRange: { from: 'now-1h', to: 'now' },
       size: 12,
     });
 
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "search",
         Object {
           "body": Object {
-            "aggregations": Object {
+            "aggs": Object {
               "locations": Object {
                 "terms": Object {
                   "field": "observer.geo.name",
@@ -195,6 +223,30 @@ describe('getAll', () => {
                         "gte": "now-1h",
                         "lte": "now",
                       },
+                    },
+                  },
+                ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
@@ -216,22 +268,22 @@ describe('getAll', () => {
   });
 
   it('omits the size param when no size passed', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue(mockEsSearchResult);
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     await getPings({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'desc',
     });
 
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "search",
         Object {
           "body": Object {
-            "aggregations": Object {
+            "aggs": Object {
               "locations": Object {
                 "terms": Object {
                   "field": "observer.geo.name",
@@ -249,6 +301,30 @@ describe('getAll', () => {
                         "gte": "now-1h",
                         "lte": "now",
                       },
+                    },
+                  },
+                ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
@@ -270,22 +346,22 @@ describe('getAll', () => {
   });
 
   it('adds a filter for monitor ID', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue(mockEsSearchResult);
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     await getPings({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       dateRange: { from: 'now-1h', to: 'now' },
       monitorId: 'testmonitorid',
     });
 
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "search",
         Object {
           "body": Object {
-            "aggregations": Object {
+            "aggs": Object {
               "locations": Object {
                 "terms": Object {
                   "field": "observer.geo.name",
@@ -311,6 +387,30 @@ describe('getAll', () => {
                     },
                   },
                 ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
             },
             "size": 25,
@@ -329,22 +429,22 @@ describe('getAll', () => {
   });
 
   it('adds a filter for monitor status', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue(mockEsSearchResult);
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     await getPings({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       dateRange: { from: 'now-1h', to: 'now' },
       status: 'down',
     });
 
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "search",
         Object {
           "body": Object {
-            "aggregations": Object {
+            "aggs": Object {
               "locations": Object {
                 "terms": Object {
                   "field": "observer.geo.name",
@@ -367,6 +467,30 @@ describe('getAll', () => {
                   Object {
                     "term": Object {
                       "monitor.status": "down",
+                    },
+                  },
+                ],
+                "must_not": Array [
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.type": "browser",
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "must_not": Array [
+                              Object {
+                                "exists": Object {
+                                  "field": "summary",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
                   },
                 ],

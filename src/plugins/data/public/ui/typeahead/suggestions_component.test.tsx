@@ -21,7 +21,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
-import { SuggestionsComponent } from './suggestions_component';
+import SuggestionsComponent from './suggestions_component';
 
 const noop = () => {
   return;
@@ -54,6 +54,7 @@ describe('SuggestionsComponent', () => {
         show={false}
         suggestions={mockSuggestions}
         loadMore={noop}
+        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -69,6 +70,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={[]}
         loadMore={noop}
+        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -84,6 +86,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
+        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -100,6 +103,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
+        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -116,6 +120,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
+        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -134,6 +139,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
+        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 

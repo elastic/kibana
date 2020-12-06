@@ -23,7 +23,7 @@ import { FilterManager } from './filter_manager';
 import {
   PhraseFilter,
   esFilters,
-  IndexPattern,
+  IndexPatternsContract,
   FilterManager as QueryFilterManager,
 } from '../../../../data/public';
 
@@ -31,24 +31,26 @@ export class PhraseFilterManager extends FilterManager {
   constructor(
     controlId: string,
     fieldName: string,
-    indexPattern: IndexPattern,
+    indexPatternId: string,
+    indexPatternsService: IndexPatternsContract,
     queryFilter: QueryFilterManager
   ) {
-    super(controlId, fieldName, indexPattern, queryFilter);
+    super(controlId, fieldName, indexPatternId, indexPatternsService, queryFilter);
   }
 
   createFilter(phrases: any): PhraseFilter {
+    const indexPattern = this.getIndexPattern()!;
     let newFilter: PhraseFilter;
-    const value = this.indexPattern.fields.getByName(this.fieldName);
+    const value = indexPattern.fields.getByName(this.fieldName);
 
     if (!value) {
       throw new Error(`Unable to find field with name: ${this.fieldName} on indexPattern`);
     }
 
     if (phrases.length === 1) {
-      newFilter = esFilters.buildPhraseFilter(value, phrases[0], this.indexPattern);
+      newFilter = esFilters.buildPhraseFilter(value, phrases[0], indexPattern);
     } else {
-      newFilter = esFilters.buildPhrasesFilter(value, phrases, this.indexPattern);
+      newFilter = esFilters.buildPhrasesFilter(value, phrases, indexPattern);
     }
 
     newFilter.meta.key = this.fieldName;
@@ -86,11 +88,11 @@ export class PhraseFilterManager extends FilterManager {
   private getValueFromFilter(kbnFilter: PhraseFilter): any {
     // bool filter - multiple phrase filters
     if (_.has(kbnFilter, 'query.bool.should')) {
-      return _.get<PhraseFilter[]>(kbnFilter, 'query.bool.should')
-        .map((kbnQueryFilter) => {
+      return _.get(kbnFilter, 'query.bool.should')
+        .map((kbnQueryFilter: PhraseFilter) => {
           return this.getValueFromFilter(kbnQueryFilter);
         })
-        .filter((value) => {
+        .filter((value: any) => {
           if (value) {
             return true;
           }

@@ -18,9 +18,12 @@
  */
 
 import React from 'react';
+import { ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
+import { MountPoint } from 'kibana/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 
 const dataShim = {
   ui: {
@@ -108,5 +111,59 @@ describe('TopNavMenu', () => {
     );
     expect(component.find('.kbnTopNavMenu').length).toBe(1);
     expect(component.find('.myCoolClass').length).toBeTruthy();
+  });
+
+  describe('when setMenuMountPoint is provided', () => {
+    let portalTarget: HTMLElement;
+    let mountPoint: MountPoint;
+    let setMountPoint: jest.Mock<(mountPoint: MountPoint<HTMLElement>) => void>;
+    let dom: ReactWrapper;
+
+    const refresh = () => {
+      new Promise(async (resolve) => {
+        if (dom) {
+          act(() => {
+            dom.update();
+          });
+        }
+        setImmediate(() => resolve(dom)); // flushes any pending promises
+      });
+    };
+
+    beforeEach(() => {
+      portalTarget = document.createElement('div');
+      document.body.append(portalTarget);
+      setMountPoint = jest.fn().mockImplementation((mp) => (mountPoint = mp));
+    });
+
+    afterEach(() => {
+      if (portalTarget) {
+        portalTarget.remove();
+      }
+    });
+
+    it('mounts the menu inside the provided mountPoint', async () => {
+      const component = mountWithIntl(
+        <TopNavMenu
+          appName={'test'}
+          config={menuItems}
+          showSearchBar={true}
+          data={dataShim as any}
+          setMenuMountPoint={setMountPoint}
+        />
+      );
+
+      act(() => {
+        mountPoint(portalTarget);
+      });
+
+      await refresh();
+
+      expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
+      expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
+
+      // menu is rendered outside of the component
+      expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
+    });
   });
 });

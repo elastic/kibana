@@ -36,6 +36,7 @@ export function azureMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.azureMetrics.nameTitle', {
       defaultMessage: 'Azure metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.azureMetrics.shortDescription', {

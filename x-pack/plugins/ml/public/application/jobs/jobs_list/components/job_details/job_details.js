@@ -14,18 +14,20 @@ import { JsonPane } from './json_tab';
 import { DatafeedPreviewPane } from './datafeed_preview_tab';
 import { AnnotationsTable } from '../../../../components/annotations/annotations_table';
 import { AnnotationFlyout } from '../../../../components/annotations/annotation_flyout';
+import { ModelSnapshotTable } from '../../../../components/model_snapshots';
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
 import { i18n } from '@kbn/i18n';
+import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-export class JobDetails extends Component {
+export class JobDetailsUI extends Component {
   constructor(props) {
     super(props);
 
     this.state = {};
     if (this.props.addYourself) {
-      this.props.addYourself(props.jobId, this);
+      this.props.addYourself(props.jobId, (j) => this.updateJob(j));
     }
   }
 
@@ -33,13 +35,18 @@ export class JobDetails extends Component {
     this.props.removeYourself(this.props.jobId);
   }
 
-  static getDerivedStateFromProps(props) {
-    const { job, loading } = props;
-    return { job, loading };
+  updateJob(job) {
+    this.setState({ job });
   }
 
   render() {
     const { job } = this.state;
+    const {
+      services: {
+        http: { basePath },
+      },
+    } = this.props.kibana;
+
     if (job === undefined) {
       return (
         <div className="job-loading-spinner" data-test-subj="mlJobDetails loading">
@@ -62,10 +69,9 @@ export class JobDetails extends Component {
         modelSizeStats,
         jobTimingStats,
         datafeedTimingStats,
-      } = extractJobDetails(job);
+      } = extractJobDetails(job, basePath);
 
-      const { showFullDetails } = this.props;
-
+      const { showFullDetails, refreshJobList } = this.props;
       const tabs = [
         {
           id: 'job-settings',
@@ -175,6 +181,19 @@ export class JobDetails extends Component {
             </Fragment>
           ),
         });
+
+        tabs.push({
+          id: 'modelSnapshots',
+          'data-test-subj': 'mlJobListTab-modelSnapshots',
+          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.modelSnapshotsLabel', {
+            defaultMessage: 'Model snapshots',
+          }),
+          content: (
+            <Fragment>
+              <ModelSnapshotTable job={job} refreshJobList={refreshJobList} />
+            </Fragment>
+          ),
+        });
       }
 
       return (
@@ -185,10 +204,13 @@ export class JobDetails extends Component {
     }
   }
 }
-JobDetails.propTypes = {
+JobDetailsUI.propTypes = {
   jobId: PropTypes.string.isRequired,
   job: PropTypes.object,
   addYourself: PropTypes.func.isRequired,
   removeYourself: PropTypes.func.isRequired,
   showFullDetails: PropTypes.bool,
+  refreshJobList: PropTypes.func,
 };
+
+export const JobDetails = withKibana(JobDetailsUI);

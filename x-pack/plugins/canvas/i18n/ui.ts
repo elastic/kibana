@@ -181,6 +181,10 @@ export const ArgumentStrings = {
           url: URL,
         },
       }),
+    getUrlTypeChangeLegend: () =>
+      i18n.translate('xpack.canvas.uis.arguments.imageUpload.urlTypes.changeLegend', {
+        defaultMessage: 'Image upload type',
+      }),
   },
   Number: {
     getDisplayName: () =>
@@ -232,7 +236,11 @@ export const ArgumentStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.arguments.paletteLabel', {
-        defaultMessage: 'Choose a color palette',
+        defaultMessage: 'The collection of colors used to render the element',
+      }),
+    getCustomPaletteLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.customPaletteLabel', {
+        defaultMessage: 'Custom',
       }),
   },
   Percentage: {

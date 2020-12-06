@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import RowParser from '../../../lib/row_parser';
-import { collapseLiteralStrings } from '../../../../../es_ui_shared/public';
+import { XJson } from '../../../../../es_ui_shared/public';
 import * as utils from '../../../lib/utils';
 
 // @ts-ignore
@@ -29,6 +29,8 @@ import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
 
 import Autocomplete from '../../../lib/autocomplete/autocomplete';
+
+const { collapseLiteralStrings } = XJson;
 
 export class SenseEditor {
   currentReqRange: (Range & { markerRef: any }) | null;

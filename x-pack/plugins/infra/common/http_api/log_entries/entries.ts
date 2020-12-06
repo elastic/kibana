@@ -5,7 +5,9 @@
  */
 
 import * as rt from 'io-ts';
-import { logEntriesCursorRT } from './common';
+import { logEntryCursorRT } from '../../log_entry';
+import { jsonArrayRT } from '../../typed_json';
+import { logSourceColumnConfigurationRT } from '../log_sources';
 
 export const LOG_ENTRIES_PATH = '/api/log_entries/entries';
 
@@ -18,22 +20,23 @@ export const logEntriesBaseRequestRT = rt.intersection([
   rt.partial({
     query: rt.union([rt.string, rt.null]),
     size: rt.number,
+    columns: rt.array(logSourceColumnConfigurationRT),
   }),
 ]);
 
 export const logEntriesBeforeRequestRT = rt.intersection([
   logEntriesBaseRequestRT,
-  rt.type({ before: rt.union([logEntriesCursorRT, rt.literal('last')]) }),
+  rt.type({ before: rt.union([logEntryCursorRT, rt.literal('last')]) }),
 ]);
 
 export const logEntriesAfterRequestRT = rt.intersection([
   logEntriesBaseRequestRT,
-  rt.type({ after: rt.union([logEntriesCursorRT, rt.literal('first')]) }),
+  rt.type({ after: rt.union([logEntryCursorRT, rt.literal('first')]) }),
 ]);
 
 export const logEntriesCenteredRequestRT = rt.intersection([
   logEntriesBaseRequestRT,
-  rt.type({ center: logEntriesCursorRT }),
+  rt.type({ center: logEntryCursorRT }),
 ]);
 
 export const logEntriesRequestRT = rt.union([
@@ -54,7 +57,7 @@ export const logMessageConstantPartRT = rt.type({
 });
 export const logMessageFieldPartRT = rt.type({
   field: rt.string,
-  value: rt.unknown,
+  value: jsonArrayRT,
   highlights: rt.array(rt.string),
 });
 
@@ -64,7 +67,7 @@ export const logTimestampColumnRT = rt.type({ columnId: rt.string, timestamp: rt
 export const logFieldColumnRT = rt.type({
   columnId: rt.string,
   field: rt.string,
-  value: rt.unknown,
+  value: jsonArrayRT,
   highlights: rt.array(rt.string),
 });
 export const logMessageColumnRT = rt.type({
@@ -74,15 +77,17 @@ export const logMessageColumnRT = rt.type({
 
 export const logColumnRT = rt.union([logTimestampColumnRT, logFieldColumnRT, logMessageColumnRT]);
 
+export const logEntryContextRT = rt.union([
+  rt.type({}),
+  rt.type({ 'container.id': rt.string }),
+  rt.type({ 'host.name': rt.string, 'log.file.path': rt.string }),
+]);
+
 export const logEntryRT = rt.type({
   id: rt.string,
-  cursor: logEntriesCursorRT,
+  cursor: logEntryCursorRT,
   columns: rt.array(logColumnRT),
-  context: rt.union([
-    rt.type({}),
-    rt.type({ 'container.id': rt.string }),
-    rt.type({ 'host.name': rt.string, 'log.file.path': rt.string }),
-  ]),
+  context: logEntryContextRT,
 });
 
 export type LogMessageConstantPart = rt.TypeOf<typeof logMessageConstantPartRT>;
@@ -92,14 +97,21 @@ export type LogTimestampColumn = rt.TypeOf<typeof logTimestampColumnRT>;
 export type LogFieldColumn = rt.TypeOf<typeof logFieldColumnRT>;
 export type LogMessageColumn = rt.TypeOf<typeof logMessageColumnRT>;
 export type LogColumn = rt.TypeOf<typeof logColumnRT>;
+export type LogEntryContext = rt.TypeOf<typeof logEntryContextRT>;
 export type LogEntry = rt.TypeOf<typeof logEntryRT>;
 
 export const logEntriesResponseRT = rt.type({
-  data: rt.type({
-    entries: rt.array(logEntryRT),
-    topCursor: rt.union([logEntriesCursorRT, rt.null]),
-    bottomCursor: rt.union([logEntriesCursorRT, rt.null]),
-  }),
+  data: rt.intersection([
+    rt.type({
+      entries: rt.array(logEntryRT),
+      topCursor: rt.union([logEntryCursorRT, rt.null]),
+      bottomCursor: rt.union([logEntryCursorRT, rt.null]),
+    }),
+    rt.partial({
+      hasMoreBefore: rt.boolean,
+      hasMoreAfter: rt.boolean,
+    }),
+  ]),
 });
 
 export type LogEntriesResponse = rt.TypeOf<typeof logEntriesResponseRT>;

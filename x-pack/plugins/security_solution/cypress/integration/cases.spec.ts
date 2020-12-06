@@ -8,10 +8,10 @@ import { case1 } from '../objects/case';
 
 import {
   ALL_CASES_CLOSE_ACTION,
-  ALL_CASES_CLOSED_CASES_COUNT,
   ALL_CASES_CLOSED_CASES_STATS,
   ALL_CASES_COMMENTS_COUNT,
   ALL_CASES_DELETE_ACTION,
+  ALL_CASES_IN_PROGRESS_CASES_STATS,
   ALL_CASES_NAME,
   ALL_CASES_OPEN_CASES_COUNT,
   ALL_CASES_OPEN_CASES_STATS,
@@ -24,27 +24,31 @@ import {
   ALL_CASES_TAGS_COUNT,
 } from '../screens/all_cases';
 import {
-  ACTION,
   CASE_DETAILS_DESCRIPTION,
   CASE_DETAILS_PAGE_TITLE,
   CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN,
   CASE_DETAILS_STATUS,
   CASE_DETAILS_TAGS,
-  CASE_DETAILS_USER_ACTION,
+  CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME,
+  CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT,
   CASE_DETAILS_USERNAMES,
   PARTICIPANTS,
   REPORTER,
-  USER,
 } from '../screens/case_details';
 import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../screens/timeline';
 
 import { goToCaseDetails, goToCreateNewCase } from '../tasks/all_cases';
 import { openCaseTimeline } from '../tasks/case_details';
-import { backToCases, createNewCase } from '../tasks/create_new_case';
+import {
+  attachTimeline,
+  backToCases,
+  createCase,
+  fillCasesMandatoryfields,
+} from '../tasks/create_new_case';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
-import { CASES } from '../urls/navigation';
+import { CASES_URL } from '../urls/navigation';
 
 describe('Cases', () => {
   before(() => {
@@ -56,16 +60,18 @@ describe('Cases', () => {
   });
 
   it('Creates a new case with timeline and opens the timeline', () => {
-    loginAndWaitForPageWithoutDateRange(CASES);
+    loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
-    createNewCase(case1);
+    fillCasesMandatoryfields(case1);
+    attachTimeline(case1);
+    createCase();
     backToCases();
 
-    cy.get(ALL_CASES_PAGE_TITLE).should('have.text', 'Cases Beta');
+    cy.get(ALL_CASES_PAGE_TITLE).should('have.text', 'Cases');
     cy.get(ALL_CASES_OPEN_CASES_STATS).should('have.text', 'Open cases1');
     cy.get(ALL_CASES_CLOSED_CASES_STATS).should('have.text', 'Closed cases0');
-    cy.get(ALL_CASES_OPEN_CASES_COUNT).should('have.text', 'Open cases (1)');
-    cy.get(ALL_CASES_CLOSED_CASES_COUNT).should('have.text', 'Closed cases (0)');
+    cy.get(ALL_CASES_IN_PROGRESS_CASES_STATS).should('have.text', 'In progress cases0');
+    cy.get(ALL_CASES_OPEN_CASES_COUNT).should('have.text', 'Open (1)');
     cy.get(ALL_CASES_REPORTERS_COUNT).should('have.text', 'Reporter1');
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
     cy.get(ALL_CASES_NAME).should('have.text', case1.name);
@@ -83,9 +89,9 @@ describe('Cases', () => {
 
     const expectedTags = case1.tags.join('');
     cy.get(CASE_DETAILS_PAGE_TITLE).should('have.text', case1.name);
-    cy.get(CASE_DETAILS_STATUS).should('have.text', 'open');
-    cy.get(CASE_DETAILS_USER_ACTION).eq(USER).should('have.text', case1.reporter);
-    cy.get(CASE_DETAILS_USER_ACTION).eq(ACTION).should('have.text', 'added description');
+    cy.get(CASE_DETAILS_STATUS).should('have.text', 'Open');
+    cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME).should('have.text', case1.reporter);
+    cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT).should('have.text', 'added description');
     cy.get(CASE_DETAILS_DESCRIPTION).should(
       'have.text',
       `${case1.description} ${case1.timeline.title}`
@@ -97,8 +103,8 @@ describe('Cases', () => {
 
     openCaseTimeline();
 
-    cy.get(TIMELINE_TITLE).should('have.attr', 'value', case1.timeline.title);
-    cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', case1.timeline.description);
-    cy.get(TIMELINE_QUERY).should('have.attr', 'value', case1.timeline.query);
+    cy.get(TIMELINE_TITLE).contains(case1.timeline.title);
+    cy.get(TIMELINE_DESCRIPTION).contains(case1.timeline.description);
+    cy.get(TIMELINE_QUERY).invoke('text').should('eq', case1.timeline.query);
   });
 });

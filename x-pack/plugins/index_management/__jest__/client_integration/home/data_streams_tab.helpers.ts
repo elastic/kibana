@@ -5,39 +5,54 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 
-import {
-  registerTestBed,
-  TestBed,
-  TestBedConfig,
-  findTestSubject,
-} from '../../../../../test_utils';
+import { EuiDescriptionListDescription } from '@elastic/eui';
+import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
 import { DataStream } from '../../../common';
-import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { IndexManagementHome } from '../../../public/application/sections/home';
+import { indexManagementStore } from '../../../public/application/store';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
-
-const testBedConfig: TestBedConfig = {
-  store: () => indexManagementStore(services as any),
-  memoryRouter: {
-    initialEntries: [`/indices`],
-    componentRoutePath: `/:section(indices|data_streams|templates)`,
-  },
-  doMountAsync: true,
-};
-
-const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), testBedConfig);
 
 export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   actions: {
     goToDataStreamsList: () => void;
     clickEmptyPromptIndexTemplateLink: () => void;
+    clickIncludeStatsSwitch: () => void;
+    clickIncludeManagedSwitch: () => void;
     clickReloadButton: () => void;
+    clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
+    clickDeleteActionAt: (index: number) => void;
+    selectDataStream: (name: string, selected: boolean) => void;
+    clickConfirmDelete: () => void;
+    clickDeleteDataStreamButton: () => void;
+    clickDetailPanelIndexTemplateLink: () => void;
   };
+  findDeleteActionAt: (index: number) => ReactWrapper;
+  findDeleteConfirmationModal: () => ReactWrapper;
+  findDetailPanel: () => ReactWrapper;
+  findDetailPanelTitle: () => string;
+  findEmptyPromptIndexTemplateLink: () => ReactWrapper;
+  findDetailPanelIlmPolicyLink: () => ReactWrapper;
+  findDetailPanelIlmPolicyName: () => ReactWrapper;
+  findDetailPanelIndexTemplateLink: () => ReactWrapper;
 }
 
-export const setup = async (): Promise<DataStreamsTabTestBed> => {
+export const setup = async (overridingDependencies: any = {}): Promise<DataStreamsTabTestBed> => {
+  const testBedConfig: TestBedConfig = {
+    store: () => indexManagementStore(services as any),
+    memoryRouter: {
+      initialEntries: [`/indices`],
+      componentRoutePath: `/:section(indices|data_streams|templates)`,
+    },
+    doMountAsync: true,
+  };
+
+  const initTestBed = registerTestBed(
+    WithAppDependencies(IndexManagementHome, overridingDependencies),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   /**
@@ -48,16 +63,28 @@ export const setup = async (): Promise<DataStreamsTabTestBed> => {
     testBed.find('data_streamsTab').simulate('click');
   };
 
-  const clickEmptyPromptIndexTemplateLink = async () => {
-    const { find, component, router } = testBed;
-
+  const findEmptyPromptIndexTemplateLink = () => {
+    const { find } = testBed;
     const templateLink = find('dataStreamsEmptyPromptTemplateLink');
+    return templateLink;
+  };
 
+  const clickEmptyPromptIndexTemplateLink = async () => {
+    const { component, router } = testBed;
     await act(async () => {
-      router.navigateTo(templateLink.props().href!);
+      router.navigateTo(findEmptyPromptIndexTemplateLink().props().href!);
     });
-
     component.update();
+  };
+
+  const clickIncludeStatsSwitch = () => {
+    const { find } = testBed;
+    find('includeStatsSwitch').simulate('click');
+  };
+
+  const clickIncludeManagedSwitch = () => {
+    const { find } = testBed;
+    find('includeManagedSwitch').simulate('click');
   };
 
   const clickReloadButton = () => {
@@ -65,10 +92,15 @@ export const setup = async (): Promise<DataStreamsTabTestBed> => {
     find('reloadButton').simulate('click');
   };
 
-  const clickIndicesAt = async (index: number) => {
-    const { component, table, router } = testBed;
+  const findTestSubjectAt = (testSubject: string, index: number) => {
+    const { table } = testBed;
     const { rows } = table.getMetaData('dataStreamTable');
-    const indicesLink = findTestSubject(rows[index].reactWrapper, 'indicesLink');
+    return findTestSubject(rows[index].reactWrapper, testSubject);
+  };
+
+  const clickIndicesAt = async (index: number) => {
+    const { component, router } = testBed;
+    const indicesLink = findTestSubjectAt('indicesLink', index);
 
     await act(async () => {
       router.navigateTo(indicesLink.props().href!);
@@ -77,20 +109,118 @@ export const setup = async (): Promise<DataStreamsTabTestBed> => {
     component.update();
   };
 
+  const clickNameAt = async (index: number) => {
+    const { component, router } = testBed;
+    const nameLink = findTestSubjectAt('nameLink', index);
+
+    await act(async () => {
+      router.navigateTo(nameLink.props().href!);
+    });
+
+    component.update();
+  };
+
+  const findDeleteActionAt = findTestSubjectAt.bind(null, 'deleteDataStream');
+
+  const clickDeleteActionAt = (index: number) => {
+    findDeleteActionAt(index).simulate('click');
+  };
+
+  const selectDataStream = (name: string, selected: boolean) => {
+    const {
+      form: { selectCheckBox },
+    } = testBed;
+    selectCheckBox(`checkboxSelectRow-${name}`, selected);
+  };
+
+  const findDeleteConfirmationModal = () => {
+    const { find } = testBed;
+    return find('deleteDataStreamsConfirmation');
+  };
+
+  const clickConfirmDelete = async () => {
+    const modal = document.body.querySelector('[data-test-subj="deleteDataStreamsConfirmation"]');
+    const confirmButton: HTMLButtonElement | null = modal!.querySelector(
+      '[data-test-subj="confirmModalConfirmButton"]'
+    );
+
+    await act(async () => {
+      confirmButton!.click();
+    });
+  };
+
+  const clickDeleteDataStreamButton = () => {
+    const { find } = testBed;
+    find('deleteDataStreamButton').simulate('click');
+  };
+
+  const clickDetailPanelIndexTemplateLink = async () => {
+    const { component, router, find } = testBed;
+    const indexTemplateLink = find('indexTemplateLink');
+
+    await act(async () => {
+      router.navigateTo(indexTemplateLink.props().href!);
+    });
+
+    component.update();
+  };
+
+  const findDetailPanel = () => {
+    const { find } = testBed;
+    return find('dataStreamDetailPanel');
+  };
+
+  const findDetailPanelTitle = () => {
+    const { find } = testBed;
+    return find('dataStreamDetailPanelTitle').text();
+  };
+
+  const findDetailPanelIlmPolicyLink = () => {
+    const { find } = testBed;
+    return find('ilmPolicyLink');
+  };
+
+  const findDetailPanelIndexTemplateLink = () => {
+    const { find } = testBed;
+    return find('indexTemplateLink');
+  };
+
+  const findDetailPanelIlmPolicyName = () => {
+    const descriptionList = testBed.component.find(EuiDescriptionListDescription);
+    // ilm policy is the last in the details list
+    return descriptionList.last();
+  };
+
   return {
     ...testBed,
     actions: {
       goToDataStreamsList,
       clickEmptyPromptIndexTemplateLink,
+      clickIncludeStatsSwitch,
+      clickIncludeManagedSwitch,
       clickReloadButton,
+      clickNameAt,
       clickIndicesAt,
+      clickDeleteActionAt,
+      selectDataStream,
+      clickConfirmDelete,
+      clickDeleteDataStreamButton,
+      clickDetailPanelIndexTemplateLink,
     },
+    findDeleteActionAt,
+    findDeleteConfirmationModal,
+    findDetailPanel,
+    findDetailPanelTitle,
+    findEmptyPromptIndexTemplateLink,
+    findDetailPanelIlmPolicyLink,
+    findDetailPanelIlmPolicyName,
+    findDetailPanelIndexTemplateLink,
   };
 };
 
-export const createDataStreamPayload = (name: string): DataStream => ({
-  name,
-  timeStampField: '@timestamp',
+export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataStream => ({
+  name: 'my-data-stream',
+  timeStampField: { name: '@timestamp' },
   indices: [
     {
       name: 'indexName',
@@ -98,4 +228,37 @@ export const createDataStreamPayload = (name: string): DataStream => ({
     },
   ],
   generation: 1,
+  health: 'green',
+  indexTemplateName: 'indexTemplate',
+  storageSize: '1b',
+  maxTimeStamp: 420,
+  privileges: {
+    delete_index: true,
+  },
+  ...dataStream,
+});
+
+export const createDataStreamBackingIndex = (indexName: string, dataStreamName: string) => ({
+  health: '',
+  status: '',
+  primary: '',
+  replica: '',
+  documents: '',
+  documents_deleted: '',
+  size: '',
+  primary_size: '',
+  name: indexName,
+  data_stream: dataStreamName,
+});
+
+export const createNonDataStreamIndex = (name: string) => ({
+  health: 'green',
+  status: 'open',
+  primary: 1,
+  replica: 1,
+  documents: 10000,
+  documents_deleted: 100,
+  size: '156kb',
+  primary_size: '156kb',
+  name,
 });

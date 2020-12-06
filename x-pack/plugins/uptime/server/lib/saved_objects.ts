@@ -22,7 +22,11 @@ export const umDynamicSettings: SavedObjectsType = {
   hidden: false,
   namespaceType: 'single',
   mappings: {
+    dynamic: false,
     properties: {
+      /* Leaving these commented to make it clear that these fields exist, even though we don't want them indexed.
+         When adding new fields please add them here. If they need to be searchable put them in the uncommented
+         part of properties.
       heartbeatIndices: {
         type: 'keyword',
       },
@@ -32,6 +36,10 @@ export const umDynamicSettings: SavedObjectsType = {
       certExpirationThreshold: {
         type: 'long',
       },
+      defaultConnectors: {
+        type: 'keyword',
+      },
+      */
     },
   },
 };
@@ -40,7 +48,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
   getUptimeDynamicSettings: async (client): Promise<DynamicSettings> => {
     try {
       const obj = await client.get<DynamicSettings>(umDynamicSettings.name, settingsObjectId);
-      return obj.attributes;
+      return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULTS;
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return DYNAMIC_SETTINGS_DEFAULTS;

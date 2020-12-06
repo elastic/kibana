@@ -1,0 +1,10 @@
+{
+  "id": "globalSearchBar",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["globalSearch"],
+  "optionalPlugins": ["usageCollection", "savedObjectsTagging"],
+  "configPath": ["xpack", "global_search_bar"]
+}

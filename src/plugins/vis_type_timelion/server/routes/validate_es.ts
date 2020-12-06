@@ -18,9 +18,9 @@
  */
 
 import _ from 'lodash';
-import { IRouter } from 'kibana/server';
+import { IRouter, CoreSetup } from 'kibana/server';
 
-export function validateEsRoute(router: IRouter) {
+export function validateEsRoute(router: IRouter, core: CoreSetup) {
   router.get(
     {
       path: '/api/timelion/validate/es',
@@ -29,32 +29,32 @@ export function validateEsRoute(router: IRouter) {
     async function (context, request, response) {
       const uiSettings = await context.core.uiSettings.client.getAll();
 
-      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
-
       const timefield = uiSettings['timelion:es.timefield'];
 
       const body = {
-        index: uiSettings['es.default_index'],
-        body: {
-          aggs: {
-            maxAgg: {
-              max: {
-                field: timefield,
+        params: {
+          index: uiSettings['es.default_index'],
+          body: {
+            aggs: {
+              maxAgg: {
+                max: {
+                  field: timefield,
+                },
+              },
+              minAgg: {
+                min: {
+                  field: timefield,
+                },
               },
             },
-            minAgg: {
-              min: {
-                field: timefield,
-              },
-            },
+            size: 0,
           },
-          size: 0,
         },
       };
 
-      let resp = {};
+      let resp;
       try {
-        resp = await callAsCurrentUser('search', body);
+        resp = (await context.search!.search(body, {}).toPromise()).rawResponse;
       } catch (errResp) {
         resp = errResp;
       }

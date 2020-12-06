@@ -19,34 +19,32 @@
 
 import { i18n } from '@kbn/i18n';
 import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { TableVisConfig } from './types';
 
-export type Input = KibanaDatatable;
+export type Input = Datatable;
 
 interface Arguments {
   visConfig: string | null;
 }
 
-type VisParams = Required<Arguments>;
-
-interface RenderValue {
+export interface TableVisRenderValue {
   visData: TableContext;
   visType: 'table';
-  visConfig: VisParams;
-  params: {
-    listenOnChange: boolean;
-  };
+  visConfig: TableVisConfig;
 }
 
-export const createTableVisFn = (): ExpressionFunctionDefinition<
+export type TableExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'kibana_table',
   Input,
   Arguments,
-  Render<RenderValue>
-> => ({
+  Render<TableVisRenderValue>
+>;
+
+export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
   name: 'kibana_table',
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['datatable'],
   help: i18n.translate('visTypeTable.function.help', {
     defaultMessage: 'Table visualization',
   }),
@@ -63,14 +61,11 @@ export const createTableVisFn = (): ExpressionFunctionDefinition<
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'table_vis',
       value: {
         visData: convertedData,
         visType: 'table',
         visConfig,
-        params: {
-          listenOnChange: true,
-        },
       },
     };
   },

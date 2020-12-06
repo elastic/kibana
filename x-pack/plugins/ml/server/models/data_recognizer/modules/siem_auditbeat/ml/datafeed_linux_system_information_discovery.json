@@ -1,0 +1,31 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "max_empty_searches": 10,
+    "query": {
+        "bool": {
+            "must": [
+              {
+                "bool": {
+                  "should": [
+                    {"term": {"process.name": "cat"}},
+                    {"term": {"process.name": "grep"}},
+                    {"term": {"process.name": "head"}},
+                    {"term": {"process.name": "hostname"}},
+                    {"term": {"process.name": "less"}},
+                    {"term": {"process.name": "ls"}},
+                    {"term": {"process.name": "lsmod"}},
+                    {"term": {"process.name": "more"}},
+                    {"term": {"process.name": "strings"}},
+                    {"term": {"process.name": "tail"}},
+                    {"term": {"process.name": "uptime"}},
+                    {"term": {"process.name": "uname"}}
+                  ]
+                }
+              }
+            ]
+        }
+    }
+}

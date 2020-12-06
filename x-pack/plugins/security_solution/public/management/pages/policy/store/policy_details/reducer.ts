@@ -4,10 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
-import { Immutable, PolicyConfig, UIPolicyConfig } from '../../../../../../common/endpoint/types';
+import {
+  Immutable,
+  PolicyConfig,
+  UIPolicyConfig,
+  PolicyData,
+} from '../../../../../../common/endpoint/types';
 import { ImmutableReducer } from '../../../../../common/store';
 import { AppAction } from '../../../../../common/store/actions';
 import { PolicyDetailsState } from '../../types';
+
+const updatePolicyConfigInPolicyData = (
+  policyData: Immutable<PolicyData>,
+  policyConfig: Immutable<PolicyConfig>
+) => ({
+  ...policyData,
+  inputs: policyData.inputs.map((input) => ({
+    ...input,
+    config: input.config && {
+      ...input.config,
+      policy: {
+        ...input.config.policy,
+        value: policyConfig,
+      },
+    },
+  })),
+});
 
 /**
  * Return a fresh copy of initial state, since we mutate state in the reducer.
@@ -21,6 +43,7 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
     offline: 0,
     online: 0,
     total: 0,
+    other: 0,
   },
 });
 
@@ -78,13 +101,20 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     const isCurrentlyOnDetailsPage = isOnPolicyDetailsPage(newState);
     const wasPreviouslyOnDetailsPage = isOnPolicyDetailsPage(state);
 
-    // Did user just enter the Detail page? if so, then set the loading indicator and return new state
-    if (isCurrentlyOnDetailsPage && !wasPreviouslyOnDetailsPage) {
-      return {
-        ...newState,
-        isLoading: true,
-      };
+    if (isCurrentlyOnDetailsPage) {
+      // Did user just enter the Detail page? if so, then
+      // set the loading indicator and return new state
+      if (!wasPreviouslyOnDetailsPage) {
+        return {
+          ...newState,
+          isLoading: true,
+        };
+      }
+      // Else, user was already on the details page,
+      // just return the updated state with new location data
+      return newState;
     }
+
     return {
       ...initialPolicyDetailsState(),
       location: action.payload,
@@ -101,14 +131,14 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     /**
      * This is directly changing redux state because `policyItem.inputs` was copied over and not cloned.
      */
-    // @ts-ignore
+    // @ts-expect-error
     newState.policyItem.inputs[0].config.policy.value = newPolicy;
 
     Object.entries(action.payload.policyConfig).forEach(([section, newSettings]) => {
       /**
        * this is not safe because `action.payload.policyConfig` may have excess keys
        */
-      // @ts-ignore
+      // @ts-expect-error
       newPolicy[section as keyof UIPolicyConfig] = {
         ...newPolicy[section as keyof UIPolicyConfig],
         ...newSettings,
@@ -116,6 +146,27 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     });
 
     return newState;
+  }
+
+  if (action.type === 'userChangedAntivirusRegistration') {
+    if (state.policyItem) {
+      const policyConfig = fullPolicy(state);
+
+      return {
+        ...state,
+        policyItem: updatePolicyConfigInPolicyData(state.policyItem, {
+          ...policyConfig,
+          windows: {
+            ...policyConfig.windows,
+            antivirus_registration: {
+              enabled: action.payload.enabled,
+            },
+          },
+        }),
+      };
+    } else {
+      return state;
+    }
   }
 
   return state;

@@ -430,37 +430,65 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
             onClick={[Function]}
             type="button"
           >
-            <button
-              className="euiButton euiButton--primary euiButton--fill"
+            <EuiButtonDisplay
+              baseClassName="euiButton"
               data-test-subj="enableCollectionInterval"
               disabled={true}
+              element="button"
+              fill={true}
+              isDisabled={true}
+              isLoading={true}
               onClick={[Function]}
               type="button"
             >
-              <span
-                className="euiButton__content"
+              <button
+                className="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                data-test-subj="enableCollectionInterval"
+                disabled={true}
+                onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
+                type="button"
               >
-                <EuiLoadingSpinner
-                  className="euiButton__spinner"
-                  size="m"
+                <EuiButtonContent
+                  className="euiButton__content"
+                  iconSide="left"
+                  isLoading={true}
+                  textProps={
+                    Object {
+                      "className": "euiButton__text",
+                    }
+                  }
                 >
                   <span
-                    className="euiLoadingSpinner euiLoadingSpinner--medium euiButton__spinner"
-                  />
-                </EuiLoadingSpinner>
-                <span
-                  className="euiButton__text"
-                >
-                  <FormattedMessage
-                    defaultMessage="Turn on monitoring"
-                    id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
-                    values={Object {}}
+                    className="euiButtonContent euiButton__content"
                   >
-                    Turn on monitoring
-                  </FormattedMessage>
-                </span>
-              </span>
-            </button>
+                    <EuiLoadingSpinner
+                      className="euiButtonContent__spinner"
+                      size="m"
+                    >
+                      <span
+                        className="euiLoadingSpinner euiLoadingSpinner--medium euiButtonContent__spinner"
+                      />
+                    </EuiLoadingSpinner>
+                    <span
+                      className="euiButton__text"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Turn on monitoring"
+                        id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
+                        values={Object {}}
+                      >
+                        Turn on monitoring
+                      </FormattedMessage>
+                    </span>
+                  </span>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonDisplay>
           </EuiButton>
         </div>
       </EuiFlexItem>
@@ -728,28 +756,54 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
             onClick={[Function]}
             type="button"
           >
-            <button
-              className="euiButton euiButton--primary euiButton--fill"
+            <EuiButtonDisplay
+              baseClassName="euiButton"
               data-test-subj="enableCollectionInterval"
+              element="button"
+              fill={true}
+              isLoading={false}
               onClick={[Function]}
               type="button"
             >
-              <span
-                className="euiButton__content"
+              <button
+                className="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="enableCollectionInterval"
+                onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
+                type="button"
               >
-                <span
-                  className="euiButton__text"
+                <EuiButtonContent
+                  className="euiButton__content"
+                  iconSide="left"
+                  isLoading={false}
+                  textProps={
+                    Object {
+                      "className": "euiButton__text",
+                    }
+                  }
                 >
-                  <FormattedMessage
-                    defaultMessage="Turn on monitoring"
-                    id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
-                    values={Object {}}
+                  <span
+                    className="euiButtonContent euiButton__content"
                   >
-                    Turn on monitoring
-                  </FormattedMessage>
-                </span>
-              </span>
-            </button>
+                    <span
+                      className="euiButton__text"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Turn on monitoring"
+                        id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
+                        values={Object {}}
+                      >
+                        Turn on monitoring
+                      </FormattedMessage>
+                    </span>
+                  </span>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonDisplay>
           </EuiButton>
         </div>
       </EuiFlexItem>

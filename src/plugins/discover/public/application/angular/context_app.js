@@ -56,8 +56,8 @@ getAngularModule().directive('contextApp', function ContextApp() {
 });
 
 function ContextAppController($scope, Private) {
-  const { filterManager, indexpatterns, uiSettings } = getServices();
-  const queryParameterActions = getQueryParameterActions(filterManager, indexpatterns);
+  const { filterManager, indexPatterns, uiSettings } = getServices();
+  const queryParameterActions = getQueryParameterActions(filterManager, indexPatterns);
   const queryActions = Private(QueryActionsProvider);
   this.state = createInitialState(
     parseInt(uiSettings.get(CONTEXT_STEP_SETTING), 10),

@@ -57,6 +57,8 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     optionalPlugins: true,
     ui: true,
     server: true,
+    extraPublicDirs: true,
+    requiredBundles: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -70,7 +72,11 @@ const KNOWN_MANIFEST_FIELDS = (() => {
  * @param packageInfo Kibana package info.
  * @internal
  */
-export async function parseManifest(pluginPath: string, packageInfo: PackageInfo, log: Logger) {
+export async function parseManifest(
+  pluginPath: string,
+  packageInfo: PackageInfo,
+  log: Logger
+): Promise<PluginManifest> {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
 
   let manifestContent;
@@ -110,7 +116,7 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
-  if (!isCamelCase(manifest.id)) {
+  if (!packageInfo.dist && !isCamelCase(manifest.id)) {
     log.warn(`Expect plugin "id" in camelCase, but found: ${manifest.id}`);
   }
 
@@ -126,6 +132,19 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
       manifestPath,
       new Error(
         `The "configPath" in plugin manifest for "${manifest.id}" should either be a string or an array of strings.`
+      )
+    );
+  }
+
+  if (
+    manifest.extraPublicDirs &&
+    (!Array.isArray(manifest.extraPublicDirs) ||
+      !manifest.extraPublicDirs.every((dir) => typeof dir === 'string'))
+  ) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `The "extraPublicDirs" in plugin manifest for "${manifest.id}" should be an array of strings.`
       )
     );
   }
@@ -173,8 +192,10 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     configPath: manifest.configPath || snakeCase(manifest.id),
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
+    requiredBundles: Array.isArray(manifest.requiredBundles) ? manifest.requiredBundles : [],
     ui: includesUiPlugin,
     server: includesServerPlugin,
+    extraPublicDirs: manifest.extraPublicDirs,
   };
 }
 

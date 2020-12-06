@@ -9,6 +9,7 @@ import {
   Description,
   NoteOrUndefined,
   ThreatOrUndefined,
+  ThresholdOrUndefined,
   FalsePositives,
   From,
   Immutable,
@@ -28,24 +29,45 @@ import {
   Version,
   MetaOrUndefined,
   RuleId,
-  ListAndOrUndefined,
+  AuthorOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  LicenseOrUndefined,
+  RiskScoreMappingOrUndefined,
+  RuleNameOverrideOrUndefined,
+  SeverityMappingOrUndefined,
+  TimestampOverrideOrUndefined,
+  Type,
+  EventCategoryOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
-import { CallAPIOptions } from '../../../../../../src/core/server';
+import {
+  ThreatIndexOrUndefined,
+  ThreatQueryOrUndefined,
+  ThreatMappingOrUndefined,
+  ThreatLanguageOrUndefined,
+  ConcurrentSearchesOrUndefined,
+  ItemsPerSearchOrUndefined,
+} from '../../../common/detection_engine/schemas/types/threat_mapping';
+
+import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
-import { RuleType } from '../../../common/detection_engine/types';
+import { ListArrayOrUndefined } from '../../../common/detection_engine/schemas/types';
 
 export type PartialFilter = Partial<Filter>;
 
 export interface RuleTypeParams {
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: AuthorOrUndefined;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   note: NoteOrUndefined;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   ruleId: RuleId;
   immutable: Immutable;
   index: IndexOrUndefined;
   language: LanguageOrUndefined;
+  license: LicenseOrUndefined;
   outputIndex: OutputIndex;
   savedId: SavedIdOrUndefined;
   timelineId: TimelineIdOrUndefined;
@@ -56,20 +78,32 @@ export interface RuleTypeParams {
   filters: PartialFilter[] | undefined;
   maxSignals: MaxSignals;
   riskScore: RiskScore;
+  riskScoreMapping: RiskScoreMappingOrUndefined;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   severity: Severity;
+  severityMapping: SeverityMappingOrUndefined;
   threat: ThreatOrUndefined;
+  threshold: ThresholdOrUndefined;
+  threatFilters: PartialFilter[] | undefined;
+  threatIndex: ThreatIndexOrUndefined;
+  threatQuery: ThreatQueryOrUndefined;
+  threatMapping: ThreatMappingOrUndefined;
+  threatLanguage: ThreatLanguageOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: To;
-  type: RuleType;
+  type: Type;
   references: References;
   version: Version;
-  exceptionsList: ListAndOrUndefined;
+  exceptionsList: ListArrayOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type CallWithRequest<T extends Record<string, any>, V> = (
   endpoint: string,
   params: T,
-  options?: CallAPIOptions
+  options?: LegacyCallAPIOptions
 ) => Promise<V>;
 
 export type RefreshTypes = false | 'wait_for';

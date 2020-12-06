@@ -20,18 +20,18 @@
 import { i18n } from '@kbn/i18n';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { KibanaLegacySetup } from '../../kibana_legacy/public';
+import { UrlForwardingSetup } from '../../url_forwarding/public';
 import {
   IndexPatternManagementService,
   IndexPatternManagementServiceSetup,
   IndexPatternManagementServiceStart,
 } from './service';
 
-import { ManagementSetup, ManagementApp, ManagementSectionId } from '../../management/public';
+import { ManagementSetup } from '../../management/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
-  kibanaLegacy: KibanaLegacySetup;
+  urlForwarding: UrlForwardingSetup;
 }
 
 export interface IndexPatternManagementStartDependencies {
@@ -57,15 +57,14 @@ export class IndexPatternManagementPlugin
       IndexPatternManagementStartDependencies
     > {
   private readonly indexPatternManagementService = new IndexPatternManagementService();
-  private managementApp?: ManagementApp;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
-    { management, kibanaLegacy }: IndexPatternManagementSetupDependencies
+    { management, urlForwarding }: IndexPatternManagementSetupDependencies
   ) {
-    const kibanaSection = management.sections.getSection(ManagementSectionId.Kibana);
+    const kibanaSection = management.sections.section.kibana;
 
     if (!kibanaSection) {
       throw new Error('`kibana` management section not found.');
@@ -74,20 +73,22 @@ export class IndexPatternManagementPlugin
     const newAppPath = `management/kibana/${IPM_APP_ID}`;
     const legacyPatternsPath = 'management/kibana/index_patterns';
 
-    kibanaLegacy.forwardApp('management/kibana/index_pattern', newAppPath, (path) => '/create');
-    kibanaLegacy.forwardApp(legacyPatternsPath, newAppPath, (path) => {
+    urlForwarding.forwardApp('management/kibana/index_pattern', newAppPath, (path) => '/create');
+    urlForwarding.forwardApp(legacyPatternsPath, newAppPath, (path) => {
       const pathInApp = path.substr(legacyPatternsPath.length + 1);
       return pathInApp && `/patterns${pathInApp}`;
     });
 
-    this.managementApp = kibanaSection.registerApp({
+    kibanaSection.registerApp({
       id: IPM_APP_ID,
       title: sectionsHeader,
       order: 0,
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params);
+        return mountManagementSection(core.getStartServices, params, () =>
+          this.indexPatternManagementService.environmentService.getEnvironment().ml()
+        );
       },
     });
 
@@ -95,10 +96,6 @@ export class IndexPatternManagementPlugin
   }
 
   public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {
-    if (!core.application.capabilities.management.kibana.index_patterns) {
-      this.managementApp!.disable();
-    }
-
     return this.indexPatternManagementService.start();
   }
 

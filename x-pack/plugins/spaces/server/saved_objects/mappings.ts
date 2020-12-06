@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { deepFreeze } from '../../../../../src/core/server';
+import { deepFreeze } from '@kbn/std';
 
 export const SpacesSavedObjectMappings = deepFreeze({
   properties: {
@@ -37,4 +37,9 @@ export const SpacesSavedObjectMappings = deepFreeze({
       type: 'boolean',
     },
   },
+});
+
+export const UsageStatsMappings = deepFreeze({
+  dynamic: false as false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+  properties: {},
 });

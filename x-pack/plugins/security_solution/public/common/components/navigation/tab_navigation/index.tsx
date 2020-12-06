@@ -6,30 +6,55 @@
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
+import deepEqual from 'fast-deep-equal';
 
+import { APP_ID } from '../../../../../common/constants';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { getSearch } from '../helpers';
 import { TabNavigationProps, TabNavigationItemProps } from './types';
+import { useKibana } from '../../../lib/kibana';
+import { SecurityPageName } from '../../../../app/types';
+import { useFormatUrl } from '../../link_to';
 
 const TabNavigationItemComponent = ({
+  disabled,
   href,
   hrefWithSearch,
   id,
-  disabled,
   name,
   isSelected,
+  pageId,
+  urlSearch,
 }: TabNavigationItemProps) => {
-  const handleClick = useCallback(() => {
-    track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
-  }, [id]);
-
+  const history = useHistory();
+  const { navigateToApp, getUrlForApp } = useKibana().services.application;
+  const { formatUrl } = useFormatUrl(((pageId ?? id) as unknown) as SecurityPageName);
+  const handleClick = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      if (id in SecurityPageName && pageId == null) {
+        navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
+      } else {
+        history.push(hrefWithSearch);
+      }
+      track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
+    },
+    [history, hrefWithSearch, id, navigateToApp, pageId, urlSearch]
+  );
+  const appHref =
+    pageId != null
+      ? formatUrl(href)
+      : getUrlForApp(`${APP_ID}:${id}`, {
+          path: urlSearch,
+        });
   return (
     <EuiTab
-      data-href={href}
+      data-href={appHref}
       data-test-subj={`navigation-${id}`}
       disabled={disabled}
-      href={hrefWithSearch}
       isSelected={isSelected}
+      href={appHref}
       onClick={handleClick}
     >
       {name}
@@ -39,15 +64,28 @@ const TabNavigationItemComponent = ({
 
 const TabNavigationItem = React.memo(TabNavigationItemComponent);
 
-export const TabNavigationComponent = (props: TabNavigationProps) => {
-  const { display, navTabs, pageName, tabName } = props;
-
+export const TabNavigationComponent: React.FC<TabNavigationProps> = ({
+  display,
+  filters,
+  query,
+  navTabs,
+  pageName,
+  savedQuery,
+  sourcerer,
+  tabName,
+  timeline,
+  timerange,
+}) => {
   const mapLocationToTab = useCallback(
     (): string =>
       getOr(
         '',
         'id',
-        Object.values(navTabs).find((item) => tabName === item.id || pageName === item.id)
+        Object.values(navTabs).find(
+          (item) =>
+            (tabName === item.id && item.pageId != null) ||
+            (pageName === item.id && item.pageId == null)
+        )
       ),
     [pageName, tabName, navTabs]
   );
@@ -66,23 +104,32 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
     () =>
       Object.values(navTabs).map((tab) => {
         const isSelected = selectedTabId === tab.id;
-        const { query, filters, savedQuery, timerange, timeline } = props;
+        const search = getSearch(tab, {
+          filters,
+          query,
+          savedQuery,
+          sourcerer,
+          timeline,
+          timerange,
+        });
         const hrefWithSearch =
-          tab.href + getSearch(tab, { query, filters, savedQuery, timerange, timeline });
+          tab.href + getSearch(tab, { filters, query, savedQuery, sourcerer, timeline, timerange });
 
         return (
           <TabNavigationItem
             key={`navigation-${tab.id}`}
             id={tab.id}
             href={tab.href}
+            hrefWithSearch={hrefWithSearch}
             name={tab.name}
             disabled={tab.disabled}
-            hrefWithSearch={hrefWithSearch}
+            pageId={tab.pageId}
             isSelected={isSelected}
+            urlSearch={search}
           />
         );
       }),
-    [navTabs, selectedTabId, props]
+    [navTabs, selectedTabId, filters, query, savedQuery, sourcerer, timeline, timerange]
   );
 
   return <EuiTabs display={display}>{renderTabs}</EuiTabs>;
@@ -90,6 +137,19 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
 
 TabNavigationComponent.displayName = 'TabNavigationComponent';
 
-export const TabNavigation = React.memo(TabNavigationComponent);
+export const TabNavigation = React.memo(
+  TabNavigationComponent,
+  (prevProps, nextProps) =>
+    prevProps.display === nextProps.display &&
+    prevProps.pageName === nextProps.pageName &&
+    prevProps.savedQuery === nextProps.savedQuery &&
+    prevProps.tabName === nextProps.tabName &&
+    deepEqual(prevProps.filters, nextProps.filters) &&
+    deepEqual(prevProps.query, nextProps.query) &&
+    deepEqual(prevProps.navTabs, nextProps.navTabs) &&
+    deepEqual(prevProps.sourcerer, nextProps.sourcerer) &&
+    deepEqual(prevProps.timeline, nextProps.timeline) &&
+    deepEqual(prevProps.timerange, nextProps.timerange)
+);
 
 TabNavigation.displayName = 'TabNavigation';

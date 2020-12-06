@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { composeValidators, patternValidator } from '../../../../ml/public';
+import { composeValidators, patternValidator } from '../../../common/shared_imports';
 
-export type AggName = string;
+import { AggName } from '../../../common/types/aggregations';
 
 export function isAggName(arg: any): arg is AggName {
   // allow all characters except `[]>` and must not start or end with a space.

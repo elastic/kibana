@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { DataVisualizer } from '../data_visualizer';
 
 import { validateJobObject } from './validate_job_object';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { Detector } from '../../../common/types/anomaly_detection_jobs';
 import { MessageId, JobValidationMessage } from '../../../common/constants/messages';
+import { isValidAggregationField } from '../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 
 function isValidCategorizationConfig(job: CombinedJob, fieldName: string): boolean {
   return (
@@ -43,8 +45,9 @@ type Validator = (obj: {
   messages: Messages;
 }>;
 
-const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validator => {
-  const dv = new DataVisualizer(callWithRequest);
+const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Validator => {
+  const { asCurrentUser } = client;
+  const dv = new DataVisualizer(client);
 
   const modelPlotConfigTerms = job?.model_plot_config?.terms ?? '';
   const modelPlotConfigFieldCount =
@@ -65,6 +68,7 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
     const relevantDetectors = detectors.filter((detector) => {
       return typeof detector[fieldName] !== 'undefined';
     });
+    const datafeedConfig = job.datafeed_config;
 
     if (relevantDetectors.length > 0) {
       try {
@@ -73,15 +77,30 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
         ] as string[];
 
         // use fieldCaps endpoint to get data about whether fields are aggregatable
-        const fieldCaps = await callWithRequest('fieldCaps', {
+        const { body: fieldCaps } = await asCurrentUser.fieldCaps({
           index: job.datafeed_config.indices.join(','),
           fields: uniqueFieldNames,
         });
+        const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
 
         let aggregatableFieldNames: string[] = [];
         // parse fieldCaps to return an array of just the fields which are aggregatable
         if (typeof fieldCaps === 'object' && typeof fieldCaps.fields === 'object') {
           aggregatableFieldNames = uniqueFieldNames.filter((field) => {
+            if (
+              typeof datafeedConfig?.script_fields === 'object' &&
+              datafeedConfig?.script_fields.hasOwnProperty(field)
+            ) {
+              return true;
+            }
+            // if datafeed has aggregation fields, check recursively if field exist
+            if (
+              datafeedAggregations !== undefined &&
+              isValidAggregationField(datafeedAggregations, field)
+            ) {
+              return true;
+            }
+
             if (typeof fieldCaps.fields[field] !== 'undefined') {
               const fieldType = Object.keys(fieldCaps.fields[field])[0];
               return fieldCaps.fields[field][fieldType].aggregatable;
@@ -95,7 +114,10 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
           job.datafeed_config.query,
           aggregatableFieldNames,
           0,
-          job.data_description.time_field
+          job.data_description.time_field,
+          undefined,
+          undefined,
+          datafeedConfig
         );
 
         uniqueFieldNames.forEach((uniqueFieldName) => {
@@ -150,7 +172,7 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
 };
 
 export async function validateCardinality(
-  callWithRequest: APICaller,
+  client: IScopedClusterClient,
   job?: CombinedJob
 ): Promise<Messages> | never {
   const messages: Messages = [];
@@ -170,7 +192,7 @@ export async function validateCardinality(
   }
 
   // validate({ type, isInvalid }) asynchronously returns an array of validation messages
-  const validate = validateFactory(callWithRequest, job);
+  const validate = validateFactory(client, job);
 
   const modelPlotEnabled = job.model_plot_config?.enabled ?? false;
 

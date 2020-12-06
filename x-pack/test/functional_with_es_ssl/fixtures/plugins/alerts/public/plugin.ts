@@ -15,21 +15,23 @@ export type Start = void;
 
 export interface AlertingExamplePublicSetupDeps {
   alerts: AlertingSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
-  public setup(core: CoreSetup, { alerts, triggers_actions_ui }: AlertingExamplePublicSetupDeps) {
+  public setup(core: CoreSetup, { alerts, triggersActionsUi }: AlertingExamplePublicSetupDeps) {
     alerts.registerNavigation(
-      'consumer-noop',
+      'alerting_fixture',
       'test.noop',
       (alert: SanitizedAlert, alertType: AlertType) => `/alert/${alert.id}`
     );
 
-    triggers_actions_ui.alertTypeRegistry.register({
+    triggersActionsUi.alertTypeRegistry.register({
       id: 'test.always-firing',
       name: 'Test Always Firing',
+      description: 'Always fires',
       iconClass: 'alert',
+      documentationUrl: null,
       alertParamsExpression: () => React.createElement('div', null, 'Test Always Firing'),
       validate: () => {
         return { errors: {} };
@@ -37,10 +39,12 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
       requiresAppContext: false,
     });
 
-    triggers_actions_ui.alertTypeRegistry.register({
+    triggersActionsUi.alertTypeRegistry.register({
       id: 'test.noop',
       name: 'Test Noop',
+      description: `Doesn't do anything`,
       iconClass: 'alert',
+      documentationUrl: null,
       alertParamsExpression: () => React.createElement('div', null, 'Test Noop'),
       validate: () => {
         return { errors: {} };
@@ -49,8 +53,8 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
     });
 
     core.application.register({
-      id: 'consumer-noop',
-      title: 'No Op App',
+      id: 'alerting_fixture',
+      title: 'Alerting Fixture App',
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');

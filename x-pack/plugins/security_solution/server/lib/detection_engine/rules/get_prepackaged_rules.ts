@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { formatErrors } from '../../../../common/format_errors';
 import { exactCheck } from '../../../../common/exact_check';
 import {
   addPrepackagedRulesSchema,
@@ -14,6 +15,8 @@ import {
   AddPrepackagedRulesSchemaDecoded,
 } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { BadRequestError } from '../errors/bad_request_error';
+
+// TODO: convert rules files to TS and add explicit type definitions
 import { rawRules } from './prepackaged_rules';
 
 /**
@@ -35,11 +38,9 @@ export const validateAllPrepackagedRules = (
         `name: "${ruleName}", rule_id: "${ruleId}" within the folder rules/prepackaged_rules ` +
           `is not a valid detection engine rule. Expect the system ` +
           `to not work with pre-packaged rules until this rule is fixed ` +
-          `or the file is removed. Error is: ${errors.join()}, Full rule contents are:\n${JSON.stringify(
-            rule,
-            null,
-            2
-          )}`
+          `or the file is removed. Error is: ${formatErrors(
+            errors
+          ).join()}, Full rule contents are:\n${JSON.stringify(rule, null, 2)}`
       );
     };
 
@@ -50,5 +51,7 @@ export const validateAllPrepackagedRules = (
   });
 };
 
-export const getPrepackagedRules = (rules = rawRules): AddPrepackagedRulesSchemaDecoded[] =>
-  validateAllPrepackagedRules(rules);
+export const getPrepackagedRules = (
+  // @ts-expect-error mock data is too loosely typed
+  rules: AddPrepackagedRulesSchema[] = rawRules
+): AddPrepackagedRulesSchemaDecoded[] => validateAllPrepackagedRules(rules);

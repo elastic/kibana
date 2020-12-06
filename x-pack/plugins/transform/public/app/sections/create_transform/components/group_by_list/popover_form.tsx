@@ -18,10 +18,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
 import {
-  AggName,
   dateHistogramIntervalFormatRegex,
   getEsAggFromGroupByConfig,
   isGroupByDateHistogram,
@@ -37,7 +37,7 @@ import {
 } from '../../../../common';
 
 export function isIntervalValid(
-  interval: optionalInterval,
+  interval: OptionalInterval,
   intervalType: PivotSupportedGroupByAggsWithInterval
 ) {
   if (interval !== '' && interval !== undefined) {
@@ -73,7 +73,7 @@ interface SelectOption {
   text: string;
 }
 
-type optionalInterval = string | undefined;
+type OptionalInterval = string | undefined;
 
 function getDefaultInterval(defaultData: PivotGroupByConfig): string | undefined {
   if (isGroupByDateHistogram(defaultData)) {

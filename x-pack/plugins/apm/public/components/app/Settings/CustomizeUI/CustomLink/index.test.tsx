@@ -4,20 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fireEvent, render, wait, RenderResult } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  waitFor,
+  RenderResult,
+} from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import * as apmApi from '../../../../../services/rest/createCallApmApi';
 import { License } from '../../../../../../../licensing/common/license';
-import * as hooks from '../../../../../hooks/useFetcher';
-import { LicenseContext } from '../../../../../context/LicenseContext';
+import * as hooks from '../../../../../hooks/use_fetcher';
+import { LicenseContext } from '../../../../../context/license/license_context';
 import { CustomLinkOverview } from '.';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
-import * as saveCustomLink from './CustomLinkFlyout/saveCustomLink';
-import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
+import * as saveCustomLink from './CreateEditCustomLinkFlyout/saveCustomLink';
+import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 
 const data = [
   {
@@ -35,9 +40,8 @@ const data = [
 ];
 
 describe('CustomLink', () => {
-  let callApmApiSpy: jasmine.Spy;
   beforeAll(() => {
-    callApmApiSpy = spyOn(apmApi, 'callApmApi').and.returnValue({});
+    jest.spyOn(apmApi, 'callApmApi').mockResolvedValue({});
   });
   afterAll(() => {
     jest.resetAllMocks();
@@ -54,9 +58,10 @@ describe('CustomLink', () => {
   });
   describe('empty prompt', () => {
     beforeAll(() => {
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: [],
-        status: 'success',
+        status: hooks.FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
       });
     });
 
@@ -75,9 +80,10 @@ describe('CustomLink', () => {
 
   describe('overview', () => {
     beforeAll(() => {
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data,
-        status: 'success',
+        status: hooks.FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
       });
     });
 
@@ -101,7 +107,7 @@ describe('CustomLink', () => {
       ]);
     });
 
-    it('checks if create custom link button is available and working', async () => {
+    it('checks if create custom link button is available and working', () => {
       const { queryByText, getByText } = render(
         <LicenseContext.Provider value={goldLicense}>
           <MockApmPluginContextWrapper>
@@ -113,27 +119,24 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(getByText('Create custom link'));
       });
-      await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
       expect(queryByText('Create link')).toBeInTheDocument();
     });
   });
 
   describe('Flyout', () => {
     const refetch = jest.fn();
-    let saveCustomLinkSpy: Function;
+    let saveCustomLinkSpy: jest.SpyInstance;
+
     beforeAll(() => {
-      saveCustomLinkSpy = spyOn(saveCustomLink, 'saveCustomLink');
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      saveCustomLinkSpy = jest.spyOn(saveCustomLink, 'saveCustomLink');
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data,
-        status: 'success',
+        status: hooks.FETCH_STATUS.SUCCESS,
         refetch,
       });
     });
-    afterEach(() => {
-      jest.resetAllMocks();
-    });
 
-    const openFlyout = async () => {
+    const openFlyout = () => {
       const component = render(
         <LicenseContext.Provider value={goldLicense}>
           <MockApmPluginContextWrapper>
@@ -145,15 +148,12 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(component.getByText('Create custom link'));
       });
-      await wait(() =>
-        expect(component.queryByText('Create link')).toBeInTheDocument()
-      );
-      await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
+      expect(component.queryByText('Create link')).toBeInTheDocument();
       return component;
     };
 
     it('creates a custom link', async () => {
-      const component = await openFlyout();
+      const component = openFlyout();
       const labelInput = component.getByTestId('label');
       act(() => {
         fireEvent.change(labelInput, {
@@ -167,7 +167,7 @@ describe('CustomLink', () => {
         });
       });
       await act(async () => {
-        await wait(() => fireEvent.submit(component.getByText('Save')));
+        fireEvent.submit(component.getByText('Save'));
       });
       expect(saveCustomLinkSpy).toHaveBeenCalledTimes(1);
     });
@@ -186,11 +186,12 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(editButtons[0]);
       });
-      expect(component.queryByText('Create link')).toBeInTheDocument();
+      await waitFor(() =>
+        expect(component.queryByText('Create link')).toBeInTheDocument()
+      );
       await act(async () => {
-        await wait(() => fireEvent.click(component.getByText('Delete')));
+        fireEvent.click(component.getByText('Delete'));
       });
-      expect(callApmApiSpy).toHaveBeenCalled();
       expect(refetch).toHaveBeenCalled();
     });
 
@@ -200,8 +201,8 @@ describe('CustomLink', () => {
           fireEvent.click(component.getByText('Add another filter'));
         }
       };
-      it('checks if add filter button is disabled after all elements have been added', async () => {
-        const component = await openFlyout();
+      it('checks if add filter button is disabled after all elements have been added', () => {
+        const component = openFlyout();
         expect(component.getAllByText('service.name').length).toEqual(1);
         addFilterField(component, 1);
         expect(component.getAllByText('service.name').length).toEqual(2);
@@ -211,8 +212,8 @@ describe('CustomLink', () => {
         addFilterField(component, 2);
         expect(component.getAllByText('service.name').length).toEqual(4);
       });
-      it('removes items already selected', async () => {
-        const component = await openFlyout();
+      it('removes items already selected', () => {
+        const component = openFlyout();
 
         const addFieldAndCheck = (
           fieldName: string,
@@ -268,9 +269,10 @@ describe('CustomLink', () => {
 
   describe('invalid license', () => {
     beforeAll(() => {
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: [],
-        status: 'success',
+        status: hooks.FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
       });
     });
     it('shows license prompt when user has a basic license', () => {

@@ -1,33 +1,37 @@
-.dscSidebar__container {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  background-color: transparent;
-  border-right-color: transparent;
-  border-bottom-color: transparent;
+.dscSidebar {
+  margin: 0;
+  flex-grow: 1;
+  padding-left: $euiSize;
+  width: $euiSize * 19;
+  height: 100%;
+
+  @include euiBreakpoint('xs', 's') {
+    width: 100%;
+    padding: $euiSize $euiSize 0 $euiSize;
+    background-color: $euiPageBackgroundColor;
+  }
 }
 
-.dscIndexPattern__container {
-  display: flex;
+.dscSidebar__group {
+  height: 100%;
+}
+
+.dscSidebar__mobile {
+  width: 100%;
+  padding: $euiSize $euiSize 0;
+
+  .dscSidebar__mobileBadge {
+    margin-left: $euiSizeS;
+    vertical-align: text-bottom;
+  }
+}
+
+.dscSidebar__flyoutHeader {
   align-items: center;
-  height: $euiSize * 3;
-  margin-top: -$euiSizeS;
-}
-
-.dscIndexPattern__triggerButton {
-  @include euiTitle('xs');
-  line-height: $euiSizeXXL;
 }
 
 .dscFieldList {
-  list-style: none;
-  margin-bottom: 0;
-}
-
-.dscFieldList--selected,
-.dscFieldList--unpopular,
-.dscFieldList--popular {
-  padding-left: $euiSizeS;
-  padding-right: $euiSizeS;
+  padding: 0 $euiSizeXS $euiSizeXS;
 }
 
 .dscFieldListHeader {
@@ -36,69 +40,18 @@
 }
 
 .dscFieldList--popular {
+  padding-bottom: $euiSizeS;
   background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
 }
 
-.dscFieldChooser {
-  padding-left: $euiSizeS !important;
-  padding-right: $euiSizeS !important;
-}
-
-.dscFieldChooser__toggle {
-  color: $euiColorMediumShade;
-  margin-left: $euiSizeS !important;
-}
-
 .dscSidebarItem {
-  border-top: 1px solid transparent;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2px;
-  cursor: pointer;
-  font-size: $euiFontSizeXS;
-  border-top: solid 1px transparent;
-  border-bottom: solid 1px transparent;
-  line-height: normal;
-
   &:hover,
-  &:focus {
+  &:focus-within,
+  &[class*='-isActive'] {
     .dscSidebarItem__action {
       opacity: 1;
     }
   }
-}
-
-.dscSidebarItem--active {
-  border-top: 1px solid $euiColorLightShade;
-  background: shade($euiColorLightestShade, 5%);
-  color: $euiColorFullShade;
-  .euiText {
-    font-weight: bold;
-  }
-}
-
-.dscSidebarField {
-  padding: $euiSizeXS 0;
-  display: flex;
-  align-items: flex-start;
-  max-width: 100%;
-  margin: 0;
-  width: 100%;
-  border: none;
-  border-radius: 0;
-  text-align: left;
-}
-
-.dscSidebarField__name {
-  margin-left: $euiSizeS;
-  flex-grow: 1;
-}
-
-.dscSidebarField__fieldIcon {
-  margin-top: $euiSizeXS / 2;
-  margin-right: $euiSizeXS / 2;
 }
 
 /**
@@ -107,50 +60,12 @@
  */
 .dscSidebarItem__action {
   opacity: 0; /* 1 */
-  transition: none;
+
+  &.dscSidebarItem__mobile {
+    opacity: 1;
+  }
 
   &:focus {
     opacity: 1; /* 2 */
   }
-  font-size: 12px;
-  padding: 2px 6px !important;
-  height: 22px !important;
-  min-width: auto !important;
-  .euiButton__content {
-    padding: 0 4px;
-  }
-}
-
-/*
-  Fixes EUI known issue https://github.com/elastic/eui/issues/1749
-*/
-.dscProgressBarTooltip__anchor {
-  display: block;
-}
-
-
-.dscFieldSearch {
-  padding: $euiSizeS;
-}
-
-.dscFieldSearch__toggleButton {
-  width: calc(100% - #{$euiSizeS});
-  color: $euiColorPrimary;
-  padding-left: $euiSizeXS;
-  margin-left: $euiSizeXS;
-}
-
-.dscFieldSearch__filterWrapper {
-  flex-grow: 0;
-}
-
-.dscFieldSearch__formWrapper {
-  padding: $euiSizeM;
-}
-
-.dscFieldDetails {
-  padding: $euiSizeS;
-  background-color: $euiColorLightestShade;
-  color: $euiTextColor;
-  margin-bottom: $euiSizeS;
 }

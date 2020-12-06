@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { curry } from 'lodash';
+import { curry, isUndefined, pick, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { postPagerduty } from './lib/post_pagerduty';
@@ -15,6 +15,18 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 // uses the PagerDuty Events API v2
 // https://v2.developer.pagerduty.com/docs/events-api-v2
 const PAGER_DUTY_API_URL = 'https://events.pagerduty.com/v2/enqueue';
+
+export type PagerDutyActionType = ActionType<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType,
+  unknown
+>;
+export type PagerDutyActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType
+>;
 
 // config definition
 
@@ -39,6 +51,10 @@ export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const EVENT_ACTION_TRIGGER = 'trigger';
 const EVENT_ACTION_RESOLVE = 'resolve';
 const EVENT_ACTION_ACKNOWLEDGE = 'acknowledge';
+const EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY = new Set([
+  EVENT_ACTION_RESOLVE,
+  EVENT_ACTION_ACKNOWLEDGE,
+]);
 
 const EventActionSchema = schema.oneOf([
   schema.literal(EVENT_ACTION_TRIGGER),
@@ -69,7 +85,7 @@ const ParamsSchema = schema.object(
 );
 
 function validateParams(paramsObject: unknown): string | void {
-  const { timestamp } = paramsObject as ActionParamsType;
+  const { timestamp, eventAction, dedupKey } = paramsObject as ActionParamsType;
   if (timestamp != null) {
     try {
       const date = Date.parse(timestamp);
@@ -91,6 +107,14 @@ function validateParams(paramsObject: unknown): string | void {
       });
     }
   }
+  if (eventAction && EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY.has(eventAction) && !dedupKey) {
+    return i18n.translate('xpack.actions.builtin.pagerduty.missingDedupkeyErrorMessage', {
+      defaultMessage: `DedupKey is required when eventAction is "{eventAction}"`,
+      values: {
+        eventAction,
+      },
+    });
+  }
 }
 
 // action type definition
@@ -100,7 +124,7 @@ export function getActionType({
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-}): ActionType {
+}): PagerDutyActionType {
   return {
     id: '.pagerduty',
     minimumLicenseRequired: 'gold',
@@ -123,12 +147,12 @@ function valdiateActionTypeConfig(
   configObject: ActionTypeConfigType
 ) {
   try {
-    configurationUtilities.ensureWhitelistedUri(getPagerDutyApiUrl(configObject));
-  } catch (whitelistError) {
+    configurationUtilities.ensureUriAllowed(getPagerDutyApiUrl(configObject));
+  } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
       defaultMessage: 'error configuring pagerduty action: {message}',
       values: {
-        message: whitelistError.message,
+        message: allowListError.message,
       },
     });
   }
@@ -142,13 +166,14 @@ function getPagerDutyApiUrl(config: ActionTypeConfigType): string {
 
 async function executor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+  execOptions: PagerDutyActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const config = execOptions.config as ActionTypeConfigType;
-  const secrets = execOptions.secrets as ActionTypeSecretsType;
-  const params = execOptions.params as ActionParamsType;
+  const config = execOptions.config;
+  const secrets = execOptions.secrets;
+  const params = execOptions.params;
   const services = execOptions.services;
+  const proxySettings = execOptions.proxySettings;
 
   const apiUrl = getPagerDutyApiUrl(config);
   const headers = {
@@ -159,7 +184,7 @@ async function executor(
 
   let response;
   try {
-    response = await postPagerduty({ apiUrl, data, headers, services });
+    response = await postPagerduty({ apiUrl, data, headers, services, proxySettings }, logger);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.pagerduty.postingErrorMessage', {
       defaultMessage: 'error posting pagerduty event',
@@ -217,26 +242,29 @@ async function executor(
 
 const AcknowledgeOrResolve = new Set([EVENT_ACTION_ACKNOWLEDGE, EVENT_ACTION_RESOLVE]);
 
-function getBodyForEventAction(actionId: string, params: ActionParamsType): unknown {
-  const eventAction = params.eventAction || EVENT_ACTION_TRIGGER;
-  const dedupKey = params.dedupKey || `action:${actionId}`;
-
-  const data: {
-    event_action: ActionParamsType['eventAction'];
-    dedup_key: string;
-    payload?: {
-      summary: string;
-      source: string;
-      severity: string;
-      timestamp?: string;
-      component?: string;
-      group?: string;
-      class?: string;
-    };
-  } = {
-    event_action: eventAction,
-    dedup_key: dedupKey,
+interface PagerDutyPayload {
+  event_action: ActionParamsType['eventAction'];
+  dedup_key?: string;
+  payload?: {
+    summary: string;
+    source: string;
+    severity: string;
+    timestamp?: string;
+    component?: string;
+    group?: string;
+    class?: string;
   };
+}
+
+function getBodyForEventAction(actionId: string, params: ActionParamsType): PagerDutyPayload {
+  const eventAction = params.eventAction ?? EVENT_ACTION_TRIGGER;
+
+  const data: PagerDutyPayload = {
+    event_action: eventAction,
+  };
+  if (params.dedupKey) {
+    data.dedup_key = params.dedupKey;
+  }
 
   // for acknowledge / resolve, just send the dedup key
   if (AcknowledgeOrResolve.has(eventAction)) {
@@ -247,12 +275,8 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): unkn
     summary: params.summary || 'No summary provided.',
     source: params.source || `Kibana Action ${actionId}`,
     severity: params.severity || 'info',
+    ...omitBy(pick(params, ['timestamp', 'component', 'group', 'class']), isUndefined),
   };
-
-  if (params.timestamp != null) data.payload.timestamp = params.timestamp;
-  if (params.component != null) data.payload.component = params.component;
-  if (params.group != null) data.payload.group = params.group;
-  if (params.class != null) data.payload.class = params.class;
 
   return data;
 }

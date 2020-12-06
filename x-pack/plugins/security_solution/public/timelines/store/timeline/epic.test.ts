@@ -8,12 +8,13 @@ import { Filter, esFilters } from '../../../../../../../src/plugins/data/public'
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { Direction } from '../../../graphql/types';
 import { convertTimelineAsInput } from './epic';
-import { TimelineModel } from './model';
+import { TimelineModel, TimelineTabs } from './model';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
     test('should return a TimelineInput instead of TimelineModel ', () => {
       const timelineModel: TimelineModel = {
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -89,6 +90,8 @@ describe('Epic Timeline', () => {
         description: '',
         eventIdToNoteIds: {},
         eventType: 'all',
+        expandedEvent: {},
+        excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
         filters: [
@@ -117,6 +120,7 @@ describe('Epic Timeline', () => {
             exists: { field: '@timestamp' },
           } as Filter,
         ],
+        indexNames: [],
         isFavorite: false,
         isLive: false,
         isSelectAllChecked: false,
@@ -131,7 +135,6 @@ describe('Epic Timeline', () => {
             serializedQuery:
               '{"bool":{"should":[{"match_phrase":{"endgame.user_name":"zeus"}}],"minimum_should_match":1}}',
           },
-          filterQueryDraft: { kind: 'kuery', expression: 'endgame.user_name : "zeus" ' },
         },
         loadingEventIds: [],
         title: 'saved',
@@ -141,15 +144,13 @@ describe('Epic Timeline', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
-        dateRange: { start: 1572469587644, end: 1572555987644 },
+        dateRange: { start: '2019-10-30T21:06:27.644Z', end: '2019-10-31T21:06:27.644Z' },
         savedObjectId: '11169110-fc22-11e9-8ca9-072f15ce2685',
         selectedEventIds: {},
         show: true,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: { columnId: '@timestamp', sortDirection: Direction.desc },
         status: TimelineStatus.active,
-        width: 1100,
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
         savedQueryId: 'my endgame timeline query',
@@ -158,9 +159,9 @@ describe('Epic Timeline', () => {
       expect(
         convertTimelineAsInput(timelineModel, {
           kind: 'absolute',
-          from: 1572469587644,
+          from: '2019-10-30T21:06:27.644Z',
           fromStr: undefined,
-          to: 1572555987644,
+          to: '2019-10-31T21:06:27.644Z',
           toStr: undefined,
         })
       ).toEqual({
@@ -228,11 +229,12 @@ describe('Epic Timeline', () => {
           },
         ],
         dateRange: {
-          end: 1572555987644,
-          start: 1572469587644,
+          end: '2019-10-31T21:06:27.644Z',
+          start: '2019-10-30T21:06:27.644Z',
         },
         description: '',
         eventType: 'all',
+        excludedRowRendererIds: [],
         filters: [
           {
             exists: null,
@@ -271,6 +273,7 @@ describe('Epic Timeline', () => {
             script: null,
           },
         ],
+        indexNames: [],
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: {

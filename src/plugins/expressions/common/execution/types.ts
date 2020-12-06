@@ -17,20 +17,25 @@
  * under the License.
  */
 
-import { ExpressionType } from '../expression_types';
-import { DataAdapter, RequestAdapter } from '../../../inspector/common';
-import { TimeRange, Query, Filter } from '../../../data/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { KibanaRequest } from 'src/core/server';
+
+import { ExpressionType, SerializableState } from '../expression_types';
+import { Adapters, DataAdapter, RequestAdapter } from '../../../inspector/common';
 import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
  * it provides various methods to perform side-effects.
  */
-export interface ExecutionContext<Input = unknown, InspectorAdapters = DefaultInspectorAdapters> {
+export interface ExecutionContext<
+  InspectorAdapters extends Adapters = Adapters,
+  ExecutionContextSearch extends SerializableState = SerializableState
+> {
   /**
-   * Get initial input with which execution started.
+   * Get search context of the expression.
    */
-  getInitialInput: () => Input;
+  getSearchContext: () => ExecutionContextSearch;
 
   /**
    * Context variables that can be consumed using `var` and `var_set` functions.
@@ -55,7 +60,14 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters = DefaultIn
   /**
    * Search context in which expression should operate.
    */
-  search?: ExecutionContextSearch;
+  getSearchSessionId: () => string | undefined;
+
+  /**
+   * Getter to retrieve the `KibanaRequest` object inside an expression function.
+   * Useful for functions which are running on the server and need to perform
+   * operations that are scoped to a specific user.
+   */
+  getKibanaRequest?: () => KibanaRequest;
 
   /**
    * Allows to fetch saved objects from ElasticSearch. In browser `getSavedObject`
@@ -75,13 +87,7 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters = DefaultIn
 /**
  * Default inspector adapters created if inspector adapters are not set explicitly.
  */
-export interface DefaultInspectorAdapters {
+export interface DefaultInspectorAdapters extends Adapters {
   requests: RequestAdapter;
   data: DataAdapter;
-}
-
-export interface ExecutionContextSearch {
-  filters?: Filter[];
-  query?: Query | Query[];
-  timeRange?: TimeRange;
 }

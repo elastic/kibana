@@ -5,29 +5,24 @@
  */
 
 import React from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
-import { CLIENT_ALERT_TYPES } from '../../../common/constants';
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { TlsTranslations } from './translations';
 import { AlertTypeInitializer } from '.';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { store } from '../../state';
 
-const { name, defaultActionMessage } = TlsTranslations;
-const TlsAlertExpression = React.lazy(() =>
-  import('../../components/overview/alerts/alerts_containers/alert_tls')
-);
+const { name, defaultActionMessage, description } = TlsTranslations;
+const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
 export const initTlsAlertType: AlertTypeInitializer = ({ core, plugins }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
-  alertParamsExpression: (_params: any) => (
-    <ReduxProvider store={store}>
-      <KibanaContextProvider services={{ ...core, ...plugins }}>
-        <TlsAlertExpression />
-      </KibanaContextProvider>
-    </ReduxProvider>
+  documentationUrl(docLinks) {
+    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/uptime/${docLinks.DOC_LINK_VERSION}/uptime-alerting.html#_tls_alerts`;
+  },
+  alertParamsExpression: (params: any) => (
+    <TLSAlert core={core} plugins={plugins} params={params} />
   ),
   name,
+  description,
   validate: () => ({ errors: {} }),
   defaultActionMessage,
   requiresAppContext: false,

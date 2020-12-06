@@ -8,252 +8,300 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'timePicker', 'endpointAlerts']);
+  const pageObjects = getPageObjects(['common', 'timePicker', 'hosts', 'settings']);
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const retry = getService('retry');
   const browser = getService('browser');
+  const queryBar = getService('queryBar');
 
-  describe('Endpoint Alert Resolver', function () {
-    this.tags(['ciGroup7']);
+  describe('Endpoint Event Resolver', function () {
     before(async () => {
-      const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
-      const toTime = 'Now';
-      await esArchiver.load('endpoint/resolver_tree/api_feature');
-      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/alerts');
-      await testSubjects.existOrFail('superDatePickerShowDatesButton', { timeout: 20000 });
+      await pageObjects.hosts.navigateToSecurityHostsPage();
+      await pageObjects.common.dismissBanner();
+      const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
+      const toTime = 'now';
       await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await testSubjects.existOrFail('alertListPage');
-      await testSubjects.click('alertTypeCellLink');
-      await testSubjects.existOrFail('alertDetailFlyout');
-      await testSubjects.click('overviewResolverTab');
-      await testSubjects.existOrFail('resolverEmbeddable', { timeout: 20000 });
-      await browser.setWindowSize(2400, 1800);
+      await browser.setWindowSize(1800, 1200);
     });
-
-    it('resolver column Process Name exits', async () => {
-      await testSubjects.existOrFail('tableHeaderCell_name_0');
-    });
-
-    it('resolver column Timestamp exits', async () => {
-      await testSubjects.existOrFail('tableHeaderCell_timestamp_1');
-    });
-
-    it('resolver Table and Node data same length', async () => {
-      let count = 1;
-      const tableData = await pageObjects.endpointAlerts.getEndpointAlertResolverTableData(
-        'resolverEmbeddable',
-        'tr'
-      );
-      await retry.try(async function () {
-        await testSubjects.click('zoom-out');
-        const Nodes = await testSubjects.findAll('resolverNode');
-        expect(tableData.length - 1).to.eql(Nodes.length);
-        count++;
+    describe('Endpoint Resolver Tree', function () {
+      before(async () => {
+        await esArchiver.load('empty_kibana');
+        await esArchiver.load('endpoint/resolver_tree/functions', { useCreate: true });
+        await pageObjects.hosts.navigateToEventsPanel();
+        await pageObjects.hosts.executeQueryAndOpenResolver('event.dataset : endpoint.events.file');
       });
-      for (let i = 0; i < count; i++) {
-        await testSubjects.click('zoom-in');
-      }
+      after(async () => {
+        await pageObjects.hosts.deleteDataStreams();
+      });
+
+      it('check that Resolver and Data table is loaded', async () => {
+        await testSubjects.existOrFail('resolver:graph');
+        await testSubjects.existOrFail('tableHeaderCell_name_0');
+        await testSubjects.existOrFail('tableHeaderCell_timestamp_1');
+      });
+
+      it('compare resolver Nodes Table data and Data length', async () => {
+        const nodeData: string[] = [];
+        const TableData: string[] = [];
+
+        const Table = await testSubjects.findAll('resolver:node-list:node-link:title');
+        for (const value of Table) {
+          const text = await value._webElement.getText();
+          TableData.push(text.split('\n')[0]);
+        }
+        await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
+        const Nodes = await testSubjects.findAll('resolver:node:primary-button');
+        for (const value of Nodes) {
+          nodeData.push(await value._webElement.getText());
+        }
+        for (let i = 0; i < nodeData.length; i++) {
+          expect(TableData[i]).to.eql(nodeData[i]);
+        }
+        expect(nodeData.length).to.eql(TableData.length);
+        await (await testSubjects.find('resolver:graph-controls:zoom-in')).click();
+      });
+
+      it('resolver Nodes navigation Up', async () => {
+        const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
+        await (await testSubjects.find('resolver:graph-controls:north-button')).click();
+
+        const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
+        for (let i = 0; i < OriginalNodeDataStyle.length; i++) {
+          expect(parseFloat(OriginalNodeDataStyle[i].top)).to.lessThan(
+            parseFloat(NewNodeDataStyle[i].top)
+          );
+          expect(parseFloat(OriginalNodeDataStyle[i].left)).to.equal(
+            parseFloat(NewNodeDataStyle[i].left)
+          );
+        }
+        await (await testSubjects.find('resolver:graph-controls:center-button')).click();
+      });
+
+      it('resolver Nodes navigation Down', async () => {
+        const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
+        await (await testSubjects.find('resolver:graph-controls:south-button')).click();
+
+        const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
+        for (let i = 0; i < NewNodeDataStyle.length; i++) {
+          expect(parseFloat(NewNodeDataStyle[i].top)).to.lessThan(
+            parseFloat(OriginalNodeDataStyle[i].top)
+          );
+          expect(parseFloat(OriginalNodeDataStyle[i].left)).to.equal(
+            parseFloat(NewNodeDataStyle[i].left)
+          );
+        }
+        await (await testSubjects.find('resolver:graph-controls:center-button')).click();
+      });
+
+      it('resolver Nodes navigation Left', async () => {
+        const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
+        await (await testSubjects.find('resolver:graph-controls:east-button')).click();
+
+        const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
+        for (let i = 0; i < OriginalNodeDataStyle.length; i++) {
+          expect(parseFloat(NewNodeDataStyle[i].left)).to.lessThan(
+            parseFloat(OriginalNodeDataStyle[i].left)
+          );
+          expect(parseFloat(NewNodeDataStyle[i].top)).to.equal(
+            parseFloat(OriginalNodeDataStyle[i].top)
+          );
+        }
+        await (await testSubjects.find('resolver:graph-controls:center-button')).click();
+      });
+
+      it('resolver Nodes navigation Right', async () => {
+        const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
+        await testSubjects.click('resolver:graph-controls:west-button');
+        const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
+        for (let i = 0; i < NewNodeDataStyle.length; i++) {
+          expect(parseFloat(OriginalNodeDataStyle[i].left)).to.lessThan(
+            parseFloat(NewNodeDataStyle[i].left)
+          );
+          expect(parseFloat(NewNodeDataStyle[i].top)).to.equal(
+            parseFloat(OriginalNodeDataStyle[i].top)
+          );
+        }
+        await (await testSubjects.find('resolver:graph-controls:center-button')).click();
+      });
+
+      it('resolver Nodes navigation Center', async () => {
+        const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
+        await (await testSubjects.find('resolver:graph-controls:east-button')).click();
+        await (await testSubjects.find('resolver:graph-controls:south-button')).click();
+
+        const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
+        for (let i = 0; i < NewNodeDataStyle.length; i++) {
+          expect(parseFloat(NewNodeDataStyle[i].left)).to.lessThan(
+            parseFloat(OriginalNodeDataStyle[i].left)
+          );
+          expect(parseFloat(NewNodeDataStyle[i].top)).to.lessThan(
+            parseFloat(OriginalNodeDataStyle[i].top)
+          );
+        }
+        await (await testSubjects.find('resolver:graph-controls:center-button')).click();
+        const CenterNodeDataStyle = await pageObjects.hosts.parseStyles();
+
+        for (let i = 0; i < CenterNodeDataStyle.length; i++) {
+          expect(parseFloat(CenterNodeDataStyle[i].left)).to.equal(
+            parseFloat(OriginalNodeDataStyle[i].left)
+          );
+          expect(parseFloat(CenterNodeDataStyle[i].top)).to.equal(
+            parseFloat(OriginalNodeDataStyle[i].top)
+          );
+        }
+      });
+
+      it('resolver Nodes navigation zoom in', async () => {
+        const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
+        await (await testSubjects.find('resolver:graph-controls:zoom-in')).click();
+
+        const NewNodeDataStyle = await pageObjects.hosts.parseStyles();
+        for (let i = 1; i < NewNodeDataStyle.length; i++) {
+          expect(parseFloat(NewNodeDataStyle[i].left)).to.lessThan(
+            parseFloat(OriginalNodeDataStyle[i].left)
+          );
+          expect(parseFloat(NewNodeDataStyle[i].top)).to.lessThan(
+            parseFloat(OriginalNodeDataStyle[i].top)
+          );
+          expect(parseFloat(OriginalNodeDataStyle[i].width)).to.lessThan(
+            parseFloat(NewNodeDataStyle[i].width)
+          );
+          expect(parseFloat(OriginalNodeDataStyle[i].height)).to.lessThan(
+            parseFloat(NewNodeDataStyle[i].height)
+          );
+          await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
+        }
+      });
+
+      it('resolver Nodes navigation zoom out', async () => {
+        const OriginalNodeDataStyle = await pageObjects.hosts.parseStyles();
+        await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
+        const NewNodeDataStyle1 = await pageObjects.hosts.parseStyles();
+        for (let i = 1; i < OriginalNodeDataStyle.length; i++) {
+          expect(parseFloat(OriginalNodeDataStyle[i].left)).to.lessThan(
+            parseFloat(NewNodeDataStyle1[i].left)
+          );
+          expect(parseFloat(OriginalNodeDataStyle[i].top)).to.lessThan(
+            parseFloat(NewNodeDataStyle1[i].top)
+          );
+          expect(parseFloat(NewNodeDataStyle1[i].width)).to.lessThan(
+            parseFloat(OriginalNodeDataStyle[i].width)
+          );
+          expect(parseFloat(NewNodeDataStyle1[i].height)).to.lessThan(
+            parseFloat(OriginalNodeDataStyle[i].height)
+          );
+        }
+        await (await testSubjects.find('resolver:graph-controls:zoom-in')).click();
+      });
+
+      it('Check Related Events for event.file Node', async () => {
+        const expectedData = [
+          '17 authentication',
+          '1 registry',
+          '17 session',
+          '8 file',
+          '1 registry',
+        ];
+        await pageObjects.hosts.runNodeEvents(expectedData);
+      });
     });
 
-    it('compare resolver Nodes and Table data', async () => {
-      const $: string[] = [];
-      const tableData = await pageObjects.endpointAlerts.getEndpointAlertResolverTableData(
-        'resolverEmbeddable',
-        'tr'
-      );
-      await testSubjects.click('zoom-out');
-      const Nodes = await testSubjects.findAll('euiButton__text');
-      for (const value of Nodes) {
-        $.push(await value._webElement.getText());
-      }
-      for (let i = 0; i < $.length; i++) {
-        expect(tableData[i + 1][0]).to.eql($[i]);
-      }
-      await testSubjects.click('zoom-in');
-    });
+    describe('Resolver Tree events', function () {
+      const expectedData = [
+        '17 authentication',
+        '1 registry',
+        '17 session',
+        '80 registry',
+        '8 network',
+        '60 registry',
+      ];
+      before(async () => {
+        await esArchiver.load('empty_kibana');
+        await esArchiver.load('endpoint/resolver_tree/events', { useCreate: true });
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
+      });
+      after(async () => {
+        await pageObjects.hosts.deleteDataStreams();
+      });
 
-    it('resolver Nodes navigation Up', async () => {
-      const OriginalNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      await testSubjects.click('north-button');
-      const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      for (let i = 0; i < OriginalNodeDataStyle.length; i++) {
-        expect(parseFloat(OriginalNodeDataStyle[i].top)).to.lessThan(
-          parseFloat(NewNodeDataStyle[i].top)
+      it('Check Related Events for event.process Node', async () => {
+        await pageObjects.hosts.navigateToEventsPanel();
+        await pageObjects.hosts.executeQueryAndOpenResolver(
+          'event.dataset : endpoint.events.process'
         );
-        expect(parseFloat(OriginalNodeDataStyle[i].left)).to.equal(
-          parseFloat(NewNodeDataStyle[i].left)
-        );
-      }
-      await testSubjects.click('center-button');
-    });
+        await pageObjects.hosts.runNodeEvents(expectedData);
+      });
 
-    it('resolver Nodes navigation Down', async () => {
-      const OriginalNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      await testSubjects.click('south-button');
+      it('Check Related Events for event.security Node', async () => {
+        await pageObjects.hosts.navigateToEventsPanel();
+        await pageObjects.hosts.executeQueryAndOpenResolver(
+          'event.dataset : endpoint.events.security'
+        );
+        await pageObjects.hosts.runNodeEvents(expectedData);
+      });
 
-      const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      for (let i = 0; i < NewNodeDataStyle.length; i++) {
-        expect(parseFloat(NewNodeDataStyle[i].top)).to.lessThan(
-          parseFloat(OriginalNodeDataStyle[i].top)
+      it('Check Related Events for event.registry Node', async () => {
+        await pageObjects.hosts.navigateToEventsPanel();
+        await pageObjects.hosts.executeQueryAndOpenResolver(
+          'event.dataset : endpoint.events.registry'
         );
-        expect(parseFloat(OriginalNodeDataStyle[i].left)).to.equal(
-          parseFloat(NewNodeDataStyle[i].left)
-        );
-      }
-      await testSubjects.click('center-button');
-    });
+        await pageObjects.hosts.runNodeEvents(expectedData);
+      });
 
-    it('resolver Nodes navigation Right', async () => {
-      const OriginalNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      await testSubjects.click('west-button');
-      const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      for (let i = 0; i < NewNodeDataStyle.length; i++) {
-        expect(parseFloat(OriginalNodeDataStyle[i].left)).to.lessThan(
-          parseFloat(NewNodeDataStyle[i].left)
+      it('Check Related Events for event.network Node', async () => {
+        await pageObjects.hosts.navigateToEventsPanel();
+        await pageObjects.hosts.executeQueryAndOpenResolver(
+          'event.dataset : endpoint.events.network'
         );
-        expect(parseFloat(NewNodeDataStyle[i].top)).to.equal(
-          parseFloat(OriginalNodeDataStyle[i].top)
-        );
-      }
-      await testSubjects.click('center-button');
-    });
+        await pageObjects.hosts.runNodeEvents(expectedData);
+      });
 
-    it('resolver Nodes navigation  Left', async () => {
-      const OriginalNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      await testSubjects.click('east-button');
+      it('Check Related Events for event.library Node', async () => {
+        await esArchiver.load('empty_kibana');
+        await esArchiver.load('endpoint/resolver_tree/library_events', { useCreate: true });
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
+        const expectedLibraryData = [
+          '1 authentication',
+          '1 session',
+          '329 network',
+          '1 library',
+          '1 library',
+        ];
+        await pageObjects.hosts.navigateToEventsPanel();
+        await pageObjects.hosts.executeQueryAndOpenResolver(
+          'event.dataset : endpoint.events.library'
+        );
+        // This lines will move the resolver view for clear visibility  of the related events.
+        for (let i = 0; i < 7; i++) {
+          await (await testSubjects.find('resolver:graph-controls:west-button')).click();
+        }
+        await pageObjects.hosts.runNodeEvents(expectedLibraryData);
+      });
 
-      const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      for (let i = 0; i < OriginalNodeDataStyle.length; i++) {
-        expect(parseFloat(NewNodeDataStyle[i].left)).to.lessThan(
-          parseFloat(OriginalNodeDataStyle[i].left)
-        );
-        expect(parseFloat(NewNodeDataStyle[i].top)).to.equal(
-          parseFloat(OriginalNodeDataStyle[i].top)
-        );
-      }
-      await testSubjects.click('center-button');
-    });
-
-    it('resolver Nodes navigation Center', async () => {
-      const OriginalNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      await testSubjects.click('east-button');
-      await testSubjects.click('south-button');
-
-      const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      for (let i = 0; i < NewNodeDataStyle.length; i++) {
-        expect(parseFloat(NewNodeDataStyle[i].left)).to.lessThan(
-          parseFloat(OriginalNodeDataStyle[i].left)
-        );
-        expect(parseFloat(NewNodeDataStyle[i].top)).to.lessThan(
-          parseFloat(OriginalNodeDataStyle[i].top)
-        );
-      }
-      await (await testSubjects.find('center-button')).click();
-      const CenterNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-
-      for (let i = 0; i < CenterNodeDataStyle.length; i++) {
-        expect(parseFloat(CenterNodeDataStyle[i].left)).to.equal(
-          parseFloat(OriginalNodeDataStyle[i].left)
-        );
-        expect(parseFloat(CenterNodeDataStyle[i].top)).to.equal(
-          parseFloat(OriginalNodeDataStyle[i].top)
-        );
-      }
-    });
-
-    it('resolver Nodes navigation zoom in', async () => {
-      const OriginalNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      await testSubjects.click('zoom-in');
-      const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      for (let i = 1; i < NewNodeDataStyle.length; i++) {
-        expect(parseFloat(OriginalNodeDataStyle[i].left)).to.lessThan(
-          parseFloat(NewNodeDataStyle[i].left)
-        );
-        expect(parseFloat(OriginalNodeDataStyle[i].top)).to.lessThan(
-          parseFloat(NewNodeDataStyle[i].top)
-        );
-        expect(parseFloat(OriginalNodeDataStyle[i].width)).to.lessThan(
-          parseFloat(NewNodeDataStyle[i].width)
-        );
-        expect(parseFloat(OriginalNodeDataStyle[i].height)).to.lessThan(
-          parseFloat(NewNodeDataStyle[i].height)
-        );
-        await testSubjects.click('zoom-out');
-      }
-    });
-
-    it('resolver Nodes navigation zoom out', async () => {
-      const OriginalNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      await testSubjects.click('zoom-out');
-      const NewNodeDataStyle1 = await pageObjects.endpointAlerts.parseStyles(
-        'resolverNode',
-        'style'
-      );
-      for (let i = 1; i < OriginalNodeDataStyle.length; i++) {
-        expect(parseFloat(NewNodeDataStyle1[i].left)).to.lessThan(
-          parseFloat(OriginalNodeDataStyle[i].left)
-        );
-        expect(parseFloat(NewNodeDataStyle1[i].top)).to.lessThan(
-          parseFloat(OriginalNodeDataStyle[i].top)
-        );
-        expect(parseFloat(NewNodeDataStyle1[i].width)).to.lessThan(
-          parseFloat(OriginalNodeDataStyle[i].width)
-        );
-        expect(parseFloat(NewNodeDataStyle1[i].height)).to.lessThan(
-          parseFloat(OriginalNodeDataStyle[i].height)
-        );
-      }
-      await testSubjects.click('zoom-in');
-    });
-
-    after(async () => {
-      await browser.setWindowSize(1600, 1000);
-      await testSubjects.click('euiFlyoutCloseButton');
-      await pageObjects.common.sleep(2000);
-      await esArchiver.unload('endpoint/resolver_tree/api_feature');
+      it('Check Related Events for event.alert Node', async () => {
+        await esArchiver.load('empty_kibana');
+        await esArchiver.load('endpoint/resolver_tree/alert_events', { useCreate: true });
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
+        const expectedAlertData = [
+          '1 library',
+          '157 file',
+          '520 registry',
+          '3 file',
+          '5 library',
+          '5 library',
+        ];
+        await pageObjects.hosts.navigateToEventsPanel();
+        await pageObjects.hosts.executeQueryAndOpenResolver('event.dataset : endpoint.alerts');
+        await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
+        await browser.setWindowSize(2100, 1500);
+        for (let i = 0; i < 2; i++) {
+          await (await testSubjects.find('resolver:graph-controls:east-button')).click();
+        }
+        await pageObjects.hosts.runNodeEvents(expectedAlertData);
+      });
     });
   });
 }

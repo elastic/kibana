@@ -14,20 +14,20 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { HttpSetup } from 'kibana/public';
 import { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
-import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../../services/rest/createCallApmApi';
 import { AgentConfigurationCreateEdit } from './index';
 import {
   ApmPluginContext,
   ApmPluginContextValue,
-} from '../../../../../context/ApmPluginContext';
+} from '../../../../../context/apm_plugin/apm_plugin_context';
+import { EuiThemeProvider } from '../../../../../../../observability/public';
 
 storiesOf(
   'app/Settings/AgentConfigurations/AgentConfigurationCreateEdit',
   module
-).add(
-  'with config',
-  () => {
+)
+  .addDecorator((storyFn) => {
     const httpMock = {};
 
     // mock
@@ -40,10 +40,21 @@ storiesOf(
         },
       },
     };
+
     return (
-      <ApmPluginContext.Provider
-        value={(contextMock as unknown) as ApmPluginContextValue}
-      >
+      <EuiThemeProvider>
+        <ApmPluginContext.Provider
+          value={(contextMock as unknown) as ApmPluginContextValue}
+        >
+          {storyFn()}
+        </ApmPluginContext.Provider>
+      </EuiThemeProvider>
+    );
+  })
+  .add(
+    'with config',
+    () => {
+      return (
         <AgentConfigurationCreateEdit
           pageStep="choose-settings-step"
           existingConfigResult={{
@@ -54,12 +65,16 @@ storiesOf(
             } as AgentConfiguration,
           }}
         />
-      </ApmPluginContext.Provider>
-    );
-  },
-  {
-    info: {
-      source: false,
+      );
     },
-  }
-);
+    {
+      info: {
+        propTablesExclude: [
+          AgentConfigurationCreateEdit,
+          ApmPluginContext.Provider,
+          EuiThemeProvider,
+        ],
+        source: false,
+      },
+    }
+  );

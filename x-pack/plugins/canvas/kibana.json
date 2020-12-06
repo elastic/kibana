@@ -5,6 +5,7 @@
     "configPath": ["xpack", "canvas"],
     "server": true,
     "ui": true,
-    "requiredPlugins": ["data", "embeddable", "expressions", "features", "home", "inspector", "uiActions"],
-    "optionalPlugins": ["usageCollection"]
+    "requiredPlugins": ["bfetch", "data", "embeddable", "expressions", "features", "inspector", "uiActions", "charts"],
+    "optionalPlugins": ["usageCollection", "home"],
+    "requiredBundles": ["kibanaReact", "maps", "lens", "visualizations", "kibanaUtils", "kibanaLegacy", "discover", "savedObjects", "reporting", "home"]
   }

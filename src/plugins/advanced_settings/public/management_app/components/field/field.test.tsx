@@ -19,13 +19,12 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
 import { UiSettingsType, StringValidation } from '../../../../../../core/public';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field, getEditableValue } from './field';
 

@@ -35,6 +35,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/management'),
       require.resolve('./apps/console'),
       require.resolve('./apps/home'),
+      require.resolve('./apps/filter_panel'),
+      require.resolve('./apps/kibana_overview'),
     ],
     pageObjects,
     services,

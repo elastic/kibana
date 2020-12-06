@@ -22,10 +22,10 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiText,
+  EuiTitle,
   EuiSpacer,
   EuiLoadingSpinner,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ensureMinimumTime, extractTimeFields } from '../../lib';
@@ -43,6 +43,7 @@ interface StepTimeFieldProps {
   goToPreviousStep: () => void;
   createIndexPattern: (selectedTimeField: string | undefined, indexPatternId: string) => void;
   indexPatternCreationType: IndexPatternCreationConfig;
+  selectedTimeField?: string;
 }
 
 interface StepTimeFieldState {
@@ -69,7 +70,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
   public readonly context!: IndexPatternManagmentContextValue;
 
-  state = {
+  state: StepTimeFieldState = {
     error: '',
     timeFields: [],
     selectedTimeField: undefined,
@@ -86,6 +87,10 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     super(props);
     this.state.indexPatternType = props.indexPatternCreationType.getIndexPatternType() || '';
     this.state.indexPatternName = props.indexPatternCreationType.getIndexPatternName();
+    this.state.selectedTimeField = props.selectedTimeField;
+    if (props.selectedTimeField) {
+      this.state.timeFieldSet = true;
+    }
   }
 
   mounted = false;
@@ -103,12 +108,12 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     const { indexPattern: pattern } = this.props;
     const { getFetchForWildcardOptions } = this.props.indexPatternCreationType;
 
-    const indexPattern = await this.context.services.data.indexPatterns.make();
-    indexPattern.title = pattern;
-
     this.setState({ isFetchingTimeFields: true });
     const fields = await ensureMinimumTime(
-      indexPattern.fieldsFetcher.fetchForWildcard(pattern, getFetchForWildcardOptions())
+      this.context.services.data.indexPatterns.getFieldsForWildcard({
+        pattern,
+        ...getFetchForWildcardOptions(),
+      })
     );
     const timeFields = extractTimeFields(fields);
 
@@ -183,21 +188,22 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
     if (isCreating) {
       return (
-        <EuiPanel>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>
+        <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h3 className="eui-textCenter">
                 <FormattedMessage
                   id="indexPatternManagement.createIndexPattern.stepTime.creatingLabel"
                   defaultMessage="Creating index pattern…"
                 />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
 
@@ -236,7 +242,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     ) : null;
 
     return (
-      <EuiPanel paddingSize="l">
+      <>
         <Header indexPattern={indexPattern} indexPatternName={indexPatternName} />
         <EuiSpacer size="m" />
         <TimeField
@@ -247,7 +253,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
           selectedTimeField={selectedTimeField}
           onTimeFieldChanged={this.onTimeFieldChanged}
         />
-        <EuiSpacer size="s" />
+        <EuiHorizontalRule />
         <AdvancedOptions
           isVisible={isAdvancedOptionsVisible}
           indexPatternId={indexPatternId}
@@ -261,7 +267,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
           submittable={submittable}
           createIndexPattern={this.createIndexPattern}
         />
-      </EuiPanel>
+      </>
     );
   }
 }

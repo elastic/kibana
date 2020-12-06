@@ -17,6 +17,4 @@
  * under the License.
  */
 
-import './debounce';
-
-export { DebounceProvider } from './debounce';
+export { createDebounceProviderTimeout } from './debounce';

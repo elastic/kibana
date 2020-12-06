@@ -5,82 +5,32 @@
  */
 
 import { EuiFlyout } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { Resizable, ResizeCallback } from 're-resizable';
+import { useDispatch } from 'react-redux';
 
-import { TimelineResizeHandle } from './timeline_resize_handle';
-import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-
+import { StatefulTimeline } from '../../timeline';
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/timeline';
 
-const minWidthPixels = 550; // do not allow the flyout to shrink below this width (pixels)
-const maxWidthPercent = 95; // do not allow the flyout to grow past this percentage of the view
 interface FlyoutPaneComponentProps {
-  children: React.ReactNode;
-  flyoutHeight: number;
-  onClose: () => void;
   timelineId: string;
-  width: number;
 }
 
 const EuiFlyoutContainer = styled.div`
   .timeline-flyout {
+    z-index: ${({ theme }) => theme.eui.euiZLevel8};
     min-width: 150px;
-    width: auto;
+    width: 100%;
+    animation: none;
   }
 `;
 
-const StyledResizable = styled(Resizable)`
-  display: flex;
-  flex-direction: column;
-`;
-
-const RESIZABLE_ENABLE = { left: true };
-
-const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
-  children,
-  flyoutHeight,
-  onClose,
-  timelineId,
-  width,
-}) => {
+const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
-
-  const onResizeStop: ResizeCallback = useCallback(
-    (_e, _direction, _ref, delta) => {
-      const bodyClientWidthPixels = document.body.clientWidth;
-
-      if (delta.width) {
-        dispatch(
-          timelineActions.applyDeltaToWidth({
-            bodyClientWidthPixels,
-            delta: -delta.width,
-            id: timelineId,
-            maxWidthPercent,
-            minWidthPixels,
-          })
-        );
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dispatch]
-  );
-  const resizableDefaultSize = useMemo(
-    () => ({
-      width,
-      height: '100%',
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-  const resizableHandleComponent = useMemo(
-    () => ({
-      left: <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />,
-    }),
-    [flyoutHeight]
+  const handleClose = useCallback(
+    () => dispatch(timelineActions.showTimeline({ id: timelineId, show: false })),
+    [dispatch, timelineId]
   );
 
   return (
@@ -90,19 +40,10 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         className="timeline-flyout"
         data-test-subj="eui-flyout"
         hideCloseButton={true}
-        onClose={onClose}
+        onClose={handleClose}
         size="l"
       >
-        <StyledResizable
-          enable={RESIZABLE_ENABLE}
-          defaultSize={resizableDefaultSize}
-          minWidth={minWidthPixels}
-          maxWidth={`${maxWidthPercent}vw`}
-          handleComponent={resizableHandleComponent}
-          onResizeStop={onResizeStop}
-        >
-          <EventDetailsWidthProvider>{children}</EventDetailsWidthProvider>
-        </StyledResizable>
+        <StatefulTimeline timelineId={timelineId} />
       </EuiFlyout>
     </EuiFlyoutContainer>
   );

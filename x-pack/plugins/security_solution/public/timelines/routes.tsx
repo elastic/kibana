@@ -5,11 +5,20 @@
  */
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
 import { Timelines } from './pages';
-import { SiemPageName } from '../app/types';
+import { NotFoundPage } from '../app/404';
 
-export const getTimelinesRoutes = () => [
-  <Route path={`/:pageName(${SiemPageName.timelines})`} render={() => <Timelines />} />,
-];
+const TimelinesRoutesComponent = () => (
+  <Switch>
+    <Route path="/">
+      <Timelines />
+    </Route>
+    <Route>
+      <NotFoundPage />
+    </Route>
+  </Switch>
+);
+
+export const TimelinesRoutes = React.memo(TimelinesRoutesComponent);

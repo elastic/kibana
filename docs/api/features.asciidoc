@@ -28,8 +28,6 @@ The API returns the following:
   {
     "id": "discover",
     "name": "Discover",
-    "icon": "discoverApp",
-    "navLinkId": "discover",
     "app": [
       "kibana"
     ],
@@ -73,8 +71,6 @@ The API returns the following:
   {
     "id": "visualize",
     "name": "Visualize",
-    "icon": "visualizeApp",
-    "navLinkId": "visualize",
     "app": [
       "kibana"
     ],
@@ -120,8 +116,6 @@ The API returns the following:
   {
     "id": "dashboard",
     "name": "Dashboard",
-    "icon": "dashboardApp",
-    "navLinkId": "dashboards",
     "app": [
       "kibana"
     ],
@@ -172,8 +166,6 @@ The API returns the following:
   {
     "id": "dev_tools",
     "name": "Dev Tools",
-    "icon": "devToolsApp",
-    "navLinkId": "dev_tools",
     "app": [
       "kibana"
     ],

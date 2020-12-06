@@ -5,7 +5,7 @@
  */
 
 import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
@@ -24,6 +24,7 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
+import { TimelineTypeLiteralWithNull, TimelineStatus } from '../../../../../common/types/timeline';
 
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -38,9 +39,6 @@ const BasicTable = styled(EuiBasicTable)`
   }
 `;
 BasicTable.displayName = 'BasicTable';
-
-const getExtendedColumnsIfEnabled = (showExtendedColumns: boolean) =>
-  showExtendedColumns ? [...getExtendedColumns()] : [];
 
 /**
  * Returns the column definitions (passed as the `columns` prop to
@@ -58,6 +56,7 @@ export const getTimelinesTableColumns = ({
   onOpenTimeline,
   onToggleShowNotes,
   showExtendedColumns,
+  timelineType,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
@@ -68,15 +67,17 @@ export const getTimelinesTableColumns = ({
   onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
+  timelineType: TimelineTypeLiteralWithNull;
 }) => {
   return [
     ...getCommonColumns({
       itemIdToExpandedNotesRowMap,
       onOpenTimeline,
       onToggleShowNotes,
+      timelineType,
     }),
-    ...getExtendedColumnsIfEnabled(showExtendedColumns),
-    ...getIconHeaderColumns(),
+    ...getExtendedColumns(showExtendedColumns),
+    ...getIconHeaderColumns({ timelineType }),
     ...getActionsColumns({
       actionTimelineToShow,
       deleteTimelines,
@@ -105,6 +106,7 @@ export interface TimelinesTableProps {
   showExtendedColumns: boolean;
   sortDirection: 'asc' | 'desc';
   sortField: string;
+  timelineType: TimelineTypeLiteralWithNull;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tableRef?: React.MutableRefObject<_EuiBasicTable<any> | undefined>;
   totalSearchResultsCount: number;
@@ -134,6 +136,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     sortField,
     sortDirection,
     tableRef,
+    timelineType,
     totalSearchResultsCount,
   }) => {
     const pagination = {
@@ -156,15 +159,17 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     };
 
     const selection = {
-      selectable: (timelineResult: OpenTimelineResult) => timelineResult.savedObjectId != null,
+      selectable: (timelineResult: OpenTimelineResult) =>
+        timelineResult.savedObjectId != null && timelineResult.status !== TimelineStatus.immutable,
       selectableMessage: (selectable: boolean) =>
         !selectable ? i18n.MISSING_SAVED_OBJECT_ID : undefined,
       onSelectionChange,
     };
     const basicTableProps = tableRef != null ? { ref: tableRef } : {};
-    return (
-      <BasicTable
-        columns={getTimelinesTableColumns({
+
+    const columns = useMemo(
+      () =>
+        getTimelinesTableColumns({
           actionTimelineToShow,
           deleteTimelines,
           itemIdToExpandedNotesRowMap,
@@ -174,8 +179,25 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
           onSelectionChange,
           onToggleShowNotes,
           showExtendedColumns,
-        })}
-        compressed
+          timelineType,
+        }),
+      [
+        actionTimelineToShow,
+        deleteTimelines,
+        itemIdToExpandedNotesRowMap,
+        enableExportTimelineDownloader,
+        onOpenDeleteTimelineModal,
+        onOpenTimeline,
+        onSelectionChange,
+        onToggleShowNotes,
+        showExtendedColumns,
+        timelineType,
+      ]
+    );
+
+    return (
+      <BasicTable
+        columns={columns}
         data-test-subj="timelines-table"
         isExpandable={true}
         isSelectable={actionTimelineToShow.includes('selectable')}

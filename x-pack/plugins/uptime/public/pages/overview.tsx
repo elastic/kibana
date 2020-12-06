@@ -8,8 +8,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { useDispatch } from 'react-redux';
 import { useGetUrlParams } from '../hooks';
-import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { PageHeader } from './page_header';
 import { IIndexPattern } from '../../../../../src/plugins/data/public';
 import { useUpdateKueryString } from '../hooks';
@@ -18,7 +18,8 @@ import { useTrackPageview } from '../../../observability/public';
 import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
 import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { getConnectorsAction, getMonitorAlertsAction } from '../state/alerts/alerts';
+import { useInitApp } from '../hooks/use_init_app';
 
 interface Props {
   loading: boolean;
@@ -43,14 +44,10 @@ export const OverviewPageComponent = React.memo(
     const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
     const { search, filters: urlFilters } = params;
 
-    const {
-      services: {
-        data: { autocomplete },
-      },
-    } = useKibana();
-
     useTrackPageview({ app: 'uptime', path: 'overview' });
     useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
+
+    useInitApp();
 
     const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
 
@@ -58,7 +55,12 @@ export const OverviewPageComponent = React.memo(
       setEsKueryFilters(esFilters ?? '');
     }, [esFilters, setEsKueryFilters]);
 
-    const linkParameters = stringifyUrlParams(params, true);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+      dispatch(getConnectorsAction.get());
+      dispatch(getMonitorAlertsAction.get());
+    }, [dispatch]);
 
     const heading = i18n.translate('xpack.uptime.overviewPage.headerText', {
       defaultMessage: 'Overview',
@@ -77,7 +79,6 @@ export const OverviewPageComponent = React.memo(
                 aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
                   defaultMessage: 'Input filter criteria for the overview page',
                 })}
-                autocomplete={autocomplete}
                 data-test-subj="xpack.uptime.filterBar"
               />
             </EuiFlexItem>
@@ -89,7 +90,7 @@ export const OverviewPageComponent = React.memo(
           <EuiSpacer size="s" />
           <StatusPanel />
           <EuiSpacer size="s" />
-          <MonitorList filters={esFilters} linkParameters={linkParameters} />
+          <MonitorList filters={esFilters} />
         </EmptyState>
       </>
     );

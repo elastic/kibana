@@ -4,70 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
-import { mount } from 'enzyme';
-import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { IndexField } from '../../../../common/search_strategy/index_fields';
+import { getBrowserFields } from '.';
+import { mockBrowserFields, mocksSource } from './mock';
 
-import { wait } from '../../lib/helpers';
-
-import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
-import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
-
-jest.mock('../../lib/kibana');
-
-describe('Index Fields & Browser Fields', () => {
-  test('Index Fields', async () => {
-    mount(
-      <MockedProvider mocks={mocksSource} addTypename={false}>
-        <WithSource sourceId="default">
-          {({ indexPattern }) => {
-            if (!isEqual(indexPattern.fields, [])) {
-              expect(indexPattern.fields).toEqual(mockIndexFields);
-            }
-
-            return null;
-          }}
-        </WithSource>
-      </MockedProvider>
-    );
-
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await wait();
-  });
-
-  test('Browser Fields', async () => {
-    mount(
-      <MockedProvider mocks={mocksSource} addTypename={false}>
-        <WithSource sourceId="default">
-          {({ browserFields }) => {
-            if (!isEqual(browserFields, {})) {
-              expect(browserFields).toEqual(mockBrowserFields);
-            }
-
-            return null;
-          }}
-        </WithSource>
-      </MockedProvider>
-    );
-
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await wait();
-  });
-
-  describe('indicesExistOrDataTemporarilyUnavailable', () => {
-    test('it returns true when undefined', () => {
-      let undefVar;
-      const result = indicesExistOrDataTemporarilyUnavailable(undefVar);
-      expect(result).toBeTruthy();
+describe('source/index.tsx', () => {
+  describe('getBrowserFields', () => {
+    test('it returns an empty object given an empty array', () => {
+      const fields = getBrowserFields('title 1', []);
+      expect(fields).toEqual({});
     });
-    test('it returns true when true', () => {
-      const result = indicesExistOrDataTemporarilyUnavailable(true);
-      expect(result).toBeTruthy();
+
+    test('it returns the same input with the same title', () => {
+      getBrowserFields('title 1', []);
+      // Since it is memoized it will return the same output which is empty object given 'title 1' a second time
+      const fields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
+      expect(fields).toEqual({});
     });
-    test('it returns false when false', () => {
-      const result = indicesExistOrDataTemporarilyUnavailable(false);
-      expect(result).toBeFalsy();
+
+    test('it transforms input into output as expected', () => {
+      const fields = getBrowserFields('title 2', mocksSource.indexFields as IndexField[]);
+      expect(fields).toEqual(mockBrowserFields);
     });
   });
 });

@@ -7,7 +7,9 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { AggName, PIVOT_SUPPORTED_GROUP_BY_AGGS, PivotGroupByConfig } from '../../../../common';
+import { AggName } from '../../../../../../common/types/aggregations';
+
+import { PIVOT_SUPPORTED_GROUP_BY_AGGS, PivotGroupByConfig } from '../../../../common';
 
 import { isIntervalValid, PopoverForm } from './popover_form';
 

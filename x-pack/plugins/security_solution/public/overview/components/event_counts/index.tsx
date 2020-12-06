@@ -20,7 +20,7 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../../common/store';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 const HorizontalSpacer = styled(EuiFlexItem)`
   width: 24px;
@@ -29,23 +29,17 @@ const HorizontalSpacer = styled(EuiFlexItem)`
 const NO_FILTERS: Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 
-interface Props {
+interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   filters?: Filter[];
-  from: number;
+  indexNames: string[];
   indexPattern: IIndexPattern;
   query?: Query;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
-  to: number;
 }
 
 const EventCountsComponent: React.FC<Props> = ({
   filters = NO_FILTERS,
   from,
+  indexNames,
   indexPattern,
   query = DEFAULT_QUERY,
   setQuery,
@@ -64,6 +58,7 @@ const EventCountsComponent: React.FC<Props> = ({
             queries: [query],
             filters: [...filters, ...filterHostData],
           })}
+          indexNames={indexNames}
           startDate={from}
           setQuery={setQuery}
         />
@@ -80,6 +75,7 @@ const EventCountsComponent: React.FC<Props> = ({
             queries: [query],
             filters: [...filters, ...filterNetworkData],
           })}
+          indexNames={indexNames}
           startDate={from}
           setQuery={setQuery}
         />

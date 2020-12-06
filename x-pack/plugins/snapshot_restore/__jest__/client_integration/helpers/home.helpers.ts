@@ -3,16 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 import { act } from 'react-dom/test-utils';
 
-import {
-  registerTestBed,
-  findTestSubject,
-  TestBed,
-  TestBedConfig,
-  nextTick,
-} from '../../../../../test_utils';
+import { registerTestBed, findTestSubject, TestBed, TestBedConfig, delay } from '@kbn/test/jest';
 import { SnapshotRestoreHome } from '../../../public/application/sections/home/home';
 import { BASE_PATH } from '../../../public/application/constants';
 import { WithAppDependencies } from './setup_environment';
@@ -66,7 +59,7 @@ export const setup = async (): Promise<HomeTestBed> => {
     await act(async () => {
       const { href } = repositoryLink.props();
       router.navigateTo(href!);
-      await nextTick();
+      await delay(10);
       component.update();
     });
   };
@@ -90,7 +83,7 @@ export const setup = async (): Promise<HomeTestBed> => {
     await act(async () => {
       const { href } = snapshotLink.props();
       router.navigateTo(href!);
-      await nextTick(100);
+      await delay(100);
       component.update();
     });
   };

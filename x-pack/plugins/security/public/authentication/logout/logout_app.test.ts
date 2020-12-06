@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppMount, ScopedHistory } from 'src/core/public';
+import { AppMount } from 'src/core/public';
 import { logoutApp } from './logout_app';
 
 import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
@@ -19,11 +19,6 @@ describe('logoutApp', () => {
       value: { href: 'https://some-host/bar?arg=true', search: '?arg=true' },
       writable: true,
     });
-  });
-
-  afterAll(() => {
-    delete (window as any).sessionStorage;
-    delete (window as any).location;
   });
 
   it('properly registers application', () => {
@@ -57,7 +52,8 @@ describe('logoutApp', () => {
       element: containerMock,
       appBasePath: '',
       onAppLeave: jest.fn(),
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      setHeaderActionMenu: jest.fn(),
+      history: scopedHistoryMock.create(),
     });
 
     expect(window.sessionStorage.clear).toHaveBeenCalledTimes(1);

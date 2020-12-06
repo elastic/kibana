@@ -17,14 +17,15 @@
  * under the License.
  */
 
-import { loggingServiceMock } from '../../../core/server/mocks';
+import { loggingSystemMock } from '../../../core/server/mocks';
 import { UsageCollectionSetup } from './plugin';
 import { CollectorSet } from './collector';
+export { Collector, createCollectorFetchContextMock } from './usage_collection.mock';
 
 const createSetupContract = () => {
   return {
     ...new CollectorSet({
-      logger: loggingServiceMock.createLogger(),
+      logger: loggingSystemMock.createLogger(),
       maximumWaitTimeForAllCollectorsInS: 1,
     }),
   } as UsageCollectionSetup;

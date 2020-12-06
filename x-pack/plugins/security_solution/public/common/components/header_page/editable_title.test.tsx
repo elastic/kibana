@@ -7,6 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import '../../mock/match_media';
 import { TestProviders } from '../../mock';
 import { EditableTitle } from './editable_title';
 import { useMountAppended } from '../../utils/use_mount_appended';

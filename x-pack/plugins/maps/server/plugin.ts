@@ -6,6 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { take } from 'rxjs/operators';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 // @ts-ignore
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
@@ -14,7 +15,7 @@ import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 // @ts-ignore
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
-import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, createMapPath } from '../common/constants';
+import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getExistingMapPath } from '../common/constants';
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 // @ts-ignore
@@ -26,12 +27,15 @@ import { initRoutes } from './routes';
 import { ILicense } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
+import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
+import { EMSSettings } from '../common/ems_settings';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
   usageCollection: UsageCollectionSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
+  mapsLegacy: MapsLegacyPluginSetup;
 }
 
 export class MapsPlugin implements Plugin {
@@ -48,7 +52,7 @@ export class MapsPlugin implements Plugin {
   _initHomeData(
     home: HomeServerPluginSetup,
     prependBasePath: (path: string) => string,
-    mapConfig: any
+    emsSettings: EMSSettings
   ) {
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map',
@@ -58,7 +62,7 @@ export class MapsPlugin implements Plugin {
 
       home.sampleData.addAppLinksToSampleDataset('ecommerce', [
         {
-          path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
+          path: getExistingMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON,
         },
@@ -80,7 +84,7 @@ export class MapsPlugin implements Plugin {
 
       home.sampleData.addAppLinksToSampleDataset('flights', [
         {
-          path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
+          path: getExistingMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON,
         },
@@ -101,7 +105,7 @@ export class MapsPlugin implements Plugin {
       home.sampleData.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
       home.sampleData.addAppLinksToSampleDataset('logs', [
         {
-          path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
+          path: getExistingMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON,
         },
@@ -121,7 +125,7 @@ export class MapsPlugin implements Plugin {
       home.tutorials.registerTutorial(
         emsBoundariesSpecProvider({
           prependBasePath,
-          emsLandingPageUrl: mapConfig.emsLandingPageUrl,
+          emsLandingPageUrl: emsSettings.getEMSLandingPageUrl(),
         })
       );
     }
@@ -129,9 +133,10 @@ export class MapsPlugin implements Plugin {
 
   // @ts-ignore
   async setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features } = plugins;
+    const { usageCollection, home, licensing, features, mapsLegacy } = plugins;
     // @ts-ignore
     const config$ = this._initializerContext.config.create();
+    const mapsLegacyConfig = await mapsLegacy.config$.pipe(take(1)).toPromise();
     const currentConfig = await config$.pipe(take(1)).toPromise();
 
     // @ts-ignore
@@ -142,31 +147,32 @@ export class MapsPlugin implements Plugin {
       return;
     }
 
-    let routesInitialized = false;
+    let isEnterprisePlus = false;
+    let lastLicenseId: string | undefined;
+    const emsSettings = new EMSSettings(mapsLegacyConfig, () => isEnterprisePlus);
     licensing.license$.subscribe((license: ILicense) => {
-      const { state } = license.check('maps', 'basic');
-      if (state === 'valid' && !routesInitialized) {
-        routesInitialized = true;
-        initRoutes(
-          core.http.createRouter(),
-          license.uid,
-          currentConfig,
-          this.kibanaVersion,
-          this._logger
-        );
-      }
+      const enterprise = license.check(APP_ID, 'enterprise');
+      isEnterprisePlus = enterprise.state === 'valid';
+      lastLicenseId = license.uid;
     });
 
-    this._initHomeData(home, core.http.basePath.prepend, currentConfig);
+    initRoutes(
+      core.http.createRouter(),
+      () => lastLicenseId,
+      emsSettings,
+      this.kibanaVersion,
+      this._logger
+    );
 
-    features.registerFeature({
+    this._initHomeData(home, core.http.basePath.prepend, emsSettings);
+
+    features.registerKibanaFeature({
       id: APP_ID,
       name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
         defaultMessage: 'Maps',
       }),
-      order: 600,
-      icon: APP_ICON,
-      navLinkId: APP_ID,
+      order: 400,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       app: [APP_ID, 'kibana'],
       catalogue: [APP_ID],
       privileges: {
@@ -175,7 +181,7 @@ export class MapsPlugin implements Plugin {
           catalogue: [APP_ID],
           savedObject: {
             all: [MAP_SAVED_OBJECT_TYPE, 'query'],
-            read: ['index-pattern'],
+            read: ['index-pattern', 'tag'],
           },
           ui: ['save', 'show', 'saveQuery'],
         },
@@ -184,7 +190,7 @@ export class MapsPlugin implements Plugin {
           catalogue: [APP_ID],
           savedObject: {
             all: [],
-            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],
+            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query', 'tag'],
           },
           ui: ['show'],
         },

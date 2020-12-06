@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
-
+import { EuiPortal, EuiProgress } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
-import { NewVisModal } from './new_vis_modal';
 import {
   getHttp,
   getSavedObjects,
@@ -29,12 +28,18 @@ import {
   getUISettings,
   getUsageCollector,
   getApplication,
+  getEmbeddable,
+  getDocLinks,
 } from '../services';
+
+const NewVisModal = lazy(() => import('./new_vis_modal'));
 
 export interface ShowNewVisModalParams {
   editorParams?: string[];
   onClose?: () => void;
+  originatingApp?: string;
   outsideVisualizeApp?: boolean;
+  createByValue?: boolean;
 }
 
 /**
@@ -45,6 +50,7 @@ export interface ShowNewVisModalParams {
 export function showNewVisModal({
   editorParams = [],
   onClose,
+  originatingApp,
   outsideVisualizeApp,
 }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
@@ -62,18 +68,29 @@ export function showNewVisModal({
   document.body.appendChild(container);
   const element = (
     <I18nProvider>
-      <NewVisModal
-        isOpen={true}
-        onClose={handleClose}
-        outsideVisualizeApp={outsideVisualizeApp}
-        editorParams={editorParams}
-        visTypesRegistry={getTypes()}
-        addBasePath={getHttp().basePath.prepend}
-        uiSettings={getUISettings()}
-        savedObjects={getSavedObjects()}
-        usageCollection={getUsageCollector()}
-        application={getApplication()}
-      />
+      <Suspense
+        fallback={
+          <EuiPortal>
+            <EuiProgress size="xs" position="fixed" />
+          </EuiPortal>
+        }
+      >
+        <NewVisModal
+          isOpen={true}
+          onClose={handleClose}
+          originatingApp={originatingApp}
+          stateTransfer={getEmbeddable().getStateTransfer()}
+          outsideVisualizeApp={outsideVisualizeApp}
+          editorParams={editorParams}
+          visTypesRegistry={getTypes()}
+          addBasePath={getHttp().basePath.prepend}
+          uiSettings={getUISettings()}
+          savedObjects={getSavedObjects()}
+          usageCollection={getUsageCollector()}
+          application={getApplication()}
+          docLinks={getDocLinks()}
+        />
+      </Suspense>
     </I18nProvider>
   );
   ReactDOM.render(element, container);

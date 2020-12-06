@@ -8,10 +8,16 @@ import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
+import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
-import { makeFloatString } from './utils';
+import { createErrorsFromShard, makeFloatString } from './utils';
+import {
+  SortOrderOrUndefined,
+  TimestampOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface SingleSearchAfterParams {
+  aggregations?: unknown;
   searchAfterSortId: string | undefined;
   index: string[];
   from: string;
@@ -19,11 +25,15 @@ interface SingleSearchAfterParams {
   services: AlertServices;
   logger: Logger;
   pageSize: number;
+  sortOrder?: SortOrderOrUndefined;
   filter: unknown;
+  timestampOverride: TimestampOverrideOrUndefined;
+  buildRuleMessage: BuildRuleMessage;
 }
 
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async ({
+  aggregations,
   searchAfterSortId,
   index,
   from,
@@ -32,28 +42,43 @@ export const singleSearchAfter = async ({
   filter,
   logger,
   pageSize,
+  sortOrder,
+  timestampOverride,
+  buildRuleMessage,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
+  searchErrors: string[];
 }> => {
   try {
     const searchAfterQuery = buildEventsSearchQuery({
+      aggregations,
       index,
       from,
       to,
       filter,
       size: pageSize,
+      sortOrder,
       searchAfterSortId,
+      timestampOverride,
     });
+
     const start = performance.now();
     const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
       'search',
       searchAfterQuery
     );
     const end = performance.now();
-    return { searchResult: nextSearchAfterResult, searchDuration: makeFloatString(end - start) };
+    const searchErrors = createErrorsFromShard({
+      errors: nextSearchAfterResult._shards.failures ?? [],
+    });
+    return {
+      searchResult: nextSearchAfterResult,
+      searchDuration: makeFloatString(end - start),
+      searchErrors,
+    };
   } catch (exc) {
-    logger.error(`[-] nextSearchAfter threw an error ${exc}`);
+    logger.error(buildRuleMessage(`[-] nextSearchAfter threw an error ${exc}`));
     throw exc;
   }
 };

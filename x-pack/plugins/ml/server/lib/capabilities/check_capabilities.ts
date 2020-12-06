@@ -4,22 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
+import type { MlClient } from '../../lib/ml_client';
+import { mlLog } from '../../lib/log';
 import {
   MlCapabilities,
   adminMlCapabilities,
   MlCapabilitiesResponse,
+  ResolveMlCapabilities,
+  MlCapabilitiesKey,
 } from '../../../common/types/capabilities';
 import { upgradeCheckProvider } from './upgrade';
 import { MlLicense } from '../../../common/license';
+import {
+  InsufficientMLCapabilities,
+  UnknownMLCapabilitiesError,
+  MLPrivilegesUninitialized,
+} from './errors';
 
 export function capabilitiesProvider(
-  callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
+  mlClient: MlClient,
   capabilities: MlCapabilities,
   mlLicense: MlLicense,
   isMlEnabledInSpace: () => Promise<boolean>
 ) {
-  const { isUpgradeInProgress } = upgradeCheckProvider(callAsCurrentUser);
+  const { isUpgradeInProgress } = upgradeCheckProvider(mlClient);
   async function getCapabilities(): Promise<MlCapabilitiesResponse> {
     const upgradeInProgress = await isUpgradeInProgress();
     const isPlatinumOrTrialLicense = mlLicense.isFullLicense();
@@ -46,4 +55,28 @@ function disableAdminPrivileges(capabilities: MlCapabilities) {
   });
   capabilities.canCreateAnnotation = false;
   capabilities.canDeleteAnnotation = false;
+}
+
+export type HasMlCapabilities = (capabilities: MlCapabilitiesKey[]) => Promise<void>;
+
+export function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabilities) {
+  return (request: KibanaRequest): HasMlCapabilities => {
+    let mlCapabilities: MlCapabilities | null = null;
+    return async (capabilities: MlCapabilitiesKey[]) => {
+      try {
+        mlCapabilities = await resolveMlCapabilities(request);
+      } catch (e) {
+        mlLog.error(e);
+        throw new UnknownMLCapabilitiesError(`Unable to perform ML capabilities check ${e}`);
+      }
+
+      if (mlCapabilities === null) {
+        throw new MLPrivilegesUninitialized('ML capabilities have not been initialized');
+      }
+
+      if (capabilities.every((c) => mlCapabilities![c] === true) === false) {
+        throw new InsufficientMLCapabilities('Insufficient privileges to access feature');
+      }
+    };
+  };
 }

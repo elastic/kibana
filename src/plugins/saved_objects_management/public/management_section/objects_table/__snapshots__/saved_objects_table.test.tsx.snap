@@ -266,8 +266,25 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "serverBasePath": "",
         }
       }
-      canDelete={false}
       canGoInApp={[Function]}
+      capabilities={
+        Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+          "savedObjectsManagement": Object {
+            "delete": false,
+            "edit": false,
+            "read": true,
+          },
+        }
+      }
+      columnRegistry={
+        Object {
+          "getAll": [MockFunction],
+          "has": [MockFunction],
+        }
+      }
       filterOptions={
         Array [
           Object {
@@ -304,7 +321,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
               "icon": "indexPatternApp",
               "inAppUrl": Object {
                 "path": "/management/kibana/indexPatterns/patterns/1",
-                "uiCapabilitiesPath": "management.kibana.index_patterns",
+                "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "MyIndexPattern*",
             },
@@ -351,6 +368,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           },
         ]
       }
+      onActionRefresh={[Function]}
       onDelete={[Function]}
       onExport={[Function]}
       onQueryChange={[Function]}

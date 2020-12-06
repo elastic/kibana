@@ -33,8 +33,6 @@ export { serializeJob, deserializeJob, deserializeJobs } from './jobs';
 
 export { createNoticeableDelay } from './noticeable_delay';
 
-export { extractQueryParams } from './query_params';
-
 export {
   setUserHasLeftApp,
   getUserHasLeftApp,

@@ -19,9 +19,13 @@
 
 import { IUiSettingsClient } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { KIBANA_STACK_MANAGEMENT_STATS_TYPE } from '../../../common/constants';
+import { stackManagementSchema } from './schema';
 
-export type UsageStats = Record<string, any>;
+export interface UsageStats extends Record<string, boolean | number | string> {
+  // We don't support `type` yet. Only interfaces. So I added at least 1 known key to the generic
+  // Record extension to avoid eslint reverting it back to a `type`
+  'visualize:enableLabs': boolean;
+}
 
 export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClient | undefined) {
   return async function fetchUsageStats(): Promise<UsageStats | undefined> {
@@ -46,10 +50,11 @@ export function registerManagementUsageCollector(
   usageCollection: UsageCollectionSetup,
   getUiSettingsClient: () => IUiSettingsClient | undefined
 ) {
-  const collector = usageCollection.makeUsageCollector({
-    type: KIBANA_STACK_MANAGEMENT_STATS_TYPE,
+  const collector = usageCollection.makeUsageCollector<UsageStats | undefined>({
+    type: 'stack_management',
     isReady: () => typeof getUiSettingsClient() !== 'undefined',
     fetch: createCollectorFetch(getUiSettingsClient),
+    schema: stackManagementSchema,
   });
 
   usageCollection.registerCollector(collector);

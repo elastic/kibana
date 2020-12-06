@@ -7,11 +7,15 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../../../../common/test_utils';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { mockTimelineData } from '../../../../../../common/mock';
+import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { SuricataDetails } from './suricata_details';
+
+jest.mock('../../../../../../common/components/link_to');
 
 describe('SuricataDetails', () => {
   const mount = useMountAppended();
@@ -38,7 +42,7 @@ describe('SuricataDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
       );
     });

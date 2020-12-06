@@ -20,7 +20,7 @@
 import React from 'react';
 import { EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 
 import { AggParamType, IAggConfig, AggGroupNames } from '../../../../data/public';
 import { useSubAggParamsHandlers } from './utils';
@@ -45,9 +45,10 @@ function SubMetricParamEditor({
     defaultMessage: 'Bucket',
   });
   const type = aggParam.name;
+  const isCustomMetric = type === 'customMetric';
 
-  const aggTitle = type === 'customMetric' ? metricTitle : bucketTitle;
-  const aggGroup = type === 'customMetric' ? AggGroupNames.Metrics : AggGroupNames.Buckets;
+  const aggTitle = isCustomMetric ? metricTitle : bucketTitle;
+  const aggGroup = isCustomMetric ? AggGroupNames.Metrics : AggGroupNames.Buckets;
 
   useMount(() => {
     if (agg.params[type]) {
@@ -87,7 +88,7 @@ function SubMetricParamEditor({
         setValidity={setValidity}
         setTouched={setTouched}
         schemas={schemas}
-        hideCustomLabel={true}
+        hideCustomLabel={!isCustomMetric}
       />
     </>
   );

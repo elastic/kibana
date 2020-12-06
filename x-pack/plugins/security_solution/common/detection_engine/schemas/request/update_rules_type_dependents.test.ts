@@ -4,28 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getUpdateRulesSchemaMock } from './update_rules_schema.mock';
-import { UpdateRulesSchema } from './update_rules_schema';
+import { getUpdateRulesSchemaMock } from './rule_schemas.mock';
+import { UpdateRulesSchema } from './rule_schemas';
 import { updateRuleValidateTypeDependents } from './update_rules_type_dependents';
 
 describe('update_rules_type_dependents', () => {
-  test('saved_id is required when type is saved_query and will not validate without out', () => {
-    const schema: UpdateRulesSchema = { ...getUpdateRulesSchemaMock(), type: 'saved_query' };
-    delete schema.saved_id;
-    const errors = updateRuleValidateTypeDependents(schema);
-    expect(errors).toEqual(['when "type" is "saved_query", "saved_id" is required']);
-  });
-
-  test('saved_id is required when type is saved_query and validates with it', () => {
-    const schema: UpdateRulesSchema = {
-      ...getUpdateRulesSchemaMock(),
-      type: 'saved_query',
-      saved_id: '123',
-    };
-    const errors = updateRuleValidateTypeDependents(schema);
-    expect(errors).toEqual([]);
-  });
-
   test('You cannot omit timeline_title when timeline_id is present', () => {
     const schema: UpdateRulesSchema = {
       ...getUpdateRulesSchemaMock(),

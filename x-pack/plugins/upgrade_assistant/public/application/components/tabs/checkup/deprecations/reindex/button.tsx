@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import React, { Fragment, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
@@ -239,7 +239,7 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
   };
 
   private async sendUIReindexTelemetryInfo(uiReindexAction: UIReindexOption) {
-    await this.props.http.fetch('/api/upgrade_assistant/telemetry/ui_reindex', {
+    await this.props.http.fetch('/api/upgrade_assistant/stats/ui_reindex', {
       method: 'PUT',
       body: JSON.stringify(set({}, uiReindexAction, true)),
     });

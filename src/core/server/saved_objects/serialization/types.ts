@@ -40,6 +40,7 @@ export interface SavedObjectsRawDocSource {
   migrationVersion?: SavedObjectsMigrationVersion;
   updated_at?: string;
   references?: SavedObjectReference[];
+  originId?: string;
 
   [typeMapping: string]: any;
 }
@@ -49,13 +50,14 @@ export interface SavedObjectsRawDocSource {
  */
 interface SavedObjectDoc<T = unknown> {
   attributes: T;
-  id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
+  id: string;
   type: string;
   namespace?: string;
   namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
   version?: string;
   updated_at?: string;
+  originId?: string;
 }
 
 interface Referencable {

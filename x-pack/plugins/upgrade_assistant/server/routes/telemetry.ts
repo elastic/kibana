@@ -12,7 +12,7 @@ import { RouteDependencies } from '../types';
 export function registerTelemetryRoutes({ router, getSavedObjectsService }: RouteDependencies) {
   router.put(
     {
-      path: '/api/upgrade_assistant/telemetry/ui_open',
+      path: '/api/upgrade_assistant/stats/ui_open',
       validate: {
         body: schema.object({
           overview: schema.boolean({ defaultValue: false }),
@@ -40,7 +40,7 @@ export function registerTelemetryRoutes({ router, getSavedObjectsService }: Rout
 
   router.put(
     {
-      path: '/api/upgrade_assistant/telemetry/ui_reindex',
+      path: '/api/upgrade_assistant/stats/ui_reindex',
       validate: {
         body: schema.object({
           close: schema.boolean({ defaultValue: false }),

@@ -6,9 +6,9 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
-import { EmailActionParams, EmailActionConnector } from '../types';
+import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
 
-export function getActionType(): ActionTypeModel<EmailActionConnector, EmailActionParams> {
+export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
   return {
     id: '.email',
@@ -71,6 +71,26 @@ export function getActionType(): ActionTypeModel<EmailActionConnector, EmailActi
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredHostText',
             {
               defaultMessage: 'Host is required.',
+            }
+          )
+        );
+      }
+      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
+        errors.user.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredAuthUserNameText',
+            {
+              defaultMessage: 'Username is required.',
+            }
+          )
+        );
+      }
+      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
+        errors.password.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredAuthPasswordText',
+            {
+              defaultMessage: 'Password is required.',
             }
           )
         );

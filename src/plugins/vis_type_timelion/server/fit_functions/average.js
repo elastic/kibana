@@ -27,7 +27,7 @@ export default function average(dataTuples, targetTuples) {
   // Phase 1: Downsample
   // We necessarily won't well match the dataSource here as we don't know how much data
   // they had when creating their own average
-  const resultTimes = _.pluck(targetTuples, 0);
+  const resultTimes = _.map(targetTuples, 0);
   const dataTuplesQueue = _.clone(dataTuples);
   const resultValues = _.map(targetTuples, function (bucket) {
     const time = bucket[0];

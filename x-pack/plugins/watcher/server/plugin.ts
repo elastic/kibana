@@ -12,13 +12,13 @@ declare module 'kibana/server' {
 
 import {
   CoreSetup,
-  ICustomClusterClient,
-  IScopedClusterClient,
+  ILegacyCustomClusterClient,
+  ILegacyScopedClusterClient,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from 'kibana/server';
-import { PLUGIN } from '../common/constants';
+import { PLUGIN, INDEX_NAMES } from '../common/constants';
 import { Dependencies, LicenseStatus, RouteDependencies } from './types';
 
 import { registerSettingsRoutes } from './routes/api/settings';
@@ -31,7 +31,7 @@ import { registerLoadHistoryRoute } from './routes/api/register_load_history_rou
 import { elasticsearchJsPlugin } from './lib/elasticsearch_js_plugin';
 
 export interface WatcherContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
@@ -42,7 +42,7 @@ async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']
 
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
   private readonly log: Logger;
-  private watcherESClient?: ICustomClusterClient;
+  private watcherESClient?: ILegacyCustomClusterClient;
 
   private licenseStatus: LicenseStatus = {
     hasRequired: false,
@@ -52,12 +52,38 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     this.log = ctx.logger.get();
   }
 
-  async setup({ http, getStartServices }: CoreSetup, { licensing }: Dependencies) {
+  async setup({ http, getStartServices }: CoreSetup, { licensing, features }: Dependencies) {
     const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
       router,
       getLicenseStatus: () => this.licenseStatus,
     };
+
+    features.registerElasticsearchFeature({
+      id: 'watcher',
+      management: {
+        insightsAndAlerting: ['watcher'],
+      },
+      catalogue: ['watcher'],
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage_watcher'],
+          requiredIndexPrivileges: {
+            [INDEX_NAMES.WATCHES]: ['read'],
+            [INDEX_NAMES.WATCHER_HISTORY]: ['read'],
+          },
+          ui: [],
+        },
+        {
+          requiredClusterPrivileges: ['monitor_watcher'],
+          requiredIndexPrivileges: {
+            [INDEX_NAMES.WATCHES]: ['read'],
+            [INDEX_NAMES.WATCHER_HISTORY]: ['read'],
+          },
+          ui: [],
+        },
+      ],
+    });
 
     http.registerRouteHandlerContext('watcher', async (ctx, request) => {
       this.watcherESClient = this.watcherESClient ?? (await getCustomEsClient(getStartServices));

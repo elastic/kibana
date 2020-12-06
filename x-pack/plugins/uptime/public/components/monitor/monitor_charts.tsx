@@ -12,15 +12,16 @@ import { MonitorDuration } from './monitor_duration/monitor_duration_container';
 interface MonitorChartsProps {
   monitorId: string;
 }
+export const MONITOR_CHART_HEIGHT = '248px';
 
 export const MonitorCharts = ({ monitorId }: MonitorChartsProps) => {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
         <MonitorDuration monitorId={monitorId} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <PingHistogram height="400px" isResponsive={false} />
+        <PingHistogram height={MONITOR_CHART_HEIGHT} isResponsive={false} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

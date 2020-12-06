@@ -17,17 +17,20 @@
  * under the License.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
-import { PluginInitializerContext } from 'kibana/public';
-import { configSchema, ConfigSchema } from '../config';
+import { Plugin, PluginConfigDescriptor } from 'kibana/server';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { Observable } from 'rxjs';
+import { configSchema, MapsLegacyConfig } from '../config';
+import { getUiSettings } from './ui_settings';
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
+export const config: PluginConfigDescriptor<MapsLegacyConfig> = {
   exposeToBrowser: {
     includeElasticMapsService: true,
     proxyElasticMapsServiceInMaps: true,
     tilemap: true,
     regionmap: true,
     manifestServiceUrl: true,
+    emsUrl: true,
     emsFileApiUrl: true,
     emsTileApiUrl: true,
     emsLandingPageUrl: true,
@@ -37,13 +40,29 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) => ({
-  setup() {
+export interface MapsLegacyPluginSetup {
+  config$: Observable<MapsLegacyConfig>;
+}
+
+export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup> {
+  readonly _initializerContext: PluginInitializerContext<MapsLegacyConfig>;
+
+  constructor(initializerContext: PluginInitializerContext<MapsLegacyConfig>) {
+    this._initializerContext = initializerContext;
+  }
+
+  public setup(core: CoreSetup) {
+    core.uiSettings.register(getUiSettings());
+
     // @ts-ignore
-    const config$ = initializerContext.config.create();
+    const config$ = this._initializerContext.config.create();
     return {
-      config: config$,
+      config$,
     };
-  },
-  start() {},
-});
+  }
+
+  public start() {}
+}
+
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new MapsLegacyPlugin(initializerContext);

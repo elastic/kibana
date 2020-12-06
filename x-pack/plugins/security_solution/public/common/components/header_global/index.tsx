@@ -4,90 +4,123 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { pickBy } from 'lodash/fp';
-import React from 'react';
-import styled, { css } from 'styled-components';
+import React, { forwardRef, useCallback } from 'react';
+import styled from 'styled-components';
+import { OutPortal } from 'react-reverse-portal';
 
-import { useLocation } from 'react-router-dom';
-import { gutterTimeline } from '../../lib/helpers';
 import { navTabs } from '../../../app/home/home_navigations';
-import { SiemPageName } from '../../../app/types';
-import { getOverviewUrl } from '../link_to';
+import { useFullScreen } from '../../containers/use_full_screen';
+import { SecurityPageName } from '../../../app/types';
+import { getAppOverviewUrl } from '../link_to';
 import { MlPopover } from '../ml_popover/ml_popover';
 import { SiemNavigation } from '../navigation';
 import * as i18n from './translations';
-import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { ADD_DATA_PATH } from '../../../../common/constants';
+import { useGetUrlSearch } from '../navigation/use_get_url_search';
+import { useKibana } from '../../lib/kibana';
+import { APP_ID, ADD_DATA_PATH, APP_DETECTIONS_PATH } from '../../../../common/constants';
+import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
+import { LinkAnchor } from '../links';
 
-const Wrapper = styled.header`
-  ${({ theme }) => css`
+const Wrapper = styled.header<{ $isFixed: boolean }>`
+  ${({ theme, $isFixed }) => `
     background: ${theme.eui.euiColorEmptyShade};
     border-bottom: ${theme.eui.euiBorderThin};
-    padding: ${theme.eui.paddingSizes.m} ${gutterTimeline} ${theme.eui.paddingSizes.m}
-      ${theme.eui.paddingSizes.l};
+    width: 100%;
+    z-index: ${theme.eui.euiZNavigation};
+    position: ${$isFixed ? 'fixed' : 'relative'};
   `}
 `;
 Wrapper.displayName = 'Wrapper';
+
+const WrapperContent = styled.div<{ $globalFullScreen: boolean }>`
+  display: ${({ $globalFullScreen }) => ($globalFullScreen ? 'none' : 'block')};
+  padding-top: ${({ $globalFullScreen, theme }) =>
+    $globalFullScreen ? theme.eui.paddingSizes.s : theme.eui.paddingSizes.m};
+`;
+
+WrapperContent.displayName = 'WrapperContent';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
 `;
 FlexItem.displayName = 'FlexItem';
 
+const FlexGroup = styled(EuiFlexGroup)<{ $hasSibling: boolean }>`
+  ${({ $hasSibling, theme }) => `
+    border-bottom: ${theme.eui.euiBorderThin};
+    margin-bottom: 1px;
+    padding-bottom: 4px;
+    padding-left: ${theme.eui.paddingSizes.l};
+    padding-right: ${theme.eui.paddingSizes.l};
+    ${$hasSibling ? `border-bottom: ${theme.eui.euiBorderThin};` : 'border-bottom-width: 0px;'}
+  `}
+`;
+FlexGroup.displayName = 'FlexGroup';
+
 interface HeaderGlobalProps {
   hideDetectionEngine?: boolean;
+  isFixed?: boolean;
 }
-export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine = false }) => {
-  const currentLocation = useLocation();
 
-  return (
-    <Wrapper className="siemHeaderGlobal">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
-        <WithSource sourceId="default">
-          {({ indicesExist }) => (
-            <>
+export const HeaderGlobal = React.memo(
+  forwardRef<HTMLDivElement, HeaderGlobalProps>(
+    ({ hideDetectionEngine = false, isFixed = true }, ref) => {
+      const { globalHeaderPortalNode } = useGlobalHeaderPortal();
+      const { globalFullScreen, timelineFullScreen } = useFullScreen();
+      const search = useGetUrlSearch(navTabs.overview);
+      const { application, http } = useKibana().services;
+      const { navigateToApp } = application;
+      const basePath = http.basePath.get();
+      const goToOverview = useCallback(
+        (ev) => {
+          ev.preventDefault();
+          navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, { path: search });
+        },
+        [navigateToApp, search]
+      );
+      return (
+        <Wrapper ref={ref} $isFixed={isFixed}>
+          <WrapperContent $globalFullScreen={globalFullScreen ?? timelineFullScreen}>
+            <FlexGroup
+              alignItems="center"
+              $hasSibling={globalHeaderPortalNode.hasChildNodes()}
+              justifyContent="spaceBetween"
+              wrap
+            >
               <FlexItem>
                 <EuiFlexGroup alignItems="center" responsive={false}>
                   <FlexItem grow={false}>
-                    <EuiLink href={getOverviewUrl()}>
-                      <EuiIcon aria-label={i18n.SIEM} type="securityAnalyticsApp" size="l" />
-                    </EuiLink>
+                    <LinkAnchor onClick={goToOverview} href={getAppOverviewUrl(search)}>
+                      <EuiIcon aria-label={i18n.SECURITY_SOLUTION} type="logoSecurity" size="l" />
+                    </LinkAnchor>
                   </FlexItem>
 
                   <FlexItem component="nav">
-                    {indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-                      <SiemNavigation
-                        display="condensed"
-                        navTabs={
-                          hideDetectionEngine
-                            ? pickBy((_, key) => key !== SiemPageName.detections, navTabs)
-                            : navTabs
-                        }
-                      />
-                    ) : (
-                      <SiemNavigation
-                        display="condensed"
-                        navTabs={pickBy((_, key) => key === SiemPageName.overview, navTabs)}
-                      />
-                    )}
+                    <SiemNavigation
+                      display="condensed"
+                      navTabs={
+                        hideDetectionEngine
+                          ? pickBy((_, key) => key !== SecurityPageName.detections, navTabs)
+                          : navTabs
+                      }
+                    />
                   </FlexItem>
                 </EuiFlexGroup>
               </FlexItem>
-
               <FlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-                  {indicesExistOrDataTemporarilyUnavailable(indicesExist) &&
-                    currentLocation.pathname.includes(`/${SiemPageName.detections}/`) && (
-                      <FlexItem grow={false}>
-                        <MlPopover />
-                      </FlexItem>
-                    )}
+                  {window.location.pathname.includes(APP_DETECTIONS_PATH) && (
+                    <FlexItem grow={false}>
+                      <MlPopover />
+                    </FlexItem>
+                  )}
 
                   <FlexItem grow={false}>
                     <EuiButtonEmpty
                       data-test-subj="add-data"
-                      href={ADD_DATA_PATH}
+                      href={`${basePath}${ADD_DATA_PATH}`}
                       iconType="plusInCircle"
                     >
                       {i18n.BUTTON_ADD_DATA}
@@ -95,11 +128,12 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
                   </FlexItem>
                 </EuiFlexGroup>
               </FlexItem>
-            </>
-          )}
-        </WithSource>
-      </EuiFlexGroup>
-    </Wrapper>
-  );
-});
+            </FlexGroup>
+          </WrapperContent>
+          <OutPortal node={globalHeaderPortalNode} />
+        </Wrapper>
+      );
+    }
+  )
+);
 HeaderGlobal.displayName = 'HeaderGlobal';

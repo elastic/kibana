@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Uses the [AppBase.updater$](./kibana-plugin-core-public.appbase.updater_.md) property when registering your application with [ApplicationSetup.register()](./kibana-plugin-core-public.applicationsetup.register.md) instead.
+> Uses the  property when registering your application with [ApplicationSetup.register()](./kibana-plugin-core-public.applicationsetup.register.md) instead.
 > 
 
 Update the navlink for the given id with the updated attributes. Returns the updated navlink or `undefined` if it does not exist.

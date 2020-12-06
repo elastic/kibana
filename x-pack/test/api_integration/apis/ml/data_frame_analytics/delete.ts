@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
 import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
       includes: [],
       excludes: [],
     },
-    model_memory_limit: '350mb',
+    model_memory_limit: '60mb',
   };
 
   const testJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>> = [
@@ -92,10 +92,10 @@ export default ({ getService }: FtrProviderContext) => {
           .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+          .expect(403);
 
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
         await ml.api.waitForDataFrameAnalyticsJobToExist(analyticsId);
       });
 
@@ -105,22 +105,23 @@ export default ({ getService }: FtrProviderContext) => {
           .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+          .expect(403);
 
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
         await ml.api.waitForDataFrameAnalyticsJobToExist(analyticsId);
       });
 
       it('should show 404 error if job does not exist or has already been deleted', async () => {
+        const id = `${jobId}_invalid`;
         const { body } = await supertest
-          .delete(`/api/ml/data_frame/analytics/${jobId}_invalid`)
+          .delete(`/api/ml/data_frame/analytics/${id}`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
           .expect(404);
 
         expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.message).to.eql(`No known job with id '${id}'`);
       });
 
       describe('with deleteDestIndex setting', function () {
@@ -162,7 +163,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         after(async () => {
-          await ml.testResources.deleteIndexPattern(destinationIndex);
+          await ml.testResources.deleteIndexPatternByTitle(destinationIndex);
         });
 
         it('should delete job and index pattern by id', async () => {
@@ -194,7 +195,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         after(async () => {
           await ml.api.deleteIndices(destinationIndex);
-          await ml.testResources.deleteIndexPattern(destinationIndex);
+          await ml.testResources.deleteIndexPatternByTitle(destinationIndex);
         });
 
         it('should delete job, target index, and index pattern by id', async () => {

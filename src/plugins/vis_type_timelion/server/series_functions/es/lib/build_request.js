@@ -50,7 +50,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
           .map(function (q) {
             return [q, { query_string: { query: q } }];
           })
-          .zipObject()
+          .fromPairs()
           .value(),
       },
       aggs: {},
@@ -93,5 +93,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
     request.timeout = `${timeout}ms`;
   }
 
-  return request;
+  return {
+    params: request,
+  };
 }

@@ -1,6 +1,6 @@
 <main id="graphBasic" ng-controller="graphuiPlugin" aria-labelledby="graphHeading">
   <!-- Local nav. -->
-  <kbn-top-nav name="workspacesTopNav" config="topNavMenu">
+  <kbn-top-nav name="workspacesTopNav" config="topNavMenu" set-menu-mount-point="setHeaderActionMenu">
   </kbn-top-nav>
 
   <div class="gphGraph__menus" ng-show="menus.showInspect">
@@ -124,7 +124,7 @@
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.selectedNodes.length === 0"
           tooltip="{{ ::'xpack.graph.sidebar.topMenu.blocklistButtonTooltip' | i18n: { defaultMessage: 'Block selection from appearing in workspace' } }}"
           aria-label="{{ ::'xpack.graph.sidebar.topMenu.blocklistButtonTooltip' | i18n: { defaultMessage: 'Block selection from appearing in workspace' } }}"
-          ng-click="workspace.blacklistSelection();">
+          ng-click="workspace.blocklistSelection();">
           <span class="kuiIcon fa-ban"></span>
         </button>
 

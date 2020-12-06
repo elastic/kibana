@@ -1,3 +1,0 @@
-rules:
-  no-console: 2
-  'import/no-default-export': error

@@ -23,7 +23,7 @@ import { JsonEditor, OnJsonEditorUpdateHandler } from '../../../../public';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
-  field: FieldHook;
+  field: FieldHook<any, string>;
   euiCodeEditorProps?: { [key: string]: any };
   [key: string]: any;
 }
@@ -44,7 +44,7 @@ export const JsonEditorField = ({ field, ...rest }: Props) => {
     <JsonEditor
       label={label}
       helpText={helpText}
-      value={value as string}
+      value={value}
       onUpdate={onJsonUpdate}
       error={errorMessage}
       {...rest}

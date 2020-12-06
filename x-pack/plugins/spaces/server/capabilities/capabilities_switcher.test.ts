@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../../plugins/features/server';
+import { KibanaFeature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 import { Capabilities, CoreSetup } from 'src/core/server';
-import { coreMock, httpServerMock, loggingServiceMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { PluginsStart } from '../plugin';
@@ -22,8 +22,7 @@ const features = ([
   {
     id: 'feature_2',
     name: 'Feature 2',
-    navLinkId: 'feature2',
-    app: [],
+    app: ['feature2'],
     catalogue: ['feature2Entry'],
     management: {
       kibana: ['somethingElse'],
@@ -42,8 +41,7 @@ const features = ([
   {
     id: 'feature_3',
     name: 'Feature 3',
-    navLinkId: 'feature3',
-    app: [],
+    app: ['feature3_app'],
     catalogue: ['feature3Entry'],
     management: {
       kibana: ['indices'],
@@ -59,7 +57,27 @@ const features = ([
       },
     },
   },
-] as unknown) as Feature[];
+  {
+    // feature 4 intentionally delcares the same items as feature 3
+    id: 'feature_4',
+    name: 'Feature 4',
+    app: ['feature3', 'feature3_app'],
+    catalogue: ['feature3Entry'],
+    management: {
+      kibana: ['indices'],
+    },
+    privileges: {
+      all: {
+        app: [],
+        ui: [],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+      },
+    },
+  },
+] as unknown) as KibanaFeature[];
 
 const buildCapabilities = () =>
   Object.freeze({
@@ -67,11 +85,13 @@ const buildCapabilities = () =>
       feature1: true,
       feature2: true,
       feature3: true,
+      feature3_app: true,
       unknownFeature: true,
     },
     catalogue: {
       discover: true,
       visualize: false,
+      feature3Entry: true,
     },
     management: {
       kibana: {
@@ -98,7 +118,7 @@ const setup = (space: Space) => {
   const coreSetup = coreMock.createSetup();
 
   const featuresStart = featuresPluginMock.createStart();
-  featuresStart.getFeatures.mockReturnValue(features);
+  featuresStart.getKibanaFeatures.mockReturnValue(features);
 
   coreSetup.getStartServices.mockResolvedValue([
     coreMock.createStart(),
@@ -106,14 +126,14 @@ const setup = (space: Space) => {
     {},
   ]);
 
-  const spacesService = spacesServiceMock.createSetupContract();
+  const spacesService = spacesServiceMock.createStartContract();
   spacesService.getActiveSpace.mockResolvedValue(space);
 
-  const logger = loggingServiceMock.createLogger();
+  const logger = loggingSystemMock.createLogger();
 
   const switcher = setupCapabilitiesSwitcher(
     (coreSetup as unknown) as CoreSetup<PluginsStart>,
-    spacesService,
+    () => spacesService,
     logger
   );
 
@@ -216,11 +236,38 @@ describe('capabilitiesSwitcher', () => {
     expect(result).toEqual(expectedCapabilities);
   });
 
+  it('does not disable catalogue, management, or app entries when they are shared with an enabled feature', async () => {
+    const space: Space = {
+      id: 'space',
+      name: '',
+      disabledFeatures: ['feature_3'],
+    };
+
+    const capabilities = buildCapabilities();
+
+    const { switcher } = setup(space);
+    const request = httpServerMock.createKibanaRequest();
+    const result = await switcher(request, capabilities);
+
+    const expectedCapabilities = buildCapabilities();
+
+    // These capabilities are shared by feature_4, which is enabled
+    expectedCapabilities.navLinks.feature3 = true;
+    expectedCapabilities.navLinks.feature3_app = true;
+    expectedCapabilities.catalogue.feature3Entry = true;
+    expectedCapabilities.management.kibana.indices = true;
+    // These capabilities are only exposed by feature_3, which is disabled
+    expectedCapabilities.feature_3.bar = false;
+    expectedCapabilities.feature_3.foo = false;
+
+    expect(result).toEqual(expectedCapabilities);
+  });
+
   it('can disable everything', async () => {
     const space: Space = {
       id: 'space',
       name: '',
-      disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
+      disabledFeatures: ['feature_1', 'feature_2', 'feature_3', 'feature_4'],
     };
 
     const capabilities = buildCapabilities();
@@ -241,6 +288,7 @@ describe('capabilitiesSwitcher', () => {
     expectedCapabilities.feature_2.foo = false;
 
     expectedCapabilities.navLinks.feature3 = false;
+    expectedCapabilities.navLinks.feature3_app = false;
     expectedCapabilities.catalogue.feature3Entry = false;
     expectedCapabilities.management.kibana.indices = false;
     expectedCapabilities.feature_3.bar = false;

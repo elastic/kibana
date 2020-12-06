@@ -4,5 +4,7 @@
   "kibanaVersion": "kibana",
   "configPath": ["map"],
   "ui": true,
-  "server": true
+  "server": true,
+  "extraPublicDirs": ["common"],
+  "requiredBundles": ["kibanaReact", "charts"]
 }

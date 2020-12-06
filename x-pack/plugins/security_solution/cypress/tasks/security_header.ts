@@ -19,5 +19,9 @@ export const navigateFromHeaderTo = (page: string) => {
 };
 
 export const refreshPage = () => {
-  cy.get(REFRESH_BUTTON).click({ force: true }).invoke('text').should('not.equal', 'Updating');
+  cy.get(REFRESH_BUTTON).click({ force: true }).should('not.have.text', 'Updating');
+};
+
+export const waitForThePageToBeUpdated = () => {
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
 };

@@ -25,7 +25,7 @@ import { getServices } from '../../../../kibana_services';
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
 import { getQueryParameterActions } from '../query_parameters';
-import { FAILURE_REASONS, LOADING_STATUS } from './constants';
+import { FAILURE_REASONS, LOADING_STATUS } from './index';
 import { MarkdownSimple } from '../../../../../../kibana_react/public';
 
 export function QueryActionsProvider(Promise) {
@@ -70,7 +70,7 @@ export function QueryActionsProvider(Promise) {
     setLoadingStatus(state)('anchor');
 
     return Promise.try(() =>
-      fetchAnchor(indexPatternId, anchorId, [_.zipObject([sort]), { [tieBreakerField]: sort[1] }])
+      fetchAnchor(indexPatternId, anchorId, [_.fromPairs([sort]), { [tieBreakerField]: sort[1] }])
     ).then(
       (anchorDocument) => {
         setLoadedStatus(state)('anchor');

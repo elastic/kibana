@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 
+import { serializeComponentTemplate } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { componentTemplateSchema } from './schema_validation';
-
-const bodySchema = schema.object({
-  name: schema.string(),
-  ...componentTemplateSchema,
-});
 
 export const registerCreateRoute = ({
   router,
@@ -24,13 +19,15 @@ export const registerCreateRoute = ({
     {
       path: addBasePath('/component_templates'),
       validate: {
-        body: bodySchema,
+        body: componentTemplateSchema,
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
 
-      const { name, ...componentTemplateDefinition } = req.body;
+      const serializedComponentTemplate = serializeComponentTemplate(req.body);
+
+      const { name } = req.body;
 
       try {
         // Check that a component template with the same name doesn't already exist
@@ -60,7 +57,7 @@ export const registerCreateRoute = ({
       try {
         const response = await callAsCurrentUser('dataManagement.saveComponentTemplate', {
           name,
-          body: componentTemplateDefinition,
+          body: serializedComponentTemplate,
         });
 
         return res.ok({ body: response });

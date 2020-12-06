@@ -18,11 +18,10 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 |  --- | --- | --- |
 |  [application](./kibana-plugin-core-public.coresetup.application.md) | <code>ApplicationSetup</code> | [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |
 |  [context](./kibana-plugin-core-public.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-core-public.contextsetup.md) |
-|  [docLinks](./kibana-plugin-core-public.coresetup.doclinks.md) | <code>DocLinksSetup</code> | [DocLinksSetup](./kibana-plugin-core-public.doclinkssetup.md) |
 |  [fatalErrors](./kibana-plugin-core-public.coresetup.fatalerrors.md) | <code>FatalErrorsSetup</code> | [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) |
 |  [getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md) | <code>StartServicesAccessor&lt;TPluginsStart, TStart&gt;</code> | [StartServicesAccessor](./kibana-plugin-core-public.startservicesaccessor.md) |
 |  [http](./kibana-plugin-core-public.coresetup.http.md) | <code>HttpSetup</code> | [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
-|  [injectedMetadata](./kibana-plugin-core-public.coresetup.injectedmetadata.md) | <code>{</code><br/><code>        getInjectedVar: (name: string, defaultValue?: any) =&gt; unknown;</code><br/><code>    }</code> | exposed temporarily until https://github.com/elastic/kibana/issues/41990 done use \*only\* to retrieve config values. There is no way to set injected values in the new platform. Use the legacy platform API instead. |
+|  [injectedMetadata](./kibana-plugin-core-public.coresetup.injectedmetadata.md) | <code>{</code><br/><code>        getInjectedVar: (name: string, defaultValue?: any) =&gt; unknown;</code><br/><code>    }</code> | exposed temporarily until https://github.com/elastic/kibana/issues/41990 done use \*only\* to retrieve config values. There is no way to set injected values in the new platform. |
 |  [notifications](./kibana-plugin-core-public.coresetup.notifications.md) | <code>NotificationsSetup</code> | [NotificationsSetup](./kibana-plugin-core-public.notificationssetup.md) |
 |  [uiSettings](./kibana-plugin-core-public.coresetup.uisettings.md) | <code>IUiSettingsClient</code> | [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) |
 

@@ -43,6 +43,7 @@ export class DashboardListing extends React.Component {
       <I18nProvider>
         <TableListView
           headingId="dashboardListingHeading"
+          rowHeader="title"
           createItem={this.props.hideWriteControls ? null : this.props.createItem}
           findItems={this.props.findItems}
           deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
@@ -61,8 +62,16 @@ export class DashboardListing extends React.Component {
           tableListTitle={i18n.translate('dashboard.listing.dashboardsTitle', {
             defaultMessage: 'Dashboards',
           })}
+          tableCaption={i18n.translate('dashboard.listing.dashboardsTitle', {
+            defaultMessage: 'Dashboards',
+          })}
           toastNotifications={this.props.core.notifications.toasts}
           uiSettings={this.props.core.uiSettings}
+          searchFilters={
+            this.props.taggingApi
+              ? [this.props.taggingApi.ui.getSearchBarFilter({ useName: true })]
+              : []
+          }
         />
       </I18nProvider>
     );
@@ -115,7 +124,7 @@ export class DashboardListing extends React.Component {
                     sampleDataInstallLink: (
                       <EuiLink
                         onClick={() =>
-                          this.props.core.application.navigateTo('home', {
+                          this.props.core.application.navigateToApp('home', {
                             path: '#/tutorial_directory/sampleData',
                           })
                         }
@@ -150,6 +159,8 @@ export class DashboardListing extends React.Component {
   }
 
   getTableColumns() {
+    const { taggingApi } = this.props;
+
     const tableColumns = [
       {
         field: 'title',
@@ -174,6 +185,7 @@ export class DashboardListing extends React.Component {
         dataType: 'string',
         sortable: true,
       },
+      ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
     ];
     return tableColumns;
   }
@@ -189,6 +201,7 @@ DashboardListing.propTypes = {
   hideWriteControls: PropTypes.bool.isRequired,
   initialFilter: PropTypes.string,
   initialPageSize: PropTypes.number.isRequired,
+  taggingApi: PropTypes.object,
 };
 
 DashboardListing.defaultProps = {

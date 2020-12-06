@@ -142,7 +142,7 @@ function RangesParamEditor({
   }, [hasInvalidRange, setValidity]);
 
   return (
-    <EuiFormRow compressed fullWidth>
+    <EuiFormRow display="rowCompressed" fullWidth>
       <>
         {ranges.map(({ from, to, id }, index) => {
           const deleteBtnTitle = i18n.translate(

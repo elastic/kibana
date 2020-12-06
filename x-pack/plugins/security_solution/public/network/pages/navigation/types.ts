@@ -8,23 +8,27 @@ import { ESTermQuery } from '../../../../common/typed_json';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 import { NavTab } from '../../../common/components/navigation/types';
-import { FlowTargetSourceDest } from '../../../graphql/types';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { networkModel } from '../../store';
-import { GlobalTimeArgs } from '../../../common/containers/global_time';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 import { SetAbsoluteRangeDatePicker } from '../types';
 import { NarrowDateRange } from '../../../common/components/ml/types';
+import { DocValueFields } from '../../../common/containers/source';
 
 interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   skip: boolean;
   type: networkModel.NetworkType;
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
   filterQuery?: string | ESTermQuery;
   narrowDateRange?: NarrowDateRange;
+  indexNames: string[];
 }
 
-export type NetworkComponentQueryProps = QueryTabBodyProps;
+export type NetworkComponentQueryProps = QueryTabBodyProps & {
+  docValueFields?: DocValueFields[];
+};
 
 export type IPsQueryTabBodyProps = QueryTabBodyProps & {
   indexPattern: IIndexPattern;
@@ -41,10 +45,12 @@ export type HttpQueryTabBodyProps = QueryTabBodyProps & {
 };
 
 export type NetworkRoutesProps = GlobalTimeArgs & {
+  docValueFields: DocValueFields[];
   networkPagePath: string;
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
   indexPattern: IIndexPattern;
+  indexNames: string[];
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 };
 
@@ -67,11 +73,10 @@ export enum NetworkRouteType {
   anomalies = 'anomalies',
   tls = 'tls',
   http = 'http',
-  alerts = 'alerts',
+  alerts = 'external-alerts',
 }
 
 export type GetNetworkRoutePath = (
-  pagePath: string,
   capabilitiesFetched: boolean,
   hasMlUserPermission: boolean
 ) => string;

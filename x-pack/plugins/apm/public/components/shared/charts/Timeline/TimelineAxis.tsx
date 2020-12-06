@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { inRange } from 'lodash';
 import React, { ReactNode } from 'react';
-import { Sticky } from 'react-sticky';
+import { inRange } from 'lodash';
 import { XAxis, XYPlot } from 'react-vis';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import { useTheme } from '../../../../hooks/use_theme';
 import { px } from '../../../../style/variables';
-import { getDurationFormatter } from '../../../../utils/formatters';
 import { Mark } from './';
 import { LastTickValue } from './LastTickValue';
 import { Marker } from './Marker';
@@ -47,63 +46,58 @@ export function TimelineAxis({
   marks = [],
   topTraceDuration,
 }: TimelineAxisProps) {
+  const theme = useTheme();
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
   const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);
   const topTraceDurationFormatted = tickFormatter(topTraceDuration).formatted;
 
   return (
-    <Sticky disableCompensation>
-      {({ style }) => {
-        return (
-          <div
-            style={{
-              position: 'absolute',
-              borderBottom: `1px solid ${theme.euiColorMediumShade}`,
-              height: px(margins.top),
-              zIndex: 2,
-              width: '100%',
-              ...style,
-            }}
-          >
-            <XYPlot
-              dontCheckIfEmpty
-              width={width}
-              height={margins.top}
-              margin={{
-                top: margins.top,
-                left: margins.left,
-                right: margins.right,
-              }}
-              xDomain={xDomain}
-            >
-              <XAxis
-                hideLine
-                orientation="top"
-                tickSize={0}
-                tickValues={xAxisTickValues}
-                tickFormat={(time?: number) => tickFormatter(time).formatted}
-                tickPadding={20}
-                style={{
-                  text: { fill: theme.euiColorDarkShade },
-                }}
-              />
-
-              {topTraceDuration > 0 && (
-                <LastTickValue
-                  x={xScale(topTraceDuration)}
-                  value={topTraceDurationFormatted}
-                  marginTop={28}
-                />
-              )}
-
-              {marks.map((mark) => (
-                <Marker key={mark.id} mark={mark} x={xScale(mark.offset)} />
-              ))}
-            </XYPlot>
-          </div>
-        );
+    <div
+      style={{
+        position: 'sticky',
+        top: 0,
+        borderBottom: `1px solid ${theme.eui.euiColorMediumShade}`,
+        height: px(margins.top),
+        zIndex: 2,
+        width: '100%',
       }}
-    </Sticky>
+    >
+      <XYPlot
+        dontCheckIfEmpty
+        width={width}
+        height={margins.top}
+        margin={{
+          top: margins.top,
+          left: margins.left,
+          right: margins.right,
+        }}
+        xDomain={xDomain}
+      >
+        <XAxis
+          hideLine
+          orientation="top"
+          tickSize={0}
+          tickValues={xAxisTickValues}
+          tickFormat={(time?: number) => tickFormatter(time).formatted}
+          tickPadding={20}
+          style={{
+            text: { fill: theme.eui.euiColorDarkShade },
+          }}
+        />
+
+        {topTraceDuration > 0 && (
+          <LastTickValue
+            x={xScale(topTraceDuration)}
+            value={topTraceDurationFormatted}
+            marginTop={28}
+          />
+        )}
+
+        {marks.map((mark) => (
+          <Marker key={mark.id} mark={mark} x={xScale(mark.offset)} />
+        ))}
+      </XYPlot>
+    </div>
   );
 }

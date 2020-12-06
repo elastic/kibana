@@ -265,7 +265,7 @@ export class JobTable extends Component {
           <EuiLink
             onClick={() => {
               trackUiMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
-              openDetailPanel(job.id);
+              openDetailPanel(encodeURIComponent(job.id));
             }}
           >
             {value}
@@ -310,6 +310,10 @@ export class JobTable extends Component {
                 this.toggleItem(id);
               }}
               data-test-subj={`indexTableRowCheckbox-${id}`}
+              aria-label={i18n.translate('xpack.rollupJobs.jobTable.selectRow', {
+                defaultMessage: 'Select this row {id}',
+                values: { id },
+              })}
             />
           </EuiTableRowCellCheckbox>
 
@@ -380,6 +384,9 @@ export class JobTable extends Component {
                   checked={this.areAllItemsSelected()}
                   onChange={this.toggleAll}
                   type="inList"
+                  aria-label={i18n.translate('xpack.rollupJobs.jobTable.selectAllRows', {
+                    defaultMessage: 'Select all rows',
+                  })}
                 />
               </EuiTableHeaderCellCheckbox>
               {this.buildHeader()}

@@ -6,8 +6,8 @@
 import React from 'react';
 import { APMLink, APMLinkExtendProps } from './APMLink';
 
-const HomeLink = (props: APMLinkExtendProps) => {
+function HomeLink(props: APMLinkExtendProps) {
   return <APMLink path="/" {...props} />;
-};
+}
 
 export { HomeLink };

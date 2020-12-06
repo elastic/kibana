@@ -14,6 +14,7 @@ pipeline {
     HOME = "${env.WORKSPACE}"
     E2E_DIR = 'x-pack/plugins/apm/e2e'
     PIPELINE_LOG_LEVEL = 'DEBUG'
+    KBN_OPTIMIZER_THEMES = 'v7light'
   }
   options {
     timeout(time: 1, unit: 'HOURS')
@@ -36,22 +37,31 @@ pipeline {
         deleteDir()
         gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false,
                     shallow: false, reference: "/var/lib/jenkins/.git-references/kibana.git")
+
+        // Filter when to run based on the below reasons:
+        //  - On a PRs when:
+        //    - There are changes related to the APM UI project
+        //      - only when the owners of those changes are members of the given GitHub teams
+        //  - On merges to branches when:
+        //    - There are changes related to the APM UI project
+        //  - FORCE parameter is set to true.
         script {
+          def apm_updated = false
           dir("${BASE_DIR}"){
-            def regexps =[ "^x-pack/plugins/apm/.*" ]
-            env.APM_UPDATED = isGitRegionMatch(patterns: regexps)
+            apm_updated = isGitRegionMatch(patterns: [ "^x-pack/plugins/apm/.*" ])
+          }
+          if (isPR()) {
+            def isMember = isMemberOf(user: env.CHANGE_AUTHOR, team: ['apm-ui', 'uptime'])
+            setEnvVar('RUN_APM_E2E', params.FORCE || (apm_updated && isMember))
+          } else {
+            setEnvVar('RUN_APM_E2E', params.FORCE || apm_updated)
           }
         }
       }
     }
     stage('Prepare Kibana') {
       options { skipDefaultCheckout() }
-      when {
-        anyOf {
-          expression { return params.FORCE }
-          expression { return env.APM_UPDATED != "false" }
-        }
-      }
+      when { expression { return env.RUN_APM_E2E != "false" } }
       environment {
         JENKINS_NODE_COOKIE = 'dontKillMe'
       }
@@ -69,14 +79,9 @@ pipeline {
     }
     stage('Smoke Tests'){
       options { skipDefaultCheckout() }
-      when {
-        anyOf {
-          expression { return params.FORCE }
-          expression { return env.APM_UPDATED != "false" }
-        }
-      }
+      when { expression { return env.RUN_APM_E2E != "false" } }
       steps{
-        notifyStatus('Running smoke tests', 'PENDING')
+        notifyTestStatus('Running smoke tests', 'PENDING')
         dir("${BASE_DIR}"){
           sh "${E2E_DIR}/ci/run-e2e.sh"
         }
@@ -95,10 +100,10 @@ pipeline {
           }
         }
         unsuccessful {
-          notifyStatus('Test failures', 'FAILURE')
+          notifyTestStatus('Test failures', 'FAILURE')
         }
         success {
-          notifyStatus('Tests passed', 'SUCCESS')
+          notifyTestStatus('Tests passed', 'SUCCESS')
         }
       }
     }
@@ -109,9 +114,16 @@ pipeline {
         archiveArtifacts(allowEmptyArchive: true, artifacts: "${E2E_DIR}/kibana.log")
       }
     }
+    cleanup {
+      notifyBuildResult(prComment: false, analyzeFlakey: false, shouldNotify: false)
+    }
   }
 }
 
 def notifyStatus(String description, String status) {
-  withGithubNotify.notify('end2end-for-apm-ui', description, status, getBlueoceanDisplayURL())
+  withGithubNotify.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('pipeline'))
+}
+
+def notifyTestStatus(String description, String status) {
+  withGithubNotify.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('tests'))
 }

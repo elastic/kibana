@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import { PipelinesTable } from './pipelines_table';
 
 describe('PipelinesTable component', () => {
@@ -45,7 +45,7 @@ describe('PipelinesTable component', () => {
   it('calls clone when cloned button clicked', () => {
     props.pipelines = [{ id: 'testPipeline', isCentrallyManaged: true }];
     const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
-    wrapper.find('[iconType="copy"]').simulate('click');
+    wrapper.find('[iconType="copy"]').first().simulate('click');
     expect(clonePipeline).toHaveBeenCalled();
   });
 

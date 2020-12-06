@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { aggregateAlertRoute } from './aggregate';
 export { createAlertRoute } from './create';
 export { deleteAlertRoute } from './delete';
 export { findAlertRoute } from './find';
 export { getAlertRoute } from './get';
 export { getAlertStateRoute } from './get_alert_state';
+export { getAlertInstanceSummaryRoute } from './get_alert_instance_summary';
 export { listAlertTypesRoute } from './list_alert_types';
 export { updateAlertRoute } from './update';
 export { enableAlertRoute } from './enable';

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
-import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { IndexManagementHome } from '../../../public/application/sections/home';
+import { indexManagementStore } from '../../../public/application/store';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
 const testBedConfig: TestBedConfig = {

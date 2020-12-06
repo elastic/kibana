@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import Joi from 'joi';
 import { has, snakeCase } from 'lodash/fp';
+import { SanitizedAlert } from '../../../../../alerts/common';
 
 import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
+  SavedObjectsFindResult,
 } from '../../../../../../../src/core/server';
+import { AlertsClient } from '../../../../../alerts/server';
 import { BadRequestError } from '../errors/bad_request_error';
+import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
 export interface OutputError {
   message: string;
@@ -288,4 +292,65 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
     const newKey = snakeCase(item);
     return { ...acc, [newKey]: obj[item] };
   }, {});
+};
+
+/**
+ *
+ * @param id rule id
+ * @param currentStatusAndFailures array of rule statuses where the 0th status is the current status and 1-5 positions are the historical failures
+ * @param acc accumulated rule id : statuses
+ */
+export const mergeStatuses = (
+  id: string,
+  currentStatusAndFailures: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>,
+  acc: RuleStatusResponse
+): RuleStatusResponse => {
+  if (currentStatusAndFailures.length === 0) {
+    return {
+      ...acc,
+    };
+  }
+  const convertedCurrentStatus = convertToSnakeCase<IRuleStatusSOAttributes>(
+    currentStatusAndFailures[0].attributes
+  );
+  return {
+    ...acc,
+    [id]: {
+      current_status: convertedCurrentStatus,
+      failures: currentStatusAndFailures
+        .slice(1)
+        .map((errorItem) => convertToSnakeCase<IRuleStatusSOAttributes>(errorItem.attributes)),
+    },
+  } as RuleStatusResponse;
+};
+
+export type GetFailingRulesResult = Record<string, SanitizedAlert>;
+
+export const getFailingRules = async (
+  ids: string[],
+  alertsClient: AlertsClient
+): Promise<GetFailingRulesResult> => {
+  try {
+    const errorRules = await Promise.all(
+      ids.map(async (id) =>
+        alertsClient.get({
+          id,
+        })
+      )
+    );
+    return errorRules
+      .filter((rule) => rule.executionStatus.status === 'error')
+      .reduce<GetFailingRulesResult>((acc, failingRule) => {
+        const accum = acc;
+        const theRule = failingRule;
+        return {
+          [theRule.id]: {
+            ...theRule,
+          },
+          ...accum,
+        };
+      }, {});
+  } catch (exc) {
+    throw new Error(`Failed to get executionStatus with AlertsClient: ${exc.message}`);
+  }
 };

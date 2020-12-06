@@ -42,7 +42,6 @@ export { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock
 export { httpServiceMock } from './http/http_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';
 export { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
-export { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
 export { notificationServiceMock } from './notifications/notifications_service.mock';
 export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
@@ -98,7 +97,7 @@ function createCoreStartMock({ basePath = '' } = {}) {
   return mock;
 }
 
-function pluginInitializerContextMock() {
+function pluginInitializerContextMock(config: any = {}) {
   const mock: PluginInitializerContext = {
     opaqueId: Symbol(),
     env: {
@@ -116,7 +115,7 @@ function pluginInitializerContextMock() {
       },
     },
     config: {
-      get: <T>() => ({} as T),
+      get: <T>() => config as T,
     },
   };
 
@@ -166,6 +165,7 @@ function createAppMountParametersMock(appBasePath = '') {
     element: document.createElement('div'),
     history,
     onAppLeave: jest.fn(),
+    setHeaderActionMenu: jest.fn(),
   };
 
   return params;

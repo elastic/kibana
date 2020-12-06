@@ -5,10 +5,11 @@
  */
 
 import { toExpression } from './map';
-import { MapEmbeddableInput } from '../../../../../../legacy/plugins/maps/public';
+import { MapEmbeddableInput } from '../../../../../../plugins/maps/public/embeddable';
 import { fromExpression, Ast } from '@kbn/interpreter/common';
 
 const baseSavedMapInput = {
+  attributes: { title: '' },
   id: 'embeddableId',
   filters: [],
   isLayerTOCOpen: false,
@@ -68,5 +69,17 @@ describe('toExpression', () => {
     expect(timerangeExpression.chain[0].function).toBe('timerange');
     expect(timerangeExpression.chain[0].arguments.from[0]).toEqual(input.timeRange?.from);
     expect(timerangeExpression.chain[0].arguments.to[0]).toEqual(input.timeRange?.to);
+  });
+
+  it('includes empty panel title', () => {
+    const input: MapEmbeddableInput = {
+      ...baseSavedMapInput,
+      title: '',
+    };
+
+    const expression = toExpression(input);
+    const ast = fromExpression(expression);
+
+    expect(ast.chain[0].arguments).toHaveProperty('title', [input.title]);
   });
 });

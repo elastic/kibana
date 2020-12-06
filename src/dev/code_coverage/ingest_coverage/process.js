@@ -18,7 +18,7 @@
  */
 
 import { fromEventPattern, of, fromEvent } from 'rxjs';
-import { concatMap, delay, map, takeUntil } from 'rxjs/operators';
+import { concatMap, delay, map, mergeMap, takeUntil } from 'rxjs/operators';
 import jsonStream from './json_stream';
 import { pipe, noop, green, always } from './utils';
 import { ingest } from './ingest';
@@ -32,23 +32,29 @@ import {
   coveredFilePath,
   ciRunUrl,
   itemizeVcs,
+  teamAssignment,
 } from './transforms';
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import readline from 'readline';
+import * as moment from 'moment';
 
 const ROOT = '../../../..';
 const COVERAGE_INGESTION_KIBANA_ROOT =
   process.env.COVERAGE_INGESTION_KIBANA_ROOT || resolve(__dirname, ROOT);
 const ms = process.env.DELAY || 0;
 const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || 'https://kibana-coverage.elastic.dev';
-const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
+const format = 'YYYY-MM-DDTHH:mm:SS';
+// eslint-disable-next-line import/namespace
+const formatted = `${moment.utc().format(format)}Z`;
+const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP || formatted);
 const preamble = pipe(statsAndstaticSiteUrl, rootDirAndOrigPath, buildId, addPrePopulatedTimeStamp);
 const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
 
-const transform = (jsonSummaryPath) => (log) => (vcsInfo) => {
+const transform = (jsonSummaryPath) => (log) => (vcsInfo) => (teamAssignmentsPath) => {
   const objStream = jsonStream(jsonSummaryPath).on('done', noop);
   const itemizeVcsInfo = itemizeVcs(vcsInfo);
+  const assignTeams = teamAssignment(teamAssignmentsPath)(log);
 
   const jsonSummary$ = (_) => objStream.on('node', '!.*', _);
 
@@ -60,6 +66,7 @@ const transform = (jsonSummaryPath) => (log) => (vcsInfo) => {
       map(ciRunUrl),
       map(addJsonSummaryPath(jsonSummaryPath)),
       map(addTestRunnerAndStaticSiteUrl),
+      mergeMap(assignTeams),
       concatMap((x) => of(x).pipe(delay(ms)))
     )
     .subscribe(ingest(log));
@@ -79,7 +86,7 @@ const vcsInfoLines$ = (vcsInfoFilePath) => {
   return fromEvent(rl, 'line').pipe(takeUntil(fromEvent(rl, 'close')));
 };
 
-export const prok = ({ jsonSummaryPath, vcsInfoFilePath }, log) => {
+export const prok = ({ jsonSummaryPath, vcsInfoFilePath, teamAssignmentsPath }, log) => {
   validateRoot(COVERAGE_INGESTION_KIBANA_ROOT, log);
   logAll(jsonSummaryPath, log);
 
@@ -89,7 +96,7 @@ export const prok = ({ jsonSummaryPath, vcsInfoFilePath }, log) => {
   vcsInfoLines$(vcsInfoFilePath).subscribe(
     mutateVcsInfo(vcsInfo),
     (err) => log.error(err),
-    always(xformWithPath(vcsInfo))
+    always(xformWithPath(vcsInfo)(teamAssignmentsPath))
   );
 };
 

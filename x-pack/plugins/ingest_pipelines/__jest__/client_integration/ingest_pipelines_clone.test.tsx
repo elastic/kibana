@@ -11,21 +11,24 @@ import { PIPELINE_TO_CLONE, PipelinesCloneTestBed } from './helpers/pipelines_cl
 
 const { setup } = pageHelpers.pipelinesClone;
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiCodeEditor, which uses React Ace under the hood
-  EuiCodeEditor: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj']}
-      onChange={(syntheticEvent: any) => {
-        props.onChange(syntheticEvent.jsonString);
-      }}
-    />
-  ),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
 
-// FLAKY: https://github.com/elastic/kibana/issues/66856
-describe.skip('<PipelinesClone />', () => {
+  return {
+    ...original,
+    // Mocking EuiCodeEditor, which uses React Ace under the hood
+    EuiCodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj']}
+        onChange={(syntheticEvent: any) => {
+          props.onChange(syntheticEvent.jsonString);
+        }}
+      />
+    ),
+  };
+});
+
+describe('<PipelinesClone />', () => {
   let testBed: PipelinesCloneTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -34,13 +37,14 @@ describe.skip('<PipelinesClone />', () => {
     server.restore();
   });
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_CLONE);
+  httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_CLONE);
 
+  beforeEach(async () => {
     await act(async () => {
       testBed = await setup();
-      await testBed.waitFor('pipelineForm');
     });
+
+    testBed.component.update();
   });
 
   test('should render the correct page header', () => {
@@ -57,12 +61,9 @@ describe.skip('<PipelinesClone />', () => {
 
   describe('form submission', () => {
     it('should send the correct payload', async () => {
-      const { actions, waitFor } = testBed;
+      const { actions } = testBed;
 
-      await act(async () => {
-        actions.clickSubmitButton();
-        await waitFor('pipelineForm', 0);
-      });
+      await actions.clickSubmitButton();
 
       const latestRequest = server.requests[server.requests.length - 1];
 
@@ -71,7 +72,7 @@ describe.skip('<PipelinesClone />', () => {
         name: `${PIPELINE_TO_CLONE.name}-copy`,
       };
 
-      expect(JSON.parse(latestRequest.requestBody)).toEqual(expected);
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
     });
   });
 });

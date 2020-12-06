@@ -15,14 +15,14 @@ import '../index.scss';
 import { NotFoundPage } from '../pages/404';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
 import { LogsPage } from '../pages/logs';
-import { ClientPluginDeps } from '../types';
+import { InfraClientStartDeps } from '../types';
 import { createApolloClient } from '../utils/apollo_client';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
 
 export const renderApp = (
   core: CoreStart,
-  plugins: ClientPluginDeps,
+  plugins: InfraClientStartDeps,
   { element, history }: AppMountParameters
 ) => {
   const apolloClient = createApolloClient(core.http.fetch);
@@ -43,7 +43,7 @@ const LogsApp: React.FC<{
   apolloClient: ApolloClient<{}>;
   core: CoreStart;
   history: History<unknown>;
-  plugins: ClientPluginDeps;
+  plugins: InfraClientStartDeps;
 }> = ({ apolloClient, core, history, plugins }) => {
   const uiCapabilities = core.application.capabilities;
 
@@ -51,7 +51,7 @@ const LogsApp: React.FC<{
     <CoreProviders core={core} plugins={plugins}>
       <CommonInfraProviders
         apolloClient={apolloClient}
-        triggersActionsUI={plugins.triggers_actions_ui}
+        triggersActionsUI={plugins.triggersActionsUi}
       >
         <Router history={history}>
           <Switch>

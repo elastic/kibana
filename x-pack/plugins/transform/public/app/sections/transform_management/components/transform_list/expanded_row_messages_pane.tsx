@@ -9,11 +9,15 @@ import React, { useState } from 'react';
 import { EuiSpacer, EuiBasicTable } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
-import { i18n } from '@kbn/i18n';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+
+import { i18n } from '@kbn/i18n';
+
+import { isGetTransformsAuditMessagesResponseSchema } from '../../../../../../common/api_schemas/type_guards';
+import { TransformMessage } from '../../../../../../common/types/messages';
+
 import { useApi } from '../../../../hooks/use_api';
 import { JobIcon } from '../../../../components/job_icon';
-import { TransformMessage } from '../../../../../../common/types/messages';
 import { useRefreshTransformList } from '../../../../common';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -36,25 +40,16 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
     let concurrentLoads = 0;
 
     return async function getMessages() {
-      try {
-        concurrentLoads++;
+      concurrentLoads++;
 
-        if (concurrentLoads > 1) {
-          return;
-        }
+      if (concurrentLoads > 1) {
+        return;
+      }
 
-        setIsLoading(true);
-        const messagesResp = await api.getTransformAuditMessages(transformId);
-        setIsLoading(false);
-        setMessages(messagesResp as any[]);
+      setIsLoading(true);
+      const messagesResp = await api.getTransformAuditMessages(transformId);
 
-        concurrentLoads--;
-
-        if (concurrentLoads > 0) {
-          concurrentLoads = 0;
-          getMessages();
-        }
-      } catch (error) {
+      if (!isGetTransformsAuditMessagesResponseSchema(messagesResp)) {
         setIsLoading(false);
         setErrorMessage(
           i18n.translate(
@@ -64,6 +59,17 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
             }
           )
         );
+        return;
+      }
+
+      setIsLoading(false);
+      setMessages(messagesResp as any[]);
+
+      concurrentLoads--;
+
+      if (concurrentLoads > 0) {
+        concurrentLoads = 0;
+        getMessages();
       }
     };
   };

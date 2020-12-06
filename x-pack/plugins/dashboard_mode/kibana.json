@@ -3,10 +3,14 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": [
-    "xpack", "dashboard_mode"
+    "xpack",
+    "dashboard_mode"
   ],
+  "optionalPlugins": ["security"],
   "requiredPlugins": [
-    "kibanaLegacy", "dashboard"
+    "kibanaLegacy",
+    "urlForwarding",
+    "dashboard"
   ],
   "server": true,
   "ui": true

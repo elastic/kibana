@@ -8,29 +8,35 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
-import { TimeRange, Filter, Query } from 'src/plugins/data/public';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
 } from 'src/plugins/expressions/public';
+import { ExecutionContextSearch } from 'src/plugins/data/public';
+import { RenderMode } from 'src/plugins/expressions';
+import { getOriginalRequestErrorMessage } from '../error_helper';
+import { LensInspectorAdapters } from '../types';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
   expression: string | null;
-  context: {
-    timeRange?: TimeRange;
-    query?: Query;
-    filters?: Filter[];
-    lastReloadRequestTime?: number;
-  };
+  variables?: Record<string, unknown>;
+  searchContext: ExecutionContextSearch;
+  searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
+  onData$: (data: unknown, inspectorAdapters?: LensInspectorAdapters | undefined) => void;
+  renderMode?: RenderMode;
 }
 
 export function ExpressionWrapper({
   ExpressionRenderer: ExpressionRendererComponent,
   expression,
-  context,
+  searchContext,
+  variables,
   handleEvent,
+  searchSessionId,
+  onData$,
+  renderMode,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -52,10 +58,27 @@ export function ExpressionWrapper({
         <div className="lnsExpressionRenderer">
           <ExpressionRendererComponent
             className="lnsExpressionRenderer__component"
-            padding="m"
+            padding="s"
+            variables={variables}
             expression={expression}
-            searchContext={{ ...context }}
-            renderError={(error) => <div data-test-subj="expression-renderer-error">{error}</div>}
+            searchContext={searchContext}
+            searchSessionId={searchSessionId}
+            onData$={onData$}
+            renderMode={renderMode}
+            renderError={(errorMessage, error) => (
+              <div data-test-subj="expression-renderer-error">
+                <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
+                  <EuiFlexItem>
+                    <EuiIcon type="alert" color="danger" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      {getOriginalRequestErrorMessage(error) || errorMessage}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            )}
             onEvent={handleEvent}
           />
         </div>

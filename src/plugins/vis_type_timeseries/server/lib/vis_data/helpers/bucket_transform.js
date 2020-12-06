@@ -19,7 +19,8 @@
 
 import { getBucketsPath } from './get_buckets_path';
 import { parseInterval } from './parse_interval';
-import { set, isEmpty } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { MODEL_SCRIPTS } from './moving_fn_scripts';
 
@@ -61,6 +62,16 @@ function extendStatsBucket(bucket, metrics) {
     body.extended_stats_bucket.sigma = parseInt(bucket.sigma, 10);
   }
   return body;
+}
+
+function getPercentileHdrParam(bucket) {
+  return bucket.numberOfSignificantValueDigits
+    ? {
+        hdr: {
+          number_of_significant_value_digits: bucket.numberOfSignificantValueDigits,
+        },
+      }
+    : undefined;
 }
 
 export const bucketTransform = {
@@ -138,13 +149,14 @@ export const bucketTransform = {
         bucket.percentiles.filter((p) => p.percentile).map((p) => p.percentile)
       );
     }
-    const agg = {
+
+    return {
       percentiles: {
         field: bucket.field,
         percents,
+        ...getPercentileHdrParam(bucket),
       },
     };
-    return agg;
   },
 
   percentile_rank: (bucket) => {
@@ -154,6 +166,7 @@ export const bucketTransform = {
       percentile_ranks: {
         field: bucket.field,
         values: (bucket.values || []).map((value) => (isEmpty(value) ? 0 : value)),
+        ...getPercentileHdrParam(bucket),
       },
     };
   },

@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IndexPatterns savedObjectToSpec 1`] = `
+Object {
+  "fieldAttrs": Object {},
+  "fieldFormats": Object {
+    "field": Object {},
+  },
+  "fields": Object {},
+  "id": "id",
+  "intervalName": undefined,
+  "sourceFilters": Array [
+    Object {
+      "value": "item1",
+    },
+    Object {
+      "value": "item2",
+    },
+  ],
+  "timeFieldName": "@timestamp",
+  "title": "kibana-*",
+  "type": "",
+  "typeMeta": Object {},
+  "version": "version",
+}
+`;

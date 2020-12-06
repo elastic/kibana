@@ -9,13 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CustomMetricMode } from './types';
 import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
-import {
-  EuiTheme,
-  withTheme,
-} from '../../../../../../../../../legacy/common/eui_styled_components';
+import { EuiTheme, withTheme } from '../../../../../../../../xpack_legacy/common';
 
 interface Props {
-  theme: EuiTheme;
+  theme: EuiTheme | undefined;
   onEdit: () => void;
   onAdd: () => void;
   onSave: () => void;
@@ -32,7 +29,7 @@ export const ModeSwitcher = withTheme(
     return (
       <div
         style={{
-          borderTop: `${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiBorderColor}`,
+          borderTop: `${theme?.eui.euiBorderWidthThin} solid ${theme?.eui.euiBorderColor}`,
           padding: 12,
         }}
       >

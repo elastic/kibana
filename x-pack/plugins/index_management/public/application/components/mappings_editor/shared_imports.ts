@@ -49,4 +49,17 @@ export {
 export {
   JsonEditor,
   OnJsonEditorUpdateHandler,
+  GlobalFlyout,
 } from '../../../../../../../src/plugins/es_ui_shared/public';
+
+export { documentationService } from '../../services/documentation';
+
+export {
+  RuntimeField,
+  RuntimeFieldEditorFlyoutContent,
+  RuntimeFieldEditorFlyoutContentProps,
+} from '../../../../../runtime_fields/public';
+
+export { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+
+export { DocLinksStart } from '../../../../../../../src/core/public';

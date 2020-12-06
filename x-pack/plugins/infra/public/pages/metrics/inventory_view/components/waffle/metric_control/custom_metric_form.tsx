@@ -27,10 +27,7 @@ import {
   SNAPSHOT_CUSTOM_AGGREGATIONS,
   SnapshotCustomAggregationRT,
 } from '../../../../../../../common/http_api/snapshot_api';
-import {
-  EuiTheme,
-  withTheme,
-} from '../../../../../../../../../legacy/common/eui_styled_components';
+import { EuiTheme, withTheme } from '../../../../../../../../xpack_legacy/common';
 
 interface SelectedOption {
   label: string;
@@ -52,7 +49,7 @@ const AGGREGATION_LABELS = {
 };
 
 interface Props {
-  theme: EuiTheme;
+  theme: EuiTheme | undefined;
   metric?: SnapshotCustomMetricInput;
   fields: IFieldType[];
   customMetrics: SnapshotCustomMetricInput[];
@@ -158,8 +155,8 @@ export const CustomMetricForm = withTheme(
           </EuiPopoverTitle>
           <div
             style={{
-              padding: theme.eui.paddingSizes.m,
-              borderBottom: `${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiBorderColor}`,
+              padding: theme?.eui.paddingSizes.m,
+              borderBottom: `${theme?.eui.euiBorderWidthThin} solid ${theme?.eui.euiBorderColor}`,
             }}
           >
             <EuiFormRow
@@ -219,11 +216,11 @@ export const CustomMetricForm = withTheme(
               />
             </EuiFormRow>
           </div>
-          <div style={{ padding: theme.eui.paddingSizes.m, textAlign: 'right' }}>
+          <div style={{ padding: theme?.eui.paddingSizes.m, textAlign: 'right' }}>
             <EuiButtonEmpty
               onClick={onCancel}
               size="s"
-              style={{ paddingRight: theme.eui.paddingSizes.xl }}
+              style={{ paddingRight: theme?.eui.paddingSizes.xl }}
             >
               <FormattedMessage
                 id="xpack.infra.waffle.customMetrics.cancelLabel"

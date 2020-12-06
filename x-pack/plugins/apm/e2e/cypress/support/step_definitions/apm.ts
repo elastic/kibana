@@ -11,8 +11,11 @@ import { loginAndWaitForPage } from '../../integration/helpers';
 export const DEFAULT_TIMEOUT = 60 * 1000;
 
 Given(`a user browses the APM UI application`, () => {
-  // open service overview page
-  loginAndWaitForPage(`/app/apm#/services`);
+  // Open service inventory page
+  loginAndWaitForPage(`/app/apm/services`, {
+    from: '2020-06-01T14:59:32.686Z',
+    to: '2020-06-16T16:59:36.219Z',
+  });
 });
 
 When(`the user inspects the opbeans-node service`, () => {
@@ -23,20 +26,6 @@ When(`the user inspects the opbeans-node service`, () => {
 });
 
 Then(`should redirect to correct path with correct params`, () => {
-  cy.url().should('contain', `/app/apm#/services/opbeans-node/transactions`);
+  cy.url().should('contain', `/app/apm/services/opbeans-node/transactions`);
   cy.url().should('contain', `transactionType=request`);
-});
-
-Then(`should have correct y-axis ticks`, () => {
-  const yAxisTick =
-    '[data-cy=transaction-duration-charts] .rv-xy-plot__axis--vertical .rv-xy-plot__axis__tick__text';
-
-  // wait for all loading to finish
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
-
-  cy.get(yAxisTick).eq(2).invoke('text').snapshot();
-
-  cy.get(yAxisTick).eq(1).invoke('text').snapshot();
-
-  cy.get(yAxisTick).eq(0).invoke('text').snapshot();
 });

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { relative } from 'path';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { createAssignmentProxy } from './assignment_proxy';
 import { wrapFunction } from './wrap_function';
 import { wrapRunnableArgs } from './wrap_runnable_args';

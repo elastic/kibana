@@ -51,6 +51,10 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         .map((tick) => $(tick).text().trim());
     }
 
+    public async getYAxisLabelsAsNumbers() {
+      return (await this.getYAxisLabels()).map((label) => Number(label.replace(',', '')));
+    }
+
     /**
      * Gets the chart data and scales it based on chart height and label.
      * @param dataLabel data-label value
@@ -214,7 +218,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async expectError() {
-      await testSubjects.existOrFail('visLibVisualizeError');
+      await testSubjects.existOrFail('vislibVisualizeError');
     }
 
     public async getVisualizationRenderingCount() {
@@ -240,7 +244,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         const firstCount = await this.getVisualizationRenderingCount();
         log.debug(`-- firstCount=${firstCount}`);
 
-        await common.sleep(1000);
+        await common.sleep(2000);
 
         const secondCount = await this.getVisualizationRenderingCount();
         log.debug(`-- secondCount=${secondCount}`);
@@ -302,12 +306,33 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return element.getVisibleText();
     }
 
+    public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
+      const tableVis = await testSubjects.find('tableVis');
+      const $ = await tableVis.parseDomContent();
+      const headers = $('span[ng-bind="::col.title"]')
+        .toArray()
+        .map((header: any) => $(header).text());
+      const fieldColumnIndex = headers.indexOf(fieldName);
+      return await find.byCssSelector(
+        `[data-test-subj="paginated-table-body"] tr:nth-of-type(${rowIndex}) td:nth-of-type(${
+          fieldColumnIndex + 1
+        }) a`
+      );
+    }
+
     /**
      * If you are writing new tests, you should rather look into getTableVisContent method instead.
      * @deprecated Use getTableVisContent instead.
      */
     public async getTableVisData() {
       return await testSubjects.getVisibleText('paginated-table-body');
+    }
+
+    /**
+     * This function returns the text displayed in the Table Vis header
+     */
+    public async getTableVisHeader() {
+      return await testSubjects.getVisibleText('paginated-table-header');
     }
 
     /**

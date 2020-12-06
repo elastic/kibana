@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 
-import { registerTestBed, TestBed } from '../../../../../test_utils';
+import { registerTestBed, TestBed } from '@kbn/test/jest';
 import { RepositoryType } from '../../../common/types';
 import { RepositoryAdd } from '../../../public/application/sections/repository_add';
 import { WithAppDependencies } from './setup_environment';

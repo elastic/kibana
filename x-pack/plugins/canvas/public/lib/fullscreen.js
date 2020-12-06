@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { platformService } from '../services';
+
 export const fullscreenClass = 'canvas-isFullscreen';
 
 export function setFullscreen(fullscreen, doc = document) {
@@ -13,8 +15,10 @@ export function setFullscreen(fullscreen, doc = document) {
   const isFullscreen = bodyClassList.contains(fullscreenClass);
 
   if (enabled && !isFullscreen) {
+    platformService.getService().setFullscreen(false);
     bodyClassList.add(fullscreenClass);
   } else if (!enabled && isFullscreen) {
     bodyClassList.remove(fullscreenClass);
+    platformService.getService().setFullscreen(true);
   }
 }

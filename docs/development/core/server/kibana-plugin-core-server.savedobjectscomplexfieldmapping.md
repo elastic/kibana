@@ -16,7 +16,9 @@ export interface SavedObjectsComplexFieldMapping
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [dynamic](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.dynamic.md) | <code>string</code> |  |
+|  [doc\_values](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.doc_values.md) | <code>boolean</code> |  |
+|  [dynamic](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.dynamic.md) | <code>false &#124; 'strict'</code> | The dynamic property of the mapping, either <code>false</code> or <code>'strict'</code>. If unspecified <code>dynamic: 'strict'</code> will be inherited from the top-level index mappings.<!-- -->Note: To limit the number of mapping fields Saved Object types should \*never\* use <code>dynamic: true</code>. |
+|  [enabled](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.enabled.md) | <code>boolean</code> |  |
 |  [properties](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.properties.md) | <code>SavedObjectsMappingProperties</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.type.md) | <code>string</code> |  |
 

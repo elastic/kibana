@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { trimLeft } from 'lodash';
+import { trimStart } from 'lodash';
 import { CoreSetup } from 'kibana/public';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
+import { UrlForwardingStart } from '../../../../src/plugins/url_forwarding/public';
 import {
   createDashboardEditUrl,
   DashboardConstants,
@@ -19,10 +20,14 @@ function defaultUrl(defaultAppId: string) {
 }
 
 function dashboardAppIdPrefix() {
-  return trimLeft(createDashboardEditUrl(''), '/');
+  return trimStart(createDashboardEditUrl(''), '/');
 }
 
-function migratePath(currentHash: string, kibanaLegacy: KibanaLegacyStart) {
+function migratePath(
+  currentHash: string,
+  kibanaLegacy: KibanaLegacyStart,
+  urlForwarding: UrlForwardingStart
+) {
   if (currentHash === '' || currentHash === '#' || currentHash === '#/') {
     return `#${defaultUrl(kibanaLegacy.config.defaultAppId || '')}`;
   }
@@ -30,7 +35,7 @@ function migratePath(currentHash: string, kibanaLegacy: KibanaLegacyStart) {
     return currentHash;
   }
 
-  const forwards = kibanaLegacy.getForwards();
+  const forwards = urlForwarding.getForwards();
 
   if (currentHash.startsWith('#/dashboards')) {
     const { rewritePath: migrateListingPath } = forwards.find(
@@ -46,18 +51,18 @@ function migratePath(currentHash: string, kibanaLegacy: KibanaLegacyStart) {
 }
 
 export const plugin = () => ({
-  setup(core: CoreSetup<{ kibanaLegacy: KibanaLegacyStart }>) {
+  setup(core: CoreSetup<{ kibanaLegacy: KibanaLegacyStart; urlForwarding: UrlForwardingStart }>) {
     core.application.register({
       id: 'dashboard_mode',
       title: 'Dashboard mode',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async () => {
-        const [coreStart, { kibanaLegacy }] = await core.getStartServices();
+        const [coreStart, { kibanaLegacy, urlForwarding }] = await core.getStartServices();
         kibanaLegacy.dashboardConfig.turnHideWriteControlsOn();
         coreStart.chrome.navLinks.showOnly('dashboards');
         setTimeout(() => {
           coreStart.application.navigateToApp('dashboards', {
-            path: migratePath(window.location.hash, kibanaLegacy),
+            path: migratePath(window.location.hash, kibanaLegacy, urlForwarding),
           });
         }, 0);
         return () => {};

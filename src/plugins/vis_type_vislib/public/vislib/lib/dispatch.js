@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import { get, pull, restParam, size, reduce } from 'lodash';
+import { get, pull, rest, size, reduce } from 'lodash';
 import $ from 'jquery';
 import { DIMMING_OPACITY_SETTING } from '../../../common';
 
@@ -97,7 +97,7 @@ export class Dispatch {
    * @param  {*} [arg...] - any number of arguments that will be applied to each handler
    * @return {Dispatch} - this, for chaining
    */
-  emit = restParam(function (name, args) {
+  emit = rest(function (name, args) {
     if (!this._listeners[name]) {
       return this;
     }
@@ -182,7 +182,6 @@ export class Dispatch {
     const data = d.input || d;
 
     return {
-      e: d3.event,
       data: isSlices ? this._pieClickResponse(data) : this._seriesClickResponse(data),
     };
   }
@@ -423,7 +422,6 @@ export class Dispatch {
    */
   createBrush(xScale, svg) {
     const self = this;
-    const visConfig = self.handler.visConfig;
     const { width, height } = svg.node().getBBox();
     const isHorizontal = self.handler.categoryAxes[0].axisConfig.isHorizontal();
 
@@ -449,8 +447,6 @@ export class Dispatch {
 
       return self.emit('brush', {
         range,
-        config: visConfig,
-        e: d3.event,
         data,
       });
     });

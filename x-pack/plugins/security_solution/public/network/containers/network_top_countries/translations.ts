@@ -1,0 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const ERROR_NETWORK_TOP_COUNTRIES = i18n.translate(
+  'xpack.securitySolution.networkTopCountries.errorSearchDescription',
+  {
+    defaultMessage: `An error has occurred on network top countries search`,
+  }
+);
+
+export const FAIL_NETWORK_TOP_COUNTRIES = i18n.translate(
+  'xpack.securitySolution.networkTopCountries.failSearchDescription',
+  {
+    defaultMessage: `Failed to run search on network top countries`,
+  }
+);

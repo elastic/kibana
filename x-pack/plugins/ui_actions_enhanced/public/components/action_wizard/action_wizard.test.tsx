@@ -5,14 +5,17 @@
  */
 
 import React from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react/pure';
-import '@testing-library/jest-dom/extend-expect'; // TODO: this should be global
+import { fireEvent, render } from '@testing-library/react';
 import { TEST_SUBJ_ACTION_FACTORY_ITEM, TEST_SUBJ_SELECTED_ACTION_FACTORY } from './action_wizard';
-import { dashboardFactory, dashboards, Demo, urlFactory } from './test_data';
-
-// TODO: afterEach is not available for it globally during setup
-// https://github.com/elastic/kibana/issues/59469
-afterEach(cleanup);
+import {
+  dashboardFactory,
+  dashboards,
+  Demo,
+  urlFactory,
+  urlDrilldownActionFactory,
+} from './test_data';
+import { ActionFactory } from '../../dynamic_actions';
+import { licensingMock } from '../../../../licensing/public/mocks';
 
 test('Pick and configure action', () => {
   const screen = render(<Demo actionFactories={[dashboardFactory, urlFactory]} />);
@@ -54,4 +57,39 @@ test('If only one actions factory is available then actionFactory selection is e
 
   // check that can't change to action factory type
   expect(screen.queryByTestId(/change/i)).not.toBeInTheDocument();
+});
+
+test('If not enough license, button is disabled', () => {
+  const urlWithGoldLicense = new ActionFactory(
+    {
+      ...urlDrilldownActionFactory,
+      minimalLicense: 'gold',
+      licenseFeatureName: 'Url Drilldown',
+    },
+    {
+      getLicense: () => licensingMock.createLicense(),
+      getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+    }
+  );
+  const screen = render(<Demo actionFactories={[dashboardFactory, urlWithGoldLicense]} />);
+
+  // check that all factories are displayed to pick
+  expect(screen.getAllByTestId(new RegExp(TEST_SUBJ_ACTION_FACTORY_ITEM))).toHaveLength(2);
+
+  expect(screen.getByTestId(/actionFactoryItem-Url/i)).toBeDisabled();
+});
+
+test('if action is beta, beta badge is shown', () => {
+  const betaUrl = new ActionFactory(
+    {
+      ...urlDrilldownActionFactory,
+      isBeta: true,
+    },
+    {
+      getLicense: () => licensingMock.createLicense(),
+      getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+    }
+  );
+  const screen = render(<Demo actionFactories={[dashboardFactory, betaUrl]} />);
+  expect(screen.getByText(/Beta/i)).toBeVisible();
 });

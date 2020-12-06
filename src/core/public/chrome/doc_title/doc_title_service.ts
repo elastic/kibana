@@ -59,11 +59,6 @@ export interface ChromeDocTitle {
    * (meaning the one present in the title meta at application load.)
    */
   reset(): void;
-
-  /** @internal */
-  __legacy: {
-    setBaseTitle(baseTitle: string): void;
-  };
 }
 
 const defaultTitle: string[] = [];
@@ -84,11 +79,6 @@ export class DocTitleService {
       },
       reset: () => {
         this.applyTitle(defaultTitle);
-      },
-      __legacy: {
-        setBaseTitle: (baseTitle) => {
-          this.baseTitle = baseTitle;
-        },
       },
     };
   }

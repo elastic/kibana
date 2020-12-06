@@ -7,23 +7,35 @@
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import LRU from 'lru-cache';
 
 import {
   CoreSetup,
   CoreStart,
+  Logger,
   Plugin as IPlugin,
   PluginInitializerContext,
-  Logger,
+  SavedObjectsClient,
+  DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
-import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../src/plugins/data/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import {
+  PluginSetupContract as AlertingSetup,
+  PluginStartContract as AlertPluginStartContract,
+} from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { IngestManagerStartContract } from '../../ingest_manager/server';
+import { ILicense, LicensingPluginStart } from '../../licensing/server';
+import { FleetStartContract, ExternalCallback } from '../../fleet/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { initRoutes } from './routes';
@@ -31,33 +43,61 @@ import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
-import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
+import { ManifestTask } from './endpoint/lib/artifacts';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, APP_ICON, SERVER_APP_ID } from '../common/constants';
+import {
+  APP_ID,
+  SERVER_APP_ID,
+  SecurityPageName,
+  SIGNALS_ID,
+  NOTIFICATIONS_ID,
+} from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
+import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
-import { registerAlertRoutes } from './endpoint/alerts/routes';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
+import { ArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
-import { IngestIndexPatternRetriever } from './endpoint/alerts/index_pattern';
+import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
+import { initUsageCollectors } from './usage';
+import { AppRequestContext } from './types';
+import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
+import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
+import { securitySolutionIndexFieldsProvider } from './search_strategy/index_fields';
+import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
+import { TelemetryEventsSender } from './lib/telemetry/sender';
+import {
+  TelemetryPluginStart,
+  TelemetryPluginSetup,
+} from '../../../../src/plugins/telemetry/server';
+import { licenseService } from './lib/license/license';
+import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
+  data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
-  licensing: LicensingPluginSetup;
+  lists?: ListPluginSetup;
+  ml?: MlSetup;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
-  ml?: MlSetup;
-  lists?: ListPluginSetup;
+  taskManager?: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 export interface StartPlugins {
-  ingestManager: IngestManagerStartContract;
+  alerts: AlertPluginStartContract;
+  data: DataPluginStart;
+  fleet?: FleetStartContract;
+  licensing: LicensingPluginStart;
+  taskManager?: TaskManagerStartContract;
+  telemetry?: TelemetryPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -65,36 +105,63 @@ export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
+const securitySubPlugins = [
+  APP_ID,
+  `${APP_ID}:${SecurityPageName.overview}`,
+  `${APP_ID}:${SecurityPageName.detections}`,
+  `${APP_ID}:${SecurityPageName.hosts}`,
+  `${APP_ID}:${SecurityPageName.network}`,
+  `${APP_ID}:${SecurityPageName.timelines}`,
+  `${APP_ID}:${SecurityPageName.case}`,
+  `${APP_ID}:${SecurityPageName.administration}`,
+];
+
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config$: Observable<ConfigType>;
+  private config?: ConfigType;
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
+  private setupPlugins?: SetupPlugins;
   private readonly endpointAppContextService = new EndpointAppContextService();
+  private readonly telemetryEventsSender: TelemetryEventsSender;
+
+  private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
+  private licensing$!: Observable<ILicense>;
+  private policyWatcher?: PolicyWatcher;
+
+  private manifestTask: ManifestTask | undefined;
+  private exceptionsCache: LRU<string, Buffer>;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
-    this.logger = context.logger.get('plugins', APP_ID);
+    this.logger = context.logger.get();
     this.config$ = createConfig$(context);
     this.appClientFactory = new AppClientFactory();
+    // Cache up to three artifacts with a max retention of 5 mins each
+    this.exceptionsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
+    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
 
     this.logger.debug('plugin initialized');
   }
 
   public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
-
-    if (hasListsFeature()) {
-      // TODO: Remove this once we have the lists feature supported
-      this.logger.error(
-        `You have activated the lists feature flag which is NOT currently supported for Security Solution! You should turn this feature flag off immediately by un-setting the environment variable: ${listsEnvFeatureFlagName} and restarting Kibana`
-      );
-    }
+    this.setupPlugins = plugins;
 
     const config = await this.config$.pipe(first()).toPromise();
+    this.config = config;
+    const globalConfig = await this.context.config.legacy.globalConfig$.pipe(first()).toPromise();
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
+    initUsageCollectors({
+      core,
+      kibanaIndex: globalConfig.kibana.index,
+      ml: plugins.ml,
+      usageCollection: plugins.usageCollection,
+    });
+
     const endpointContext: EndpointAppContext = {
       logFactory: this.context.logger,
       service: this.endpointAppContextService,
@@ -102,9 +169,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
 
     const router = core.http.createRouter();
-    core.http.registerRouteHandlerContext(APP_ID, (context, request, response) => ({
-      getAppClient: () => this.appClientFactory.create(request),
-    }));
+    core.http.registerRouteHandlerContext(
+      APP_ID,
+      (context, request, response): AppRequestContext => ({
+        getAppClient: () => this.appClientFactory.create(request),
+      })
+    );
 
     this.appClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
@@ -120,30 +190,33 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.ml
     );
     registerEndpointRoutes(router, endpointContext);
+    registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router, endpointContext);
-    registerAlertRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
+    registerTrustedAppsRoutes(router, endpointContext);
+    registerDownloadExceptionListRoute(router, endpointContext, this.exceptionsCache);
 
-    plugins.features.registerFeature({
+    plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
       name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
         defaultMessage: 'Security',
       }),
       order: 1100,
-      icon: APP_ICON,
-      navLinkId: 'securitySolution',
-      app: ['securitySolution', 'kibana'],
+      category: DEFAULT_APP_CATEGORIES.security,
+      app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
+      alerting: [SIGNALS_ID, NOTIFICATIONS_ID],
       privileges: {
         all: {
-          app: ['securitySolution', 'kibana'],
+          app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          api: ['securitySolution', 'lists-all', 'lists-read'],
           savedObject: {
             all: [
               'alert',
-              'action',
-              'action_task_params',
               'cases',
               'cases-comments',
               'cases-configure',
@@ -152,23 +225,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
             read: ['config'],
           },
-          ui: [
-            'show',
-            'crud',
-            'alerting:show',
-            'actions:show',
-            'alerting:save',
-            'actions:save',
-            'alerting:delete',
-            'actions:delete',
-          ],
+          alerting: {
+            all: [SIGNALS_ID, NOTIFICATIONS_ID],
+          },
+          management: {
+            insightsAndAlerting: ['triggersActions'],
+          },
+          ui: ['show', 'crud'],
         },
         read: {
-          app: ['securitySolution', 'kibana'],
+          app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          api: ['securitySolution', 'lists-read'],
           savedObject: {
-            all: ['alert', 'action', 'action_task_params'],
+            all: [],
             read: [
               'config',
               'cases',
@@ -178,15 +248,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               ...savedObjectTypes,
             ],
           },
-          ui: [
-            'show',
-            'alerting:show',
-            'actions:show',
-            'alerting:save',
-            'actions:save',
-            'alerting:delete',
-            'actions:delete',
-          ],
+          alerting: {
+            read: [SIGNALS_ID, NOTIFICATIONS_ID],
+          },
+          management: {
+            insightsAndAlerting: ['triggersActions'],
+          },
+          ui: ['show'],
         },
       },
     });
@@ -194,6 +262,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (plugins.alerts != null) {
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
+        eventsTelemetry: this.telemetryEventsSender,
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
@@ -211,25 +280,112 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }
     }
 
-    const libs = compose(core, plugins, this.context.env.mode.prod);
+    const exceptionListsSetupEnabled = () => {
+      return plugins.taskManager && plugins.lists;
+    };
+
+    if (exceptionListsSetupEnabled()) {
+      this.lists = plugins.lists;
+      this.manifestTask = new ManifestTask({
+        endpointAppContext: endpointContext,
+        taskManager: plugins.taskManager!,
+      });
+    }
+
+    const libs = compose(core, plugins, endpointContext);
     initServer(libs);
+
+    core.getStartServices().then(([_, depsStart]) => {
+      const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(depsStart.data);
+      const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
+        depsStart.data
+      );
+      const securitySolutionIndexFields = securitySolutionIndexFieldsProvider();
+
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionSearchStrategy',
+        securitySolutionSearchStrategy
+      );
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionIndexFields',
+        securitySolutionIndexFields
+      );
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionTimelineSearchStrategy',
+        securitySolutionTimelineSearchStrategy
+      );
+    });
+
+    this.telemetryEventsSender.setup(plugins.telemetry);
 
     return {};
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
+    const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+
+    let manifestManager: ManifestManager | undefined;
+    let registerIngestCallback: ((...args: ExternalCallback) => void) | undefined;
+
+    const exceptionListsStartEnabled = () => {
+      return this.lists && plugins.taskManager && plugins.fleet;
+    };
+
+    if (exceptionListsStartEnabled()) {
+      const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
+      const artifactClient = new ArtifactClient(savedObjectsClient);
+
+      registerIngestCallback = plugins.fleet!.registerExternalCallback;
+      manifestManager = new ManifestManager({
+        savedObjectsClient,
+        artifactClient,
+        exceptionListClient,
+        packagePolicyService: plugins.fleet!.packagePolicyService,
+        logger: this.logger,
+        cache: this.exceptionsCache,
+      });
+    }
+
     this.endpointAppContextService.start({
-      indexPatternRetriever: new IngestIndexPatternRetriever(
-        plugins.ingestManager.esIndexPatternService,
-        this.context.logger
-      ),
-      agentService: plugins.ingestManager.agentService,
+      agentService: plugins.fleet?.agentService,
+      packageService: plugins.fleet?.packageService,
+      packagePolicyService: plugins.fleet?.packagePolicyService,
+      agentPolicyService: plugins.fleet?.agentPolicyService,
+      appClientFactory: this.appClientFactory,
+      security: this.setupPlugins!.security!,
+      alerts: plugins.alerts,
+      config: this.config!,
+      logger: this.logger,
+      manifestManager,
+      registerIngestCallback,
+      savedObjectsStart: core.savedObjects,
     });
+
+    if (exceptionListsStartEnabled() && this.manifestTask) {
+      this.manifestTask.start({
+        taskManager: plugins.taskManager!,
+      });
+    } else {
+      this.logger.debug('User artifacts task not available.');
+    }
+
+    this.telemetryEventsSender.start(core, plugins.telemetry);
+    this.licensing$ = plugins.licensing.license$;
+    licenseService.start(this.licensing$);
+    this.policyWatcher = new PolicyWatcher(
+      plugins.fleet!.packagePolicyService,
+      core.savedObjects,
+      this.logger
+    );
+    this.policyWatcher.start(licenseService);
     return {};
   }
 
   public stop() {
     this.logger.debug('Stopping plugin');
+    this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
+    this.policyWatcher?.stop();
+    licenseService.stop();
   }
 }

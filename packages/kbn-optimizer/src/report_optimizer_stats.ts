@@ -18,40 +18,40 @@
  */
 
 import { materialize, mergeMap, dematerialize } from 'rxjs/operators';
-import { CiStatsReporter } from '@kbn/dev-utils';
+import { CiStatsReporter, ToolingLog } from '@kbn/dev-utils';
 
 import { OptimizerUpdate$ } from './run_optimizer';
-import { OptimizerState, OptimizerConfig } from './optimizer';
+import { OptimizerConfig, getMetrics } from './optimizer';
 import { pipeClosure } from './common';
 
-export function reportOptimizerStats(reporter: CiStatsReporter, config: OptimizerConfig) {
-  return pipeClosure((update$: OptimizerUpdate$) => {
-    let lastState: OptimizerState | undefined;
-    return update$.pipe(
+export function reportOptimizerStats(
+  reporter: CiStatsReporter,
+  config: OptimizerConfig,
+  log: ToolingLog
+) {
+  return pipeClosure((update$: OptimizerUpdate$) =>
+    update$.pipe(
       materialize(),
       mergeMap(async (n) => {
-        if (n.kind === 'N' && n.value?.state) {
-          lastState = n.value?.state;
-        }
+        if (n.kind === 'C') {
+          const metrics = getMetrics(log, config);
 
-        if (n.kind === 'C' && lastState) {
-          await reporter.metrics(
-            config.bundles.map((bundle) => {
-              // make the cache read from the cache file since it was likely updated by the worker
-              bundle.cache.refresh();
+          await reporter.metrics(metrics);
 
-              return {
-                group: `@kbn/optimizer bundle module count`,
-                id: bundle.id,
-                value: bundle.cache.getModuleCount() || 0,
-              };
-            })
-          );
+          for (const metric of metrics) {
+            if (metric.limit != null && metric.value > metric.limit) {
+              const value = metric.value.toLocaleString();
+              const limit = metric.limit.toLocaleString();
+              log.warning(
+                `Metric [${metric.group}] for [${metric.id}] of [${value}] over the limit of [${limit}]`
+              );
+            }
+          }
         }
 
         return n;
       }),
       dematerialize()
-    );
-  });
+    )
+  );
 }

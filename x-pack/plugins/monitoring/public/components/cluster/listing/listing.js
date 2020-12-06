@@ -14,24 +14,23 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiToolTip,
   EuiCallOut,
   EuiSpacer,
   EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { EuiMonitoringTable } from '../../table';
-import { AlertsIndicator } from '../../cluster/listing/alerts_indicator';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { AlertsStatus } from '../../../alerts/status';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import './listing.scss';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
 };
-
-const STANDALONE_CLUSTER_STORAGE_KEY = 'viewedStandaloneCluster';
 
 /*
  * This checks if alerts feature is supported via monitoring cluster
@@ -61,6 +60,8 @@ const IsAlertsSupported = (props) => {
   );
 };
 
+const STANDALONE_CLUSTER_STORAGE_KEY = 'viewedStandaloneCluster';
+
 const getColumns = (
   showLicenseExpiration,
   changeCluster,
@@ -78,7 +79,7 @@ const getColumns = (
         if (cluster.isSupported) {
           return (
             <EuiLink
-              onClick={() => changeCluster(cluster.cluster_uuid, cluster.ccs)}
+              href={getSafeForExternalLink(`#/overview`, { cluster_uuid: cluster.cluster_uuid })}
               data-test-subj="clusterLink"
             >
               {value}
@@ -119,7 +120,7 @@ const getColumns = (
       render: (_status, cluster) => (
         <IsClusterSupported {...cluster}>
           <IsAlertsSupported cluster={cluster}>
-            <AlertsIndicator alerts={cluster.alerts} />
+            <AlertsStatus alerts={cluster.alerts.list} />
           </IsAlertsSupported>
         </IsClusterSupported>
       ),

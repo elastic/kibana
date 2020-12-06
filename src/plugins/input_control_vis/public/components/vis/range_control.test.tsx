@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 
 import { RangeControl, ceilWithPrecision, floorWithPrecision } from './range_control';
 import { RangeControl as RangeControlClass } from '../../control/range_control_factory';
@@ -46,7 +46,7 @@ test('renders RangeControl', () => {
   const component = shallowWithIntl(
     <RangeControl control={control} controlIndex={0} stageFilter={() => {}} />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('disabled', () => {
@@ -69,7 +69,7 @@ test('disabled', () => {
   const component = shallowWithIntl(
     <RangeControl control={disabledRangeControl} controlIndex={0} stageFilter={() => {}} />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('ceilWithPrecision', () => {

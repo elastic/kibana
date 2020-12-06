@@ -7,11 +7,10 @@
 import createContainer from 'constate';
 import { isString } from 'lodash';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-
-import { LogEntriesItem } from '../../../common/http_api';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { UrlStateContainer } from '../../utils/url_state';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
-import { fetchLogEntriesItem } from './log_entries/api/fetch_log_entries_item';
+import { fetchLogEntry } from './log_entries/api/fetch_log_entry';
 import { useLogSourceContext } from './log_source';
 
 export enum FlyoutVisibility {
@@ -26,10 +25,10 @@ export interface FlyoutOptionsUrlState {
 }
 
 export const useLogFlyout = () => {
+  const { services } = useKibanaContextForPlugin();
   const { sourceId } = useLogSourceContext();
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
   const [flyoutId, setFlyoutId] = useState<string | null>(null);
-  const [flyoutItem, setFlyoutItem] = useState<LogEntriesItem | null>(null);
   const [surroundingLogsId, setSurroundingLogsId] = useState<string | null>(null);
 
   const [loadFlyoutItemRequest, loadFlyoutItem] = useTrackedPromise(
@@ -37,15 +36,9 @@ export const useLogFlyout = () => {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         if (!flyoutId) {
-          return;
+          throw new Error('Failed to load log entry: Id not specified.');
         }
-        return await fetchLogEntriesItem({ sourceId, id: flyoutId });
-      },
-      onResolve: (response) => {
-        if (response) {
-          const { data } = response;
-          setFlyoutItem(data || null);
-        }
+        return await fetchLogEntry({ sourceId, logEntryId: flyoutId }, services.data.search);
       },
     },
     [sourceId, flyoutId]
@@ -69,7 +62,10 @@ export const useLogFlyout = () => {
     surroundingLogsId,
     setSurroundingLogsId,
     isLoading,
-    flyoutItem,
+    flyoutItem:
+      loadFlyoutItemRequest.state === 'resolved' ? loadFlyoutItemRequest.value.data : null,
+    flyoutError:
+      loadFlyoutItemRequest.state === 'rejected' ? `${loadFlyoutItemRequest.value}` : null,
   };
 };
 

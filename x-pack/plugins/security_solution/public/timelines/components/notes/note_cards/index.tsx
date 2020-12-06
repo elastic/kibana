@@ -5,12 +5,13 @@
  */
 
 import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { Note } from '../../../../common/lib/note';
+import { appSelectors } from '../../../../common/store';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { AddNote } from '../add_note';
-import { AssociateNote, GetNewNoteId, UpdateNote } from '../helpers';
+import { AssociateNote } from '../helpers';
 import { NoteCard } from '../note_card';
 
 const AddNoteContainer = styled.div``;
@@ -24,46 +25,38 @@ NoteContainer.displayName = 'NoteContainer';
 interface NoteCardsCompProps {
   children: React.ReactNode;
 }
+const NoteCardsCompContainer = styled(EuiPanel)`
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+`;
+NoteCardsCompContainer.displayName = 'NoteCardsCompContainer';
 
 const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => (
-  <EuiPanel
-    data-test-subj="note-cards"
-    hasShadow={false}
-    paddingSize="none"
-    style={{ border: 'none' }}
-  >
+  <NoteCardsCompContainer data-test-subj="note-cards" hasShadow={false} paddingSize="none">
     {children}
-  </EuiPanel>
+  </NoteCardsCompContainer>
 ));
 NoteCardsComp.displayName = 'NoteCardsComp';
 
 const NotesContainer = styled(EuiFlexGroup)`
-  padding: 0 5px;
   margin-bottom: 5px;
 `;
 NotesContainer.displayName = 'NotesContainer';
 
 interface Props {
   associateNote: AssociateNote;
-  getNotesByIds: (noteIds: string[]) => Note[];
-  getNewNoteId: GetNewNoteId;
   noteIds: string[];
   showAddNote: boolean;
   toggleShowAddNote: () => void;
-  updateNote: UpdateNote;
 }
 
 /** A view for entering and reviewing notes */
 export const NoteCards = React.memo<Props>(
-  ({
-    associateNote,
-    getNotesByIds,
-    getNewNoteId,
-    noteIds,
-    showAddNote,
-    toggleShowAddNote,
-    updateNote,
-  }) => {
+  ({ associateNote, noteIds, showAddNote, toggleShowAddNote }) => {
+    const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
+    const notesById = useDeepEqualSelector(getNotesByIds);
+    const items = useMemo(() => appSelectors.getNotes(notesById, noteIds), [notesById, noteIds]);
     const [newNote, setNewNote] = useState('');
 
     const associateNoteAndToggleShow = useCallback(
@@ -78,7 +71,7 @@ export const NoteCards = React.memo<Props>(
       <NoteCardsComp>
         {noteIds.length ? (
           <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
-            {getNotesByIds(noteIds).map((note) => (
+            {items.map((note) => (
               <NoteContainer data-test-subj="note-container" key={note.id}>
                 <NoteCard created={note.created} rawNote={note.note} user={note.user} />
               </NoteContainer>
@@ -90,11 +83,9 @@ export const NoteCards = React.memo<Props>(
           <AddNoteContainer data-test-subj="add-note-container">
             <AddNote
               associateNote={associateNoteAndToggleShow}
-              getNewNoteId={getNewNoteId}
               newNote={newNote}
               onCancelAddNote={toggleShowAddNote}
               updateNewNote={setNewNote}
-              updateNote={updateNote}
             />
           </AddNoteContainer>
         ) : null}

@@ -23,7 +23,7 @@
 .mlDataFrameAnalyticsClassification__actualLabel {
   float: left;
   width: 80px;
-  padding-top: $euiSize * 4 + $euiSizeXS;
+  padding-top: $euiSize * 4;
 }
 
 /*
@@ -32,4 +32,8 @@
 .mlDataFrameAnalyticsClassification__dataGridMinWidth {
   min-width: 480px;
   width: 100%;
+
+  .euiDataGridRowCell--boolean {
+    text-transform: none;
+  }
 }

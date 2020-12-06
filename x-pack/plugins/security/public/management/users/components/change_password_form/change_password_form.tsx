@@ -6,14 +6,16 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
+  EuiFieldPassword,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
 } from '@elastic/eui';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import React, { ChangeEvent, Component } from 'react';
 import { NotificationsStart } from 'src/core/public';
 import { User } from '../../../../../common/model';
@@ -71,10 +73,10 @@ export class ChangePasswordForm extends Component<Props, State> {
               />
             }
           >
-            <EuiFieldText
+            <EuiFieldPassword
               autoComplete="off"
               data-test-subj="currentPassword"
-              type="password"
+              type="dual"
               value={this.state.currentPassword}
               onChange={this.onCurrentPasswordChange}
               disabled={this.state.changeInProgress}
@@ -99,10 +101,10 @@ export class ChangePasswordForm extends Component<Props, State> {
             />
           }
         >
-          <EuiFieldText
+          <EuiFieldPassword
             autoComplete="new-password"
             data-test-subj="newPassword"
-            type="password"
+            type="dual"
             value={this.state.newPassword}
             onChange={this.onNewPasswordChange}
             disabled={this.state.changeInProgress}
@@ -119,10 +121,10 @@ export class ChangePasswordForm extends Component<Props, State> {
             />
           }
         >
-          <EuiFieldText
+          <EuiFieldPassword
             autoComplete="new-password"
             data-test-subj="confirmNewPassword"
-            type="password"
+            type="dual"
             value={this.state.confirmPassword}
             onChange={this.onConfirmPasswordChange}
             disabled={this.state.changeInProgress}

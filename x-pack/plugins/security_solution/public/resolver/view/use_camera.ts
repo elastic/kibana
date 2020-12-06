@@ -280,23 +280,70 @@ export function useCamera(): {
  * tracked. So if the element's position moves for some reason, be sure to
  * handle that.
  */
-export function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) => void] {
+function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) => void] {
+  // Access `getBoundingClientRect` via the `SideEffectContext` (for testing.)
+  const { getBoundingClientRect } = useContext(SideEffectContext);
+
+  // This hooks returns `rect`.
   const [rect, setRect] = useState<DOMRect | null>(null);
-  // Using state as ref.current update does not trigger effect hook when reset
+
+  const { ResizeObserver, requestAnimationFrame } = useContext(SideEffectContext);
+
+  // Keep the current DOM node in state so that we can create a ResizeObserver for it via `useEffect`.
   const [currentNode, setCurrentNode] = useState<Element | null>(null);
 
+  // `ref` will be used with a react element. When the element is available, this function will be called.
   const ref = useCallback((node: Element | null) => {
+    // track the node in state
     setCurrentNode(node);
-    if (node !== null) {
-      setRect(node.getBoundingClientRect());
-    }
   }, []);
-  const { ResizeObserver } = useContext(SideEffectContext);
+
+  /**
+   * Any time the DOM node changes (to something other than `null`) recalculate the DOMRect and set it (which will cause it to be returned from the hook.
+   * This effect re-runs when the DOM node has changed.
+   */
+  useEffect(() => {
+    if (currentNode !== null) {
+      // When the DOM node is received, immedaiately calculate its DOM Rect and return that
+      setRect(getBoundingClientRect(currentNode));
+    }
+  }, [currentNode, getBoundingClientRect]);
+
+  /**
+   * When scroll events occur, recalculate the DOMRect. DOMRect represents the position of an element relative to the viewport, so that may change during scroll (depending on the layout.)
+   * This effect re-runs when the DOM node has changed.
+   */
+  useEffect(() => {
+    // the last scrollX and scrollY values that we handled
+    let previousX: number = window.scrollX;
+    let previousY: number = window.scrollY;
+
+    const handleScroll = () => {
+      requestAnimationFrame(() => {
+        // synchronously read from the DOM
+        const currentX = window.scrollX;
+        const currentY = window.scrollY;
+
+        if (currentNode !== null && (previousX !== currentX || previousY !== currentY)) {
+          setRect(getBoundingClientRect(currentNode));
+        }
+
+        previousX = currentX;
+        previousY = currentY;
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [currentNode, requestAnimationFrame, getBoundingClientRect]);
+
   useEffect(() => {
     if (currentNode !== null) {
       const resizeObserver = new ResizeObserver((entries) => {
         if (currentNode !== null && currentNode === entries[0].target) {
-          setRect(currentNode.getBoundingClientRect());
+          setRect(getBoundingClientRect(currentNode));
         }
       });
       resizeObserver.observe(currentNode);
@@ -304,6 +351,6 @@ export function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | n
         resizeObserver.disconnect();
       };
     }
-  }, [ResizeObserver, currentNode]);
+  }, [ResizeObserver, currentNode, getBoundingClientRect]);
   return [rect, ref];
 }

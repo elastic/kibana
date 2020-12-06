@@ -1,0 +1,102 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddData render 1`] = `
+<section
+  aria-labelledby="kbnOverviewDataAdd__title"
+  className="kbnOverviewDataAdd"
+>
+  <EuiFlexGroup
+    alignItems="center"
+  >
+    <EuiFlexItem
+      grow={1}
+    >
+      <EuiTitle
+        size="s"
+      >
+        <h2
+          id="kbnOverviewDataAdd__title"
+        >
+          <FormattedMessage
+            defaultMessage="Ingest your data"
+            id="kibanaOverview.addData.sectionTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="kbnOverviewDataAdd__actions"
+      grow={false}
+    >
+      <div>
+        <EuiButtonEmpty
+          className="kbnOverviewDataAdd__actionButton"
+          flush="left"
+          href="#/tutorial_directory/sampleData"
+          iconType="visTable"
+          size="xs"
+        >
+          <FormattedMessage
+            defaultMessage="Try our sample data"
+            id="kibanaOverview.addData.sampleDataButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </div>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    className="kbnOverviewDataAdd__content"
+  >
+    <EuiFlexItem
+      key="home_tutorial_directory"
+    >
+      <RedirectAppLinks>
+        <Synopsis
+          description="Ingest data from popular apps and services."
+          iconType="indexOpen"
+          id="home_tutorial_directory"
+          isBeta={false}
+          title="Ingest data"
+          url="/app/home#/tutorial_directory"
+          wrapInPanel={true}
+        />
+      </RedirectAppLinks>
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="ingestManager"
+    >
+      <RedirectAppLinks>
+        <Synopsis
+          description="Add and manage your fleet of Elastic Agents and integrations."
+          iconType="indexManagementApp"
+          id="ingestManager"
+          isBeta={false}
+          title="Add Elastic Agent"
+          url="/app/ingestManager"
+          wrapInPanel={true}
+        />
+      </RedirectAppLinks>
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="ml_file_data_visualizer"
+    >
+      <RedirectAppLinks>
+        <Synopsis
+          description="Import your own CSV, NDJSON, or log file"
+          iconType="document"
+          id="ml_file_data_visualizer"
+          isBeta={false}
+          title="Upload a file"
+          url="/app/ml#/filedatavisualizer"
+          wrapInPanel={true}
+        />
+      </RedirectAppLinks>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</section>
+`;

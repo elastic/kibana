@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getAcknowledgeSchemaResponseMock } from './acknowledge_schema.mock';
 import { AcknowledgeSchema, acknowledgeSchema } from './acknowledge_schema';
@@ -24,6 +24,7 @@ describe('acknowledge_schema', () => {
   });
   test('it should NOT accept an undefined for "ok"', () => {
     const payload = getAcknowledgeSchemaResponseMock();
+    // @ts-expect-error
     delete payload.acknowledged;
     const decoded = acknowledgeSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

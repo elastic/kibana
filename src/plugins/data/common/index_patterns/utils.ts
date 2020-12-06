@@ -17,34 +17,26 @@
  * under the License.
  */
 
-import { find } from 'lodash';
-import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
+import type { IndexPatternSavedObjectAttrs } from './index_patterns';
+import type { SavedObjectsClientCommon } from '../types';
 
 /**
  * Returns an object matching a given title
  *
- * @param client {SavedObjectsClientContract}
+ * @param client {SavedObjectsClientCommon}
  * @param title {string}
- * @returns {Promise<SimpleSavedObject|undefined>}
+ * @returns {Promise<SavedObject|undefined>}
  */
-export async function findByTitle(
-  client: SavedObjectsClientContract,
-  title: string
-): Promise<SimpleSavedObject<any> | void> {
-  if (!title) {
-    return Promise.resolve();
+export async function findByTitle(client: SavedObjectsClientCommon, title: string) {
+  if (title) {
+    const savedObjects = await client.find<IndexPatternSavedObjectAttrs>({
+      type: 'index-pattern',
+      perPage: 10,
+      search: `"${title}"`,
+      searchFields: ['title'],
+      fields: ['title'],
+    });
+
+    return savedObjects.find((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
   }
-
-  const { savedObjects } = await client.find({
-    type: 'index-pattern',
-    perPage: 10,
-    search: `"${title}"`,
-    searchFields: ['title'],
-    fields: ['title'],
-  });
-
-  return find(
-    savedObjects,
-    (obj: SimpleSavedObject<any>) => obj.get('title').toLowerCase() === title.toLowerCase()
-  );
 }

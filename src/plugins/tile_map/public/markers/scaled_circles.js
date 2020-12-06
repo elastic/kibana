@@ -21,7 +21,7 @@ import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
-import { L, colorUtil } from '../../../maps_legacy/public';
+import { colorUtil } from '../../../maps_legacy/public';
 import { truncatedColorMaps } from '../../../charts/public';
 
 export class ScaledCirclesMarkers extends EventEmitter {
@@ -31,14 +31,13 @@ export class ScaledCirclesMarkers extends EventEmitter {
     options,
     targetZoom,
     kibanaMap,
-    metricAgg
+    leaflet
   ) {
     super();
     this._featureCollection = featureCollection;
     this._featureCollectionMetaData = featureCollectionMetaData;
 
     this._zoom = targetZoom;
-    this._metricAgg = metricAgg;
 
     this._valueFormatter =
       options.valueFormatter ||
@@ -55,6 +54,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
     this._legendColors = null;
     this._legendQuantizer = null;
+    this._leaflet = leaflet;
 
     this._popups = [];
 
@@ -72,7 +72,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
         return kibanaMap.isInside(bucketRectBounds);
       };
     }
-    this._leafletLayer = L.geoJson(null, layerOptions);
+    this._leafletLayer = this._leaflet.geoJson(null, layerOptions);
     this._leafletLayer.addData(this._featureCollection);
   }
 
@@ -143,7 +143,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
       mouseover: (e) => {
         const layer = e.target;
         // bring layer to front if not older browser
-        if (!L.Browser.ie && !L.Browser.opera) {
+        if (!this._leaflet.Browser.ie && !this._leaflet.Browser.opera) {
           layer.bringToFront();
         }
         this._showTooltip(feature);
@@ -170,7 +170,10 @@ export class ScaledCirclesMarkers extends EventEmitter {
       return;
     }
 
-    const latLng = L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+    const latLng = this._leaflet.latLng(
+      feature.geometry.coordinates[1],
+      feature.geometry.coordinates[0]
+    );
     this.emit('showTooltip', {
       content: content,
       position: latLng,
@@ -182,7 +185,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     return (feature, latlng) => {
       const value = feature.properties.value;
       const scaledRadius = this._radiusScale(value) * scaleFactor;
-      return L.circleMarker(latlng).setRadius(scaledRadius);
+      return this._leaflet.circleMarker(latlng).setRadius(scaledRadius);
     };
   }
 

@@ -6,6 +6,79 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const commonMonitorStateI18 = [
+  {
+    name: 'monitorName',
+    description: i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.state.monitor', {
+      defaultMessage: 'A human friendly rendering of name or ID, preferring name (e.g. My Monitor)',
+    }),
+  },
+  {
+    name: 'monitorId',
+    description: i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.monitorId',
+      {
+        defaultMessage: 'ID of the monitor.',
+      }
+    ),
+  },
+  {
+    name: 'monitorUrl',
+    description: i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.monitorUrl',
+      {
+        defaultMessage: 'URL of the monitor.',
+      }
+    ),
+  },
+  {
+    name: 'monitorType',
+    description: i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.monitorType',
+      {
+        defaultMessage: 'Type (e.g. HTTP/TCP) of the monitor.',
+      }
+    ),
+  },
+  {
+    name: 'statusMessage',
+    description: i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.statusMessage',
+      {
+        defaultMessage:
+          'Status message e.g down or is below availability threshold in case of availability check or both.',
+      }
+    ),
+  },
+  {
+    name: 'latestErrorMessage',
+    description: i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastErrorMessage',
+      {
+        defaultMessage: 'Monitor latest error message',
+      }
+    ),
+  },
+  {
+    name: 'observerLocation',
+    description: i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.observerLocation',
+      {
+        defaultMessage: 'Observer location from which heartbeat check is performed.',
+      }
+    ),
+  },
+  {
+    name: 'observerHostname',
+    description: i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.observerHostname',
+      {
+        defaultMessage: 'Observer hostname from which heartbeat check is performed.',
+      }
+    ),
+  },
+];
+
 export const commonStateTranslations = [
   {
     name: 'firstCheckedAt',
@@ -148,3 +221,97 @@ export const tlsTranslations = {
       },
     }),
 };
+
+export const durationAnomalyTranslations = {
+  alertFactoryName: i18n.translate('xpack.uptime.alerts.durationAnomaly', {
+    defaultMessage: 'Uptime Duration Anomaly',
+  }),
+  actionVariables: [
+    {
+      name: 'severity',
+      description: i18n.translate(
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.severity',
+        {
+          defaultMessage: 'The severity of the anomaly.',
+        }
+      ),
+    },
+    {
+      name: 'anomalyStartTimestamp',
+      description: i18n.translate(
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.anomalyStartTimestamp',
+        {
+          defaultMessage: 'ISO8601 timestamp of the start of the anomaly.',
+        }
+      ),
+    },
+    {
+      name: 'monitor',
+      description: i18n.translate(
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.monitor',
+        {
+          defaultMessage:
+            'A human friendly rendering of name or ID, preferring name (e.g. My Monitor)',
+        }
+      ),
+    },
+    {
+      name: 'monitorId',
+      description: i18n.translate(
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.monitorId',
+        {
+          defaultMessage: 'ID of the monitor.',
+        }
+      ),
+    },
+    {
+      name: 'monitorUrl',
+      description: i18n.translate(
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.monitorUrl',
+        {
+          defaultMessage: 'URL of the monitor.',
+        }
+      ),
+    },
+    {
+      name: 'slowestAnomalyResponse',
+      description: i18n.translate(
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.slowestAnomalyResponse',
+        {
+          defaultMessage: 'Slowest response time during anomaly bucket with unit (ms, s) attached.',
+        }
+      ),
+    },
+    {
+      name: 'expectedResponseTime',
+      description: i18n.translate(
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.expectedResponseTime',
+        {
+          defaultMessage: 'Expected response time',
+        }
+      ),
+    },
+    {
+      name: 'severityScore',
+      description: i18n.translate(
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.severityScore',
+        {
+          defaultMessage: 'Anomaly severity score',
+        }
+      ),
+    },
+    {
+      name: 'observerLocation',
+      description: i18n.translate(
+        'xpack.uptime.alerts.durationAnomaly.actionVariables.state.observerLocation',
+        {
+          defaultMessage: 'Observer location from which heartbeat check is performed.',
+        }
+      ),
+    },
+  ],
+};
+
+export const DOWN_LABEL = i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.down', {
+  defaultMessage: 'down',
+});

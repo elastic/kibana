@@ -5,11 +5,6 @@
  */
 
 import { FC } from 'react';
-
-import { UrlState } from '../util/url_state';
-
-import { JobSelection } from '../components/job_selector/use_job_selection';
-
 import { ExplorerState } from './reducers';
 import { AppStateSelectedCells } from './explorer_utils';
 

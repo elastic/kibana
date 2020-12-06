@@ -5,15 +5,37 @@
  */
 
 import sinon, { SinonFakeServer } from 'sinon';
-import { API_BASE_PATH } from '../../../../../../../common';
+import {
+  ComponentTemplateListItem,
+  ComponentTemplateDeserialized,
+  ComponentTemplateSerialized,
+} from '../../../shared_imports';
+import { API_BASE_PATH } from './constants';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadComponentTemplatesResponse = (response?: any[], error?: any) => {
+  const setLoadComponentTemplatesResponse = (
+    response?: ComponentTemplateListItem[],
+    error?: any
+  ) => {
     const status = error ? error.status || 400 : 200;
     const body = error ? error.body : response;
 
     server.respondWith('GET', `${API_BASE_PATH}/component_templates`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setLoadComponentTemplateResponse = (
+    response?: ComponentTemplateDeserialized,
+    error?: any
+  ) => {
+    const status = error ? error.status || 400 : 200;
+    const body = error ? error.body : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/component_templates/:name`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -28,9 +50,25 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setCreateComponentTemplateResponse = (
+    response?: ComponentTemplateSerialized,
+    error?: any
+  ) => {
+    const status = error ? error.body.status || 400 : 200;
+    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+
+    server.respondWith('POST', `${API_BASE_PATH}/component_templates`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      body,
+    ]);
+  };
+
   return {
     setLoadComponentTemplatesResponse,
     setDeleteComponentTemplateResponse,
+    setLoadComponentTemplateResponse,
+    setCreateComponentTemplateResponse,
   };
 };
 

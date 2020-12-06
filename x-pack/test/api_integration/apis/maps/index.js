@@ -16,6 +16,9 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./fonts_api'));
       loadTestFile(require.resolve('./index_settings'));
       loadTestFile(require.resolve('./migrations'));
+      loadTestFile(require.resolve('./get_tile'));
+      loadTestFile(require.resolve('./get_grid_tile'));
+      loadTestFile(require.resolve('./proxy_api'));
     });
   });
 }

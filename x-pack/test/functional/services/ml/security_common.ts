@@ -10,9 +10,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export type MlSecurityCommon = ProvidedType<typeof MachineLearningSecurityCommonProvider>;
 
 export enum USER {
-  ML_POWERUSER = 'ml_poweruser',
-  ML_VIEWER = 'ml_viewer',
-  ML_UNAUTHORIZED = 'ml_unauthorized',
+  ML_POWERUSER = 'ft_ml_poweruser',
+  ML_POWERUSER_SPACES = 'ft_ml_poweruser_spaces',
+  ML_VIEWER = 'ft_ml_viewer',
+  ML_VIEWER_SPACES = 'ft_ml_viewer_spaces',
+  ML_UNAUTHORIZED = 'ft_ml_unauthorized',
+  ML_UNAUTHORIZED_SPACES = 'ft_ml_unauthorized_spaces',
 }
 
 export function MachineLearningSecurityCommonProvider({ getService }: FtrProviderContext) {
@@ -20,53 +23,116 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
 
   const roles = [
     {
-      name: 'ml_source',
+      name: 'ft_ml_source',
       elasticsearch: {
         indices: [{ names: ['*'], privileges: ['read', 'view_index_metadata'] }],
       },
       kibana: [],
     },
     {
-      name: 'ml_dest',
+      name: 'ft_ml_source_readonly',
+      elasticsearch: {
+        indices: [{ names: ['*'], privileges: ['read'] }],
+      },
+      kibana: [],
+    },
+    {
+      name: 'ft_ml_dest',
       elasticsearch: {
         indices: [{ names: ['user-*'], privileges: ['read', 'index', 'manage'] }],
       },
       kibana: [],
     },
     {
-      name: 'ml_dest_readonly',
+      name: 'ft_ml_dest_readonly',
       elasticsearch: {
         indices: [{ names: ['user-*'], privileges: ['read'] }],
       },
       kibana: [],
     },
     {
-      name: 'ml_ui_extras',
+      name: 'ft_ml_ui_extras',
       elasticsearch: {
         cluster: ['manage_ingest_pipelines', 'monitor'],
       },
       kibana: [],
     },
+    {
+      name: 'ft_default_space_ml_all',
+      elasticsearch: { cluster: [], indices: [], run_as: [] },
+      kibana: [
+        {
+          base: [],
+          feature: { ml: ['all'], savedObjectsManagement: ['all'] },
+          spaces: ['default'],
+        },
+      ],
+    },
+    {
+      name: 'ft_default_space_ml_read',
+      elasticsearch: { cluster: [], indices: [], run_as: [] },
+      kibana: [
+        {
+          base: [],
+          feature: { ml: ['read'], savedObjectsManagement: ['read'] },
+          spaces: ['default'],
+        },
+      ],
+    },
+    {
+      name: 'ft_default_space_ml_none',
+      elasticsearch: { cluster: [], indices: [], run_as: [] },
+      kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['default'] }],
+    },
   ];
 
   const users = [
     {
-      name: 'ml_poweruser',
+      name: 'ft_ml_poweruser',
       full_name: 'ML Poweruser',
       password: 'mlp001',
-      roles: ['kibana_admin', 'machine_learning_admin', 'ml_source', 'ml_dest', 'ml_ui_extras'],
+      roles: [
+        'kibana_admin',
+        'machine_learning_admin',
+        'ft_ml_source',
+        'ft_ml_dest',
+        'ft_ml_ui_extras',
+      ],
     },
     {
-      name: 'ml_viewer',
+      name: 'ft_ml_poweruser_spaces',
+      full_name: 'ML Poweruser',
+      password: 'mlps001',
+      roles: ['ft_default_space_ml_all', 'ft_ml_source', 'ft_ml_dest', 'ft_ml_ui_extras'],
+    },
+    {
+      name: 'ft_ml_viewer',
       full_name: 'ML Viewer',
       password: 'mlv001',
-      roles: ['kibana_admin', 'machine_learning_user', 'ml_source', 'ml_dest_readonly'],
+      roles: [
+        'kibana_admin',
+        'machine_learning_user',
+        'ft_ml_source_readonly',
+        'ft_ml_dest_readonly',
+      ],
     },
     {
-      name: 'ml_unauthorized',
+      name: 'ft_ml_viewer_spaces',
+      full_name: 'ML Viewer',
+      password: 'mlvs001',
+      roles: ['ft_default_space_ml_read', 'ft_ml_source_readonly', 'ft_ml_dest_readonly'],
+    },
+    {
+      name: 'ft_ml_unauthorized',
       full_name: 'ML Unauthorized',
       password: 'mlu001',
-      roles: ['kibana_admin', 'ml_source'],
+      roles: ['kibana_admin', 'ft_ml_source_readonly'],
+    },
+    {
+      name: 'ft_ml_unauthorized_spaces',
+      full_name: 'ML Unauthorized',
+      password: 'mlus001',
+      roles: ['ft_default_space_ml_none', 'ft_ml_source_readonly'],
     },
   ];
 

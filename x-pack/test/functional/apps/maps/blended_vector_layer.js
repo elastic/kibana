@@ -9,15 +9,26 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const security = getService('security');
 
   describe('blended vector layer', () => {
     before(async () => {
+      await security.testUser.setRoles(['test_logstash_reader', 'global_maps_all']);
       await PageObjects.maps.loadSavedMap('blended document example');
+    });
+
+    afterEach(async () => {
+      await inspector.close();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('should request documents when zoomed to smaller regions showing less data', async () => {
       const hits = await PageObjects.maps.getHits();
-      expect(hits).to.equal('33');
+      // Allow a range of hits to account for variances in browser window size.
+      expect(parseInt(hits)).to.be.within(30, 40);
     });
 
     it('should request clusters when zoomed to larger regions showing lots of data', async () => {

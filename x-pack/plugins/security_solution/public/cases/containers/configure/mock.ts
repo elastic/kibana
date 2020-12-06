@@ -5,9 +5,10 @@
  */
 
 import {
-  Connector,
+  ActionConnector,
   CasesConfigureResponse,
   CasesConfigureRequest,
+  ConnectorTypes,
 } from '../../../../../case/common/api';
 import { CaseConfigure, CasesConfigurationMapping } from './types';
 
@@ -28,30 +29,32 @@ export const mapping: CasesConfigurationMapping[] = [
     actionType: 'append',
   },
 ];
-export const connectorsMock: Connector[] = [
+export const connectorsMock: ActionConnector[] = [
   {
     id: 'servicenow-1',
     actionTypeId: '.servicenow',
     name: 'My Connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
-      casesConfiguration: {
+      incidentConfiguration: {
         mapping,
       },
+      isCaseOwned: true,
     },
     isPreconfigured: false,
   },
   {
-    id: 'servicenow-2',
-    actionTypeId: '.servicenow',
+    id: 'resilient-2',
+    actionTypeId: '.resilient',
     name: 'My Connector 2',
     config: {
-      apiUrl: 'https://instance2.service-now.com',
-      casesConfiguration: {
+      apiUrl: 'https://test/',
+      orgId: '201',
+      incidentConfiguration: {
         mapping: [
           {
             source: 'title',
-            target: 'short_description',
+            target: 'name',
             actionType: 'overwrite',
           },
           {
@@ -75,7 +78,7 @@ export const connectorsMock: Connector[] = [
     name: 'Jira',
     config: {
       apiUrl: 'https://instance.atlassian.ne',
-      casesConfiguration: {
+      incidentConfiguration: {
         mapping: [
           {
             source: 'title',
@@ -102,8 +105,12 @@ export const connectorsMock: Connector[] = [
 export const caseConfigurationResposeMock: CasesConfigureResponse = {
   created_at: '2020-04-06T13:03:18.657Z',
   created_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
-  connector_id: '123',
-  connector_name: 'My Connector',
+  connector: {
+    id: '123',
+    name: 'My connector',
+    type: ConnectorTypes.jira,
+    fields: null,
+  },
   closure_type: 'close-by-pushing',
   updated_at: '2020-04-06T14:03:18.657Z',
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
@@ -111,16 +118,24 @@ export const caseConfigurationResposeMock: CasesConfigureResponse = {
 };
 
 export const caseConfigurationMock: CasesConfigureRequest = {
-  connector_id: '123',
-  connector_name: 'My Connector',
+  connector: {
+    id: '123',
+    name: 'My connector',
+    type: ConnectorTypes.jira,
+    fields: null,
+  },
   closure_type: 'close-by-user',
 };
 
 export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
   createdAt: '2020-04-06T13:03:18.657Z',
   createdBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
-  connectorId: '123',
-  connectorName: 'My Connector',
+  connector: {
+    id: '123',
+    name: 'My connector',
+    type: ConnectorTypes.jira,
+    fields: null,
+  },
   closureType: 'close-by-pushing',
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },

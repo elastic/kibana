@@ -14,27 +14,37 @@ import { AgentName } from '../typings/es_schemas/ui/fields/agent';
  * AGENT_NAMES array.
  */
 
+export const OPEN_TELEMETRY_AGENT_NAMES: AgentName[] = [
+  'otlp',
+  'opentelemetry/cpp',
+  'opentelemetry/dotnet',
+  'opentelemetry/erlang',
+  'opentelemetry/go',
+  'opentelemetry/java',
+  'opentelemetry/nodejs',
+  'opentelemetry/php',
+  'opentelemetry/python',
+  'opentelemetry/ruby',
+  'opentelemetry/webjs',
+];
+
 export const AGENT_NAMES: AgentName[] = [
-  'java',
-  'js-base',
-  'rum-js',
   'dotnet',
   'go',
   'java',
+  'js-base',
   'nodejs',
   'python',
   'ruby',
+  'rum-js',
+  ...OPEN_TELEMETRY_AGENT_NAMES,
 ];
 
-export function isAgentName(agentName: string): agentName is AgentName {
-  return AGENT_NAMES.includes(agentName as AgentName);
-}
-
-export function isRumAgentName(
-  agentName: string | undefined
-): agentName is 'js-base' | 'rum-js' {
-  return agentName === 'js-base' || agentName === 'rum-js';
-}
+export const RUM_AGENT_NAMES: AgentName[] = [
+  'js-base',
+  'rum-js',
+  'opentelemetry/webjs',
+];
 
 export function isJavaAgentName(
   agentName: string | undefined
@@ -42,15 +52,8 @@ export function isJavaAgentName(
   return agentName === 'java';
 }
 
-/**
- * "Normalizes" and agent name by:
- *
- * * Converting to lowercase
- * * Converting "rum-js" to "js-base"
- *
- * This helps dealing with some older agent versions
- */
-export function getNormalizedAgentName(agentName?: string) {
-  const lowercased = agentName && agentName.toLowerCase();
-  return isRumAgentName(lowercased) ? 'js-base' : lowercased;
+export function isRumAgentName(
+  agentName?: string
+): agentName is 'js-base' | 'rum-js' | 'opentelemetry/webjs' {
+  return RUM_AGENT_NAMES.includes(agentName! as AgentName);
 }

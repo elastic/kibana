@@ -16,17 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
 import { QueryService, QuerySetup, QueryStart } from '.';
 import { timefilterServiceMock } from './timefilter/timefilter_service.mock';
+import { createFilterManagerMock } from './filter_manager/filter_manager.mock';
+import { queryStringManagerMock } from './query_string/query_string_manager.mock';
 
 type QueryServiceClientContract = PublicMethodsOf<QueryService>;
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<QuerySetup> = {
-    filterManager: jest.fn() as any,
+    filterManager: createFilterManagerMock(),
     timefilter: timefilterServiceMock.createSetupContract(),
+    queryString: queryStringManagerMock.createSetupContract(),
     state$: new Observable(),
   };
 
@@ -35,10 +38,13 @@ const createSetupContractMock = () => {
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<QueryStart> = {
-    filterManager: jest.fn() as any,
-    timefilter: timefilterServiceMock.createStartContract(),
+    addToQueryLog: jest.fn(),
+    filterManager: createFilterManagerMock(),
+    queryString: queryStringManagerMock.createStartContract(),
     savedQueries: jest.fn() as any,
     state$: new Observable(),
+    timefilter: timefilterServiceMock.createStartContract(),
+    getEsQuery: jest.fn(),
   };
 
   return startContract;

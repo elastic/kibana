@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServiceHealthStatus } from '../../../common/service_health_status';
+
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -12,7 +14,6 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { ServiceAnomalies } from './get_service_map';
 import {
   transformServiceMapResponses,
   ServiceMapResponse,
@@ -36,12 +37,22 @@ const javaService = {
   [AGENT_NAME]: 'java',
 };
 
-const serviceAnomalies: ServiceAnomalies = [];
+const anomalies = {
+  mlJobIds: ['apm-test-1234-ml-module-name'],
+  serviceAnomalies: {
+    'opbeans-test': {
+      transactionType: 'request',
+      actualValue: 10000,
+      anomalyScore: 50,
+      jobId: 'apm-test-1234-ml-module-name',
+      healthStatus: ServiceHealthStatus.warning,
+    },
+  },
+};
 
 describe('transformServiceMapResponses', () => {
   it('maps external destinations to internal services', () => {
     const response: ServiceMapResponse = {
-      anomalies: serviceAnomalies,
       services: [nodejsService, javaService],
       discoveredServices: [
         {
@@ -55,6 +66,7 @@ describe('transformServiceMapResponses', () => {
           destination: nodejsExternal,
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
@@ -63,8 +75,11 @@ describe('transformServiceMapResponses', () => {
       (element) => 'source' in element.data && 'target' in element.data
     );
 
-    // @ts-ignore
-    expect(connection?.data.target).toBe('opbeans-node');
+    expect(connection).toHaveProperty('data');
+    expect(connection?.data).toHaveProperty('target');
+    if (connection?.data && 'target' in connection.data) {
+      expect(connection.data.target).toBe('opbeans-node');
+    }
 
     expect(
       elements.find((element) => element.data.id === '>opbeans-node')
@@ -73,7 +88,6 @@ describe('transformServiceMapResponses', () => {
 
   it('collapses external destinations based on span.destination.resource.name', () => {
     const response: ServiceMapResponse = {
-      anomalies: serviceAnomalies,
       services: [nodejsService, javaService],
       discoveredServices: [
         {
@@ -94,6 +108,7 @@ describe('transformServiceMapResponses', () => {
           },
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
@@ -109,7 +124,6 @@ describe('transformServiceMapResponses', () => {
 
   it('picks the first span.type/subtype in an alphabetically sorted list', () => {
     const response: ServiceMapResponse = {
-      anomalies: serviceAnomalies,
       services: [javaService],
       discoveredServices: [],
       connections: [
@@ -132,6 +146,7 @@ describe('transformServiceMapResponses', () => {
           },
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);
@@ -140,15 +155,14 @@ describe('transformServiceMapResponses', () => {
 
     const nodejsNode = nodes.find((node) => node.data.id === '>opbeans-node');
 
-    // @ts-ignore
+    // @ts-expect-error
     expect(nodejsNode?.data[SPAN_TYPE]).toBe('external');
-    // @ts-ignore
+    // @ts-expect-error
     expect(nodejsNode?.data[SPAN_SUBTYPE]).toBe('aa');
   });
 
   it('processes connections without a matching "service" aggregation', () => {
     const response: ServiceMapResponse = {
-      anomalies: serviceAnomalies,
       services: [javaService],
       discoveredServices: [],
       connections: [
@@ -157,6 +171,7 @@ describe('transformServiceMapResponses', () => {
           destination: nodejsService,
         },
       ],
+      anomalies,
     };
 
     const { elements } = transformServiceMapResponses(response);

@@ -7,18 +7,22 @@
 import React, { FC, Fragment } from 'react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { OUTLIER_ANALYSIS_METHOD } from '../../../../common/analytics';
+import { OUTLIER_ANALYSIS_METHOD, ANALYSIS_ADVANCED_FIELDS } from '../../../../common/analytics';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { getNumberValue } from './advanced_step_form';
+import { AdvancedParamErrors, getNumberValue } from './advanced_step_form';
 
-export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
+interface Props extends CreateAnalyticsFormProps {
+  advancedParamErrors: AdvancedParamErrors;
+}
+
+export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedParamErrors }) => {
   const { setFormState } = actions;
 
   const { method, nNeighbors, outlierFraction, standardizationEnabled } = state.form;
 
   return (
     <Fragment>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.methodLabel', {
             defaultMessage: 'Method',
@@ -27,6 +31,8 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
             defaultMessage:
               'Sets the method that outlier detection uses. If not set, uses an ensemble of different methods and normalises and combines their individual outlier scores to obtain the overall outlier score. We recommend to use the ensemble method',
           })}
+          isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.METHOD] !== undefined}
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.METHOD]}
         >
           <EuiSelect
             options={Object.values(OUTLIER_ANALYSIS_METHOD).map((outlierMethod) => ({
@@ -42,7 +48,7 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.nNeighborsLabel', {
             defaultMessage: 'N neighbors',
@@ -51,6 +57,8 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
             defaultMessage:
               'The value for how many nearest neighbors each method of outlier detection will use to calculate its outlier score. When not set, different values will be used for different ensemble members. Must be a positive integer',
           })}
+          isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.N_NEIGHBORS] !== undefined}
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.N_NEIGHBORS]}
         >
           <EuiFieldNumber
             aria-label={i18n.translate(
@@ -70,7 +78,7 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.outlierFractionLabel', {
             defaultMessage: 'Outlier fraction',
@@ -79,6 +87,8 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
             defaultMessage:
               'Sets the proportion of the data set that is assumed to be outlying prior to outlier detection.',
           })}
+          isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.OUTLIER_FRACTION] !== undefined}
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.OUTLIER_FRACTION]}
         >
           <EuiFieldNumber
             aria-label={i18n.translate(
@@ -99,7 +109,7 @@ export const OutlierHyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, 
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: '30%' }}>
+      <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.standardizationEnabledLabel', {
             defaultMessage: 'Standardization enabled',

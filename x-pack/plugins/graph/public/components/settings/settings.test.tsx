@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiTab, EuiListGroupItem, EuiButton, EuiAccordion, EuiFieldText } from '@elastic/eui';
 import * as Rx from 'rxjs';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { Settings, AngularProps } from './settings';
 import { act } from '@testing-library/react';
 import { ReactWrapper } from 'enzyme';
@@ -46,7 +46,7 @@ describe('settings', () => {
   };
 
   const angularProps: jest.Mocked<AngularProps> = {
-    blacklistedNodes: [
+    blocklistedNodes: [
       {
         x: 0,
         y: 0,
@@ -57,7 +57,7 @@ describe('settings', () => {
           field: 'A',
           term: '1',
         },
-        label: 'blacklisted node 1',
+        label: 'blocklisted node 1',
         icon: {
           class: 'test',
           code: '1',
@@ -74,7 +74,7 @@ describe('settings', () => {
           field: 'A',
           term: '1',
         },
-        label: 'blacklisted node 2',
+        label: 'blocklisted node 2',
         icon: {
           class: 'test',
           code: '1',
@@ -82,7 +82,7 @@ describe('settings', () => {
         },
       },
     ],
-    unblacklistNode: jest.fn(),
+    unblocklistNode: jest.fn(),
     canEditDrillDownUrls: true,
   };
 
@@ -164,9 +164,9 @@ describe('settings', () => {
     });
 
     it('should set advanced settings', () => {
-      input('Sample size').prop('onChange')!({ target: { valueAsNumber: 13 } } as React.ChangeEvent<
-        HTMLInputElement
-      >);
+      input('Sample size').prop('onChange')!({
+        target: { valueAsNumber: 13 },
+      } as React.ChangeEvent<HTMLInputElement>);
 
       expect(dispatchSpy).toHaveBeenCalledWith(
         updateSettings(
@@ -177,17 +177,39 @@ describe('settings', () => {
         )
       );
     });
+
+    it('should let the user edit and empty the field to input a new number', () => {
+      act(() => {
+        input('Sample size').prop('onChange')!({
+          target: { value: '', valueAsNumber: NaN },
+        } as React.ChangeEvent<HTMLInputElement>);
+      });
+      // Central state should not be called
+      expect(dispatchSpy).not.toHaveBeenCalledWith(
+        updateSettings(
+          expect.objectContaining({
+            timeoutMillis: 10000,
+            sampleSize: NaN,
+          })
+        )
+      );
+
+      // Update the local state
+      instance.update();
+      // Now check that local state should reflect what the user sent
+      expect(input('Sample size').prop('value')).toEqual('');
+    });
   });
 
-  describe('blacklist', () => {
+  describe('blocklist', () => {
     beforeEach(() => {
       toTab('Block list');
     });
 
-    it('should switch tab to blacklist', () => {
+    it('should switch tab to blocklist', () => {
       expect(instance.find(EuiListGroupItem).map((item) => item.prop('label'))).toEqual([
-        'blacklisted node 1',
-        'blacklisted node 2',
+        'blocklisted node 1',
+        'blocklisted node 2',
       ]);
     });
 
@@ -195,7 +217,7 @@ describe('settings', () => {
       act(() => {
         subject.next({
           ...angularProps,
-          blacklistedNodes: [
+          blocklistedNodes: [
             {
               x: 0,
               y: 0,
@@ -206,7 +228,7 @@ describe('settings', () => {
                 field: 'A',
                 term: '1',
               },
-              label: 'blacklisted node 3',
+              label: 'blocklisted node 3',
               icon: {
                 class: 'test',
                 code: '1',
@@ -220,21 +242,21 @@ describe('settings', () => {
       instance.update();
 
       expect(instance.find(EuiListGroupItem).map((item) => item.prop('label'))).toEqual([
-        'blacklisted node 3',
+        'blocklisted node 3',
       ]);
     });
 
     it('should delete node', () => {
       instance.find(EuiListGroupItem).at(0).prop('extraAction')!.onClick!({} as any);
 
-      expect(angularProps.unblacklistNode).toHaveBeenCalledWith(angularProps.blacklistedNodes![0]);
+      expect(angularProps.unblocklistNode).toHaveBeenCalledWith(angularProps.blocklistedNodes![0]);
     });
 
     it('should delete all nodes', () => {
-      instance.find('[data-test-subj="graphUnblacklistAll"]').find(EuiButton).simulate('click');
+      instance.find('[data-test-subj="graphUnblocklistAll"]').find(EuiButton).simulate('click');
 
-      expect(angularProps.unblacklistNode).toHaveBeenCalledWith(angularProps.blacklistedNodes![0]);
-      expect(angularProps.unblacklistNode).toHaveBeenCalledWith(angularProps.blacklistedNodes![1]);
+      expect(angularProps.unblocklistNode).toHaveBeenCalledWith(angularProps.blocklistedNodes![0]);
+      expect(angularProps.unblocklistNode).toHaveBeenCalledWith(angularProps.blocklistedNodes![1]);
     });
   });
 

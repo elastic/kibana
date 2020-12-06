@@ -10,9 +10,7 @@ import { ESResponse } from './fetcher';
 
 type IBucket = ReturnType<typeof getBucket>;
 function getBucket(
-  bucket: Required<
-    ESResponse
-  >['aggregations']['ml_avg_response_times']['buckets'][0]
+  bucket: Required<ESResponse>['aggregations']['ml_avg_response_times']['buckets'][0]
 ) {
   return {
     x: bucket.key,
@@ -29,7 +27,8 @@ export function anomalySeriesTransform(
   response: ESResponse,
   mlBucketSize: number,
   bucketSize: number,
-  timeSeriesDates: number[]
+  timeSeriesDates: number[],
+  jobId: string
 ) {
   const buckets =
     response.aggregations?.ml_avg_response_times.buckets.map(getBucket) || [];
@@ -37,6 +36,7 @@ export function anomalySeriesTransform(
   const bucketSizeInMillis = Math.max(bucketSize, mlBucketSize) * 1000;
 
   return {
+    jobId,
     anomalyScore: getAnomalyScoreDataPoints(
       buckets,
       timeSeriesDates,
@@ -54,6 +54,10 @@ export function getAnomalyScoreDataPoints(
   const ANOMALY_THRESHOLD = 75;
   const firstDate = first(timeSeriesDates);
   const lastDate = last(timeSeriesDates);
+
+  if (firstDate === undefined || lastDate === undefined) {
+    return [];
+  }
 
   return buckets
     .filter(
@@ -90,6 +94,10 @@ export function replaceFirstAndLastBucket(
 ) {
   const firstDate = first(timeSeriesDates);
   const lastDate = last(timeSeriesDates);
+
+  if (firstDate === undefined || lastDate === undefined) {
+    return buckets;
+  }
 
   const preBucketWithValue = buckets
     .filter((p) => p.x <= firstDate)

@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 jest.mock('./browsers/install', () => ({
   installBrowser: jest.fn().mockImplementation(() => ({
     binaryPath$: {
@@ -16,6 +17,7 @@ jest.mock('./browsers/install', () => ({
 import { coreMock } from 'src/core/server/mocks';
 import { ReportingPlugin } from './plugin';
 import { createMockConfigSchema } from './test_helpers';
+import { featuresPluginMock } from '../../features/server/mocks';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -30,10 +32,11 @@ describe('Reporting Plugin', () => {
   beforeEach(async () => {
     configSchema = createMockConfigSchema();
     initContext = coreMock.createPluginInitializerContext(configSchema);
-    coreSetup = await coreMock.createSetup(configSchema);
-    coreStart = await coreMock.createStart();
+    coreSetup = coreMock.createSetup(configSchema);
+    coreStart = coreMock.createStart();
     pluginSetup = ({
       licensing: {},
+      features: featuresPluginMock.createSetup(),
       usageCollection: {
         makeUsageCollector: jest.fn(),
         registerCollector: jest.fn(),
@@ -62,10 +65,10 @@ describe('Reporting Plugin', () => {
   });
 
   it('logs setup issues', async () => {
+    initContext.config = null;
     const plugin = new ReportingPlugin(initContext);
     // @ts-ignore overloading error logger
     plugin.logger.error = jest.fn();
-    coreSetup.elasticsearch = null;
     plugin.setup(coreSetup, pluginSetup);
 
     await sleep(5);
@@ -83,6 +86,15 @@ describe('Reporting Plugin', () => {
     plugin.setup(coreSetup, pluginSetup);
     await sleep(5);
     expect(plugin.start(coreStart, pluginStart)).not.toHaveProperty('then');
+  });
+
+  it('registers an advanced setting for PDF logos', async () => {
+    const plugin = new ReportingPlugin(initContext);
+    plugin.setup(coreSetup, pluginSetup);
+    expect(coreSetup.uiSettings.register).toHaveBeenCalled();
+    expect(coreSetup.uiSettings.register.mock.calls[0][0]).toHaveProperty(
+      'xpackReporting:customPdfLogo'
+    );
   });
 
   it('logs start issues', async () => {

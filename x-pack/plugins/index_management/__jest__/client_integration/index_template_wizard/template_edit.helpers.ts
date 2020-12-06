@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
-import { TemplateEdit } from '../../../public/application/sections/template_edit'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
+import { TemplateEdit } from '../../../public/application/sections/template_edit';
 import { WithAppDependencies } from '../helpers';
 
 import { formSetup, TestSubjects } from './template_form.helpers';

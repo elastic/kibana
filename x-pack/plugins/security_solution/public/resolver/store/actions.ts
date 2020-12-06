@@ -4,53 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CameraAction } from './camera';
-import { DataAction } from './data';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { DataAction } from './data/action';
 
 /**
- * When the user wants to bring a process node front-and-center on the map.
+ * When the user wants to bring a node front-and-center on the map.
+ * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
  */
-interface UserBroughtProcessIntoView {
-  readonly type: 'userBroughtProcessIntoView';
+interface UserBroughtNodeIntoView {
+  /**
+   * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
+   */
+  readonly type: 'userBroughtNodeIntoView';
+  /**
+   * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
+   */
   readonly payload: {
     /**
-     * Used to identify the process node that should be brought into view.
+     * Used to identify the node that should be brought into view.
+     * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
      */
-    readonly process: ResolverEvent;
+    readonly nodeID: string;
     /**
      * The time (since epoch in milliseconds) when the action was dispatched.
+     * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
      */
     readonly time: number;
   };
 }
 
 /**
- * Used when the alert list selects an alert and the flyout shows resolver.
- */
-interface UserChangedSelectedEvent {
-  readonly type: 'userChangedSelectedEvent';
-  readonly payload: {
-    /**
-     * Optional because they could have unselected the event.
-     */
-    readonly selectedEvent?: ResolverEvent;
-  };
-}
-
-/**
- * Triggered by middleware when the data for resolver needs to be loaded. Used to set state in redux to 'loading'.
- */
-interface AppRequestedResolverData {
-  readonly type: 'appRequestedResolverData';
-}
-
-/**
- * The action dispatched when the app requests related event data for one or more
- * subjects (whose ids should be included as an array @ `payload`)
+ * The action dispatched when the app requests related event data for one
+ * subject (whose entity_id should be included as `payload`)
  */
 interface UserRequestedRelatedEventData {
   readonly type: 'userRequestedRelatedEventData';
-  readonly payload: ResolverEvent;
+  readonly payload: string;
 }
 
 /**
@@ -62,12 +50,9 @@ interface UserRequestedRelatedEventData {
  */
 interface UserFocusedOnResolverNode {
   readonly type: 'userFocusedOnResolverNode';
-  readonly payload: {
-    /**
-     * Used to identify the process node that the user focused on (in the DOM)
-     */
-    readonly nodeId: string;
-  };
+
+  /** focused nodeID */
+  readonly payload: string;
 }
 
 /**
@@ -78,44 +63,49 @@ interface UserFocusedOnResolverNode {
  */
 interface UserSelectedResolverNode {
   readonly type: 'userSelectedResolverNode';
-  readonly payload: {
+  /**
+   * The nodeID (aka entity_id) that was select.
+   */
+  readonly payload: string;
+}
+
+/**
+ * Used by `useStateSyncingActions` hook.
+ * This is dispatched when external sources provide new parameters for Resolver.
+ * When the component receives a new 'databaseDocumentID' prop, this is fired.
+ */
+interface AppReceivedNewExternalProperties {
+  type: 'appReceivedNewExternalProperties';
+  /**
+   * Defines the externally provided properties that Resolver acknowledges.
+   */
+  payload: {
     /**
-     * Used to identify the process node that the user selected
+     * the `_id` of an ES document. This defines the origin of the Resolver graph.
      */
-    readonly nodeId: string;
-  };
-}
+    databaseDocumentID: string;
+    /**
+     * An ID that uniquely identifies this Resolver instance from other concurrent Resolvers.
+     */
+    resolverComponentInstanceID: string;
 
-/**
- * This action should dispatch to indicate that the user chose to
- * focus on examining the related events of a particular ResolverEvent.
- * Optionally, this can be bound by a category of related events (e.g. 'file' or 'dns')
- */
-interface UserSelectedRelatedEventCategory {
-  readonly type: 'userSelectedRelatedEventCategory';
-  readonly payload: {
-    subject: ResolverEvent;
-    category?: string;
-  };
-}
+    /**
+     * The `search` part of the URL of this page.
+     */
+    locationSearch: string;
 
-/**
- * This action should dispatch to indicate that the user chose to focus
- * on examining alerts related to a particular ResolverEvent
- */
-interface UserSelectedRelatedAlerts {
-  readonly type: 'userSelectedRelatedAlerts';
-  readonly payload: ResolverEvent;
+    /**
+     * Indices that the backend will use to find the document.
+     */
+    indices: string[];
+  };
 }
 
 export type ResolverAction =
   | CameraAction
   | DataAction
-  | UserBroughtProcessIntoView
-  | UserChangedSelectedEvent
-  | AppRequestedResolverData
+  | AppReceivedNewExternalProperties
+  | UserBroughtNodeIntoView
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
-  | UserRequestedRelatedEventData
-  | UserSelectedRelatedEventCategory
-  | UserSelectedRelatedAlerts;
+  | UserRequestedRelatedEventData;

@@ -22,6 +22,19 @@ export enum AnnoTypes {
   warning = 'warning',
 }
 
+export type Parser = ReturnType<typeof createParser>;
+
+export interface Annotation {
+  name?: string;
+  type: AnnoTypes;
+  text: string;
+  at: number;
+}
+
+export interface ParseResult {
+  annotations: Annotation[];
+}
+
 /* eslint-disable */
 
 export const createParser = () => {
@@ -200,12 +213,13 @@ export const createParser = () => {
 
       try {
         value();
+        white();
       } catch (e) {
         errored = true;
         annos.push({ type: AnnoTypes.error, at: e.at - 1, text: e.message });
       }
       if (!errored && ch) {
-        error('Syntax error');
+        annos.push({ type: AnnoTypes.error, at: at, text: 'Syntax Error' });
       }
       return { annotations: annos };
     }

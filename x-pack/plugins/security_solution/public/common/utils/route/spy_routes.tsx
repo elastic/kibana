@@ -11,14 +11,18 @@ import deepEqual from 'fast-deep-equal';
 
 import { SpyRouteProps } from './types';
 import { useRouteSpy } from './use_route_spy';
+import { SecurityPageName } from '../../../../common/constants';
 
-export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
+export const SpyRouteComponent = memo<
+  SpyRouteProps & { location: H.Location; pageName: string | undefined }
+>(
   ({
     location: { pathname, search },
     history,
     match: {
-      params: { pageName, detailName, tabName, flowTarget },
+      params: { detailName, tabName, flowTarget },
     },
+    pageName,
     state,
   }) => {
     const [isInitializing, setIsInitializing] = useState(true);
@@ -31,6 +35,11 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
           search,
         });
         setIsInitializing(false);
+      } else if (search !== '' && search !== route.search) {
+        dispatch({
+          type: 'updateSearch',
+          search,
+        });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
@@ -47,6 +56,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
               pathName: pathname,
               state,
               tabName,
+              ...(pageName === SecurityPageName.administration ? { search: search ?? '' } : {}),
             },
           });
           setIsInitializing(false);

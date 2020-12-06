@@ -34,7 +34,7 @@ import {
   CreateIndexPatternWizardWithRouter,
 } from '../components';
 import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
-import { IndexPatternManagmentContext } from '../types';
+import { IndexPatternManagmentContext, MlCardState } from '../types';
 
 const readOnlyBadge = {
   text: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.text', {
@@ -48,7 +48,8 @@ const readOnlyBadge = {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
+  getMlCardState: () => MlCardState
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
@@ -73,6 +74,7 @@ export async function mountManagementSection(
     data,
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
+    getMlCardState,
   };
 
   ReactDOM.render(
@@ -100,6 +102,7 @@ export async function mountManagementSection(
   );
 
   return () => {
+    chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(params.element);
   };
 }

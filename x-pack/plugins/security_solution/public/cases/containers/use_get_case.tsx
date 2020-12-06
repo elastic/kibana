@@ -5,11 +5,13 @@
  */
 
 import { useEffect, useReducer, useCallback } from 'react';
+import { CaseStatuses } from '../../../../case/common/api';
 
 import { Case } from './types';
 import * as i18n from './translations';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getCase } from './api';
+import { getNoneConnector } from '../components/configure_cases/utils';
 
 interface CaseState {
   data: Case;
@@ -59,13 +61,13 @@ export const initialData: Case = {
   closedBy: null,
   createdAt: '',
   comments: [],
-  connectorId: 'none',
+  connector: { ...getNoneConnector(), fields: null },
   createdBy: {
     username: '',
   },
   description: '',
   externalService: null,
-  status: '',
+  status: CaseStatuses.open,
   tags: [],
   title: '',
   totalComment: 0,

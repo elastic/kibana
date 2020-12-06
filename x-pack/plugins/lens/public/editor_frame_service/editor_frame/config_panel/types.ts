@@ -10,6 +10,7 @@ import {
   FramePublicAPI,
   Datasource,
   DatasourceDimensionEditorProps,
+  VisualizationDimensionGroupConfig,
 } from '../../../types';
 
 export interface ConfigPanelWrapperProps {
@@ -30,9 +31,8 @@ export interface ConfigPanelWrapperProps {
   core: DatasourceDimensionEditorProps['core'];
 }
 
-export interface DimensionPopoverState {
-  isOpen: boolean;
-  openId: string | null;
-  addingToGroupId: string | null;
-  tabId: 'datasource' | 'visualization' | null;
+export interface ActiveDimensionState {
+  isNew: boolean;
+  activeId?: string;
+  activeGroup?: VisualizationDimensionGroupConfig;
 }

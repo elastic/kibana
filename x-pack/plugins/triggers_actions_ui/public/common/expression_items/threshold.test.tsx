@@ -5,6 +5,7 @@
  */
 import * as React from 'react';
 import { shallow } from 'enzyme';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ThresholdExpression } from './threshold';
 
 describe('threshold expression', () => {
@@ -52,7 +53,7 @@ describe('threshold expression', () => {
     `);
   });
 
-  it('renders with treshold title', () => {
+  it('renders with threshold title', () => {
     const onChangeSelectedThreshold = jest.fn();
     const onChangeSelectedThresholdComparator = jest.fn();
     const wrapper = shallow(
@@ -64,5 +65,47 @@ describe('threshold expression', () => {
       />
     );
     expect(wrapper.contains('Is between')).toBeTruthy();
+  });
+
+  it('fires onChangeSelectedThreshold only when threshold actually changed', async () => {
+    const onChangeSelectedThreshold = jest.fn();
+    const onChangeSelectedThresholdComparator = jest.fn();
+
+    const wrapper = mountWithIntl(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        threshold={[10]}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={onChangeSelectedThreshold}
+        onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
+      />
+    );
+
+    wrapper.find('[data-test-subj="thresholdPopover"]').first().simulate('click');
+    expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="alertThresholdInput"]').exists()).toBeTruthy();
+
+    wrapper
+      .find('[data-test-subj="alertThresholdInput"]')
+      .last()
+      .simulate('change', { target: { value: 1000 } });
+    expect(onChangeSelectedThreshold).toHaveBeenCalled();
+    expect(onChangeSelectedThresholdComparator).not.toHaveBeenCalled();
+
+    jest.clearAllMocks();
+    wrapper
+      .find('[data-test-subj="comparatorOptionsComboBox"]')
+      .last()
+      .simulate('change', { target: { value: '<' } });
+    expect(onChangeSelectedThreshold).not.toHaveBeenCalled();
+    expect(onChangeSelectedThresholdComparator).toHaveBeenCalled();
+
+    jest.clearAllMocks();
+    wrapper
+      .find('[data-test-subj="comparatorOptionsComboBox"]')
+      .last()
+      .simulate('change', { target: { value: 'between' } });
+    expect(onChangeSelectedThreshold).toHaveBeenCalled();
+    expect(onChangeSelectedThresholdComparator).toHaveBeenCalled();
   });
 });

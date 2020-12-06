@@ -5,10 +5,18 @@
  */
 
 import React from 'react';
-import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { ShowLicenseInfo } from '../license_info';
+import * as redux from 'react-redux';
 
 describe('ShowLicenseInfo', () => {
+  beforeEach(() => {
+    const spy = jest.spyOn(redux, 'useDispatch');
+    spy.mockReturnValue(jest.fn());
+
+    const spy1 = jest.spyOn(redux, 'useSelector');
+    spy1.mockReturnValue(true);
+  });
   it('shallow renders without errors', () => {
     const wrapper = shallowWithIntl(<ShowLicenseInfo />);
     expect(wrapper).toMatchSnapshot();

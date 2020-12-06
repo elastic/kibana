@@ -26,7 +26,13 @@ import {
 } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
+import {
+  CODE_PATH_LOGSTASH,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+  ALERT_MISSING_MONITORING_DATA,
+  LOGSTASH_SYSTEM_ID,
+} from '../../../../common/constants';
+import { AlertsCallout } from '../../../alerts/callout';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -69,6 +75,18 @@ uiRoutes.when('/logstash/node/:uuid', {
         reactNodeId: 'monitoringLogstashNodeApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH, ALERT_MISSING_MONITORING_DATA],
+            filters: [
+              {
+                stackProduct: LOGSTASH_SYSTEM_ID,
+              },
+            ],
+          },
+        },
+        telemetryPageViewTitle: 'logstash_node',
       });
 
       $scope.$watch(
@@ -81,6 +99,15 @@ uiRoutes.when('/logstash/node/:uuid', {
           this.setTitle(
             i18n.translate('xpack.monitoring.logstash.node.routeTitle', {
               defaultMessage: 'Logstash - {nodeName}',
+              values: {
+                nodeName: data.nodeSummary.name,
+              },
+            })
+          );
+
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.logstash.node.pageTitle', {
+              defaultMessage: 'Logstash node: {nodeName}',
               values: {
                 nodeName: data.nodeSummary.name,
               },
@@ -103,6 +130,15 @@ uiRoutes.when('/logstash/node/:uuid', {
                   <DetailStatus stats={data.nodeSummary} />
                 </EuiPanel>
                 <EuiSpacer size="m" />
+                <AlertsCallout
+                  alerts={this.alerts}
+                  nextStepsFilter={(nextStep) => {
+                    if (nextStep.text.includes('Logstash nodes')) {
+                      return false;
+                    }
+                    return true;
+                  }}
+                />
                 <EuiPageContent>
                   <EuiFlexGrid columns={2} gutterSize="s">
                     {metricsToShow.map((metric, index) => (

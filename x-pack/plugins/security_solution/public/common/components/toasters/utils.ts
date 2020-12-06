@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type React from 'react';
 import uuid from 'uuid';
 import { isError } from 'lodash/fp';
 
 import { AppToast, ActionToaster } from './';
 import { isToasterError } from './errors';
-import { isApiError } from '../../utils/api';
+import { isAppError } from '../../utils/api';
 
 /**
  * Displays an error toast for the provided title and message
@@ -114,7 +114,7 @@ export const errorToToaster = ({
       iconType,
       errors: error.messages,
     };
-  } else if (isApiError(error)) {
+  } else if (isAppError(error)) {
     toast = {
       id,
       title,

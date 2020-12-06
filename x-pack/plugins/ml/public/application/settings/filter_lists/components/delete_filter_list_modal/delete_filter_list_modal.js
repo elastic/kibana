@@ -58,7 +58,7 @@ export class DeleteFilterListModal extends Component {
       const title = (
         <FormattedMessage
           id="xpack.ml.settings.filterLists.deleteFilterListModal.modalTitle"
-          defaultMessage="Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}"
+          defaultMessage="Delete {selectedFilterListsLength, plural, one {{selectedFilterId}} other {# filter lists}}?"
           values={{
             selectedFilterListsLength: selectedFilterLists.length,
             selectedFilterId: !!selectedFilterLists.length && selectedFilterLists[0].filter_id,
@@ -86,18 +86,8 @@ export class DeleteFilterListModal extends Component {
             }
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteWarningMessage"
-                defaultMessage="Are you sure you want to delete
-{selectedFilterListsLength, plural, one {this filter list} other {these filter lists}}"
-                values={{
-                  selectedFilterListsLength: selectedFilterLists.length,
-                }}
-              />
-            </p>
-          </EuiConfirmModal>
+            data-test-subj={'mlFilterListDeleteConfirmation'}
+          />
         </EuiOverlayMask>
       );
     }
@@ -114,6 +104,7 @@ export class DeleteFilterListModal extends Component {
             selectedFilterLists.length === 0 ||
             canDeleteFilter === false
           }
+          data-test-subj="mlFilterListsDeleteButton"
         >
           <FormattedMessage
             id="xpack.ml.settings.filterLists.deleteFilterListModal.deleteButtonLabel"

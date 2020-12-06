@@ -7,7 +7,7 @@
 import numeral from '@elastic/numeral';
 import React from 'react';
 
-import { NetworkDnsFields, NetworkDnsItem } from '../../../graphql/types';
+import { NetworkDnsFields, NetworkDnsItem } from '../../../../common/search_strategy';
 import {
   DragEffects,
   DraggableWrapper,

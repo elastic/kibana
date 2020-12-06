@@ -11,11 +11,16 @@ import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 export const featureCatalogueEntry = {
   id: APP_ID,
   title: getAppTitle(),
+  subtitle: i18n.translate('xpack.maps.featureCatalogue.mapsSubtitle', {
+    defaultMessage: 'Plot geographic data.',
+  }),
   description: i18n.translate('xpack.maps.feature.appDescription', {
-    defaultMessage: 'Explore geospatial data from Elasticsearch and the Elastic Maps Service',
+    defaultMessage: 'Explore geospatial data from Elasticsearch and the Elastic Maps Service.',
   }),
   icon: APP_ICON,
   path: '/app/maps',
-  showOnHomePage: true,
+  showOnHomePage: false,
   category: FeatureCatalogueCategory.DATA,
+  solutionId: 'kibana',
+  order: 400,
 };

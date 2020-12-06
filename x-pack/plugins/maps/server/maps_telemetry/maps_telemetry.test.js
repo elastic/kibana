@@ -6,22 +6,17 @@
 
 import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
 import indexPatternSavedObjects from './test_resources/sample_index_pattern_saved_objects';
-import { buildMapsTelemetry } from './maps_telemetry';
+import {
+  buildMapsIndexPatternsTelemetry,
+  buildMapsSavedObjectsTelemetry,
+  getLayerLists,
+} from './maps_telemetry';
 
-describe('buildMapsTelemetry', () => {
-  const settings = { showMapVisualizationTypes: false };
-
+describe('buildMapsSavedObjectsTelemetry', () => {
   test('returns zeroed telemetry data when there are no saved objects', async () => {
-    const result = buildMapsTelemetry({
-      mapSavedObjects: [],
-      indexPatternSavedObjects: [],
-      settings,
-    });
+    const result = buildMapsSavedObjectsTelemetry([]);
 
     expect(result).toMatchObject({
-      indexPatternsWithGeoFieldCount: 0,
-      indexPatternsWithGeoPointFieldCount: 0,
-      indexPatternsWithGeoShapeFieldCount: 0,
       attributesPerMap: {
         dataSourcesCount: {
           avg: 0,
@@ -37,64 +32,68 @@ describe('buildMapsTelemetry', () => {
         },
       },
       mapsTotalCount: 0,
-      settings: {
-        showMapVisualizationTypes: false,
-      },
     });
   });
 
   test('returns expected telemetry data from saved objects', async () => {
-    const result = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
+    const layerLists = getLayerLists(mapSavedObjects);
+    const result = buildMapsSavedObjectsTelemetry(layerLists);
 
     expect(result).toMatchObject({
-      indexPatternsWithGeoFieldCount: 3,
-      indexPatternsWithGeoPointFieldCount: 2,
-      indexPatternsWithGeoShapeFieldCount: 1,
       attributesPerMap: {
         dataSourcesCount: {
-          avg: 2.6666666666666665,
+          avg: 2,
           max: 3,
-          min: 2,
+          min: 1,
         },
         emsVectorLayersCount: {
           canada_provinces: {
-            avg: 0.3333333333333333,
+            avg: 0.2,
             max: 1,
             min: 1,
           },
           france_departments: {
-            avg: 0.3333333333333333,
+            avg: 0.2,
             max: 1,
             min: 1,
           },
           italy_provinces: {
-            avg: 0.3333333333333333,
+            avg: 0.2,
             max: 1,
             min: 1,
           },
         },
         layerTypesCount: {
           TILE: {
-            avg: 1,
+            avg: 0.6,
             max: 1,
             min: 1,
           },
           VECTOR: {
-            avg: 1.6666666666666667,
+            avg: 1.2,
             max: 2,
             min: 1,
           },
         },
         layersCount: {
-          avg: 2.6666666666666665,
+          avg: 2,
           max: 3,
-          min: 2,
+          min: 1,
         },
       },
-      mapsTotalCount: 3,
-      settings: {
-        showMapVisualizationTypes: false,
-      },
+      mapsTotalCount: 5,
+    });
+  });
+
+  test('returns expected telemetry data from index patterns', async () => {
+    const layerLists = getLayerLists(mapSavedObjects);
+    const result = buildMapsIndexPatternsTelemetry(indexPatternSavedObjects, layerLists);
+
+    expect(result).toMatchObject({
+      indexPatternsWithGeoFieldCount: 3,
+      indexPatternsWithGeoPointFieldCount: 2,
+      indexPatternsWithGeoShapeFieldCount: 1,
+      geoShapeAggLayersCount: 2,
     });
   });
 });

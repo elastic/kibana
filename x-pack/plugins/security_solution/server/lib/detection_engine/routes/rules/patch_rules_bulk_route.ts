@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { validate } from '../../../../../common/validate';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import {
   patchRulesBulkSchema,
@@ -18,7 +19,7 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { transformBulkError, buildSiemResponse } from '../utils';
 import { getIdBulkError } from './utils';
-import { transformValidateBulkError, validate } from './validate';
+import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
@@ -48,18 +49,27 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
         return siemResponse.error({ statusCode: 404 });
       }
 
-      const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+      const mlAuthz = buildMlAuthz({
+        license: context.licensing.license,
+        ml,
+        request,
+        savedObjectsClient,
+      });
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
           const {
             actions: actionsRest,
+            author,
+            building_block_type: buildingBlockType,
             description,
             enabled,
+            event_category_override: eventCategoryOverride,
             false_positives: falsePositives,
             from,
             query,
             language,
+            license,
             output_index: outputIndex,
             saved_id: savedId,
             timeline_id: timelineId,
@@ -72,12 +82,24 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
             interval,
             max_signals: maxSignals,
             risk_score: riskScore,
+            risk_score_mapping: riskScoreMapping,
+            rule_name_override: ruleNameOverride,
             name,
             severity,
+            severity_mapping: severityMapping,
             tags,
             to,
             type,
             threat,
+            threshold,
+            threat_filters: threatFilters,
+            threat_index: threatIndex,
+            threat_query: threatQuery,
+            threat_mapping: threatMapping,
+            threat_language: threatLanguage,
+            concurrent_searches: concurrentSearches,
+            items_per_search: itemsPerSearch,
+            timestamp_override: timestampOverride,
             throttle,
             references,
             note,
@@ -106,12 +128,16 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
             const rule = await patchRules({
               rule: existingRule,
               alertsClient,
+              author,
+              buildingBlockType,
               description,
               enabled,
+              eventCategoryOverride,
               falsePositives,
               from,
               query,
               language,
+              license,
               outputIndex,
               savedId,
               savedObjectsClient,
@@ -123,12 +149,24 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               interval,
               maxSignals,
               riskScore,
+              riskScoreMapping,
+              ruleNameOverride,
               name,
               severity,
+              severityMapping,
               tags,
               to,
               type,
               threat,
+              threshold,
+              threatFilters,
+              threatIndex,
+              threatQuery,
+              threatMapping,
+              threatLanguage,
+              concurrentSearches,
+              itemsPerSearch,
+              timestampOverride,
               references,
               note,
               version,
@@ -154,12 +192,7 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformValidateBulkError(
-                rule.id,
-                rule,
-                ruleActions,
-                ruleStatuses.saved_objects[0]
-              );
+              return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
             } else {
               return getIdBulkError({ id, ruleId });
             }

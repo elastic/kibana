@@ -10,12 +10,15 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
+import '../../../common/mock/match_media';
 import { FlowTargetSourceDest } from '../../../graphql/types';
 import {
   apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
@@ -23,15 +26,30 @@ import { networkModel } from '../../store';
 import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
 
+jest.mock('../../../common/components/link_to');
+
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   describe('rendering', () => {
@@ -39,50 +57,42 @@ describe('NetworkTopNFlow Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkTopNFlowTable
-            data={mockData.NetworkTopNFlow.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             flowTargeted={FlowTargetSourceDest.source}
             id="topNFlowSource"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.NetworkTopNFlow.pageInfo
-            )}
-            totalCount={mockData.NetworkTopNFlow.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={networkModel.NetworkType.page}
           />
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(Component)')).toMatchSnapshot();
+      expect(wrapper.find('Memo(NetworkTopNFlowTableComponent)')).toMatchSnapshot();
     });
 
     test('it renders the default NetworkTopNFlow table on the IP Details page', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkTopNFlowTable
-            data={mockData.NetworkTopNFlow.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             flowTargeted={FlowTargetSourceDest.source}
             id="topNFlowSource"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.NetworkTopNFlow.pageInfo
-            )}
-            totalCount={mockData.NetworkTopNFlow.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(Component)')).toMatchSnapshot();
+      expect(wrapper.find('Memo(NetworkTopNFlowTableComponent)')).toMatchSnapshot();
     });
   });
 
@@ -92,19 +102,15 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkTopNFlowTable
-              data={mockData.NetworkTopNFlow.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
+              data={mockData.edges}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
               flowTargeted={FlowTargetSourceDest.source}
               id="topNFlowSource"
               isInspect={false}
               loading={false}
               loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.NetworkTopNFlow.pageInfo
-              )}
-              totalCount={mockData.NetworkTopNFlow.totalCount}
+              showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+              totalCount={mockData.totalCount}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>

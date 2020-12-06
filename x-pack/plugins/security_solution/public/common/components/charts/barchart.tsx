@@ -47,15 +47,20 @@ const checkIfAnyValidSeriesExist = (
   !checkIfAllValuesAreZero(data) &&
   data.some(checkIfAllTheDataInTheSeriesAreValid);
 
+const yAccessors = ['y'];
+const splitSeriesAccessors = ['g'];
+
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = ({
   data,
   forceHiddenLegend = false,
+  yAxisTitle,
   ...chartConfigs
 }: {
   data: ChartSeriesData[];
   width: string | null | undefined;
   height: string | null | undefined;
+  yAxisTitle?: string | undefined;
   configs?: ChartSeriesConfigs | undefined;
   forceHiddenLegend?: boolean;
 }) => {
@@ -84,9 +89,9 @@ export const BarChartBaseComponent = ({
             xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
             yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
             xAccessor="x"
-            yAccessors={['y']}
+            yAccessors={yAccessors}
             timeZone={timeZone}
-            splitSeriesAccessors={['g']}
+            splitSeriesAccessors={splitSeriesAccessors}
             data={series.value!}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             color={series.color ? series.color : undefined}
@@ -98,11 +103,25 @@ export const BarChartBaseComponent = ({
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
-        tickSize={tickSize}
+        style={{
+          tickLine: {
+            size: tickSize,
+          },
+        }}
         tickFormat={xTickFormatter}
       />
 
-      <Axis id={yAxisId} position={Position.Left} tickSize={tickSize} tickFormat={yTickFormatter} />
+      <Axis
+        id={yAxisId}
+        position={Position.Left}
+        style={{
+          tickLine: {
+            size: tickSize,
+          },
+        }}
+        tickFormat={yTickFormatter}
+        title={yAxisTitle}
+      />
     </Chart>
   ) : null;
 };
@@ -117,6 +136,7 @@ interface BarChartComponentProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
   stackByField?: string;
+  timelineId?: string;
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -125,23 +145,26 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   barChart,
   configs,
   stackByField,
+  timelineId,
 }) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
   const legendItems: LegendItem[] = useMemo(
     () =>
       barChart != null && stackByField != null
         ? barChart.map((d, i) => ({
-            color: d.color ?? i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
+            color: d.color ?? (i < defaultLegendColors.length ? defaultLegendColors[i] : undefined),
             dataProviderId: escapeDataProviderId(
               `draggable-legend-item-${uuid.v4()}-${stackByField}-${d.key}`
             ),
+            timelineId,
             field: stackByField,
             value: d.key,
           }))
         : NO_LEGEND_DATA,
-    [barChart, stackByField]
+    [barChart, stackByField, timelineId]
   );
 
+  const yAxisTitle = get('yAxisTitle', configs);
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
   const chartHeight = getChartHeight(customHeight, height);
@@ -154,6 +177,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
           <BarChartBase
             configs={configs}
             data={barChart}
+            yAxisTitle={yAxisTitle}
             forceHiddenLegend={stackByField != null}
             height={chartHeight}
             width={chartHeight}

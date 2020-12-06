@@ -9,12 +9,12 @@ import {
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore
   EuiSearchBar,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import * as i18n from '../translations';
 import { OpenTimelineProps } from '../types';
 
@@ -34,26 +34,37 @@ SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';
 
 type Props = Pick<
   OpenTimelineProps,
-  'onlyFavorites' | 'onQueryChange' | 'onToggleOnlyFavorites' | 'query' | 'totalSearchResultsCount'
-> & { tabs?: JSX.Element };
-
-const searchBox = {
-  placeholder: i18n.SEARCH_PLACEHOLDER,
-  incremental: false,
-};
+  | 'favoriteCount'
+  | 'onlyFavorites'
+  | 'onQueryChange'
+  | 'onToggleOnlyFavorites'
+  | 'query'
+  | 'timelineType'
+> & { children?: JSX.Element | null };
 
 /**
  * Renders the row containing the search input and Only Favorites filter
  */
 export const SearchRow = React.memo<Props>(
   ({
+    favoriteCount,
     onlyFavorites,
     onQueryChange,
     onToggleOnlyFavorites,
-    query,
-    totalSearchResultsCount,
-    tabs,
+    children,
+    timelineType,
   }) => {
+    const searchBox = useMemo(
+      () => ({
+        placeholder:
+          timelineType === TimelineType.default
+            ? i18n.SEARCH_PLACEHOLDER
+            : i18n.SEARCH_TEMPLATE_PLACEHOLDER,
+        incremental: false,
+      }),
+      [timelineType]
+    );
+
     return (
       <SearchRowContainer>
         <SearchRowFlexGroup gutterSize="s">
@@ -68,10 +79,11 @@ export const SearchRow = React.memo<Props>(
                   data-test-subj="only-favorites-toggle"
                   hasActiveFilters={onlyFavorites}
                   onClick={onToggleOnlyFavorites}
+                  numFilters={favoriteCount ?? undefined}
                 >
                   {i18n.ONLY_FAVORITES}
                 </EuiFilterButton>
-                {tabs}
+                {!!children && children}
               </>
             </EuiFilterGroup>
           </EuiFlexItem>

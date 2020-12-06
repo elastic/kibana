@@ -8,6 +8,7 @@
  * Kibana Instance
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
@@ -26,7 +27,13 @@ import {
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from '../../../components/kibana/detail_status';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_KIBANA } from '../../../../common/constants';
+import {
+  CODE_PATH_KIBANA,
+  ALERT_KIBANA_VERSION_MISMATCH,
+  ALERT_MISSING_MONITORING_DATA,
+  KIBANA_SYSTEM_ID,
+} from '../../../../common/constants';
+import { AlertsCallout } from '../../../alerts/callout';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -65,11 +72,23 @@ uiRoutes.when('/kibana/instances/:uuid', {
     constructor($injector, $scope) {
       super({
         title: `Kibana - ${get($scope.pageData, 'kibanaSummary.name')}`,
+        telemetryPageViewTitle: 'kibana_instance',
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringKibanaInstanceApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH, ALERT_MISSING_MONITORING_DATA],
+            filters: [
+              {
+                stackProduct: KIBANA_SYSTEM_ID,
+              },
+            ],
+          },
+        },
       });
 
       $scope.$watch(
@@ -78,8 +97,15 @@ uiRoutes.when('/kibana/instances/:uuid', {
           if (!data || !data.metrics) {
             return;
           }
-
           this.setTitle(`Kibana - ${get(data, 'kibanaSummary.name')}`);
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.kibana.instance.pageTitle', {
+              defaultMessage: 'Kibana instance: {instance}',
+              values: {
+                instance: get($scope.pageData, 'kibanaSummary.name'),
+              },
+            })
+          );
 
           this.renderReact(
             <EuiPage>
@@ -88,6 +114,15 @@ uiRoutes.when('/kibana/instances/:uuid', {
                   <DetailStatus stats={data.kibanaSummary} />
                 </EuiPanel>
                 <EuiSpacer size="m" />
+                <AlertsCallout
+                  alerts={this.alerts}
+                  nextStepsFilter={(nextStep) => {
+                    if (nextStep.text.includes('Kibana instances')) {
+                      return false;
+                    }
+                    return true;
+                  }}
+                />
                 <EuiPageContent>
                   <EuiFlexGrid columns={2} gutterSize="s">
                     <EuiFlexItem grow={true}>

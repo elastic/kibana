@@ -12,7 +12,7 @@ import { getThreadCountChart } from './by_agent/java/thread_count';
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../public/utils/testHelpers';
+} from '../../utils/test_helpers';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 
 describe('metrics queries', () => {
@@ -21,7 +21,7 @@ describe('metrics queries', () => {
   const createTests = (serviceNodeName?: string) => {
     it('fetches cpu chart data', async () => {
       mock = await inspectSearchParams((setup) =>
-        getCPUChartData(setup, 'foo', serviceNodeName)
+        getCPUChartData({ setup, serviceName: 'foo', serviceNodeName })
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -29,7 +29,7 @@ describe('metrics queries', () => {
 
     it('fetches memory chart data', async () => {
       mock = await inspectSearchParams((setup) =>
-        getMemoryChartData(setup, 'foo', serviceNodeName)
+        getMemoryChartData({ setup, serviceName: 'foo', serviceNodeName })
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -37,7 +37,7 @@ describe('metrics queries', () => {
 
     it('fetches heap memory chart data', async () => {
       mock = await inspectSearchParams((setup) =>
-        getHeapMemoryChart(setup, 'foo', serviceNodeName)
+        getHeapMemoryChart({ setup, serviceName: 'foo', serviceNodeName })
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -45,7 +45,7 @@ describe('metrics queries', () => {
 
     it('fetches non heap memory chart data', async () => {
       mock = await inspectSearchParams((setup) =>
-        getNonHeapMemoryChart(setup, 'foo', serviceNodeName)
+        getNonHeapMemoryChart({ setup, serviceName: 'foo', serviceNodeName })
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -53,7 +53,7 @@ describe('metrics queries', () => {
 
     it('fetches thread count chart data', async () => {
       mock = await inspectSearchParams((setup) =>
-        getThreadCountChart(setup, 'foo', serviceNodeName)
+        getThreadCountChart({ setup, serviceName: 'foo', serviceNodeName })
       );
 
       expect(mock.params).toMatchSnapshot();

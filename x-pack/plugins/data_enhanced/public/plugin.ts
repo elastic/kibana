@@ -4,23 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-  ES_SEARCH_STRATEGY,
-} from '../../../../src/plugins/data/public';
+import React from 'react';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
+
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
-import {
-  ASYNC_SEARCH_STRATEGY,
-  asyncSearchStrategyProvider,
-  enhancedEsSearchStrategyProvider,
-} from './search';
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
+<<<<<<< HEAD
 import { BackgroundSessionService } from './background_session';
+=======
+import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { createConnectedBackgroundSessionIndicator } from './search';
+import { ConfigSchema } from '../config';
+>>>>>>> 058f28ab235a661cfa4b9168e97dd55026f54146
 
 export interface DataEnhancedSetupDependencies {
+  bfetch: BfetchPublicSetup;
   data: DataPublicPluginSetup;
 }
 export interface DataEnhancedStartDependencies {
@@ -34,24 +35,43 @@ export interface DataEnhancedStart {
 
 export class DataEnhancedPlugin
   implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
+<<<<<<< HEAD
   private backgroundSessionService!: BackgroundSessionService;
+=======
+  private enhancedSearchInterceptor!: EnhancedSearchInterceptor;
+
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
+>>>>>>> 058f28ab235a661cfa4b9168e97dd55026f54146
 
   public setup(
     core: CoreSetup<DataEnhancedStartDependencies>,
-    { data }: DataEnhancedSetupDependencies
+    { bfetch, data }: DataEnhancedSetupDependencies
   ) {
     data.autocomplete.addQuerySuggestionProvider(
       KUERY_LANGUAGE_NAME,
       setupKqlQuerySuggestionProvider(core)
     );
-    const asyncSearchStrategy = asyncSearchStrategyProvider(core);
-    const esSearchStrategy = enhancedEsSearchStrategyProvider(core, asyncSearchStrategy);
-    data.search.registerSearchStrategy(ASYNC_SEARCH_STRATEGY, asyncSearchStrategy);
-    data.search.registerSearchStrategy(ES_SEARCH_STRATEGY, esSearchStrategy);
+
+    this.enhancedSearchInterceptor = new EnhancedSearchInterceptor({
+      bfetch,
+      toasts: core.notifications.toasts,
+      http: core.http,
+      uiSettings: core.uiSettings,
+      startServices: core.getStartServices(),
+      usageCollector: data.search.usageCollector,
+      session: data.search.session,
+    });
+
+    data.__enhance({
+      search: {
+        searchInterceptor: this.enhancedSearchInterceptor,
+      },
+    });
   }
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies): DataEnhancedStart {
     setAutocompleteService(plugins.data.autocomplete);
+<<<<<<< HEAD
     this.backgroundSessionService = new BackgroundSessionService(core.http, plugins.data.search);
 
     const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
@@ -74,5 +94,25 @@ export class DataEnhancedPlugin
     return {
       backgroundSession: this.backgroundSessionService,
     };
+=======
+
+    if (this.initializerContext.config.get().search.sendToBackground.enabled) {
+      core.chrome.setBreadcrumbsAppendExtension({
+        content: toMountPoint(
+          React.createElement(
+            createConnectedBackgroundSessionIndicator({
+              sessionService: plugins.data.search.session,
+              application: core.application,
+              timeFilter: plugins.data.query.timefilter.timefilter,
+            })
+          )
+        ),
+      });
+    }
+  }
+
+  public stop() {
+    this.enhancedSearchInterceptor.stop();
+>>>>>>> 058f28ab235a661cfa4b9168e97dd55026f54146
   }
 }

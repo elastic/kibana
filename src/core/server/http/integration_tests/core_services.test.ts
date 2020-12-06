@@ -16,11 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Boom from 'boom';
-import { Request } from 'hapi';
-import { clusterClientMock } from './core_service.test.mocks';
 
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import {
+  MockLegacyScopedClusterClient,
+  MockElasticsearchClient,
+  legacyClusterClientInstanceMock,
+} from './core_service.test.mocks';
+
+import Boom from '@hapi/boom';
+import { Request } from '@hapi/hapi';
+import { errors as esErrors } from 'elasticsearch';
+import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy';
+
+import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import { InternalElasticsearchServiceStart } from '../../elasticsearch';
 
 interface User {
   id: string;
@@ -40,6 +51,17 @@ const cookieOptions = {
 };
 
 describe('http service', () => {
+  let esClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
+
+  beforeEach(async () => {
+    esClient = elasticsearchClientMock.createInternalClient();
+    MockElasticsearchClient.mockImplementation(() => esClient);
+  }, 30000);
+
+  afterEach(async () => {
+    MockElasticsearchClient.mockClear();
+  });
+
   describe('auth', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
@@ -196,7 +218,7 @@ describe('http service', () => {
       }, 30000);
 
       afterEach(async () => {
-        clusterClientMock.mockClear();
+        MockLegacyScopedClusterClient.mockClear();
         await root.shutdown();
       });
 
@@ -333,7 +355,7 @@ describe('http service', () => {
       it('basePath information for an incoming request is available in legacy server', async () => {
         const reqBasePath = '/requests-specific-base-path';
         const { http } = await root.setup();
-        http.registerOnPreAuth((req, res, toolkit) => {
+        http.registerOnPreRouting((req, res, toolkit) => {
           http.basePath.set(req, reqBasePath);
           return toolkit.next();
         });
@@ -352,14 +374,14 @@ describe('http service', () => {
       });
     });
   });
-  describe('elasticsearch', () => {
+  describe('legacy elasticsearch client', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
       root = kbnTestServer.createRoot({ plugins: { initialize: false } });
     }, 30000);
 
     afterEach(async () => {
-      clusterClientMock.mockClear();
+      MockLegacyScopedClusterClient.mockClear();
       await root.shutdown();
     });
 
@@ -382,9 +404,12 @@ describe('http service', () => {
       await kbnTestServer.request.get(root, '/new-platform/').expect(200);
 
       // client contains authHeaders for BWC with legacy platform.
-      const [client] = clusterClientMock.mock.calls;
+      const [client] = MockLegacyScopedClusterClient.mock.calls;
       const [, , clientHeaders] = client;
-      expect(clientHeaders).toEqual(authHeaders);
+      expect(clientHeaders).toEqual({
+        ...authHeaders,
+        'x-opaque-id': expect.any(String),
+      });
     });
 
     it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
@@ -406,9 +431,125 @@ describe('http service', () => {
         .set('Authorization', authorizationHeader)
         .expect(200);
 
-      const [client] = clusterClientMock.mock.calls;
+      const [client] = MockLegacyScopedClusterClient.mock.calls;
       const [, , clientHeaders] = client;
-      expect(clientHeaders).toEqual({ authorization: authorizationHeader });
+      expect(clientHeaders).toEqual({
+        authorization: authorizationHeader,
+        'x-opaque-id': expect.any(String),
+      });
+    });
+
+    it('forwards 401 errors returned from elasticsearch', async () => {
+      const { http } = await root.setup();
+      const { createRouter } = http;
+
+      const authenticationError = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(
+        new (esErrors.AuthenticationException as any)('Authentication Exception', {
+          body: { error: { header: { 'WWW-Authenticate': 'authenticate header' } } },
+          statusCode: 401,
+        })
+      );
+
+      legacyClusterClientInstanceMock.callAsCurrentUser.mockRejectedValue(authenticationError);
+
+      const router = createRouter('/new-platform');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
+        return res.ok();
+      });
+
+      await root.start();
+
+      const response = await kbnTestServer.request.get(root, '/new-platform/').expect(401);
+
+      expect(response.header['www-authenticate']).toEqual('authenticate header');
+    });
+  });
+
+  describe('elasticsearch client', () => {
+    let root: ReturnType<typeof kbnTestServer.createRoot>;
+
+    beforeEach(async () => {
+      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+    }, 30000);
+
+    afterEach(async () => {
+      MockElasticsearchClient.mockClear();
+      await root.shutdown();
+    });
+
+    it('forwards unauthorized errors from elasticsearch', async () => {
+      const { http } = await root.setup();
+      const { createRouter } = http;
+      // eslint-disable-next-line prefer-const
+      let elasticsearch: InternalElasticsearchServiceStart;
+
+      esClient.ping.mockImplementation(() =>
+        elasticsearchClientMock.createErrorTransportRequestPromise(
+          new ResponseError({
+            statusCode: 401,
+            body: {
+              error: {
+                type: 'Unauthorized',
+              },
+            },
+            warnings: [],
+            headers: {
+              'WWW-Authenticate': 'content',
+            },
+            meta: {} as any,
+          })
+        )
+      );
+
+      const router = createRouter('/new-platform');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        await elasticsearch.client.asScoped(req).asInternalUser.ping();
+        return res.ok();
+      });
+
+      const coreStart = await root.start();
+      elasticsearch = coreStart.elasticsearch;
+
+      const { header } = await kbnTestServer.request.get(root, '/new-platform/').expect(401);
+
+      expect(header['www-authenticate']).toEqual('content');
+    });
+
+    it('uses a default value for `www-authenticate` header when ES 401 does not specify it', async () => {
+      const { http } = await root.setup();
+      const { createRouter } = http;
+      // eslint-disable-next-line prefer-const
+      let elasticsearch: InternalElasticsearchServiceStart;
+
+      esClient.ping.mockImplementation(() =>
+        elasticsearchClientMock.createErrorTransportRequestPromise(
+          new ResponseError({
+            statusCode: 401,
+            body: {
+              error: {
+                type: 'Unauthorized',
+              },
+            },
+            warnings: [],
+            headers: {},
+            meta: {} as any,
+          })
+        )
+      );
+
+      const router = createRouter('/new-platform');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        await elasticsearch.client.asScoped(req).asInternalUser.ping();
+        return res.ok();
+      });
+
+      const coreStart = await root.start();
+      elasticsearch = coreStart.elasticsearch;
+
+      const { header } = await kbnTestServer.request.get(root, '/new-platform/').expect(401);
+
+      expect(header['www-authenticate']).toEqual('Basic realm="Authorization Required"');
     });
   });
 });

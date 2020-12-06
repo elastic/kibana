@@ -3,104 +3,54 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { EuiButtonIcon, EuiLoadingSpinner, EuiCheckbox } from '@elastic/eui';
 
-import { Note } from '../../../../../common/lib/note';
-import { AssociateNote, UpdateNote } from '../../../notes/helpers';
-import { Pin } from '../../pin';
-import { NotesButton } from '../../properties/helpers';
-import { EventsLoading, EventsTd, EventsTdContent, EventsTdGroupActions } from '../../styles';
-import { eventHasNotes, getPinTooltip } from '../helpers';
+import { EventsTd, EventsTdContent, EventsTdGroupActions } from '../../styles';
 import * as i18n from '../translations';
 import { OnRowSelected } from '../../events';
-import { Ecs } from '../../../../../graphql/types';
-
-export interface TimelineRowActionOnClick {
-  eventId: string;
-  ecsData: Ecs;
-}
-
-export interface TimelineRowAction {
-  ariaLabel?: string;
-  dataTestSubj?: string;
-  displayType: 'icon' | 'contextMenu';
-  iconType: string;
-  id: string;
-  isActionDisabled?: boolean;
-  onClick: ({ eventId, ecsData }: TimelineRowActionOnClick) => void;
-  content: string;
-  width?: number;
-}
+import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 
 interface Props {
   actionsColumnWidth: number;
   additionalActions?: JSX.Element[];
-  associateNote: AssociateNote;
   checked: boolean;
   onRowSelected: OnRowSelected;
   expanded: boolean;
   eventId: string;
-  eventIsPinned: boolean;
-  getNotesByIds: (noteIds: string[]) => Note[];
-  isEventViewer?: boolean;
-  loading: boolean;
   loadingEventIds: Readonly<string[]>;
-  noteIds: string[];
   onEventToggled: () => void;
-  onPinClicked: () => void;
-  showNotes: boolean;
   showCheckboxes: boolean;
-  toggleShowNotes: () => void;
-  updateNote: UpdateNote;
 }
 
-const emptyNotes: string[] = [];
+const ActionsComponent: React.FC<Props> = ({
+  actionsColumnWidth,
+  additionalActions,
+  checked,
+  expanded,
+  eventId,
+  loadingEventIds,
+  onEventToggled,
+  onRowSelected,
+  showCheckboxes,
+}) => {
+  const handleSelectEvent = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) =>
+      onRowSelected({
+        eventIds: [eventId],
+        isSelected: event.currentTarget.checked,
+      }),
+    [eventId, onRowSelected]
+  );
 
-export const Actions = React.memo<Props>(
-  ({
-    actionsColumnWidth,
-    additionalActions,
-    associateNote,
-    checked,
-    expanded,
-    eventId,
-    eventIsPinned,
-    getNotesByIds,
-    isEventViewer = false,
-    loading = false,
-    loadingEventIds,
-    noteIds,
-    onEventToggled,
-    onPinClicked,
-    onRowSelected,
-    showCheckboxes,
-    showNotes,
-    toggleShowNotes,
-    updateNote,
-  }) => (
+  return (
     <EventsTdGroupActions
       actionsColumnWidth={actionsColumnWidth}
       data-test-subj="event-actions-container"
     >
-      <EventsTd>
-        <EventsTdContent textAlign="center">
-          {loading && <EventsLoading />}
-
-          {!loading && (
-            <EuiButtonIcon
-              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
-              data-test-subj="expand-event"
-              iconType={expanded ? 'arrowDown' : 'arrowRight'}
-              id={eventId}
-              onClick={onEventToggled}
-            />
-          )}
-        </EventsTdContent>
-      </EventsTd>
       {showCheckboxes && (
-        <EventsTd data-test-subj="select-event-container">
-          <EventsTdContent textAlign="center">
+        <EventsTd key="select-event-container" data-test-subj="select-event-container">
+          <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
             {loadingEventIds.includes(eventId) ? (
               <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
             ) : (
@@ -108,76 +58,30 @@ export const Actions = React.memo<Props>(
                 data-test-subj="select-event"
                 id={eventId}
                 checked={checked}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  onRowSelected({
-                    eventIds: [eventId],
-                    isSelected: event.currentTarget.checked,
-                  });
-                }}
+                onChange={handleSelectEvent}
               />
             )}
           </EventsTdContent>
         </EventsTd>
       )}
+      <EventsTd key="expand-event">
+        <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          <EuiButtonIcon
+            aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
+            data-test-subj="expand-event"
+            disabled={expanded}
+            iconType="arrowRight"
+            id={eventId}
+            onClick={onEventToggled}
+          />
+        </EventsTdContent>
+      </EventsTd>
 
       <>{additionalActions}</>
-
-      {!isEventViewer && (
-        <>
-          <EventsTd>
-            <EventsTdContent textAlign="center">
-              <EuiToolTip
-                data-test-subj="timeline-action-pin-tool-tip"
-                content={getPinTooltip({
-                  isPinned: eventIsPinned,
-                  eventHasNotes: eventHasNotes(noteIds),
-                })}
-              >
-                <Pin
-                  allowUnpinning={!eventHasNotes(noteIds)}
-                  data-test-subj="pin-event"
-                  onClick={onPinClicked}
-                  pinned={eventIsPinned}
-                />
-              </EuiToolTip>
-            </EventsTdContent>
-          </EventsTd>
-
-          <EventsTd>
-            <EventsTdContent textAlign="center">
-              <NotesButton
-                animate={false}
-                associateNote={associateNote}
-                data-test-subj="add-note"
-                getNotesByIds={getNotesByIds}
-                noteIds={noteIds || emptyNotes}
-                showNotes={showNotes}
-                size="s"
-                toggleShowNotes={toggleShowNotes}
-                toolTip={i18n.NOTES_TOOLTIP}
-                updateNote={updateNote}
-              />
-            </EventsTdContent>
-          </EventsTd>
-        </>
-      )}
     </EventsTdGroupActions>
-  ),
-  (nextProps, prevProps) => {
-    return (
-      prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
-      prevProps.additionalActions === nextProps.additionalActions &&
-      prevProps.checked === nextProps.checked &&
-      prevProps.expanded === nextProps.expanded &&
-      prevProps.eventId === nextProps.eventId &&
-      prevProps.eventIsPinned === nextProps.eventIsPinned &&
-      prevProps.loading === nextProps.loading &&
-      prevProps.loadingEventIds === nextProps.loadingEventIds &&
-      prevProps.noteIds === nextProps.noteIds &&
-      prevProps.onRowSelected === nextProps.onRowSelected &&
-      prevProps.showCheckboxes === nextProps.showCheckboxes &&
-      prevProps.showNotes === nextProps.showNotes
-    );
-  }
-);
-Actions.displayName = 'Actions';
+  );
+};
+
+ActionsComponent.displayName = 'ActionsComponent';
+
+export const Actions = React.memo(ActionsComponent);

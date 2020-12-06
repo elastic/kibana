@@ -5,7 +5,8 @@
   "configPath": ["xpack", "logstash"],
   "requiredPlugins": [
     "licensing",
-    "management"
+    "management",
+    "features"
   ],
   "optionalPlugins": [
     "home",
@@ -13,5 +14,6 @@
     "security"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": ["home"]
 }

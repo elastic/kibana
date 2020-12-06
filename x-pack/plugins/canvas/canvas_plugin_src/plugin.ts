@@ -5,6 +5,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { CanvasSetup } from '../public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
@@ -12,20 +13,17 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 
 import { functions } from './functions/browser';
 import { typeFunctions } from './expression_types';
-// @ts-ignore: untyped local
 import { renderFunctions, renderFunctionFactories } from './renderers';
 import { initializeElements } from './elements';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { transformSpecs } from './uis/transforms';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { datasourceSpecs } from './uis/datasources';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { modelSpecs } from './uis/models';
 import { initializeViews } from './uis/views';
-// @ts-ignore Untyped Local
 import { initializeArgs } from './uis/arguments';
 import { tagSpecs } from './uis/tags';
-import { templateSpecs } from './templates';
 
 interface SetupDeps {
   canvas: CanvasSetup;
@@ -35,6 +33,7 @@ export interface StartDeps {
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   inspector: InspectorStart;
+  charts: ChartsPluginStart;
 }
 
 export type SetupInitializer<T> = (core: CoreSetup<StartDeps>, plugins: SetupDeps) => T;
@@ -60,7 +59,6 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     plugins.canvas.addViewUIs(initializeViews(core, plugins));
     plugins.canvas.addArgumentUIs(initializeArgs(core, plugins));
     plugins.canvas.addTagUIs(tagSpecs);
-    plugins.canvas.addTemplates(templateSpecs);
     plugins.canvas.addTransformUIs(transformSpecs);
   }
 

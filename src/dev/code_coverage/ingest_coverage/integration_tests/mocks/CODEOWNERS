@@ -1,0 +1,6 @@
+# GitHub CODEOWNERS definition
+# Identify which groups will be pinged by changes to different parts of the codebase.
+# For more info, see https://help.github.com/articles/about-codeowners/
+
+# App
+/x-pack/plugins/code/ @elastic/kibana-tre

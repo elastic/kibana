@@ -38,6 +38,7 @@ const urlPartsSchema = () =>
       password: Joi.string(),
       pathname: Joi.string().regex(/^\//, 'start with a /'),
       hash: Joi.string().regex(/^\//, 'start with a /'),
+      certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
     })
     .default();
 
@@ -46,6 +47,27 @@ const appUrlPartsSchema = () =>
     .keys({
       pathname: Joi.string().regex(/^\//, 'start with a /'),
       hash: Joi.string().regex(/^\//, 'start with a /'),
+    })
+    .default();
+
+const requiredWhenEnabled = (schema: Joi.Schema) => {
+  return Joi.when('enabled', {
+    is: true,
+    then: schema.required(),
+    otherwise: schema.optional(),
+  });
+};
+
+const dockerServerSchema = () =>
+  Joi.object()
+    .keys({
+      enabled: Joi.boolean().required(),
+      image: requiredWhenEnabled(Joi.string()),
+      port: requiredWhenEnabled(Joi.number()),
+      portInContainer: requiredWhenEnabled(Joi.number()),
+      waitForLogLine: Joi.alternatives(Joi.object().type(RegExp), Joi.string()).optional(),
+      waitFor: Joi.func().optional(),
+      args: Joi.array().items(Joi.string()).optional(),
     })
     .default();
 
@@ -116,12 +138,13 @@ export const schema = Joi.object()
       .default(),
 
     updateBaselines: Joi.boolean().default(false),
-
+    updateSnapshots: Joi.boolean().default(false),
     browser: Joi.object()
       .keys({
-        type: Joi.string().valid('chrome', 'firefox', 'ie', 'msedge').default('chrome'),
+        type: Joi.string().valid('chrome', 'firefox', 'msedge').default('chrome'),
 
         logPollingMs: Joi.number().default(100),
+        acceptInsecureCerts: Joi.boolean().default(false),
       })
       .default(),
 
@@ -232,7 +255,7 @@ export const schema = Joi.object()
     // settings for the find service
     layout: Joi.object()
       .keys({
-        fixedHeaderHeight: Joi.number().default(50),
+        fixedHeaderHeight: Joi.number().default(100),
       })
       .default(),
 
@@ -250,5 +273,7 @@ export const schema = Joi.object()
         disableTestUser: Joi.boolean(),
       })
       .default(),
+
+    dockerServers: Joi.object().pattern(Joi.string(), dockerServerSchema()).default(),
   })
   .default();

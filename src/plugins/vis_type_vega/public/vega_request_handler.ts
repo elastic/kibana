@@ -20,13 +20,12 @@
 import { Filter, esQuery, TimeRange, Query } from '../../data/public';
 
 import { SearchAPI } from './data_model/search_api';
-
-// @ts-ignore
 import { TimeCache } from './data_model/time_cache';
 
 import { VegaVisualizationDependencies } from './plugin';
 import { VisParams } from './vega_fn';
 import { getData, getInjectedMetadata } from './services';
+import { VegaInspectorAdapters } from './vega_inspector';
 
 interface VegaRequestHandlerParams {
   query: Query;
@@ -35,9 +34,14 @@ interface VegaRequestHandlerParams {
   visParams: VisParams;
 }
 
+interface VegaRequestHandlerContext {
+  abortSignal?: AbortSignal;
+  inspectorAdapters?: VegaInspectorAdapters;
+}
+
 export function createVegaRequestHandler(
-  { plugins: { data }, core: { uiSettings }, serviceSettings }: VegaVisualizationDependencies,
-  abortSignal?: AbortSignal
+  { plugins: { data }, core: { uiSettings }, getServiceSettings }: VegaVisualizationDependencies,
+  context: VegaRequestHandlerContext = {}
 ) {
   let searchAPI: SearchAPI;
   const { timefilter } = data.query.timefilter;
@@ -56,7 +60,8 @@ export function createVegaRequestHandler(
           search: getData().search,
           injectedMetadata: getInjectedMetadata(),
         },
-        abortSignal
+        context.abortSignal,
+        context.inspectorAdapters
       );
     }
 
@@ -64,9 +69,8 @@ export function createVegaRequestHandler(
 
     const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
     const filtersDsl = esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs);
-    // @ts-ignore
     const { VegaParser } = await import('./data_model/vega_parser');
-    const vp = new VegaParser(visParams.spec, searchAPI, timeCache, filtersDsl, serviceSettings);
+    const vp = new VegaParser(visParams.spec, searchAPI, timeCache, filtersDsl, getServiceSettings);
 
     return await vp.parseAsync();
   };

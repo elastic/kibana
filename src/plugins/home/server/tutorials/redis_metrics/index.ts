@@ -36,6 +36,7 @@ export function redisMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.redisMetrics.nameTitle', {
       defaultMessage: 'Redis metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.redisMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Redis.',

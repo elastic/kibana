@@ -18,8 +18,10 @@ normal=$(tput sgr0)
 
 # paths
 E2E_DIR="${0%/*}"
-TMP_DIR="./tmp"
-APM_IT_DIR="./tmp/apm-integration-testing"
+TMP_DIR="tmp"
+APM_IT_DIR="tmp/apm-integration-testing"
+WAIT_ON_BIN="../../../../node_modules/.bin/wait-on"
+CYPRESS_BIN="../../../../node_modules/.bin/cypress"
 
 cd ${E2E_DIR}
 
@@ -93,23 +95,17 @@ if [ $? -ne 0 ]; then
 fi
 
 #
-# Cypress
-##################################################
-echo "" # newline
-echo "${bold}Cypress (logs: ${E2E_DIR}${TMP_DIR}/e2e-yarn.log)${normal}"
-echo "Installing cypress dependencies "
-yarn &> ${TMP_DIR}/e2e-yarn.log
-
-#
 # Static mock data
 ##################################################
 echo "" # newline
 echo "${bold}Static mock data (logs: ${E2E_DIR}${TMP_DIR}/ingest-data.log)${normal}"
 
+STATIC_MOCK_FILENAME='2020-06-12.json'
+
 # Download static data if not already done
-if [ ! -e "${TMP_DIR}/events.json" ]; then
-    echo 'Downloading events.json...'
-    curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --output ${TMP_DIR}/events.json
+if [ ! -e "${TMP_DIR}/${STATIC_MOCK_FILENAME}" ]; then
+    echo "Downloading ${STATIC_MOCK_FILENAME}..."
+    curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/${STATIC_MOCK_FILENAME} --output ${TMP_DIR}/${STATIC_MOCK_FILENAME}
 fi
 
 # echo "Deleting existing indices (apm* and .apm*)"
@@ -117,7 +113,7 @@ curl --silent --user admin:changeme -XDELETE "localhost:${ELASTICSEARCH_PORT}/.a
 curl --silent --user admin:changeme -XDELETE "localhost:${ELASTICSEARCH_PORT}/apm*" > /dev/null
 
 # Ingest data into APM Server
-node ingest-data/replay.js --server-url http://localhost:$APM_SERVER_PORT --events ${TMP_DIR}/events.json 2>> ${TMP_DIR}/ingest-data.log
+node ingest-data/replay.js --server-url http://localhost:$APM_SERVER_PORT --events ${TMP_DIR}/${STATIC_MOCK_FILENAME} 2>> ${TMP_DIR}/ingest-data.log
 
 # Abort if not all events were ingested correctly
 if [ $? -ne 0 ]; then
@@ -146,7 +142,7 @@ fi
 echo "" # newline
 echo "${bold}Waiting for Kibana to start...${normal}"
 echo "Note: you need to start Kibana manually. Find the instructions at the top."
-yarn wait-on -i 500 -w 500 http-get://admin:changeme@localhost:$KIBANA_PORT/api/status > /dev/null
+$WAIT_ON_BIN -i 500 -w 500 http-get://admin:changeme@localhost:$KIBANA_PORT/api/status > /dev/null
 
 ## Workaround to wait for the http server running
 ## See: https://github.com/elastic/kibana/issues/66326
@@ -163,11 +159,18 @@ echo "✅ Setup completed successfully. Running tests..."
 #
 # run cypress tests
 ##################################################
-yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
+$CYPRESS_BIN run --config pageLoadTimeout=100000,watchForFileChanges=true
+e2e_status=$?
 
 #
 # Run interactively
 ##################################################
 echo "${bold}If you want to run the test interactively, run:${normal}"
 echo "" # newline
-echo "cd ${E2E_DIR} && yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true"
+echo "cd ${E2E_DIR} && ${CYPRESS_BIN} open --config pageLoadTimeout=100000,watchForFileChanges=true"
+
+# Report the e2e status at the very end
+if [ $e2e_status -ne 0 ]; then
+    echo "⚠️  Running tests failed."
+    exit 1
+fi

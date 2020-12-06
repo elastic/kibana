@@ -26,10 +26,14 @@ import { EuiButtonGroup } from '@elastic/eui';
 import { VisLegend, VisLegendProps } from './legend';
 import { legendColors } from './models';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  htmlIdGenerator: jest.fn().mockReturnValue(() => 'legendId'),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: jest.fn().mockReturnValue(() => 'legendId'),
+  };
+});
 
 jest.mock('../../../services', () => ({
   getDataActions: () => ({
@@ -37,16 +41,8 @@ jest.mock('../../../services', () => ({
   }),
 }));
 
-const vis = {
-  params: {
-    addLegend: true,
-  },
-  API: {
-    events: {
-      filter: jest.fn(),
-    },
-  },
-};
+const fireEvent = jest.fn();
+
 const vislibVis = {
   handler: {
     highlight: jest.fn(),
@@ -92,14 +88,15 @@ const uiState = {
   set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
   emit: jest.fn(),
   setSilent: jest.fn(),
-};
+} as any;
 
 const getWrapper = async (props?: Partial<VisLegendProps>) => {
   const wrapper = mount(
     <I18nProvider>
       <VisLegend
+        addLegend
         position="top"
-        vis={vis}
+        fireEvent={fireEvent}
         vislibVis={vislibVis}
         visData={visData}
         uiState={uiState}
@@ -184,8 +181,7 @@ describe('VisLegend Component', () => {
     });
 
     it('should work with no handlers set', () => {
-      const newVis = {
-        ...vis,
+      const newProps = {
         vislibVis: {
           ...vislibVis,
           handler: null,
@@ -193,7 +189,7 @@ describe('VisLegend Component', () => {
       };
 
       expect(async () => {
-        wrapper = await getWrapper({ vis: newVis });
+        wrapper = await getWrapper(newProps);
         const first = getLegendItems(wrapper).first();
         first.simulate('focus');
         first.simulate('blur');
@@ -212,8 +208,11 @@ describe('VisLegend Component', () => {
       const filterGroup = wrapper.find(EuiButtonGroup).first();
       filterGroup.getElement().props.onChange('filterIn');
 
-      expect(vis.API.events.filter).toHaveBeenCalledWith({ data: ['valuesA'], negate: false });
-      expect(vis.API.events.filter).toHaveBeenCalledTimes(1);
+      expect(fireEvent).toHaveBeenCalledWith({
+        name: 'filterBucket',
+        data: { data: ['valuesA'], negate: false },
+      });
+      expect(fireEvent).toHaveBeenCalledTimes(1);
     });
 
     it('should filter in when clicked', () => {
@@ -222,8 +221,11 @@ describe('VisLegend Component', () => {
       const filterGroup = wrapper.find(EuiButtonGroup).first();
       filterGroup.getElement().props.onChange('filterOut');
 
-      expect(vis.API.events.filter).toHaveBeenCalledWith({ data: ['valuesA'], negate: true });
-      expect(vis.API.events.filter).toHaveBeenCalledTimes(1);
+      expect(fireEvent).toHaveBeenCalledWith({
+        name: 'filterBucket',
+        data: { data: ['valuesA'], negate: true },
+      });
+      expect(fireEvent).toHaveBeenCalledTimes(1);
     });
   });
 

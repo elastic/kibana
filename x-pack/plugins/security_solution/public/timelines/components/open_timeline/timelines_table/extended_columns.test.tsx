@@ -6,10 +6,11 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep, omit } from 'lodash/fp';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import '../../../../common/mock/match_media';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineResult } from '../types';

@@ -6,15 +6,14 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
-import { signal_ids, signal_status_query, status } from '../common/schemas';
-/* eslint-enable @typescript-eslint/camelcase */
+import { conflicts, signal_ids, signal_status_query, status } from '../common/schemas';
 
 export const setSignalsStatusSchema = t.intersection([
   t.type({
     status,
   }),
   t.partial({
+    conflicts,
     signal_ids,
     query: signal_status_query,
   }),

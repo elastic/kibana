@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { LogRecord } from '@kbn/logging';
 import { Conversion } from './type';
-import { LogRecord } from '../../log_record';
 
 export const PidConversion: Conversion = {
   pattern: /%pid/g,

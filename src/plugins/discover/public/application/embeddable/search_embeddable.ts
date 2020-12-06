@@ -38,7 +38,7 @@ import * as columnActions from '../angular/doc_table/actions/columns';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
-import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
+import { getSortForSearchSource } from '../angular/doc_table';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -78,12 +78,13 @@ interface SearchEmbeddableConfig {
   filterManager: FilterManager;
 }
 
-export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
+export class SearchEmbeddable
+  extends Embeddable<SearchInput, SearchOutput>
   implements ISearchEmbeddable {
   private readonly savedSearch: SavedSearch;
   private $rootScope: ng.IRootScopeService;
   private $compile: ng.ICompileService;
-  private inspectorAdaptors: Adapters;
+  private inspectorAdapters: Adapters;
   private searchScope?: SearchScope;
   private panelTitle: string = '';
   private filtersSearchSource?: ISearchSource;
@@ -130,7 +131,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
     this.$compile = $compile;
-    this.inspectorAdaptors = {
+    this.inspectorAdapters = {
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
@@ -149,7 +150,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   }
 
   public getInspectorAdapters() {
-    return this.inspectorAdaptors;
+    return this.inspectorAdapters;
   }
 
   public getSavedSearch() {
@@ -194,7 +195,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     const searchScope: SearchScope = (this.searchScope = this.$rootScope.$new());
 
     searchScope.description = this.savedSearch.description;
-    searchScope.inspectorAdapters = this.inspectorAdaptors;
+    searchScope.inspectorAdapters = this.inspectorAdapters;
 
     const { searchSource } = this.savedSearch;
     const indexPattern = (searchScope.indexPattern = searchSource.getField('index'))!;
@@ -220,7 +221,6 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       if (!searchScope.columns) {
         return;
       }
-      indexPattern.popularizeField(columnName, 1);
       const columns = columnActions.addColumn(searchScope.columns, columnName);
       this.updateInput({ columns });
     };
@@ -266,6 +266,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   }
 
   private fetch = async () => {
+    const searchSessionId = this.input.searchSessionId;
+
     if (!this.searchScope) return;
 
     const { searchSource } = this.savedSearch;
@@ -285,14 +287,18 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     );
 
     // Log request to inspector
-    this.inspectorAdaptors.requests.reset();
+    this.inspectorAdapters.requests!.reset();
     const title = i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
       defaultMessage: 'Data',
     });
     const description = i18n.translate('discover.embeddable.inspectorRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
-    const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
+
+    const inspectorRequest = this.inspectorAdapters.requests!.start(title, {
+      description,
+      searchSessionId,
+    });
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
     searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
@@ -303,11 +309,12 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       // Make the request
       const resp = await searchSource.fetch({
         abortSignal: this.abortController.signal,
+        sessionId: searchSessionId,
       });
       this.updateOutput({ loading: false, error: undefined });
 
       // Log response to inspector
-      inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+      inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
 
       // Apply the changes to the angular scope
       this.searchScope.$apply(() => {
@@ -335,12 +342,11 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (isFetchRequired) {
       this.filtersSearchSource!.setField('filter', this.input.filters);
       this.filtersSearchSource!.setField('query', this.input.query);
-
-      this.fetch();
-
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
       this.prevTimeRange = this.input.timeRange;
+
+      this.fetch();
     } else if (this.searchScope) {
       // trigger a digest cycle to make sure non-fetch relevant changes are propagated
       this.searchScope.$applyAsync();

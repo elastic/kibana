@@ -12,6 +12,7 @@ import { JoinExpression } from './join_expression';
 import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
 import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
+import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox';
 
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
@@ -126,6 +127,16 @@ export class Join extends Component {
     });
   };
 
+  _onApplyGlobalTimeChange = (applyGlobalTime) => {
+    this.props.onChange({
+      leftField: this.props.join.leftField,
+      right: {
+        ...this.props.join.right,
+        applyGlobalTime,
+      },
+    });
+  };
+
   render() {
     const { join, onRemove, leftFields, leftSourceName } = this.props;
     const { rightFields, indexPattern } = this.state;
@@ -137,6 +148,7 @@ export class Join extends Component {
 
     let metricsExpression;
     let globalFilterCheckbox;
+    let globalTimeCheckbox;
     if (isJoinConfigComplete) {
       metricsExpression = (
         <EuiFlexItem grow={false}>
@@ -156,6 +168,19 @@ export class Join extends Component {
           })}
         />
       );
+      if (this.state.indexPattern && this.state.indexPattern.timeFieldName) {
+        globalTimeCheckbox = (
+          <GlobalTimeCheckbox
+            applyGlobalTime={
+              typeof right.applyGlobalTime === 'undefined' ? true : right.applyGlobalTime
+            }
+            setApplyGlobalTime={this._onApplyGlobalTimeChange}
+            label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalTimeCheckboxLabel', {
+              defaultMessage: `Apply global time to join`,
+            })}
+          />
+        );
+      }
     }
 
     let whereExpression;
@@ -192,22 +217,24 @@ export class Join extends Component {
           {metricsExpression}
 
           {whereExpression}
-
-          {globalFilterCheckbox}
-
-          <EuiButtonIcon
-            className="mapJoinItem__delete"
-            iconType="trash"
-            color="danger"
-            aria-label={i18n.translate('xpack.maps.layerPanel.join.deleteJoinAriaLabel', {
-              defaultMessage: 'Delete join',
-            })}
-            title={i18n.translate('xpack.maps.layerPanel.join.deleteJoinTitle', {
-              defaultMessage: 'Delete join',
-            })}
-            onClick={onRemove}
-          />
         </EuiFlexGroup>
+
+        {globalFilterCheckbox}
+
+        {globalTimeCheckbox}
+
+        <EuiButtonIcon
+          className="mapJoinItem__delete"
+          iconType="trash"
+          color="danger"
+          aria-label={i18n.translate('xpack.maps.layerPanel.join.deleteJoinAriaLabel', {
+            defaultMessage: 'Delete join',
+          })}
+          title={i18n.translate('xpack.maps.layerPanel.join.deleteJoinTitle', {
+            defaultMessage: 'Delete join',
+          })}
+          onClick={onRemove}
+        />
       </div>
     );
   }

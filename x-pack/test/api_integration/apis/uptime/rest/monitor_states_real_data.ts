@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { MonitorSummaryResultType } from '../../../../../plugins/uptime/common/runtime_types';
+import { MonitorSummariesResultType } from '../../../../../plugins/uptime/common/runtime_types';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 interface ExpectedMonitorStatesPage {
@@ -38,7 +38,7 @@ const checkMonitorStatesResponse = ({
   prevPagination,
   nextPagination,
 }: ExpectedMonitorStatesPage) => {
-  const decoded = MonitorSummaryResultType.decode(response);
+  const decoded = MonitorSummariesResultType.decode(response);
   expect(isRight(decoded)).to.be.ok();
   if (isRight(decoded)) {
     const { summaries, prevPagePagination, nextPagePagination, totalSummaryCount } = decoded.right;
@@ -88,6 +88,16 @@ export default function ({ getService }: FtrProviderContext) {
         prevPagination: null,
         nextPagination: null,
       });
+    });
+
+    it('will fetch monitor state data for the given down filters', async () => {
+      const statusFilter = 'down';
+      const size = 2;
+      const { body } = await supertest.get(
+        `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&statusFilter=${statusFilter}&pageSize=${size}`
+      );
+
+      expectSnapshot(body).toMatch();
     });
 
     it('can navigate forward and backward using pagination', async () => {

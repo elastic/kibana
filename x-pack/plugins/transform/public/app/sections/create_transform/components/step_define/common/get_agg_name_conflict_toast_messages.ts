@@ -6,7 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { AggName, PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
+import { AggName } from '../../../../../../../common/types/aggregations';
+import { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
 
 export function getAggNameConflictToastMessages(
   aggName: AggName,
@@ -36,7 +37,7 @@ export function getAggNameConflictToastMessages(
   // check the new aggName against existing aggs and groupbys
   const aggNameSplit = aggName.split('.');
   let aggNameCheck: string;
-  aggNameSplit.forEach((aggNamePart) => {
+  aggNameSplit.forEach((aggNamePart: string) => {
     aggNameCheck = aggNameCheck === undefined ? aggNamePart : `${aggNameCheck}.${aggNamePart}`;
     if (aggList[aggNameCheck] !== undefined || groupByList[aggNameCheck] !== undefined) {
       conflicts.push(

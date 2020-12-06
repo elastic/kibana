@@ -5,10 +5,10 @@
  */
 
 import { Dictionary } from '../../../common/types/common';
+import { EsFieldName } from '../../../common/types/fields';
 
 export type EsId = string;
 export type EsDocSource = Dictionary<any>;
-export type EsFieldName = string;
 
 export interface EsDoc extends Dictionary<any> {
   _id: EsId;

@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { TimelineNonEcsData } from '../../../../../graphql/types';
+import type React from 'react';
+import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 
 export interface ColumnRenderer {

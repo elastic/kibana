@@ -19,7 +19,8 @@
 
 import React, { useState, Fragment, useEffect } from 'react';
 import * as Rx from 'rxjs';
-import { EuiHeaderSectionItemButton, EuiIcon, EuiNotificationBadge } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../types';
 
@@ -65,15 +66,19 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
           aria-controls="keyPadMenu"
           aria-expanded={flyoutVisible}
           aria-haspopup="true"
-          aria-label="Newsfeed menu"
+          aria-label={
+            showBadge
+              ? i18n.translate('newsfeed.headerButton.unreadAriaLabel', {
+                  defaultMessage: 'Newsfeed menu - unread items available',
+                })
+              : i18n.translate('newsfeed.headerButton.readAriaLabel', {
+                  defaultMessage: 'Newsfeed menu - all items read',
+                })
+          }
+          notification={showBadge ? true : null}
           onClick={showFlyout}
         >
-          <EuiIcon type="email" size="m" />
-          {showBadge ? (
-            <EuiNotificationBadge className="euiHeaderNotification" data-test-subj="showBadgeNews">
-              &#9642;
-            </EuiNotificationBadge>
-          ) : null}
+          <EuiIcon type="cheer" size="m" />
         </EuiHeaderSectionItemButton>
         {flyoutVisible ? <NewsfeedFlyout /> : null}
       </Fragment>

@@ -9,7 +9,7 @@ import { ml } from '../services/ml_api_service';
 let mlNodeCount: number = 0;
 let userHasPermissionToViewMlNodeCount: boolean = false;
 
-export async function checkMlNodesAvailable() {
+export async function checkMlNodesAvailable(redirectToJobsManagementPage: () => Promise<void>) {
   try {
     const nodes = await getMlNodeCount();
     if (nodes.count !== undefined && nodes.count > 0) {
@@ -20,7 +20,7 @@ export async function checkMlNodesAvailable() {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
-    window.location.href = '#/jobs';
+    await redirectToJobsManagementPage();
     Promise.reject();
   }
 }

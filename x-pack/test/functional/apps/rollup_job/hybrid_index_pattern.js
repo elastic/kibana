@@ -11,6 +11,7 @@ import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 export default function ({ getService, getPageObjects }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
+  const find = getService('find');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings']);
 
@@ -81,10 +82,22 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.createIndexPattern(rollupIndexPatternName, '@timestamp', false);
 
       await PageObjects.settings.clickKibanaIndexPatterns();
-      const indexPattern = (await PageObjects.settings.getIndexPatternList()).pop();
-      const indexPatternText = await indexPattern.getVisibleText();
-      expect(indexPatternText).to.contain(rollupIndexPatternName);
-      expect(indexPatternText).to.contain('Rollup');
+      const indexPatternNames = await PageObjects.settings.getAllIndexPatternNames();
+      //The assertion is going to check that the string has the right name and that the text Rollup
+      //is included (since there is a Rollup tag).
+      const filteredIndexPatternNames = indexPatternNames.filter(
+        (i) => i.includes(rollupIndexPatternName) && i.includes('Rollup')
+      );
+      expect(filteredIndexPatternNames.length).to.be(1);
+
+      // make sure there are no toasts which might be showing unexpected errors
+      const toastShown = await find.existsByCssSelector('.euiToast');
+      expect(toastShown).to.be(false);
+
+      // ensure all fields are available
+      await PageObjects.settings.clickIndexPatternByName(rollupIndexPatternName);
+      const fields = await PageObjects.settings.getFieldNames();
+      expect(fields).to.eql(['_source', '_id', '_type', '_index', '_score', '@timestamp']);
     });
 
     after(async () => {

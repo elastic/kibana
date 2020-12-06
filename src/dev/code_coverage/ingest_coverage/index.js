@@ -20,13 +20,16 @@
 import { resolve } from 'path';
 import { prok } from './process';
 import { run, createFlagError } from '@kbn/dev-utils';
+import { pathExists } from './team_assignment/enumeration_helpers';
+import { id, reThrow } from './utils';
 
 const ROOT = resolve(__dirname, '../../../..');
 const flags = {
-  string: ['path', 'verbose', 'vcsInfoPath'],
+  string: ['path', 'verbose', 'vcsInfoPath', 'teamAssignmentsPath'],
   help: `
 --path             Required, path to the file to extract coverage data
 --vcsInfoPath      Required, path to the git info file (branch, sha, author, & commit msg)
+--teamAssignmentsPath  Required, path to the team assignments data file
         `,
 };
 
@@ -36,12 +39,18 @@ export function runCoverageIngestionCli() {
       if (flags.path === '') throw createFlagError('please provide a single --path flag');
       if (flags.vcsInfoPath === '')
         throw createFlagError('please provide a single --vcsInfoPath flag');
+      if (flags.teamAssignmentsPath === '')
+        throw createFlagError('please provide a single --teamAssignments flag');
       if (flags.verbose) log.verbose(`Verbose logging enabled`);
 
       const resolveRoot = resolve.bind(null, ROOT);
       const jsonSummaryPath = resolveRoot(flags.path);
       const vcsInfoFilePath = resolveRoot(flags.vcsInfoPath);
-      prok({ jsonSummaryPath, vcsInfoFilePath }, log);
+      const { teamAssignmentsPath } = flags;
+
+      pathExists(teamAssignmentsPath).fold(reThrow, id);
+
+      prok({ jsonSummaryPath, vcsInfoFilePath, teamAssignmentsPath }, log);
     },
     {
       description: `

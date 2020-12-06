@@ -17,11 +17,10 @@
  * under the License.
  */
 
-jest.mock('../legacy_logging_server');
+jest.mock('@kbn/legacy-logging');
 
-import { LogLevel } from '../../../logging/log_level';
-import { LogRecord } from '../../../logging/log_record';
-import { LegacyLoggingServer } from '../legacy_logging_server';
+import { LogRecord, LogLevel } from '../../../logging';
+import { LegacyLoggingServer } from '@kbn/legacy-logging';
 import { LegacyAppender } from './legacy_appender';
 
 afterEach(() => (LegacyLoggingServer as any).mockClear());

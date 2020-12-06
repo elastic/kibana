@@ -24,6 +24,30 @@ export default function ({ getService }: FtrProviderContext) {
     before('load heartbeat data', () => getService('esArchiver').load('uptime/blank'));
     after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
 
+    // In this case we don't actually have any monitors to display
+    // but the query should still return successfully. This has
+    // caused bugs in the past because a bucket of monitor data
+    // was available and the query code assumed at least one
+    // event would be a summary for each monitor.
+    // See https://github.com/elastic/kibana/issues/81950
+    describe('checks with no summaries', async () => {
+      const testMonitorId = 'scope-test-id';
+      before(async () => {
+        const es = getService('legacyEs');
+        dateRangeStart = new Date().toISOString();
+        await makeChecksWithStatus(es, testMonitorId, 1, numIps, 1, {}, 'up', (d) => {
+          delete d.summary;
+          return d;
+        });
+      });
+
+      it('should return no monitors and have no errors', async () => {
+        const url = getBaseUrl(dateRangeStart, new Date().toISOString());
+        const apiResponse = await supertest.get(url);
+        expect(apiResponse.status).to.equal(200);
+      });
+    });
+
     describe('query document scoping with mismatched check statuses', async () => {
       let checks: any[] = [];
       let nonSummaryIp: string | null = null;
@@ -51,18 +75,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         dateRangeEnd = new Date().toISOString();
         nonSummaryIp = checks[0][0].monitor.ip;
-      });
-
-      it('should return all IPs', async () => {
-        const filters = makeApiParams(testMonitorId);
-        const url = getBaseUrl(dateRangeStart, dateRangeEnd) + `&filters=${filters}`;
-        const apiResponse = await supertest.get(url);
-        const res = apiResponse.body;
-
-        const uniqueIps = new Set<string>();
-        res.summaries[0].state.checks.forEach((c: any) => uniqueIps.add(c.monitor.ip));
-
-        expect(uniqueIps.size).to.eql(4);
       });
 
       it('should match non summary documents without a status filter', async () => {

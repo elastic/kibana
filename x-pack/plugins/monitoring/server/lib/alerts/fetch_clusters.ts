@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { AlertCommonCluster } from '../../alerts/types';
+import { AlertCluster } from '../../../common/types/alerts';
+
+interface RangeFilter {
+  [field: string]: {
+    format?: string;
+    gte: string | number;
+  };
+}
 
 export async function fetchClusters(
   callCluster: any,
-  index: string
-): Promise<AlertCommonCluster[]> {
+  index: string,
+  rangeFilter: RangeFilter = { timestamp: { gte: 'now-2m' } }
+): Promise<AlertCluster[]> {
   const params = {
     index,
     filterPath: [
@@ -28,11 +36,7 @@ export async function fetchClusters(
               },
             },
             {
-              range: {
-                timestamp: {
-                  gte: 'now-2m',
-                },
-              },
+              range: rangeFilter,
             },
           ],
         },

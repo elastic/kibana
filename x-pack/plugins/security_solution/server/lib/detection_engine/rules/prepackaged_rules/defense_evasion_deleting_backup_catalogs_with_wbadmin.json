@@ -1,0 +1,44 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies use of the wbadmin.exe to delete the backup catalog. Ransomware and other malware may do this to prevent system recovery.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Deleting Backup Catalogs with Wbadmin",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:wbadmin.exe and process.args:(catalog and delete)",
+  "risk_score": 21,
+  "rule_id": "581add16-df76-42bb-af8e-c979bfb39a59",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1107",
+          "name": "File Deletion",
+          "reference": "https://attack.mitre.org/techniques/T1107/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 5
+}

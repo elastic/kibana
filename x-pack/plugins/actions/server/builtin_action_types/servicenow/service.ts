@@ -6,29 +6,26 @@
 
 import axios from 'axios';
 
-import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
-import { addTimeZoneToDate, patch, request, getErrorMessage } from '../case/utils';
+import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from './types';
 
 import * as i18n from './translations';
-import {
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
-  CreateIncidentRequest,
-  UpdateIncidentRequest,
-  CreateCommentRequest,
-} from './types';
+import { Logger } from '../../../../../../src/core/server';
+import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
+import { request, getErrorMessage, addTimeZoneToDate, patch } from '../lib/axios_utils';
+import { ProxySettings } from '../../types';
 
 const API_VERSION = 'v2';
 const INCIDENT_URL = `api/now/${API_VERSION}/table/incident`;
-const COMMENT_URL = `api/now/${API_VERSION}/table/incident`;
+const SYS_DICTIONARY = `api/now/${API_VERSION}/table/sys_dictionary`;
 
 // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
 const VIEW_INCIDENT_URL = `nav_to.do?uri=incident.do?sys_id=`;
 
-export const createExternalService = ({
-  config,
-  secrets,
-}: ExternalServiceCredentials): ExternalService => {
+export const createExternalService = (
+  { config, secrets }: ExternalServiceCredentials,
+  logger: Logger,
+  proxySettings?: ProxySettings
+): ExternalService => {
   const { apiUrl: url } = config as ServiceNowPublicConfigurationType;
   const { username, password } = secrets as ServiceNowSecretConfigurationType;
 
@@ -37,7 +34,7 @@ export const createExternalService = ({
   }
 
   const incidentUrl = `${url}/${INCIDENT_URL}`;
-  const commentUrl = `${url}/${COMMENT_URL}`;
+  const fieldsUrl = `${url}/${SYS_DICTIONARY}?sysparm_query=name=task^internal_type=string&active=true&read_only=false&sysparm_fields=max_length,element,column_label`;
   const axiosInstance = axios.create({
     auth: { username, password },
   });
@@ -51,6 +48,8 @@ export const createExternalService = ({
       const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}/${id}`,
+        logger,
+        proxySettings,
       });
 
       return { ...res.data.result };
@@ -61,13 +60,33 @@ export const createExternalService = ({
     }
   };
 
+  const findIncidents = async (params?: Record<string, string>) => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: incidentUrl,
+        logger,
+        proxySettings,
+        params,
+      });
+
+      return res.data.result.length > 0 ? { ...res.data.result } : undefined;
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(i18n.NAME, `Unable to find incidents by query. Error: ${error.message}`)
+      );
+    }
+  };
+
   const createIncident = async ({ incident }: ExternalServiceParams) => {
     try {
-      const res = await request<CreateIncidentRequest>({
+      const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}`,
+        logger,
+        proxySettings,
         method: 'post',
-        data: { ...incident },
+        data: { ...(incident as Record<string, unknown>) },
       });
 
       return {
@@ -85,10 +104,12 @@ export const createExternalService = ({
 
   const updateIncident = async ({ incidentId, incident }: ExternalServiceParams) => {
     try {
-      const res = await patch<UpdateIncidentRequest>({
+      const res = await patch({
         axios: axiosInstance,
         url: `${incidentUrl}/${incidentId}`,
-        data: { ...incident },
+        logger,
+        data: { ...(incident as Record<string, unknown>) },
+        proxySettings,
       });
 
       return {
@@ -107,32 +128,28 @@ export const createExternalService = ({
     }
   };
 
-  const createComment = async ({ incidentId, comment, field }: ExternalServiceParams) => {
+  const getFields = async () => {
     try {
-      const res = await patch<CreateCommentRequest>({
+      const res = await request({
         axios: axiosInstance,
-        url: `${commentUrl}/${incidentId}`,
-        data: { [field]: comment.comment },
+        url: fieldsUrl,
+        logger,
+        proxySettings,
       });
 
-      return {
-        commentId: comment.commentId,
-        pushedDate: new Date(addTimeZoneToDate(res.data.result.sys_updated_on)).toISOString(),
-      };
+      return res.data.result.length > 0 ? res.data.result : [];
     } catch (error) {
       throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}`
-        )
+        getErrorMessage(i18n.NAME, `Unable to get common fields. Error: ${error.message}`)
       );
     }
   };
 
   return {
-    getIncident,
     createIncident,
+    findIncidents,
+    getFields,
+    getIncident,
     updateIncident,
-    createComment,
   };
 };

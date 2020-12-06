@@ -8,11 +8,10 @@
 
 import { has } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-import { hostsActions, hostsModel, hostsSelectors } from '../../store';
-import { AuthenticationsEdges } from '../../../graphql/types';
-import { State } from '../../../common/store';
+import { AuthenticationsEdges } from '../../../../common/search_strategy/security_solution/hosts/authentications';
+
 import {
   DragEffects,
   DraggableWrapper,
@@ -20,17 +19,20 @@ import {
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import { HostDetailsLink, IPDetailsLink } from '../../../common/components/links';
+import { HostDetailsLink, NetworkDetailsLink } from '../../../common/components/links';
 import { Columns, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
+import { getRowItemDraggables } from '../../../common/components/tables/helpers';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+
+import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 
 import * as i18n from './translations';
-import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 
 const tableType = hostsModel.HostsTableType.authentications;
 
-interface OwnProps {
+interface AuthenticationTableProps {
   data: AuthenticationsEdges[];
   fakeTotalCount: number;
   loading: boolean;
@@ -54,8 +56,6 @@ export type AuthTableColumns = [
   Columns<AuthenticationsEdges>
 ];
 
-type AuthenticationTableProps = OwnProps & PropsFromRedux;
-
 const rowItems: ItemsPerRow[] = [
   {
     text: i18n.ROWS_5,
@@ -67,87 +67,75 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const AuthenticationTableComponent = React.memo<AuthenticationTableProps>(
-  ({
-    activePage,
-    data,
-    fakeTotalCount,
-    id,
-    isInspect,
-    limit,
-    loading,
-    loadPage,
-    showMorePagesIndicator,
-    totalCount,
-    type,
-    updateTableActivePage,
-    updateTableLimit,
-  }) => {
-    const updateLimitPagination = useCallback(
-      (newLimit) =>
-        updateTableLimit({
+const AuthenticationTableComponent: React.FC<AuthenticationTableProps> = ({
+  data,
+  fakeTotalCount,
+  id,
+  isInspect,
+  loading,
+  loadPage,
+  showMorePagesIndicator,
+  totalCount,
+  type,
+}) => {
+  const dispatch = useDispatch();
+  const getAuthenticationsSelector = useMemo(() => hostsSelectors.authenticationsSelector(), []);
+  const { activePage, limit } = useDeepEqualSelector((state) =>
+    getAuthenticationsSelector(state, type)
+  );
+
+  const updateLimitPagination = useCallback(
+    (newLimit) =>
+      dispatch(
+        hostsActions.updateTableLimit({
           hostsType: type,
           limit: newLimit,
           tableType,
-        }),
-      [type, updateTableLimit]
-    );
+        })
+      ),
+    [type, dispatch]
+  );
 
-    const updateActivePage = useCallback(
-      (newPage) =>
-        updateTableActivePage({
+  const updateActivePage = useCallback(
+    (newPage) =>
+      dispatch(
+        hostsActions.updateTableActivePage({
           activePage: newPage,
           hostsType: type,
           tableType,
-        }),
-      [type, updateTableActivePage]
-    );
+        })
+      ),
+    [type, dispatch]
+  );
 
-    const columns = useMemo(() => getAuthenticationColumnsCurated(type), [type]);
+  const columns = useMemo(() => getAuthenticationColumnsCurated(type), [type]);
 
-    return (
-      <PaginatedTable
-        activePage={activePage}
-        columns={columns}
-        dataTestSubj={`table-${tableType}`}
-        headerCount={totalCount}
-        headerTitle={i18n.AUTHENTICATIONS}
-        headerUnit={i18n.UNIT(totalCount)}
-        id={id}
-        isInspect={isInspect}
-        itemsPerRow={rowItems}
-        limit={limit}
-        loading={loading}
-        loadPage={loadPage}
-        pageOfItems={data}
-        showMorePagesIndicator={showMorePagesIndicator}
-        totalCount={fakeTotalCount}
-        updateLimitPagination={updateLimitPagination}
-        updateActivePage={updateActivePage}
-      />
-    );
-  }
-);
+  return (
+    <PaginatedTable
+      activePage={activePage}
+      columns={columns}
+      dataTestSubj={`table-${tableType}`}
+      headerCount={totalCount}
+      headerTitle={i18n.AUTHENTICATIONS}
+      headerUnit={i18n.UNIT(totalCount)}
+      id={id}
+      isInspect={isInspect}
+      itemsPerRow={rowItems}
+      limit={limit}
+      loading={loading}
+      loadPage={loadPage}
+      pageOfItems={data}
+      showMorePagesIndicator={showMorePagesIndicator}
+      totalCount={fakeTotalCount}
+      updateLimitPagination={updateLimitPagination}
+      updateActivePage={updateActivePage}
+    />
+  );
+};
 
 AuthenticationTableComponent.displayName = 'AuthenticationTableComponent';
 
-const makeMapStateToProps = () => {
-  const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  return (state: State, { type }: OwnProps) => {
-    return getAuthenticationsSelector(state, type);
-  };
-};
-
-const mapDispatchToProps = {
-  updateTableActivePage: hostsActions.updateTableActivePage,
-  updateTableLimit: hostsActions.updateTableLimit,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const AuthenticationTable = connector(AuthenticationTableComponent);
+export const AuthenticationTable = React.memo(AuthenticationTableComponent);
 
 const getAuthenticationColumns = (): AuthTableColumns => [
   {
@@ -254,15 +242,10 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems:
-          node.lastSuccess != null &&
-          node.lastSuccess.source != null &&
-          node.lastSuccess.source.ip != null
-            ? node.lastSuccess.source.ip
-            : null,
+        rowItems: node.lastSuccess?.source?.ip || null,
         attrName: 'source.ip',
         idPrefix: `authentications-table-${node._id}-lastSuccessSource`,
-        render: (item) => <IPDetailsLink ip={item} />,
+        render: (item) => <NetworkDetailsLink ip={item} />,
       }),
   },
   {
@@ -271,12 +254,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems:
-          node.lastSuccess != null &&
-          node.lastSuccess.host != null &&
-          node.lastSuccess.host.name != null
-            ? node.lastSuccess.host.name
-            : null,
+        rowItems: node.lastSuccess?.host?.name ?? null,
         attrName: 'host.name',
         idPrefix: `authentications-table-${node._id}-lastSuccessfulDestination`,
         render: (item) => <HostDetailsLink hostName={item} />,
@@ -299,15 +277,10 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems:
-          node.lastFailure != null &&
-          node.lastFailure.source != null &&
-          node.lastFailure.source.ip != null
-            ? node.lastFailure.source.ip
-            : null,
+        rowItems: node.lastFailure?.source?.ip || null,
         attrName: 'source.ip',
         idPrefix: `authentications-table-${node._id}-lastFailureSource`,
-        render: (item) => <IPDetailsLink ip={item} />,
+        render: (item) => <NetworkDetailsLink ip={item} />,
       }),
   },
   {
@@ -316,12 +289,7 @@ const getAuthenticationColumns = (): AuthTableColumns => [
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({
-        rowItems:
-          node.lastFailure != null &&
-          node.lastFailure.host != null &&
-          node.lastFailure.host.name != null
-            ? node.lastFailure.host.name
-            : null,
+        rowItems: node.lastFailure?.host?.name || null,
         attrName: 'host.name',
         idPrefix: `authentications-table-${node._id}-lastFailureDestination`,
         render: (item) => <HostDetailsLink hostName={item} />,

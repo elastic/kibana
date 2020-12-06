@@ -4,8 +4,17 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
+    "bfetch",
     "expressions",
-    "uiActions"
+    "uiActions",
+    "share"
   ],
-  "optionalPlugins": ["usageCollection"]
+  "optionalPlugins": ["usageCollection"],
+  "extraPublicDirs": ["common"],
+  "requiredBundles": [
+    "usageCollection",
+    "kibanaUtils",
+    "kibanaReact",
+    "inspector"
+  ]
 }

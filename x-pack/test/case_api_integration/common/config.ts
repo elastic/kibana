@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import path from 'path';
-
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
@@ -21,12 +19,14 @@ interface CreateTestConfigOptions {
 const enabledActionTypes = [
   '.email',
   '.index',
+  '.jira',
   '.pagerduty',
+  '.resilient',
   '.server-log',
   '.servicenow',
-  '.jira',
   '.slack',
   '.webhook',
+  '.case',
   'test.authorization',
   'test.failing',
   'test.index-record',
@@ -73,15 +73,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-          `--xpack.actions.whitelistedHosts=${JSON.stringify([
-            'localhost',
-            'some.non.existent.com',
-          ])}`,
+          `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

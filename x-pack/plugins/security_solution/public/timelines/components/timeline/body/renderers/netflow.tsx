@@ -7,7 +7,7 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { Ecs } from '../../../../../graphql/types';
+import { Ecs } from '../../../../../../common/ecs';
 import { asArrayIfExists } from '../../../../../common/lib/helpers';
 import {
   TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,

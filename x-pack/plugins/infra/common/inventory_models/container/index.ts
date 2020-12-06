@@ -37,4 +37,5 @@ export const container: InventoryModel = {
     'containerDiskIOBytes',
     'containerDiskIOOps',
   ],
+  tooltipMetrics: ['cpu', 'memory', 'rx', 'tx'],
 };

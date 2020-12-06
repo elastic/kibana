@@ -23,17 +23,20 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await transform.testResources.deleteSavedSearches();
 
-      await transform.testResources.deleteIndexPattern('ft_farequote');
-      await transform.testResources.deleteIndexPattern('ft_ecommerce');
+      await transform.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
 
       await esArchiver.unload('ml/farequote');
       await esArchiver.unload('ml/ecommerce');
 
       await transform.testResources.resetKibanaTimeZone();
+      await transform.securityUI.logout();
     });
 
     loadTestFile(require.resolve('./creation_index_pattern'));
     loadTestFile(require.resolve('./creation_saved_search'));
     loadTestFile(require.resolve('./cloning'));
+    loadTestFile(require.resolve('./editing'));
+    loadTestFile(require.resolve('./feature_controls'));
   });
 }

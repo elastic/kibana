@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MatchedIndex } from '../../components/create_index_pattern_wizard/types';
+import { MatchedItem } from '../../components/create_index_pattern_wizard/types';
 
 const indexPatternTypeName = i18n.translate(
   'indexPatternManagement.editIndexPattern.createIndex.defaultTypeName',
@@ -105,7 +105,7 @@ export class IndexPatternCreationConfig {
     return [];
   }
 
-  public checkIndicesForErrors(indices: MatchedIndex[]) {
+  public checkIndicesForErrors(indices: MatchedItem[]) {
     return undefined;
   }
 

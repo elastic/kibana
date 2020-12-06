@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestBed, SetupFunc } from '../../../../../test_utils';
+import { TestBed, SetupFunc } from '@kbn/test/jest';
 
 export interface PolicyFormTestBed extends TestBed<PolicyFormTestSubjects> {
   actions: {
@@ -41,6 +41,8 @@ export type PolicyFormTestSubjects =
   | 'allIndicesToggle'
   | 'backButton'
   | 'deselectIndicesLink'
+  | 'allDataStreamsToggle'
+  | 'deselectDataStreamLink'
   | 'expireAfterValueInput'
   | 'expireAfterUnitSelect'
   | 'ignoreUnavailableIndicesToggle'
@@ -53,4 +55,7 @@ export type PolicyFormTestSubjects =
   | 'selectIndicesLink'
   | 'showAdvancedCronLink'
   | 'snapshotNameInput'
+  | 'dataStreamBadge'
+  | 'repositoryNotFoundWarning'
+  | 'repositorySelect'
   | 'submitButton';

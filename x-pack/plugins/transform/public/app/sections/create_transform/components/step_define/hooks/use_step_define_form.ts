@@ -6,7 +6,7 @@
 
 import { useEffect } from 'react';
 
-import { getPreviewRequestBody } from '../../../../../common';
+import { getPreviewTransformRequestBody } from '../../../../../common';
 
 import { getDefaultStepDefineState } from '../common';
 
@@ -26,7 +26,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
   const searchBar = useSearchBar(defaults, indexPattern);
   const pivotConfig = usePivotConfig(defaults, indexPattern);
 
-  const previewRequest = getPreviewRequestBody(
+  const previewRequest = getPreviewTransformRequestBody(
     indexPattern.title,
     searchBar.state.pivotQuery,
     pivotConfig.state.pivotGroupByArr,
@@ -41,7 +41,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
 
   useEffect(() => {
     if (!advancedSourceEditor.state.isAdvancedSourceEditorEnabled) {
-      const previewRequestUpdate = getPreviewRequestBody(
+      const previewRequestUpdate = getPreviewTransformRequestBody(
         indexPattern.title,
         searchBar.state.pivotQuery,
         pivotConfig.state.pivotGroupByArr,

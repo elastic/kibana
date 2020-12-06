@@ -27,7 +27,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 const TYPES = [
   'dashboard',
@@ -39,13 +39,16 @@ const TYPES = [
 ];
 
 export interface KibanaSavedObjectCounts {
-  [pluginName: string]: {
-    total: number;
-  };
+  dashboard: { total: number };
+  visualization: { total: number };
+  search: { total: number };
+  index_pattern: { total: number };
+  graph_workspace: { total: number };
+  timelion_sheet: { total: number };
 }
 
 export async function getSavedObjectsCounts(
-  callCluster: APICaller,
+  callCluster: LegacyAPICaller,
   kibanaIndex: string // Typically '.kibana'. We might need a way to obtain it from the SavedObjects client (or the SavedObjects client to provide a way to run aggregations?)
 ): Promise<KibanaSavedObjectCounts> {
   const savedObjectCountSearchParams = {
@@ -71,7 +74,7 @@ export async function getSavedObjectsCounts(
   // Initialise the object with all zeros for all the types
   const allZeros: KibanaSavedObjectCounts = TYPES.reduce(
     (acc, type) => ({ ...acc, [snakeCase(type)]: { total: 0 } }),
-    {}
+    {} as KibanaSavedObjectCounts
   );
 
   // Add the doc_count from each bucket

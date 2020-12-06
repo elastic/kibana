@@ -5,11 +5,10 @@
  */
 
 import numeral from '@elastic/numeral';
-import { formatDate } from '@elastic/eui/lib/services/format';
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 import { toLocaleString } from '../../../../util/string_utils';
+import { timeFormatter } from '../../../../../../common/util/date_utils';
 
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const DATA_FORMAT = '0.0 b';
 
 function formatData(txt) {
@@ -29,7 +28,7 @@ export function formatValues([key, value]) {
     case 'latest_empty_bucket_timestamp':
     case 'latest_sparse_bucket_timestamp':
     case 'latest_bucket_timestamp':
-      value = formatDate(value, TIME_FORMAT);
+      value = timeFormatter(value);
       break;
 
     // data
@@ -38,6 +37,7 @@ export function formatValues([key, value]) {
     case 'model_bytes':
     case 'model_bytes_exceeded':
     case 'model_bytes_memory_limit':
+    case 'peak_model_bytes':
       value = formatData(value);
       break;
 

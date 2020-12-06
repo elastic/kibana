@@ -17,43 +17,43 @@
  * under the License.
  */
 
-import { fromNullable, tryCatch, left, right } from '../either';
+import * as Either from '../either';
 import { noop } from '../utils';
 import expect from '@kbn/expect';
 
 const pluck = (x) => (obj) => obj[x];
 const expectNull = (x) => expect(x).to.equal(null);
-const attempt = (obj) => fromNullable(obj).map(pluck('detail'));
+const attempt = (obj) => Either.fromNullable(obj).map(pluck('detail'));
 
 describe(`either datatype functions`, () => {
   describe(`helpers`, () => {
     it(`'fromNullable' should be a fn`, () => {
-      expect(typeof fromNullable).to.be('function');
+      expect(typeof Either.fromNullable).to.be('function');
     });
-    it(`'tryCatch' should be a fn`, () => {
-      expect(typeof tryCatch).to.be('function');
+    it(`' Either.tryCatch' should be a fn`, () => {
+      expect(typeof Either.tryCatch).to.be('function');
     });
     it(`'left' should be a fn`, () => {
-      expect(typeof left).to.be('function');
+      expect(typeof Either.left).to.be('function');
     });
     it(`'right' should be a fn`, () => {
-      expect(typeof right).to.be('function');
+      expect(typeof Either.right).to.be('function');
     });
   });
-  describe('tryCatch', () => {
+  describe(' Either.tryCatch', () => {
     let sut = undefined;
     it(`should return a 'Left' on error`, () => {
-      sut = tryCatch(() => {
+      sut = Either.tryCatch(() => {
         throw new Error('blah');
       });
       expect(sut.inspect()).to.be('Left(Error: blah)');
     });
     it(`should return a 'Right' on successful execution`, () => {
-      sut = tryCatch(noop);
+      sut = Either.tryCatch(noop);
       expect(sut.inspect()).to.be('Right(undefined)');
     });
   });
-  describe(`'fromNullable`, () => {
+  describe(`fromNullable`, () => {
     it(`should continue processing if a truthy is calculated`, () => {
       attempt({ detail: 'x' }).fold(
         () => {},
@@ -62,6 +62,20 @@ describe(`either datatype functions`, () => {
     });
     it(`should drop processing if a falsey is calculated`, () => {
       attempt(false).fold(expectNull, () => {});
+    });
+  });
+  describe(`predicate fns`, () => {
+    it(`right.isRight() is true`, () => {
+      expect(Either.right('a').isRight()).to.be(true);
+    });
+    it(`right.isLeft() is false`, () => {
+      expect(Either.right('a').isLeft()).to.be(false);
+    });
+    it(`left.isLeft() is true`, () => {
+      expect(Either.left().isLeft()).to.be(true);
+    });
+    it(`left.isRight() is true`, () => {
+      expect(Either.left().isRight()).to.be(false);
     });
   });
 });

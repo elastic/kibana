@@ -7,8 +7,13 @@
     "licensing",
     "management",
     "charts",
-    "data"
+    "data",
+    "features"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "esUiShared",
+    "kibanaReact"
+  ]
 }

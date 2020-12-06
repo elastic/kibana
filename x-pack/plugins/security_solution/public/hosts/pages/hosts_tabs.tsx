@@ -26,66 +26,74 @@ import { HostAlertsQueryTabBody } from './navigation/alerts_query_tab_body';
 export const HostsTabs = memo<HostsTabsProps>(
   ({
     deleteQuery,
+    docValueFields,
     filterQuery,
-    setAbsoluteRangeDatePicker,
-    to,
     from,
-    setQuery,
+    indexNames,
     isInitializing,
+    setAbsoluteRangeDatePicker,
+    setQuery,
+    to,
     type,
-    indexPattern,
-    hostsPagePath,
   }) => {
+    const narrowDateRange = useCallback(
+      (score: Anomaly, interval: string) => {
+        const fromTo = scoreIntervalToDateTime(score, interval);
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: fromTo.from,
+          to: fromTo.to,
+        });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
+
+    const updateDateRange = useCallback<UpdateDateRange>(
+      ({ x }) => {
+        if (!x) {
+          return;
+        }
+        const [min, max] = x;
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
+
     const tabProps = {
       deleteQuery,
       endDate: to,
       filterQuery,
+      indexNames,
       skip: isInitializing,
       setQuery,
       startDate: from,
       type,
-      indexPattern,
-      narrowDateRange: useCallback(
-        (score: Anomaly, interval: string) => {
-          const fromTo = scoreIntervalToDateTime(score, interval);
-          setAbsoluteRangeDatePicker({
-            id: 'global',
-            from: fromTo.from,
-            to: fromTo.to,
-          });
-        },
-        [setAbsoluteRangeDatePicker]
-      ),
-      updateDateRange: useCallback<UpdateDateRange>(
-        ({ x }) => {
-          if (!x) {
-            return;
-          }
-          const [min, max] = x;
-          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-        },
-        [setAbsoluteRangeDatePicker]
-      ),
+      narrowDateRange,
+      updateDateRange,
     };
 
     return (
       <Switch>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}>
-          <HostsQueryTabBody {...tabProps} />
+        <Route path={`/:tabName(${HostsTableType.hosts})`}>
+          <HostsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
+        <Route path={`/:tabName(${HostsTableType.authentications})`}>
+          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
+        <Route path={`/:tabName(${HostsTableType.uncommonProcesses})`}>
           <UncommonProcessQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}>
+        <Route path={`/:tabName(${HostsTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}>
+        <Route path={`/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.alerts})`}>
+        <Route path={`/:tabName(${HostsTableType.alerts})`}>
           <HostAlertsQueryTabBody {...tabProps} />
         </Route>
       </Switch>

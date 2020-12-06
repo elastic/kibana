@@ -8,15 +8,11 @@
 import { SavedObject } from '../../../../src/core/types/saved_objects';
 
 export type MapSavedObjectAttributes = {
-  title?: string;
+  title: string;
   description?: string;
   mapStateJSON?: string;
   layerListJSON?: string;
   uiStateJSON?: string;
-  bounds?: {
-    type?: string;
-    coordinates?: [];
-  };
 };
 
 export type MapSavedObject = SavedObject<MapSavedObjectAttributes>;

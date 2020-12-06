@@ -4,65 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../constants', () => ({ MAIN_DATA_TYPE_DEFINITION: {} }));
+jest.mock('../constants', () => {
+  const { TYPE_DEFINITION } = jest.requireActual('../constants');
+  return { MAIN_DATA_TYPE_DEFINITION: {}, TYPE_DEFINITION };
+});
 
-import { isStateValid, stripUndefinedValues } from './utils';
+import { stripUndefinedValues, getTypeLabelFromField } from './utils';
 
 describe('utils', () => {
-  describe('isStateValid()', () => {
-    let components: any;
-    it('handles base case', () => {
-      components = {
-        fieldsJsonEditor: { isValid: undefined },
-        configuration: { isValid: undefined },
-        fieldForm: undefined,
-      };
-      expect(isStateValid(components)).toBe(undefined);
-    });
-
-    it('handles combinations of true, false and undefined', () => {
-      components = {
-        fieldsJsonEditor: { isValid: false },
-        configuration: { isValid: true },
-        fieldForm: undefined,
-      };
-
-      expect(isStateValid(components)).toBe(false);
-
-      components = {
-        fieldsJsonEditor: { isValid: false },
-        configuration: { isValid: undefined },
-        fieldForm: undefined,
-      };
-
-      expect(isStateValid(components)).toBe(undefined);
-
-      components = {
-        fieldsJsonEditor: { isValid: true },
-        configuration: { isValid: undefined },
-        fieldForm: undefined,
-      };
-
-      expect(isStateValid(components)).toBe(undefined);
-
-      components = {
-        fieldsJsonEditor: { isValid: true },
-        configuration: { isValid: false },
-        fieldForm: undefined,
-      };
-
-      expect(isStateValid(components)).toBe(false);
-
-      components = {
-        fieldsJsonEditor: { isValid: false },
-        configuration: { isValid: true },
-        fieldForm: { isValid: true },
-      };
-
-      expect(isStateValid(components)).toBe(false);
-    });
-  });
-
   describe('stripUndefinedValues()', () => {
     test('should remove all undefined value recursively', () => {
       const myDate = new Date();
@@ -105,6 +54,26 @@ describe('utils', () => {
       };
 
       expect(stripUndefinedValues(dataIN)).toEqual(dataOUT);
+    });
+  });
+
+  describe('getTypeLabelFromField()', () => {
+    test('returns label for fields', () => {
+      expect(
+        getTypeLabelFromField({
+          type: 'keyword',
+        })
+      ).toBe('Keyword');
+    });
+
+    test(`returns a label prepended with 'Other' for unrecognized fields`, () => {
+      expect(
+        getTypeLabelFromField({
+          name: 'testField',
+          // @ts-ignore
+          type: 'hyperdrive',
+        })
+      ).toBe('Other: hyperdrive');
     });
   });
 });

@@ -6,26 +6,57 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { datatable, DatatableComponent } from './expression';
 import { LensMultiTable } from '../types';
 import { DatatableProps } from './expression';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 import { IAggType } from 'src/plugins/data/public';
-const onClickValue = jest.fn();
 import { EmptyPlaceholder } from '../shared_components';
+import { LensIconChartDatatable } from '../assets/chart_datatable';
 
 function sampleArgs() {
+  const indexPatternId = 'indexPatternId';
   const data: LensMultiTable = {
     type: 'lens_multitable',
     tables: {
       l1: {
-        type: 'kibana_datatable',
+        type: 'datatable',
         columns: [
-          { id: 'a', name: 'a', meta: { type: 'terms' } },
-          { id: 'b', name: 'b', meta: { type: 'date_histogram', aggConfigParams: { field: 'b' } } },
-          { id: 'c', name: 'c', meta: { type: 'count' } },
+          {
+            id: 'a',
+            name: 'a',
+            meta: {
+              type: 'string',
+              source: 'esaggs',
+              field: 'a',
+              sourceParams: { type: 'terms', indexPatternId },
+            },
+          },
+          {
+            id: 'b',
+            name: 'b',
+            meta: {
+              type: 'date',
+              field: 'b',
+              source: 'esaggs',
+              sourceParams: {
+                type: 'date_histogram',
+                indexPatternId,
+              },
+            },
+          },
+          {
+            id: 'c',
+            name: 'c',
+            meta: {
+              type: 'number',
+              source: 'esaggs',
+              field: 'c',
+              sourceParams: { indexPatternId, type: 'count' },
+            },
+          },
         ],
         rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
       },
@@ -44,6 +75,11 @@ function sampleArgs() {
 }
 
 describe('datatable_expression', () => {
+  let onClickValue: jest.Mock;
+  beforeEach(() => {
+    onClickValue = jest.fn();
+  });
+
   describe('datatable renders', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
@@ -105,7 +141,7 @@ describe('datatable_expression', () => {
           },
         ],
         negate: true,
-        timeFieldName: undefined,
+        timeFieldName: 'a',
       });
     });
 
@@ -144,6 +180,75 @@ describe('datatable_expression', () => {
       });
     });
 
+    test('it invokes executeTriggerActions with correct context on click on timefield from range', () => {
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          l1: {
+            type: 'datatable',
+            columns: [
+              {
+                id: 'a',
+                name: 'a',
+                meta: {
+                  type: 'date',
+                  source: 'esaggs',
+                  field: 'a',
+                  sourceParams: { type: 'date_range', indexPatternId: 'a' },
+                },
+              },
+              {
+                id: 'b',
+                name: 'b',
+                meta: {
+                  type: 'number',
+                  source: 'esaggs',
+                  sourceParams: { type: 'count', indexPatternId: 'a' },
+                },
+              },
+            ],
+            rows: [{ a: 1588024800000, b: 3 }],
+          },
+        },
+      };
+
+      const args: DatatableProps['args'] = {
+        title: '',
+        columns: { columnIds: ['a', 'b'], type: 'lens_datatable_columns' },
+      };
+
+      const wrapper = mountWithIntl(
+        <DatatableComponent
+          data={{
+            ...data,
+            dateRange: {
+              fromDate: new Date('2020-04-20T05:00:00.000Z'),
+              toDate: new Date('2020-05-03T05:00:00.000Z'),
+            },
+          }}
+          args={args}
+          formatFactory={(x) => x as IFieldFormat}
+          onClickValue={onClickValue}
+          getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+        />
+      );
+
+      wrapper.find('[data-test-subj="lensDatatableFilterFor"]').at(1).simulate('click');
+
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 0,
+            row: 0,
+            table: data.tables.l1,
+            value: 1588024800000,
+          },
+        ],
+        negate: false,
+        timeFieldName: 'a',
+      });
+    });
+
     test('it shows emptyPlaceholder for undefined bucketed data', () => {
       const { args, data } = sampleArgs();
       const emptyData: LensMultiTable = {
@@ -167,7 +272,7 @@ describe('datatable_expression', () => {
           )}
         />
       );
-      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual('visTable');
+      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDatatable);
     });
   });
 });

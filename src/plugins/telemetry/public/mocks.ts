@@ -25,18 +25,20 @@ import { httpServiceMock } from '../../../core/public/http/http_service.mock';
 import { notificationServiceMock } from '../../../core/public/notifications/notifications_service.mock';
 import { TelemetryService } from './services/telemetry_service';
 import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
-import { TelemetryPluginStart, TelemetryPluginConfig } from './plugin';
+import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
 
 // The following is to be able to access private methods
 /* eslint-disable dot-notation */
 
 export interface TelemetryServiceMockOptions {
   reportOptInStatusChange?: boolean;
+  currentKibanaVersion?: string;
   config?: Partial<TelemetryPluginConfig>;
 }
 
 export function mockTelemetryService({
   reportOptInStatusChange,
+  currentKibanaVersion = 'mockKibanaVersion',
   config: configOverride = {},
 }: TelemetryServiceMockOptions = {}) {
   const config = {
@@ -48,6 +50,7 @@ export function mockTelemetryService({
     banner: true,
     allowChangingOptInStatus: true,
     telemetryNotifyUserAboutOptInDefault: true,
+    userCanChangeSettings: true,
     ...configOverride,
   };
 
@@ -55,6 +58,7 @@ export function mockTelemetryService({
     config,
     http: httpServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
+    currentKibanaVersion,
     reportOptInStatusChange,
   });
 
@@ -77,20 +81,35 @@ export function mockTelemetryNotifications({
   });
 }
 
-export type Setup = jest.Mocked<TelemetryPluginStart>;
+export type Setup = jest.Mocked<TelemetryPluginSetup>;
+export type Start = jest.Mocked<TelemetryPluginStart>;
 
 export const telemetryPluginMock = {
   createSetupContract,
+  createStartContract,
 };
 
 function createSetupContract(): Setup {
   const telemetryService = mockTelemetryService();
-  const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
 
   const setupContract: Setup = {
     telemetryService,
-    telemetryNotifications,
   };
 
   return setupContract;
+}
+
+function createStartContract(): Start {
+  const telemetryService = mockTelemetryService();
+  const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
+
+  const startContract: Start = {
+    telemetryService,
+    telemetryNotifications,
+    telemetryConstants: {
+      getPrivacyStatementUrl: jest.fn(),
+    },
+  };
+
+  return startContract;
 }

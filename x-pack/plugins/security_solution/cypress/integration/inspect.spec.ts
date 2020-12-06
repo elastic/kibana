@@ -12,19 +12,15 @@ import {
 
 import { closesModal, openStatsAndTables } from '../tasks/inspect';
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/security_main';
-import {
-  executeTimelineKQL,
-  openTimelineInspectButton,
-  openTimelineSettings,
-} from '../tasks/timeline';
+import { openTimelineUsingToggle } from '../tasks/security_main';
+import { executeTimelineKQL, openTimelineInspectButton } from '../tasks/timeline';
 
-import { HOSTS_PAGE, NETWORK_PAGE } from '../urls/navigation';
+import { HOSTS_URL, NETWORK_URL } from '../urls/navigation';
 
 describe('Inspect', () => {
   context('Hosts stats and tables', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      loginAndWaitForPage(HOSTS_URL);
     });
     afterEach(() => {
       closesModal();
@@ -40,7 +36,7 @@ describe('Inspect', () => {
 
   context('Network stats and tables', () => {
     before(() => {
-      loginAndWaitForPage(NETWORK_PAGE);
+      loginAndWaitForPage(NETWORK_URL);
     });
     afterEach(() => {
       closesModal();
@@ -57,10 +53,9 @@ describe('Inspect', () => {
   context('Timeline', () => {
     it('inspects the timeline', () => {
       const hostExistsQuery = 'host.name: *';
-      loginAndWaitForPage(HOSTS_PAGE);
-      openTimeline();
+      loginAndWaitForPage(HOSTS_URL);
+      openTimelineUsingToggle();
       executeTimelineKQL(hostExistsQuery);
-      openTimelineSettings();
       openTimelineInspectButton();
       cy.get(INSPECT_MODAL).should('be.visible');
     });

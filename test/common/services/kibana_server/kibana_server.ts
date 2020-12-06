@@ -28,8 +28,12 @@ export function KibanaServerProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const url = Url.format(config.get('servers.kibana'));
   const defaults = config.get('uiSettings.defaults');
-
-  const kbn = new KbnClient(log, [url], defaults);
+  const kbn = new KbnClient({
+    log,
+    url,
+    certificateAuthorities: config.get('servers.kibana.certificateAuthorities'),
+    uiSettingDefaults: defaults,
+  });
 
   if (defaults) {
     lifecycle.beforeTests.add(async () => {

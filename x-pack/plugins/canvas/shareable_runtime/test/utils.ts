@@ -15,12 +15,13 @@ export const tick = (ms = 0) =>
 export const takeMountedSnapshot = (mountedComponent: ReactWrapper<{}, {}, Component>) => {
   const html = mountedComponent.html();
   const template = document.createElement('template');
+  // eslint-disable-next-line no-unsanitized/property
   template.innerHTML = html;
   return template.content.firstChild;
 };
 
 export const waitFor = (fn: () => boolean, stepMs = 100, failAfterMs = 1000) => {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     let waitForTimeout: NodeJS.Timeout;
 
     const tryCondition = () => {

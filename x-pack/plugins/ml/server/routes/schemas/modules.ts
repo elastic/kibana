@@ -69,21 +69,26 @@ export const setupModuleBodySchema = schema.object({
    * should be made by checking the cardinality of fields in the job configurations (optional).
    */
   estimateModelMemory: schema.maybe(schema.boolean()),
+
+  /**
+   * Add each job created to the * space (optional)
+   */
+  applyToAllSpaces: schema.maybe(schema.boolean()),
 });
 
-export const getModuleIdParamSchema = (optional = false) => {
-  const stringType = schema.string();
-  return schema.object({
-    /**
-     * ID of the module.
-     */
-    moduleId: optional ? schema.maybe(stringType) : stringType,
-  });
-};
+export const optionalModuleIdParamSchema = schema.object({
+  /**
+   * ID of the module.
+   */
+  moduleId: schema.maybe(schema.string()),
+});
 
-export const optionalModuleIdParamSchema = getModuleIdParamSchema(true);
-
-export const moduleIdParamSchema = getModuleIdParamSchema(false);
+export const moduleIdParamSchema = schema.object({
+  /**
+   * ID of the module.
+   */
+  moduleId: schema.string(),
+});
 
 export const modulesIndexPatternTitleSchema = schema.object({
   /**

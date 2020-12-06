@@ -4,10 +4,6 @@
 
 ## ChromeNavLink.disabled property
 
-> Warning: This API is now obsolete.
-> 
-> 
-
 Disables a link from being clickable.
 
 <b>Signature:</b>

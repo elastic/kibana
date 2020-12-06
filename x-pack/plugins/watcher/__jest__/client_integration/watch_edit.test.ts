@@ -12,22 +12,26 @@ import { WatchEditTestBed } from './helpers/watch_edit.helpers';
 import { WATCH } from './helpers/constants';
 import defaultWatchJson from '../../public/application/models/watch/default_watch.json';
 import { getWatch } from '../../test/fixtures';
-import { getRandomString } from '../../../../test_utils';
+import { getRandomString } from '@kbn/test/jest';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-jest.mock('../../public/application/lib/api', () => ({
-  ...jest.requireActual('../../public/application/lib/api'),
-  loadIndexPatterns: async () => {
-    const INDEX_PATTERNS = [
-      { attributes: { title: 'index1' } },
-      { attributes: { title: 'index2' } },
-      { attributes: { title: 'index3' } },
-    ];
-    return await INDEX_PATTERNS;
-  },
-  getHttpClient: () => mockHttpClient,
-}));
+jest.mock('../../public/application/lib/api', () => {
+  const original = jest.requireActual('../../public/application/lib/api');
+
+  return {
+    ...original,
+    loadIndexPatterns: async () => {
+      const INDEX_PATTERNS = [
+        { attributes: { title: 'index1' } },
+        { attributes: { title: 'index2' } },
+        { attributes: { title: 'index3' } },
+      ];
+      return await INDEX_PATTERNS;
+    },
+    getHttpClient: () => mockHttpClient,
+  };
+});
 
 const { setup } = pageHelpers.watchEdit;
 

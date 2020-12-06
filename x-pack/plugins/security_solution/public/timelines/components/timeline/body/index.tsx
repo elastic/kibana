@@ -4,119 +4,132 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useRef } from 'react';
+import memoizeOne from 'memoize-one';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
+import { RowRendererId, TimelineId } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
-import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
-import { Note } from '../../../../common/lib/note';
-import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
-import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
-import {
-  OnColumnRemoved,
-  OnColumnResized,
-  OnColumnSorted,
-  OnFilterChange,
-  OnPinEvent,
-  OnRowSelected,
-  OnSelectAll,
-  OnUnPinEvent,
-  OnUpdateColumns,
-} from '../events';
+import { TimelineItem } from '../../../../../common/search_strategy/timeline';
+import { inputsModel, State } from '../../../../common/store';
+import { useManageTimeline } from '../../manage_timeline';
+import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
+import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { OnRowSelected, OnSelectAll } from '../events';
+import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
+import { getEventIdToDataMapping } from './helpers';
+import { columnRenderers, rowRenderers } from './renderers';
+import { Sort } from './sort';
+import { plainRowRenderer } from './renderers/plain_row_renderer';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
-import { getActionsColumnWidth } from './column_headers/helpers';
 import { Events } from './events';
-import { ColumnRenderer } from './renderers/column_renderer';
-import { RowRenderer } from './renderers/row_renderer';
-import { Sort } from './sort';
-import { useManageTimeline } from '../../manage_timeline';
+import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 
-export interface BodyProps {
-  addNoteToEvent: AddNoteToEvent;
+interface OwnProps {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
-  columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
-  getNotesByIds: (noteIds: string[]) => Note[];
-  height?: number;
   id: string;
   isEventViewer?: boolean;
-  isSelectAllChecked: boolean;
-  eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  loadingEventIds: Readonly<string[]>;
-  onColumnRemoved: OnColumnRemoved;
-  onColumnResized: OnColumnResized;
-  onColumnSorted: OnColumnSorted;
-  onRowSelected: OnRowSelected;
-  onSelectAll: OnSelectAll;
-  onFilterChange: OnFilterChange;
-  onPinEvent: OnPinEvent;
-  onUpdateColumns: OnUpdateColumns;
-  onUnPinEvent: OnUnPinEvent;
-  pinnedEventIds: Readonly<Record<string, boolean>>;
-  rowRenderers: RowRenderer[];
-  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
-  showCheckboxes: boolean;
   sort: Sort;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
-  updateNote: UpdateNote;
+  refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
 }
 
-/** Renders the timeline body */
-export const Body = React.memo<BodyProps>(
+export const hasAdditionalActions = (id: TimelineId): boolean =>
+  [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
+    id
+  );
+
+const EXTRA_WIDTH = 4; // px
+
+export type StatefulBodyProps = OwnProps & PropsFromRedux;
+
+export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
-    addNoteToEvent,
     browserFields,
     columnHeaders,
-    columnRenderers,
     data,
     eventIdToNoteIds,
-    getNotesByIds,
-    height,
+    excludedRowRendererIds,
     id,
     isEventViewer = false,
     isSelectAllChecked,
     loadingEventIds,
-    onColumnRemoved,
-    onColumnResized,
-    onColumnSorted,
-    onRowSelected,
-    onSelectAll,
-    onFilterChange,
-    onPinEvent,
-    onUpdateColumns,
-    onUnPinEvent,
     pinnedEventIds,
-    rowRenderers,
     selectedEventIds,
+    setSelected,
+    clearSelected,
+    onRuleChange,
     showCheckboxes,
+    refetch,
     sort,
-    toggleColumn,
-    updateNote,
   }) => {
-    const containerElementRef = useRef<HTMLDivElement>(null);
     const { getManageTimelineById } = useManageTimeline();
-    const timelineActions = useMemo(() => getManageTimelineById(id).timelineRowActions, [
+    const { queryFields, selectAll } = useMemo(() => getManageTimelineById(id), [
       getManageTimelineById,
       id,
     ]);
 
-    const additionalActionWidth = useMemo(() => {
-      let hasContextMenu = false;
-      return (
-        timelineActions.reduce((acc, v) => {
-          if (v.displayType === 'icon') {
-            return acc + (v.width ?? 0);
-          }
-          const addWidth = hasContextMenu ? 0 : 26;
-          hasContextMenu = true;
-          return acc + addWidth;
-        }, 0) ?? 0
-      );
-    }, [timelineActions]);
+    const onRowSelected: OnRowSelected = useCallback(
+      ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
+        setSelected!({
+          id,
+          eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
+          isSelected,
+          isSelectAllChecked:
+            isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
+        });
+      },
+      [setSelected, id, data, selectedEventIds, queryFields]
+    );
+
+    const onSelectAll: OnSelectAll = useCallback(
+      ({ isSelected }: { isSelected: boolean }) =>
+        isSelected
+          ? setSelected!({
+              id,
+              eventIds: getEventIdToDataMapping(
+                data,
+                data.map((event) => event._id),
+                queryFields
+              ),
+              isSelected,
+              isSelectAllChecked: isSelected,
+            })
+          : clearSelected!({ id }),
+      [setSelected, clearSelected, id, data, queryFields]
+    );
+
+    // Sync to selectAll so parent components can select all events
+    useEffect(() => {
+      if (selectAll && !isSelectAllChecked) {
+        onSelectAll({ isSelected: true });
+      }
+    }, [isSelectAllChecked, onSelectAll, selectAll]);
+
+    const enabledRowRenderers = useMemo(() => {
+      if (
+        excludedRowRendererIds &&
+        excludedRowRendererIds.length === Object.keys(RowRendererId).length
+      )
+        return [plainRowRenderer];
+
+      if (!excludedRowRendererIds) return rowRenderers;
+
+      return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
+    }, [excludedRowRendererIds]);
+
     const actionsColumnWidth = useMemo(
-      () => getActionsColumnWidth(isEventViewer, showCheckboxes, additionalActionWidth),
-      [isEventViewer, showCheckboxes, additionalActionWidth]
+      () =>
+        getActionsColumnWidth(
+          isEventViewer,
+          showCheckboxes,
+          hasAdditionalActions(id as TimelineId) ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH : 0
+        ),
+      [isEventViewer, showCheckboxes, id]
     );
 
     const columnWidths = useMemo(
@@ -127,7 +140,7 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        <TimelineBody data-test-subj="timeline-body" bodyHeight={height} ref={containerElementRef}>
+        <TimelineBody data-test-subj="timeline-body" data-timeline-id={id}>
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
             <ColumnHeaders
               actionsColumnWidth={actionsColumnWidth}
@@ -135,49 +148,97 @@ export const Body = React.memo<BodyProps>(
               columnHeaders={columnHeaders}
               isEventViewer={isEventViewer}
               isSelectAllChecked={isSelectAllChecked}
-              onColumnRemoved={onColumnRemoved}
-              onColumnResized={onColumnResized}
-              onColumnSorted={onColumnSorted}
-              onFilterChange={onFilterChange}
               onSelectAll={onSelectAll}
-              onUpdateColumns={onUpdateColumns}
               showEventsSelect={false}
               showSelectAllCheckbox={showCheckboxes}
               sort={sort}
               timelineId={id}
-              toggleColumn={toggleColumn}
             />
 
             <Events
-              containerElementRef={containerElementRef.current!}
               actionsColumnWidth={actionsColumnWidth}
-              addNoteToEvent={addNoteToEvent}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
               data={data}
               eventIdToNoteIds={eventIdToNoteIds}
-              getNotesByIds={getNotesByIds}
               id={id}
               isEventViewer={isEventViewer}
               loadingEventIds={loadingEventIds}
-              onColumnResized={onColumnResized}
-              onPinEvent={onPinEvent}
               onRowSelected={onRowSelected}
-              onUpdateColumns={onUpdateColumns}
-              onUnPinEvent={onUnPinEvent}
               pinnedEventIds={pinnedEventIds}
-              rowRenderers={rowRenderers}
+              refetch={refetch}
+              rowRenderers={enabledRowRenderers}
+              onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
-              toggleColumn={toggleColumn}
-              updateNote={updateNote}
             />
           </EventsTable>
         </TimelineBody>
         <TimelineBodyGlobalStyle />
       </>
     );
-  }
+  },
+  (prevProps, nextProps) =>
+    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
+    deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
+    deepEqual(prevProps.data, nextProps.data) &&
+    deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
+    deepEqual(prevProps.sort, nextProps.sort) &&
+    deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
+    deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
+    deepEqual(prevProps.selectedEventIds, nextProps.selectedEventIds) &&
+    deepEqual(prevProps.loadingEventIds, nextProps.loadingEventIds) &&
+    prevProps.id === nextProps.id &&
+    prevProps.isEventViewer === nextProps.isEventViewer &&
+    prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
+    prevProps.showCheckboxes === nextProps.showCheckboxes
 );
-Body.displayName = 'Body';
+
+BodyComponent.displayName = 'BodyComponent';
+
+const makeMapStateToProps = () => {
+  const memoizedColumnHeaders: (
+    headers: ColumnHeaderOptions[],
+    browserFields: BrowserFields
+  ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
+
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
+    const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
+    const {
+      columns,
+      eventIdToNoteIds,
+      excludedRowRendererIds,
+      isSelectAllChecked,
+      loadingEventIds,
+      pinnedEventIds,
+      selectedEventIds,
+      showCheckboxes,
+    } = timeline;
+
+    return {
+      columnHeaders: memoizedColumnHeaders(columns, browserFields),
+      eventIdToNoteIds,
+      excludedRowRendererIds,
+      isSelectAllChecked,
+      loadingEventIds,
+      id,
+      pinnedEventIds,
+      selectedEventIds,
+      showCheckboxes,
+    };
+  };
+  return mapStateToProps;
+};
+
+const mapDispatchToProps = {
+  clearSelected: timelineActions.clearSelected,
+  setSelected: timelineActions.setSelected,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulBody = connector(BodyComponent);

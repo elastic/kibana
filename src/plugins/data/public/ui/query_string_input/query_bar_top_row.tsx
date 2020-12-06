@@ -36,12 +36,16 @@ import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
-import { useKibana, toMountPoint } from '../../../../kibana_react/public';
-import { QueryStringInput } from './query_string_input';
+import { useKibana, toMountPoint, withKibana } from '../../../../kibana_react/public';
+import QueryStringInputUI from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
+import { NoDataPopover } from './no_data_popover';
 
-interface Props {
+const QueryStringInput = withKibana(QueryStringInputUI);
+
+// @internal
+export interface QueryBarTopRowProps {
   query?: Query;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -63,10 +67,14 @@ interface Props {
   customSubmitButton?: any;
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
+  indicateNoData?: boolean;
 }
 
-export function QueryBarTopRow(props: Props) {
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
+  const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
   const { uiSettings, notifications, storage, appName, docLinks } = kibana.services;
@@ -91,7 +99,7 @@ export function QueryBarTopRow(props: Props) {
   }
 
   function getDateRange() {
-    const defaultTimeSetting = uiSettings!.get('timepicker:timeDefaults');
+    const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
     return {
       from: props.dateRangeFrom || defaultTimeSetting.from,
       to: props.dateRangeTo || defaultTimeSetting.to,
@@ -103,6 +111,10 @@ export function QueryBarTopRow(props: Props) {
       query,
       dateRange: getDateRange(),
     });
+  }
+
+  function onChangeQueryInputFocus(isFocused: boolean) {
+    setIsQueryInputFocused(isFocused);
   }
 
   function onTimeChange({
@@ -180,6 +192,7 @@ export function QueryBarTopRow(props: Props) {
           query={props.query!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
+          onChangeQueryInputFocus={onChangeQueryInputFocus}
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
@@ -230,10 +243,12 @@ export function QueryBarTopRow(props: Props) {
     }
 
     return (
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        {renderDatePicker()}
-        <EuiFlexItem grow={false}>{button}</EuiFlexItem>
-      </EuiFlexGroup>
+      <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          {renderDatePicker()}
+          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+        </EuiFlexGroup>
+      </NoDataPopover>
     );
   }
 
@@ -264,8 +279,13 @@ export function QueryBarTopRow(props: Props) {
         };
       });
 
+    const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper', {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      'kbnQueryBar__datePickerWrapper-isHidden': isQueryInputFocused,
+    });
+
     return (
-      <EuiFlexItem className="kbnQueryBar__datePickerWrapper">
+      <EuiFlexItem className={wrapperClasses}>
         <EuiSuperDatePicker
           start={props.dateRangeFrom}
           end={props.dateRangeTo}
@@ -279,6 +299,7 @@ export function QueryBarTopRow(props: Props) {
           commonlyUsedRanges={commonlyUsedRanges}
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
+          className="kbnQueryBar__datePicker"
         />
       </EuiFlexItem>
     );

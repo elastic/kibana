@@ -5,6 +5,8 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { getMapsCapabilities } from '../kibana_services';
+
 import {
   UPDATE_FLYOUT,
   CLOSE_SET_VIEW,
@@ -15,7 +17,6 @@ import {
   SET_OPEN_TOC_DETAILS,
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
-  UPDATE_INDEXING_STAGE,
 } from '../actions';
 
 export enum FLYOUT_STATE {
@@ -25,13 +26,6 @@ export enum FLYOUT_STATE {
   MAP_SETTINGS_PANEL = 'MAP_SETTINGS_PANEL',
 }
 
-export enum INDEXING_STAGE {
-  READY = 'READY',
-  TRIGGERED = 'TRIGGERED',
-  SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR',
-}
-
 export type MapUiState = {
   flyoutDisplay: FLYOUT_STATE;
   isFullScreen: boolean;
@@ -39,7 +33,6 @@ export type MapUiState = {
   isLayerTOCOpen: boolean;
   isSetViewOpen: boolean;
   openTOCDetails: string[];
-  importIndexingStage: INDEXING_STAGE | null;
 };
 
 export const DEFAULT_IS_LAYER_TOC_OPEN = true;
@@ -47,13 +40,12 @@ export const DEFAULT_IS_LAYER_TOC_OPEN = true;
 export const DEFAULT_MAP_UI_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   isFullScreen: false,
-  isReadOnly: false,
+  isReadOnly: !getMapsCapabilities().save,
   isLayerTOCOpen: DEFAULT_IS_LAYER_TOC_OPEN,
   isSetViewOpen: false,
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.
   // This also makes for easy read/write access for embeddables.
   openTOCDetails: [],
-  importIndexingStage: null,
 };
 
 // Reducer
@@ -85,8 +77,6 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
           return layerId !== action.layerId;
         }),
       };
-    case UPDATE_INDEXING_STAGE:
-      return { ...state, importIndexingStage: action.stage };
     default:
       return state;
   }

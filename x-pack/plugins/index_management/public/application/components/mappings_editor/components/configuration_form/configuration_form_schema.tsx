@@ -11,7 +11,6 @@ import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../../services/documentation';
 import { FormSchema, FIELD_TYPES, VALIDATION_TYPES, fieldValidators } from '../../shared_imports';
-import { MappingsConfiguration } from '../../reducer';
 import { ComboBoxOption } from '../../types';
 
 const { containsCharsField, isJsonField } = fieldValidators;
@@ -29,7 +28,7 @@ const fieldPathComboBoxConfig = {
   deserializer: (values: string[]): ComboBoxOption[] => values.map((value) => ({ label: value })),
 };
 
-export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
+export const configurationFormSchema: FormSchema = {
   metaField: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.metaFieldEditorLabel', {
       defaultMessage: '_meta field data',
@@ -48,10 +47,30 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
         validator: isJsonField(
           i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.metaFieldEditorJsonError', {
             defaultMessage: 'The _meta field JSON is not valid.',
-          })
+          }),
+          { allowEmptyString: true }
         ),
       },
     ],
+    deserializer: (value: any) => {
+      if (value === '') {
+        return value;
+      }
+      return JSON.stringify(value, null, 2);
+    },
+    serializer: (value: string) => {
+      try {
+        const parsed = JSON.parse(value);
+        // If an empty object was passed, strip out this value entirely.
+        if (!Object.keys(parsed).length) {
+          return undefined;
+        }
+        return parsed;
+      } catch (error) {
+        // swallow error and return non-parsed value;
+        return value;
+      }
+    },
   },
   sourceField: {
     enabled: {

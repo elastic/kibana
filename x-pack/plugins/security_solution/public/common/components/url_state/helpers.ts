@@ -12,15 +12,18 @@ import * as H from 'history';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
-import { SiemPageName } from '../../../app/types';
+import { TimelineId } from '../../../../common/types/timeline';
+import { SecurityPageName } from '../../../app/types';
 import { inputsSelectors, State } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
+import { TimelineTabs, TimelineUrl } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
 import { ReplaceStateInLocation, UpdateUrlStateString } from './types';
+import { sourcererSelectors } from '../../store/sourcerer';
+import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
@@ -57,16 +60,14 @@ export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) =
 
   // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
   // Remove this if these utilities are promoted to kibana core
-  const encodedUrlState =
-    typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-
-  return stringify(
-    url.encodeQuery({
-      ...previousQueryValues,
-      [stateKey]: encodedUrlState,
-    }),
-    { sort: false, encode: false }
-  );
+  const newValue =
+    typeof urlState === 'undefined'
+      ? previousQueryValues
+      : {
+          ...previousQueryValues,
+          [stateKey]: encodeRisonUrlState(urlState),
+        };
+  return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
 };
 
 export const replaceQueryStringInLocation = (
@@ -84,18 +85,20 @@ export const replaceQueryStringInLocation = (
 };
 
 export const getUrlType = (pageName: string): UrlStateType => {
-  if (pageName === SiemPageName.overview) {
+  if (pageName === SecurityPageName.overview) {
     return 'overview';
-  } else if (pageName === SiemPageName.hosts) {
+  } else if (pageName === SecurityPageName.hosts) {
     return 'host';
-  } else if (pageName === SiemPageName.network) {
+  } else if (pageName === SecurityPageName.network) {
     return 'network';
-  } else if (pageName === SiemPageName.detections) {
+  } else if (pageName === SecurityPageName.detections) {
     return 'detections';
-  } else if (pageName === SiemPageName.timelines) {
+  } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
-  } else if (pageName === SiemPageName.case) {
+  } else if (pageName === SecurityPageName.case) {
     return 'case';
+  } else if (pageName === SecurityPageName.administration) {
+    return 'administration';
   }
   return 'overview';
 };
@@ -114,19 +117,23 @@ export const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
-  const getTimelines = timelineSelectors.getTimelines();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getSourcererScopes = sourcererSelectors.scopesSelector();
   const mapStateToProps = (state: State) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
-    const timeline = Object.entries(getTimelines(state)).reduce(
-      (obj, [timelineId, timelineObj]) => ({
-        id: timelineObj.savedObjectId != null ? timelineObj.savedObjectId : '',
-        isOpen: timelineObj.show,
-      }),
-      { id: '', isOpen: false }
-    );
+    const flyoutTimeline = getTimeline(state, TimelineId.active);
+    const timeline =
+      flyoutTimeline != null
+        ? {
+            id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
+            isOpen: flyoutTimeline.show,
+            activeTab: flyoutTimeline.activeTab,
+            graphEventId: flyoutTimeline.graphEventId ?? '',
+          }
+        : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;
@@ -142,10 +149,16 @@ export const makeMapStateToProps = () => {
         [CONSTANTS.savedQuery]: savedQuery.id,
       };
     }
+    const sourcerer = getSourcererScopes(state);
+    const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
+    const selectedPatterns: SourcererScopePatterns = activeScopes
+      .filter((scope) => scope === SourcererScopeName.default)
+      .reduce((acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }), {});
 
     return {
       urlState: {
         ...searchAttr,
+        [CONSTANTS.sourcerer]: selectedPatterns,
         [CONSTANTS.timerange]: {
           global: {
             [CONSTANTS.timerange]: globalTimerange,
@@ -212,6 +225,17 @@ export const updateUrlStateString = ({
         urlStateKey: urlKey,
       });
     }
+  } else if (urlKey === CONSTANTS.sourcerer) {
+    const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
+    if (sourcererState != null && Object.keys(sourcererState).length > 0) {
+      return replaceStateInLocation({
+        history,
+        pathName,
+        search,
+        urlStateToReplace: sourcererState,
+        urlStateKey: urlKey,
+      });
+    }
   } else if (urlKey === CONSTANTS.filters) {
     const queryState = decodeRisonUrlState<Filter[]>(newUrlStateString);
     if (isEmpty(queryState)) {
@@ -255,6 +279,7 @@ export const replaceStateInLocation = <T>({
     replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(getQueryStringFromLocation(search))
   );
   if (history) {
+    newLocation.state = history.location.state;
     history.replace(newLocation);
   }
   return newLocation.search;

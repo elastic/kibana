@@ -18,13 +18,13 @@
  */
 
 import { migratorInstanceMock } from './migrate.test.mocks';
-import * as kbnTestServer from '../../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 describe('SavedObjects /_migrate endpoint', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
 
   beforeEach(async () => {
-    root = kbnTestServer.createRoot({ migrations: { skip: true } });
+    root = kbnTestServer.createRoot({ migrations: { skip: true }, plugins: { initialize: false } });
     await root.setup();
     await root.start();
     migratorInstanceMock.runMigrations.mockClear();

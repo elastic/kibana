@@ -55,10 +55,6 @@ export const args = ({ userDataDir, viewport, disableSandbox, proxy: proxyConfig
     flags.push('--no-sandbox');
   }
 
-  // log to chrome_debug.log
-  flags.push('--enable-logging');
-  flags.push('--v=1');
-
   if (process.platform === 'linux') {
     flags.push('--disable-setuid-sandbox');
   }

@@ -11,7 +11,7 @@ import { createConfig$ } from './create_config';
 import { ReportingConfigType } from './schema';
 
 interface KibanaServer {
-  host?: string;
+  hostname?: string;
   port?: number;
   protocol?: string;
 }
@@ -41,7 +41,7 @@ describe('Reporting server createConfig$', () => {
   let mockLogger: LevelLogger;
 
   beforeEach(() => {
-    mockCoreSetup = makeMockCoreSetup({ host: 'kibanaHost', port: 5601, protocol: 'http' });
+    mockCoreSetup = makeMockCoreSetup({ hostname: 'kibanaHost', port: 5601, protocol: 'http' });
     mockInitContext = makeMockInitContext({
       kibanaServer: {},
     });
@@ -70,7 +70,7 @@ describe('Reporting server createConfig$', () => {
     `);
     expect((mockLogger.warn as any).mock.calls.length).toBe(1);
     expect((mockLogger.warn as any).mock.calls[0]).toMatchObject([
-      'Generating a random key for xpack.reporting.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.reporting.encryptionKey in kibana.yml',
+      'Generating a random key for xpack.reporting.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.reporting.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.',
     ]);
   });
 

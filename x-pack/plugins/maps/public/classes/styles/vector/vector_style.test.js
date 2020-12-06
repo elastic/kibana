@@ -6,29 +6,19 @@
 
 import { VectorStyle } from './vector_style';
 import { DataRequest } from '../../util/data_request';
-import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
-import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../common/constants';
+import {
+  FIELD_ORIGIN,
+  STYLE_TYPE,
+  VECTOR_SHAPE_TYPE,
+  VECTOR_STYLES,
+} from '../../../../common/constants';
+import { MockField } from './properties/__tests__/test_util';
 
 jest.mock('../../../kibana_services');
-jest.mock('ui/new_platform');
-
-class MockField {
-  constructor({ fieldName }) {
-    this._fieldName = fieldName;
-  }
-
-  getName() {
-    return this._fieldName;
-  }
-
-  isValid() {
-    return !!this._fieldName;
-  }
-}
 
 class MockSource {
   constructor({ supportedShapeTypes } = {}) {
-    this._supportedShapeTypes = supportedShapeTypes || Object.values(VECTOR_SHAPE_TYPES);
+    this._supportedShapeTypes = supportedShapeTypes || Object.values(VECTOR_SHAPE_TYPE);
   }
   getSupportedShapeTypes() {
     return this._supportedShapeTypes;
@@ -41,8 +31,9 @@ class MockSource {
   }
 }
 
-describe('getDescriptorWithMissingStylePropsRemoved', () => {
-  const fieldName = 'doIStillExist';
+describe('getDescriptorWithUpdatedStyleProps', () => {
+  const previousFieldName = 'doIStillExist';
+  const mapColors = [];
   const properties = {
     fillColor: {
       type: STYLE_TYPE.STATIC,
@@ -52,7 +43,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
       type: STYLE_TYPE.DYNAMIC,
       options: {
         field: {
-          name: fieldName,
+          name: previousFieldName,
           origin: FIELD_ORIGIN.SOURCE,
         },
       },
@@ -60,11 +51,14 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     iconSize: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        color: 'a color',
-        field: { name: fieldName, origin: FIELD_ORIGIN.SOURCE },
+        minSize: 1,
+        maxSize: 10,
+        field: { name: previousFieldName, origin: FIELD_ORIGIN.SOURCE },
       },
     },
   };
+
+  const previousFields = [new MockField({ fieldName: previousFieldName })];
 
   beforeEach(() => {
     require('../../../kibana_services').getUiSettings = () => ({
@@ -72,90 +66,110 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     });
   });
 
-  it('Should return no changes when next ordinal fields contain existing style property fields', () => {
-    const vectorStyle = new VectorStyle({ properties }, new MockSource());
+  describe('When there is no mismatch in configuration', () => {
+    it('Should return no changes when next ordinal fields contain existing style property fields', async () => {
+      const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
-    const nextFields = [new MockField({ fieldName })];
-    const { hasChanges } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields);
-    expect(hasChanges).toBe(false);
+      const nextFields = [new MockField({ fieldName: previousFieldName, dataType: 'number' })];
+      const { hasChanges } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
+        nextFields,
+        previousFields,
+        mapColors
+      );
+      expect(hasChanges).toBe(false);
+    });
   });
 
-  it('Should clear missing fields when next ordinal fields do not contain existing style property fields', () => {
-    const vectorStyle = new VectorStyle({ properties }, new MockSource());
+  describe('When styles should revert to static styling', () => {
+    it('Should convert dynamic styles to static styles when there are no next fields', async () => {
+      const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
-    const nextFields = [];
-    const {
-      hasChanges,
-      nextStyleDescriptor,
-    } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields);
-    expect(hasChanges).toBe(true);
-    expect(nextStyleDescriptor.properties).toEqual({
-      fillColor: {
-        options: {},
-        type: 'STATIC',
-      },
-      icon: {
+      const nextFields = [];
+      const {
+        hasChanges,
+        nextStyleDescriptor,
+      } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
+        nextFields,
+        previousFields,
+        mapColors
+      );
+      expect(hasChanges).toBe(true);
+      expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
         options: {
-          value: 'marker',
+          color: '#41937c',
         },
         type: 'STATIC',
-      },
-      iconOrientation: {
+      });
+      expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
         options: {
-          orientation: 0,
+          size: 6,
         },
         type: 'STATIC',
-      },
-      iconSize: {
+      });
+    });
+
+    it('Should convert dynamic ICON_SIZE static style when there are no next ordinal fields', async () => {
+      const vectorStyle = new VectorStyle({ properties }, new MockSource());
+
+      const nextFields = [
+        new MockField({
+          fieldName: previousFieldName,
+          dataType: 'number',
+          supportsAutoDomain: false,
+        }),
+      ];
+      const {
+        hasChanges,
+        nextStyleDescriptor,
+      } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
+        nextFields,
+        previousFields,
+        mapColors
+      );
+      expect(hasChanges).toBe(true);
+      expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
         options: {
-          color: 'a color',
+          size: 6,
+        },
+        type: 'STATIC',
+      });
+    });
+  });
+
+  describe('When styles should not be cleared', () => {
+    it('Should update field in styles when the fields and style combination remains compatible', async () => {
+      const vectorStyle = new VectorStyle({ properties }, new MockSource());
+
+      const nextFields = [new MockField({ fieldName: 'someOtherField', dataType: 'number' })];
+      const {
+        hasChanges,
+        nextStyleDescriptor,
+      } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
+        nextFields,
+        previousFields,
+        mapColors
+      );
+      expect(hasChanges).toBe(true);
+      expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
+        options: {
+          field: {
+            name: 'someOtherField',
+            origin: FIELD_ORIGIN.SOURCE,
+          },
         },
         type: 'DYNAMIC',
-      },
-      labelText: {
+      });
+      expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
         options: {
-          value: '',
+          minSize: 1,
+          maxSize: 10,
+          field: {
+            name: 'someOtherField',
+            origin: FIELD_ORIGIN.SOURCE,
+          },
         },
-        type: 'STATIC',
-      },
-      labelBorderColor: {
-        options: {
-          color: '#FFFFFF',
-        },
-        type: 'STATIC',
-      },
-      labelBorderSize: {
-        options: {
-          size: 'SMALL',
-        },
-      },
-      labelColor: {
-        options: {
-          color: '#000000',
-        },
-        type: 'STATIC',
-      },
-      labelSize: {
-        options: {
-          size: 14,
-        },
-        type: 'STATIC',
-      },
-      lineColor: {
-        options: {},
         type: 'DYNAMIC',
-      },
-      lineWidth: {
-        options: {
-          size: 1,
-        },
-        type: 'STATIC',
-      },
-      symbolizeAs: {
-        options: {
-          value: 'circle',
-        },
-      },
+      });
     });
   });
 });

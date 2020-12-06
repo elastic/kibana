@@ -19,7 +19,7 @@
 import React, { useState } from 'react';
 import { escapeRegExp } from 'lodash';
 import { DocViewTableRow } from './table_row';
-import { arrayContainsObjects, trimAngularSpan } from './table_helper';
+import { trimAngularSpan } from './table_helper';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 const COLLAPSE_LINE_LENGTH = 350;
@@ -32,13 +32,16 @@ export function DocViewTable({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) {
+  const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
+  if (!indexPattern) {
+    return null;
+  }
   const mapping = indexPattern.fields.getByName;
   const flattened = indexPattern.flattenHit(hit);
   const formatted = indexPattern.formatHit(hit, 'html');
-  const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
 
   function toggleValueCollapse(field: string) {
-    fieldRowOpen[field] = fieldRowOpen[field] !== true;
+    fieldRowOpen[field] = !fieldRowOpen[field];
     setFieldRowOpen({ ...fieldRowOpen });
   }
 
@@ -46,7 +49,13 @@ export function DocViewTable({
     <table className="table table-condensed kbnDocViewerTable">
       <tbody>
         {Object.keys(flattened)
-          .sort()
+          .sort((fieldA, fieldB) => {
+            const mappingA = mapping(fieldA);
+            const mappingB = mapping(fieldB);
+            const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
+            const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
+            return nameA.localeCompare(nameB);
+          })
           .map((field) => {
             const valueRaw = flattened[field];
             const value = trimAngularSpan(String(formatted[field]));
@@ -63,11 +72,7 @@ export function DocViewTable({
                     }
                   }
                 : undefined;
-            const isArrayOfObjects =
-              Array.isArray(flattened[field]) && arrayContainsObjects(flattened[field]);
             const displayUnderscoreWarning = !mapping(field) && field.indexOf('_') === 0;
-            const displayNoMappingWarning =
-              !mapping(field) && !displayUnderscoreWarning && !isArrayOfObjects;
 
             // Discover doesn't flatten arrays of objects, so for documents with an `object` or `nested` field that
             // contains an array, Discover will only detect the top level root field. We want to detect when those
@@ -104,15 +109,13 @@ export function DocViewTable({
             // to the index pattern, but that has its own complications which you can read more about in the following
             // issue: https://github.com/elastic/kibana/issues/54957
             const isNestedField =
-              !indexPattern.fields.find((patternField) => patternField.name === field) &&
-              !!indexPattern.fields.find((patternField) => {
+              !indexPattern.fields.getByName(field) &&
+              !!indexPattern.fields.getAll().find((patternField) => {
                 // We only want to match a full path segment
                 const nestedRootRegex = new RegExp(escapeRegExp(field) + '(\\.|$)');
                 return nestedRootRegex.test(patternField.subType?.nested?.path ?? '');
               });
-            const fieldType = isNestedField
-              ? 'nested'
-              : indexPattern.fields.find((patternField) => patternField.name === field)?.type;
+            const fieldType = isNestedField ? 'nested' : indexPattern.fields.getByName(field)?.type;
 
             return (
               <DocViewTableRow
@@ -121,7 +124,6 @@ export function DocViewTable({
                 fieldMapping={mapping(field)}
                 fieldType={String(fieldType)}
                 displayUnderscoreWarning={displayUnderscoreWarning}
-                displayNoMappingWarning={displayNoMappingWarning}
                 isCollapsed={isCollapsed}
                 isCollapsible={isCollapsible}
                 isColumnActive={Array.isArray(columns) && columns.includes(field)}

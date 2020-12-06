@@ -5,13 +5,18 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
 import { LinkIcon, LinkIconProps } from '../link_icon';
 import { Subtitle, SubtitleProps } from '../subtitle';
 import { Title } from './title';
 import { DraggableArguments, BadgeOptions, TitleProp } from './types';
+import { useFormatUrl } from '../link_to';
+import { SecurityPageName } from '../../../app/types';
+import { Sourcerer } from '../sourcerer';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 interface HeaderProps {
   border?: boolean;
@@ -61,13 +66,17 @@ interface BackOptions {
   href: LinkIconProps['href'];
   text: LinkIconProps['children'];
   dataTestSubj?: string;
+  pageId: SecurityPageName;
 }
 
 export interface HeaderPageProps extends HeaderProps {
   backOptions?: BackOptions;
+  /** A component to be displayed as the back button. Used only if `backOption` is not defined */
+  backComponent?: React.ReactNode;
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   draggableArguments?: DraggableArguments;
+  hideSourcerer?: boolean;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
   title: TitleProp;
@@ -76,52 +85,71 @@ export interface HeaderPageProps extends HeaderProps {
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   backOptions,
+  backComponent,
   badgeOptions,
   border,
   children,
   draggableArguments,
+  hideSourcerer = false,
   isLoading,
   subtitle,
   subtitle2,
   title,
   titleNode,
   ...rest
-}) => (
-  <Header border={border} {...rest}>
-    <EuiFlexGroup alignItems="center">
-      <FlexItem>
-        {backOptions && (
-          <LinkBack>
-            <LinkIcon
-              dataTestSubj={backOptions.dataTestSubj}
-              href={backOptions.href}
-              iconType="arrowLeft"
-            >
-              {backOptions.text}
-            </LinkIcon>
-          </LinkBack>
-        )}
+}) => {
+  const history = useHistory();
+  const { formatUrl } = useFormatUrl(backOptions?.pageId ?? SecurityPageName.overview);
+  const goTo = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      if (backOptions) {
+        history.push(backOptions.href ?? '');
+      }
+    },
+    [backOptions, history]
+  );
+  return (
+    <Header border={border} {...rest}>
+      <EuiFlexGroup alignItems="center">
+        <FlexItem>
+          {backOptions && (
+            <LinkBack>
+              <LinkIcon
+                dataTestSubj={backOptions.dataTestSubj}
+                onClick={goTo}
+                href={formatUrl(backOptions.href ?? '')}
+                iconType="arrowLeft"
+              >
+                {backOptions.text}
+              </LinkIcon>
+            </LinkBack>
+          )}
 
-        {titleNode || (
-          <Title
-            draggableArguments={draggableArguments}
-            title={title}
-            badgeOptions={badgeOptions}
-          />
-        )}
+          {!backOptions && backComponent && <>{backComponent}</>}
 
-        {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
-        {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
-        {border && isLoading && <EuiProgress size="xs" color="accent" />}
-      </FlexItem>
+          {titleNode || (
+            <Title
+              draggableArguments={draggableArguments}
+              title={title}
+              badgeOptions={badgeOptions}
+            />
+          )}
 
-      {children && (
-        <FlexItem data-test-subj="header-page-supplements" grow={false}>
-          {children}
+          {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
+          {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
+          {border && isLoading && <EuiProgress size="xs" color="accent" />}
         </FlexItem>
-      )}
-    </EuiFlexGroup>
-  </Header>
-);
+
+        {children && (
+          <FlexItem data-test-subj="header-page-supplements" grow={false}>
+            {children}
+          </FlexItem>
+        )}
+      </EuiFlexGroup>
+      {!hideSourcerer && <Sourcerer scope={SourcererScopeName.default} />}
+    </Header>
+  );
+};
 
 export const HeaderPage = React.memo(HeaderPageComponent);

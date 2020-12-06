@@ -8,19 +8,22 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { getOr } from 'lodash/fp';
 
 import { NetworkDnsTable } from '../../components/network_dns_table';
-import { NetworkDnsQuery, HISTOGRAM_ID } from '../../containers/network_dns';
+import { useNetworkDns } from '../../containers/network_dns';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
 import { NetworkComponentQueryProps } from './types';
-import { networkModel } from '../../store';
 
 import {
   MatrixHistogramOption,
-  MatrixHisrogramConfigs,
+  MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
 import * as i18n from '../translations';
-import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
-import { HistogramType } from '../../../graphql/types';
+import { MatrixHistogram } from '../../../common/components/matrix_histogram';
+import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import { networkSelectors } from '../../store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+
+const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
@@ -33,24 +36,31 @@ const dnsStackByOptions: MatrixHistogramOption[] = [
 
 const DEFAULT_STACK_BY = 'dns.question.registered_domain';
 
-export const histogramConfigs: Omit<MatrixHisrogramConfigs, 'title'> = {
+export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
   defaultStackByOption:
     dnsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? dnsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_DNS_DATA,
-  histogramType: HistogramType.dns,
+  histogramType: MatrixHistogramType.dns,
   stackByOptions: dnsStackByOptions,
   subtitle: undefined,
 };
 
-export const DnsQueryTabBody = ({
+const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   deleteQuery,
+  docValueFields,
   endDate,
   filterQuery,
+  indexNames,
   skip,
   startDate,
   setQuery,
   type,
-}: NetworkComponentQueryProps) => {
+}) => {
+  const getNetworkDnsSelector = networkSelectors.dnsSelector();
+  const isPtrIncluded = useShallowEqualSelector(
+    (state) => getNetworkDnsSelector(state).isPtrIncluded
+  );
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
@@ -59,12 +69,25 @@ export const DnsQueryTabBody = ({
     };
   }, [deleteQuery]);
 
+  const [
+    loading,
+    { totalCount, networkDns, pageInfo, loadPage, id, inspect, isInspected, refetch },
+  ] = useNetworkDns({
+    docValueFields: docValueFields ?? [],
+    endDate,
+    filterQuery,
+    indexNames,
+    skip,
+    startDate,
+    type,
+  });
+
   const getTitle = useCallback(
     (option: MatrixHistogramOption) => i18n.DOMAINS_COUNT_BY(option.text),
     []
   );
 
-  const dnsHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+  const dnsHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       title: getTitle,
@@ -74,54 +97,36 @@ export const DnsQueryTabBody = ({
 
   return (
     <>
-      <MatrixHistogramContainer
+      <MatrixHistogram
+        id={HISTOGRAM_ID}
+        isPtrIncluded={isPtrIncluded}
+        docValueFields={docValueFields}
         endDate={endDate}
         filterQuery={filterQuery}
-        id={HISTOGRAM_ID}
+        indexNames={indexNames}
         setQuery={setQuery}
         showLegend={true}
-        sourceId="default"
         startDate={startDate}
-        type={networkModel.NetworkType.page}
         {...dnsHistogramConfigs}
       />
-      <NetworkDnsQuery
-        endDate={endDate}
-        filterQuery={filterQuery}
-        skip={skip}
-        sourceId="default"
-        startDate={startDate}
+      <NetworkDnsTableManage
+        data={networkDns}
+        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+        id={id}
+        inspect={inspect}
+        isInspect={isInspected}
+        loading={loading}
+        loadPage={loadPage}
+        refetch={refetch}
+        setQuery={setQuery}
+        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+        totalCount={totalCount}
         type={type}
-      >
-        {({
-          totalCount,
-          loading,
-          networkDns,
-          pageInfo,
-          loadPage,
-          id,
-          inspect,
-          isInspected,
-          refetch,
-        }) => (
-          <NetworkDnsTableManage
-            data={networkDns}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-            id={id}
-            inspect={inspect}
-            isInspect={isInspected}
-            loading={loading}
-            loadPage={loadPage}
-            refetch={refetch}
-            setQuery={setQuery}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-            totalCount={totalCount}
-            type={type}
-          />
-        )}
-      </NetworkDnsQuery>
+      />
     </>
   );
 };
 
-DnsQueryTabBody.displayName = 'DNSQueryTabBody';
+DnsQueryTabBodyComponent.displayName = 'DnsQueryTabBodyComponent';
+
+export const DnsQueryTabBody = React.memo(DnsQueryTabBodyComponent);

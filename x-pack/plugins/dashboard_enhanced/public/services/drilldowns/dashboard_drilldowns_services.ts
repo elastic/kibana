@@ -14,7 +14,7 @@ import {
   OPEN_FLYOUT_ADD_DRILLDOWN,
   OPEN_FLYOUT_EDIT_DRILLDOWN,
 } from './actions';
-import { DashboardToDashboardDrilldown } from './dashboard_to_dashboard_drilldown';
+import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { createStartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 
 declare module '../../../../../../src/plugins/ui_actions/public' {
@@ -44,12 +44,6 @@ export class DashboardDrilldownsService {
     { uiActionsEnhanced: uiActions }: SetupDependencies
   ) {
     const start = createStartServicesGetter(core.getStartServices);
-    const getDashboardUrlGenerator = () => {
-      const urlGenerator = start().plugins.dashboard.dashboardUrlGenerator;
-      if (!urlGenerator)
-        throw new Error('dashboardUrlGenerator is required for dashboard to dashboard drilldown');
-      return urlGenerator;
-    };
 
     const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ start });
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
@@ -57,10 +51,7 @@ export class DashboardDrilldownsService {
     const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ start });
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
 
-    const dashboardToDashboardDrilldown = new DashboardToDashboardDrilldown({
-      start,
-      getDashboardUrlGenerator,
-    });
+    const dashboardToDashboardDrilldown = new EmbeddableToDashboardDrilldown({ start });
     uiActions.registerDrilldown(dashboardToDashboardDrilldown);
   }
 }

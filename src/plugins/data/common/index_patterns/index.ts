@@ -19,3 +19,6 @@
 
 export * from './fields';
 export * from './types';
+export { IndexPatternsService } from './index_patterns';
+export type { IndexPattern } from './index_patterns';
+export * from './errors';

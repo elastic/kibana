@@ -4,27 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { skip } from 'rxjs/operators';
+import { skip, take } from 'rxjs/operators';
 import * as Rx from 'rxjs';
 import { mount } from 'enzyme';
 
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
 import { CustomTimeRangeAction } from './custom_time_range_action';
-/* eslint-disable */
 import { HelloWorldContainer } from '../../../../src/plugins/embeddable/public/lib/test_samples';
-/* eslint-enable */
 
 import {
   HelloWorldEmbeddable,
   HELLO_WORLD_EMBEDDABLE,
 } from '../../../../examples/embeddable_examples/public';
 
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { ReactElement } from 'react';
-
-jest.mock('ui/new_platform');
 
 const createOpenModalMock = () => {
   const mock = jest.fn();
@@ -32,7 +27,7 @@ const createOpenModalMock = () => {
   return mock;
 };
 
-test('Custom time range action prevents embeddable from using container time', async (done) => {
+test('Custom time range action prevents embeddable from using container time', async () => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -84,19 +79,19 @@ test('Custom time range action prevents embeddable from using container time', a
 
   findTestSubject(wrapper, 'addPerPanelTimeRangeButton').simulate('click');
 
-  const subscription = Rx.merge(container.getOutput$(), container.getInput$())
-    .pipe(skip(2))
-    .subscribe(() => {
-      expect(child1.getInput().timeRange).toEqual({ from: 'now-30days', to: 'now-29days' });
-      expect(child2.getInput().timeRange).toEqual({ from: 'now-30m', to: 'now-1m' });
-      subscription.unsubscribe();
-      done();
-    });
+  const promise = Rx.merge(container.getOutput$(), container.getOutput$(), container.getInput$())
+    .pipe(skip(2), take(1))
+    .toPromise();
 
   container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
+
+  await promise;
+
+  expect(child1.getInput().timeRange).toEqual({ from: 'now-30days', to: 'now-29days' });
+  expect(child2.getInput().timeRange).toEqual({ from: 'now-30m', to: 'now-1m' });
 });
 
-test('Removing custom time range action resets embeddable back to container time', async (done) => {
+test('Removing custom time range action resets embeddable back to container time', async () => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -158,19 +153,19 @@ test('Removing custom time range action resets embeddable back to container time
   const wrapper2 = mount(openModal2);
   findTestSubject(wrapper2, 'removePerPanelTimeRangeButton').simulate('click');
 
-  const subscription = Rx.merge(container.getOutput$(), container.getInput$())
-    .pipe(skip(2))
-    .subscribe(() => {
-      expect(child1.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
-      expect(child2.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
-      subscription.unsubscribe();
-      done();
-    });
+  const promise = Rx.merge(container.getOutput$(), container.getOutput$(), container.getInput$())
+    .pipe(skip(2), take(1))
+    .toPromise();
 
   container.updateInput({ timeRange: { from: 'now-10m', to: 'now-5m' } });
+
+  await promise;
+
+  expect(child1.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
+  expect(child2.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
 });
 
-test('Cancelling custom time range action leaves state alone', async (done) => {
+test('Cancelling custom time range action leaves state alone', async () => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -217,16 +212,16 @@ test('Cancelling custom time range action leaves state alone', async (done) => {
 
   findTestSubject(wrapper, 'cancelPerPanelTimeRangeButton').simulate('click');
 
-  const subscription = Rx.merge(container.getOutput$(), container.getInput$())
-    .pipe(skip(2))
-    .subscribe(() => {
-      expect(child1.getInput().timeRange).toEqual({ from: '1', to: '2' });
-      expect(child2.getInput().timeRange).toEqual({ from: 'now-30m', to: 'now-1m' });
-      subscription.unsubscribe();
-      done();
-    });
+  const promise = Rx.merge(container.getOutput$(), container.getOutput$(), container.getInput$())
+    .pipe(skip(2), take(1))
+    .toPromise();
 
   container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
+
+  await promise;
+
+  expect(child1.getInput().timeRange).toEqual({ from: '1', to: '2' });
+  expect(child2.getInput().timeRange).toEqual({ from: 'now-30m', to: 'now-1m' });
 });
 
 test(`badge is compatible with embeddable that inherits from parent`, async () => {

@@ -19,8 +19,6 @@
 
 export * from './service';
 
-export { SavedObjectsSchema } from './schema';
-
 export * from './import';
 
 export {
@@ -50,6 +48,7 @@ export {
 export {
   ISavedObjectsRepository,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsIncrementCounterField,
   SavedObjectsDeleteByNamespaceOptions,
 } from './service/lib/repository';
 

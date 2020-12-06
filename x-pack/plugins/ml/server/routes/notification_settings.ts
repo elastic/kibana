@@ -10,7 +10,7 @@ import { RouteInitialization } from '../types';
 /**
  * Routes for notification settings
  */
-export function notificationRoutes({ router, mlLicense }: RouteInitialization) {
+export function notificationRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup NotificationSettings
    *
@@ -26,16 +26,15 @@ export function notificationRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const params = {
-          includeDefaults: true,
-          filterPath: '**.xpack.notification',
-        };
-        const resp = await context.ml!.mlClient.callAsCurrentUser('cluster.getSettings', params);
+        const { body } = await client.asCurrentUser.cluster.getSettings({
+          include_defaults: true,
+          filter_path: '**.xpack.notification',
+        });
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));

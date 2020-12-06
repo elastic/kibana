@@ -21,11 +21,12 @@ export interface GetPingHistogramParams {
   dateEnd: string;
   filters?: string;
   monitorId?: string;
+  bucketSize?: string;
 }
 
 export interface HistogramResult {
   histogram: HistogramDataPoint[];
-  interval: string;
+  minInterval: number;
 }
 
 export interface HistogramQueryResult {

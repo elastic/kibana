@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import WebhookParamsFields from './webhook_params';
 
 describe('WebhookParamsFields renders', () => {
@@ -12,6 +12,7 @@ describe('WebhookParamsFields renders', () => {
     const actionParams = {
       body: 'test message',
     };
+
     const wrapper = mountWithIntl(
       <WebhookParamsFields
         actionParams={actionParams}
@@ -20,10 +21,10 @@ describe('WebhookParamsFields renders', () => {
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="webhookBodyEditor"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="webhookBodyEditor"]').first().prop('value')
-    ).toStrictEqual('test message');
+    expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').first().prop('value')).toStrictEqual(
+      'test message'
+    );
     expect(wrapper.find('[data-test-subj="bodyAddVariableButton"]').length > 0).toBeTruthy();
   });
 });

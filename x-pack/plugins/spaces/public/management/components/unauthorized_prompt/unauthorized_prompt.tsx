@@ -24,7 +24,7 @@ export const UnauthorizedPrompt = () => (
       <p data-test-subj="permissionDeniedMessage">
         <FormattedMessage
           id="xpack.spaces.management.unauthorizedPrompt.permissionDeniedDescription"
-          defaultMessage="You do not have permission to manage spaces."
+          defaultMessage="You don't have permission to manage spaces."
         />
       </p>
     }

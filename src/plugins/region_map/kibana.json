@@ -9,6 +9,13 @@
     "visualizations",
     "expressions",
     "mapsLegacy",
-    "data"
+    "kibanaLegacy",
+    "data",
+    "share"
+  ],
+  "requiredBundles": [
+    "kibanaUtils",
+    "charts", 
+    "visDefaultEditor"
   ]
 }

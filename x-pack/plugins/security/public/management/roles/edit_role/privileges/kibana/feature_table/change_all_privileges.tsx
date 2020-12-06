@@ -6,7 +6,14 @@
 
 import './change_all_privileges.scss';
 
-import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
+import {
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiLink,
+  EuiPopover,
+  EuiIcon,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -34,10 +41,13 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
         className={'secPrivilegeFeatureChangeAllLink'}
         data-test-subj="changeAllPrivilegesButton"
       >
-        <FormattedMessage
-          id="xpack.security.management.editRole.changeAllPrivilegesLink"
-          defaultMessage="(change all)"
-        />
+        <EuiText size="xs">
+          <FormattedMessage
+            id="xpack.security.management.editRole.changeAllPrivilegesLink"
+            defaultMessage="Bulk actions"
+          />{' '}
+          <EuiIcon size="s" type="arrowDown" />
+        </EuiText>
       </EuiLink>
     );
 
@@ -51,7 +61,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
           }}
           disabled={this.props.disabled}
         >
-          {_.capitalize(privilege.id)}
+          {_.upperFirst(privilege.id)}
         </EuiContextMenuItem>
       );
     });
@@ -65,7 +75,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
         }}
         disabled={this.props.disabled}
       >
-        {_.capitalize(NO_PRIVILEGE_VALUE)}
+        {_.upperFirst(NO_PRIVILEGE_VALUE)}
       </EuiContextMenuItem>
     );
 

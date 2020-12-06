@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment } from 'react';
-import { indexBy } from 'lodash';
+import React, { useState, Fragment, useEffect, useReducer } from 'react';
+import { keyBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPageBody,
@@ -22,13 +22,13 @@ import {
   EuiSwitch,
   EuiCallOut,
   EuiSpacer,
-  EuiBetaBadge,
   EuiButtonEmpty,
+  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-import { useAppDependencies } from '../../../app_context';
-import { hasSaveAlertsCapability } from '../../../lib/capabilities';
+import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
+import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
+import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { Alert, AlertType, ActionType } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
@@ -36,10 +36,12 @@ import {
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
-import { PLUGIN } from '../../../constants/plugin';
 import { AlertEdit } from '../../alert_form';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
+import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
+import { useKibana } from '../../../../common/lib/kibana';
+import { alertReducer } from '../../alert_form/alert_reducer';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -61,31 +63,64 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const history = useHistory();
   const {
     http,
-    toastNotifications,
-    capabilities,
+    notifications: { toasts },
+    application: { capabilities },
     alertTypeRegistry,
     actionTypeRegistry,
     uiSettings,
     docLinks,
     charts,
-    dataPlugin,
-  } = useAppDependencies();
+    data,
+    setBreadcrumbs,
+    chrome,
+  } = useKibana().services;
+  const [{}, dispatch] = useReducer(alertReducer, { alert });
+  const setInitialAlert = (value: Alert) => {
+    dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
+  };
 
-  const canSave = hasSaveAlertsCapability(capabilities);
-  const actionTypesByTypeId = indexBy(actionTypes, 'id');
+  // Set breadcrumb and page title
+  useEffect(() => {
+    setBreadcrumbs([
+      getAlertingSectionBreadcrumb('alerts'),
+      getAlertDetailsBreadcrumb(alert.id, alert.name),
+    ]);
+    chrome.docTitle.change(getCurrentDocTitle('alerts'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const canExecuteActions = hasExecuteActionsCapability(capabilities);
+  const canSaveAlert =
+    hasAllPrivilege(alert, alertType) &&
+    // if the alert has actions, can the user save the alert's action params
+    (canExecuteActions || (!canExecuteActions && alert.actions.length === 0));
+
+  const actionTypesByTypeId = keyBy(actionTypes, 'id');
   const hasEditButton =
-    canSave && alertTypeRegistry.has(alert.alertTypeId)
+    // can the user save the alert
+    canSaveAlert &&
+    // is this alert type editable from within Alerts Management
+    (alertTypeRegistry.has(alert.alertTypeId)
       ? !alertTypeRegistry.get(alert.alertTypeId).requiresAppContext
-      : false;
+      : false);
 
   const alertActions = alert.actions;
   const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
 
   const setAlert = async () => {
     history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
+  };
+
+  const getAlertStatusErrorReasonText = () => {
+    if (alert.executionStatus.error && alert.executionStatus.error.reason) {
+      return alertsErrorReasonTranslationsMapping[alert.executionStatus.error.reason];
+    } else {
+      return alertsErrorReasonTranslationsMapping.unknown;
+    }
   };
 
   return (
@@ -97,20 +132,6 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               <EuiTitle size="m">
                 <h1>
                   <span data-test-subj="alertDetailsTitle">{alert.name}</span>
-                  &emsp;
-                  <EuiBetaBadge
-                    label="Beta"
-                    tooltipContent={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
-                      {
-                        defaultMessage:
-                          '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                        values: {
-                          pluginName: PLUGIN.getI18nName(i18n),
-                        },
-                      }
-                    )}
-                  />
                 </h1>
               </EuiTitle>
             </EuiPageContentHeaderSection>
@@ -124,6 +145,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         data-test-subj="openEditAlertFlyoutButton"
                         iconType="pencil"
                         onClick={() => setEditFlyoutVisibility(true)}
+                        name="edit"
                       >
                         <FormattedMessage
                           id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
@@ -136,18 +158,23 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                             http,
                             actionTypeRegistry,
                             alertTypeRegistry,
-                            toastNotifications,
+                            toastNotifications: toasts,
                             uiSettings,
                             docLinks,
                             charts,
-                            dataFieldsFormats: dataPlugin.fieldFormats,
+                            dataFieldsFormats: data.fieldFormats,
                             reloadAlerts: setAlert,
                             capabilities,
+                            dataUi: data.ui,
+                            dataIndexPatterns: data.indexPatterns,
                           }}
                         >
                           <AlertEdit
                             initialAlert={alert}
-                            onClose={() => setEditFlyoutVisibility(false)}
+                            onClose={() => {
+                              setInitialAlert(alert);
+                              setEditFlyoutVisibility(false);
+                            }}
                           />
                         </AlertsContextProvider>
                       )}
@@ -204,7 +231,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiSwitch
                       name="disable"
-                      disabled={!canSave}
+                      disabled={!canSaveAlert}
                       checked={!isEnabled}
                       data-test-subj="disableSwitch"
                       onChange={async () => {
@@ -229,7 +256,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <EuiSwitch
                       name="mute"
                       checked={isMuted}
-                      disabled={!canSave || !isEnabled}
+                      disabled={!canSaveAlert || !isEnabled}
                       data-test-subj="muteSwitch"
                       onChange={async () => {
                         if (isMuted) {
@@ -252,10 +279,39 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
+            {!dissmissAlertErrors && alert.executionStatus.status === 'error' ? (
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiCallOut
+                    color="danger"
+                    data-test-subj="alertErrorBanner"
+                    size="s"
+                    title={getAlertStatusErrorReasonText()}
+                    iconType="alert"
+                  >
+                    <EuiText size="s" color="danger" data-test-subj="alertErrorMessageText">
+                      {alert.executionStatus.error?.message}
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    <EuiButton color="danger" onClick={() => setDissmissAlertErrors(true)}>
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.dismissButtonTitle"
+                        defaultMessage="Dismiss"
+                      />
+                    </EuiButton>
+                  </EuiCallOut>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : null}
             <EuiFlexGroup>
               <EuiFlexItem>
                 {alert.enabled ? (
-                  <AlertInstancesRouteWithApi requestRefresh={requestRefresh} alert={alert} />
+                  <AlertInstancesRouteWithApi
+                    requestRefresh={requestRefresh}
+                    alert={alert}
+                    alertType={alertType}
+                    readOnly={!canSaveAlert}
+                  />
                 ) : (
                   <Fragment>
                     <EuiSpacer />

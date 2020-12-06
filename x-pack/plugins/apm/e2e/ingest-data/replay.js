@@ -35,6 +35,8 @@ const pLimit = require('p-limit');
 const pRetry = require('p-retry');
 const { argv } = require('yargs');
 const ora = require('ora');
+const userAgents = require('./user_agents');
+const userIps = require('./rum_ips');
 
 const APM_SERVER_URL = argv.serverUrl;
 const SECRET_TOKEN = argv.secretToken;
@@ -66,17 +68,42 @@ function incrementSpinnerCount({ success }) {
 
   spinner.text = `Remaining: ${remaining}. Succeeded: ${requestProgress.succeeded}. Failed: ${requestProgress.failed}.`;
 }
+let iterIndex = 0;
 
-async function insertItem(item) {
+function setItemMetaAndHeaders(item) {
+  const headers = {
+    'content-type': 'application/x-ndjson',
+  };
+
+  if (SECRET_TOKEN) {
+    headers.Authorization = `Bearer ${SECRET_TOKEN}`;
+  }
+
+  if (item.url === '/intake/v2/rum/events') {
+    if (iterIndex === userAgents.length) {
+      // set some event agent to opbean
+      setRumAgent(item);
+      iterIndex = 0;
+    }
+    headers['User-Agent'] = userAgents[iterIndex];
+    headers['X-Forwarded-For'] = userIps[iterIndex];
+    iterIndex++;
+  }
+  return headers;
+}
+
+function setRumAgent(item) {
+  if (item.body) {
+    item.body = item.body.replace(
+      '"name":"client"',
+      '"name":"elastic-frontend"'
+    );
+  }
+}
+
+async function insertItem(item, headers) {
   try {
     const url = `${APM_SERVER_URL}${item.url}`;
-    const headers = {
-      'content-type': 'application/x-ndjson',
-    };
-
-    if (SECRET_TOKEN) {
-      headers.Authorization = `Bearer ${SECRET_TOKEN}`;
-    }
 
     await axios({
       method: item.method,
@@ -99,7 +126,11 @@ async function init() {
     .split('\n')
     .filter((item) => item)
     .map((item) => JSON.parse(item))
-    .filter((item) => item.url === '/intake/v2/events');
+    .filter((item) => {
+      return (
+        item.url === '/intake/v2/events' || item.url === '/intake/v2/rum/events'
+      );
+    });
 
   spinner.start();
   requestProgress.total = items.length;
@@ -108,8 +139,11 @@ async function init() {
   await Promise.all(
     items.map(async (item) => {
       try {
+        const headers = setItemMetaAndHeaders(item);
         // retry 5 times with exponential backoff
-        await pRetry(() => limit(() => insertItem(item)), { retries: 5 });
+        await pRetry(() => limit(() => insertItem(item, headers)), {
+          retries: 5,
+        });
         incrementSpinnerCount({ success: true });
       } catch (e) {
         incrementSpinnerCount({ success: false });

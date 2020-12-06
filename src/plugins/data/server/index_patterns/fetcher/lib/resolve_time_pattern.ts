@@ -20,7 +20,7 @@
 import { chain } from 'lodash';
 import moment from 'moment';
 
-import { APICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { timePatternToWildcard } from './time_pattern_to_wildcard';
 import { callIndexAliasApi, IndicesAliasResponse } from './es_api';
@@ -36,17 +36,17 @@ import { callIndexAliasApi, IndicesAliasResponse } from './es_api';
  *                            and the indices that actually match the time
  *                            pattern (matches);
  */
-export async function resolveTimePattern(callCluster: APICaller, timePattern: string) {
+export async function resolveTimePattern(callCluster: ElasticsearchClient, timePattern: string) {
   const aliases = await callIndexAliasApi(callCluster, timePatternToWildcard(timePattern));
 
-  const allIndexDetails = chain<IndicesAliasResponse>(aliases)
+  const allIndexDetails = chain<IndicesAliasResponse>(aliases.body)
     .reduce(
       (acc: string[], index: any, indexName: string) =>
         acc.concat(indexName, Object.keys(index.aliases || {})),
       []
     )
     .sortBy((indexName: string) => indexName)
-    .uniq(true)
+    .sortedUniq()
     .map((indexName) => {
       const parsed = moment(indexName, timePattern, true);
       if (!parsed.isValid()) {
@@ -65,7 +65,7 @@ export async function resolveTimePattern(callCluster: APICaller, timePattern: st
         isMatch: indexName === parsed.format(timePattern),
       };
     })
-    .sortByOrder(['valid', 'order'], ['desc', 'desc'])
+    .orderBy(['valid', 'order'], ['desc', 'desc'])
     .value();
 
   return {

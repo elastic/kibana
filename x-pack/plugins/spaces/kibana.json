@@ -8,10 +8,15 @@
     "advancedSettings",
     "home",
     "management",
-    "security",
     "usageCollection",
     "savedObjectsManagement"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "extraPublicDirs": ["common"],
+  "requiredBundles": [
+    "kibanaReact",
+    "savedObjectsManagement",
+    "home"
+  ]
 }

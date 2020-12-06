@@ -13,7 +13,7 @@ import { Mappings } from './mappings';
  */
 export interface TemplateSerialized {
   index_patterns: string[];
-  template: {
+  template?: {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
@@ -21,6 +21,8 @@ export interface TemplateSerialized {
   composed_of?: string[];
   version?: number;
   priority?: number;
+  _meta?: { [key: string]: any };
+  data_stream?: {};
 }
 
 /**
@@ -31,23 +33,28 @@ export interface TemplateSerialized {
 export interface TemplateDeserialized {
   name: string;
   indexPatterns: string[];
-  template: {
+  template?: {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
   };
-  composedOf?: string[]; // Used on composable index template
+  composedOf?: string[]; // Composable template only
   version?: number;
-  priority?: number;
-  order?: number; // Used on legacy index template
+  priority?: number; // Composable template only
+  order?: number; // Legacy template only
   ilmPolicy?: {
     name: string;
   };
+  _meta?: { [key: string]: any }; // Composable template only
+  dataStream?: {}; // Composable template only
   _kbnMeta: {
-    isManaged: boolean;
+    type: TemplateType;
+    hasDatastream: boolean;
     isLegacy?: boolean;
   };
 }
+
+export type TemplateType = 'default' | 'managed' | 'cloudManaged' | 'system';
 
 export interface TemplateFromEs {
   name: string;
@@ -72,7 +79,8 @@ export interface TemplateListItem {
     name: string;
   };
   _kbnMeta: {
-    isManaged: boolean;
+    type: TemplateType;
+    hasDatastream: boolean;
     isLegacy?: boolean;
   };
 }

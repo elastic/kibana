@@ -49,6 +49,16 @@ export const esFilters = {
   isFilterDisabled,
 };
 
+/**
+ * Exporters (CSV)
+ */
+
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export const exporters = {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+};
+
 /*
  * esQuery and esKuery:
  */
@@ -86,7 +96,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -97,17 +106,14 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-  serializeFieldFormat,
 } from '../common/field_formats';
 
 export const fieldFormats = {
   FieldFormatsRegistry,
   FieldFormat,
-  serializeFieldFormat,
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -137,16 +143,19 @@ export {
   IndexPatternsFetcher,
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
+  FieldDescriptor,
+  mergeCapabilitiesWithFields,
+  getCapabilitiesForRollupIndices,
 } from './index_patterns';
 
 export {
-  IIndexPattern,
   IFieldType,
   IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
   UI_SETTINGS,
+  IndexPattern,
 } from '../common';
 
 /**
@@ -154,42 +163,114 @@ export {
  */
 
 import {
+  // aggs
+  CidrMask,
+  intervalOptions,
+  isNumberType,
+  isStringType,
+  isType,
+  parentPipelineType,
+  propFilter,
+  siblingPipelineType,
+  termsAggFilter,
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
+  Ipv4Address,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
+  // expressions utils
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
+  calcAutoIntervalLessThan,
 } from '../common';
 
-export { ParsedInterval } from '../common';
+export {
+  // aggs
+  AggGroupLabels,
+  AggGroupName,
+  AggGroupNames,
+  AggParam,
+  AggParamOption,
+  AggParamType,
+  AggConfigOptions,
+  BUCKET_TYPES,
+  EsaggsExpressionFunctionDefinition,
+  IAggConfig,
+  IAggConfigs,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  METRIC_TYPES,
+  OptionedParamType,
+  OptionedValueProp,
+  ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
+  // search
+  ISearchOptions,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  ES_SEARCH_STRATEGY,
+  // tabify
+  TabbedAggColumn,
+  TabbedAggRow,
+  TabbedTable,
+} from '../common';
 
 export {
-  ISearch,
-  ISearchCancel,
-  ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
-  ISearchContext,
-  TSearchStrategyProvider,
+  ISearchStrategy,
+  ISearchSetup,
+  ISearchStart,
+  SearchStrategyDependencies,
   getDefaultSearchParams,
+  getShardTimeout,
   getTotalLoaded,
+  toKibanaSearchResponse,
+  shimHitsTotal,
+  usageProvider,
+  searchUsageObserver,
+  shimAbortSignal,
+  SearchUsage,
 } from './search';
 
 // Search namespace
 export const search = {
   aggs: {
+    CidrMask,
     dateHistogramInterval,
+    intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
+    Ipv4Address,
+    isNumberType,
+    isStringType,
+    isType,
     isValidEsInterval,
     isValidInterval,
+    parentPipelineType,
     parseEsInterval,
     parseInterval,
+    propFilter,
+    siblingPipelineType,
+    termsAggFilter,
     toAbsoluteDates,
+    calcAutoIntervalLessThan,
   },
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
 };
 
 /**
@@ -202,6 +283,7 @@ export {
   castEsToKbnFieldTypeName,
   // query
   Filter,
+  getTime,
   Query,
   // timefilter
   RefreshInterval,
@@ -228,6 +310,9 @@ export {
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     autocomplete: true,
+    search: true,
   },
   schema: configSchema,
 };
+
+export type { IndexPatternsService } from './index_patterns';

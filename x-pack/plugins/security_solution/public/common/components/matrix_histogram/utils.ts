@@ -8,14 +8,14 @@ import { get, groupBy, map, toPairs } from 'lodash/fp';
 
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
 import { MatrixHistogramMappingTypes, BarchartConfigs } from './types';
-import { MatrixOverTimeHistogramData } from '../../../graphql/types';
+import { MatrixHistogramData } from '../../../../common/search_strategy';
 import { histogramDateTimeFormatter } from '../utils';
 
 interface GetBarchartConfigsProps {
   chartHeight?: number;
-  from: number;
+  from: string;
   legendPosition?: Position;
-  to: number;
+  to: string;
   onBrushEnd: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
@@ -84,14 +84,14 @@ export const defaultLegendColors = [
 
 export const formatToChartDataItem = ([key, value]: [
   string,
-  MatrixOverTimeHistogramData[]
+  MatrixHistogramData[]
 ]): ChartSeriesData => ({
   key,
   value,
 });
 
 export const getCustomChartData = (
-  data: MatrixOverTimeHistogramData[] | null,
+  data: MatrixHistogramData[] | null,
   mapping?: MatrixHistogramMappingTypes
 ): ChartSeriesData[] => {
   if (!data) return [];

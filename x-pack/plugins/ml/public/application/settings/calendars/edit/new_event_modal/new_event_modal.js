@@ -24,7 +24,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import moment from 'moment';
-import { TIME_FORMAT } from '../events_table';
+import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 import { generateTempId } from '../utils';
 
 import { i18n } from '@kbn/i18n';
@@ -257,7 +257,12 @@ export class NewEventModal extends Component {
 
     return (
       <Fragment>
-        <EuiModal onClose={closeModal} initialFocus="[name=eventDescription]" maxWidth={false}>
+        <EuiModal
+          onClose={closeModal}
+          initialFocus="[name=eventDescription]"
+          maxWidth={false}
+          data-test-subj={'mlCalendarEventForm'}
+        >
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
@@ -283,6 +288,7 @@ export class NewEventModal extends Component {
                   onChange={this.onDescriptionChange}
                   isInvalid={!description}
                   fullWidth
+                  data-test-subj={'mlCalendarEventDescriptionInput'}
                 />
               </EuiFormRow>
 
@@ -293,13 +299,18 @@ export class NewEventModal extends Component {
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeModal}>
+            <EuiButtonEmpty onClick={closeModal} data-test-subj={'mlCalendarCancelEventButton'}>
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.newEventModal.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
-            <EuiButton onClick={this.handleAddEvent} fill disabled={!description}>
+            <EuiButton
+              onClick={this.handleAddEvent}
+              fill
+              disabled={!description}
+              data-test-subj={'mlCalendarAddEventButton'}
+            >
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.newEventModal.addButtonLabel"
                 defaultMessage="Add"

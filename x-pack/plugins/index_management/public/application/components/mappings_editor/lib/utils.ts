@@ -18,6 +18,8 @@ import {
   ParameterName,
   ComboBoxOption,
   GenericObject,
+  RuntimeFields,
+  NormalizedRuntimeFields,
 } from '../types';
 
 import {
@@ -30,7 +32,6 @@ import {
   MAIN_DATA_TYPE_DEFINITION,
 } from '../constants';
 
-import { State } from '../reducer';
 import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
 
@@ -72,13 +73,23 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
   };
 };
 
-export const getTypeLabelFromType = (type: DataType) =>
-  TYPE_DEFINITION[type] ? TYPE_DEFINITION[type].label : `${TYPE_DEFINITION.other.label}: ${type}`;
+const getTypeLabel = (type?: DataType): string => {
+  return type && TYPE_DEFINITION[type]
+    ? TYPE_DEFINITION[type].label
+    : `${TYPE_DEFINITION.other.label}: ${type}`;
+};
+
+export const getTypeLabelFromField = (field: { type: DataType }) => {
+  const { type } = field;
+  const typeLabel = getTypeLabel(type);
+
+  return typeLabel;
+};
 
 export const getFieldConfig = <T = unknown>(
   param: ParameterName,
   prop?: string
-): FieldConfig<any, T> => {
+): FieldConfig<T> => {
   if (prop !== undefined) {
     if (
       !(PARAMETERS_DEFINITION[param] as any).props ||
@@ -200,7 +211,7 @@ export const getTypeMetaFromSource = (
  *
  * @param fieldsToNormalize The "properties" object from the mappings (or "fields" object for `text` and `keyword` types)
  */
-export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
+export const normalize = (fieldsToNormalize: Fields = {}): NormalizedFields => {
   let maxNestedDepth = 0;
 
   const normalizeFields = (
@@ -517,24 +528,6 @@ export const shouldDeleteChildFieldsAfterTypeChange = (
 export const canUseMappingsEditor = (maxNestedDepth: number) =>
   maxNestedDepth < MAX_DEPTH_DEFAULT_EDITOR;
 
-const stateWithValidity: Array<keyof State> = ['configuration', 'fieldsJsonEditor', 'fieldForm'];
-
-export const isStateValid = (state: State): boolean | undefined =>
-  Object.entries(state)
-    .filter(([key]) => stateWithValidity.includes(key as keyof State))
-    .reduce((isValid, { 1: value }) => {
-      if (value === undefined) {
-        return isValid;
-      }
-
-      // If one section validity of the state is "undefined", the mappings validity is also "undefined"
-      if (isValid === undefined || value.isValid === undefined) {
-        return undefined;
-      }
-
-      return isValid && value.isValid;
-    }, true as undefined | boolean);
-
 /**
  * This helper removes all the keys on an object with an "undefined" value.
  * To avoid sending updates from the mappings editor with this type of object:
@@ -570,3 +563,29 @@ export const stripUndefinedValues = <T = GenericObject>(obj: GenericObject, recu
       ? { ...acc, [key]: stripUndefinedValues(value, recursive) }
       : { ...acc, [key]: value };
   }, {} as T);
+
+export const normalizeRuntimeFields = (fields: RuntimeFields = {}): NormalizedRuntimeFields => {
+  return Object.entries(fields).reduce((acc, [name, field]) => {
+    const id = getUniqueId();
+    return {
+      ...acc,
+      [id]: {
+        id,
+        source: {
+          name,
+          ...field,
+        },
+      },
+    };
+  }, {} as NormalizedRuntimeFields);
+};
+
+export const deNormalizeRuntimeFields = (fields: NormalizedRuntimeFields): RuntimeFields => {
+  return Object.values(fields).reduce((acc, { source }) => {
+    const { name, ...rest } = source;
+    return {
+      ...acc,
+      [name]: rest,
+    };
+  }, {} as RuntimeFields);
+};

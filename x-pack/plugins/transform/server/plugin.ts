@@ -6,9 +6,9 @@
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   Plugin,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   Logger,
   PluginInitializerContext,
 } from 'src/core/server';
@@ -23,7 +23,7 @@ import { License } from './services';
 declare module 'kibana/server' {
   interface RequestHandlerContext {
     transform?: {
-      dataClient: IScopedClusterClient;
+      dataClient: ILegacyScopedClusterClient;
     };
   }
 }
@@ -50,7 +50,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
   private readonly logger: Logger;
-  private transformESClient?: ICustomClusterClient;
+  private transformESClient?: ILegacyCustomClusterClient;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -58,7 +58,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     this.license = new License();
   }
 
-  setup({ http, getStartServices }: CoreSetup, { licensing }: Dependencies): {} {
+  setup({ http, getStartServices }: CoreSetup, { licensing, features }: Dependencies): {} {
     const router = http.createRouter();
 
     this.license.setup(
@@ -74,6 +74,20 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
         logger: this.logger,
       }
     );
+
+    features.registerElasticsearchFeature({
+      id: PLUGIN.id,
+      management: {
+        data: [PLUGIN.id],
+      },
+      catalogue: [PLUGIN.id],
+      privileges: [
+        {
+          requiredClusterPrivileges: ['monitor_transform'],
+          ui: [],
+        },
+      ],
+    });
 
     this.apiRoutes.setup({
       router,

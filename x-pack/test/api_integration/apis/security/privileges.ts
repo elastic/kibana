@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import util from 'util';
-import { isEqual } from 'lodash';
+import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect/expect.js';
 import { RawKibanaPrivileges } from '../../../../plugins/security/common/model';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
             advancedSettings: ['all', 'read'],
             indexPatterns: ['all', 'read'],
             savedObjectsManagement: ['all', 'read'],
+            savedObjectsTagging: ['all', 'read'],
             timelion: ['all', 'read'],
             graph: ['all', 'read'],
             maps: ['all', 'read'],
@@ -35,12 +36,15 @@ export default function ({ getService }: FtrProviderContext) {
             logs: ['all', 'read'],
             uptime: ['all', 'read'],
             apm: ['all', 'read'],
+            ml: ['all', 'read'],
             siem: ['all', 'read'],
-            ingestManager: ['all', 'read'],
+            fleet: ['all', 'read'],
+            stackAlerts: ['all', 'read'],
+            actions: ['all', 'read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
-          reserved: ['ml_user', 'ml_admin', 'monitoring'],
+          reserved: ['ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
         };
 
         await supertest
@@ -53,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
             // supertest uses assert.deepStrictEqual.
             // expect.js doesn't help us here.
             // and lodash's isEqual doesn't know how to compare Sets.
-            const success = isEqual(res.body, expected, (value, other, key) => {
+            const success = isEqualWith(res.body, expected, (value, other, key) => {
               if (Array.isArray(value) && Array.isArray(other)) {
                 if (key === 'reserved') {
                   // order does not matter for the reserved privilege set.

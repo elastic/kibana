@@ -6,40 +6,39 @@
 
 import {
   EuiButtonEmpty,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiTitle,
-  EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import React from 'react';
-import styled from 'styled-components';
 import { first } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { px, unit, units } from '../../../../style/variables';
+import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { history } from '../../../../utils/history';
 import { ErrorMetadata } from '../../../shared/MetadataTable/ErrorMetadata';
 import { Stacktrace } from '../../../shared/Stacktrace';
+import { Summary } from '../../../shared/Summary';
+import { HttpInfoSummaryItem } from '../../../shared/Summary/HttpInfoSummaryItem';
+import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import {
   ErrorTab,
   exceptionStacktraceTab,
   getTabs,
   logStacktraceTab,
 } from './ErrorTabs';
-import { Summary } from '../../../shared/Summary';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
-import { HttpInfoSummaryItem } from '../../../shared/Summary/HttpInfoSummaryItem';
-import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
-import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
 import { ExceptionStacktrace } from './ExceptionStacktrace';
 
 const HeaderContainer = styled.div`
@@ -56,7 +55,7 @@ const TransactionLinkName = styled.div`
 `;
 
 interface Props {
-  errorGroup: ErrorGroupAPIResponse;
+  errorGroup: APIReturnType<'GET /api/apm/services/{serviceName}/errors/{groupId}'>;
   urlParams: IUrlParams;
   location: Location;
 }
@@ -65,12 +64,13 @@ interface Props {
 function getCurrentTab(
   tabs: ErrorTab[] = [],
   currentTabKey: string | undefined
-) {
+): ErrorTab | {} {
   const selectedTab = tabs.find(({ key }) => key === currentTabKey);
   return selectedTab ? selectedTab : first(tabs) || {};
 }
 
 export function DetailView({ errorGroup, urlParams, location }: Props) {
+  const history = useHistory();
   const { transaction, error, occurrencesCount } = errorGroup;
 
   if (!error) {
@@ -78,7 +78,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   }
 
   const tabs = getTabs(error);
-  const currentTab = getCurrentTab(tabs, urlParams.detailTab);
+  const currentTab = getCurrentTab(tabs, urlParams.detailTab) as ErrorTab;
 
   const errorUrl = error.error.page?.url || error.url?.full;
 

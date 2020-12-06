@@ -7,18 +7,24 @@
 import * as t from 'io-ts';
 
 // IO type for validation
-export const MonitorErrorType = t.partial({
-  code: t.number,
-  message: t.string,
-  type: t.string,
-});
+export const PingErrorType = t.intersection([
+  t.partial({
+    code: t.string,
+    id: t.string,
+    stack_trace: t.string,
+    type: t.string,
+  }),
+  t.type({
+    // this is _always_ on the error field
+    message: t.string,
+  }),
+]);
 
 // Typescript type for type checking
-export type MonitorError = t.TypeOf<typeof MonitorErrorType>;
+export type PingError = t.TypeOf<typeof PingErrorType>;
 
 export const MonitorDetailsType = t.intersection([
   t.type({ monitorId: t.string }),
-  t.partial({ error: MonitorErrorType }),
-  t.partial({ timestamp: t.string }),
+  t.partial({ error: PingErrorType, timestamp: t.string, alerts: t.unknown }),
 ]);
 export type MonitorDetails = t.TypeOf<typeof MonitorDetailsType>;

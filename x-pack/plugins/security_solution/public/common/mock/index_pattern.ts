@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const mockIndexPattern = {
+import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+
+export const mockIndexPattern: IIndexPattern = {
   fields: [
     {
       name: '@timestamp',
@@ -93,3 +95,5 @@ export const mockIndexPattern = {
   ],
   title: 'filebeat-*,auditbeat-*,packetbeat-*',
 };
+
+export const mockIndexNames = ['filebeat-*', 'auditbeat-*', 'packetbeat-*'];

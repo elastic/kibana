@@ -17,12 +17,12 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
   extraAction={
     <div>
       <EuiToolTip
-        content="Enable aggregation"
+        content="Enable   aggregation"
         delay="regular"
         position="bottom"
       >
         <EuiButtonIcon
-          aria-label="Enable aggregation"
+          aria-label="Enable   aggregation"
           color="text"
           data-test-subj="toggleDisableAggregationBtn enable"
           iconType="eyeClosed"
@@ -33,6 +33,8 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
   }
   id="visEditorAggAccordion1"
   initialIsOpen={true}
+  isLoading={false}
+  isLoadingMessage={false}
   onToggle={[Function]}
   paddingSize="none"
 >

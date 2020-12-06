@@ -6,9 +6,10 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
-import { SlackActionParams, SlackActionConnector } from '../types';
+import { SlackActionParams, SlackSecrets, SlackActionConnector } from '../types';
+import { isValidUrl } from '../../../lib/value_validators';
 
-export function getActionType(): ActionTypeModel<SlackActionConnector, SlackActionParams> {
+export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackActionParams> {
   return {
     id: '.slack',
     iconClass: 'logoSlack',
@@ -39,6 +40,26 @@ export function getActionType(): ActionTypeModel<SlackActionConnector, SlackActi
             }
           )
         );
+      } else if (action.secrets.webhookUrl) {
+        if (!isValidUrl(action.secrets.webhookUrl)) {
+          errors.webhookUrl.push(
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.error.invalidWebhookUrlText',
+              {
+                defaultMessage: 'Webhook URL is invalid.',
+              }
+            )
+          );
+        } else if (!isValidUrl(action.secrets.webhookUrl, 'https:')) {
+          errors.webhookUrl.push(
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.error.requireHttpsWebhookUrlText',
+              {
+                defaultMessage: 'Webhook URL must start with https://.',
+              }
+            )
+          );
+        }
       }
       return validationResult;
     },

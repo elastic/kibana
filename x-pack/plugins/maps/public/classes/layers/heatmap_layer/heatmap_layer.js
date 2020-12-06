@@ -31,6 +31,18 @@ export class HeatmapLayer extends VectorLayer {
     }
   }
 
+  getStyleForEditing() {
+    return this._style;
+  }
+
+  getStyle() {
+    return this._style;
+  }
+
+  getCurrentStyle() {
+    return this._style;
+  }
+
   _getPropKeyOfSelectedMetric() {
     const metricfields = this.getSource().getMetricFields();
     return metricfields[0].getName();
@@ -91,7 +103,7 @@ export class HeatmapLayer extends VectorLayer {
       resolution: this.getSource().getGridResolution(),
     });
     mbMap.setPaintProperty(heatmapLayerId, 'heatmap-opacity', this.getAlpha());
-    mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    mbMap.setLayerZoomRange(heatmapLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   getLayerTypeIconName() {

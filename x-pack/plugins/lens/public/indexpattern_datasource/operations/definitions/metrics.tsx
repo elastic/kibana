@@ -6,27 +6,49 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn } from './column_types';
+import { getInvalidFieldMessage } from './helpers';
+import {
+  FormattedIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  BaseIndexPatternColumn,
+} from './column_types';
+import {
+  adjustTimeScaleLabelSuffix,
+  adjustTimeScaleOnOtherColumnChange,
+} from '../time_scale_utils';
 
-type MetricColumn<T> = FormattedIndexPatternColumn & {
-  operationType: T;
-};
+type MetricColumn<T> = FormattedIndexPatternColumn &
+  FieldBasedIndexPatternColumn & {
+    operationType: T;
+  };
 
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
   displayName,
   ofName,
   priority,
+  optionalTimeScaling,
 }: {
   type: T['operationType'];
   displayName: string;
   ofName: (name: string) => string;
   priority?: number;
+  optionalTimeScaling?: boolean;
 }) {
+  const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
+    const rawLabel = ofName(name);
+    if (!optionalTimeScaling) {
+      return rawLabel;
+    }
+    return adjustTimeScaleLabelSuffix(rawLabel, undefined, column?.timeScale);
+  };
+
   return {
     type,
     priority,
     displayName,
+    input: 'field',
+    timeScalingMode: optionalTimeScaling ? 'optional' : undefined,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
         fieldType === 'number' &&
@@ -41,7 +63,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       }
     },
     isTransferable: (column, newIndexPattern) => {
-      const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
+      const newField = newIndexPattern.getFieldByName(column.sourceField);
 
       return Boolean(
         newField &&
@@ -50,25 +72,29 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    buildColumn: ({ suggestedPriority, field, previousColumn }) => ({
-      label: ofName(field.name),
+    onOtherColumnChanged: (column, otherColumns) =>
+      optionalTimeScaling ? adjustTimeScaleOnOtherColumnChange(column, otherColumns) : column,
+    getDefaultLabel: (column, indexPattern, columns) =>
+      labelLookup(indexPattern.getFieldByName(column.sourceField)!.displayName, column),
+    buildColumn: ({ field, previousColumn }) => ({
+      label: labelLookup(field.displayName, previousColumn),
       dataType: 'number',
       operationType: type,
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
+      timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
       params:
         previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
     }),
-    onFieldChange: (oldColumn, indexPattern, field) => {
+    onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,
-        label: ofName(field.name),
+        label: labelLookup(field.displayName, oldColumn),
         sourceField: field.name,
       };
     },
-    toEsAggsConfig: (column, columnId) => ({
+    toEsAggsConfig: (column, columnId, _indexPattern) => ({
       id: columnId,
       enabled: true,
       type: column.operationType,
@@ -78,13 +104,16 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         missing: 0,
       },
     }),
-  } as OperationDefinition<T>;
+    getErrorMessage: (layer, columnId, indexPattern) =>
+      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+  } as OperationDefinition<T, 'field'>;
 }
 
 export type SumIndexPatternColumn = MetricColumn<'sum'>;
 export type AvgIndexPatternColumn = MetricColumn<'avg'>;
 export type MinIndexPatternColumn = MetricColumn<'min'>;
 export type MaxIndexPatternColumn = MetricColumn<'max'>;
+export type MedianIndexPatternColumn = MetricColumn<'median'>;
 
 export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
   type: 'min',
@@ -132,6 +161,19 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
   ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.sumOf', {
       defaultMessage: 'Sum of {name}',
+      values: { name },
+    }),
+  optionalTimeScaling: true,
+});
+
+export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
+  type: 'median',
+  displayName: i18n.translate('xpack.lens.indexPattern.median', {
+    defaultMessage: 'Median',
+  }),
+  ofName: (name) =>
+    i18n.translate('xpack.lens.indexPattern.medianOf', {
+      defaultMessage: 'Median of {name}',
       values: { name },
     }),
 });

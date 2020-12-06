@@ -31,31 +31,36 @@ export const SiemNavigationComponent: React.FC<
   flowTarget,
   state,
 }) => {
-  const { chrome } = useKibana().services;
+  const {
+    chrome,
+    application: { getUrlForApp },
+  } = useKibana().services;
 
   useEffect(() => {
-    if (pathName) {
+    if (pathName || pageName) {
       setBreadcrumbs(
         {
-          query: urlState.query,
           detailName,
           filters: urlState.filters,
+          flowTarget,
           navTabs,
           pageName,
           pathName,
+          query: urlState.query,
           savedQuery: urlState.savedQuery,
           search,
-          tabName,
-          flowTarget,
-          timerange: urlState.timerange,
-          timeline: urlState.timeline,
+          sourcerer: urlState.sourcerer,
           state,
+          tabName,
+          timeline: urlState.timeline,
+          timerange: urlState.timerange,
         },
-        chrome
+        chrome,
+        getUrlForApp
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chrome, pathName, search, navTabs, urlState, state]);
+  }, [chrome, pageName, pathName, search, navTabs, urlState, state]);
 
   return (
     <TabNavigation
@@ -65,6 +70,7 @@ export const SiemNavigationComponent: React.FC<
       navTabs={navTabs}
       pageName={pageName}
       pathName={pathName}
+      sourcerer={urlState.sourcerer}
       savedQuery={urlState.savedQuery}
       tabName={tabName}
       timeline={urlState.timeline}
@@ -97,4 +103,6 @@ const SiemNavigationContainer: React.FC<SiemNavigationProps> = (props) => {
   return <SiemNavigationRedux {...stateNavReduxProps} />;
 };
 
-export const SiemNavigation = SiemNavigationContainer;
+export const SiemNavigation = React.memo(SiemNavigationContainer, (prevProps, nextProps) =>
+  deepEqual(prevProps.navTabs, nextProps.navTabs)
+);

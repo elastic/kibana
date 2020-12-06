@@ -19,6 +19,8 @@
 
 import _ from 'lodash';
 import { buildAggBody } from './agg_body';
+import { search } from '../../../../../../plugins/data/server';
+const { dateHistogramInterval } = search.aggs;
 
 export default function createDateAgg(config, tlConfig, scriptedFields) {
   const dateAgg = {
@@ -26,13 +28,13 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
       meta: { type: 'time_buckets' },
       date_histogram: {
         field: config.timefield,
-        interval: config.interval,
         time_zone: tlConfig.time.timezone,
         extended_bounds: {
           min: tlConfig.time.from,
           max: tlConfig.time.to,
         },
         min_doc_count: 0,
+        ...dateHistogramInterval(config.interval),
       },
     },
   };

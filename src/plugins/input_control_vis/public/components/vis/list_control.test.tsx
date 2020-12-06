@@ -19,7 +19,7 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 
 import { ListControl } from './list_control';
 
@@ -49,7 +49,7 @@ test('renders ListControl', () => {
       intl={{} as any}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('disableMsg', () => {
@@ -66,5 +66,5 @@ test('disableMsg', () => {
       intl={{} as any}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });

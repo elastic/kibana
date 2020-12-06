@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { PingListComponent, toggleDetails } from '../ping_list';
+import { shallowWithIntl } from '@kbn/test/jest';
+import { PingListComponent, rowShouldExpand, toggleDetails } from '../ping_list';
 import { Ping, PingsResponse } from '../../../../../common/runtime_types';
 import { ExpandedRowMap } from '../../../overview/monitor_list/types';
 
@@ -182,6 +182,7 @@ describe('PingList component', () => {
           to: 'now',
         }}
         getPings={jest.fn()}
+        pruneJourneysCallback={jest.fn()}
         lastRefresh={123}
         loading={false}
         locations={[]}
@@ -272,6 +273,15 @@ describe('PingList component', () => {
           }
         />
       `);
+    });
+
+    describe('rowShouldExpand', () => {
+      // TODO: expand for all cases
+      it('returns true for browser monitors', () => {
+        const ping = pings[0];
+        ping.monitor.type = 'browser';
+        expect(rowShouldExpand(ping)).toBe(true);
+      });
     });
   });
 });

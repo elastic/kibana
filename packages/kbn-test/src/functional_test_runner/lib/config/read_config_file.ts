@@ -21,7 +21,6 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { defaultsDeep } from 'lodash';
 
 import { Config } from './config';
-import { transformDeprecations } from './transform_deprecations';
 
 const cache = new WeakMap();
 
@@ -52,8 +51,7 @@ async function getSettingsFromFile(log: ToolingLog, path: string, settingOverrid
     await cache.get(configProvider)!
   );
 
-  const logDeprecation = (error: string | Error) => log.error(error);
-  return transformDeprecations(settingsWithDefaults, logDeprecation);
+  return settingsWithDefaults;
 }
 
 export async function readConfigFile(log: ToolingLog, path: string, settingOverrides: any = {}) {

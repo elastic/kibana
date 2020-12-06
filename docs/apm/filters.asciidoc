@@ -69,7 +69,7 @@ the host filter will still be applied.
 
 These filters are very useful for quickly and easily removing noise from your data.
 With just a click, you can filter your transactions by the transaction result,
-host, container ID, and more.
+host, container ID, Kubernetes pod, and more.
 
 [role="screenshot"]
 image::apm/images/local-filter.png[Local filters available in the APM app in Kibana]

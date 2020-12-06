@@ -15,6 +15,7 @@ import {
   SimilarityParameter,
   TermVectorParameter,
   MaxShingleSizeParameter,
+  MetaParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
@@ -26,6 +27,7 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'similarity':
     case 'term_vector':
+    case 'meta':
     case 'max_shingle_size': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
@@ -65,6 +67,8 @@ export const SearchAsYouType = React.memo(({ field }: Props) => {
         />
 
         <StoreParameter />
+
+        <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
       </AdvancedParametersSection>
     </>
   );

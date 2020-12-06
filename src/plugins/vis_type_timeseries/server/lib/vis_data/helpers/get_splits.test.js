@@ -89,6 +89,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:example-01',
         key: 'example-01',
         label: 'example-01',
+        labelFormatted: '',
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
         timeseries: { buckets: [] },
@@ -98,6 +99,125 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:example-02',
         key: 'example-02',
         label: 'example-02',
+        labelFormatted: '',
+        meta: { bucketSize: 10 },
+        color: 'rgb(255, 0, 0)',
+        timeseries: { buckets: [] },
+        SIBAGG: { value: 2 },
+      },
+    ]);
+  });
+
+  test('should return a splits for terms group with label formatted by {{key}} placeholder', () => {
+    const resp = {
+      aggregations: {
+        SERIES: {
+          buckets: [
+            {
+              key: 'example-01',
+              timeseries: { buckets: [] },
+              SIBAGG: { value: 1 },
+            },
+            {
+              key: 'example-02',
+              timeseries: { buckets: [] },
+              SIBAGG: { value: 2 },
+            },
+          ],
+          meta: { bucketSize: 10 },
+        },
+      },
+    };
+    const series = {
+      id: 'SERIES',
+      label: '--{{key}}--',
+      color: '#F00',
+      split_mode: 'terms',
+      terms_field: 'beat.hostname',
+      terms_size: 10,
+      metrics: [
+        { id: 'AVG', type: 'avg', field: 'cpu' },
+        { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
+      ],
+    };
+    const panel = { type: 'top_n' };
+    expect(getSplits(resp, panel, series)).toEqual([
+      {
+        id: 'SERIES:example-01',
+        key: 'example-01',
+        label: '--example-01--',
+        labelFormatted: '',
+        meta: { bucketSize: 10 },
+        color: 'rgb(255, 0, 0)',
+        timeseries: { buckets: [] },
+        SIBAGG: { value: 1 },
+      },
+      {
+        id: 'SERIES:example-02',
+        key: 'example-02',
+        label: '--example-02--',
+        labelFormatted: '',
+        meta: { bucketSize: 10 },
+        color: 'rgb(255, 0, 0)',
+        timeseries: { buckets: [] },
+        SIBAGG: { value: 2 },
+      },
+    ]);
+  });
+
+  test('should return a splits for terms group with labelFormatted if {{key}} placeholder is applied and key_as_string exists', () => {
+    const resp = {
+      aggregations: {
+        SERIES: {
+          buckets: [
+            {
+              key: 'example-01',
+              key_as_string: 'false',
+              timeseries: { buckets: [] },
+              SIBAGG: { value: 1 },
+            },
+            {
+              key: 'example-02',
+              key_as_string: 'true',
+              timeseries: { buckets: [] },
+              SIBAGG: { value: 2 },
+            },
+          ],
+          meta: { bucketSize: 10 },
+        },
+      },
+    };
+    const series = {
+      id: 'SERIES',
+      label: '--{{key}}--',
+      color: '#F00',
+      split_mode: 'terms',
+      terms_field: 'beat.hostname',
+      terms_size: 10,
+      metrics: [
+        { id: 'AVG', type: 'avg', field: 'cpu' },
+        { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
+      ],
+    };
+    const panel = { type: 'top_n' };
+    expect(getSplits(resp, panel, series)).toEqual([
+      {
+        id: 'SERIES:example-01',
+        key: 'example-01',
+        key_as_string: 'false',
+        label: '--example-01--',
+        labelFormatted: '--false--',
+        meta: { bucketSize: 10 },
+        color: 'rgb(255, 0, 0)',
+        timeseries: { buckets: [] },
+        SIBAGG: { value: 1 },
+      },
+      {
+        id: 'SERIES:example-02',
+        key: 'example-02',
+        key_as_string: 'true',
+        label: '--example-02--',
+        labelFormatted: '--true--',
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
         timeseries: { buckets: [] },
@@ -145,6 +265,7 @@ describe('getSplits(resp, panel, series)', () => {
           id: 'SERIES:example-01',
           key: 'example-01',
           label: 'example-01',
+          labelFormatted: '',
           meta: { bucketSize: 10 },
           color: undefined,
           timeseries: { buckets: [] },
@@ -154,6 +275,7 @@ describe('getSplits(resp, panel, series)', () => {
           id: 'SERIES:example-02',
           key: 'example-02',
           label: 'example-02',
+          labelFormatted: '',
           meta: { bucketSize: 10 },
           color: undefined,
           timeseries: { buckets: [] },

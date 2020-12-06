@@ -21,7 +21,20 @@ export class TileLayer extends AbstractLayer {
   }
 
   constructor({ source, layerDescriptor }) {
-    super({ source, layerDescriptor, style: new TileStyle() });
+    super({ source, layerDescriptor });
+    this._style = new TileStyle();
+  }
+
+  getStyleForEditing() {
+    return this._style;
+  }
+
+  getStyle() {
+    return this._style;
+  }
+
+  getCurrentStyle() {
+    return this._style;
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -74,8 +87,8 @@ export class TileLayer extends AbstractLayer {
         return;
       }
 
-      const sourceId = this.getId();
-      mbMap.addSource(sourceId, {
+      const mbSourceId = this._getMbSourceId();
+      mbMap.addSource(mbSourceId, {
         type: 'raster',
         tiles: [tmsSourceData.url],
         tileSize: 256,
@@ -85,7 +98,7 @@ export class TileLayer extends AbstractLayer {
       mbMap.addLayer({
         id: mbLayerId,
         type: 'raster',
-        source: sourceId,
+        source: mbSourceId,
         minzoom: this._descriptor.minZoom,
         maxzoom: this._descriptor.maxZoom,
       });

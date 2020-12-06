@@ -19,10 +19,11 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -35,16 +36,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('saved search visualizations from visualize app', function describeIndexTests() {
     describe('linked saved searched', () => {
       const savedSearchName = 'vis_saved_search';
+      let discoverSavedSearchUrlPath: string;
 
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
         await filterBar.addFilter('extension.raw', 'is', 'jpg');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.saveSearch(savedSearchName);
+        discoverSavedSearchUrlPath = (await browser.getCurrentUrl()).split('?')[0];
       });
 
       it('should create a visualization from a saved search', async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -52,6 +55,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const data = await PageObjects.visChart.getTableVisData();
           return data.trim() === '9,109';
         });
+      });
+
+      it('should have a valid link to the saved search from the visualization', async () => {
+        await testSubjects.click('showUnlinkSavedSearchPopover');
+        await testSubjects.click('viewSavedSearch');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.waitFor('wait discover load its breadcrumbs', async () => {
+          const discoverBreadcrumb = await PageObjects.discover.getCurrentQueryName();
+          return discoverBreadcrumb === savedSearchName;
+        });
+
+        const discoverURLPath = (await browser.getCurrentUrl()).split('?')[0];
+        expect(discoverURLPath).to.equal(discoverSavedSearchUrlPath);
+
+        // go back to visualize
+        await browser.goBack();
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should respect the time filter when linked to a saved search', async () => {

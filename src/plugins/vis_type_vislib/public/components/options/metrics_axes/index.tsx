@@ -18,7 +18,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { cloneDeep, uniq, get } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { IAggConfig } from 'src/plugins/data/public';
@@ -293,15 +293,6 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     updateAxisTitle(updatedSeries);
   }, [metrics, firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle]);
 
-  const visType = useMemo(() => {
-    const types = uniq(stateParams.seriesParams.map(({ type }) => type));
-    return types.length === 1 ? types[0] : 'histogram';
-  }, [stateParams.seriesParams]);
-
-  useEffect(() => {
-    vis.setState({ ...vis.serialize(), type: visType });
-  }, [vis, visType]);
-
   return isTabSelected ? (
     <>
       <SeriesPanel
@@ -334,4 +325,6 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   ) : null;
 }
 
-export { MetricsAxisOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { MetricsAxisOptions as default };

@@ -18,9 +18,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { TableHeader } from './table_header';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
 import { IndexPattern, IFieldType } from '../../../../../kibana_services';
@@ -36,6 +35,7 @@ function getMockIndexPattern() {
       if (name === 'test1') {
         return {
           name,
+          displayName: name,
           type: 'string',
           aggregatable: false,
           searchable: true,
@@ -44,6 +44,7 @@ function getMockIndexPattern() {
       } else {
         return {
           name,
+          displayName: name,
           type: 'string',
           aggregatable: false,
           searchable: true,

@@ -19,7 +19,12 @@
 
 import expect from '@kbn/expect';
 
-import { Filter, IndexPattern, FilterManager as QueryFilterManager } from '../../../../data/public';
+import {
+  Filter,
+  IndexPattern,
+  FilterManager as QueryFilterManager,
+  IndexPatternsContract,
+} from '../../../../data/public';
 import { PhraseFilterManager } from './phrase_filter_manager';
 
 describe('PhraseFilterManager', function () {
@@ -42,15 +47,20 @@ describe('PhraseFilterManager', function () {
         },
       },
     } as IndexPattern;
+    const indexPatternsServiceMock = ({
+      get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
+    } as unknown) as jest.Mocked<IndexPatternsContract>;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: PhraseFilterManager;
-    beforeEach(() => {
+    beforeEach(async () => {
       filterManager = new PhraseFilterManager(
         controlId,
         'field1',
-        indexPatternMock,
+        '1',
+        indexPatternsServiceMock,
         queryFilterMock
       );
+      await filterManager.init();
     });
 
     test('should create match phrase filter from single value', function () {
@@ -89,10 +99,11 @@ describe('PhraseFilterManager', function () {
       constructor(
         id: string,
         fieldName: string,
-        indexPattern: IndexPattern,
+        indexPatternId: string,
+        indexPatternsService: IndexPatternsContract,
         queryFilter: QueryFilterManager
       ) {
-        super(id, fieldName, indexPattern, queryFilter);
+        super(id, fieldName, indexPatternId, indexPatternsService, queryFilter);
         this.mockFilters = [];
       }
 
@@ -105,14 +116,15 @@ describe('PhraseFilterManager', function () {
       }
     }
 
-    const indexPatternMock: IndexPattern = {} as IndexPattern;
+    const indexPatternsServiceMock = {} as IndexPatternsContract;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: MockFindFiltersPhraseFilterManager;
     beforeEach(() => {
       filterManager = new MockFindFiltersPhraseFilterManager(
         controlId,
         'field1',
-        indexPatternMock,
+        '1',
+        indexPatternsServiceMock,
         queryFilterMock
       );
     });

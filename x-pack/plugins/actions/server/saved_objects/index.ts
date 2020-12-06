@@ -5,18 +5,24 @@
  */
 
 import { SavedObjectsServiceSetup } from 'kibana/server';
-import mappings from './mappings.json';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import mappings from './mappings.json';
+import { getMigrations } from './migrations';
+
+export const ACTION_SAVED_OBJECT_TYPE = 'action';
+export const ALERT_SAVED_OBJECT_TYPE = 'alert';
+export const ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE = 'action_task_params';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   savedObjects.registerType({
-    name: 'action',
+    name: ACTION_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType: 'single',
     mappings: mappings.action,
+    migrations: getMigrations(encryptedSavedObjects),
   });
 
   // Encrypted attributes
@@ -24,19 +30,19 @@ export function setupSavedObjects(
   // - `config` will be included in AAD
   // - everything else excluded from AAD
   encryptedSavedObjects.registerType({
-    type: 'action',
+    type: ACTION_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['secrets']),
     attributesToExcludeFromAAD: new Set(['name']),
   });
 
   savedObjects.registerType({
-    name: 'action_task_params',
+    name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType: 'single',
     mappings: mappings.action_task_params,
   });
   encryptedSavedObjects.registerType({
-    type: 'action_task_params',
+    type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['apiKey']),
   });
 }

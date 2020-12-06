@@ -4,83 +4,99 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectAttributes } from 'kibana/server';
-import { Query, Filter } from '../../../../../src/plugins/data/public';
+import {
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+  SavedObjectReference,
+} from 'kibana/public';
+import { Query } from '../../../../../src/plugins/data/public';
+import { DOC_TYPE, PersistableFilter } from '../../common';
 
 export interface Document {
-  id?: string;
+  savedObjectId?: string;
   type?: string;
   visualizationType: string | null;
   title: string;
   description?: string;
-  expression: string | null;
   state: {
-    datasourceMetaData: {
-      filterableIndexPatterns: Array<{ id: string; title: string }>;
-    };
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
     query: Query;
-    filters: Filter[];
+    globalPalette?: {
+      activePaletteId: string;
+      state?: unknown;
+    };
+    filters: PersistableFilter[];
   };
-}
-
-export const DOC_TYPE = 'lens';
-
-interface SavedObjectClient {
-  create: (type: string, object: SavedObjectAttributes) => Promise<{ id: string }>;
-  update: (type: string, id: string, object: SavedObjectAttributes) => Promise<{ id: string }>;
-  get: (
-    type: string,
-    id: string
-  ) => Promise<{
-    id: string;
-    type: string;
-    attributes: SavedObjectAttributes;
-    error?: { statusCode: number; message: string };
-  }>;
+  references: SavedObjectReference[];
 }
 
 export interface DocumentSaver {
-  save: (vis: Document) => Promise<{ id: string }>;
+  save: (vis: Document) => Promise<{ savedObjectId: string }>;
 }
 
 export interface DocumentLoader {
-  load: (id: string) => Promise<Document>;
+  load: (savedObjectId: string) => Promise<Document>;
 }
 
 export type SavedObjectStore = DocumentLoader & DocumentSaver;
 
 export class SavedObjectIndexStore implements SavedObjectStore {
-  private client: SavedObjectClient;
+  private client: SavedObjectsClientContract;
 
-  constructor(client: SavedObjectClient) {
+  constructor(client: SavedObjectsClientContract) {
     this.client = client;
   }
 
-  async save(vis: Document) {
-    const { id, type, ...rest } = vis;
+  save = async (vis: Document) => {
+    const { savedObjectId, type, references, ...rest } = vis;
     // TODO: SavedObjectAttributes should support this kind of object,
     // remove this workaround when SavedObjectAttributes is updated.
     const attributes = (rest as unknown) as SavedObjectAttributes;
-    const result = await (id
-      ? this.client.update(DOC_TYPE, id, attributes)
-      : this.client.create(DOC_TYPE, attributes));
 
-    return { ...vis, id: result.id };
+    const result = await (savedObjectId
+      ? this.safeUpdate(savedObjectId, attributes, references)
+      : this.client.create(DOC_TYPE, attributes, {
+          references,
+        }));
+
+    return { ...vis, savedObjectId: result.id };
+  };
+
+  // As Lens is using an object to store its attributes, using the update API
+  // will merge the new attribute object with the old one, not overwriting deleted
+  // keys. As Lens is using objects as maps in various places, this is a problem because
+  // deleted subtrees make it back into the object after a load.
+  // This function fixes this by doing two updates - one to empty out the document setting
+  // every key to null, and a second one to load the new content.
+  private async safeUpdate(
+    savedObjectId: string,
+    attributes: SavedObjectAttributes,
+    references: SavedObjectReference[]
+  ) {
+    const resetAttributes: SavedObjectAttributes = {};
+    Object.keys(attributes).forEach((key) => {
+      resetAttributes[key] = null;
+    });
+    return (
+      await this.client.bulkUpdate([
+        { type: DOC_TYPE, id: savedObjectId, attributes: resetAttributes, references },
+        { type: DOC_TYPE, id: savedObjectId, attributes, references },
+      ])
+    ).savedObjects[1];
   }
 
-  async load(id: string): Promise<Document> {
-    const { type, attributes, error } = await this.client.get(DOC_TYPE, id);
+  async load(savedObjectId: string): Promise<Document> {
+    const { type, attributes, references, error } = await this.client.get(DOC_TYPE, savedObjectId);
 
     if (error) {
       throw error;
     }
 
     return {
-      ...attributes,
-      id,
+      ...(attributes as SavedObjectAttributes),
+      references,
+      savedObjectId,
       type,
     } as Document;
   }

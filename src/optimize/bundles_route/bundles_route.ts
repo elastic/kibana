@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { isAbsolute, extname, join } from 'path';
+import { extname, join } from 'path';
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 import { createDynamicAssetResponse } from './dynamic_asset_response';
@@ -28,32 +28,22 @@ import { assertIsNpUiPluginPublicDirs, NpUiPluginPublicDirs } from '../np_ui_plu
 import { fromRoot } from '../../core/server/utils';
 
 /**
- *  Creates the routes that serves files from `bundlesPath` or from
- *  `dllBundlesPath` (if they are dll bundle's related files). If the
- *  file is js or css then it is searched for instances of
- *  PUBLIC_PATH_PLACEHOLDER and replaces them with `publicPath`.
+ *  Creates the routes that serves files from `bundlesPath`.
  *
  *  @param {Object} options
  *  @property {Array<{id,path}>} options.npUiPluginPublicDirs array of ids and paths that should be served for new platform plugins
  *  @property {string} options.regularBundlesPath
- *  @property {string} options.dllBundlesPath
  *  @property {string} options.basePublicPath
  *
  *  @return Array.of({Hapi.Route})
  */
 export function createBundlesRoute({
-  regularBundlesPath,
-  dllBundlesPath,
   basePublicPath,
-  builtCssPath,
   npUiPluginPublicDirs = [],
   buildHash,
   isDist = false,
 }: {
-  regularBundlesPath: string;
-  dllBundlesPath: string;
   basePublicPath: string;
-  builtCssPath: string;
   npUiPluginPublicDirs?: NpUiPluginPublicDirs;
   buildHash: string;
   isDist?: boolean;
@@ -63,18 +53,6 @@ export function createBundlesRoute({
   // will store the 100 most recently used hashes.
   const fileHashCache = new FileHashCache();
   assertIsNpUiPluginPublicDirs(npUiPluginPublicDirs);
-
-  if (typeof regularBundlesPath !== 'string' || !isAbsolute(regularBundlesPath)) {
-    throw new TypeError(
-      'regularBundlesPath must be an absolute path to the directory containing the regular bundles'
-    );
-  }
-
-  if (typeof dllBundlesPath !== 'string' || !isAbsolute(dllBundlesPath)) {
-    throw new TypeError(
-      'dllBundlesPath must be an absolute path to the directory containing the dll bundles'
-    );
-  }
 
   if (typeof basePublicPath !== 'string') {
     throw new TypeError('basePublicPath must be a string');
@@ -90,7 +68,6 @@ export function createBundlesRoute({
       routePath: `/${buildHash}/bundles/kbn-ui-shared-deps/`,
       bundlesPath: UiSharedDeps.distDir,
       fileHashCache,
-      replacePublicPath: false,
       isDist,
     }),
     ...npUiPluginPublicDirs.map(({ id, path }) =>
@@ -99,7 +76,6 @@ export function createBundlesRoute({
         routePath: `/${buildHash}/bundles/plugin/${id}/`,
         bundlesPath: path,
         fileHashCache,
-        replacePublicPath: false,
         isDist,
       })
     ),
@@ -107,28 +83,6 @@ export function createBundlesRoute({
       publicPath: `${basePublicPath}/${buildHash}/bundles/core/`,
       routePath: `/${buildHash}/bundles/core/`,
       bundlesPath: fromRoot(join('src', 'core', 'target', 'public')),
-      fileHashCache,
-      replacePublicPath: false,
-      isDist,
-    }),
-    buildRouteForBundles({
-      publicPath: `${basePublicPath}/${buildHash}/bundles/`,
-      routePath: `/${buildHash}/bundles/`,
-      bundlesPath: regularBundlesPath,
-      fileHashCache,
-      isDist,
-    }),
-    buildRouteForBundles({
-      publicPath: `${basePublicPath}/${buildHash}/built_assets/dlls/`,
-      routePath: `/${buildHash}/built_assets/dlls/`,
-      bundlesPath: dllBundlesPath,
-      fileHashCache,
-      isDist,
-    }),
-    buildRouteForBundles({
-      publicPath: `${basePublicPath}/`,
-      routePath: `/${buildHash}/built_assets/css/`,
-      bundlesPath: builtCssPath,
       fileHashCache,
       isDist,
     }),
@@ -140,14 +94,12 @@ function buildRouteForBundles({
   routePath,
   bundlesPath,
   fileHashCache,
-  replacePublicPath = true,
   isDist,
 }: {
   publicPath: string;
   routePath: string;
   bundlesPath: string;
   fileHashCache: FileHashCache;
-  replacePublicPath?: boolean;
   isDist: boolean;
 }) {
   return {
@@ -170,7 +122,6 @@ function buildRouteForBundles({
               bundlesPath,
               fileHashCache,
               publicPath,
-              replacePublicPath,
               isDist,
             });
           },

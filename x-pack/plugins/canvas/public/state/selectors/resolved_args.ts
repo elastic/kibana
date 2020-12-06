@@ -5,14 +5,12 @@
  */
 
 import { get } from 'lodash';
-// @ts-ignore Untyped Local
 import * as argHelper from '../../lib/resolved_arg';
-// @ts-ignore Untyped Local
 import { prepend } from '../../lib/modify_path';
 import { State } from '../../../types';
 
 export function getArgs(state: State) {
-  return get<State, State['transient']['resolvedArgs']>(state, ['transient', 'resolvedArgs']);
+  return get(state, ['transient', 'resolvedArgs']);
 }
 
 export function getArg(state: State, path: any[]) {

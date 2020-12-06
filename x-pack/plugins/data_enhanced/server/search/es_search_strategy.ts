@@ -4,20 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first } from 'rxjs/operators';
-import { mapKeys, snakeCase } from 'lodash';
+import type { Observable } from 'rxjs';
+import type { Logger, SharedGlobalConfig } from 'kibana/server';
+import { first, tap } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
+<<<<<<< HEAD
 import { APICaller } from 'kibana/server';
 import { ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import {
   ISearchContext,
   TSearchStrategyProvider,
   ISearch,
+=======
+import { from } from 'rxjs';
+import type {
+  IEsSearchRequest,
+  IEsSearchResponse,
+>>>>>>> 058f28ab235a661cfa4b9168e97dd55026f54146
   ISearchOptions,
-  ISearchCancel,
-  getDefaultSearchParams,
-  getTotalLoaded,
+  ISearchStrategy,
+  SearchStrategyDependencies,
+  SearchUsage,
 } from '../../../../../src/plugins/data/server';
+import {
+  getDefaultSearchParams,
+  getShardTimeout,
+  getTotalLoaded,
+  searchUsageObserver,
+  shimAbortSignal,
+} from '../../../../../src/plugins/data/server';
+<<<<<<< HEAD
 import { IEnhancedEsSearchRequest, BACKGROUND_SESSION_STORE_DAYS } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
 import { BackgroundSessionService } from '../background_session';
@@ -155,6 +171,77 @@ async function asyncSearch(
     { method, path, body, query },
     options
   )) as AsyncSearchResponse<any>;
+=======
+import type { IAsyncSearchOptions } from '../../common';
+import { pollSearch } from '../../common';
+import {
+  getDefaultAsyncGetParams,
+  getDefaultAsyncSubmitParams,
+  getIgnoreThrottled,
+} from './request_utils';
+import { toAsyncKibanaSearchResponse } from './response_utils';
+import { AsyncSearchResponse } from './types';
+
+export const enhancedEsSearchStrategyProvider = (
+  config$: Observable<SharedGlobalConfig>,
+  logger: Logger,
+  usage?: SearchUsage
+): ISearchStrategy<IEsSearchRequest> => {
+  function asyncSearch(
+    { id, ...request }: IEsSearchRequest,
+    options: IAsyncSearchOptions,
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
+  ) {
+    const client = esClient.asCurrentUser.asyncSearch;
+
+    const search = async () => {
+      const params = id
+        ? getDefaultAsyncGetParams()
+        : { ...(await getDefaultAsyncSubmitParams(uiSettingsClient, options)), ...request.params };
+      const promise = id
+        ? client.get<AsyncSearchResponse>({ ...params, id })
+        : client.submit<AsyncSearchResponse>(params);
+      const { body } = await shimAbortSignal(promise, options.abortSignal);
+      return toAsyncKibanaSearchResponse(body);
+    };
+
+    return pollSearch(search, options).pipe(
+      tap((response) => (id = response.id)),
+      tap(searchUsageObserver(logger, usage))
+    );
+  }
+
+  async function rollupSearch(
+    request: IEsSearchRequest,
+    options: ISearchOptions,
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
+  ): Promise<IEsSearchResponse> {
+    const config = await config$.pipe(first()).toPromise();
+    const { body, index, ...params } = request.params!;
+    const method = 'POST';
+    const path = encodeURI(`/${index}/_rollup_search`);
+    const querystring = {
+      ...getShardTimeout(config),
+      ...(await getIgnoreThrottled(uiSettingsClient)),
+      ...(await getDefaultSearchParams(uiSettingsClient)),
+      ...params,
+    };
+
+    const promise = esClient.asCurrentUser.transport.request({
+      method,
+      path,
+      body,
+      querystring,
+    });
+
+    const esResponse = await shimAbortSignal(promise, options?.abortSignal);
+    const response = esResponse.body as SearchResponse<any>;
+    return {
+      rawResponse: response,
+      ...getTotalLoaded(response),
+    };
+  }
+>>>>>>> 058f28ab235a661cfa4b9168e97dd55026f54146
 
   // Track if ID wasn't recovered from a BG search
   if (!storedAsyncId) {
@@ -162,34 +249,25 @@ async function asyncSearch(
   }
 
   return {
+<<<<<<< HEAD
     id,
     is_partial,
     is_running,
     restored: !!storedAsyncId,
     rawResponse: shimHitsTotal(response),
     ...getTotalLoaded(response._shards),
+=======
+    search: (request, options: IAsyncSearchOptions, deps) => {
+      logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
+
+      return request.indexType !== 'rollup'
+        ? asyncSearch(request, options, deps)
+        : from(rollupSearch(request, options, deps));
+    },
+    cancel: async (id, options, { esClient }) => {
+      logger.debug(`cancel ${id}`);
+      await esClient.asCurrentUser.asyncSearch.delete({ id });
+    },
+>>>>>>> 058f28ab235a661cfa4b9168e97dd55026f54146
   };
-}
-
-async function rollupSearch(
-  caller: APICaller,
-  request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions
-) {
-  const { body, index, ...params } = request.params;
-  const method = 'POST';
-  const path = encodeURI(`/${index}/_rollup_search`);
-  const query = toSnakeCase(params);
-
-  const rawResponse = await ((caller(
-    'transport.request',
-    { method, path, body, query },
-    options
-  ) as unknown) as SearchResponse<any>);
-
-  return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
-}
-
-function toSnakeCase(obj: Record<string, any>) {
-  return mapKeys(obj, (value, key) => snakeCase(key));
-}
+};

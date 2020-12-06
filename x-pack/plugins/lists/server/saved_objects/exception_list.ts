@@ -6,6 +6,8 @@
 
 import { SavedObjectsType } from 'kibana/server';
 
+import { migrations } from './migrations';
+
 export const exceptionListSavedObjectType = 'exception-list';
 export const exceptionListAgnosticSavedObjectType = 'exception-list-agnostic';
 export type SavedObjectType = 'exception-list' | 'exception-list-agnostic';
@@ -29,6 +31,9 @@ export const commonMapping: SavedObjectsType['mappings'] = {
     },
     description: {
       type: 'keyword',
+    },
+    immutable: {
+      type: 'boolean',
     },
     list_id: {
       type: 'keyword',
@@ -54,6 +59,9 @@ export const commonMapping: SavedObjectsType['mappings'] = {
     updated_by: {
       type: 'keyword',
     },
+    version: {
+      type: 'keyword',
+    },
   },
 };
 
@@ -77,25 +85,73 @@ export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
         created_by: {
           type: 'keyword',
         },
+        id: {
+          type: 'keyword',
+        },
+        updated_at: {
+          type: 'keyword',
+        },
+        updated_by: {
+          type: 'keyword',
+        },
       },
     },
     entries: {
       properties: {
+        entries: {
+          properties: {
+            field: {
+              type: 'keyword',
+            },
+            operator: {
+              type: 'keyword',
+            },
+            type: {
+              type: 'keyword',
+            },
+            value: {
+              fields: {
+                text: {
+                  type: 'text',
+                },
+              },
+              type: 'keyword',
+            },
+          },
+        },
         field: {
           type: 'keyword',
         },
-        match: {
-          type: 'keyword',
-        },
-        match_any: {
-          type: 'keyword',
+        list: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            type: {
+              type: 'keyword',
+            },
+          },
         },
         operator: {
+          type: 'keyword',
+        },
+        type: {
+          type: 'keyword',
+        },
+        value: {
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
           type: 'keyword',
         },
       },
     },
     item_id: {
+      type: 'keyword',
+    },
+    os_types: {
       type: 'keyword',
     },
   },
@@ -112,6 +168,7 @@ const combinedMappings: SavedObjectsType['mappings'] = {
 export const exceptionListType: SavedObjectsType = {
   hidden: false,
   mappings: combinedMappings,
+  migrations,
   name: exceptionListSavedObjectType,
   namespaceType: 'single',
 };
@@ -119,6 +176,7 @@ export const exceptionListType: SavedObjectsType = {
 export const exceptionListAgnosticType: SavedObjectsType = {
   hidden: false,
   mappings: combinedMappings,
+  migrations,
   name: exceptionListAgnosticSavedObjectType,
   namespaceType: 'agnostic',
 };

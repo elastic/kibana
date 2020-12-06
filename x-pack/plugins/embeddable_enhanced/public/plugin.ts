@@ -17,6 +17,7 @@ import {
   defaultEmbeddableFactoryProvider,
   EmbeddableContext,
   PANEL_NOTIFICATION_TRIGGER,
+  ViewMode,
 } from '../../../../src/plugins/embeddable/public';
 import { EnhancedEmbeddable, EnhancedEmbeddableContext } from './types';
 import {
@@ -60,7 +61,6 @@ export class EmbeddableEnhancedPlugin
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     this.setCustomEmbeddableFactoryProvider(plugins);
-
     const panelNotificationAction = new PanelNotificationsAction();
     plugins.uiActionsEnhanced.registerAction(panelNotificationAction);
     plugins.uiActionsEnhanced.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
@@ -106,6 +106,15 @@ export class EmbeddableEnhancedPlugin
     );
   }
 
+  private readonly isEmbeddableContext = (context: unknown): context is EmbeddableContext => {
+    if (!(context as EmbeddableContext)?.embeddable) {
+      // eslint-disable-next-line no-console
+      console.warn('For drilldowns to work action context should contain .embeddable field.');
+      return false;
+    }
+    return true;
+  };
+
   private enhanceEmbeddableWithDynamicActions<E extends IEmbeddable>(
     embeddable: E
   ): EnhancedEmbeddable<E> {
@@ -114,13 +123,9 @@ export class EmbeddableEnhancedPlugin
     const storage = new EmbeddableActionStorage(embeddable as EmbeddableWithDynamicActions);
     const dynamicActions = new DynamicActionManager({
       isCompatible: async (context: unknown) => {
-        if (!(context as EmbeddableContext)?.embeddable) {
-          // eslint-disable-next-line no-console
-          console.warn('For drilldowns to work action context should contain .embeddable field.');
-          return false;
-        }
-
-        return (context as EmbeddableContext).embeddable.runtimeId === embeddable.runtimeId;
+        if (!this.isEmbeddableContext(context)) return false;
+        if (context.embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
+        return context.embeddable.runtimeId === embeddable.runtimeId;
       },
       storage,
       uiActions: this.uiActions!,

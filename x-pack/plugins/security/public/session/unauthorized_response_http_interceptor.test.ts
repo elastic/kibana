@@ -7,7 +7,7 @@
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 import { SessionExpired } from './session_expired';
-import { setup } from '../../../../../src/test_utils/public/http_test_setup';
+import { setup } from '../../../../../src/core/test_helpers/http_test_setup';
 import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_http_interceptor';
 jest.mock('./session_expired');
 
@@ -34,7 +34,7 @@ afterEach(() => {
 it(`logs out 401 responses`, async () => {
   const http = setupHttp('/foo');
   const sessionExpired = new SessionExpired(`${http.basePath}/logout`, tenant);
-  const logoutPromise = new Promise((resolve) => {
+  const logoutPromise = new Promise<void>((resolve) => {
     jest.spyOn(sessionExpired, 'logout').mockImplementation(() => resolve());
   });
   const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);

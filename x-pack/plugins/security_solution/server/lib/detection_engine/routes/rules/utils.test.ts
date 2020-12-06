@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Readable } from 'stream';
+import { createPromiseFromStreams } from '@kbn/utils';
+
 import {
   transformAlertToRule,
   getIdError,
@@ -19,30 +21,21 @@ import {
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { RuleTypeParams } from '../../types';
+import { PartialFilter, RuleTypeParams } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
 import { PartialAlert } from '../../../../../../alerts/server';
 import { SanitizedAlert } from '../../../../../../alerts/server/types';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
-import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 describe('utils', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
       const fullRule = getResult();
@@ -115,7 +108,7 @@ describe('utils', () => {
       expect(rule).toEqual(expected);
     });
 
-    it('transforms ML Rule fields', () => {
+    test('transforms ML Rule fields', () => {
       const mlRule = getResult();
       mlRule.params.anomalyThreshold = 55;
       mlRule.params.machineLearningJobId = 'some_job_id';
@@ -127,6 +120,82 @@ describe('utils', () => {
           anomaly_threshold: 55,
           machine_learning_job_id: 'some_job_id',
           type: 'machine_learning',
+        })
+      );
+    });
+
+    test('transforms threat_matching fields', () => {
+      const threatRule = getResult();
+      const threatFilters: PartialFilter[] = [
+        {
+          query: {
+            bool: {
+              must: [
+                {
+                  query_string: {
+                    query: 'host.name: linux',
+                    analyze_wildcard: true,
+                    time_zone: 'Zulu',
+                  },
+                },
+              ],
+              filter: [],
+              should: [],
+              must_not: [],
+            },
+          },
+        },
+      ];
+      const threatMapping: ThreatMapping = [
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'host.name',
+              type: 'mapping',
+            },
+          ],
+        },
+      ];
+      threatRule.params.threatIndex = ['index-123'];
+      threatRule.params.threatFilters = threatFilters;
+      threatRule.params.threatMapping = threatMapping;
+      threatRule.params.threatQuery = '*:*';
+
+      const rule = transformAlertToRule(threatRule);
+      expect(rule).toEqual(
+        expect.objectContaining({
+          threat_index: ['index-123'],
+          threat_filters: threatFilters,
+          threat_mapping: threatMapping,
+          threat_query: '*:*',
+        })
+      );
+    });
+
+    // This has to stay here until we do data migration of saved objects and lists is removed from:
+    // signal_params_schema.ts
+    test('does not leak a lists structure in the transform which would cause validation issues', () => {
+      const result: RuleAlertType & { lists: [] } = { lists: [], ...getResult() };
+      const rule = transformAlertToRule(result);
+      expect(rule).toEqual(
+        expect.not.objectContaining({
+          lists: [],
+        })
+      );
+    });
+
+    // This has to stay here until we do data migration of saved objects and exceptions_list is removed from:
+    // signal_params_schema.ts
+    test('does not leak an exceptions_list structure in the transform which would cause validation issues', () => {
+      const result: RuleAlertType & { exceptions_list: [] } = {
+        exceptions_list: [],
+        ...getResult(),
+      };
+      const rule = transformAlertToRule(result);
+      expect(rule).toEqual(
+        expect.not.objectContaining({
+          exceptions_list: [],
         })
       );
     });
@@ -480,7 +549,7 @@ describe('utils', () => {
           { rule_id: 'value3' },
           {},
           {},
-        ] as CreateRulesBulkSchemaDecoded,
+        ] as CreateRulesBulkSchema,
         'rule_id'
       );
       const expected = ['value2', 'value3'];
@@ -494,7 +563,7 @@ describe('utils', () => {
           { rule_id: 'value3' },
           {},
           {},
-        ] as CreateRulesBulkSchemaDecoded,
+        ] as CreateRulesBulkSchema,
         'rule_id'
       );
       const expected: string[] = [];

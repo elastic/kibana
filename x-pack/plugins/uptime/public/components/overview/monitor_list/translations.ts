@@ -62,10 +62,6 @@ export const NO_DATA_MESSAGE = i18n.translate('xpack.uptime.monitorList.noItemMe
   description: 'This message is shown if the monitors table is rendered but has no items.',
 });
 
-export const URL = i18n.translate('xpack.uptime.monitorList.table.url.name', {
-  defaultMessage: 'Url',
-});
-
 export const UP = i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
   defaultMessage: 'Up',
 });
@@ -80,3 +76,7 @@ export const RESPONSE_ANOMALY_SCORE = i18n.translate(
     defaultMessage: 'Response Anomaly Score',
   }
 );
+
+export const STATUS_ALERT_COLUMN = i18n.translate('xpack.uptime.monitorList.statusAlert.label', {
+  defaultMessage: 'Status alert',
+});

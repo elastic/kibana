@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
+import { noop, startsWith, endsWith } from 'lodash/fp';
 import {
   EuiButton,
   EuiComboBox,
@@ -15,14 +15,13 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
-  EuiToolTip,
 } from '@elastic/eui';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
 import { OnDataProviderEdited } from '../timeline/events';
-import { QueryOperator } from '../timeline/data_providers/data_provider';
+import { DataProviderType, QueryOperator } from '../timeline/data_providers/data_provider';
 
 import {
   getCategorizedFieldNames,
@@ -56,6 +55,7 @@ interface Props {
   providerId: string;
   timelineId: string;
   value: string | number;
+  type?: DataProviderType;
 }
 
 const sanatizeValue = (value: string | number): string =>
@@ -83,6 +83,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
     providerId,
     timelineId,
     value,
+    type = DataProviderType.default,
   }) => {
     const [updatedField, setUpdatedField] = useState<EuiComboBoxOptionOption[]>([{ label: field }]);
     const [updatedOperator, setUpdatedOperator] = useState<EuiComboBoxOptionOption[]>(
@@ -105,11 +106,18 @@ export const StatefulEditDataProvider = React.memo<Props>(
       }
     };
 
-    const onFieldSelected = useCallback((selectedField: EuiComboBoxOptionOption[]) => {
-      setUpdatedField(selectedField);
+    const onFieldSelected = useCallback(
+      (selectedField: EuiComboBoxOptionOption[]) => {
+        setUpdatedField(selectedField);
 
-      focusInput();
-    }, []);
+        if (type === DataProviderType.template) {
+          setUpdatedValue(`{${selectedField[0].label}}`);
+        }
+
+        focusInput();
+      },
+      [type]
+    );
 
     const onOperatorSelected = useCallback((operatorSelected: EuiComboBoxOptionOption[]) => {
       setUpdatedOperator(operatorSelected);
@@ -139,6 +147,36 @@ export const StatefulEditDataProvider = React.memo<Props>(
       window.onscroll = () => noop;
     };
 
+    const handleSave = useCallback(() => {
+      onDataProviderEdited({
+        andProviderId,
+        excluded: getExcludedFromSelection(updatedOperator),
+        field: updatedField.length > 0 ? updatedField[0].label : '',
+        id: timelineId,
+        operator: getQueryOperatorFromSelection(updatedOperator),
+        providerId,
+        value: updatedValue,
+        type,
+      });
+    }, [
+      onDataProviderEdited,
+      andProviderId,
+      updatedOperator,
+      updatedField,
+      timelineId,
+      providerId,
+      updatedValue,
+      type,
+    ]);
+
+    const isValueFieldInvalid = useMemo(
+      () =>
+        type !== DataProviderType.template &&
+        (startsWith('{', sanatizeValue(updatedValue)) ||
+          endsWith('}', sanatizeValue(updatedValue))),
+      [type, updatedValue]
+    );
+
     useEffect(() => {
       disableScrolling();
       focusInput();
@@ -151,21 +189,19 @@ export const StatefulEditDataProvider = React.memo<Props>(
       <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
+            <EuiFlexGroup gutterSize="s" direction="row" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiFormRow label={i18n.FIELD}>
-                  <EuiToolTip content={updatedField.length > 0 ? updatedField[0].label : null}>
-                    <EuiComboBox
-                      data-test-subj="field"
-                      isClearable={false}
-                      onChange={onFieldSelected}
-                      options={getCategorizedFieldNames(browserFields)}
-                      placeholder={i18n.FIELD_PLACEHOLDER}
-                      selectedOptions={updatedField}
-                      singleSelection={{ asPlainText: true }}
-                      style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
-                    />
-                  </EuiToolTip>
+                  <EuiComboBox
+                    data-test-subj="field"
+                    isClearable={false}
+                    onChange={onFieldSelected}
+                    options={getCategorizedFieldNames(browserFields)}
+                    placeholder={i18n.FIELD_PLACEHOLDER}
+                    selectedOptions={updatedField}
+                    singleSelection={{ asPlainText: true }}
+                    style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
 
@@ -187,10 +223,11 @@ export const StatefulEditDataProvider = React.memo<Props>(
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiSpacer />
+            <EuiSpacer size="m" />
           </EuiFlexItem>
 
-          {updatedOperator.length > 0 &&
+          {type !== DataProviderType.template &&
+          updatedOperator.length > 0 &&
           updatedOperator[0].label !== i18n.EXISTS &&
           updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
             <EuiFlexItem grow={false}>
@@ -201,13 +238,14 @@ export const StatefulEditDataProvider = React.memo<Props>(
                   onChange={onValueChange}
                   placeholder={i18n.VALUE}
                   value={sanatizeValue(updatedValue)}
+                  isInvalid={isValueFieldInvalid}
                 />
               </EuiFormRow>
             </EuiFlexItem>
           ) : null}
 
           <EuiFlexItem grow={false}>
-            <EuiSpacer />
+            <EuiSpacer size="m" />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -224,20 +262,10 @@ export const StatefulEditDataProvider = React.memo<Props>(
                       browserFields,
                       selectedField: updatedField,
                       selectedOperator: updatedOperator,
-                    })
+                    }) || isValueFieldInvalid
                   }
-                  onClick={() => {
-                    onDataProviderEdited({
-                      andProviderId,
-                      excluded: getExcludedFromSelection(updatedOperator),
-                      field: updatedField.length > 0 ? updatedField[0].label : '',
-                      id: timelineId,
-                      operator: getQueryOperatorFromSelection(updatedOperator),
-                      providerId,
-                      value: updatedValue,
-                    });
-                  }}
-                  size="s"
+                  onClick={handleSave}
+                  size="m"
                 >
                   {i18n.SAVE}
                 </EuiButton>

@@ -20,6 +20,12 @@
 import { always, pretty } from './utils';
 import chalk from 'chalk';
 import { fromNullable } from './either';
+import {
+  COVERAGE_INDEX,
+  RESEARCH_COVERAGE_INDEX,
+  RESEARCH_TOTALS_INDEX,
+  TOTALS_INDEX,
+} from './constants';
 
 export function errMsg(index, redacted, body, e) {
   const orig = fromNullable(e.body).fold(
@@ -38,6 +44,9 @@ ${orig}
 
 ### Troubleshooting Hint:
 ${red('Perhaps the coverage data was not merged properly?\n')}
+
+### Error.meta (stringified):
+${pretty(e.meta)}
 `;
 }
 
@@ -58,4 +67,16 @@ function color(whichColor) {
   return function colorInner(x) {
     return chalk[whichColor].bgWhiteBright(x);
   };
+}
+
+export function whichIndex(isResearchJob) {
+  return (isTotal) =>
+    isTotal ? whichTotalsIndex(isResearchJob) : whichCoverageIndex(isResearchJob);
+}
+function whichTotalsIndex(isResearchJob) {
+  return isResearchJob ? RESEARCH_TOTALS_INDEX : TOTALS_INDEX;
+}
+
+function whichCoverageIndex(isResearchJob) {
+  return isResearchJob ? RESEARCH_COVERAGE_INDEX : COVERAGE_INDEX;
 }

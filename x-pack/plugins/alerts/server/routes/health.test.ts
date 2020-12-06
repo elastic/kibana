@@ -11,13 +11,34 @@ import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { alertsClientMock } from '../alerts_client.mock';
+import { HealthStatus } from '../types';
+import { alertsMock } from '../mocks';
+const alertsClient = alertsClientMock.create();
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
+const alerting = alertsMock.createStart();
+
+const currentDate = new Date().toISOString();
 beforeEach(() => {
   jest.resetAllMocks();
+  alerting.getFrameworkHealth.mockResolvedValue({
+    decryptionHealth: {
+      status: HealthStatus.OK,
+      timestamp: currentDate,
+    },
+    executionHealth: {
+      status: HealthStatus.OK,
+      timestamp: currentDate,
+    },
+    readHealth: {
+      status: HealthStatus.OK,
+      timestamp: currentDate,
+    },
+  });
 });
 
 describe('healthRoute', () => {
@@ -43,10 +64,10 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments({ esClient, alertsClient }, {}, ['ok']);
 
     await handler(context, req, res);
 
@@ -72,19 +93,35 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments(
+      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      {},
+      ['ok']
+    );
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "hasPermanentEncryptionKey": false,
-          "isSufficientlySecure": true,
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alertingFrameworkHeath: {
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
         },
-      }
-    `);
+        hasPermanentEncryptionKey: false,
+        isSufficientlySecure: true,
+      },
+    });
   });
 
   it('evaluates missing security info from the usage api to mean that the security plugin is disbled', async () => {
@@ -96,19 +133,35 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments(
+      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      {},
+      ['ok']
+    );
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "hasPermanentEncryptionKey": true,
-          "isSufficientlySecure": true,
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alertingFrameworkHeath: {
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
         },
-      }
-    `);
+        hasPermanentEncryptionKey: true,
+        isSufficientlySecure: true,
+      },
+    });
   });
 
   it('evaluates missing security http info from the usage api to mean that the security plugin is disbled', async () => {
@@ -120,19 +173,35 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({ security: {} }));
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments(
+      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      {},
+      ['ok']
+    );
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "hasPermanentEncryptionKey": true,
-          "isSufficientlySecure": true,
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alertingFrameworkHeath: {
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
         },
-      }
-    `);
+        hasPermanentEncryptionKey: true,
+        isSufficientlySecure: true,
+      },
+    });
   });
 
   it('evaluates security enabled, and missing ssl info from the usage api to mean that the user cannot generate keys', async () => {
@@ -144,19 +213,35 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(Promise.resolve({ security: { enabled: true } }));
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments(
+      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      {},
+      ['ok']
+    );
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "hasPermanentEncryptionKey": true,
-          "isSufficientlySecure": false,
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alertingFrameworkHeath: {
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
         },
-      }
-    `);
+        hasPermanentEncryptionKey: true,
+        isSufficientlySecure: false,
+      },
+    });
   });
 
   it('evaluates security enabled, SSL info present but missing http info from the usage api to mean that the user cannot generate keys', async () => {
@@ -168,21 +253,37 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(
       Promise.resolve({ security: { enabled: true, ssl: {} } })
     );
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments(
+      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      {},
+      ['ok']
+    );
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "hasPermanentEncryptionKey": true,
-          "isSufficientlySecure": false,
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alertingFrameworkHeath: {
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
         },
-      }
-    `);
+        hasPermanentEncryptionKey: true,
+        isSufficientlySecure: false,
+      },
+    });
   });
 
   it('evaluates security and tls enabled to mean that the user can generate keys', async () => {
@@ -194,20 +295,36 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const esClient = elasticsearchServiceMock.createClusterClient();
+    const esClient = elasticsearchServiceMock.createLegacyClusterClient();
     esClient.callAsInternalUser.mockReturnValue(
       Promise.resolve({ security: { enabled: true, ssl: { http: { enabled: true } } } })
     );
 
-    const [context, req, res] = mockHandlerArguments({ esClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments(
+      { esClient, alertsClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      {},
+      ['ok']
+    );
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "hasPermanentEncryptionKey": true,
-          "isSufficientlySecure": true,
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alertingFrameworkHeath: {
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
         },
-      }
-    `);
+        hasPermanentEncryptionKey: true,
+        isSufficientlySecure: true,
+      },
+    });
   });
 });

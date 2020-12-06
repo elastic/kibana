@@ -8,7 +8,7 @@ import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { FlowTargetSourceDest } from '../../../graphql/types';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 
 import { IPsQueryTabBody } from './ips_query_tab_body';
@@ -27,12 +27,14 @@ import { UpdateDateRange } from '../../../common/components/charts/common';
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(
   ({
     networkPagePath,
+    docValueFields,
     type,
     to,
     filterQuery,
     isInitializing,
     from,
     indexPattern,
+    indexNames,
     setQuery,
     setAbsoluteRangeDatePicker,
   }) => {
@@ -53,7 +55,11 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
           return;
         }
         const [min, max] = x;
-        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        });
       },
       [setAbsoluteRangeDatePicker]
     );
@@ -79,6 +85,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     const commonProps = {
       startDate: from,
       endDate: to,
+      indexNames,
       skip: isInitializing,
       type,
       narrowDateRange,
@@ -100,10 +107,10 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
 
     return (
       <Switch>
-        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.dns})`}>
-          <DnsQueryTabBody {...tabProps} />
+        <Route path={`/:tabName(${NetworkRouteType.dns})`}>
+          <DnsQueryTabBody {...tabProps} docValueFields={docValueFields} />
         </Route>
-        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.flows})`}>
+        <Route path={`/:tabName(${NetworkRouteType.flows})`}>
           <>
             <ConditionalFlexGroup direction="column">
               <EuiFlexItem>
@@ -129,19 +136,19 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
             </ConditionalFlexGroup>
           </>
         </Route>
-        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.http})`}>
+        <Route path={`/:tabName(${NetworkRouteType.http})`}>
           <HttpQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.tls})`}>
+        <Route path={`/:tabName(${NetworkRouteType.tls})`}>
           <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
         </Route>
-        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.anomalies})`}>
+        <Route path={`/:tabName(${NetworkRouteType.anomalies})`}>
           <AnomaliesQueryTabBody
             {...anomaliesProps}
             AnomaliesTableComponent={AnomaliesNetworkTable}
           />
         </Route>
-        <Route path={`${networkPagePath}/:tabName(${NetworkRouteType.alerts})`}>
+        <Route path={`/:tabName(${NetworkRouteType.alerts})`}>
           <NetworkAlertsQueryTabBody {...tabProps} />
         </Route>
       </Switch>

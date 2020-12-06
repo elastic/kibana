@@ -5,19 +5,20 @@
  */
 
 import {
-  PolicyData,
+  AppLocation,
   Immutable,
   MalwareFields,
+  PolicyData,
   UIPolicyConfig,
-  AppLocation,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
   GetAgentStatusResponse,
-  GetDatasourcesResponse,
-  GetOneDatasourceResponse,
-  UpdateDatasourceResponse,
-} from '../../../../../ingest_manager/common';
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesResponse,
+  GetPackagesResponse,
+  UpdatePackagePolicyResponse,
+} from '../../../../../fleet/common';
 
 /**
  * Policy list store state
@@ -25,6 +26,8 @@ import {
 export interface PolicyListState {
   /** Array of policy items  */
   policyItems: PolicyData[];
+  /** Information about the latest endpoint package */
+  endpointPackageInfo?: GetPackagesResponse['response'][0];
   /** API error if loading data failed */
   apiError?: ServerApiError;
   /** total number of policies */
@@ -41,7 +44,7 @@ export interface PolicyListState {
   isDeleting: boolean;
   /** Deletion status */
   deleteStatus?: boolean;
-  /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
+  /** A summary of stats for the agents associated with a given Fleet Agent Policy */
   agentStatusSummary?: GetAgentStatusResponse['results'];
 }
 
@@ -56,7 +59,7 @@ export interface PolicyDetailsState {
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<AppLocation>;
-  /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
+  /** A summary of stats for the agents associated with a given Fleet Agent Policy */
   agentStatusSummary?: GetAgentStatusResponse['results'];
   /** Status of an update to the policy  */
   updateStatus?: {
@@ -71,68 +74,6 @@ export interface PolicyDetailsState {
 export interface PolicyListUrlSearchParams {
   page_index: number;
   page_size: number;
-}
-
-/**
- * Endpoint Policy configuration
- */
-export interface PolicyConfig {
-  windows: {
-    events: {
-      dll_and_driver_load: boolean;
-      dns: boolean;
-      file: boolean;
-      network: boolean;
-      process: boolean;
-      registry: boolean;
-      security: boolean;
-    };
-    malware: MalwareFields;
-    logging: {
-      stdout: string;
-      file: string;
-    };
-    advanced: PolicyConfigAdvancedOptions;
-  };
-  mac: {
-    events: {
-      file: boolean;
-      process: boolean;
-      network: boolean;
-    };
-    malware: MalwareFields;
-    logging: {
-      stdout: string;
-      file: string;
-    };
-    advanced: PolicyConfigAdvancedOptions;
-  };
-  linux: {
-    events: {
-      file: boolean;
-      process: boolean;
-      network: boolean;
-    };
-    logging: {
-      stdout: string;
-      file: string;
-    };
-    advanced: PolicyConfigAdvancedOptions;
-  };
-}
-
-interface PolicyConfigAdvancedOptions {
-  elasticsearch: {
-    indices: {
-      control: string;
-      event: string;
-      logging: string;
-    };
-    kernel: {
-      connect: boolean;
-      process: boolean;
-    };
-  };
 }
 
 export enum OS {
@@ -166,14 +107,14 @@ export type KeysByValueCriteria<O, Criteria> = {
 /** Returns an array of the policy OSes that have a malware protection field */
 export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
 
-export interface GetPolicyListResponse extends GetDatasourcesResponse {
+export interface GetPolicyListResponse extends GetPackagePoliciesResponse {
   items: PolicyData[];
 }
 
-export interface GetPolicyResponse extends GetOneDatasourceResponse {
+export interface GetPolicyResponse extends GetOnePackagePolicyResponse {
   item: PolicyData;
 }
 
-export interface UpdatePolicyResponse extends UpdateDatasourceResponse {
+export interface UpdatePolicyResponse extends UpdatePackagePolicyResponse {
   item: PolicyData;
 }

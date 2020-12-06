@@ -5,19 +5,22 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { HttpSetup, DocLinksSetup, NotificationsSetup } from 'src/core/public';
+import { UiCounterMetricType } from '@kbn/analytics';
 
-import { getApi, getUseRequest, getSendRequest, getDocumentation } from './lib';
+import { HttpSetup, DocLinksStart, NotificationsSetup, CoreStart } from 'src/core/public';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { getApi, getUseRequest, getSendRequest, getDocumentation, getBreadcrumbs } from './lib';
 
 const ComponentTemplatesContext = createContext<Context | undefined>(undefined);
 
 interface Props {
   httpClient: HttpSetup;
   apiBasePath: string;
-  appBasePath: string;
-  trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
-  docLinks: DocLinksSetup;
+  trackMetric: (type: UiCounterMetricType, eventName: string) => void;
+  docLinks: DocLinksStart;
   toasts: NotificationsSetup['toasts'];
+  setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+  getUrlForApp: CoreStart['application']['getUrlForApp'];
 }
 
 interface Context {
@@ -25,9 +28,10 @@ interface Context {
   apiBasePath: string;
   api: ReturnType<typeof getApi>;
   documentation: ReturnType<typeof getDocumentation>;
-  trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
+  breadcrumbs: ReturnType<typeof getBreadcrumbs>;
+  trackMetric: (type: UiCounterMetricType, eventName: string) => void;
   toasts: NotificationsSetup['toasts'];
-  appBasePath: string;
+  getUrlForApp: CoreStart['application']['getUrlForApp'];
 }
 
 export const ComponentTemplatesProvider = ({
@@ -37,17 +41,35 @@ export const ComponentTemplatesProvider = ({
   value: Props;
   children: React.ReactNode;
 }) => {
-  const { httpClient, apiBasePath, trackMetric, docLinks, toasts, appBasePath } = value;
+  const {
+    httpClient,
+    apiBasePath,
+    trackMetric,
+    docLinks,
+    toasts,
+    setBreadcrumbs,
+    getUrlForApp,
+  } = value;
 
   const useRequest = getUseRequest(httpClient);
   const sendRequest = getSendRequest(httpClient);
 
   const api = getApi(useRequest, sendRequest, apiBasePath, trackMetric);
   const documentation = getDocumentation(docLinks);
+  const breadcrumbs = getBreadcrumbs(setBreadcrumbs);
 
   return (
     <ComponentTemplatesContext.Provider
-      value={{ api, documentation, trackMetric, toasts, appBasePath, httpClient, apiBasePath }}
+      value={{
+        api,
+        documentation,
+        trackMetric,
+        toasts,
+        httpClient,
+        apiBasePath,
+        breadcrumbs,
+        getUrlForApp,
+      }}
     >
       {children}
     </ComponentTemplatesContext.Provider>
@@ -63,3 +85,5 @@ export const useComponentTemplatesContext = () => {
   }
   return ctx;
 };
+
+export const useApi = () => useComponentTemplatesContext().api;

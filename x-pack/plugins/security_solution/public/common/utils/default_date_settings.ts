@@ -34,8 +34,8 @@ export type DefaultIntervalSetting = DefaultInterval | null | undefined;
 
 // Defaults for if everything fails including dateMath.parse(DEFAULT_FROM) or dateMath.parse(DEFAULT_TO)
 // These should not really be hit unless we are in an extreme buggy state.
-const DEFAULT_FROM_MOMENT = moment().subtract(24, 'hours');
-const DEFAULT_TO_MOMENT = moment();
+export const DEFAULT_FROM_MOMENT = moment().subtract(24, 'hours');
+export const DEFAULT_TO_MOMENT = moment();
 
 /**
  * Retrieves timeRange settings to populate filters
@@ -49,8 +49,8 @@ export const getTimeRangeSettings = (uiSettings = true) => {
 
   const fromStr = (isString(timeRange?.from) && timeRange?.from) || DEFAULT_FROM;
   const toStr = (isString(timeRange?.to) && timeRange?.to) || DEFAULT_TO;
-  const from = parseDateWithDefault(fromStr, DEFAULT_FROM_MOMENT).valueOf();
-  const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT).valueOf();
+  const from = parseDateWithDefault(fromStr, DEFAULT_FROM_MOMENT).toISOString();
+  const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT).toISOString();
 
   return { from, fromStr, to, toStr };
 };

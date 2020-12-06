@@ -7,22 +7,20 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   IRouter,
-  CallAPIOptions,
   SavedObjectsClientContract,
   ISavedObjectsRepository,
+  IScopedClusterClient,
 } from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
-import { DynamicSettings } from '../../../../common/runtime_types';
-
-export type APICaller = (
-  endpoint: string,
-  clientParams: Record<string, any>,
-  options?: CallAPIOptions
-) => Promise<any>;
+import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
+import { UptimeESClient } from '../../lib';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
-  params: { callES: APICaller; dynamicSettings: DynamicSettings } & P
+  params: {
+    uptimeEsClient: UptimeESClient;
+    esClient?: IScopedClusterClient;
+  } & P
 ) => Promise<R>;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
@@ -39,6 +37,7 @@ export interface UptimeCorePlugins {
   alerts: any;
   elasticsearch: any;
   usageCollection: UsageCollectionSetup;
+  ml: MlSetup;
 }
 
 export interface UMBackendFrameworkAdapter {

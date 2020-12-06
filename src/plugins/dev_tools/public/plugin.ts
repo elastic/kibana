@@ -18,12 +18,14 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { AppUpdater, CoreSetup, Plugin } from 'kibana/public';
+import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
+import { AppUpdater } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
-import { KibanaLegacySetup } from '../../kibana_legacy/public';
-import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
+
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { UrlForwardingSetup } from '../../url_forwarding/public';
+import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
 import './index.scss';
 
@@ -49,26 +51,31 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     return sortBy([...this.devTools.values()], 'order');
   }
 
-  public setup(core: CoreSetup, { kibanaLegacy }: { kibanaLegacy: KibanaLegacySetup }) {
-    core.application.register({
+  public setup(coreSetup: CoreSetup, { urlForwarding }: { urlForwarding: UrlForwardingSetup }) {
+    const { application: applicationSetup, getStartServices } = coreSetup;
+
+    applicationSetup.register({
       id: 'dev_tools',
       title: i18n.translate('devTools.devToolsTitle', {
         defaultMessage: 'Dev Tools',
       }),
       updater$: this.appStateUpdater,
-      euiIconType: 'devToolsApp',
-      order: 9001,
+      euiIconType: 'logoElastic',
+      order: 9010,
       category: DEFAULT_APP_CATEGORIES.management,
-      mount: async (appMountContext, params) => {
-        if (!this.getSortedDevTools) {
-          throw new Error('not started yet');
-        }
+      mount: async (params: AppMountParameters) => {
+        const { element, history } = params;
+        element.classList.add('devAppWrapper');
+
+        const [core] = await getStartServices();
+        const { application, chrome } = core;
+
         const { renderApp } = await import('./application');
-        params.element.classList.add('devAppWrapper');
-        return renderApp(params.element, appMountContext, params.history, this.getSortedDevTools());
+        return renderApp(element, application, chrome, history, this.getSortedDevTools());
       },
     });
-    kibanaLegacy.forwardApp('dev_tools', 'dev_tools');
+
+    urlForwarding.forwardApp('dev_tools', 'dev_tools');
 
     return {
       register: (devToolArgs: CreateDevToolArgs) => {

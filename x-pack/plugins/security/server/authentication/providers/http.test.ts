@@ -9,8 +9,8 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
 import {
-  ElasticsearchErrorHelpers,
-  IClusterClient,
+  LegacyElasticsearchErrorHelpers,
+  ILegacyClusterClient,
   ScopeableRequest,
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
@@ -18,7 +18,7 @@ import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthenticationProvider } from './http';
 
 function expectAuthenticateCall(
-  mockClusterClient: jest.Mocked<IClusterClient>,
+  mockClusterClient: jest.Mocked<ILegacyClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
@@ -126,7 +126,7 @@ describe('HTTPAuthenticationProvider', () => {
       ]) {
         const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
 
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
         mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
         mockOptions.client.asScoped.mockClear();
@@ -136,7 +136,10 @@ describe('HTTPAuthenticationProvider', () => {
         });
 
         await expect(provider.authenticate(request)).resolves.toEqual(
-          AuthenticationResult.succeeded({ ...user, authentication_provider: 'http' })
+          AuthenticationResult.succeeded({
+            ...user,
+            authentication_provider: { type: 'http', name: 'http' },
+          })
         );
 
         expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
@@ -146,7 +149,7 @@ describe('HTTPAuthenticationProvider', () => {
     });
 
     it('fails if authentication via `authorization` header with supported scheme fails.', async () => {
-      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
+      const failureReason = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
       for (const { schemes, header } of [
         { schemes: ['basic'], header: 'Basic xxx' },
         { schemes: ['bearer'], header: 'Bearer xxx' },
@@ -156,7 +159,7 @@ describe('HTTPAuthenticationProvider', () => {
       ]) {
         const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
 
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
         mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
         mockOptions.client.asScoped.mockClear();

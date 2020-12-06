@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginInitializerContext } from 'kibana/public';
 import { DataEnhancedPlugin, DataEnhancedSetup, DataEnhancedStart } from './plugin';
+import { ConfigSchema } from '../config';
 
-export const plugin = () => new DataEnhancedPlugin();
+export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema>) =>
+  new DataEnhancedPlugin(initializerContext);
 
 export { DataEnhancedSetup, DataEnhancedStart };
 
-export { ASYNC_SEARCH_STRATEGY, IAsyncSearchRequest, IAsyncSearchOptions } from './search';
+export { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';

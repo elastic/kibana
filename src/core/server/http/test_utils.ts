@@ -18,18 +18,18 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
 import { HttpService } from './http_service';
 import { CoreContext } from '../core_context';
-import { configServiceMock } from '../config/config_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { getEnvOptions, configServiceMock } from '../config/mocks';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 const coreId = Symbol('core');
-const env = Env.createDefault(getEnvOptions());
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 
 const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(
@@ -43,9 +43,15 @@ configService.atPath.mockReturnValue(
     compression: { enabled: true },
     xsrf: {
       disableProtection: true,
-      whitelist: [],
+      allowlist: [],
     },
     customResponseHeaders: {},
+    requestId: {
+      allowFromAnyIp: true,
+      ipAllowlist: [],
+    },
+    keepaliveTimeout: 120_000,
+    socketTimeout: 120_000,
   } as any)
 );
 

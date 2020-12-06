@@ -5,26 +5,20 @@
  */
 
 import { isString } from 'lodash';
-import memoizeOne from 'memoize-one';
 import { getExportType as getTypeCsv } from '../export_types/csv';
 import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_from_savedobject';
 import { getExportType as getTypePng } from '../export_types/png';
 import { getExportType as getTypePrintablePdf } from '../export_types/printable_pdf';
-import { ExportTypeDefinition } from '../types';
+import { CreateJobFn, ExportTypeDefinition } from '../types';
 
-type GetCallbackFn<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType> = (
-  item: ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>
-) => boolean;
-// => ExportTypeDefinition<T, U, V, W>
+type GetCallbackFn = (item: ExportTypeDefinition) => boolean;
 
 export class ExportTypesRegistry {
-  private _map: Map<string, ExportTypeDefinition<any, any, any, any>> = new Map();
+  private _map: Map<string, ExportTypeDefinition> = new Map();
 
   constructor() {}
 
-  register<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>(
-    item: ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>
-  ): void {
+  register(item: ExportTypeDefinition): void {
     if (!isString(item.id)) {
       throw new Error(`'item' must have a String 'id' property `);
     }
@@ -33,8 +27,6 @@ export class ExportTypesRegistry {
       throw new Error(`'item' with id ${item.id} has already been registered`);
     }
 
-    // TODO: Unwrap the execute function from the item's executeJobFactory
-    // Move that work out of server/lib/create_worker to reduce dependence on ESQueue
     this._map.set(item.id, item);
   }
 
@@ -46,35 +38,21 @@ export class ExportTypesRegistry {
     return this._map.size;
   }
 
-  getById<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>(
-    id: string
-  ): ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType> {
+  getById(id: string): ExportTypeDefinition {
     if (!this._map.has(id)) {
       throw new Error(`Unknown id ${id}`);
     }
 
-    return this._map.get(id) as ExportTypeDefinition<
-      JobParamsType,
-      CreateJobFnType,
-      JobPayloadType,
-      ExecuteJobFnType
-    >;
+    return this._map.get(id) as ExportTypeDefinition;
   }
 
-  get<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>(
-    findType: GetCallbackFn<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>
-  ): ExportTypeDefinition<JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType> {
+  get(findType: GetCallbackFn): ExportTypeDefinition {
     let result;
     for (const value of this._map.values()) {
       if (!findType(value)) {
         continue; // try next value
       }
-      const foundResult: ExportTypeDefinition<
-        JobParamsType,
-        CreateJobFnType,
-        JobPayloadType,
-        ExecuteJobFnType
-      > = value;
+      const foundResult: ExportTypeDefinition = value;
 
       if (result) {
         throw new Error('Found multiple items matching predicate.');
@@ -91,13 +69,19 @@ export class ExportTypesRegistry {
   }
 }
 
-function getExportTypesRegistryFn(): ExportTypesRegistry {
-  const registry = new ExportTypesRegistry();
+// TODO: Define a 2nd ExportTypeRegistry instance for "immediate execute" report job types only.
+// It should not require a `CreateJobFn` for its ExportTypeDefinitions, which only makes sense for async.
+// Once that is done, the `any` types below can be removed.
 
-  /* this replaces the previously async method of registering export types,
-   * where this would run a directory scan and types would be registered via
-   * discovery */
-  const getTypeFns: Array<() => ExportTypeDefinition<any, any, any, any>> = [
+/*
+ * @return ExportTypeRegistry: the ExportTypeRegistry instance that should be
+ * used to register async export type definitions
+ */
+export function getExportTypesRegistry(): ExportTypesRegistry {
+  const registry = new ExportTypesRegistry();
+  type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
+  type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
+  const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType, RunFnType>> = [
     getTypeCsv,
     getTypeCsvFromSavedObject,
     getTypePng,
@@ -108,6 +92,3 @@ function getExportTypesRegistryFn(): ExportTypesRegistry {
   });
   return registry;
 }
-
-// FIXME: is this the best way to return a singleton?
-export const getExportTypesRegistry = memoizeOne(getExportTypesRegistryFn);

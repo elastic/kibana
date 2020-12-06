@@ -4,15 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
-import { ExecutorError, TaskRunnerFactory, ILicenseState } from './lib';
-import { ActionType, PreConfiguredAction } from './types';
 import { ActionType as CommonActionType } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
+import { LicensingPluginSetup } from '../../licensing/server';
+import {
+  ExecutorError,
+  getActionTypeFeatureUsageName,
+  TaskRunnerFactory,
+  ILicenseState,
+} from './lib';
+import {
+  ActionType,
+  PreConfiguredAction,
+  ActionTypeConfig,
+  ActionTypeSecrets,
+  ActionTypeParams,
+} from './types';
 
 export interface ActionTypeRegistryOpts {
+  licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
   actionsConfigUtils: ActionsConfigurationUtilities;
@@ -27,6 +40,7 @@ export class ActionTypeRegistry {
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
   private readonly licenseState: ILicenseState;
   private readonly preconfiguredActions: PreConfiguredAction[];
+  private readonly licensing: LicensingPluginSetup;
 
   constructor(constructorParams: ActionTypeRegistryOpts) {
     this.taskManager = constructorParams.taskManager;
@@ -34,6 +48,7 @@ export class ActionTypeRegistry {
     this.actionsConfigUtils = constructorParams.actionsConfigUtils;
     this.licenseState = constructorParams.licenseState;
     this.preconfiguredActions = constructorParams.preconfiguredActions;
+    this.licensing = constructorParams.licensing;
   }
 
   /**
@@ -48,26 +63,36 @@ export class ActionTypeRegistry {
    */
   public ensureActionTypeEnabled(id: string) {
     this.actionsConfigUtils.ensureActionTypeEnabled(id);
+    // Important to happen last because the function will notify of feature usage at the
+    // same time and it shouldn't notify when the action type isn't enabled
     this.licenseState.ensureLicenseForActionType(this.get(id));
   }
 
   /**
    * Returns true if action type is enabled in the config and a valid license is used.
    */
-  public isActionTypeEnabled(id: string) {
+  public isActionTypeEnabled(
+    id: string,
+    options: { notifyUsage: boolean } = { notifyUsage: false }
+  ) {
     return (
       this.actionsConfigUtils.isActionTypeEnabled(id) &&
-      this.licenseState.isLicenseValidForActionType(this.get(id)).isValid === true
+      this.licenseState.isLicenseValidForActionType(this.get(id), options).isValid === true
     );
   }
 
   /**
    * Returns true if action type is enabled or it is a preconfigured action type.
    */
-  public isActionExecutable(actionId: string, actionTypeId: string) {
+  public isActionExecutable(
+    actionId: string,
+    actionTypeId: string,
+    options: { notifyUsage: boolean } = { notifyUsage: false }
+  ) {
+    const actionTypeEnabled = this.isActionTypeEnabled(actionTypeId, options);
     return (
-      this.isActionTypeEnabled(actionTypeId) ||
-      (!this.isActionTypeEnabled(actionTypeId) &&
+      actionTypeEnabled ||
+      (!actionTypeEnabled &&
         this.preconfiguredActions.find(
           (preconfiguredAction) => preconfiguredAction.id === actionId
         ) !== undefined)
@@ -77,7 +102,12 @@ export class ActionTypeRegistry {
   /**
    * Registers an action type to the action type registry
    */
-  public register(actionType: ActionType) {
+  public register<
+    Config extends ActionTypeConfig = ActionTypeConfig,
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+    Params extends ActionTypeParams = ActionTypeParams,
+    ExecutorResultData = void
+  >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
     if (this.has(actionType.id)) {
       throw new Error(
         i18n.translate(
@@ -91,11 +121,10 @@ export class ActionTypeRegistry {
         )
       );
     }
-    this.actionTypes.set(actionType.id, { ...actionType });
+    this.actionTypes.set(actionType.id, { ...actionType } as ActionType);
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
-        type: `actions:${actionType.id}`,
         maxAttempts: actionType.maxAttempts || 1,
         getRetry(attempts: number, error: unknown) {
           if (error instanceof ExecutorError) {
@@ -107,12 +136,24 @@ export class ActionTypeRegistry {
         createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
       },
     });
+    // No need to notify usage on basic action types
+    if (actionType.minimumLicenseRequired !== 'basic') {
+      this.licensing.featureUsage.register(
+        getActionTypeFeatureUsageName(actionType as ActionType),
+        actionType.minimumLicenseRequired
+      );
+    }
   }
 
   /**
    * Returns an action type, throws if not registered
    */
-  public get(id: string): ActionType {
+  public get<
+    Config extends ActionTypeConfig = ActionTypeConfig,
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+    Params extends ActionTypeParams = ActionTypeParams,
+    ExecutorResultData = void
+  >(id: string): ActionType<Config, Secrets, Params, ExecutorResultData> {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.actions.actionTypeRegistry.get.missingActionTypeErrorMessage', {
@@ -123,7 +164,7 @@ export class ActionTypeRegistry {
         })
       );
     }
-    return this.actionTypes.get(id)!;
+    return this.actionTypes.get(id)! as ActionType<Config, Secrets, Params, ExecutorResultData>;
   }
 
   /**

@@ -5,31 +5,41 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { EuiCard, EuiHorizontalRule, EuiIcon } from '@elastic/eui';
+import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useMlKibana, useMlUrlGenerator } from '../../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 
-function redirectToAnalyticsManagementPage() {
-  window.location.href = '#/data_frame_analytics?';
-}
+export const BackToListPanel: FC = () => {
+  const urlGenerator = useMlUrlGenerator();
+  const {
+    services: {
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
 
-export const BackToListPanel: FC = () => (
-  <Fragment>
-    <EuiHorizontalRule />
-    <EuiCard
-      // @ts-ignore
-      style={{ width: '300px' }}
-      icon={<EuiIcon size="xxl" type="list" />}
-      title={i18n.translate('xpack.ml.dataframe.analytics.create.analyticsListCardTitle', {
-        defaultMessage: 'Data Frame Analytics',
-      })}
-      description={i18n.translate(
-        'xpack.ml.dataframe.analytics.create.analyticsListCardDescription',
-        {
-          defaultMessage: 'Return to the analytics management page.',
-        }
-      )}
-      onClick={redirectToAnalyticsManagementPage}
-      data-test-subj="analyticsWizardCardManagement"
-    />
-  </Fragment>
-);
+  const redirectToAnalyticsManagementPage = async () => {
+    const url = await urlGenerator.createUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
+    await navigateToUrl(url);
+  };
+
+  return (
+    <Fragment>
+      <EuiCard
+        className="dfAnalyticsCreationWizard__card"
+        icon={<EuiIcon size="xxl" type="list" />}
+        title={i18n.translate('xpack.ml.dataframe.analytics.create.analyticsListCardTitle', {
+          defaultMessage: 'Data Frame Analytics',
+        })}
+        description={i18n.translate(
+          'xpack.ml.dataframe.analytics.create.analyticsListCardDescription',
+          {
+            defaultMessage: 'Return to the analytics management page.',
+          }
+        )}
+        onClick={redirectToAnalyticsManagementPage}
+        data-test-subj="analyticsWizardCardManagement"
+      />
+    </Fragment>
+  );
+};

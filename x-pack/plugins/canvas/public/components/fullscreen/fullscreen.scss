@@ -1,5 +1,5 @@
 body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
-  // following two rules are for overriding the header bar padding 
+  // following two rules are for overriding the header bar padding
   &.euiBody--headerIsFixed {
     padding-top: 0;
   }
@@ -13,19 +13,9 @@ body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
     padding-left: 0 !important; // sass-lint:disable-line no-important
   }
 
-
   // hide global loading indicator
   .kbnLoadingIndicator {
     display: none;
-  }
-
-  // remove space for global nav elements
-  // TODO #64541
-  // Can delete this block
-  .chrHeaderWrapper ~ .app-wrapper {
-    // Override locked nav at all breakpoints
-    left: 0 !important; // sass-lint:disable-line no-important
-    top: 0;
   }
 
   // set the background color
@@ -34,7 +24,6 @@ body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
   }
 
   // hide all the interface parts
-  .chrHeaderWrapper, // K7 global top nav
   .canvasLayout__stageHeader,
   .canvasLayout__sidebar,
   .canvasLayout__footer,

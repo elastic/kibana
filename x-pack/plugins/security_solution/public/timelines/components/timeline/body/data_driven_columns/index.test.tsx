@@ -7,6 +7,7 @@ import { shallow } from 'enzyme';
 
 import React from 'react';
 
+import '../../../../../common/mock/match_media';
 import { mockTimelineData } from '../../../../../common/mock';
 import { defaultHeaders } from '../column_headers/default_headers';
 import { columnRenderers } from '../renderers';
@@ -24,7 +25,6 @@ describe('Columns', () => {
         columnRenderers={columnRenderers}
         data={mockTimelineData[0].data}
         ecsData={mockTimelineData[0].ecs}
-        onColumnResized={jest.fn()}
         timelineId="test"
       />
     );

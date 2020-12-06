@@ -8,21 +8,21 @@
 import { ReactElement } from 'react';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
-import { FieldMetaOptions, StylePropertyOptions } from '../../../../../common/descriptor_types';
-import { VECTOR_STYLES } from '../../../../../common/constants';
+import { FieldMetaOptions } from '../../../../../common/descriptor_types';
+import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 
-type LegendProps = {
+export type LegendProps = {
   isPointsOnly: boolean;
   isLinesOnly: boolean;
   symbolId?: string;
 };
 
-export interface IStyleProperty {
+export interface IStyleProperty<T> {
   isDynamic(): boolean;
   isComplete(): boolean;
-  formatField(value: string | undefined): string;
+  formatField(value: RawValue): string | number;
   getStyleName(): VECTOR_STYLES;
-  getOptions(): StylePropertyOptions;
+  getOptions(): T;
   renderLegendDetailRow(legendProps: LegendProps): ReactElement<any> | null;
   renderFieldMetaPopover(
     onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
@@ -30,11 +30,11 @@ export interface IStyleProperty {
   getDisplayStyleName(): string;
 }
 
-export class AbstractStyleProperty implements IStyleProperty {
-  private readonly _options: StylePropertyOptions;
-  private readonly _styleName: VECTOR_STYLES;
+export class AbstractStyleProperty<T> implements IStyleProperty<T> {
+  protected readonly _options: T;
+  protected readonly _styleName: VECTOR_STYLES;
 
-  constructor(options: StylePropertyOptions, styleName: VECTOR_STYLES) {
+  constructor(options: T, styleName: VECTOR_STYLES) {
     this._options = options;
     this._styleName = styleName;
   }
@@ -53,24 +53,31 @@ export class AbstractStyleProperty implements IStyleProperty {
     return true;
   }
 
-  formatField(value: string | undefined): string {
-    // eslint-disable-next-line eqeqeq
-    return value == undefined ? '' : value;
+  formatField(value: RawValue): string | number {
+    if (typeof value === 'undefined' || value === null) {
+      return '';
+    } else if (typeof value === 'boolean') {
+      return value.toString();
+    } else {
+      return value;
+    }
   }
 
   getStyleName(): VECTOR_STYLES {
     return this._styleName;
   }
 
-  getOptions(): StylePropertyOptions {
-    return this._options || {};
+  getOptions(): T {
+    return this._options;
   }
 
-  renderLegendDetailRow() {
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly }: LegendProps): ReactElement<any> | null {
     return null;
   }
 
-  renderFieldMetaPopover() {
+  renderFieldMetaPopover(
+    onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
+  ): ReactElement<any> | null {
     return null;
   }
 

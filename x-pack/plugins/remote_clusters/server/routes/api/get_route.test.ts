@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { register } from './get_route';
@@ -29,7 +29,7 @@ describe('GET remote clusters', () => {
     { licenseCheckResult = { valid: true }, apiResponses = [], asserts }: TestOptions
   ) => {
     test(description, async () => {
-      const elasticsearchMock = elasticsearchServiceMock.createClusterClient();
+      const elasticsearchMock = elasticsearchServiceMock.createLegacyClusterClient();
 
       const mockRouteDependencies = {
         router: httpServiceMock.createRouter(),
@@ -41,10 +41,10 @@ describe('GET remote clusters', () => {
         },
       };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
 
       elasticsearchServiceMock
-        .createClusterClient()
+        .createLegacyClusterClient()
         .asScoped.mockReturnValue(mockScopedClusterClient);
 
       for (const apiResponse of apiResponses) {

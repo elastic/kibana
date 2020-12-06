@@ -40,7 +40,7 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
   );
 };
 
-const getOverallAnomalyExplorerLinkDescriptor = (
+export const getOverallAnomalyExplorerLinkDescriptor = (
   jobId: string,
   timeRange: TimeRange
 ): LinkDescriptor => {
@@ -58,7 +58,7 @@ const getOverallAnomalyExplorerLinkDescriptor = (
 
   return {
     app: 'ml',
-    hash: '/explorer',
+    pathname: '/explorer',
     search: { _g },
   };
 };
@@ -89,7 +89,7 @@ export const getEntitySpecificSingleMetricViewerLink = (
 
   return {
     app: 'ml',
-    hash: '/timeseriesexplorer',
+    pathname: '/timeseriesexplorer',
     search: { _g, _a },
   };
 };

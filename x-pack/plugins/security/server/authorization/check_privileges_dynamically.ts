@@ -6,10 +6,11 @@
 
 import { KibanaRequest } from '../../../../../src/core/server';
 import { SpacesService } from '../plugin';
-import { CheckPrivilegesResponse, CheckPrivilegesWithRequest } from './check_privileges';
+import { CheckPrivilegesResponse, CheckPrivilegesWithRequest } from './types';
+import { CheckPrivilegesPayload } from './types';
 
 export type CheckPrivilegesDynamically = (
-  privilegeOrPrivileges: string | string[]
+  privileges: CheckPrivilegesPayload
 ) => Promise<CheckPrivilegesResponse>;
 
 export type CheckPrivilegesDynamicallyWithRequest = (
@@ -22,11 +23,11 @@ export function checkPrivilegesDynamicallyWithRequestFactory(
 ): CheckPrivilegesDynamicallyWithRequest {
   return function checkPrivilegesDynamicallyWithRequest(request: KibanaRequest) {
     const checkPrivileges = checkPrivilegesWithRequest(request);
-    return async function checkPrivilegesDynamically(privilegeOrPrivileges: string | string[]) {
+    return async function checkPrivilegesDynamically(privileges: CheckPrivilegesPayload) {
       const spacesService = getSpacesService();
       return spacesService
-        ? await checkPrivileges.atSpace(spacesService.getSpaceId(request), privilegeOrPrivileges)
-        : await checkPrivileges.globally(privilegeOrPrivileges);
+        ? await checkPrivileges.atSpace(spacesService.getSpaceId(request), privileges)
+        : await checkPrivileges.globally(privileges);
     };
   };
 }

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n/';
 import crypto from 'crypto';
-import { capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
 import { Observable } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import { CoreSetup } from 'src/core/server';
@@ -35,7 +35,7 @@ export function createConfig$(
           i18n.translate('xpack.reporting.serverConfig.randomEncryptionKey', {
             defaultMessage:
               'Generating a random key for xpack.reporting.encryptionKey. To prevent sessions from being invalidated on ' +
-              'restart, please set xpack.reporting.encryptionKey in kibana.yml',
+              'restart, please set xpack.reporting.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.',
           })
         );
         encryptionKey = crypto.randomBytes(16).toString('hex');
@@ -45,7 +45,7 @@ export function createConfig$(
       // kibanaServer.hostname, default to server.host, don't allow "0"
       let kibanaServerHostname = reportingServer.hostname
         ? reportingServer.hostname
-        : serverInfo.host;
+        : serverInfo.hostname;
       if (kibanaServerHostname === '0') {
         logger.warn(
           i18n.translate('xpack.reporting.serverConfig.invalidServerHostname', {
@@ -84,7 +84,7 @@ export function createConfig$(
 
       // disableSandbox was not set by user, apply default for OS
       const { os, disableSandbox } = await getDefaultChromiumSandboxDisabled();
-      const osName = [os.os, os.dist, os.release].filter(Boolean).map(capitalize).join(' ');
+      const osName = [os.os, os.dist, os.release].filter(Boolean).map(upperFirst).join(' ');
 
       logger.debug(
         i18n.translate('xpack.reporting.serverConfig.osDetected', {

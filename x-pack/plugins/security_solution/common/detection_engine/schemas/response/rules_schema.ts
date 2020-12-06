@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
 import * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
 import { Either, left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
-import { isMlRule } from '../../../machine_learning/helpers';
 
+import { isMlRule } from '../../../machine_learning/helpers';
+import { isThresholdRule } from '../../utils';
 import {
   actions,
   anomaly_threshold,
   description,
   enabled,
+  event_category_override,
   false_positives,
   from,
   id,
@@ -44,6 +44,7 @@ import {
   timeline_title,
   type,
   threat,
+  threshold,
   throttle,
   job_status,
   status_date,
@@ -55,8 +56,28 @@ import {
   filters,
   meta,
   note,
+  building_block_type,
+  license,
+  rule_name_override,
+  timestamp_override,
 } from '../common/schemas';
-import { ListsDefaultArray } from '../types/lists_default_array';
+import {
+  threat_index,
+  concurrent_searches,
+  items_per_search,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+  threat_language,
+} from '../types/threat_mapping';
+
+import { DefaultListArray } from '../types/lists_default_array';
+import {
+  DefaultStringArray,
+  DefaultRiskScoreMappingArray,
+  DefaultSeverityMappingArray,
+} from '../types';
+import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
 
 /**
  * This is the required fields for the rules schema response. Put all required properties on
@@ -64,6 +85,7 @@ import { ListsDefaultArray } from '../types/lists_default_array';
  * output schema.
  */
 export const requiredRulesSchema = t.type({
+  author: DefaultStringArray,
   description,
   enabled,
   false_positives,
@@ -75,9 +97,11 @@ export const requiredRulesSchema = t.type({
   output_index,
   max_signals,
   risk_score,
+  risk_score_mapping: DefaultRiskScoreMappingArray,
   name,
   references,
   severity,
+  severity_mapping: DefaultSeverityMappingArray,
   updated_by,
   tags,
   to,
@@ -87,7 +111,7 @@ export const requiredRulesSchema = t.type({
   updated_at,
   created_by,
   version,
-  exceptions_list: ListsDefaultArray,
+  exceptions_list: DefaultListArray,
 });
 
 export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
@@ -101,7 +125,10 @@ export const dependentRulesSchema = t.partial({
   language,
   query,
 
-  // when type = saved_query, saved_is is required
+  // eql only fields
+  event_category_override,
+
+  // when type = saved_query, saved_id is required
   saved_id,
 
   // These two are required together or not at all.
@@ -111,6 +138,18 @@ export const dependentRulesSchema = t.partial({
   // ML fields
   anomaly_threshold,
   machine_learning_job_id,
+
+  // Threshold fields
+  threshold,
+
+  // Threat Match fields
+  threat_filters,
+  threat_index,
+  threat_query,
+  concurrent_searches,
+  items_per_search,
+  threat_mapping,
+  threat_language,
 });
 
 /**
@@ -120,9 +159,13 @@ export const dependentRulesSchema = t.partial({
  */
 export const partialRulesSchema = t.partial({
   actions,
+  building_block_type,
+  license,
   throttle,
+  rule_name_override,
   status: job_status,
   status_date,
+  timestamp_override,
   last_success_at,
   last_success_message,
   last_failure_at,
@@ -186,7 +229,7 @@ export const addTimelineTitle = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mi
 };
 
 export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (typeAndTimelineOnly.type === 'query' || typeAndTimelineOnly.type === 'saved_query') {
+  if (['query', 'saved_query', 'threshold', 'threat_match'].includes(typeAndTimelineOnly.type)) {
     return [
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
@@ -209,6 +252,52 @@ export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[]
   }
 };
 
+export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (isThresholdRule(typeAndTimelineOnly.type)) {
+    return [
+      t.exact(t.type({ threshold: dependentRulesSchema.props.threshold })),
+      t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
+    ];
+  } else {
+    return [];
+  }
+};
+
+export const addEqlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (typeAndTimelineOnly.type === 'eql') {
+    return [
+      t.exact(
+        t.partial({ event_category_override: dependentRulesSchema.props.event_category_override })
+      ),
+      t.exact(t.type({ query: dependentRulesSchema.props.query })),
+      t.exact(t.type({ language: dependentRulesSchema.props.language })),
+    ];
+  } else {
+    return [];
+  }
+};
+
+export const addThreatMatchFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (typeAndTimelineOnly.type === 'threat_match') {
+    return [
+      t.exact(t.type({ threat_query: dependentRulesSchema.props.threat_query })),
+      t.exact(t.type({ threat_index: dependentRulesSchema.props.threat_index })),
+      t.exact(t.type({ threat_mapping: dependentRulesSchema.props.threat_mapping })),
+      t.exact(t.partial({ threat_language: dependentRulesSchema.props.threat_language })),
+      t.exact(t.partial({ threat_filters: dependentRulesSchema.props.threat_filters })),
+      t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
+      t.exact(t.partial({ concurrent_searches: dependentRulesSchema.props.concurrent_searches })),
+      t.exact(
+        t.partial({
+          items_per_search: dependentRulesSchema.props.items_per_search,
+        })
+      ),
+    ];
+  } else {
+    return [];
+  }
+};
+
 export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed => {
   const dependents: t.Mixed[] = [
     t.exact(requiredRulesSchema),
@@ -217,6 +306,9 @@ export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed
     ...addTimelineTitle(typeAndTimelineOnly),
     ...addQueryFields(typeAndTimelineOnly),
     ...addMlFields(typeAndTimelineOnly),
+    ...addThresholdFields(typeAndTimelineOnly),
+    ...addEqlFields(typeAndTimelineOnly),
+    ...addThreatMatchFields(typeAndTimelineOnly),
   ];
 
   if (dependents.length > 1) {

@@ -6,7 +6,6 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context.d';
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, import/no-default-export
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
@@ -29,8 +28,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       this.tags(['ciGroup4', 'skipFirefox']);
 
       loadTestFile(require.resolve('./smokescreen'));
+      loadTestFile(require.resolve('./dashboard'));
       loadTestFile(require.resolve('./persistent_context'));
+      loadTestFile(require.resolve('./colors'));
+      loadTestFile(require.resolve('./drag_and_drop'));
       loadTestFile(require.resolve('./lens_reporting'));
+
+      // has to be last one in the suite because it overrides saved objects
+      loadTestFile(require.resolve('./rollup'));
     });
   });
 }

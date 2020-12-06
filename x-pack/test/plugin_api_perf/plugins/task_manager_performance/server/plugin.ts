@@ -79,7 +79,6 @@ export class SampleTaskManagerFixturePlugin
 
     taskManager.registerTaskDefinitions({
       performanceTestTask: {
-        type: 'performanceTestTask',
         title,
         description: 'A task for stress testing task_manager.',
         timeout: '1m',
@@ -265,8 +264,8 @@ function avg(items: number[]) {
   return {
     mean: Math.round(stats.mean(items)),
     range: {
-      min: Math.round(isNumericArray(mode) ? _.min([...mode]) : mode),
-      max: Math.round(isNumericArray(mode) ? _.max([...mode]) : mode),
+      min: Math.round(isNumericArray(mode) ? (_.min([...mode]) as number) : (mode as number)),
+      max: Math.round(isNumericArray(mode) ? (_.max([...mode]) as number) : (mode as number)),
     },
   };
 }

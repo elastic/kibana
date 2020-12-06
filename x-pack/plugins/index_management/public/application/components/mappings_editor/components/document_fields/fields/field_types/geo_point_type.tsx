@@ -14,11 +14,14 @@ import {
   IgnoreMalformedParameter,
   NullValueParameter,
   IgnoreZValueParameter,
+  MetaParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
+    case 'meta':
+      return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     case 'null_value': {
       return field.null_value !== undefined;
     }
@@ -65,6 +68,8 @@ export const GeoPointType = ({ field }: Props) => {
             config={getFieldConfig('null_value_geo_point')}
           />
         </NullValueParameter>
+
+        <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
       </AdvancedParametersSection>
     </>
   );

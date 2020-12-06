@@ -10,23 +10,32 @@ import {
   reactToUiComponent,
   toMountPoint,
 } from '../../../../../../../../src/plugins/kibana_react/public';
-import { EmbeddableContext, ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
+import {
+  EmbeddableContext,
+  ViewMode,
+  CONTEXT_MENU_TRIGGER,
+} from '../../../../../../../../src/plugins/embeddable/public';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
-import { isEnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
+import {
+  isEnhancedEmbeddable,
+  embeddableEnhancedDrilldownGrouping,
+} from '../../../../../../embeddable_enhanced/public';
 import { StartDependencies } from '../../../../plugin';
 import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { ensureNestedTriggers } from '../drilldown_shared';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
 export interface FlyoutEditDrilldownParams {
-  start: StartServicesGetter<Pick<StartDependencies, 'drilldowns'>>;
+  start: StartServicesGetter<Pick<StartDependencies, 'uiActionsEnhanced'>>;
 }
 
 export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public order = 10;
+  public grouping = embeddableEnhancedDrilldownGrouping;
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
@@ -58,10 +67,12 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
 
     const handle = core.overlays.openFlyout(
       toMountPoint(
-        <plugins.drilldowns.FlyoutManageDrilldowns
+        <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
           onClose={() => handle.close()}
           viewMode={'manage'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
+          triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
+          placeContext={{ embeddable }}
         />
       ),
       {

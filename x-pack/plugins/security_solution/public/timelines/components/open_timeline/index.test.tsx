@@ -4,43 +4,93 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
+import React from 'react';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
 import { MockedProvider } from 'react-apollo/test-utils';
-import React from 'react';
+import { waitFor } from '@testing-library/react';
+import { useHistory, useParams } from 'react-router-dom';
 
-import { wait } from '../../../common/lib/helpers';
-import { TestProviders, apolloClient } from '../../../common/mock/test_providers';
-import { mockOpenTimelineQueryResults } from '../../../common/mock/timeline_results';
+import '../../../common/mock/match_media';
+import '../../../common/mock/formatted_relative';
+import { SecurityPageName } from '../../../app/types';
+import { TimelineType } from '../../../../common/types/timeline';
+
+import { TestProviders, mockOpenTimelineQueryResults } from '../../../common/mock';
+import { getTimelineTabsUrl } from '../../../common/components/link_to';
+
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
+import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
 
+import { useTimelineStatus } from './use_timeline_status';
 import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-import { TimelineTabsStyle } from './types';
-
 import { StatefulOpenTimeline } from '.';
-import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
-jest.mock('../../../common/lib/kibana');
+import { TimelineTabsStyle } from './types';
+import {
+  useTimelineTypes,
+  UseTimelineTypesArgs,
+  UseTimelineTypesResult,
+} from './use_timeline_types';
+
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+
+  return {
+    ...originalModule,
+    useParams: jest.fn(),
+    useHistory: jest.fn(),
+  };
+});
+
+jest.mock('./helpers', () => {
+  const originalModule = jest.requireActual('./helpers');
+  return {
+    ...originalModule,
+    queryTimelineById: jest.fn(),
+  };
+});
+
 jest.mock('../../containers/all', () => {
   const originalModule = jest.requireActual('../../containers/all');
   return {
     ...originalModule,
     useGetAllTimeline: jest.fn(),
-    getAllTimeline: originalModule.getAllTimeline,
   };
 });
-jest.mock('./use_timeline_types', () => {
+
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/components/link_to');
+
+jest.mock('../../../common/components/link_to', () => {
+  const originalModule = jest.requireActual('../../../common/components/link_to');
   return {
-    useTimelineTypes: jest.fn().mockReturnValue({
-      timelineType: 'default',
-      timelineTabs: <div data-test-subj="timeline-tab" />,
-      timelineFilters: <div data-test-subj="timeline-filter" />,
-    }),
+    ...originalModule,
+    getTimelineTabsUrl: jest.fn(),
+    useFormatUrl: jest.fn().mockReturnValue({ formatUrl: jest.fn(), search: 'urlSearch' }),
+  };
+});
+
+jest.mock('./use_timeline_status', () => {
+  return {
+    useTimelineStatus: jest.fn(),
   };
 });
 
 describe('StatefulOpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
+  let mockHistory: History[];
+  const mockInstallPrepackagedTimelines = jest.fn();
+
   beforeEach(() => {
+    (useParams as jest.Mock).mockReturnValue({
+      tabName: TimelineType.default,
+      pageName: SecurityPageName.timelines,
+    });
+    mockHistory = [];
+    (useHistory as jest.Mock).mockReturnValue(mockHistory);
     ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
       fetchAllTimeline: jest.fn(),
       timelines: getAllTimeline(
@@ -51,6 +101,20 @@ describe('StatefulOpenTimeline', () => {
       totalCount: mockOpenTimelineQueryResults[0].result.data.getAllTimeline.totalCount,
       refetch: jest.fn(),
     });
+    ((useTimelineStatus as unknown) as jest.Mock).mockReturnValue({
+      timelineStatus: null,
+      templateTimelineType: null,
+      templateTimelineFilter: <div />,
+      installPrepackagedTimelines: mockInstallPrepackagedTimelines,
+    });
+    mockInstallPrepackagedTimelines.mockClear();
+  });
+
+  afterEach(() => {
+    (getTimelineTabsUrl as jest.Mock).mockClear();
+    (useParams as jest.Mock).mockClear();
+    (useHistory as jest.Mock).mockClear();
+    mockHistory = [];
   });
 
   test('it has the expected initial state', () => {
@@ -59,7 +123,6 @@ describe('StatefulOpenTimeline', () => {
         <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
-            apolloClient={apolloClient}
             isModal={false}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             title={title}
@@ -83,6 +146,107 @@ describe('StatefulOpenTimeline', () => {
     });
   });
 
+  describe("Template timelines' tab", () => {
+    test("should land on correct timelines' tab with url timelines/default", () => {
+      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
+        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.timelineType).toBe(TimelineType.default);
+    });
+
+    test("should land on correct timelines' tab with url timelines/template", () => {
+      (useParams as jest.Mock).mockReturnValue({
+        tabName: TimelineType.template,
+        pageName: SecurityPageName.timelines,
+      });
+
+      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
+        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.timelineType).toBe(TimelineType.template);
+    });
+
+    test("should land on correct templates' tab after switching tab", () => {
+      (useParams as jest.Mock).mockReturnValue({
+        tabName: TimelineType.template,
+        pageName: SecurityPageName.timelines,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              isModal={false}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+      wrapper
+        .find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}-${TimelineType.template}"]`)
+        .first()
+        .simulate('click');
+      act(() => {
+        expect(history.length).toBeGreaterThan(0);
+      });
+    });
+
+    test("should selecting correct timelines' filter", () => {
+      (useParams as jest.Mock).mockReturnValue({
+        tabName: 'mockTabName',
+        pageName: SecurityPageName.case,
+      });
+
+      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
+        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.timelineType).toBe(TimelineType.default);
+    });
+
+    test('should not change url after switching filter', () => {
+      (useParams as jest.Mock).mockReturnValue({
+        tabName: 'mockTabName',
+        pageName: SecurityPageName.case,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              isModal={true}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+      wrapper
+        .find(
+          `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineType.template}"]`
+        )
+        .first()
+        .simulate('click');
+      act(() => {
+        expect(mockHistory.length).toEqual(0);
+      });
+    });
+  });
+
   describe('#onQueryChange', () => {
     test('it updates the query state with the expected trimmed value when the user enters a query', () => {
       const wrapper = mount(
@@ -90,7 +254,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -100,7 +263,7 @@ describe('StatefulOpenTimeline', () => {
       );
       wrapper
         .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
+        .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
       expect(wrapper.find('[data-test-subj="search-row"]').first().prop('query')).toEqual('abcd');
     });
 
@@ -109,7 +272,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -118,15 +280,15 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper
+          .find('[data-test-subj="search-bar"] input')
+          .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
 
-      wrapper
-        .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
-
-      expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
-        'Showing: 11 timelines with'
-      );
+        expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
+          'Showing: 11 timelines with'
+        );
+      });
     });
 
     test('echos (renders) the query when the user enters a query', async () => {
@@ -134,7 +296,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -143,15 +304,15 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper
+          .find('[data-test-subj="search-bar"] input')
+          .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
 
-      wrapper
-        .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
-
-      expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toEqual(
-        'with "abcd"'
-      );
+        expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toEqual(
+          'with "abcd"'
+        );
+      });
     });
   });
 
@@ -161,7 +322,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -170,12 +330,12 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
-
-      expect(
-        wrapper.find(`.${OPEN_TIMELINE_CLASS_NAME} input`).first().getDOMNode().id ===
-          document.activeElement!.id
-      ).toBe(true);
+      await waitFor(() => {
+        expect(
+          wrapper.find(`.${OPEN_TIMELINE_CLASS_NAME} input`).first().getDOMNode().id ===
+            document.activeElement!.id
+        ).toBe(true);
+      });
     });
   });
 
@@ -188,7 +348,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -197,26 +356,26 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper
+          .find('.euiCheckbox__input')
+          .first()
+          .simulate('change', { target: { checked: true } });
 
-      wrapper
-        .find('.euiCheckbox__input')
-        .first()
-        .simulate('change', { target: { checked: true } });
+        wrapper.find('[data-test-subj="favorite-selected"]').first().simulate('click');
 
-      wrapper.find('[data-test-subj="favorite-selected"]').first().simulate('click');
-
-      expect(addTimelinesToFavorites).toHaveBeenCalledWith([
-        'saved-timeline-11',
-        'saved-timeline-10',
-        'saved-timeline-9',
-        'saved-timeline-8',
-        'saved-timeline-6',
-        'saved-timeline-5',
-        'saved-timeline-4',
-        'saved-timeline-3',
-        'saved-timeline-2',
-      ]);
+        expect(addTimelinesToFavorites).toHaveBeenCalledWith([
+          'saved-timeline-11',
+          'saved-timeline-10',
+          'saved-timeline-9',
+          'saved-timeline-8',
+          'saved-timeline-6',
+          'saved-timeline-5',
+          'saved-timeline-4',
+          'saved-timeline-3',
+          'saved-timeline-2',
+        ]);
+      });
     });
   });
 
@@ -229,7 +388,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -238,26 +396,26 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper
+          .find('.euiCheckbox__input')
+          .first()
+          .simulate('change', { target: { checked: true } });
 
-      wrapper
-        .find('.euiCheckbox__input')
-        .first()
-        .simulate('change', { target: { checked: true } });
+        wrapper.find('[data-test-subj="delete-selected"]').first().simulate('click');
 
-      wrapper.find('[data-test-subj="delete-selected"]').first().simulate('click');
-
-      expect(deleteTimelines).toHaveBeenCalledWith([
-        'saved-timeline-11',
-        'saved-timeline-10',
-        'saved-timeline-9',
-        'saved-timeline-8',
-        'saved-timeline-6',
-        'saved-timeline-5',
-        'saved-timeline-4',
-        'saved-timeline-3',
-        'saved-timeline-2',
-      ]);
+        expect(deleteTimelines).toHaveBeenCalledWith([
+          'saved-timeline-11',
+          'saved-timeline-10',
+          'saved-timeline-9',
+          'saved-timeline-8',
+          'saved-timeline-6',
+          'saved-timeline-5',
+          'saved-timeline-4',
+          'saved-timeline-3',
+          'saved-timeline-2',
+        ]);
+      });
     });
   });
 
@@ -268,7 +426,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -277,19 +434,19 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper
+          .find('.euiCheckbox__input')
+          .first()
+          .simulate('change', { target: { checked: true } });
 
-      wrapper
-        .find('.euiCheckbox__input')
-        .first()
-        .simulate('change', { target: { checked: true } });
+        const selectedItems: [] = wrapper
+          .find('[data-test-subj="open-timeline"]')
+          .last()
+          .prop('selectedItems');
 
-      const selectedItems: [] = wrapper
-        .find('[data-test-subj="open-timeline"]')
-        .last()
-        .prop('selectedItems');
-
-      expect(selectedItems.length).toEqual(13); // 13 because we did mock 13 timelines in the query
+        expect(selectedItems.length).toEqual(13); // 13 because we did mock 13 timelines in the query
+      });
     });
   });
 
@@ -300,7 +457,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -328,7 +484,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -356,7 +511,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -365,7 +519,6 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
       wrapper.update();
 
       expect(
@@ -374,20 +527,26 @@ describe('StatefulOpenTimeline', () => {
 
       wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
 
-      expect(
-        wrapper.find('[data-test-subj="open-timeline"]').last().prop('itemIdToExpandedNotesRowMap')
-      ).toEqual({
-        '10849df0-7b44-11e9-a608-ab3d811609': (
-          <NotePreviews
-            notes={
-              mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes != null
-                ? mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes.map(
-                    (note) => ({ ...note, savedObjectId: note.noteId })
-                  )
-                : []
-            }
-          />
-        ),
+      await waitFor(() => {
+        expect(
+          wrapper
+            .find('[data-test-subj="open-timeline"]')
+            .last()
+            .prop('itemIdToExpandedNotesRowMap')
+        ).toEqual({
+          '10849df0-7b44-11e9-a608-ab3d811609': (
+            <NotePreviews
+              notes={
+                mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes !=
+                null
+                  ? mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes.map(
+                      (note) => ({ ...note, savedObjectId: note.noteId })
+                    )
+                  : []
+              }
+            />
+          ),
+        });
       });
     });
 
@@ -397,7 +556,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -406,33 +564,29 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper.update();
 
-      wrapper.update();
+        wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
+        expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toEqual(true);
+        expect(wrapper.find('[data-test-subj="updated-by"]').exists()).toEqual(true);
 
-      wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
-      expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toEqual(true);
-      expect(wrapper.find('[data-test-subj="updated-by"]').exists()).toEqual(true);
-
-      expect(
-        wrapper
-          .find('[data-test-subj="note-previews-container"]')
-          .find('[data-test-subj="updated-by"]')
-          .first()
-          .text()
-      ).toEqual('elastic');
+        expect(
+          wrapper
+            .find('[data-test-subj="note-previews-container"]')
+            .find('[data-test-subj="updated-by"]')
+            .first()
+            .text()
+        ).toEqual('elastic');
+      });
     });
 
-    /**
-     * enable this test when createtTemplateTimeline is ready
-     */
-    test.skip('it renders the tabs', async () => {
+    test('it has the expected initial state for openTimeline - templateTimelineFilter', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -441,11 +595,30 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      expect(wrapper.find('[data-test-subj="open-timeline-subtabs"]').exists()).toEqual(true);
+    });
 
-      expect(wrapper.find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}"]`).exists()).toEqual(
-        true
+    test('it has the expected initial state for openTimelineModalBody - templateTimelineFilter', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              isModal={true}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </MockedProvider>
+        </TestProviders>
       );
+
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineType.default}"]`
+          )
+          .exists()
+      ).toEqual(true);
     });
   });
 
@@ -456,7 +629,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -466,13 +638,14 @@ describe('StatefulOpenTimeline', () => {
       );
       const getSelectedItem = (): [] =>
         wrapper.find('[data-test-subj="open-timeline"]').last().prop('selectedItems');
-      await wait();
-      expect(getSelectedItem().length).toEqual(0);
-      wrapper
-        .find('.euiCheckbox__input')
-        .first()
-        .simulate('change', { target: { checked: true } });
-      expect(getSelectedItem().length).toEqual(13);
+      await waitFor(() => {
+        expect(getSelectedItem().length).toEqual(0);
+        wrapper
+          .find('.euiCheckbox__input')
+          .first()
+          .simulate('change', { target: { checked: true } });
+        expect(getSelectedItem().length).toEqual(13);
+      });
     });
   });
 
@@ -482,7 +655,6 @@ describe('StatefulOpenTimeline', () => {
         <MockedProvider addTypename={false}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
-            apolloClient={apolloClient}
             isModal={false}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             title={title}
@@ -491,13 +663,13 @@ describe('StatefulOpenTimeline', () => {
       </TestProviders>
     );
 
-    await wait();
+    await waitFor(() => {
+      wrapper.update();
 
-    wrapper.update();
-
-    expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
-      'Showing: 11 timelines '
-    );
+      expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
+        'Showing: 11 timelines '
+      );
+    });
   });
 
   // TODO - Have been skip because we need to re-implement the test as the component changed
@@ -509,7 +681,6 @@ describe('StatefulOpenTimeline', () => {
         <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
-            apolloClient={apolloClient}
             isModal={false}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             title={title}
@@ -518,21 +689,21 @@ describe('StatefulOpenTimeline', () => {
       </TestProviders>
     );
 
-    await wait();
+    await waitFor(() => {
+      wrapper
+        .find(
+          `[data-test-subj="title-${
+            mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].savedObjectId
+          }"]`
+        )
+        .first()
+        .simulate('click');
 
-    wrapper
-      .find(
-        `[data-test-subj="title-${
-          mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].savedObjectId
-        }"]`
-      )
-      .first()
-      .simulate('click');
-
-    expect(onOpenTimeline).toHaveBeenCalledWith({
-      duplicate: false,
-      timelineId: mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0]
-        .savedObjectId,
+      expect(onOpenTimeline).toHaveBeenCalledWith({
+        duplicate: false,
+        timelineId: mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0]
+          .savedObjectId,
+      });
     });
   });
 
@@ -545,7 +716,6 @@ describe('StatefulOpenTimeline', () => {
         <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
-            apolloClient={apolloClient}
             isModal={false}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             title={title}
@@ -554,10 +724,10 @@ describe('StatefulOpenTimeline', () => {
       </TestProviders>
     );
 
-    await wait();
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
 
-    wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
-
-    expect(onOpenTimeline).toBeCalledWith({ duplicate: true, timelineId: 'saved-timeline-11' });
+      expect(onOpenTimeline).toBeCalledWith({ duplicate: true, timelineId: 'saved-timeline-11' });
+    });
   });
 });

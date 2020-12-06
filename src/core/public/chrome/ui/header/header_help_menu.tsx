@@ -312,7 +312,6 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     );
 
     return (
-      // @ts-ignore repositionOnScroll doesn't exist in EuiPopover
       <EuiPopover
         anchorPosition="downRight"
         button={button}
@@ -320,7 +319,6 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         data-test-subj="helpMenuButton"
         id="headerHelpMenu"
         isOpen={this.state.isOpen}
-        ownFocus
         repositionOnScroll
       >
         <EuiPopoverTitle>

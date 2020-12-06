@@ -12,6 +12,8 @@ import { addFieldMetaOptions } from '../../common/migrations/add_field_meta_opti
 import { migrateSymbolStyleDescriptor } from '../../common/migrations/migrate_symbol_style_descriptor';
 import { migrateUseTopHitsToScalingType } from '../../common/migrations/scaling_type';
 import { migrateJoinAggKey } from '../../common/migrations/join_agg_key';
+import { removeBoundsFromSavedObject } from '../../common/migrations/remove_bounds';
+import { setDefaultAutoFitToBounds } from '../../common/migrations/set_default_auto_fit_to_bounds';
 
 export const migrations = {
   map: {
@@ -60,6 +62,22 @@ export const migrations = {
     },
     '7.8.0': (doc) => {
       const attributes = migrateJoinAggKey(doc);
+
+      return {
+        ...doc,
+        attributes,
+      };
+    },
+    '7.9.0': (doc) => {
+      const attributes = removeBoundsFromSavedObject(doc);
+
+      return {
+        ...doc,
+        attributes,
+      };
+    },
+    '7.10.0': (doc) => {
+      const attributes = setDefaultAutoFitToBounds(doc);
 
       return {
         ...doc,

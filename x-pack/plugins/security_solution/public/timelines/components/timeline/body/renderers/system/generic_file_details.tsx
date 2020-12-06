@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 
 import { BrowserFields } from '../../../../../../common/containers/source';
-import { Ecs } from '../../../../../../graphql/types';
+import { Ecs } from '../../../../../../../common/ecs';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 import { OverflowField } from '../../../../../../common/components/tables/helpers';
 
@@ -240,7 +240,7 @@ export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
     const packageVersion: string | null | undefined = get('system.audit.package.version[0]', data);
     const processHashMd5: string | null | undefined = get('process.hash.md5[0]', data);
     const processHashSha1: string | null | undefined = get('process.hash.sha1[0]', data);
-    const processHashSha256: string | null | undefined = get('process.hash.sha256', data);
+    const processHashSha256: string | null | undefined = get('process.hash.sha256[0]', data);
     const processPid: number | null | undefined = get('process.pid[0]', data);
     const processPpid: number | null | undefined = get('process.ppid[0]', data);
     const processName: string | null | undefined = get('process.name[0]', data);

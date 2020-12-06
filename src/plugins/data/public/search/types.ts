@@ -17,6 +17,7 @@
  * under the License.
  */
 
+<<<<<<< HEAD
 import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
@@ -24,35 +25,21 @@ import { LegacyApiCaller } from './legacy/es_client';
 import { SearchInterceptor, SearchEventInfo } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
 import { ISessionService } from './session_service';
+=======
+import { PackageInfo } from 'kibana/server';
+import { ISearchInterceptor } from './search_interceptor';
+import { SearchUsageCollector } from './collectors';
+import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
+import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
+import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { ISessionsClient, ISessionService } from './session';
+>>>>>>> 058f28ab235a661cfa4b9168e97dd55026f54146
 
-/**
- * Search strategy interface contains a search method that takes in
- * a request and returns a promise that resolves to a response.
- */
-export interface ISearchStrategy<T extends TStrategyTypes> {
-  search: ISearch<T>;
-}
+export { ISearchStartSearchSource };
 
-export type TSearchStrategiesMap = {
-  [K in TStrategyTypes]?: ISearchStrategy<any>;
-};
-
-/**
- * Extension point exposed for other plugins to register their own search
- * strategies.
- */
-export type TRegisterSearchStrategy = <T extends TStrategyTypes>(
-  name: T,
-  searchStrategy: ISearchStrategy<T>
-) => void;
-
-/**
- * Used if a plugin needs access to an already registered search strategy.
- */
-export type TGetSearchStrategy = <T extends TStrategyTypes>(name: T) => ISearchStrategy<T>;
-
-export interface ISearchStartLegacy {
-  esClient: LegacyApiCaller;
+export interface SearchEnhancements {
+  searchInterceptor: ISearchInterceptor;
 }
 
 /**
@@ -60,23 +47,60 @@ export interface ISearchStartLegacy {
  * point.
  */
 export interface ISearchSetup {
-  aggs: SearchAggsSetup;
+  aggs: AggsSetup;
+  usageCollector?: SearchUsageCollector;
   /**
-   * Extension point exposed for other plugins to register their own search
-   * strategies.
+   * Current session management
+   * {@link ISessionService}
    */
-  registerSearchStrategy: TRegisterSearchStrategy;
+  session: ISessionService;
+  /**
+   * Background search sessions SO CRUD
+   * {@link ISessionsClient}
+   */
+  sessionsClient: ISessionsClient;
+  /**
+   * @internal
+   */
+  __enhance: (enhancements: SearchEnhancements) => void;
 }
 
+/**
+ * search service
+ * @public
+ */
 export interface ISearchStart {
-  aggs: SearchAggsStart;
-  setInterceptor: (searchInterceptor: SearchInterceptor) => void;
-
   /**
-   * Used if a plugin needs access to an already registered search strategy.
+   * agg config sub service
+   * {@link AggsStart}
+   *
    */
-  getSearchStrategy: TGetSearchStrategy;
+  aggs: AggsStart;
+  /**
+   * low level search
+   * {@link ISearchGeneric}
+   */
+  search: ISearchGeneric;
 
+  showError: (e: Error) => void;
+  /**
+   * high level search
+   * {@link ISearchStartSearchSource}
+   */
+  searchSource: ISearchStartSearchSource;
+  /**
+   * Current session management
+   * {@link ISessionService}
+   */
+  session: ISessionService;
+  /**
+   * Background search sessions SO CRUD
+   * {@link ISessionsClient}
+   */
+  sessionsClient: ISessionsClient;
+}
+
+<<<<<<< HEAD
   search: ISearchGeneric;
   session: ISessionService;
   searchSource: {
@@ -85,4 +109,19 @@ export interface ISearchStart {
   };
   subscribe: (handler: (e: SearchEventInfo) => void) => Subscription;
   __LEGACY: ISearchStartLegacy;
+=======
+export { SEARCH_EVENT_TYPE } from './collectors';
+
+/** @internal */
+export interface SearchServiceSetupDependencies {
+  packageInfo: PackageInfo;
+  registerFunction: AggsSetupDependencies['registerFunction'];
+  usageCollection?: UsageCollectionSetup;
+}
+
+/** @internal */
+export interface SearchServiceStartDependencies {
+  fieldFormats: AggsStartDependencies['fieldFormats'];
+  indexPatterns: IndexPatternsContract;
+>>>>>>> 058f28ab235a661cfa4b9168e97dd55026f54146
 }

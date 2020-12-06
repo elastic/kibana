@@ -8,27 +8,29 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
 
-import { EventType } from '../../../timelines/store/timeline/model';
+import { TimelineEventsType } from '../../../../common/types/timeline';
 import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/helpers';
 
 /**
  * TIMELINE BODY
  */
+export const SELECTOR_TIMELINE_BODY_CLASS_NAME = 'securitySolutionTimeline__body';
 
 // SIDE EFFECT: the following creates a global class selector
 export const TimelineBodyGlobalStyle = createGlobalStyle`
-  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .siemTimeline__body {
+  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .${SELECTOR_TIMELINE_BODY_CLASS_NAME} {
     overflow: hidden;
   }
 `;
 
 export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
-  className: `siemTimeline__body ${className}`,
-}))<{ bodyHeight?: number }>`
-  height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
+  className: `${SELECTOR_TIMELINE_BODY_CLASS_NAME} ${className}`,
+}))`
+  height: auto;
   overflow: auto;
   scrollbar-width: thin;
   flex: 1;
+  display: block;
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
@@ -89,11 +91,14 @@ export const EventsTrHeader = styled.div.attrs(({ className }) => ({
 
 export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thGroupActions ${className}`,
-}))<{ actionsColumnWidth: number; justifyContent: string }>`
+}))<{ actionsColumnWidth: number; isEventViewer: boolean }>`
   display: flex;
-  flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
-  justify-content: ${({ justifyContent }) => justifyContent};
+  flex: 0 0
+    ${({ actionsColumnWidth, isEventViewer }) =>
+      `${!isEventViewer ? actionsColumnWidth + 4 : actionsColumnWidth}px`};
   min-width: 0;
+  padding-left: ${({ isEventViewer }) =>
+    !isEventViewer ? '4px;' : '0;'}; // match timeline event border
 `;
 
 export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
@@ -108,10 +113,10 @@ export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
   }
 `;
 
-export const EventsTh = styled.div.attrs(({ className = '' }) => ({
+export const EventsTh = styled.div.attrs<{ role: string }>(({ className = '' }) => ({
   className: `siemEventsTable__th ${className}`,
   role: 'columnheader',
-}))`
+}))<{ role?: string }>`
   align-items: center;
   display: flex;
   flex-shrink: 0;
@@ -139,14 +144,22 @@ export const EventsTh = styled.div.attrs(({ className = '' }) => ({
 
 export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thContent ${className}`,
-}))<{ textAlign?: string }>`
+}))<{ textAlign?: string; width?: number }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
   padding: ${({ theme }) => theme.eui.paddingSizes.xs};
   text-align: ${({ textAlign }) => textAlign};
-  width: 100%; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+  width: ${({ width }) =>
+    width != null
+      ? `${width}px`
+      : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+
+  > button.euiButtonIcon,
+  > .euiToolTipAnchor > button.euiButtonIcon {
+    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+  }
 `;
 
 /* EVENTS BODY */
@@ -160,7 +173,13 @@ export const EventsTbody = styled.div.attrs(({ className = '' }) => ({
 
 export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trGroup ${className}`,
-}))<{ className?: string; eventType: Omit<EventType, 'all'>; showLeftBorder: boolean }>`
+}))<{
+  className?: string;
+  eventType: Omit<TimelineEventsType, 'all'>;
+  isExpanded: boolean;
+  isBuildingBlockType: boolean;
+  showLeftBorder: boolean;
+}>`
   border-bottom: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorLightShade};
   ${({ theme, eventType, showLeftBorder }) =>
@@ -168,10 +187,24 @@ export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
       ? `border-left: 4px solid
     ${eventType === 'raw' ? theme.eui.euiColorLightShade : theme.eui.euiColorWarning}`
       : ''};
+  ${({ isBuildingBlockType }) =>
+    isBuildingBlockType
+      ? `background: repeating-linear-gradient(127deg, rgba(245, 167, 0, 0.2), rgba(245, 167, 0, 0.2) 1px, rgba(245, 167, 0, 0.05) 2px, rgba(245, 167, 0, 0.05) 10px);`
+      : ''};
 
   &:hover {
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
   }
+
+  ${({ isExpanded, theme }) =>
+    isExpanded &&
+    `
+    background: ${theme.eui.euiTableSelectedColor};
+
+    &:hover {
+      ${theme.eui.euiTableHoverSelectedColor}
+    }
+  `}
 `;
 
 export const EventsTrData = styled.div.attrs(({ className = '' }) => ({
@@ -194,15 +227,20 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs} 0
-    ${({ theme }) => theme.eui.paddingSizes.xl};
+  padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
+  .euiAccordion + div {
+    background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+    padding: 0 ${({ theme }) => theme.eui.paddingSizes.s};
+    border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+    border-radius: ${({ theme }) => theme.eui.paddingSizes.xs};
+  }
 `;
 
 export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__tdGroupActions ${className}`,
 }))<{ actionsColumnWidth: number }>`
+  align-items: center;
   display: flex;
-  justify-content: space-between;
   flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
   min-width: 0;
 `;
@@ -234,14 +272,21 @@ export const EventsTd = styled.div.attrs<WidthProp>(({ className = '', width }) 
 `;
 
 export const EventsTdContent = styled.div.attrs(({ className }) => ({
-  className: `siemEventsTable__tdContent ${className}`,
-}))<{ textAlign?: string }>`
+  className: `siemEventsTable__tdContent ${className != null ? className : ''}`,
+}))<{ textAlign?: string; width?: number }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
   padding: ${({ theme }) => theme.eui.paddingSizes.xs};
   text-align: ${({ textAlign }) => textAlign};
-  width: 100%; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+  width: ${({ width }) =>
+    width != null
+      ? `${width}px`
+      : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+
+  button.euiButtonIcon {
+    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+  }
 `;
 
 /**
@@ -327,6 +372,5 @@ export const EventsHeadingHandle = styled.div.attrs(({ className = '' }) => ({
  */
 
 export const EventsLoading = styled(EuiLoadingSpinner)`
-  margin: ${({ theme }) => theme.eui.euiSizeXS};
-  vertical-align: top;
+  vertical-align: middle;
 `;

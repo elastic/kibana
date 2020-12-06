@@ -12,8 +12,8 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
-  EuiText,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
@@ -27,7 +27,6 @@ import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
 import { getDroppableId, getDraggableFieldId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
 import { DraggableFieldBadge } from '../draggables/field_badge';
 import { FieldName } from '../../../timelines/components/fields_browser/field_name';
-import { SelectableText } from '../selectable_text';
 import { OverflowField } from '../tables/helpers';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
@@ -147,12 +146,19 @@ export const getColumns = ({
                     data-test-subj="field-name"
                     fieldId={field}
                     onUpdateColumns={onUpdateColumns}
-                    timelineId={contextId}
                   />
                 </div>
               )}
             </Draggable>
           </DroppableWrapper>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            aria-label={i18n.DESCRIPTION}
+            type="iInCircle"
+            color="subdued"
+            content={`${data.description || ''} ${getExampleText(data.example)}`}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -187,18 +193,6 @@ export const getColumns = ({
           ))}
       </EuiFlexGroup>
     ),
-  },
-  {
-    field: 'description',
-    name: i18n.DESCRIPTION,
-    render: (description: string | null | undefined, data: EventFieldsData) => (
-      <SelectableText>
-        <EuiText size="xs">{`${description || ''} ${getExampleText(data.example)}`}</EuiText>
-      </SelectableText>
-    ),
-    sortable: true,
-    truncateText: true,
-    width: '50%',
   },
   {
     field: 'valuesConcatenated',

@@ -7,17 +7,22 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AppMountParameters } from '../../../../../src/core/public';
-import { StartServices } from '../types';
-import { SiemApp } from './app';
-import { SecuritySubPlugins } from './types';
+import { SecurityApp } from './app';
+import { RenderAppProps } from './types';
 
-export const renderApp = (
-  services: StartServices,
-  { element }: AppMountParameters,
-  subPlugins: SecuritySubPlugins
-) => {
-  render(<SiemApp services={services} subPlugins={subPlugins} />, element);
+export const renderApp = ({
+  apolloClient,
+  element,
+  history,
+  services,
+  store,
+  SubPluginRoutes,
+}: RenderAppProps): (() => void) => {
+  render(
+    <SecurityApp apolloClient={apolloClient} history={history} services={services} store={store}>
+      <SubPluginRoutes />
+    </SecurityApp>,
+    element
+  );
   return () => unmountComponentAtNode(element);
 };

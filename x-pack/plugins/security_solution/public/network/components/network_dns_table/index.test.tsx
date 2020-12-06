@@ -10,11 +10,14 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
+import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { State, createStore } from '../../../common/store';
 import { networkModel } from '../../store';
@@ -26,11 +29,24 @@ import { mockData } from './mock';
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   describe('rendering', () => {
@@ -38,24 +54,20 @@ describe('NetworkTopNFlow Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkDnsTable
-            data={mockData.NetworkDns.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             id="dns"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.NetworkDns.pageInfo
-            )}
-            totalCount={mockData.NetworkDns.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={networkModel.NetworkType.page}
           />
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(NetworkDnsTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Memo(NetworkDnsTableComponent)')).toMatchSnapshot();
     });
   });
 
@@ -65,18 +77,14 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkDnsTable
-              data={mockData.NetworkDns.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
+              data={mockData.edges}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
               id="dns"
               isInspect={false}
               loading={false}
               loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.NetworkDns.pageInfo
-              )}
-              totalCount={mockData.NetworkDns.totalCount}
+              showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+              totalCount={mockData.totalCount}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>

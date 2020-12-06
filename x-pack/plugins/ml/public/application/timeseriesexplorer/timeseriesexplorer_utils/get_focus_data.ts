@@ -11,6 +11,7 @@ import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../../common/constants/search';
+import { extractErrorMessage } from '../../../../common/util/errors';
 import { mlTimeSeriesSearchService } from '../timeseries_search_service';
 import { mlResultsService, CriteriaField } from '../../services/results_service';
 import { Job } from '../../../../common/types/anomaly_detection_jobs';
@@ -23,7 +24,9 @@ import {
 } from './timeseriesexplorer_utils';
 import { mlForecastService } from '../../services/forecast_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
-import { Annotation } from '../../../../common/types/annotations';
+import { GetAnnotationsResponse } from '../../../../common/types/annotations';
+import { ANNOTATION_EVENT_USER } from '../../../../common/constants/annotations';
+import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 
 export interface Interval {
   asMilliseconds: () => number;
@@ -35,8 +38,10 @@ export interface FocusData {
   anomalyRecords: any;
   scheduledEvents: any;
   showForecastCheckbox?: any;
-  focusAnnotationData?: any;
+  focusAnnotationError?: string;
+  focusAnnotationData?: any[];
   focusForecastData?: any;
+  focusAggregations?: any;
 }
 
 export function getFocusData(
@@ -47,8 +52,14 @@ export function getFocusData(
   modelPlotEnabled: boolean,
   nonBlankEntities: any[],
   searchBounds: any,
-  selectedJob: Job
+  selectedJob: Job,
+  functionDescription?: string | undefined
 ): Observable<FocusData> {
+  const esFunctionToPlotIfMetric =
+    functionDescription !== undefined
+      ? aggregationTypeTransform.toES(functionDescription)
+      : functionDescription;
+
   return forkJoin([
     // Query 1 - load metric data across selected time range.
     mlTimeSeriesSearchService.getMetricData(
@@ -57,7 +68,8 @@ export function getFocusData(
       nonBlankEntities,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      focusAggregationInterval.expression
+      focusAggregationInterval.asMilliseconds(),
+      esFunctionToPlotIfMetric
     ),
     // Query 2 - load all the records across selected time range for the chart anomaly markers.
     mlResultsService.getRecordsForCriteria(
@@ -66,30 +78,43 @@ export function getFocusData(
       0,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
+      functionDescription
     ),
     // Query 3 - load any scheduled events for the selected job.
     mlResultsService.getScheduledEventsByBucket(
       [selectedJob.job_id],
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      focusAggregationInterval.expression,
+      focusAggregationInterval.asMilliseconds(),
       1,
       MAX_SCHEDULED_EVENTS
     ),
     // Query 4 - load any annotations for the selected job.
     ml.annotations
-      .getAnnotations({
+      .getAnnotations$({
         jobIds: [selectedJob.job_id],
         earliestMs: searchBounds.min.valueOf(),
         latestMs: searchBounds.max.valueOf(),
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+        fields: [
+          {
+            field: 'event',
+            missing: ANNOTATION_EVENT_USER,
+          },
+        ],
+        detectorIndex,
+        entities: nonBlankEntities,
       })
       .pipe(
-        catchError(() => {
-          // silent fail
-          return of({ annotations: {} as Record<string, Annotation[]> });
-        })
+        catchError((resp) =>
+          of({
+            annotations: {},
+            aggregations: {},
+            error: extractErrorMessage(resp),
+            success: false,
+          } as GetAnnotationsResponse)
+        )
       ),
     // Plus query for forecast data if there is a forecastId stored in the appState.
     forecastId !== undefined
@@ -107,7 +132,7 @@ export function getFocusData(
             nonBlankEntities,
             searchBounds.min.valueOf(),
             searchBounds.max.valueOf(),
-            focusAggregationInterval.expression,
+            focusAggregationInterval.asMilliseconds(),
             aggType
           );
         })()
@@ -127,7 +152,8 @@ export function getFocusData(
         focusChartData,
         anomalyRecords,
         focusAggregationInterval,
-        modelPlotEnabled
+        modelPlotEnabled,
+        functionDescription
       );
       focusChartData = processScheduledEventsForChart(focusChartData, scheduledEvents);
 
@@ -138,21 +164,28 @@ export function getFocusData(
       };
 
       if (annotations) {
-        refreshFocusData.focusAnnotationData = (annotations.annotations[selectedJob.job_id] ?? [])
-          .sort((a, b) => {
-            return a.timestamp - b.timestamp;
-          })
-          .map((d, i) => {
-            d.key = String.fromCharCode(65 + i);
-            return d;
-          });
+        if (annotations.error !== undefined) {
+          refreshFocusData.focusAnnotationError = annotations.error;
+          refreshFocusData.focusAnnotationData = [];
+          refreshFocusData.focusAggregations = {};
+        } else {
+          refreshFocusData.focusAnnotationData = (annotations.annotations[selectedJob.job_id] ?? [])
+            .sort((a, b) => {
+              return a.timestamp - b.timestamp;
+            })
+            .map((d, i: number) => {
+              d.key = (i + 1).toString();
+              return d;
+            });
+
+          refreshFocusData.focusAggregations = annotations.aggregations;
+        }
       }
 
       if (forecastData) {
         refreshFocusData.focusForecastData = processForecastResults(forecastData.results);
         refreshFocusData.showForecastCheckbox = refreshFocusData.focusForecastData.length > 0;
       }
-
       return refreshFocusData;
     })
   );

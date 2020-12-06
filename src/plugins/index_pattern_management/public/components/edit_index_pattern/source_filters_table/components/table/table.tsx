@@ -20,7 +20,7 @@
 import React, { Component } from 'react';
 
 import {
-  keyCodes,
+  keys,
   EuiBasicTableColumn,
   EuiInMemoryTable,
   EuiFieldText,
@@ -30,7 +30,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { SourceFiltersTableFilter } from '../../types';
 
 const filterHeader = i18n.translate(
@@ -80,7 +80,7 @@ const cancelAria = i18n.translate(
 );
 
 export interface TableProps {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   items: SourceFiltersTableFilter[];
   deleteFilter: Function;
   fieldWildcardMatcher: Function;
@@ -111,15 +111,15 @@ export class Table extends Component<TableProps, TableState> {
   onEditingFilterChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     this.setState({ editingFilterValue: e.target.value });
 
-  onEditFieldKeyDown = ({ keyCode }: React.KeyboardEvent<HTMLInputElement>) => {
-    if (keyCodes.ENTER === keyCode && this.state.editingFilterId && this.state.editingFilterValue) {
+  onEditFieldKeyDown = ({ key }: React.KeyboardEvent<HTMLInputElement>) => {
+    if (keys.ENTER === key && this.state.editingFilterId && this.state.editingFilterValue) {
       this.props.saveFilter({
         clientId: this.state.editingFilterId,
         value: this.state.editingFilterValue,
       });
       this.stopEditingFilter();
     }
-    if (keyCodes.ESCAPE === keyCode) {
+    if (keys.ESCAPE === key) {
       this.stopEditingFilter();
     }
   };

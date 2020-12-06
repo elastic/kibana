@@ -26,6 +26,10 @@ export const hostsSchema = gql`
     type: String
   }
 
+  type AgentFields {
+    id: String
+  }
+
   type CloudInstance {
     id: [String]
   }
@@ -41,12 +45,26 @@ export const hostsSchema = gql`
     region: [String]
   }
 
+  enum HostPolicyResponseActionStatus {
+    success
+    failure
+    warning
+  }
+
+  type EndpointFields {
+    endpointPolicy: String
+    sensorVersion: String
+    policyStatus: HostPolicyResponseActionStatus
+  }
+
   type HostItem {
     _id: String
-    lastSeen: Date
-    host: HostEcsFields
+    agent: AgentFields
     cloud: CloudFields
+    endpoint: EndpointFields
+    host: HostEcsFields
     inspect: Inspect
+    lastSeen: Date
   }
 
   type HostsEdges {
@@ -86,6 +104,7 @@ export const hostsSchema = gql`
       sort: HostsSortField!
       filterQuery: String
       defaultIndex: [String!]!
+      docValueFields: [docValueFieldsInput!]!
     ): HostsData!
     HostOverview(
       id: String
@@ -93,6 +112,11 @@ export const hostsSchema = gql`
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): HostItem!
-    HostFirstLastSeen(id: String, hostName: String!, defaultIndex: [String!]!): FirstLastSeenHost!
+    HostFirstLastSeen(
+      id: String
+      hostName: String!
+      defaultIndex: [String!]!
+      docValueFields: [docValueFieldsInput!]!
+    ): FirstLastSeenHost!
   }
 `;

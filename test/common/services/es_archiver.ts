@@ -18,9 +18,9 @@
  */
 
 import { format as formatUrl } from 'url';
+import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-import { EsArchiver } from '../../../src/es_archiver';
 // @ts-ignore not TS yet
 import * as KibanaServer from './kibana_server';
 

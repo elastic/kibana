@@ -18,8 +18,7 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -27,14 +26,6 @@ describe('create_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.create>;
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -170,6 +161,17 @@ describe('create_rules_bulk', () => {
       expect(result.ok).toHaveBeenCalled();
     });
 
+    test('allows rule type of query and custom from and interval', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+        body: [{ from: 'now-7m', interval: '5m', ...getCreateRulesSchemaMock() }],
+      });
+      const result = server.validate(request);
+
+      expect(result.ok).toHaveBeenCalled();
+    });
+
     test('disallows unknown rule type', async () => {
       const request = requestMock.create({
         method: 'post',
@@ -178,9 +180,23 @@ describe('create_rules_bulk', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unexpected_type" supplied to "type"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
+    });
+
+    test('disallows invalid "from" param on rule', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+        body: [
+          {
+            from: 'now-3755555555555555.67s',
+            interval: '5m',
+            ...getCreateRulesSchemaMock(),
+          },
+        ],
+      });
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
     });
   });
 });

@@ -158,7 +158,7 @@ export default function securityTests({ getService }: FtrProviderContext) {
           .auth(username, password)
           .set('kbn-xsrf', 'xxx')
           .send()
-          .expect(404);
+          .expect(403);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -232,7 +232,7 @@ export default function securityTests({ getService }: FtrProviderContext) {
           .auth(user1.username, user1.password)
           .set('kbn-xsrf', 'xxx')
           .send()
-          .expect(404);
+          .expect(403);
       });
     });
   });

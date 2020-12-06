@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { ClusterStatus } from '../cluster_status';
@@ -25,12 +24,16 @@ import {
   EuiButton,
   EuiText,
   EuiScreenReaderOnly,
+  EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import { get } from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
+import { AlertsStatus } from '../../../alerts/status';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 const getNodeTooltip = (node) => {
   const { nodeTypeLabel, nodeTypeClass } = node;
@@ -55,8 +58,8 @@ const getNodeTooltip = (node) => {
   return null;
 };
 
-const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
-const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
+const getSortHandler = (type) => (item) => get(item, [type, 'summary', 'lastVal']);
+const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts) => {
   const cols = [];
 
   const cpuUsageColumnTitle = i18n.translate(
@@ -70,7 +73,6 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.nameColumnTitle', {
       defaultMessage: 'Name',
     }),
-    width: '20%',
     field: 'name',
     sortable: true,
     render: (value, node) => {
@@ -84,8 +86,8 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
       );
 
       let setupModeStatus = null;
-      if (setupMode && setupMode.enabled) {
-        const list = _.get(setupMode, 'data.byUuid', {});
+      if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
+        const list = get(setupMode, 'data.byUuid', {});
         const status = list[node.resolver] || {};
         const instance = {
           uuid: node.resolver,
@@ -124,9 +126,36 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
   });
 
   cols.push({
+    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.alertsColumnTitle', {
+      defaultMessage: 'Alerts',
+    }),
+    field: 'alerts',
+    // width: '175px',
+    sortable: true,
+    render: (_field, node) => {
+      return (
+        <AlertsStatus
+          showBadge={true}
+          alerts={alerts}
+          stateFilter={(state) =>
+            state.nodeId === node.resolver || state.stackProductUuid === node.resolver
+          }
+          nextStepsFilter={(nextStep) => {
+            if (nextStep.text.includes('Elasticsearch nodes')) {
+              return false;
+            }
+            return true;
+          }}
+        />
+      );
+    },
+  });
+
+  cols.push({
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumnTitle', {
       defaultMessage: 'Status',
     }),
+    dataType: 'boolean',
     field: 'isOnline',
     sortable: true,
     render: (value) => {
@@ -138,9 +167,20 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
             defaultMessage: 'Offline',
           });
       return (
-        <div className="monTableCell__status">
-          <NodeStatusIcon isOnline={value} status={status} /> {status}
-        </div>
+        <EuiToolTip content={status} position="bottom" trigger="hover">
+          <EuiHealth
+            color={value ? 'success' : 'subdued'}
+            data-test-subj="statusIcon"
+            alt={i18n.translate('xpack.monitoring.elasticsearch.nodes.healthAltIcon', {
+              defaultMessage: 'Status: {status}',
+              values: {
+                status,
+              },
+            })}
+          >
+            {status}
+          </EuiHealth>
+        </EuiToolTip>
       );
     },
   });
@@ -149,22 +189,18 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.shardsColumnTitle', {
       defaultMessage: 'Shards',
     }),
+    dataType: 'number',
     field: 'shardCount',
     sortable: true,
     render: (value, node) => {
-      return node.isOnline ? (
-        <div className="monTableCell__number" data-test-subj="shards">
-          {value}
-        </div>
-      ) : (
-        <OfflineCell />
-      );
+      return node.isOnline ? <span data-test-subj="shards">{value}</span> : <OfflineCell />;
     },
   });
 
   if (showCgroupMetricsElasticsearch) {
     cols.push({
       name: cpuUsageColumnTitle,
+      dataType: 'number',
       field: 'node_cgroup_quota',
       sortable: getSortHandler('node_cgroup_quota'),
       render: (value, node) => (
@@ -181,6 +217,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
       name: i18n.translate('xpack.monitoring.elasticsearch.nodes.cpuThrottlingColumnTitle', {
         defaultMessage: 'CPU Throttling',
       }),
+      dataType: 'number',
       field: 'node_cgroup_throttled',
       sortable: getSortHandler('node_cgroup_throttled'),
       render: (value, node) => (
@@ -195,22 +232,26 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
   } else {
     cols.push({
       name: cpuUsageColumnTitle,
+      dataType: 'number',
       field: 'node_cpu_utilization',
       sortable: getSortHandler('node_cpu_utilization'),
-      render: (value, node) => (
-        <MetricCell
-          isOnline={node.isOnline}
-          metric={value}
-          isPercent={true}
-          data-test-subj="cpuUsage"
-        />
-      ),
+      render: (value, node) => {
+        return (
+          <MetricCell
+            isOnline={node.isOnline}
+            metric={value}
+            isPercent={true}
+            data-test-subj="cpuUsage"
+          />
+        );
+      },
     });
 
     cols.push({
       name: i18n.translate('xpack.monitoring.elasticsearch.nodes.loadAverageColumnTitle', {
         defaultMessage: 'Load Average',
       }),
+      dataType: 'number',
       field: 'node_load_average',
       sortable: getSortHandler('node_load_average'),
       render: (value, node) => (
@@ -231,6 +272,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
         javaVirtualMachine: 'JVM',
       },
     }),
+    dataType: 'number',
     field: 'node_jvm_mem_percent',
     sortable: getSortHandler('node_jvm_mem_percent'),
     render: (value, node) => (
@@ -247,6 +289,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.diskFreeSpaceColumnTitle', {
       defaultMessage: 'Disk Free Space',
     }),
+    dataType: 'number',
     field: 'node_free_space',
     sortable: getSortHandler('node_free_space'),
     render: (value, node) => (
@@ -263,12 +306,25 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
 };
 
 export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
-  const { sorting, pagination, onTableChange, clusterUuid, setupMode, fetchMoreData } = props;
-  const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, clusterUuid);
+  const {
+    sorting,
+    pagination,
+    onTableChange,
+    clusterUuid,
+    setupMode,
+    fetchMoreData,
+    alerts,
+  } = props;
+
+  const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts);
 
   // Merge the nodes data with the setup data if enabled
   const nodes = props.nodes || [];
-  if (setupMode.enabled && setupMode.data) {
+  if (
+    setupMode &&
+    setupMode.enabled &&
+    isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
+  ) {
     // We want to create a seamless experience for the user by merging in the setup data
     // and the node data from monitoring indices in the likely scenario where some nodes
     // are using MB collection and some are using no collection
@@ -291,7 +347,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
   }
 
   let setupModeCallout = null;
-  if (setupMode.enabled && setupMode.data) {
+  if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
     setupModeCallout = (
       <ListingCallOut
         setupModeData={setupMode.data}
@@ -340,7 +396,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             setupMode.data.totalUniqueInstanceCount
           ) {
             const finishMigrationAction =
-              _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
+              get(setupMode.meta, 'liveClusterUuid') === clusterUuid
                 ? setupMode.shortcutToFinishMigration
                 : setupMode.openFlyout;
 
@@ -392,7 +448,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
     return (
       <Fragment>
         <EuiPanel>
-          <ClusterStatus stats={clusterStatus} />
+          <ClusterStatus stats={clusterStatus} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
       </Fragment>

@@ -44,12 +44,14 @@ export const visualizationSavedObjectType: SavedObjectsType = {
   mappings: {
     properties: {
       description: { type: 'text' },
-      kibanaSavedObjectMeta: { properties: { searchSourceJSON: { type: 'text' } } },
-      savedSearchRefName: { type: 'keyword' },
+      kibanaSavedObjectMeta: {
+        properties: { searchSourceJSON: { type: 'text', index: false } },
+      },
+      savedSearchRefName: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
-      uiStateJSON: { type: 'text' },
+      uiStateJSON: { type: 'text', index: false },
       version: { type: 'integer' },
-      visState: { type: 'text' },
+      visState: { type: 'text', index: false },
     },
   },
   migrations: visualizationSavedObjectTypeMigrations,

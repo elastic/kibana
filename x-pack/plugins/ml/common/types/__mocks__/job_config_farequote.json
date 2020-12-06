@@ -69,9 +69,7 @@
     "datafeed_id": "datafeed-farequote",
     "job_id": "farequote",
     "query_delay": "115823ms",
-    "indices": [
-      "farequote"
-    ],
+    "indices": ["farequote"],
     "query": {
       "bool": {
         "must": [
@@ -103,7 +101,7 @@
       "buckets": {
         "date_histogram": {
           "field": "@timestamp",
-          "interval": 900000,
+          "fixed_interval": "15m",
           "offset": 0,
           "order": {
             "_key": "asc"

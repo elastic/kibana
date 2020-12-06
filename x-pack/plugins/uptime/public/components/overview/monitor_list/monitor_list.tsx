@@ -9,27 +9,28 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { HistogramPoint } from '../../../../common/runtime_types';
+import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
-import { MonitorListStatusColumn } from './monitor_list_status_column';
+import { MonitorListStatusColumn } from './columns/monitor_status_column';
 import { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../../common/charts';
-import { MonitorPageLink } from '../../common/monitor_page_link';
 import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
 import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
-import { CertStatusColumn } from './cert_status_column';
+import { CertStatusColumn } from './columns/cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
+import { URL_LABEL } from '../../common/translations';
+import { EnableMonitorAlert } from './columns/enable_alert';
+import { STATUS_ALERT_COLUMN } from './translations';
+import { MonitorNameColumn } from './columns/monitor_name_col';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -37,24 +38,17 @@ interface Props extends MonitorListProps {
   monitorList: MonitorList;
 }
 
-const TruncatedEuiLink = styled(EuiLink)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
 export const noItemsMessage = (loading: boolean, filters?: string) => {
   if (loading) return labels.LOADING;
   return !!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
 };
 
-export const MonitorListComponent: React.FC<Props> = ({
+export const MonitorListComponent: ({
   filters,
   monitorList: { list, error, loading },
-  linkParameters,
   pageSize,
   setPageSize,
-}) => {
+}: Props) => any = ({ filters, monitorList: { list, error, loading }, pageSize, setPageSize }) => {
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const items = list.summaries ?? [];
@@ -68,7 +62,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         ...map,
         [id]: (
           <MonitorListDrawer
-            summary={items.find(({ monitor_id: monitorId }) => monitorId === id)}
+            summary={items.find(({ monitor_id: monitorId }) => monitorId === id)!}
           />
         ),
       };
@@ -78,14 +72,18 @@ export const MonitorListComponent: React.FC<Props> = ({
   const columns = [
     {
       align: 'left' as const,
-      field: 'state.monitor.status',
+      field: 'state.summary.status',
       name: labels.STATUS_COLUMN_LABEL,
       mobileOptions: {
         fullWidth: true,
       },
-      render: (status: string, { state: { timestamp, checks } }: MonitorSummary) => {
+      render: (status: string, { state: { timestamp, summaryPings } }: MonitorSummary) => {
         return (
-          <MonitorListStatusColumn status={status} timestamp={timestamp} checks={checks ?? []} />
+          <MonitorListStatusColumn
+            status={status}
+            timestamp={timestamp}
+            summaryPings={summaryPings ?? []}
+          />
         );
       },
     },
@@ -96,28 +94,25 @@ export const MonitorListComponent: React.FC<Props> = ({
       mobileOptions: {
         fullWidth: true,
       },
-      render: (name: string, summary: MonitorSummary) => (
-        <MonitorPageLink monitorId={summary.monitor_id} linkParameters={linkParameters}>
-          {name ? name : `Unnamed - ${summary.monitor_id}`}
-        </MonitorPageLink>
-      ),
+      render: (name: string, summary: MonitorSummary) => <MonitorNameColumn summary={summary} />,
       sortable: true,
     },
     {
       align: 'left' as const,
       field: 'state.url.full',
-      name: labels.URL,
-      render: (url: string, summary: MonitorSummary) => (
-        <TruncatedEuiLink href={url} target="_blank" color="text">
-          {url} <EuiIcon size="s" type="popout" color="subbdued" />
-        </TruncatedEuiLink>
+      name: URL_LABEL,
+      width: '40%',
+      render: (url: string) => (
+        <EuiLink href={url} target="_blank" color="text" external>
+          {url}
+        </EuiLink>
       ),
     },
     {
       align: 'left' as const,
-      field: 'state.tls',
+      field: 'state.tls.server.x509',
       name: labels.TLS_COLUMN_LABEL,
-      render: (tls: any) => <CertStatusColumn cert={tls?.[0]} />,
+      render: (x509: X509Expiry) => <CertStatusColumn expiry={x509} />,
     },
     {
       align: 'center' as const,
@@ -126,8 +121,20 @@ export const MonitorListComponent: React.FC<Props> = ({
       mobileOptions: {
         show: false,
       },
-      render: (histogramSeries: HistogramPoint[] | null) => (
-        <MonitorBarSeries histogramSeries={histogramSeries} />
+      render: (histogramSeries: HistogramPoint[] | null, summary: MonitorSummary) => (
+        <MonitorBarSeries histogramSeries={histogramSeries} minInterval={summary.minInterval!} />
+      ),
+    },
+    {
+      align: 'center' as const,
+      field: '',
+      name: STATUS_ALERT_COLUMN,
+      width: '100px',
+      render: (item: MonitorSummary) => (
+        <EnableMonitorAlert
+          monitorId={item.monitor_id}
+          monitorName={item.state.monitor.name || item.monitor_id}
+        />
       ),
     },
     {
@@ -136,7 +143,7 @@ export const MonitorListComponent: React.FC<Props> = ({
       name: '',
       sortable: true,
       isExpander: true,
-      width: '24px',
+      width: '40px',
       render: (id: string) => {
         return (
           <EuiButtonIcon
@@ -162,7 +169,7 @@ export const MonitorListComponent: React.FC<Props> = ({
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
-        error={error?.message}
+        error={error?.body?.message || error?.message}
         loading={loading}
         isExpandable={true}
         hasActions={true}
@@ -171,6 +178,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         items={items}
         noItemsMessage={noItemsMessage(loading, filters)}
         columns={columns}
+        tableLayout={'auto'}
       />
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>

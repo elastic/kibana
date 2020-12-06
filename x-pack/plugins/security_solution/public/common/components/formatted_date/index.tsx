@@ -22,6 +22,24 @@ export const PreferenceFormattedDate = React.memo<{ dateFormat?: string; value: 
 
 PreferenceFormattedDate.displayName = 'PreferenceFormattedDate';
 
+export const PreferenceFormattedDateFromPrimitive = ({
+  value,
+}: {
+  value?: string | number | null;
+}) => {
+  if (value == null) {
+    return getOrEmptyTagFromValue(value);
+  }
+  const maybeDate = getMaybeDate(value);
+  if (!maybeDate.isValid()) {
+    return getOrEmptyTagFromValue(value);
+  }
+  const date = maybeDate.toDate();
+  return <PreferenceFormattedDate value={date} />;
+};
+
+PreferenceFormattedDateFromPrimitive.displayName = 'PreferenceFormattedDateFromPrimitive';
+
 /**
  * This function may be passed to `Array.find()` to locate the `P1DT`
  * configuration (sub) setting, a string array that contains two entries

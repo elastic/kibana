@@ -110,7 +110,7 @@ function getOverflow(size, pos, containers) {
 }
 
 function mergeOverflows(dest, src) {
-  _.merge(dest, src, function (a, b) {
+  _.mergeWith(dest, src, function (a, b) {
     if (a == null || b == null) return a || b;
     if (a < 0 && b < 0) return Math.min(a, b);
     return Math.max(a, b);
@@ -131,7 +131,7 @@ function pickPlacement(prop, pos, overflow, prev, pref, fallback, placement) {
   const stash = '_' + prop;
 
   // list of directions in order of preference
-  const dirs = _.unique([prev[stash], pref, fallback].filter(Boolean));
+  const dirs = _.uniq([prev[stash], pref, fallback].filter(Boolean));
 
   let dir;
   let value;

@@ -8,11 +8,7 @@
   "main": "target/test/plugin_api_integration/plugins/sample_task_plugin",
   "scripts": {
     "kbn": "node ../../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && tsc"
+    "build": "rm -rf './target' && ../../../../../node_modules/.bin/tsc"
   },
-  "devDependencies": {
-    "typescript": "3.9.5"
-  },
-  "license": "Apache-2.0",
-  "dependencies": {}
+  "license": "Apache-2.0"
 }

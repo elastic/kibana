@@ -8,6 +8,7 @@ import { ManagementAppMountParams } from '../../../../../src/plugins/management/
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { PluginsDependencies } from '../plugin';
+import { getMlSharedImports } from '../shared_imports';
 
 import { AppDependencies } from './app_dependencies';
 import { breadcrumbService } from './services/navigation';
@@ -47,7 +48,14 @@ export async function mountManagementSection(
     storage: localStorage,
     uiSettings,
     history,
+    savedObjectsPlugin: plugins.savedObjects,
+    ml: await getMlSharedImports(),
   };
 
-  return renderApp(element, appDependencies);
+  const unmountAppCallback = renderApp(element, appDependencies);
+
+  return () => {
+    docTitle.reset();
+    unmountAppCallback();
+  };
 }

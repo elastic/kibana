@@ -19,14 +19,14 @@
 
 import { EuiHeaderSectionItem } from '@elastic/eui';
 import React from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { ChromeNavControl } from '../../nav_controls';
 import { HeaderExtension } from './header_extension';
 
 interface Props {
   navControls$: Observable<readonly ChromeNavControl[]>;
-  side: 'left' | 'right';
+  side?: 'left' | 'right';
 }
 
 export function HeaderNavControls({ navControls$, side }: Props) {
@@ -41,7 +41,10 @@ export function HeaderNavControls({ navControls$, side }: Props) {
   return (
     <>
       {navControls.map((navControl: ChromeNavControl, index: number) => (
-        <EuiHeaderSectionItem key={index} border={side === 'left' ? 'right' : 'left'}>
+        <EuiHeaderSectionItem
+          key={index}
+          border={side ? (side === 'left' ? 'right' : 'left') : 'none'}
+        >
           <HeaderExtension extension={navControl.mount} />
         </EuiHeaderSectionItem>
       ))}

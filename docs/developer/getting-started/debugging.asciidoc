@@ -1,0 +1,59 @@
+[[kibana-debugging]]
+== Debugging {kib}
+
+For information about how to debug unit tests, refer to <<debugging-unit-tests>>.
+
+[discrete]
+=== Server Code
+
+`yarn debug` will start the server with Node's inspect flag. {kib}'s development mode will start three processes on ports `9229`, `9230`, and `9231`. Chrome's developer tools need to be configured to connect to all three connections. Add `localhost:<port>` for each {kib} process in Chrome's developer tools connection tab.
+
+[discrete]
+=== Instrumenting with Elastic APM
+
+{kib} ships with the
+https://github.com/elastic/apm-agent-nodejs[Elastic APM Node.js Agent]
+built-in for debugging purposes.
+
+Its default configuration is meant to be used by core {kib} developers
+only, but it can easily be re-configured to your needs. In its default
+configuration it’s disabled and will, once enabled, send APM data to a
+centrally managed {es} cluster accessible only to Elastic
+employees.
+
+To change the location where data is sent, use the
+https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#server-url[`serverUrl`]
+APM config option. To activate the APM agent, use the
+https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#active[`active`]
+APM config option.
+
+All config options can be set either via environment variables, or by
+creating an appropriate config file under `config/apm.dev.js`. For
+more information about configuring the APM agent, please refer to
+https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuring-the-agent.html[the
+documentation].
+
+Example `config/apm.dev.js` file:
+
+[source,js]
+----
+module.exports = {
+  active: true,
+};
+----
+
+APM
+https://www.elastic.co/guide/en/apm/agent/rum-js/current/index.html[Real
+User Monitoring agent] is not available in the {kib} distributables,
+however the agent can be enabled by setting `ELASTIC_APM_ACTIVE` to
+`true`. flags
+
+....
+ELASTIC_APM_ACTIVE=true yarn start
+// activates both Node.js and RUM agent
+....
+
+Once the agent is active, it will trace all incoming HTTP requests to
+{kib}, monitor for errors, and collect process-level metrics. The
+collected data will be sent to the APM Server and is viewable in the APM
+UI in {kib}.

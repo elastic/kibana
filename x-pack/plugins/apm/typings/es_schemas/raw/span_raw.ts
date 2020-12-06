@@ -5,8 +5,8 @@
  */
 
 import { APMBaseDoc } from './apm_base_doc';
-import { IStackframe } from './fields/stackframe';
-import { Observer } from './fields/observer';
+import { Stackframe } from './fields/stackframe';
+import { TimestampUs } from './fields/timestamp_us';
 
 interface Processor {
   name: 'transaction';
@@ -24,7 +24,7 @@ export interface SpanRaw extends APMBaseDoc {
     duration: { us: number };
     id: string;
     name: string;
-    stacktrace?: IStackframe[];
+    stacktrace?: Stackframe[];
     subtype?: string;
     sync?: boolean;
     type: string;
@@ -48,9 +48,9 @@ export interface SpanRaw extends APMBaseDoc {
       headers?: Record<string, unknown>;
     };
   };
+  timestamp: TimestampUs;
   transaction?: {
     id: string;
   };
-  observer?: Observer;
   child?: { id: string[] };
 }

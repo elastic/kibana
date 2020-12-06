@@ -10,7 +10,7 @@
     "buckets": {
       "date_histogram": {
         "field": "timestamp",
-        "interval": 3600000
+        "fixed_interval": "1h"
       },
       "aggregations": {
         "timestamp": {

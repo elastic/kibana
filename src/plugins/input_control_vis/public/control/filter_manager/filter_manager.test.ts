@@ -21,7 +21,11 @@ import expect from '@kbn/expect';
 
 import { FilterManager } from './filter_manager';
 import { coreMock } from '../../../../../core/public/mocks';
-import { Filter, IndexPattern, FilterManager as QueryFilterManager } from '../../../../data/public';
+import {
+  Filter,
+  FilterManager as QueryFilterManager,
+  IndexPatternsContract,
+} from '../../../../data/public';
 
 const setupMock = coreMock.createSetup();
 
@@ -39,7 +43,6 @@ describe('FilterManager', function () {
   const controlId = 'control1';
 
   describe('findFilters', function () {
-    const indexPatternMock = {} as IndexPattern;
     let kbnFilters: Filter[];
     const queryFilterMock = new QueryFilterManager(setupMock.uiSettings);
     queryFilterMock.getAppFilters = () => kbnFilters;
@@ -48,7 +51,13 @@ describe('FilterManager', function () {
     let filterManager: FilterManagerTest;
     beforeEach(() => {
       kbnFilters = [];
-      filterManager = new FilterManagerTest(controlId, 'field1', indexPatternMock, queryFilterMock);
+      filterManager = new FilterManagerTest(
+        controlId,
+        'field1',
+        '1',
+        {} as IndexPatternsContract,
+        queryFilterMock
+      );
     });
 
     test('should not find filters that are not controlled by any visualization', function () {

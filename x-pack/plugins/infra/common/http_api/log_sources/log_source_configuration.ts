@@ -20,6 +20,9 @@ export const logSourceConfigurationOriginRT = rt.keyof({
 export type LogSourceConfigurationOrigin = rt.TypeOf<typeof logSourceConfigurationOriginRT>;
 
 const logSourceFieldsConfigurationRT = rt.strict({
+  container: rt.string,
+  host: rt.string,
+  pod: rt.string,
   timestamp: rt.string,
   tiebreaker: rt.string,
 });
@@ -45,7 +48,7 @@ const logSourceFieldColumnConfigurationRT = rt.strict({
   ]),
 });
 
-const logSourceColumnConfigurationRT = rt.union([
+export const logSourceColumnConfigurationRT = rt.union([
   logSourceTimestampColumnConfigurationRT,
   logSourceMessageColumnConfigurationRT,
   logSourceFieldColumnConfigurationRT,

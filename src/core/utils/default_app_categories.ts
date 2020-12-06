@@ -18,16 +18,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AppCategory } from '../types';
 
 /** @internal */
-export const DEFAULT_APP_CATEGORIES = Object.freeze({
+export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
   kibana: {
     id: 'kibana',
     label: i18n.translate('core.ui.kibanaNavList.label', {
-      defaultMessage: 'Kibana',
+      defaultMessage: 'Analytics',
     }),
     euiIconType: 'logoKibana',
     order: 1000,
+  },
+  enterpriseSearch: {
+    id: 'enterpriseSearch',
+    label: i18n.translate('core.ui.enterpriseSearchNavList.label', {
+      defaultMessage: 'Enterprise Search',
+    }),
+    order: 2000,
+    euiIconType: 'logoEnterpriseSearch',
   },
   observability: {
     id: 'observability',
@@ -35,14 +44,14 @@ export const DEFAULT_APP_CATEGORIES = Object.freeze({
       defaultMessage: 'Observability',
     }),
     euiIconType: 'logoObservability',
-    order: 2000,
+    order: 3000,
   },
   security: {
-    id: 'security',
+    id: 'securitySolution',
     label: i18n.translate('core.ui.securityNavList.label', {
       defaultMessage: 'Security',
     }),
-    order: 3000,
+    order: 4000,
     euiIconType: 'logoSecurity',
   },
   management: {
@@ -51,5 +60,6 @@ export const DEFAULT_APP_CATEGORIES = Object.freeze({
       defaultMessage: 'Management',
     }),
     order: 5000,
+    euiIconType: 'managementApp',
   },
 });

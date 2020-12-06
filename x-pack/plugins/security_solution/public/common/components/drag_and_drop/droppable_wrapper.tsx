@@ -5,7 +5,7 @@
  */
 
 import { rgba } from 'polished';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
@@ -96,15 +96,9 @@ export const DroppableWrapper = React.memo<Props>(
     type,
     render = null,
     renderClone,
-  }) => (
-    <Droppable
-      isDropDisabled={isDropDisabled}
-      droppableId={droppableId}
-      direction={'horizontal'}
-      type={type}
-      renderClone={renderClone}
-    >
-      {(provided, snapshot) => (
+  }) => {
+    const DroppableContent = useCallback(
+      (provided, snapshot) => (
         <ReactDndDropTarget
           height={height}
           ref={provided.innerRef}
@@ -114,8 +108,21 @@ export const DroppableWrapper = React.memo<Props>(
           {render == null ? children : render({ isDraggingOver: snapshot.isDraggingOver })}
           {provided.placeholder}
         </ReactDndDropTarget>
-      )}
-    </Droppable>
-  )
+      ),
+      [children, height, render]
+    );
+
+    return (
+      <Droppable
+        isDropDisabled={isDropDisabled}
+        droppableId={droppableId}
+        direction={'horizontal'}
+        type={type}
+        renderClone={renderClone}
+      >
+        {DroppableContent}
+      </Droppable>
+    );
+  }
 );
 DroppableWrapper.displayName = 'DroppableWrapper';

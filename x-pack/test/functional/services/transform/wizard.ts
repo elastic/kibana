@@ -76,6 +76,12 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail(selector);
     },
 
+    async assertPivotPreviewChartHistogramButtonMissing() {
+      // the button should not exist because histogram charts
+      // for the pivot preview are not supported yet
+      await testSubjects.missingOrFail('transformPivotPreviewHistogramButton');
+    },
+
     async parseEuiDataGrid(tableSubj: string) {
       const table = await testSubjects.find(`~${tableSubj}`);
       const $ = await table.parseDomContent();
@@ -153,6 +159,58 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
     async assertPivotPreviewEmpty() {
       await this.assertPivotPreviewExists('empty');
+    },
+
+    async assertIndexPreviewHistogramChartButtonExists() {
+      await testSubjects.existOrFail('transformIndexPreviewHistogramButton');
+    },
+
+    async enableIndexPreviewHistogramCharts() {
+      await this.assertIndexPreviewHistogramChartButtonCheckState(false);
+      await testSubjects.click('transformIndexPreviewHistogramButton');
+      await this.assertIndexPreviewHistogramChartButtonCheckState(true);
+    },
+
+    async assertIndexPreviewHistogramChartButtonCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute(
+          'transformIndexPreviewHistogramButton',
+          'aria-checked'
+        )) === 'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Chart histogram button check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertIndexPreviewHistogramCharts(
+      expectedHistogramCharts: Array<{ chartAvailable: boolean; id: string; legend: string }>
+    ) {
+      // For each chart, get the content of each header cell and assert
+      // the legend text and column id and if the chart should be present or not.
+      await retry.tryForTime(5000, async () => {
+        for (const [index, expected] of expectedHistogramCharts.entries()) {
+          await testSubjects.existOrFail(`mlDataGridChart-${index}`);
+
+          if (expected.chartAvailable) {
+            await testSubjects.existOrFail(`mlDataGridChart-${index}-histogram`);
+          } else {
+            await testSubjects.missingOrFail(`mlDataGridChart-${index}-histogram`);
+          }
+
+          const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${index}-legend`);
+          expect(actualLegend).to.eql(
+            expected.legend,
+            `Legend text for column '${index}' should be '${expected.legend}' (got '${actualLegend}')`
+          );
+
+          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${index}-id`);
+          expect(actualId).to.eql(
+            expected.id,
+            `Id text for column '${index}' should be '${expected.id}' (got '${actualId}')`
+          );
+        }
+      });
     },
 
     async assertQueryInputExists() {
@@ -461,6 +519,53 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Continuous mode switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertTransformAdvancedSettingsAccordionExists() {
+      await testSubjects.existOrFail('transformWizardAccordionAdvancedSettings');
+    },
+
+    // for now we expect this to be used only for opening the accordion
+    async openTransformAdvancedSettingsAccordion() {
+      await this.assertTransformAdvancedSettingsAccordionExists();
+      await testSubjects.click('transformWizardAccordionAdvancedSettings');
+      await this.assertTransformFrequencyInputExists();
+      await this.assertTransformMaxPageSearchSizeInputExists();
+    },
+
+    async assertTransformFrequencyInputExists() {
+      await testSubjects.existOrFail('transformFrequencyInput');
+      expect(await testSubjects.isDisplayed('transformFrequencyInput')).to.eql(
+        true,
+        `Expected 'Frequency' input to be displayed`
+      );
+    },
+
+    async assertTransformFrequencyValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute('transformFrequencyInput', 'value');
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Transform frequency input text should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async assertTransformMaxPageSearchSizeInputExists() {
+      await testSubjects.existOrFail('transformMaxPageSearchSizeInput');
+      expect(await testSubjects.isDisplayed('transformMaxPageSearchSizeInput')).to.eql(
+        true,
+        `Expected 'Maximum page search size' input to be displayed`
+      );
+    },
+
+    async assertTransformMaxPageSearchSizeValue(expectedValue: number) {
+      const actualValue = await testSubjects.getAttribute(
+        'transformMaxPageSearchSizeInput',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Transform maximum page search size input text should be '${expectedValue}' (got '${actualValue}')`
       );
     },
 

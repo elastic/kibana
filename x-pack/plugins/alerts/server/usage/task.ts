@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, CoreSetup, APICaller } from 'kibana/server';
+import { Logger, CoreSetup, LegacyAPICaller } from 'kibana/server';
 import moment from 'moment';
 import {
   RunContext,
@@ -41,8 +41,7 @@ function registerAlertingTelemetryTask(
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
-      title: 'Alerting telemetry fetch task',
-      type: TELEMETRY_TASK_TYPE,
+      title: 'Alerting usage fetch task',
       timeout: '5m',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
     },
@@ -54,7 +53,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
     await taskManager.ensureScheduled({
       id: TASK_ID,
       taskType: TELEMETRY_TASK_TYPE,
-      state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
+      state: {},
       params: {},
     });
   } catch (e) {
@@ -65,7 +64,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
-    const callCluster = (...args: Parameters<APICaller>) => {
+    const callCluster = (...args: Parameters<LegacyAPICaller>) => {
       return core.getStartServices().then(([{ elasticsearch: { legacy: { client } } }]) =>
         client.callAsInternalUser(...args)
       );

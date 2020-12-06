@@ -36,7 +36,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         name: 'abc',
         tags: ['foo'],
         alertTypeId: 'test.noop',
-        consumer: 'bar',
+        consumer: 'alertsFixture',
         schedule: { interval: '1m' },
         enabled: true,
         actions: [],
@@ -50,6 +50,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         mutedInstanceIds: [],
         createdAt: response.body.createdAt,
         updatedAt: response.body.updatedAt,
+        executionStatus: response.body.executionStatus,
       });
       expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);

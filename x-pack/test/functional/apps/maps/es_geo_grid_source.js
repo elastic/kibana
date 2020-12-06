@@ -10,12 +10,24 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
+  const security = getService('security');
 
   describe('layer geo grid aggregation source', () => {
     const EXPECTED_NUMBER_FEATURES_ZOOMED_OUT = 4;
     const EXPECTED_NUMBER_FEATURES_ZOOMED_IN = 6;
     const DATA_CENTER_LON = -98;
     const DATA_CENTER_LAT = 38;
+
+    before(async () => {
+      await security.testUser.setRoles(
+        ['global_maps_all', 'test_logstash_reader', 'geoshape_data_reader'],
+        false
+      );
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
 
     async function getRequestTimestamp() {
       await inspector.open();

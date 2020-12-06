@@ -16,12 +16,18 @@ describe('Transaction', () => {
     '@timestamp': new Date().toString(),
     '@metadata': 'whatever',
     observer: {
+      name: 'an observer',
       version: 'whatever',
       version_major: 8,
     },
     agent: {
       name: 'java',
       version: 'agent version',
+    },
+    cloud: {
+      availability_zone: 'europe-west1-c',
+      provider: 'gcp',
+      region: 'europe-west1',
     },
     http: {
       request: { method: 'GET' },
@@ -67,12 +73,18 @@ describe('Span', () => {
     '@timestamp': new Date().toString(),
     '@metadata': 'whatever',
     observer: {
+      name: 'an observer',
       version: 'whatever',
       version_major: 8,
     },
     agent: {
       name: 'java',
       version: 'agent version',
+    },
+    cloud: {
+      availability_zone: 'europe-west1-c',
+      provider: 'gcp',
+      region: 'europe-west1',
     },
     processor: {
       name: 'transaction',
@@ -114,12 +126,18 @@ describe('Error', () => {
   const errorDoc: AllowUnknownProperties<APMError> = {
     '@metadata': 'whatever',
     observer: {
+      name: 'an observer',
       version: 'whatever',
       version_major: 8,
     },
     agent: {
       name: 'java',
       version: 'agent version',
+    },
+    cloud: {
+      availability_zone: 'europe-west1-c',
+      provider: 'gcp',
+      region: 'europe-west1',
     },
     error: {
       exception: [

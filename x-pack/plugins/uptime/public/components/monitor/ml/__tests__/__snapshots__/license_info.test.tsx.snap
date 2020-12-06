@@ -9,7 +9,7 @@ Array [
     <div
       class="euiCallOutHeader"
     >
-      <div
+      <span
         aria-hidden="true"
         class="euiCallOutHeader__icon"
         data-euiicon-type="help"
@@ -29,11 +29,10 @@ Array [
       <a
         class="euiButton euiButton--primary"
         href="/app/management/stack/license_management/home"
-        rel="noopener noreferrer"
-        target="_blank"
+        rel="noreferrer"
       >
         <span
-          class="euiButton__content"
+          class="euiButtonContent euiButton__content"
         >
           <span
             class="euiButton__text"
@@ -65,7 +64,6 @@ exports[`ShowLicenseInfo shallow renders without errors 1`] = `
     <EuiButton
       color="primary"
       href="/app/management/stack/license_management/home"
-      target="_blank"
     >
       Start free 14-day trial
     </EuiButton>

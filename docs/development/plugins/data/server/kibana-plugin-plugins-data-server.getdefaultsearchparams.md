@@ -7,24 +7,16 @@
 <b>Signature:</b>
 
 ```typescript
-export declare function getDefaultSearchParams(config: SharedGlobalConfig): {
-    timeout: string;
-    ignoreUnavailable: boolean;
-    restTotalHitsAsInt: boolean;
-};
+export declare function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient): Promise<Pick<Search, 'max_concurrent_shard_requests' | 'ignore_unavailable' | 'track_total_hits'>>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  config | <code>SharedGlobalConfig</code> |  |
+|  uiSettingsClient | <code>IUiSettingsClient</code> |  |
 
 <b>Returns:</b>
 
-`{
-    timeout: string;
-    ignoreUnavailable: boolean;
-    restTotalHitsAsInt: boolean;
-}`
+`Promise<Pick<Search, 'max_concurrent_shard_requests' | 'ignore_unavailable' | 'track_total_hits'>>`
 

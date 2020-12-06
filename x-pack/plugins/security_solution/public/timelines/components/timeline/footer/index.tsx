@@ -6,7 +6,6 @@
 
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -17,18 +16,21 @@ import {
   EuiText,
   EuiToolTip,
   EuiPopoverProps,
+  EuiPagination,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 
 import { LoadingPanel } from '../../loading';
-import { OnChangeItemsPerPage, OnLoadMore } from '../events';
+import { OnChangePage } from '../events';
 
-import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
 import { useManageTimeline } from '../../manage_timeline';
+import { LastUpdatedAt } from '../../../../common/components/last_updated';
+import { timelineActions } from '../../../store/timeline';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 
@@ -68,7 +70,7 @@ const FooterContainer = styled(EuiFlexGroup).attrs<HeightProp>(({ height }) => (
     height: `${height}px`,
   },
 }))<HeightProp>`
-  flex: 0;
+  flex: 0 0 auto;
 `;
 
 FooterContainer.displayName = 'FooterContainer';
@@ -144,6 +146,7 @@ export const EventsCountComponent = ({
                 iconType="arrowDown"
                 iconSide="right"
                 onClick={onClick}
+                data-test-subj="local-events-count-button"
               />
             </EuiBadge>
             {` ${i18n.OF} `}
@@ -173,38 +176,57 @@ export const EventsCount = React.memo(EventsCountComponent);
 
 EventsCount.displayName = 'EventsCount';
 
-export const PagingControlComponent = ({
-  hasNextPage,
-  isLoading,
-  loadMore,
-}: {
-  hasNextPage: boolean;
+interface PagingControlProps {
+  activePage: number;
   isLoading: boolean;
-  loadMore: () => void;
-}) => (
-  <>
-    {hasNextPage && (
-      <EuiButton
-        data-test-subj="TimelineMoreButton"
-        isLoading={isLoading}
-        onClick={loadMore}
-        size="s"
-      >
-        {isLoading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
-      </EuiButton>
-    )}
-  </>
-);
+  onPageClick: OnChangePage;
+  totalCount: number;
+  totalPages: number;
+}
+
+const TimelinePaginationContainer = styled.div<{ hideLastPage: boolean }>`
+  ul.euiPagination__list {
+    li.euiPagination__item:last-child {
+      ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
+    }
+  }
+`;
+
+export const PagingControlComponent: React.FC<PagingControlProps> = ({
+  activePage,
+  isLoading,
+  onPageClick,
+  totalCount,
+  totalPages,
+}) => {
+  if (isLoading) {
+    return <>{`${i18n.LOADING}...`}</>;
+  }
+
+  if (!totalPages) {
+    return null;
+  }
+
+  return (
+    <TimelinePaginationContainer hideLastPage={totalCount > 9999}>
+      <EuiPagination
+        data-test-subj="timeline-pagination"
+        pageCount={totalPages}
+        activePage={activePage}
+        onPageClick={onPageClick}
+      />
+    </TimelinePaginationContainer>
+  );
+};
 
 PagingControlComponent.displayName = 'PagingControlComponent';
 
 export const PagingControl = React.memo(PagingControlComponent);
 
 PagingControl.displayName = 'PagingControl';
-
 interface FooterProps {
-  getUpdatedAt: () => number;
-  hasNextPage: boolean;
+  updatedAt: number;
+  activePage: number;
   height: number;
   id: string;
   isLive: boolean;
@@ -212,17 +234,14 @@ interface FooterProps {
   itemsCount: number;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
-  nextCursor: string;
-  onChangeItemsPerPage: OnChangeItemsPerPage;
-  onLoadMore: OnLoadMore;
-  serverSideEventCount: number;
-  tieBreaker: string;
+  onChangePage: OnChangePage;
+  totalCount: number;
 }
 
 /** Renders a loading indicator and paging controls */
 export const FooterComponent = ({
-  getUpdatedAt,
-  hasNextPage,
+  activePage,
+  updatedAt,
   height,
   id,
   isLive,
@@ -230,15 +249,12 @@ export const FooterComponent = ({
   itemsCount,
   itemsPerPage,
   itemsPerPageOptions,
-  nextCursor,
-  onChangeItemsPerPage,
-  onLoadMore,
-  serverSideEventCount,
-  tieBreaker,
+  onChangePage,
+  totalCount,
 }: FooterProps) => {
+  const dispatch = useDispatch();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
-  const [updatedAt, setUpdatedAt] = useState<number | null>(null);
 
   const { getManageTimelineById } = useManageTimeline();
   const { documentType, loadingText, footerText } = useMemo(() => getManageTimelineById(id), [
@@ -246,28 +262,56 @@ export const FooterComponent = ({
     id,
   ]);
 
-  const loadMore = useCallback(() => {
-    setPaginationLoading(true);
-    onLoadMore(nextCursor, tieBreaker);
-  }, [nextCursor, tieBreaker, onLoadMore, setPaginationLoading]);
+  const handleChangePageClick = useCallback(
+    (nextPage: number) => {
+      setPaginationLoading(true);
+      onChangePage(nextPage);
+    },
+    [onChangePage]
+  );
 
   const onButtonClick = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [
     isPopoverOpen,
     setIsPopoverOpen,
   ]);
+
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
+
+  const onChangeItemsPerPage = useCallback(
+    (itemsChangedPerPage) =>
+      dispatch(timelineActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage })),
+    [dispatch, id]
+  );
+
+  const rowItems = useMemo(
+    () =>
+      itemsPerPageOptions &&
+      itemsPerPageOptions.map((item) => (
+        <EuiContextMenuItem
+          key={item}
+          icon={itemsPerPage === item ? 'check' : 'empty'}
+          data-test-subj={`items-per-page-option-${item}`}
+          onClick={() => {
+            closePopover();
+            onChangeItemsPerPage(item);
+          }}
+        >
+          {`${item} ${i18n.ROWS}`}
+        </EuiContextMenuItem>
+      )),
+    [closePopover, itemsPerPage, itemsPerPageOptions, onChangeItemsPerPage]
+  );
+
+  const totalPages = useMemo(() => Math.ceil(totalCount / itemsPerPage), [
+    itemsPerPage,
+    totalCount,
+  ]);
 
   useEffect(() => {
     if (paginationLoading && !isLoading) {
       setPaginationLoading(false);
-      setUpdatedAt(getUpdatedAt());
     }
-
-    if (updatedAt === null || !isLoading) {
-      setUpdatedAt(getUpdatedAt());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
+  }, [isLoading, paginationLoading]);
 
   if (isLoading && !paginationLoading) {
     return (
@@ -282,21 +326,6 @@ export const FooterComponent = ({
       </LoadingPanelContainer>
     );
   }
-
-  const rowItems =
-    itemsPerPageOptions &&
-    itemsPerPageOptions.map((item) => (
-      <EuiContextMenuItem
-        key={item}
-        icon={itemsPerPage === item ? 'check' : 'empty'}
-        onClick={() => {
-          closePopover();
-          onChangeItemsPerPage(item);
-        }}
-      >
-        {`${item} ${i18n.ROWS}`}
-      </EuiContextMenuItem>
-    ));
 
   return (
     <FooterContainer
@@ -328,7 +357,7 @@ export const FooterComponent = ({
               items={rowItems}
               itemsCount={itemsCount}
               onClick={onButtonClick}
-              serverSideEventCount={serverSideEventCount}
+              serverSideEventCount={totalCount}
             />
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -356,15 +385,17 @@ export const FooterComponent = ({
           ) : (
             <PagingControl
               data-test-subj="paging-control"
-              hasNextPage={hasNextPage}
+              totalCount={totalCount}
+              totalPages={totalPages}
+              activePage={activePage}
+              onPageClick={handleChangePageClick}
               isLoading={isLoading}
-              loadMore={loadMore}
             />
           )}
         </EuiFlexItem>
 
         <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-          <FixedWidthLastUpdatedContainer updatedAt={updatedAt || getUpdatedAt()} />
+          <FixedWidthLastUpdatedContainer updatedAt={updatedAt} />
         </EuiFlexItem>
       </FooterFlexGroup>
     </FooterContainer>

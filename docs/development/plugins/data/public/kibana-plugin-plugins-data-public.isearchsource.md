@@ -4,7 +4,7 @@
 
 ## ISearchSource type
 
-\*
+search source interface
 
 <b>Signature:</b>
 

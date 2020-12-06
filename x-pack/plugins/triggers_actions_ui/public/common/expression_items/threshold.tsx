@@ -43,6 +43,7 @@ interface ThresholdExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const ThresholdExpression = ({
@@ -51,6 +52,7 @@ export const ThresholdExpression = ({
   onChangeSelectedThresholdComparator,
   onChangeSelectedThreshold,
   customComparators,
+  display = 'inline',
   threshold = [],
   popupPosition,
 }: ThresholdExpressionProps) => {
@@ -81,11 +83,12 @@ export const ThresholdExpression = ({
           onClick={() => {
             setAlertThresholdPopoverOpen(true);
           }}
-          color={
+          display={display === 'inline' ? 'inline' : 'columns'}
+          isInvalid={
             (errors.threshold0 && errors.threshold0.length) ||
-            (errors.threshold1 && errors.threshold1.length)
-              ? 'danger'
-              : 'secondary'
+            (errors.threshold1 && errors.threshold1.length) > 0
+              ? true
+              : false
           }
         />
       }
@@ -94,7 +97,7 @@ export const ThresholdExpression = ({
         setAlertThresholdPopoverOpen(false);
       }}
       ownFocus
-      withTitle
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
@@ -107,12 +110,17 @@ export const ThresholdExpression = ({
               data-test-subj="comparatorOptionsComboBox"
               value={thresholdComparator}
               onChange={(e) => {
+                const updateThresholdValue =
+                  comparators[thresholdComparator].requiredValues !==
+                  comparators[e.target.value].requiredValues;
                 onChangeSelectedThresholdComparator(e.target.value);
-                const thresholdValues = threshold.slice(
-                  0,
-                  comparators[e.target.value].requiredValues
-                );
-                onChangeSelectedThreshold(thresholdValues);
+                if (updateThresholdValue) {
+                  const thresholdValues = threshold.slice(
+                    0,
+                    comparators[e.target.value].requiredValues
+                  );
+                  onChangeSelectedThreshold(thresholdValues);
+                }
               }}
               options={Object.values(comparators).map(({ text, value }) => {
                 return { text, value };
@@ -132,14 +140,14 @@ export const ThresholdExpression = ({
                 ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiFormRow
-                    isInvalid={errors[`threshold${i}`].length > 0 || !threshold[i]}
+                    isInvalid={errors[`threshold${i}`]?.length > 0 || !threshold[i]}
                     error={errors[`threshold${i}`]}
                   >
                     <EuiFieldNumber
                       data-test-subj="alertThresholdInput"
                       min={0}
                       value={!threshold || threshold[i] === undefined ? '' : threshold[i]}
-                      isInvalid={errors[`threshold${i}`].length > 0 || !threshold[i]}
+                      isInvalid={errors[`threshold${i}`]?.length > 0 || !threshold[i]}
                       onChange={(e) => {
                         const { value } = e.target;
                         const thresholdVal = value !== '' ? parseFloat(value) : undefined;

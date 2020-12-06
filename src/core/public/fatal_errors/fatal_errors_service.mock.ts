@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors_service';
 
 const createSetupContractMock = () => {

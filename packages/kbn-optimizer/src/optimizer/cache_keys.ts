@@ -23,7 +23,7 @@ import { promisify } from 'util';
 
 import Chalk from 'chalk';
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import stripAnsi from 'strip-ansi';
 
 import jestDiff from 'jest-diff';
@@ -36,16 +36,6 @@ import { OptimizerConfig } from './optimizer_config';
 
 const OPTIMIZER_DIR = Path.dirname(require.resolve('../../package.json'));
 const RELATIVE_DIR = Path.relative(REPO_ROOT, OPTIMIZER_DIR);
-
-function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
-  const result: any = {};
-  for (const [key, value] of Object.entries(obj) as any) {
-    if (!keys.includes(key)) {
-      result[key] = value;
-    }
-  }
-  return result as Omit<T, K>;
-}
 
 export function diffCacheKey(expected?: unknown, actual?: unknown) {
   const expectedJson = jsonStable(expected, {
@@ -185,7 +175,7 @@ export async function getOptimizerCacheKey(config: OptimizerConfig) {
     bootstrap,
     deletedPaths,
     modifiedTimes: {} as Record<string, number>,
-    workerConfig: omit(config.getWorkerConfig('♻'), ['watch', 'profileWebpack', 'cache']),
+    workerConfig: config.getCacheableWorkerConfig(),
   };
 
   const mtimes = await getMtimes(modifiedPaths);

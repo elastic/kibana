@@ -7,28 +7,58 @@
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../types';
 import {
-  validateTree,
+  validateTreeEntityID,
   validateEvents,
   validateChildren,
   validateAncestry,
+  validateAlerts,
+  validateEntities,
+  validateTree,
 } from '../../../common/endpoint/schema/resolver';
-import { handleEvents } from './resolver/events';
 import { handleChildren } from './resolver/children';
 import { handleAncestry } from './resolver/ancestry';
-import { handleTree } from './resolver/tree';
+import { handleTree as handleTreeEntityID } from './resolver/tree';
+import { handleTree } from './resolver/tree/handler';
+import { handleAlerts } from './resolver/alerts';
+import { handleEntities } from './resolver/entity';
+import { handleEvents } from './resolver/events';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
 
-  router.get(
+  router.post(
     {
-      path: '/api/endpoint/resolver/{id}/events',
+      path: '/api/endpoint/resolver/tree',
+      validate: validateTree,
+      options: { authRequired: true },
+    },
+    handleTree(log)
+  );
+
+  router.post(
+    {
+      path: '/api/endpoint/resolver/events',
       validate: validateEvents,
       options: { authRequired: true },
     },
-    handleEvents(log, endpointAppContext)
+    handleEvents(log)
   );
 
+  /**
+   * @deprecated will be removed because it is not used
+   */
+  router.post(
+    {
+      path: '/api/endpoint/resolver/{id}/alerts',
+      validate: validateAlerts,
+      options: { authRequired: true },
+    },
+    handleAlerts(log, endpointAppContext)
+  );
+
+  /**
+   * @deprecated use the /resolver/tree api instead
+   */
   router.get(
     {
       path: '/api/endpoint/resolver/{id}/children',
@@ -38,6 +68,9 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
     handleChildren(log, endpointAppContext)
   );
 
+  /**
+   * @deprecated use the /resolver/tree api instead
+   */
   router.get(
     {
       path: '/api/endpoint/resolver/{id}/ancestry',
@@ -47,12 +80,27 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
     handleAncestry(log, endpointAppContext)
   );
 
+  /**
+   * @deprecated use the /resolver/tree api instead
+   */
   router.get(
     {
       path: '/api/endpoint/resolver/{id}',
-      validate: validateTree,
+      validate: validateTreeEntityID,
       options: { authRequired: true },
     },
-    handleTree(log, endpointAppContext)
+    handleTreeEntityID(log, endpointAppContext)
+  );
+
+  /**
+   * Used to get details about an entity, aka process.
+   */
+  router.get(
+    {
+      path: '/api/endpoint/resolver/entity',
+      validate: validateEntities,
+      options: { authRequired: true },
+    },
+    handleEntities()
   );
 }

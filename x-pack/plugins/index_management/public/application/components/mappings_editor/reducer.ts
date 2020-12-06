@@ -3,112 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { OnFormUpdateArg, FormHook } from './shared_imports';
-import { Field, NormalizedFields, NormalizedField, FieldsEditor, SearchResult } from './types';
+import { Field, NormalizedFields, NormalizedField, State, Action } from './types';
 import {
   getFieldMeta,
   getUniqueId,
   shouldDeleteChildFieldsAfterTypeChange,
   getAllChildFields,
   getMaxNestedDepth,
-  isStateValid,
   normalize,
   updateFieldsPathAfterFieldNameChange,
   searchFields,
 } from './lib';
 import { PARAMETERS_DEFINITION } from './constants';
-
-export interface MappingsConfiguration {
-  enabled?: boolean;
-  throwErrorsForUnmappedFields?: boolean;
-  date_detection: boolean;
-  numeric_detection: boolean;
-  dynamic_date_formats: string[];
-  _source: {
-    enabled?: boolean;
-    includes?: string[];
-    excludes?: string[];
-  };
-  _meta?: string;
-}
-
-export interface MappingsTemplates {
-  dynamic_templates: DynamicTemplate[];
-}
-
-interface DynamicTemplate {
-  [key: string]: {
-    mapping: {
-      [key: string]: any;
-    };
-    match_mapping_type?: string;
-    match?: string;
-    unmatch?: string;
-    match_pattern?: string;
-    path_match?: string;
-    path_unmatch?: string;
-  };
-}
-
-export interface MappingsFields {
-  [key: string]: any;
-}
-
-type DocumentFieldsStatus = 'idle' | 'editingField' | 'creatingField';
-
-interface DocumentFieldsState {
-  status: DocumentFieldsStatus;
-  editor: FieldsEditor;
-  fieldToEdit?: string;
-  fieldToAddFieldTo?: string;
-}
-
-interface ConfigurationFormState extends OnFormUpdateArg<MappingsConfiguration> {
-  defaultValue: MappingsConfiguration;
-  submitForm?: FormHook<MappingsConfiguration>['submit'];
-}
-
-interface TemplatesFormState extends OnFormUpdateArg<MappingsTemplates> {
-  defaultValue: MappingsTemplates;
-  submitForm?: FormHook<MappingsTemplates>['submit'];
-}
-
-export interface State {
-  isValid: boolean | undefined;
-  configuration: ConfigurationFormState;
-  documentFields: DocumentFieldsState;
-  fields: NormalizedFields;
-  fieldForm?: OnFormUpdateArg<any>;
-  fieldsJsonEditor: {
-    format(): MappingsFields;
-    isValid: boolean;
-  };
-  search: {
-    term: string;
-    result: SearchResult[];
-  };
-  templates: TemplatesFormState;
-}
-
-export type Action =
-  | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
-  | { type: 'configuration.update'; value: Partial<ConfigurationFormState> }
-  | { type: 'configuration.save'; value: MappingsConfiguration }
-  | { type: 'templates.update'; value: Partial<State['templates']> }
-  | { type: 'templates.save'; value: MappingsTemplates }
-  | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
-  | { type: 'field.add'; value: Field }
-  | { type: 'field.remove'; value: string }
-  | { type: 'field.edit'; value: Field }
-  | { type: 'field.toggleExpand'; value: { fieldId: string; isExpanded?: boolean } }
-  | { type: 'documentField.createField'; value?: string }
-  | { type: 'documentField.editField'; value: string }
-  | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
-  | { type: 'documentField.changeEditor'; value: FieldsEditor }
-  | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
-  | { type: 'search:update'; value: string };
-
-export type Dispatch = (action: Action) => void;
 
 export const addFieldToState = (field: Field, state: State): State => {
   const updatedFields = { ...state.fields };
@@ -164,7 +70,7 @@ export const addFieldToState = (field: Field, state: State): State => {
 
   return {
     ...state,
-    isValid: isStateValid(state),
+    isValid: true,
     fields: updatedFields,
   };
 };
@@ -269,17 +175,29 @@ export const reducer = (state: State, action: Action): State => {
         fields: action.value.fields,
         configuration: {
           ...state.configuration,
+          data: {
+            internal: action.value.configuration,
+            format: () => action.value.configuration,
+          },
           defaultValue: action.value.configuration,
         },
         templates: {
           ...state.templates,
+          data: {
+            internal: action.value.templates,
+            format: () => action.value.templates,
+          },
           defaultValue: action.value.templates,
         },
         documentFields: {
           ...state.documentFields,
-          status: 'idle',
+          ...action.value.documentFields,
           fieldToAddFieldTo: undefined,
           fieldToEdit: undefined,
+        },
+        runtimeFields: action.value.runtimeFields,
+        runtimeFieldsList: {
+          status: 'idle',
         },
         search: {
           term: '',
@@ -293,8 +211,7 @@ export const reducer = (state: State, action: Action): State => {
         configuration: { ...state.configuration, ...action.value },
       };
 
-      const isValid = isStateValid(nextState);
-      nextState.isValid = isValid;
+      nextState.isValid = action.value.isValid;
       return nextState;
     }
     case 'configuration.save': {
@@ -304,7 +221,7 @@ export const reducer = (state: State, action: Action): State => {
           isValid: true,
           defaultValue: action.value,
           data: {
-            raw: action.value,
+            internal: action.value,
             format: () => action.value,
           },
           validate: async () => true,
@@ -317,8 +234,7 @@ export const reducer = (state: State, action: Action): State => {
         templates: { ...state.templates, ...action.value },
       };
 
-      const isValid = isStateValid(nextState);
-      nextState.isValid = isValid;
+      nextState.isValid = action.value.isValid;
 
       return nextState;
     }
@@ -329,7 +245,7 @@ export const reducer = (state: State, action: Action): State => {
           isValid: true,
           defaultValue: action.value,
           data: {
-            raw: action.value,
+            internal: action.value,
             format: () => action.value,
           },
           validate: async () => true,
@@ -342,8 +258,7 @@ export const reducer = (state: State, action: Action): State => {
         fieldForm: action.value,
       };
 
-      const isValid = isStateValid(nextState);
-      nextState.isValid = isValid;
+      nextState.isValid = action.value.isValid;
 
       return nextState;
     }
@@ -432,6 +347,11 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         fields: updatedFields,
+        documentFields: {
+          ...state.documentFields,
+          // If we removed the last field, show the "Create field" form
+          status: updatedFields.rootLevelFields.length === 0 ? 'creatingField' : 'idle',
+        },
         // If we have a search in progress, we reexecute the search to update our result array
         search: Boolean(state.search.term)
           ? {
@@ -529,7 +449,7 @@ export const reducer = (state: State, action: Action): State => {
 
       return {
         ...state,
-        isValid: isStateValid(state),
+        isValid: true,
         fieldForm: undefined,
         fields: updatedFields,
         documentFields: {
@@ -566,6 +486,80 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
     }
+    case 'runtimeFieldsList.createField': {
+      return {
+        ...state,
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'creatingField',
+        },
+      };
+    }
+    case 'runtimeFieldsList.editField': {
+      return {
+        ...state,
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'editingField',
+          fieldToEdit: action.value,
+        },
+      };
+    }
+    case 'runtimeField.add': {
+      const id = getUniqueId();
+      const normalizedField = {
+        id,
+        source: action.value,
+      };
+
+      return {
+        ...state,
+        runtimeFields: {
+          ...state.runtimeFields,
+          [id]: normalizedField,
+        },
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'idle',
+        },
+      };
+    }
+    case 'runtimeField.edit': {
+      const fieldToEdit = state.runtimeFieldsList.fieldToEdit!;
+
+      return {
+        ...state,
+        runtimeFields: {
+          ...state.runtimeFields,
+          [fieldToEdit]: action.value,
+        },
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'idle',
+        },
+      };
+    }
+    case 'runtimeField.remove': {
+      const field = state.runtimeFields[action.value];
+      const { id } = field;
+
+      const updatedFields = { ...state.runtimeFields };
+      delete updatedFields[id];
+
+      return {
+        ...state,
+        runtimeFields: updatedFields,
+      };
+    }
+    case 'runtimeFieldsList.closeRuntimeFieldEditor':
+      return {
+        ...state,
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'idle',
+          fieldToEdit: undefined,
+        },
+      };
     case 'fieldsJsonEditor.update': {
       const nextState = {
         ...state,
@@ -577,7 +571,7 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
 
-      nextState.isValid = isStateValid(nextState);
+      nextState.isValid = action.value.isValid;
 
       return nextState;
     }
@@ -588,6 +582,12 @@ export const reducer = (state: State, action: Action): State => {
           term: action.value,
           result: searchFields(action.value, state.fields.byId),
         },
+      };
+    }
+    case 'validity:update': {
+      return {
+        ...state,
+        isValid: action.value,
       };
     }
     default:

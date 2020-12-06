@@ -5,6 +5,23 @@
  */
 import { isFunction, get } from 'lodash';
 
+export function appendMetricbeatIndex(config, indexPattern, bypass = false) {
+  if (bypass) {
+    return indexPattern;
+  }
+  // Leverage this function to also append the dynamic metricbeat index too
+  let mbIndex = null;
+  // TODO: NP
+  // This function is called with both NP config and LP config
+  if (isFunction(config.get)) {
+    mbIndex = config.get('monitoring.ui.metricbeat.index');
+  } else {
+    mbIndex = get(config, 'ui.metricbeat.index');
+  }
+
+  return `${indexPattern},${mbIndex}`;
+}
+
 /**
  * Prefix all comma separated index patterns within the original {@code indexPattern}.
  *
@@ -16,18 +33,18 @@ import { isFunction, get } from 'lodash';
  * @param  {String} ccs The optional cluster-prefix to prepend.
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
-export function prefixIndexPattern(config, indexPattern, ccs) {
+export function prefixIndexPattern(config, indexPattern, ccs, monitoringIndicesOnly = false) {
   let ccsEnabled = false;
   // TODO: NP
   // This function is called with both NP config and LP config
   if (isFunction(config.get)) {
     ccsEnabled = config.get('monitoring.ui.ccs.enabled');
   } else {
-    ccsEnabled = get(config, 'monitoring.ui.ccs.enabled');
+    ccsEnabled = get(config, 'ui.ccs.enabled');
   }
 
   if (!ccsEnabled || !ccs) {
-    return indexPattern;
+    return appendMetricbeatIndex(config, indexPattern, monitoringIndicesOnly);
   }
 
   const patterns = indexPattern.split(',');
@@ -35,10 +52,14 @@ export function prefixIndexPattern(config, indexPattern, ccs) {
 
   // if a wildcard is used, then we also want to search the local indices
   if (ccs === '*') {
-    return `${prefixedPattern},${indexPattern}`;
+    return appendMetricbeatIndex(
+      config,
+      `${prefixedPattern},${indexPattern}`,
+      monitoringIndicesOnly
+    );
   }
 
-  return prefixedPattern;
+  return appendMetricbeatIndex(config, prefixedPattern, monitoringIndicesOnly);
 }
 
 /**

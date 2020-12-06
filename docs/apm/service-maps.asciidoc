@@ -2,11 +2,6 @@
 [[service-maps]]
 === Service maps
 
-beta::[]
-
-WARNING: Service map support for Internet Explorer 11 is extremely limited.
-Please use Chrome or Firefox if available.
-
 A service map is a real-time visual representation of the instrumented services in your application's architecture.
 It shows you how these services are connected, along with high-level metrics like average transaction duration,
 requests per minute, and errors per minute.
@@ -38,7 +33,7 @@ distributed tracing will not work, and the connection will not be drawn on the m
 Select the **Service Map** tab to get started.
 By default, all instrumented services and connections are shown.
 Whether you're onboarding a new engineer, or just trying to grasp the big picture,
-click around, zoom in and out, and begin to visualize how your services are connected.
+drag things around, zoom in and out, and begin to visualize how your services are connected.
 
 If there's a specific service that interests you, select that service to highlight its connections.
 Clicking **Focus map** will refocus the map on that specific service and lock the connection highlighting.

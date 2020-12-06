@@ -5,6 +5,7 @@
  */
 
 jest.mock('./kibana_services', () => ({}));
+jest.mock('./licensed_features', () => ({}));
 
 import {
   getSourceFields,
@@ -68,7 +69,8 @@ describe('Gold+ licensing', () => {
 
   describe('basic license', () => {
     beforeEach(() => {
-      require('./kibana_services').getIsGoldPlus = () => false;
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('./licensed_features').getIsGoldPlus = () => false;
     });
 
     describe('getAggregatableGeoFieldTypes', () => {
@@ -90,7 +92,8 @@ describe('Gold+ licensing', () => {
 
   describe('gold license', () => {
     beforeEach(() => {
-      require('./kibana_services').getIsGoldPlus = () => true;
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('./licensed_features').getIsGoldPlus = () => true;
     });
     describe('getAggregatableGeoFieldTypes', () => {
       test('Should add geo_shape field', () => {

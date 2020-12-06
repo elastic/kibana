@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import * as t from 'io-ts';
-import { LICENSES } from '../../../../../../legacy/plugins/beats_management/common/constants/security';
+import { LICENSES } from '../../../../common/constants/security';
 import { RegisterManagementAppArgs } from '../../../../../../../src/plugins/management/public';
 
 export interface FrameworkAdapter {
@@ -43,7 +43,7 @@ export interface FrameworkInfo extends t.TypeOf<typeof RuntimeFrameworkInfo> {}
 export const RuntimeFrameworkUser = t.interface(
   {
     username: t.string,
-    roles: t.array(t.string),
+    roles: t.readonlyArray(t.string),
     full_name: t.union([t.null, t.string]),
     email: t.union([t.null, t.string]),
     enabled: t.boolean,

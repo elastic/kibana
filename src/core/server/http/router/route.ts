@@ -144,6 +144,21 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * Additional body options {@link RouteConfigOptionsBody}.
    */
   body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
+
+  /**
+   * Defines per-route timeouts.
+   */
+  timeout?: {
+    /**
+     * Milliseconds to receive the payload
+     */
+    payload?: Method extends 'get' | 'options' ? undefined : number;
+
+    /**
+     * Milliseconds the socket can be idle before it's closed
+     */
+    idleSocket?: number;
+  };
 }
 
 /**

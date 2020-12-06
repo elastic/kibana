@@ -31,7 +31,7 @@ exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
           size="m"
           type="alert"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
             data-euiicon-type="alert"
@@ -61,7 +61,7 @@ exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
             id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorDescription"
             values={
               Object {
-                "link": <ForwardRef
+                "link": <EuiLink
                   href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
                   target="_blank"
                 >
@@ -70,7 +70,7 @@ exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
                     id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorLinkText"
                     values={Object {}}
                   />
-                </ForwardRef>,
+                </EuiLink>,
               }
             }
           >
@@ -92,6 +92,31 @@ exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
                 >
                   docs
                 </FormattedMessage>
+                <EuiIcon
+                  aria-label="External link"
+                  className="euiLink__externalIcon"
+                  size="s"
+                  type="popout"
+                >
+                  <span
+                    aria-label="External link"
+                    className="euiLink__externalIcon"
+                    data-euiicon-type="popout"
+                    size="s"
+                  />
+                </EuiIcon>
+                <EuiScreenReaderOnly>
+                  <span
+                    className="euiScreenReaderOnly"
+                  >
+                    <EuiI18n
+                      default="(opens in a new tab or window)"
+                      token="euiLink.newTarget.screenReaderOnlyText"
+                    >
+                      (opens in a new tab or window)
+                    </EuiI18n>
+                  </span>
+                </EuiScreenReaderOnly>
               </a>
             </EuiLink>
              to enable API keys.
@@ -119,7 +144,7 @@ exports[`APIKeysGridPage renders permission denied if user does not have require
           paddingSize="l"
         >
           <div
-            className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--horizontalCenter"
+            className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--horizontalCenter"
           >
             <EuiEmptyPrompt
               body={
@@ -154,7 +179,7 @@ exports[`APIKeysGridPage renders permission denied if user does not have require
                   size="xxl"
                   type="securityApp"
                 >
-                  <div
+                  <span
                     color="subdued"
                     data-euiicon-type="securityApp"
                     size="xxl"
@@ -173,7 +198,9 @@ exports[`APIKeysGridPage renders permission denied if user does not have require
                   <span
                     className="euiTextColor euiTextColor--subdued"
                   >
-                    <EuiTitle>
+                    <EuiTitle
+                      size="m"
+                    >
                       <h2
                         className="euiTitle euiTitle--medium"
                         data-test-subj="apiKeysPermissionDeniedMessage"

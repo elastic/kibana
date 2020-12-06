@@ -29,7 +29,7 @@ import {
   Storage,
 } from '../../../../kibana_utils/public';
 import { QueryService, QueryStart } from '../query_service';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { TimefilterContract } from '../timefilter';
 import { syncQueryStateWithUrl } from './sync_state_with_url';
 import { QueryState } from './types';
@@ -43,6 +43,8 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
       return true;
     case 'timepicker:timeDefaults':
       return { from: 'now-15m', to: 'now' };
+    case 'search:queryLanguage':
+      return 'kuery';
     case UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS:
       return { pause: false, value: 0 };
     default:
@@ -72,7 +74,11 @@ describe('sync_query_state_with_url', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
     });
-    queryServiceStart = queryService.start(startMock.savedObjects);
+    queryServiceStart = queryService.start({
+      uiSettings: startMock.uiSettings,
+      storage: new Storage(new StubBrowserStorage()),
+      savedObjectsClient: startMock.savedObjects.client,
+    });
     filterManager = queryServiceStart.filterManager;
     timefilter = queryServiceStart.timefilter.timefilter;
 

@@ -4,28 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
 import { ActionCreator } from 'typescript-fsa';
 
-import { SiemPageName } from '../../app/types';
 import { hostsModel } from '../store';
-import { GlobalTimeArgs } from '../../common/containers/global_time';
+import { GlobalTimeArgs } from '../../common/containers/use_global_time';
 import { InputsModelId } from '../../common/store/inputs/constants';
+import { DocValueFields } from '../../common/containers/source';
 
-export const hostsPagePath = `/:pageName(${SiemPageName.hosts})`;
-export const hostDetailsPagePath = `${hostsPagePath}/:detailName`;
+export const hostsPagePath = '/';
+export const hostDetailsPagePath = `/:detailName`;
 
-export type HostsTabsProps = HostsComponentProps & {
+export type HostsTabsProps = GlobalTimeArgs & {
+  docValueFields: DocValueFields[];
   filterQuery: string;
+  indexNames: string[];
   type: hostsModel.HostsType;
-  indexPattern: IIndexPattern;
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
-    from: number;
-    to: number;
+    from: string;
+    to: string;
   }>;
 };
 
 export type HostsQueryProps = GlobalTimeArgs;
-
-export type HostsComponentProps = HostsQueryProps & { hostsPagePath: string };

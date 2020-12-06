@@ -10,7 +10,7 @@ import uuid from 'uuid';
 
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
+import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerts/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
@@ -105,13 +105,16 @@ export const transformAlertToRule = (
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<RulesSchema> => {
   return pickBy<RulesSchema>((value: unknown) => value != null, {
+    author: alert.params.author ?? [],
     actions: ruleActions?.actions ?? [],
+    building_block_type: alert.params.buildingBlockType,
     created_at: alert.createdAt.toISOString(),
     updated_at: alert.updatedAt.toISOString(),
     created_by: alert.createdBy ?? 'elastic',
     description: alert.params.description,
     enabled: alert.enabled,
     anomaly_threshold: alert.params.anomalyThreshold,
+    event_category_override: alert.params.eventCategoryOverride,
     false_positives: alert.params.falsePositives,
     filters: alert.params.filters,
     from: alert.params.from,
@@ -121,10 +124,13 @@ export const transformAlertToRule = (
     interval: alert.schedule.interval,
     rule_id: alert.params.ruleId,
     language: alert.params.language,
+    license: alert.params.license,
     output_index: alert.params.outputIndex,
     max_signals: alert.params.maxSignals,
     machine_learning_job_id: alert.params.machineLearningJobId,
     risk_score: alert.params.riskScore,
+    risk_score_mapping: alert.params.riskScoreMapping ?? [],
+    rule_name_override: alert.params.ruleNameOverride,
     name: alert.name,
     query: alert.params.query,
     references: alert.params.references,
@@ -133,12 +139,22 @@ export const transformAlertToRule = (
     timeline_title: alert.params.timelineTitle,
     meta: alert.params.meta,
     severity: alert.params.severity,
+    severity_mapping: alert.params.severityMapping ?? [],
     updated_by: alert.updatedBy ?? 'elastic',
     tags: transformTags(alert.tags),
     to: alert.params.to,
     type: alert.params.type,
     threat: alert.params.threat ?? [],
+    threshold: alert.params.threshold,
+    threat_filters: alert.params.threatFilters,
+    threat_index: alert.params.threatIndex,
+    threat_query: alert.params.threatQuery,
+    threat_mapping: alert.params.threatMapping,
+    threat_language: alert.params.threatLanguage,
+    concurrent_searches: alert.params.concurrentSearches,
+    items_per_search: alert.params.itemsPerSearch,
     throttle: ruleActions?.ruleThrottle || 'no_actions',
+    timestamp_override: alert.params.timestampOverride,
     note: alert.params.note,
     version: alert.params.version,
     status: ruleStatus?.attributes.status ?? undefined,
@@ -240,10 +256,7 @@ export const transformOrImportError = (
   }
 };
 
-export const getDuplicates = (
-  ruleDefinitions: CreateRulesBulkSchemaDecoded,
-  by: 'rule_id'
-): string[] => {
+export const getDuplicates = (ruleDefinitions: CreateRulesBulkSchema, by: 'rule_id'): string[] => {
   const mappedDuplicates = countBy(
     by,
     ruleDefinitions.filter((r) => r[by] != null)

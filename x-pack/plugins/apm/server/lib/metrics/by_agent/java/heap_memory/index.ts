@@ -12,11 +12,7 @@ import {
   METRIC_JAVA_HEAP_MEMORY_USED,
   AGENT_NAME,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
 
@@ -54,11 +50,15 @@ const chartBase: ChartBase = {
   series,
 };
 
-export async function getHeapMemoryChart(
-  setup: Setup & SetupTimeRange & SetupUIFilters,
-  serviceName: string,
-  serviceNodeName?: string
-) {
+export async function getHeapMemoryChart({
+  setup,
+  serviceName,
+  serviceNodeName,
+}: {
+  setup: Setup & SetupTimeRange;
+  serviceName: string;
+  serviceNodeName?: string;
+}) {
   return fetchAndTransformMetrics({
     setup,
     serviceName,

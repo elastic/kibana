@@ -21,12 +21,11 @@ import Path from 'path';
 
 import cpy from 'cpy';
 import del from 'del';
-import { toArray } from 'rxjs/operators';
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { getMtimes } from '../optimizer/get_mtimes';
 import { OptimizerConfig } from '../optimizer/optimizer_config';
-import { Bundle } from '../common/bundle';
+import { allValuesFrom, Bundle } from '../common';
 import { getBundleCacheEvent$ } from '../optimizer/bundle_cache';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
@@ -75,11 +74,10 @@ it('emits "bundle cached" event when everything is updated', async () => {
     optimizerCacheKey,
     files,
     moduleCount: files.length,
+    bundleRefExportIds: [],
   });
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
@@ -115,11 +113,10 @@ it('emits "bundle not cached" event when cacheKey is up to date but caching is d
     optimizerCacheKey,
     files,
     moduleCount: files.length,
+    bundleRefExportIds: [],
   });
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
@@ -155,11 +152,10 @@ it('emits "bundle not cached" event when optimizerCacheKey is missing', async ()
     optimizerCacheKey: undefined,
     files,
     moduleCount: files.length,
+    bundleRefExportIds: [],
   });
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
@@ -195,11 +191,10 @@ it('emits "bundle not cached" event when optimizerCacheKey is outdated, includes
     optimizerCacheKey: 'old',
     files,
     moduleCount: files.length,
+    bundleRefExportIds: [],
   });
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
@@ -211,6 +206,51 @@ it('emits "bundle not cached" event when optimizerCacheKey is outdated, includes
     [32m- \\"old\\"[39m
     [31m+ \\"optimizerCacheKey\\"[39m",
         "reason": "optimizer cache key mismatch",
+        "type": "bundle not cached",
+      },
+    ]
+  `);
+});
+
+it('emits "bundle not cached" event when bundleRefExportIds is outdated, includes diff', async () => {
+  const config = OptimizerConfig.create({
+    repoRoot: MOCK_REPO_DIR,
+    pluginScanDirs: [],
+    pluginPaths: [Path.resolve(MOCK_REPO_DIR, 'plugins/foo')],
+    maxWorkerCount: 1,
+  });
+  const [bundle] = config.bundles;
+
+  const optimizerCacheKey = 'optimizerCacheKey';
+  const files = [
+    Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/ext.ts'),
+    Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
+    Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
+  ];
+  const mtimes = await getMtimes(files);
+  const cacheKey = bundle.createCacheKey(files, mtimes);
+
+  bundle.cache.set({
+    cacheKey,
+    optimizerCacheKey,
+    files,
+    moduleCount: files.length,
+    bundleRefExportIds: ['plugin/bar/public'],
+  });
+
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
+
+  expect(cacheEvents).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "bundle": <Bundle>,
+        "diff": "[32m- Expected[39m
+    [31m+ Received[39m
+
+    [2m  [[22m
+    [31m+   \\"plugin/bar/public\\"[39m
+    [2m  ][22m",
+        "reason": "bundle references outdated",
         "type": "bundle not cached",
       },
     ]
@@ -238,11 +278,10 @@ it('emits "bundle not cached" event when cacheKey is missing', async () => {
     optimizerCacheKey,
     files,
     moduleCount: files.length,
+    bundleRefExportIds: [],
   });
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
@@ -276,13 +315,12 @@ it('emits "bundle not cached" event when cacheKey is outdated', async () => {
     optimizerCacheKey,
     files,
     moduleCount: files.length,
+    bundleRefExportIds: [],
   });
 
   jest.spyOn(bundle, 'createCacheKey').mockImplementation(() => 'new');
 
-  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
-    .pipe(toArray())
-    .toPromise();
+  const cacheEvents = await allValuesFrom(getBundleCacheEvent$(config, optimizerCacheKey));
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [

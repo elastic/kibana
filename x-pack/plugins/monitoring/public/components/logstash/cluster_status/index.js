@@ -9,7 +9,7 @@ import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 
-export function ClusterStatus({ stats }) {
+export function ClusterStatus({ stats, alerts }) {
   const {
     node_count: nodeCount,
     avg_memory_used: avgMemoryUsed,
@@ -49,5 +49,5 @@ export function ClusterStatus({ stats }) {
     },
   ];
 
-  return <SummaryStatus metrics={metrics} data-test-subj="logstashClusterStatus" />;
+  return <SummaryStatus metrics={metrics} alerts={alerts} data-test-subj="logstashClusterStatus" />;
 }

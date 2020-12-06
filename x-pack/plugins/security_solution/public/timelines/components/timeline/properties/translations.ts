@@ -17,24 +17,24 @@ export const TITLE = i18n.translate('xpack.securitySolution.timeline.properties.
   defaultMessage: 'Title',
 });
 
-export const FAVORITE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.favoriteTooltip',
+export const ADD_TO_FAVORITES = i18n.translate(
+  'xpack.securitySolution.timeline.properties.addToFavoriteButtonLabel',
   {
-    defaultMessage: 'Favorite',
+    defaultMessage: 'Add to favorites',
   }
 );
 
-export const NOT_A_FAVORITE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.notAFavoriteTooltip',
+export const REMOVE_FROM_FAVORITES = i18n.translate(
+  'xpack.securitySolution.timeline.properties.removeFromFavoritesButtonLabel',
   {
-    defaultMessage: 'Not a Favorite',
+    defaultMessage: 'Remove from favorites',
   }
 );
 
 export const TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.properties.timelineTitleAriaLabel',
   {
-    defaultMessage: 'Timeline title',
+    defaultMessage: 'Title',
   }
 );
 
@@ -52,10 +52,17 @@ export const UNTITLED_TIMELINE = i18n.translate(
   }
 );
 
+export const UNTITLED_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.timeline.properties.untitledTemplatePlaceholder',
+  {
+    defaultMessage: 'Untitled template',
+  }
+);
+
 export const DESCRIPTION = i18n.translate(
   'xpack.securitySolution.timeline.properties.descriptionPlaceholder',
   {
-    defaultMessage: 'Description',
+    defaultMessage: 'Add a description',
   }
 );
 
@@ -112,7 +119,14 @@ export const NEW_TIMELINE = i18n.translate(
 export const NEW_TEMPLATE_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.newTemplateTimelineButtonLabel',
   {
-    defaultMessage: 'Create template timeline',
+    defaultMessage: 'Create new timeline template',
+  }
+);
+
+export const ADD_TIMELINE = i18n.translate(
+  'xpack.securitySolution.timeline.properties.addTimelineButtonLabel',
+  {
+    defaultMessage: 'Add new timeline or template',
   }
 );
 
@@ -123,10 +137,38 @@ export const ATTACH_TIMELINE_TO_NEW_CASE = i18n.translate(
   }
 );
 
+export const ATTACH_TO_CASE = i18n.translate(
+  'xpack.securitySolution.timeline.properties.attachToCaseButtonLabel',
+  {
+    defaultMessage: 'Attach to case',
+  }
+);
+
+export const ATTACH_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.timeline.properties.attachToNewCaseButtonLabel',
+  {
+    defaultMessage: 'Attach to new case',
+  }
+);
+
 export const ATTACH_TIMELINE_TO_EXISTING_CASE = i18n.translate(
   'xpack.securitySolution.timeline.properties.existingCaseButtonLabel',
   {
-    defaultMessage: 'Attach timeline to existing case',
+    defaultMessage: 'Attach timeline to existing case...',
+  }
+);
+
+export const ATTACH_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.timeline.properties.attachToExistingCaseButtonLabel',
+  {
+    defaultMessage: 'Attach to existing case...',
+  }
+);
+
+export const ATTACH_TIMELINE_TO_CASE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.timeline.properties.attachTimelineToCaseTooltip',
+  {
+    defaultMessage: 'Please provide a title for your timeline in order to attach it to a case',
   }
 );
 
@@ -137,32 +179,9 @@ export const STREAM_LIVE = i18n.translate(
   }
 );
 
-export const LOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP = i18n.translate(
-  'xpack.securitySolution.timeline.properties.lockDatePickerTooltip',
+export const OPTIONAL = i18n.translate(
+  'xpack.securitySolution.timeline.properties.timelineDescriptionOptional',
   {
-    defaultMessage:
-      'Disable syncing of date/time range between the currently viewed page and your timeline',
-  }
-);
-
-export const UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP = i18n.translate(
-  'xpack.securitySolution.timeline.properties.unlockDatePickerTooltip',
-  {
-    defaultMessage:
-      'Enable syncing of date/time range between the currently viewed page and your timeline',
-  }
-);
-
-export const LOCK_SYNC_MAIN_DATE_PICKER_ARIA = i18n.translate(
-  'xpack.securitySolution.timeline.properties.lockDatePickerDescription',
-  {
-    defaultMessage: 'Lock date picker to global date picker',
-  }
-);
-
-export const UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA = i18n.translate(
-  'xpack.securitySolution.timeline.properties.unlockDatePickerDescription',
-  {
-    defaultMessage: 'Unlock date picker to global date picker',
+    defaultMessage: 'Optional',
   }
 );

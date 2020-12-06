@@ -23,6 +23,7 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
+  const deployment = getService('deployment');
   const PageObjects = getPageObjects(['common']);
   let isOss = true;
 
@@ -43,6 +44,14 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
       return !(await testSubjects.exists(`addSampleDataSet${id}`));
     }
 
+    async getVisibileSolutions() {
+      const solutionPanels = await testSubjects.findAll('~homSolutionPanel', 2000);
+      const panelAttributes = await Promise.all(
+        solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
+      );
+      return panelAttributes.map((attributeValue) => attributeValue.split('homSolutionPanel_')[1]);
+    }
+
     async addSampleDataSet(id: string) {
       const isInstalled = await this.isSampleDataSetInstalled(id);
       if (!isInstalled) {
@@ -54,6 +63,10 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
     async removeSampleDataSet(id: string) {
       // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
       await testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
+      // https://github.com/elastic/kibana/issues/65949
+      // Even after waiting for the "Remove" button to be enabled we still have failures
+      // where it appears the click just didn't work.
+      await PageObjects.common.sleep(1010);
       await testSubjects.click(`removeSampleDataSet${id}`);
       await this._waitForSampleDataLoadingAction(id);
     }
@@ -70,7 +83,7 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async launchSampleDashboard(id: string) {
       await this.launchSampleDataSet(id);
-      isOss = await PageObjects.common.isOss();
+      isOss = await deployment.isOss();
       if (!isOss) {
         await find.clickByLinkText('Dashboard');
       }
@@ -94,24 +107,39 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     async clickOnConsole() {
-      await testSubjects.click('homeSynopsisLinkconsole');
+      await this.clickSynopsis('console');
     }
     async clickOnLogo() {
       await testSubjects.click('logo');
     }
 
-    async ClickOnLogsData() {
-      await testSubjects.click('logsData');
+    async clickOnAddData() {
+      await this.clickSynopsis('home_tutorial_directory');
     }
 
     // clicks on Active MQ logs
     async clickOnLogsTutorial() {
-      await testSubjects.click('homeSynopsisLinkactivemq logs');
+      await this.clickSynopsis('activemqlogs');
     }
 
     // clicks on cloud tutorial link
     async clickOnCloudTutorial() {
       await testSubjects.click('onCloudTutorial');
+    }
+
+    // click on side nav toggle button to see all of side nav
+    async clickOnToggleNavButton() {
+      await testSubjects.click('toggleNavButton');
+    }
+
+    // collapse the observability side nav details
+    async collapseObservabibilitySideNav() {
+      await testSubjects.click('collapsibleNavGroup-observability');
+    }
+
+    // dock the side nav
+    async dockTheSideNav() {
+      await testSubjects.click('collapsible-nav-lock');
     }
 
     async loadSavedObjects() {

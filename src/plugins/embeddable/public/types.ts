@@ -25,10 +25,24 @@ import {
   IEmbeddable,
   EmbeddableFactoryDefinition,
 } from './lib/embeddables';
-
-export const EMBEDDABLE_ORIGINATING_APP_PARAM = 'embeddableOriginatingApp';
+import {
+  PersistableState,
+  PersistableStateDefinition,
+  SerializableState,
+} from '../../kibana_utils/common';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
+export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;
+
+export interface EnhancementRegistryDefinition<P extends SerializableState = SerializableState>
+  extends PersistableStateDefinition<P> {
+  id: string;
+}
+
+export interface EnhancementRegistryItem<P extends SerializableState = SerializableState>
+  extends PersistableState<P> {
+  id: string;
+}
 
 export type EmbeddableFactoryProvider = <
   I extends EmbeddableInput = EmbeddableInput,

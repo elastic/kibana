@@ -3,11 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
@@ -287,44 +285,43 @@ export default function ({ getService }: FtrProviderContext) {
 
     for (const testData of testDataList) {
       describe(` ${testData.suiteTitle}`, function () {
-        it('job creation loads the job management page', async () => {
+        it('job creation loads the multi metric wizard for the source data', async () => {
+          await ml.testExecution.logTestStep('job creation loads the job management page');
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToJobManagement();
-        });
 
-        it('job creation loads the new job source selection page', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation loads the new job source selection page'
+          );
           await ml.jobManagement.navigateToNewJobSourceSelection();
-        });
 
-        it('job creation loads the job type selection page', async () => {
+          await ml.testExecution.logTestStep('job creation loads the job type selection page');
           await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(testData.jobSource);
-        });
 
-        it('job creation loads the multi metric job wizard page', async () => {
+          await ml.testExecution.logTestStep('job creation loads the multi metric job wizard page');
           await ml.jobTypeSelection.selectMultiMetricJob();
         });
 
-        it('job creation displays the time range step', async () => {
+        it('job creation navigates through the multi metric wizard and sets all needed fields', async () => {
+          await ml.testExecution.logTestStep('job creation displays the time range step');
           await ml.jobWizardCommon.assertTimeRangeSectionExists();
-        });
 
-        it('job creation sets the timerange', async () => {
+          await ml.testExecution.logTestStep('job creation sets the time range');
           await ml.jobWizardCommon.clickUseFullDataButton(
             'Feb 7, 2016 @ 00:00:00.000',
             'Feb 11, 2016 @ 23:59:54.000'
           );
-        });
 
-        it('job creation displays the event rate chart', async () => {
+          await ml.testExecution.logTestStep('job creation displays the event rate chart');
           await ml.jobWizardCommon.assertEventRateChartExists();
           await ml.jobWizardCommon.assertEventRateChartHasData();
-        });
 
-        it('job creation displays the pick fields step', async () => {
+          await ml.testExecution.logTestStep('job creation displays the pick fields step');
           await ml.jobWizardCommon.advanceToPickFieldsSection();
-        });
 
-        it('job creation selects detectors and displays detector previews', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation selects detectors and displays detector previews'
+          );
           for (const [index, aggAndFieldIdentifier] of testData.aggAndFieldIdentifiers.entries()) {
             await ml.jobWizardCommon.assertAggAndFieldInputExists();
             await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier, false);
@@ -334,9 +331,10 @@ export default function ({ getService }: FtrProviderContext) {
               'LINE'
             );
           }
-        });
 
-        it('job creation inputs the split field and displays split cards', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation inputs the split field and displays split cards'
+          );
           await ml.jobWizardMultiMetric.assertSplitFieldInputExists();
           await ml.jobWizardMultiMetric.selectSplitField(testData.splitField);
 
@@ -349,129 +347,93 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           await ml.jobWizardCommon.assertInfluencerSelection([testData.splitField]);
-        });
 
-        it('job creation displays the influencer field', async () => {
+          await ml.testExecution.logTestStep('job creation displays the influencer field');
           await ml.jobWizardCommon.assertInfluencerInputExists();
           await ml.jobWizardCommon.assertInfluencerSelection([testData.splitField]);
-        });
 
-        it('job creation inputs the bucket span', async () => {
+          await ml.testExecution.logTestStep('job creation inputs the bucket span');
           await ml.jobWizardCommon.assertBucketSpanInputExists();
           await ml.jobWizardCommon.setBucketSpan(testData.bucketSpan);
-        });
 
-        it('job creation displays the job details step', async () => {
+          await ml.testExecution.logTestStep('job creation displays the job details step');
           await ml.jobWizardCommon.advanceToJobDetailsSection();
-        });
 
-        it('job creation inputs the job id', async () => {
+          await ml.testExecution.logTestStep('job creation inputs the job id');
           await ml.jobWizardCommon.assertJobIdInputExists();
           await ml.jobWizardCommon.setJobId(testData.jobId);
-        });
 
-        it('job creation inputs the job description', async () => {
+          await ml.testExecution.logTestStep('job creation inputs the job description');
           await ml.jobWizardCommon.assertJobDescriptionInputExists();
           await ml.jobWizardCommon.setJobDescription(testData.jobDescription);
-        });
 
-        it('job creation inputs job groups', async () => {
+          await ml.testExecution.logTestStep('job creation inputs job groups');
           await ml.jobWizardCommon.assertJobGroupInputExists();
           for (const jobGroup of testData.jobGroups) {
             await ml.jobWizardCommon.addJobGroup(jobGroup);
           }
           await ml.jobWizardCommon.assertJobGroupSelection(testData.jobGroups);
-        });
 
-        it('job creation opens the advanced section', async () => {
+          await ml.testExecution.logTestStep('job creation opens the advanced section');
           await ml.jobWizardCommon.ensureAdvancedSectionOpen();
-        });
 
-        it('job creation displays the model plot switch', async () => {
+          await ml.testExecution.logTestStep('job creation displays the model plot switch');
           await ml.jobWizardCommon.assertModelPlotSwitchExists();
-        });
 
-        it('job creation enables the dedicated index switch', async () => {
+          await ml.testExecution.logTestStep('job creation enables the dedicated index switch');
           await ml.jobWizardCommon.assertDedicatedIndexSwitchExists();
           await ml.jobWizardCommon.activateDedicatedIndexSwitch();
-        });
 
-        it('job creation inputs the model memory limit', async () => {
+          await ml.testExecution.logTestStep('job creation inputs the model memory limit');
           await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
           await ml.jobWizardCommon.setModelMemoryLimit(testData.memoryLimit);
-        });
 
-        it('job creation displays the validation step', async () => {
+          await ml.testExecution.logTestStep('job creation displays the validation step');
           await ml.jobWizardCommon.advanceToValidationSection();
-        });
 
-        it('job creation displays the summary step', async () => {
+          await ml.testExecution.logTestStep('job creation displays the summary step');
           await ml.jobWizardCommon.advanceToSummarySection();
         });
 
-        it('job creation creates the job and finishes processing', async () => {
+        it('job creation runs the job and displays it correctly in the job list', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation creates the job and finishes processing'
+          );
           await ml.jobWizardCommon.assertCreateJobButtonExists();
           await ml.jobWizardCommon.createJobAndWaitForCompletion();
-        });
 
-        it('job creation displays the created job in the job list', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation displays the created job in the job list'
+          );
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToJobManagement();
 
           await ml.jobTable.waitForJobsToLoad();
-          await ml.jobTable.filterWithSearchString(testData.jobId);
-          const rows = await ml.jobTable.parseJobTable();
-          expect(rows.filter((row) => row.id === testData.jobId)).to.have.length(1);
-        });
+          await ml.jobTable.filterWithSearchString(testData.jobId, 1);
 
-        it('job creation displays details for the created job in the job list', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation displays details for the created job in the job list'
+          );
           await ml.jobTable.assertJobRowFields(testData.jobId, {
             id: testData.jobId,
             description: testData.jobDescription,
             jobGroups: [...new Set(testData.jobGroups)].sort(),
-            recordCount: testData.expected.row.recordCount,
-            memoryStatus: testData.expected.row.memoryStatus,
-            jobState: testData.expected.row.jobState,
-            datafeedState: testData.expected.row.datafeedState,
-            latestTimestamp: testData.expected.row.latestTimestamp,
+            ...testData.expected.row,
           });
 
           await ml.jobTable.assertJobRowDetailsCounts(
             testData.jobId,
             {
               job_id: testData.jobId,
-              processed_record_count: testData.expected.counts.processed_record_count,
-              processed_field_count: testData.expected.counts.processed_field_count,
-              input_bytes: testData.expected.counts.input_bytes,
-              input_field_count: testData.expected.counts.input_field_count,
-              invalid_date_count: testData.expected.counts.invalid_date_count,
-              missing_field_count: testData.expected.counts.missing_field_count,
-              out_of_order_timestamp_count: testData.expected.counts.out_of_order_timestamp_count,
-              empty_bucket_count: testData.expected.counts.empty_bucket_count,
-              sparse_bucket_count: testData.expected.counts.sparse_bucket_count,
-              bucket_count: testData.expected.counts.bucket_count,
-              earliest_record_timestamp: testData.expected.counts.earliest_record_timestamp,
-              latest_record_timestamp: testData.expected.counts.latest_record_timestamp,
-              input_record_count: testData.expected.counts.input_record_count,
-              latest_bucket_timestamp: testData.expected.counts.latest_bucket_timestamp,
+              ...testData.expected.counts,
             },
             {
               job_id: testData.jobId,
-              result_type: testData.expected.modelSizeStats.result_type,
-              model_bytes_exceeded: testData.expected.modelSizeStats.model_bytes_exceeded,
-              total_by_field_count: testData.expected.modelSizeStats.total_by_field_count,
-              total_over_field_count: testData.expected.modelSizeStats.total_over_field_count,
-              total_partition_field_count:
-                testData.expected.modelSizeStats.total_partition_field_count,
-              bucket_allocation_failures_count:
-                testData.expected.modelSizeStats.bucket_allocation_failures_count,
-              memory_status: testData.expected.modelSizeStats.memory_status,
-              timestamp: testData.expected.modelSizeStats.timestamp,
+              ...testData.expected.modelSizeStats,
             }
           );
-        });
 
-        it('has detector results', async () => {
+          await ml.testExecution.logTestStep('has detector results');
           for (let i = 0; i < testData.aggAndFieldIdentifiers.length; i++) {
             await ml.api.assertDetectorResultsExist(testData.jobId, i);
           }

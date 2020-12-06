@@ -22,13 +22,14 @@ import './index.scss';
 import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
-export { EMBEDDABLE_ORIGINATING_APP_PARAM } from './types';
 export {
   ACTION_ADD_PANEL,
-  ACTION_APPLY_FILTER,
   ACTION_EDIT_PANEL,
   Adapters,
   AddPanelAction,
+  ReferenceOrValueEmbeddable,
+  isReferenceOrValueEmbeddable,
+  ChartActionContext,
   Container,
   ContainerInput,
   ContainerOutput,
@@ -43,14 +44,13 @@ export {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableFactoryNotFoundError,
-  EmbeddableFactoryRenderer,
   EmbeddableInput,
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePanel,
   EmbeddableRoot,
-  ValueClickTriggerContext,
-  RangeSelectTriggerContext,
+  ValueClickContext,
+  RangeSelectContext,
   ErrorEmbeddable,
   IContainer,
   IEmbeddable,
@@ -70,7 +70,17 @@ export {
   isSavedObjectEmbeddableInput,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  isContextMenuTriggerContext,
+  EmbeddableStateTransfer,
+  EmbeddableEditorState,
+  EmbeddablePackageState,
+  EmbeddableRenderer,
+  EmbeddableRendererProps,
 } from './lib';
+
+export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
+
+export { EnhancementRegistryDefinition } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
@@ -81,4 +91,5 @@ export {
   EmbeddableStart,
   EmbeddableSetupDependencies,
   EmbeddableStartDependencies,
+  EmbeddablePanelHOC,
 } from './plugin';

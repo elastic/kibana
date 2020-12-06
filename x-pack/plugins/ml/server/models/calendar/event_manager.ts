@@ -5,6 +5,7 @@
  */
 
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+import type { MlClient } from '../../lib/ml_client';
 
 export interface CalendarEvent {
   calendar_id?: string;
@@ -15,39 +16,42 @@ export interface CalendarEvent {
 }
 
 export class EventManager {
-  private _client: any;
-  constructor(client: any) {
-    this._client = client;
+  private _mlClient: MlClient;
+  constructor(mlClient: MlClient) {
+    this._mlClient = mlClient;
   }
 
   async getCalendarEvents(calendarId: string) {
-    const resp = await this._client('ml.events', { calendarId });
+    const { body } = await this._mlClient.getCalendarEvents({ calendar_id: calendarId });
 
-    return resp.events;
+    return body.events;
   }
 
   // jobId is optional
   async getAllEvents(jobId?: string) {
     const calendarId = GLOBAL_CALENDAR;
-    const resp = await this._client('ml.events', {
-      calendarId,
-      jobId,
+    const { body } = await this._mlClient.getCalendarEvents({
+      calendar_id: calendarId,
+      job_id: jobId,
     });
 
-    return resp.events;
+    return body.events;
   }
 
   async addEvents(calendarId: string, events: CalendarEvent[]) {
     const body = { events };
 
-    return await this._client('ml.addEvent', {
-      calendarId,
+    return await this._mlClient.postCalendarEvents({
+      calendar_id: calendarId,
       body,
     });
   }
 
   async deleteEvent(calendarId: string, eventId: string) {
-    return this._client('ml.deleteEvent', { calendarId, eventId });
+    return this._mlClient.deleteCalendarEvent({
+      calendar_id: calendarId,
+      event_id: eventId,
+    });
   }
 
   isEqual(ev1: CalendarEvent, ev2: CalendarEvent) {

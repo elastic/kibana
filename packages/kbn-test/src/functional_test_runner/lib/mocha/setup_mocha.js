@@ -19,7 +19,7 @@
 
 import Mocha from 'mocha';
 import { relative } from 'path';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { loadTestFiles } from './load_test_files';
 import { filterSuitesByTags } from './filter_suites_by_tags';
@@ -53,6 +53,7 @@ export async function setupMocha(lifecycle, log, config, providers) {
     providers,
     paths: config.get('testFiles'),
     updateBaselines: config.get('updateBaselines'),
+    updateSnapshots: config.get('updateSnapshots'),
   });
 
   // Each suite has a tag that is the path relative to the root of the repo

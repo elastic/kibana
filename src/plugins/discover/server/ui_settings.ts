@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { UiSettingsParams } from 'kibana/server';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
@@ -32,6 +33,7 @@ import {
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
+  MODIFY_COLUMNS_ON_SWITCH,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -162,5 +164,20 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
+  },
+  [MODIFY_COLUMNS_ON_SWITCH]: {
+    name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
+      defaultMessage: 'Modify columns when changing index patterns',
+    }),
+    value: true,
+    description: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchText', {
+      defaultMessage: 'Remove columns that are not available in the new index pattern.',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:modifyColumnsOnSwitchTitle',
+    },
   },
 };

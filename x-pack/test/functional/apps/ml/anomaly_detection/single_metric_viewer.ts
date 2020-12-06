@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
@@ -34,58 +33,171 @@ const DATAFEED_CONFIG: Datafeed = {
   query: { bool: { must: [{ match_all: {} }] } },
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   describe('single metric viewer', function () {
     this.tags(['mlqa']);
-    before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
-      await ml.testResources.setKibanaTimeZoneToUTC();
 
-      await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
-      await ml.securityUI.loginAsMlPowerUser();
+    describe('with single metric job', function () {
+      before(async () => {
+        await esArchiver.loadIfNeeded('ml/farequote');
+        await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+        await ml.testResources.setKibanaTimeZoneToUTC();
+
+        await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
+        await ml.securityUI.loginAsMlPowerUser();
+      });
+
+      after(async () => {
+        await ml.api.cleanMlIndices();
+      });
+
+      it('opens a job from job list link', async () => {
+        await ml.testExecution.logTestStep('navigate to job list');
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToJobManagement();
+
+        await ml.testExecution.logTestStep('open job in single metric viewer');
+        await ml.jobTable.waitForJobsToLoad();
+        await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
+
+        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
+        await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+      });
+
+      it('displays job results', async () => {
+        await ml.testExecution.logTestStep('pre-fills the job selection');
+        await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
+
+        await ml.testExecution.logTestStep('pre-fills the detector input');
+        await ml.singleMetricViewer.assertDetectorInputExist();
+        await ml.singleMetricViewer.assertDetectorInputValue('0');
+
+        await ml.testExecution.logTestStep('displays the chart');
+        await ml.singleMetricViewer.assertChartExist();
+
+        await ml.testExecution.logTestStep('should display the annotations section');
+        await ml.singleMetricViewer.assertAnnotationsExists('loaded');
+
+        await ml.testExecution.logTestStep('displays the anomalies table');
+        await ml.anomaliesTable.assertTableExists();
+
+        await ml.testExecution.logTestStep('anomalies table is not empty');
+        await ml.anomaliesTable.assertTableNotEmpty();
+      });
     });
 
-    after(async () => {
-      await ml.api.cleanMlIndices();
-    });
+    describe('with entity fields', function () {
+      const jobConfig: Job = {
+        job_id: `ecom_01`,
+        description:
+          'mean(taxless_total_price) over "geoip.city_name" partitionfield=day_of_week on ecommerce dataset with 15m bucket span',
+        groups: ['ecommerce', 'automated', 'advanced'],
+        analysis_config: {
+          bucket_span: '15m',
+          detectors: [
+            {
+              detector_description:
+                'mean(taxless_total_price) over "geoip.city_name" partitionfield=day_of_week',
+              function: 'mean',
+              field_name: 'taxless_total_price',
+              over_field_name: 'geoip.city_name',
+              partition_field_name: 'day_of_week',
+            },
+          ],
+          influencers: ['day_of_week'],
+        },
+        data_description: {
+          time_field: 'order_date',
+          time_format: 'epoch_ms',
+        },
+        analysis_limits: {
+          model_memory_limit: '11mb',
+          categorization_examples_limit: 4,
+        },
+        model_plot_config: { enabled: true },
+      };
 
-    it('loads from job list row link', async () => {
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
+      const datafeedConfig: Datafeed = {
+        datafeed_id: 'datafeed-ecom_01',
+        indices: ['ft_ecommerce'],
+        job_id: 'ecom_01',
+        query: { bool: { must: [{ match_all: {} }] } },
+      };
 
-      await ml.jobTable.waitForJobsToLoad();
-      await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id);
-      const rows = await ml.jobTable.parseJobTable();
-      expect(rows.filter((row) => row.id === JOB_CONFIG.job_id)).to.have.length(1);
+      before(async () => {
+        await esArchiver.loadIfNeeded('ml/ecommerce');
+        await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+        await ml.testResources.setKibanaTimeZoneToUTC();
+        await ml.api.createAndRunAnomalyDetectionLookbackJob(jobConfig, datafeedConfig);
+        await ml.securityUI.loginAsMlPowerUser();
+      });
 
-      await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
-      await ml.common.waitForMlLoadingIndicatorToDisappear();
-    });
+      after(async () => {
+        await ml.api.cleanMlIndices();
+      });
 
-    it('pre-fills the job selection', async () => {
-      await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
-    });
+      it('opens a job from job list link', async () => {
+        await ml.testExecution.logTestStep('navigate to job list');
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToJobManagement();
 
-    it('pre-fills the detector input', async () => {
-      await ml.singleMetricViewer.assertDetectorInputExsist();
-      await ml.singleMetricViewer.assertDetectorInputValue('0');
-    });
+        await ml.testExecution.logTestStep('open job in single metric viewer');
+        await ml.jobTable.waitForJobsToLoad();
+        await ml.jobTable.filterWithSearchString(jobConfig.job_id, 1);
 
-    it('displays the chart', async () => {
-      await ml.singleMetricViewer.assertChartExsist();
-    });
+        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobConfig.job_id);
+        await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+      });
 
-    it('displays the anomalies table', async () => {
-      await ml.anomaliesTable.assertTableExists();
-    });
+      it('render entity control', async () => {
+        await ml.testExecution.logTestStep('pre-fills the detector input');
+        await ml.singleMetricViewer.assertDetectorInputExist();
+        await ml.singleMetricViewer.assertDetectorInputValue('0');
 
-    it('anomalies table is not empty', async () => {
-      await ml.anomaliesTable.assertTableNotEmpty();
+        await ml.testExecution.logTestStep('should input entities values');
+        await ml.singleMetricViewer.assertEntityInputExist('day_of_week');
+        await ml.singleMetricViewer.assertEntityInputSelection('day_of_week', []);
+        await ml.singleMetricViewer.selectEntityValue('day_of_week', 'Friday');
+        await ml.singleMetricViewer.assertEntityInputExist('geoip.city_name');
+        await ml.singleMetricViewer.assertEntityInputSelection('geoip.city_name', []);
+        await ml.singleMetricViewer.selectEntityValue('geoip.city_name', 'Abu Dhabi');
+
+        // TODO if placed before combobox update, tests fail to update combobox values
+        await ml.testExecution.logTestStep('assert the default state of entity configs');
+        await ml.singleMetricViewer.assertEntityConfig(
+          'day_of_week',
+          true,
+          'anomaly_score',
+          'desc'
+        );
+
+        await ml.singleMetricViewer.assertEntityConfig(
+          'geoip.city_name',
+          true,
+          'anomaly_score',
+          'desc'
+        );
+
+        await ml.testExecution.logTestStep('modify the entity config');
+        await ml.singleMetricViewer.setEntityConfig('geoip.city_name', false, 'name', 'asc');
+
+        // Make sure anomalous only control has been synced.
+        // Also sorting by name is enforced because the model plot is enabled
+        // and anomalous only is disabled
+        await ml.singleMetricViewer.assertEntityConfig('day_of_week', false, 'name', 'desc');
+
+        await ml.testExecution.logTestStep('displays the chart');
+        await ml.singleMetricViewer.assertChartExist();
+
+        await ml.testExecution.logTestStep('displays the anomalies table');
+        await ml.anomaliesTable.assertTableExists();
+
+        await ml.testExecution.logTestStep('anomalies table is not empty');
+        await ml.anomaliesTable.assertTableNotEmpty();
+      });
     });
   });
 }

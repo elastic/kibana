@@ -46,10 +46,10 @@ const markdownIt = new MarkdownIt({
  * create the visualization
  */
 export class Handler {
-  constructor(vis, visConfig, deps) {
+  constructor(vis, visConfig, uiSettings) {
     this.el = visConfig.get('el');
     this.ChartClass = chartTypes[visConfig.get('type')];
-    this.deps = deps;
+    this.uiSettings = uiSettings;
     this.charts = [];
 
     this.vis = vis;
@@ -91,12 +91,18 @@ export class Handler {
             const xRaw = _.get(eventPayload.data, 'series[0].values[0].xRaw');
             if (!xRaw) return; // not sure if this is possible?
             return self.vis.emit(eventType, {
-              table: xRaw.table,
-              range: eventPayload.range,
-              column: xRaw.column,
+              name: 'brush',
+              data: {
+                table: xRaw.table,
+                range: eventPayload.range,
+                column: xRaw.column,
+              },
             });
           case 'click':
-            return self.vis.emit(eventType, eventPayload);
+            return self.vis.emit(eventType, {
+              name: 'filterBucket',
+              data: eventPayload,
+            });
         }
       };
     });
@@ -164,7 +170,7 @@ export class Handler {
     let loadedCount = 0;
     const chartSelection = selection.selectAll('.chart');
     chartSelection.each(function (chartData) {
-      const chart = new self.ChartClass(self, this, chartData, self.deps);
+      const chart = new self.ChartClass(self, this, chartData, self.uiSettings);
 
       self.vis.eventNames().forEach(function (event) {
         self.enable(event, chart);
@@ -222,7 +228,7 @@ export class Handler {
       // class name needs `chart` in it for the polling checkSize function
       // to continuously call render on resize
       .attr('class', 'visError chart error')
-      .attr('data-test-subj', 'visLibVisualizeError');
+      .attr('data-test-subj', 'vislibVisualizeError');
 
     div.append('h4').text(markdownIt.renderInline(message));
 

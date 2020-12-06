@@ -13,8 +13,8 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { ListsDefaultArraySchema } from '../../../../common/detection_engine/schemas/types/lists_default_array';
 import {
   FalsePositives,
   From,
@@ -60,9 +60,9 @@ import {
   TagsOrUndefined,
   ToOrUndefined,
   ThreatOrUndefined,
+  ThresholdOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
-  ListAndOrUndefined,
   PerPageOrUndefined,
   PageOrUndefined,
   SortFieldOrUndefined,
@@ -75,18 +75,40 @@ import {
   LastSuccessMessage,
   LastFailureAt,
   LastFailureMessage,
+  Author,
+  AuthorOrUndefined,
+  LicenseOrUndefined,
+  RiskScoreMapping,
+  RiskScoreMappingOrUndefined,
+  SeverityMapping,
+  SeverityMappingOrUndefined,
+  TimestampOverrideOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  RuleNameOverrideOrUndefined,
+  EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  ThreatIndexOrUndefined,
+  ThreatQueryOrUndefined,
+  ThreatMappingOrUndefined,
+  ThreatFiltersOrUndefined,
+  ThreatLanguageOrUndefined,
+  ConcurrentSearchesOrUndefined,
+  ItemsPerSearchOrUndefined,
+} from '../../../../common/detection_engine/schemas/types/threat_mapping';
+
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams, PartialFilter } from '../types';
+import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
 
 export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface IRuleStatusAttributes extends Record<string, any> {
+export interface IRuleStatusSOAttributes extends Record<string, any> {
   alertId: string; // created alert id.
   statusDate: StatusDate;
   lastFailureAt: LastFailureAt | null | undefined;
@@ -100,21 +122,35 @@ export interface IRuleStatusAttributes extends Record<string, any> {
   searchAfterTimeDurations: string[] | null | undefined;
 }
 
+export interface IRuleStatusResponseAttributes {
+  alert_id: string; // created alert id.
+  status_date: StatusDate;
+  last_failure_at: LastFailureAt | null | undefined;
+  last_failure_message: LastFailureMessage | null | undefined;
+  last_success_at: LastSuccessAt | null | undefined;
+  last_success_message: LastSuccessMessage | null | undefined;
+  status: JobStatus | null | undefined;
+  last_look_back_date: string | null | undefined;
+  gap: string | null | undefined;
+  bulk_create_time_durations: string[] | null | undefined;
+  search_after_time_durations: string[] | null | undefined;
+}
+
 export interface RuleStatusResponse {
   [key: string]: {
-    current_status: IRuleStatusAttributes | null | undefined;
-    failures: IRuleStatusAttributes[] | null | undefined;
+    current_status: IRuleStatusResponseAttributes | null | undefined;
+    failures: IRuleStatusResponseAttributes[] | null | undefined;
   };
 }
 
 export interface IRuleSavedAttributesSavedObjectAttributes
-  extends IRuleStatusAttributes,
+  extends IRuleStatusSOAttributes,
     SavedObjectAttributes {}
 
 export interface IRuleStatusSavedObject {
   type: string;
   id: string;
-  attributes: Array<SavedObject<IRuleStatusAttributes & SavedObjectAttributes>>;
+  attributes: Array<SavedObject<IRuleStatusSOAttributes & SavedObjectAttributes>>;
   references: unknown[];
   updated_at: string;
   version: string;
@@ -166,8 +202,11 @@ export const isRuleStatusFindTypes = (
 export interface CreateRulesOptions {
   alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: Author;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   query: QueryOrUndefined;
@@ -182,64 +221,51 @@ export interface CreateRulesOptions {
   immutable: Immutable;
   index: IndexOrUndefined;
   interval: Interval;
+  license: LicenseOrUndefined;
   maxSignals: MaxSignals;
   riskScore: RiskScore;
+  riskScoreMapping: RiskScoreMapping;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndex;
   name: Name;
   severity: Severity;
+  severityMapping: SeverityMapping;
   tags: Tags;
   threat: Threat;
+  threshold: ThresholdOrUndefined;
+  threatFilters: ThreatFiltersOrUndefined;
+  threatIndex: ThreatIndexOrUndefined;
+  threatQuery: ThreatQueryOrUndefined;
+  threatMapping: ThreatMappingOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
+  threatLanguage: ThreatLanguageOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
   references: References;
   note: NoteOrUndefined;
   version: Version;
-  exceptionsList: ListsDefaultArraySchema;
+  exceptionsList: ListArray;
   actions: RuleAlertAction[];
 }
 
 export interface UpdateRulesOptions {
-  id: IdOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
   alertsClient: AlertsClient;
-  anomalyThreshold: AnomalyThresholdOrUndefined;
-  description: Description;
-  enabled: Enabled;
-  falsePositives: FalsePositives;
-  from: From;
-  query: QueryOrUndefined;
-  language: LanguageOrUndefined;
-  savedId: SavedIdOrUndefined;
-  timelineId: TimelineIdOrUndefined;
-  timelineTitle: TimelineTitleOrUndefined;
-  meta: MetaOrUndefined;
-  machineLearningJobId: MachineLearningJobIdOrUndefined;
-  filters: PartialFilter[];
-  ruleId: RuleIdOrUndefined;
-  index: IndexOrUndefined;
-  interval: Interval;
-  maxSignals: MaxSignals;
-  riskScore: RiskScore;
-  outputIndex: OutputIndex;
-  name: Name;
-  severity: Severity;
-  tags: Tags;
-  threat: Threat;
-  to: To;
-  type: Type;
-  references: References;
-  note: NoteOrUndefined;
-  version: VersionOrUndefined;
-  exceptionsList: ListsDefaultArraySchema;
-  actions: RuleAlertAction[];
+  defaultOutputIndex: string;
+  ruleUpdate: UpdateRulesSchema;
 }
 
 export interface PatchRulesOptions {
   savedObjectsClient: SavedObjectsClientContract;
   alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: AuthorOrUndefined;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
   enabled: EnabledOrUndefined;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
   from: FromOrUndefined;
   query: QueryOrUndefined;
@@ -252,19 +278,32 @@ export interface PatchRulesOptions {
   filters: PartialFilter[];
   index: IndexOrUndefined;
   interval: IntervalOrUndefined;
+  license: LicenseOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
   riskScore: RiskScoreOrUndefined;
+  riskScoreMapping: RiskScoreMappingOrUndefined;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndexOrUndefined;
   name: NameOrUndefined;
   severity: SeverityOrUndefined;
+  severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
   threat: ThreatOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
+  threshold: ThresholdOrUndefined;
+  threatFilters: ThreatFiltersOrUndefined;
+  threatIndex: ThreatIndexOrUndefined;
+  threatQuery: ThreatQueryOrUndefined;
+  threatMapping: ThreatMappingOrUndefined;
+  threatLanguage: ThreatLanguageOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;
   references: ReferencesOrUndefined;
   note: NoteOrUndefined;
   version: VersionOrUndefined;
-  exceptionsList: ListAndOrUndefined;
+  exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
   rule: SanitizedAlert | null;
 }

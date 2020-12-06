@@ -5,16 +5,15 @@
  */
 
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
 
+import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
 import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
-import { EventType } from '../../../timelines/store/timeline/model';
+import { TimelineEventsType } from '../../../../common/types/timeline';
 
 import { TopNOption } from './helpers';
 import * as i18n from './translations';
@@ -43,30 +42,17 @@ const TopNContent = styled.div`
   }
 `;
 
-export interface Props {
+export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
-  defaultView: EventType;
-  deleteQuery?: ({ id }: { id: string }) => void;
+  defaultView: TimelineEventsType;
   field: string;
   filters: Filter[];
-  from: number;
   indexPattern: IIndexPattern;
-  indexToAdd?: string[] | null;
+  indexNames: string[];
   options: TopNOption[];
   query: Query;
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
-  to: number;
+  timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
   value?: string[] | string | null;
@@ -83,17 +69,23 @@ const TopNComponent: React.FC<Props> = ({
   field,
   from,
   indexPattern,
-  indexToAdd,
+  indexNames,
   options,
   query = DEFAULT_QUERY,
-  setAbsoluteRangeDatePicker,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
+  timelineId,
   to,
   toggleTopN,
 }) => {
-  const [view, setView] = useState<EventType>(defaultView);
-  const onViewSelected = useCallback((value: string) => setView(value as EventType), [setView]);
+  const [view, setView] = useState<TimelineEventsType>(defaultView);
+  const onViewSelected = useCallback((value: string) => setView(value as TimelineEventsType), [
+    setView,
+  ]);
+
+  useEffect(() => {
+    setView(defaultView);
+  }, [defaultView]);
 
   const headerChildren = useMemo(
     () => (
@@ -126,12 +118,13 @@ const TopNComponent: React.FC<Props> = ({
             from={from}
             headerChildren={headerChildren}
             indexPattern={indexPattern}
-            indexToAdd={indexToAdd}
+            indexNames={indexNames}
             onlyField={field}
             query={query}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             showSpacer={false}
+            timelineId={timelineId}
             to={to}
           />
         ) : (
@@ -142,9 +135,9 @@ const TopNComponent: React.FC<Props> = ({
             indexPattern={indexPattern}
             onlyField={field}
             query={query}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
+            timelineId={timelineId}
             to={to}
           />
         )}

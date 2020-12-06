@@ -6,48 +6,29 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
-import { FilterManager, IIndexPattern } from 'src/plugins/data/public';
-import deepEqual from 'fast-deep-equal';
+import { FilterManager } from 'src/plugins/data/public';
 
 import { DataProviders } from '../data_providers';
-import { DataProvider } from '../data_providers/data_provider';
-import {
-  OnDataProviderEdited,
-  OnDataProviderRemoved,
-  OnToggleDataProviderEnabled,
-  OnToggleDataProviderExcluded,
-} from '../events';
 import { StatefulSearchOrFilter } from '../search_or_filter';
-import { BrowserFields } from '../../../../common/containers/source';
 
 import * as i18n from './translations';
+import {
+  TimelineStatus,
+  TimelineStatusLiteralWithNull,
+} from '../../../../../common/types/timeline';
 
 interface Props {
-  browserFields: BrowserFields;
-  dataProviders: DataProvider[];
   filterManager: FilterManager;
-  id: string;
-  indexPattern: IIndexPattern;
-  onDataProviderEdited: OnDataProviderEdited;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
-  show: boolean;
   showCallOutUnauthorizedMsg: boolean;
+  status: TimelineStatusLiteralWithNull;
+  timelineId: string;
 }
 
 const TimelineHeaderComponent: React.FC<Props> = ({
-  browserFields,
-  id,
-  indexPattern,
-  dataProviders,
   filterManager,
-  onDataProviderEdited,
-  onDataProviderRemoved,
-  onToggleDataProviderEnabled,
-  onToggleDataProviderExcluded,
-  show,
   showCallOutUnauthorizedMsg,
+  status,
+  timelineId,
 }) => (
   <>
     {showCallOutUnauthorizedMsg && (
@@ -59,39 +40,19 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         size="s"
       />
     )}
-    {show && (
-      <DataProviders
-        browserFields={browserFields}
-        id={id}
-        dataProviders={dataProviders}
-        onDataProviderEdited={onDataProviderEdited}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+    {status === TimelineStatus.immutable && (
+      <EuiCallOut
+        data-test-subj="timelineImmutableCallOut"
+        title={i18n.CALL_OUT_IMMUTABLE}
+        color="primary"
+        iconType="alert"
+        size="s"
       />
     )}
+    <DataProviders timelineId={timelineId} />
 
-    <StatefulSearchOrFilter
-      browserFields={browserFields}
-      filterManager={filterManager}
-      indexPattern={indexPattern}
-      timelineId={id}
-    />
+    <StatefulSearchOrFilter filterManager={filterManager} timelineId={timelineId} />
   </>
 );
 
-export const TimelineHeader = React.memo(
-  TimelineHeaderComponent,
-  (prevProps, nextProps) =>
-    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
-    prevProps.id === nextProps.id &&
-    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
-    deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-    prevProps.filterManager === nextProps.filterManager &&
-    prevProps.onDataProviderEdited === nextProps.onDataProviderEdited &&
-    prevProps.onDataProviderRemoved === nextProps.onDataProviderRemoved &&
-    prevProps.onToggleDataProviderEnabled === nextProps.onToggleDataProviderEnabled &&
-    prevProps.onToggleDataProviderExcluded === nextProps.onToggleDataProviderExcluded &&
-    prevProps.show === nextProps.show &&
-    prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg
-);
+export const TimelineHeader = React.memo(TimelineHeaderComponent);

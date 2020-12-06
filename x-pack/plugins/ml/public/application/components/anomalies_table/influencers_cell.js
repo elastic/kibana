@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { each } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
@@ -148,7 +148,7 @@ export class InfluencersCell extends Component {
 
     const influencers = [];
     recordInfluencers.forEach((influencer) => {
-      _.each(influencer, (influencerFieldValue, influencerFieldName) => {
+      each(influencer, (influencerFieldValue, influencerFieldName) => {
         influencers.push({
           influencerFieldName,
           influencerFieldValue,

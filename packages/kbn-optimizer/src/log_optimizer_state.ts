@@ -24,7 +24,7 @@ import { tap } from 'rxjs/operators';
 
 import { OptimizerConfig } from './optimizer';
 import { OptimizerUpdate$ } from './run_optimizer';
-import { CompilerMsg, pipeClosure } from './common';
+import { CompilerMsg, pipeClosure, ALL_THEMES } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {
@@ -37,12 +37,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         const { event, state } = update;
 
         if (event?.type === 'worker stdio') {
-          const chunk = event.chunk.toString('utf8');
-          log.warning(
-            `worker`,
-            event.stream,
-            chunk.slice(0, chunk.length - (chunk.endsWith('\n') ? 1 : 0))
-          );
+          log.warning(`worker`, event.stream, event.line);
         }
 
         if (event?.type === 'bundle not cached') {
@@ -59,12 +54,18 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
 
         if (event?.type === 'worker started') {
           let moduleCount = 0;
+          let workUnits = 0;
           for (const bundle of event.bundles) {
             moduleCount += bundle.cache.getModuleCount() ?? NaN;
+            workUnits += bundle.cache.getWorkUnits() ?? NaN;
           }
-          const mcString = isFinite(moduleCount) ? String(moduleCount) : '?';
-          const bcString = String(event.bundles.length);
-          log.info(`starting worker [${bcString} bundles, ${mcString} modules]`);
+
+          log.info(
+            `starting worker [${event.bundles.length} ${
+              event.bundles.length === 1 ? 'bundle' : 'bundles'
+            }]`
+          );
+          log.debug(`modules [${moduleCount}] work units [${workUnits}]`);
         }
 
         if (state.phase === 'reallocating') {
@@ -76,6 +77,11 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           if (!loggedInit) {
             loggedInit = true;
             log.info(`initialized, ${state.offlineBundles.length} bundles cached`);
+            if (config.themeTags.length !== ALL_THEMES.length) {
+              log.warning(
+                `only building [${config.themeTags}] themes, customize with the KBN_OPTIMIZER_THEMES environment variable`
+              );
+            }
           }
           return;
         }
@@ -98,7 +104,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         }
 
         if (state.phase === 'running' || state.phase === 'initializing') {
-          return true;
+          return;
         }
 
         if (state.phase === 'issue') {
@@ -113,7 +119,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
             }
           }
           log.indent(-4);
-          return true;
+          return;
         }
 
         if (state.phase === 'success') {
@@ -129,7 +135,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
             );
           }
 
-          return true;
+          return;
         }
 
         throw new Error(`unhandled optimizer message: ${inspect(update)}`);

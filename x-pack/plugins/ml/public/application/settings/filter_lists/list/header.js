@@ -61,7 +61,12 @@ function FilterListsHeaderUI({ totalCount, refreshFilterLists, kibana }) {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" iconType="refresh" onClick={() => refreshFilterLists()}>
+              <EuiButtonEmpty
+                size="s"
+                iconType="refresh"
+                onClick={() => refreshFilterLists()}
+                data-test-subj="mlFilterListRefreshButton"
+              >
                 <FormattedMessage
                   id="xpack.ml.settings.filterLists.listHeader.refreshButtonLabel"
                   defaultMessage="Refresh"

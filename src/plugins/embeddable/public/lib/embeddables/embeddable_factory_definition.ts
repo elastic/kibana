@@ -40,5 +40,9 @@ export type EmbeddableFactoryDefinition<
         | 'savedObjectMetaData'
         | 'canCreateNew'
         | 'getDefaultInput'
+        | 'telemetry'
+        | 'extract'
+        | 'inject'
+        | 'migrations'
       >
     >;

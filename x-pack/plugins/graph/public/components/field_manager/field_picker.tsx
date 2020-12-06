@@ -55,6 +55,7 @@ export function FieldPicker({
         <EuiBadge
           data-test-subj="graph-add-field-button"
           className={classNames('gphFieldPicker__button', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'gphFieldPicker__button--disabled': !hasFields,
           })}
           color="hollow"

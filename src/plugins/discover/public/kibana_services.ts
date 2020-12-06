@@ -16,8 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import _ from 'lodash';
 import { createHashHistory } from 'history';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory, AppMountParameters } from 'kibana/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DiscoverServices } from './build_services';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { search } from '../../data/public';
@@ -25,6 +28,7 @@ import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 
 let angularModule: any = null;
 let services: DiscoverServices | null = null;
+let uiActions: UiActionsStart;
 
 /**
  * set bootstrapped inner angular module
@@ -51,17 +55,38 @@ export function setServices(newServices: any) {
   services = newServices;
 }
 
+export const setUiActions = (pluginUiActions: UiActionsStart) => (uiActions = pluginUiActions);
+export const getUiActions = () => uiActions;
+
+export const [getHeaderActionMenuMounter, setHeaderActionMenuMounter] = createGetterSetter<
+  AppMountParameters['setHeaderActionMenu']
+>('headerActionMenuMounter');
+
 export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
   setTrackedUrl: (url: string) => void;
+  restorePreviousUrl: () => void;
 }>('urlTracker');
 
 export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<DocViewsRegistry>(
   'DocViewsRegistry'
 );
 /**
- * Makes sure discover and context are using one instance of history
+ * Makes sure discover and context are using one instance of history.
  */
 export const getHistory = _.once(() => createHashHistory());
+
+/**
+ * Discover currently uses two `history` instances: one from Kibana Platform and
+ * another from `history` package. Below function is used every time Discover
+ * app is loaded to synchronize both instances.
+ *
+ * This helper is temporary until https://github.com/elastic/kibana/issues/65161 is resolved.
+ */
+export const syncHistoryLocations = () => {
+  const h = getHistory();
+  Object.assign(h.location, createHashHistory().location);
+  return h;
+};
 
 export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHistory>(
   'scopedHistory'

@@ -45,6 +45,7 @@ describe('state selectors', () => {
       esKuery: '',
       integrationsPopoverOpen: null,
       searchText: '',
+      monitorId: '',
     },
     monitorStatus: {
       status: null,
@@ -108,6 +109,15 @@ describe('state selectors', () => {
       },
     },
     selectedFilters: null,
+    alerts: {
+      alertDeletion: { data: null, loading: false },
+      anomalyAlert: { data: null, loading: false },
+      alerts: { data: null, loading: false },
+      connectors: { data: null, loading: false },
+      newAlert: { data: null, loading: false },
+      anomalyAlertDeletion: { data: null, loading: false },
+    },
+    journeys: {},
   };
 
   it('selects base path from state', () => {

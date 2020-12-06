@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
@@ -207,7 +207,7 @@ export default function ({ getService, getPageObjects }) {
           const vizName1 = 'Visualization TileMap';
           await PageObjects.visualize.loadSavedVisualization(vizName1);
           await inspector.open();
-          await inspector.expectTableHeaders(['filter', 'geohash_grid', 'Count', 'Geo Centroid']);
+          await inspector.expectTableHeaders(['Filter', 'Geohash', 'Count', 'Geo Centroid']);
           await inspector.close();
         });
 
@@ -216,7 +216,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visEditor.setIsFilteredByCollarCheckbox(false);
           await PageObjects.visEditor.clickGo();
           await inspector.open();
-          await inspector.expectTableHeaders(['geohash_grid', 'Count', 'Geo Centroid']);
+          await inspector.expectTableHeaders(['Geohash', 'Count', 'Geo Centroid']);
           await inspector.close();
         });
 
@@ -240,7 +240,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();

@@ -155,7 +155,7 @@ export const ElasticsearchIndices = ({
             label={
               <FormattedMessage
                 id="xpack.monitoring.elasticsearch.indices.systemIndicesLabel"
-                defaultMessage="System indices"
+                defaultMessage="Filter for system indices"
               />
             }
             checked={showSystemIndices}

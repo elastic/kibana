@@ -46,7 +46,7 @@ export function getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid }) 
         },
       },
       collapse: { field: 'logstash_stats.logstash.uuid' },
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
   };
 

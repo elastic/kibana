@@ -11,18 +11,22 @@ import { PIPELINE_TO_EDIT, PipelinesEditTestBed } from './helpers/pipelines_edit
 
 const { setup } = pageHelpers.pipelinesEdit;
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiCodeEditor, which uses React Ace under the hood
-  EuiCodeEditor: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj']}
-      onChange={(syntheticEvent: any) => {
-        props.onChange(syntheticEvent.jsonString);
-      }}
-    />
-  ),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    // Mocking EuiCodeEditor, which uses React Ace under the hood
+    EuiCodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj']}
+        onChange={(syntheticEvent: any) => {
+          props.onChange(syntheticEvent.jsonString);
+        }}
+      />
+    ),
+  };
+});
 
 describe('<PipelinesEdit />', () => {
   let testBed: PipelinesEditTestBed;
@@ -33,13 +37,14 @@ describe('<PipelinesEdit />', () => {
     server.restore();
   });
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_EDIT);
+  httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_EDIT);
 
+  beforeEach(async () => {
     await act(async () => {
       testBed = await setup();
-      await testBed.waitFor('pipelineForm');
     });
+
+    testBed.component.update();
   });
 
   test('should render the correct page header', () => {
@@ -64,15 +69,12 @@ describe('<PipelinesEdit />', () => {
   describe('form submission', () => {
     it('should send the correct payload with changed values', async () => {
       const UPDATED_DESCRIPTION = 'updated pipeline description';
-      const { actions, form, waitFor } = testBed;
+      const { actions, form } = testBed;
 
       // Make change to description field
       form.setInputValue('descriptionField.input', UPDATED_DESCRIPTION);
 
-      await act(async () => {
-        actions.clickSubmitButton();
-        await waitFor('pipelineForm', 0);
-      });
+      await actions.clickSubmitButton();
 
       const latestRequest = server.requests[server.requests.length - 1];
 
@@ -83,7 +85,7 @@ describe('<PipelinesEdit />', () => {
         description: UPDATED_DESCRIPTION,
       };
 
-      expect(JSON.parse(latestRequest.requestBody)).toEqual(expected);
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
     });
   });
 });

@@ -36,6 +36,7 @@ export function aerospikeMetricsSpecProvider(context: TutorialContext): Tutorial
     name: i18n.translate('home.tutorials.aerospikeMetrics.nameTitle', {
       defaultMessage: 'Aerospike metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.aerospikeMetrics.shortDescription', {

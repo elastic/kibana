@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import stringify from 'json-stable-stringify';
-import React, { useMemo } from 'react';
-
+import React from 'react';
 import { euiStyled } from '../../../../../observability/public';
-import { isFieldColumn, isHighlightFieldColumn } from '../../../utils/log_entry';
-import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
-import { LogEntryColumnContent } from './log_entry_column';
 import { LogColumn } from '../../../../common/http_api';
+import { isFieldColumn, isHighlightFieldColumn } from '../../../utils/log_entry';
+import { FieldValue } from './field_value';
+import { LogEntryColumnContent } from './log_entry_column';
 import {
   longWrappedContentStyle,
   preWrappedContentStyle,
@@ -32,44 +30,20 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   isActiveHighlight,
   wrapMode,
 }) => {
-  const value = useMemo(() => {
-    if (isFieldColumn(columnValue)) {
-      return columnValue.value;
-    }
+  if (isFieldColumn(columnValue)) {
+    return (
+      <FieldColumnContent wrapMode={wrapMode}>
+        <FieldValue
+          highlightTerms={isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : []}
+          isActiveHighlight={isActiveHighlight}
+          value={columnValue.value}
+        />
+      </FieldColumnContent>
+    );
+  } else {
     return null;
-  }, [columnValue]);
-  const formattedValue = Array.isArray(value) ? (
-    <ul>
-      {value.map((entry, i) => (
-        <CommaSeparatedLi key={`LogEntryFieldColumn-${i}`}>
-          {highlightFieldValue(
-            entry,
-            isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : [],
-            isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
-          )}
-        </CommaSeparatedLi>
-      ))}
-    </ul>
-  ) : (
-    highlightFieldValue(
-      typeof value === 'string' ? value : stringify(value),
-      isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : [],
-      isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
-    )
-  );
-
-  return <FieldColumnContent wrapMode={wrapMode}>{formattedValue}</FieldColumnContent>;
-};
-
-const CommaSeparatedLi = euiStyled.li`
-  display: inline;
-  &:not(:last-child) {
-    margin-right: 1ex;
-    &::after {
-      content: ',';
-    }
   }
-`;
+};
 
 interface LogEntryColumnContentProps {
   wrapMode: WrapMode;

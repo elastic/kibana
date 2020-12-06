@@ -30,7 +30,7 @@ interface Props {
   [key: string]: any;
 }
 
-export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+export const ComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
   // Errors for the comboBox value (the "array")
   const errorMessageField = field.getErrorsMessages();
 
@@ -74,7 +74,7 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
   };
 
   const onSearchComboChange = (value: string) => {
-    if (value) {
+    if (value !== undefined) {
       field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
     }
   };
@@ -87,8 +87,8 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      data-test-subj={rest['data-test-subj']}
-      describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      describedByIds={idAria ? [idAria] : undefined}
+      {...rest}
     >
       <EuiComboBox
         noSuggestions

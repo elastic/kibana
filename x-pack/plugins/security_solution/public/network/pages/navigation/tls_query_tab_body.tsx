@@ -6,47 +6,55 @@
 import React from 'react';
 import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { TlsQuery } from '../../../network/containers/tls';
+import { useNetworkTls } from '../../../network/containers/tls';
 import { TlsTable } from '../../components/tls_table';
 import { TlsQueryTabBodyProps } from './types';
 
 const TlsTableManage = manageQuery(TlsTable);
 
-export const TlsQueryTabBody = ({
+const TlsQueryTabBodyComponent: React.FC<TlsQueryTabBodyProps> = ({
   endDate,
   filterQuery,
   flowTarget,
+  indexNames,
   ip = '',
   setQuery,
   skip,
   startDate,
   type,
-}: TlsQueryTabBodyProps) => (
-  <TlsQuery
-    endDate={endDate}
-    filterQuery={filterQuery}
-    flowTarget={flowTarget}
-    ip={ip}
-    skip={skip}
-    sourceId="default"
-    startDate={startDate}
-    type={type}
-  >
-    {({ id, inspect, isInspected, tls, totalCount, pageInfo, loading, loadPage, refetch }) => (
-      <TlsTableManage
-        data={tls}
-        id={id}
-        inspect={inspect}
-        isInspect={isInspected}
-        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-        loading={loading}
-        loadPage={loadPage}
-        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-        refetch={refetch}
-        setQuery={setQuery}
-        totalCount={totalCount}
-        type={type}
-      />
-    )}
-  </TlsQuery>
-);
+}) => {
+  const [
+    loading,
+    { id, inspect, isInspected, tls, totalCount, pageInfo, loadPage, refetch },
+  ] = useNetworkTls({
+    endDate,
+    filterQuery,
+    flowTarget,
+    indexNames,
+    ip,
+    skip,
+    startDate,
+    type,
+  });
+
+  return (
+    <TlsTableManage
+      data={tls}
+      id={id}
+      inspect={inspect}
+      isInspect={isInspected}
+      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+      loading={loading}
+      loadPage={loadPage}
+      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+      refetch={refetch}
+      setQuery={setQuery}
+      totalCount={totalCount}
+      type={type}
+    />
+  );
+};
+
+TlsQueryTabBodyComponent.displayName = 'TlsQueryTabBodyComponent';
+
+export const TlsQueryTabBody = React.memo(TlsQueryTabBodyComponent);

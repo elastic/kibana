@@ -18,18 +18,20 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { Observable } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import {
   PluginInitializerContext,
   CoreSetup,
   Plugin,
-  MetricsServiceSetup,
   ISavedObjectsRepository,
   IUiSettingsClient,
   SharedGlobalConfig,
   SavedObjectsClient,
   CoreStart,
   SavedObjectsServiceSetup,
+  OpsMetrics,
+  Logger,
+  CoreUsageDataStart,
 } from '../../../core/server';
 import {
   registerApplicationUsageCollector,
@@ -37,6 +39,12 @@ import {
   registerManagementUsageCollector,
   registerOpsStatsCollector,
   registerUiMetricUsageCollector,
+  registerCspCollector,
+  registerCoreUsageCollector,
+  registerLocalizationUsageCollector,
+  registerUiCountersUsageCollector,
+  registerUiCounterSavedObjectType,
+  registerUiCountersRollups,
 } from './collectors';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
@@ -46,20 +54,25 @@ interface KibanaUsageCollectionPluginsDepsSetup {
 type SavedObjectsRegisterType = SavedObjectsServiceSetup['registerType'];
 
 export class KibanaUsageCollectionPlugin implements Plugin {
+  private readonly logger: Logger;
   private readonly legacyConfig$: Observable<SharedGlobalConfig>;
   private savedObjectsClient?: ISavedObjectsRepository;
   private uiSettingsClient?: IUiSettingsClient;
+  private metric$: Subject<OpsMetrics>;
+  private coreUsageData?: CoreUsageDataStart;
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
     this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
+    this.metric$ = new Subject<OpsMetrics>();
   }
 
-  public setup(
-    { savedObjects, metrics, getStartServices }: CoreSetup,
-    { usageCollection }: KibanaUsageCollectionPluginsDepsSetup
-  ) {
-    this.registerUsageCollectors(usageCollection, metrics, (opts) =>
-      savedObjects.registerType(opts)
+  public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
+    this.registerUsageCollectors(
+      usageCollection,
+      coreSetup,
+      this.metric$,
+      coreSetup.savedObjects.registerType.bind(coreSetup.savedObjects)
     );
   }
 
@@ -68,22 +81,40 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.savedObjectsClient = savedObjects.createInternalRepository();
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+    core.metrics.getOpsMetrics$().subscribe(this.metric$);
+    this.coreUsageData = core.coreUsageData;
   }
 
-  public stop() {}
+  public stop() {
+    this.metric$.complete();
+  }
 
   private registerUsageCollectors(
     usageCollection: UsageCollectionSetup,
-    metrics: MetricsServiceSetup,
+    coreSetup: CoreSetup,
+    metric$: Subject<OpsMetrics>,
     registerType: SavedObjectsRegisterType
   ) {
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
+    const getCoreUsageDataService = () => this.coreUsageData!;
 
-    registerOpsStatsCollector(usageCollection, metrics.getOpsMetrics$());
+    registerUiCounterSavedObjectType(coreSetup.savedObjects);
+    registerUiCountersRollups(this.logger.get('ui-counters'), getSavedObjectsClient);
+    registerUiCountersUsageCollector(usageCollection);
+
+    registerOpsStatsCollector(usageCollection, metric$);
     registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
-    registerApplicationUsageCollector(usageCollection, registerType, getSavedObjectsClient);
+    registerApplicationUsageCollector(
+      this.logger.get('application-usage'),
+      usageCollection,
+      registerType,
+      getSavedObjectsClient
+    );
+    registerCspCollector(usageCollection, coreSetup.http);
+    registerCoreUsageCollector(usageCollection, getCoreUsageDataService);
+    registerLocalizationUsageCollector(usageCollection, coreSetup.i18n);
   }
 }

@@ -17,7 +17,8 @@ import { createDataStreamPayload } from './data_streams_tab.helpers';
       Could not load worker ReferenceError: Worker is not defined
           at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
  */
-import { stubWebWorker } from '../../../../../test_utils/stub_web_worker';
+import { stubWebWorker } from '@kbn/test/jest';
+import { createMemoryHistory } from 'history';
 stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
@@ -70,12 +71,16 @@ describe('<IndexManagementHome />', () => {
         },
       ]);
 
-      httpRequestsMockHelpers.setLoadDataStreamsResponse([
-        createDataStreamPayload('dataStream1'),
-        createDataStreamPayload('dataStream2'),
-      ]);
+      // The detail panel should still appear even if there are no data streams.
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([]);
 
-      testBed = await setup();
+      httpRequestsMockHelpers.setLoadDataStreamResponse(
+        createDataStreamPayload({ name: 'dataStream1' })
+      );
+
+      testBed = await setup({
+        history: createMemoryHistory(),
+      });
 
       await act(async () => {
         const { component } = testBed;
@@ -86,13 +91,16 @@ describe('<IndexManagementHome />', () => {
     });
 
     test('navigates to the data stream in the Data Streams tab', async () => {
-      const { table, actions } = testBed;
+      const {
+        findDataStreamDetailPanel,
+        findDataStreamDetailPanelTitle,
+        actions: { clickDataStreamAt },
+      } = testBed;
 
-      await actions.clickDataStreamAt(0);
+      await clickDataStreamAt(0);
 
-      expect(table.getMetaData('dataStreamTable').tableCellsValues).toEqual([
-        ['dataStream1', '1', '@timestamp', '1'],
-      ]);
+      expect(findDataStreamDetailPanel().length).toBe(1);
+      expect(findDataStreamDetailPanelTitle()).toBe('dataStream1');
     });
   });
 

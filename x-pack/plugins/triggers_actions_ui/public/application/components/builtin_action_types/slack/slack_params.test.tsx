@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import SlackParamsFields from './slack_params';
 
 describe('SlackParamsFields renders', () => {
@@ -12,6 +12,7 @@ describe('SlackParamsFields renders', () => {
     const actionParams = {
       message: 'test message',
     };
+
     const wrapper = mountWithIntl(
       <SlackParamsFields
         actionParams={actionParams}
@@ -20,9 +21,9 @@ describe('SlackParamsFields renders', () => {
         index={0}
       />
     );
-    expect(wrapper.find('[data-test-subj="slackMessageTextArea"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="slackMessageTextArea"]').first().prop('value')
-    ).toStrictEqual('test message');
+    expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="messageTextArea"]').first().prop('value')).toStrictEqual(
+      'test message'
+    );
   });
 });

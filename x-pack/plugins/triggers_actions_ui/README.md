@@ -25,6 +25,7 @@ Table of Contents
       - [GROUPED BY expression component](#grouped-by-expression-component)
       - [FOR THE LAST expression component](#for-the-last-expression-component)
       - [THRESHOLD expression component](#threshold-expression-component)
+    - [Alert Conditions Components](#alert-conditions-components)
     - [Embed the Create Alert flyout within any Kibana plugin](#embed-the-create-alert-flyout-within-any-kibana-plugin)
   - [Build and register Action Types](#build-and-register-action-types)
     - [Built-in Action Types](#built-in-action-types)
@@ -220,7 +221,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
       <EuiFormLabel>
         <FormattedMessage
           defaultMessage="Select Index to query:"
-          id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+          id="xpack.stackAlerts.threshold.ui.selectIndex"
         />
   ....
       </Fragment>
@@ -291,7 +292,7 @@ function getSomeNewAlertType() {
   return { ... } as AlertTypeModel;
 }
 
-triggers_actions_ui.alertTypeRegistry.register(getSomeNewAlertType());
+triggersActionsUi.alertTypeRegistry.register(getSomeNewAlertType());
 ```
 
 ## Create and register new alert type UI example
@@ -634,13 +635,162 @@ interface ThresholdExpressionProps {
 |customComparators|(Optional) List of comparators that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts`.|
 |popupPosition|(Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.|
 
+## Alert Conditions Components
+To aid in creating a uniform UX across Alert Types, we provide two components for specifying the conditions for detection of a certain alert under within any specific Action Groups:
+1. `AlertConditions`: A component that generates a container which renders custom component for each Action Group which has had its _conditions_ specified.
+2. `AlertConditionsGroup`: A component that provides a unified container for the Action Group with its name and a button for resetting its condition.
+
+These can be used by any Alert Type to easily create the UI for adding action groups along with an Alert Type specific component.
+
+For Example:
+Given an Alert Type which requires different thresholds for each detected Action Group (for example), you might have a `ThresholdSpecifier` component for specifying the threshold for a specific Action Group.
+
+```
+const ThresholdSpecifier = (
+  {
+    actionGroup,
+    setThreshold
+  } : {
+    actionGroup?: ActionGroupWithCondition<number>;
+    setThreshold: (actionGroup: ActionGroupWithCondition<number>) => void;
+}) => {
+  if (!actionGroup) {
+    // render empty if no condition action group is specified
+    return <Fragment />;
+  }
+
+  return (
+    <EuiFieldNumber
+      value={actionGroup.conditions}
+      onChange={(e) => {
+        const conditions = parseInt(e.target.value, 10);
+        if (e.target.value && !isNaN(conditions)) {
+          setThreshold({
+            ...actionGroup,
+            conditions,
+          });
+        }
+      }}
+    />
+  );
+};
+
+```
+
+This component takes two props, one which is required (`actionGroup`) and one which is alert type specific (`setThreshold`).
+The `actionGroup` will be populated by the `AlertConditions` component, but `setThreshold` will have to be provided by the AlertType itself.
+
+To understand how this is used, lets take a closer look at `actionGroup`:
+
+```
+type ActionGroupWithCondition<T> = ActionGroup &
+  (
+    | // allow isRequired=false with or without conditions
+    {
+        conditions?: T;
+        isRequired?: false;
+      }
+    // but if isRequired=true then conditions must be specified
+    | {
+        conditions: T;
+        isRequired: true;
+      }
+  )
+```
+
+The `condition` field is Alert Type specific, and holds whichever type an Alert Type needs for specifying the condition under which a certain detection falls under that specific Action Group.
+In our example, this is a `number` as that's all we need to speciufy the threshold which dictates whether an alert falls into one actio ngroup rather than another.
+
+The `isRequired` field specifies whether this specific action group is _required_, that is, you can't reset its condition and _have_ to specify a some condition for it.
+
+Using this `ThresholdSpecifier` component, we can now use `AlertConditionsGroup` & `AlertConditions` to enable the user to specify these thresholds for each action group in the alert type.
+
+Like so:
+```
+interface ThresholdAlertTypeParams {
+  thresholds?: {
+    alert?: number;
+    warning?: number;
+    error?: number;
+  };
+}
+
+const DEFAULT_THRESHOLDS: ThresholdAlertTypeParams['threshold] = {
+  alert: 50,
+  warning: 80,
+  error: 90,
+};
+```
+
+```
+<AlertConditions
+  headline={'Set different thresholds for each level'}
+  actionGroups={[
+    {
+      id: 'alert',
+      name: 'Alert',
+      condition: DEFAULT_THRESHOLD
+    },
+    {
+      id: 'warning',
+      name: 'Warning',
+    },
+    {
+      id: 'error',
+      name: 'Error',
+    },
+  ]}
+  onInitializeConditionsFor={(actionGroup) => {
+    setAlertParams('thresholds', {
+      ...thresholds,
+      ...pick(DEFAULT_THRESHOLDS, actionGroup.id),
+    });
+  }}
+>
+  <AlertConditionsGroup
+    onResetConditionsFor={(actionGroup) => {
+      setAlertParams('thresholds', omit(thresholds, actionGroup.id));
+    }}
+  >
+    <TShirtSelector
+      setTShirtThreshold={(actionGroup) => {
+        setAlertParams('thresholds', {
+          ...thresholds,
+          [actionGroup.id]: actionGroup.conditions,
+        });
+      }}
+    />
+  </AlertConditionsGroup>
+</AlertConditions>
+```
+
+### The AlertConditions component 
+
+This component will render the `Conditions` header & headline, along with the selectors for adding every Action Group you specity.
+Additionally it will clone its `children` for _each_ action group which has a `condition` specified for it, passing in the appropriate `actionGroup` prop for each one.
+
+|Property|Description|
+|---|---|
+|headline|The headline title displayed above the fields |
+|actionGroups|A list of `ActionGroupWithCondition` which includes all the action group you wish to offer the user and what conditions they are already configured to follow|
+|onInitializeConditionsFor|A callback which is called when the user ask for a certain actionGroup to be initialized with an initial default condition. If you have no specific default, that's fine, as the component will render the action group's field even if the condition is empty (using a `null` or an `undefined`) and determines whether to render these fields by _the very presence_ of a `condition` field|
+
+### The AlertConditionsGroup component 
+
+This component renders a standard EuiTitle foe each action group, wrapping the Alert Type specific component, in addition to a "reset" button which allows the user to reset the condition for that action group. The definition of what a _reset_ actually means is Alert Type specific, and up to the implementor to decide. In some case it might mean removing the condition, in others it might mean to reset it to some default value on the server side. In either case, it should _delete_ the `condition` field from the appropriate `actionGroup` as per the above example.
+
+|Property|Description|
+|---|---|
+|onResetConditionsFor|A callback which is called when the user clicks the _reset_ button besides the action group's title. The implementor should use this to remove the `condition` from the specified actionGroup|
+
+
 ## Embed the Create Alert flyout within any Kibana plugin
 
 Follow the instructions bellow to embed the Create Alert flyout within any Kibana plugin:
 1. Add TriggersAndActionsUIPublicPluginSetup to Kibana plugin setup dependencies:
 
 ```
-triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ```
 Then this dependency will be used to embed Create Alert flyout or register new alert/action type.
 
@@ -669,8 +819,8 @@ const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 <AlertsContextProvider
   value={{
     http,
-    actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-    alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
+    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+    alertTypeRegistry: triggersActionsUi.alertTypeRegistry,
     toastNotifications: toasts,
     uiSettings,
     docLinks,
@@ -900,10 +1050,23 @@ export function getActionType(): ActionTypeModel {
 
 ![Index connector card](https://i.imgur.com/fflsmu5.png)
 
-![Index connector form](https://i.imgur.com/tbgyvAL.png)
+![Index connector form](https://i.imgur.com/IkixGMV.png)
 
 and action params form available in Create Alert form:
-![Index action form](https://i.imgur.com/VsWMLeU.png)
+![Index action form](https://i.imgur.com/mpxnPOF.png)
+
+Example of the index document for Index Threshold alert:
+
+```
+{
+    "alert_id": "{{alertId}}",
+    "alert_name": "{{alertName}}",
+    "alert_instance_id": "{{alertInstanceId}}",
+    "context_title": "{{context.title}}",
+    "context_value": "{{context.value}}",
+    "context_message": "{{context.message}}"
+} 
+```
 
 ### Webhook
 
@@ -1017,7 +1180,7 @@ function getSomeNewActionType() {
   return { ... } as ActionTypeModel;
 }
 
-triggers_actions_ui.actionTypeRegistry.register(getSomeNewActionType());
+triggersActionsUi.actionTypeRegistry.register(getSomeNewActionType());
 ```
 
 ## Create and register new action type UI
@@ -1231,10 +1394,10 @@ import {
    TriggersAndActionsUIPublicPluginStart,
  } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
 Then this dependencies will be used to embed Actions form or register your own action type.
 
@@ -1252,8 +1415,8 @@ Then this dependencies will be used to embed Actions form or register your own a
  ];
 
  export const ComponentWithActionsForm: () => {
-   const { http, triggers_actions_ui, toastNotifications } = useKibana().services;
-   const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
+   const { http, triggersActionsUi, notifications } = useKibana().services;
+   const actionTypeRegistry = triggersActionsUi.actionTypeRegistry;
    const initialAlert = ({
         name: 'test',
         params: {},
@@ -1281,7 +1444,7 @@ Then this dependencies will be used to embed Actions form or register your own a
    return (
      <ActionForm
           actions={initialAlert.actions}
-          messageVariables={['test var1', 'test var2']}
+          messageVariables={[ { name: 'testVar1', description: 'test var1' } ]}
           defaultActionGroupId={'default'}
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;
@@ -1294,7 +1457,8 @@ Then this dependencies will be used to embed Actions form or register your own a
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
           actionTypes={ALOWED_BY_PLUGIN_ACTION_TYPES}
-          toastNotifications={toastNotifications}
+          toastNotifications={notifications.toasts}
+          consumer={initialAlert.consumer}
         />
    );
  };
@@ -1305,18 +1469,19 @@ ActionForm Props definition:
 interface ActionAccordionFormProps {
   actions: AlertAction[];
   defaultActionGroupId: string;
+  actionGroups?: ActionGroup[];
   setActionIdByIndex: (id: string, index: number) => void;
+  setActionGroupIdByIndex?: (group: string, index: number) => void;
   setAlertProperty: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  toastNotifications: ToastsSetup;
+  docLinks: DocLinksStart;
   actionTypes?: ActionType[];
-  messageVariables?: string[];
+  messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
+  capabilities: ApplicationStart['capabilities'];
 }
 
 ```
@@ -1324,16 +1489,20 @@ interface ActionAccordionFormProps {
 |Property|Description|
 |---|---|
 |actions|List of actions comes from alert.actions property.|
-|defaultActionGroupId|Default action group id to which each new action will belong to.|
+|defaultActionGroupId|Default action group id to which each new action will belong by default.|
+|actionGroups|Optional. List of action groups to which new action can be assigned. The RunWhen field is only displayed when these action groups are specified|
 |setActionIdByIndex|Function for changing action 'id' by the proper index in alert.actions array.|
+|setActionGroupIdByIndex|Function for changing action 'group' by the proper index in alert.actions array.|
 |setAlertProperty|Function for changing alert property 'actions'. Used when deleting action from the array to reset it.|
 |setActionParamsProperty|Function for changing action key/value property by index in alert.actions array.|
 |http|HttpSetup needed for executing API calls.|
 |actionTypeRegistry|Registry for action types.|
-|toastNotifications|Toast messages.|
+|toastNotifications|Toast messages  Plugin Setup Contract.|
+|docLinks|Documentation links Plugin Start Contract.|
 |actionTypes|Optional property, which allowes to define a list of available actions specific for a current plugin.|
 |actionTypes|Optional property, which allowes to define a list of variables for action 'message' property.|
 |defaultActionMessage|Optional property, which allowes to define a message value for action with 'message' property.|
+|capabilities|Kibana core's Capabilities ApplicationStart['capabilities'].|
 
 
 AlertsContextProvider value options:
@@ -1377,10 +1546,10 @@ import {
    TriggersAndActionsUIPublicPluginStart,
  } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
 Then this dependency will be used to embed Create Connector flyout or register new action type.
 
@@ -1393,7 +1562,7 @@ import { ActionsConnectorsContextProvider, ConnectorAddFlyout } from '../../../.
 const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
 
 // load required dependancied
-const { http, triggers_actions_ui, toastNotifications, capabilities, docLinks } = useKibana().services;
+const { http, triggersActionsUi, notifications, application, docLinks } = useKibana().services;
 
 const connector = {
       secrets: {},
@@ -1419,15 +1588,6 @@ const connector = {
 </EuiButton>
 
 // in render section of component
-<ActionsConnectorsContextProvider
-        value={{
-          http: http,
-          toastNotifications: toastNotifications,
-          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-          capabilities: capabilities,
-          docLinks, 
-        }}
-      >
         <ConnectorAddFlyout
           addFlyoutVisible={addFlyoutVisible}
           setAddFlyoutVisibility={setAddFlyoutVisibility}
@@ -1438,8 +1598,9 @@ const connector = {
               name: 'Index',
             },
           ]}
+          reloadConnectors={reloadConnectors}
+          consumer={'alerts'}
         />
-</ActionsConnectorsContextProvider>
 ```
 
 ConnectorAddFlyout Props definition:
@@ -1469,6 +1630,7 @@ export interface ActionsConnectorsContextValue {
   capabilities: ApplicationStart['capabilities'];
   docLinks: DocLinksStart;
   reloadConnectors?: () => Promise<void>;
+  consumer: string;
 }
 ```
 
@@ -1479,6 +1641,7 @@ export interface ActionsConnectorsContextValue {
 |capabilities|Property, which is defining action current user usage capabilities like canSave or canDelete.|
 |toastNotifications|Toast messages.|
 |reloadConnectors|Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs.|
+|consumer|Optional name of the plugin that creates an action.|
 
 
 ## Embed the Edit Connector flyout within any Kibana plugin
@@ -1492,10 +1655,10 @@ import {
    TriggersAndActionsUIPublicPluginStart,
  } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 ...
 
-triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
 Then this dependency will be used to embed Edit Connector flyout.
 
@@ -1508,7 +1671,7 @@ import { ActionsConnectorsContextProvider, ConnectorEditFlyout } from '../../../
 const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
 
 // load required dependancied
-const { http, triggers_actions_ui, toastNotifications, capabilities } = useKibana().services;
+const { http, triggersActionsUi, notifications, application } = useKibana().services;
 
 // UI control item for open flyout
 <EuiButton
@@ -1524,29 +1687,23 @@ const { http, triggers_actions_ui, toastNotifications, capabilities } = useKiban
 </EuiButton>
 
 // in render section of component
-<ActionsConnectorsContextProvider
-        value={{
-          http: http,
-          toastNotifications: toastNotifications,
-          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
-          capabilities: capabilities,
-        }}
-      >
         <ConnectorEditFlyout
-            initialConnector={connector}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={setEditFlyoutVisibility}
-          />
-</ActionsConnectorsContextProvider>
+          initialConnector={editedConnectorItem}
+          onClose={onCloseEditFlyout}
+          reloadConnectors={reloadConnectors}
+          consumer={'alerts'}
+        />
 
 ```
 
 ConnectorEditFlyout Props definition:
 ```
 export interface ConnectorEditProps {
-  initialConnector: ActionConnectorTableItem;
-  editFlyoutVisible: boolean;
-  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  initialConnector: ActionConnector;
+  onClose: () => void;
+  tab?: EditConectorTabs;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
+  consumer?: string;
 }
 ```
 
@@ -1577,4 +1734,3 @@ export interface ActionsConnectorsContextValue {
 |capabilities|Property, which is defining action current user usage capabilities like canSave or canDelete.|
 |toastNotifications|Toast messages.|
 |reloadConnectors|Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs.|
-

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IRouter, Logger } from 'kibana/server';
+import { IRouter, Logger, CoreSetup } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import Bluebird from 'bluebird';
 import _ from 'lodash';
@@ -37,10 +37,12 @@ export function runRoute(
     logger,
     getFunction,
     configManager,
+    core,
   }: {
     logger: Logger;
     getFunction: (name: string) => TimelionFunctionInterface;
     configManager: ConfigManager;
+    core: CoreSetup;
   }
 ) {
   router.post(
@@ -73,6 +75,7 @@ export function runRoute(
               to: schema.maybe(schema.string()),
             })
           ),
+          sessionId: schema.maybe(schema.string()),
         }),
       },
     },
@@ -81,13 +84,14 @@ export function runRoute(
         const uiSettings = await context.core.uiSettings.client.getAll();
 
         const tlConfig = getTlConfig({
+          context,
           request,
           settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
           getFunction,
+          getStartServices: core.getStartServices,
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
           esShardTimeout: configManager.getEsShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
-          esDataClient: () => context.core.elasticsearch.legacy.client,
         });
         const chainRunner = chainRunnerFn(tlConfig);
         const sheet = await Bluebird.all(chainRunner.processRequest(request.body));

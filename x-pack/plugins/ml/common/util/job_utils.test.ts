@@ -18,8 +18,10 @@ import {
   prefixDatafeedId,
   getSafeAggregationName,
   getLatestDataOrBucketTimestamp,
+  getEarliestDatafeedStartTime,
 } from './job_utils';
 import { CombinedJob, Job } from '../types/anomaly_detection_jobs';
+import moment from 'moment';
 
 describe('ML - job utils', () => {
   describe('calculateDatafeedFrequencyDefaultSeconds', () => {
@@ -186,8 +188,8 @@ describe('ML - job utils', () => {
       expect(isTimeSeriesViewDetector(job, 3)).toBe(false);
     });
 
-    test('returns false for a detector using a script field as a metric field_name', () => {
-      expect(isTimeSeriesViewDetector(job, 4)).toBe(false);
+    test('returns true for a detector using a script field as a metric field_name', () => {
+      expect(isTimeSeriesViewDetector(job, 4)).toBe(true);
     });
   });
 
@@ -279,6 +281,7 @@ describe('ML - job utils', () => {
       expect(isSourceDataChartableForDetector(job, 22)).toBe(true);
       expect(isSourceDataChartableForDetector(job, 23)).toBe(true);
       expect(isSourceDataChartableForDetector(job, 24)).toBe(true);
+      expect(isSourceDataChartableForDetector(job, 37)).toBe(true);
     });
 
     test('returns false for expected detectors', () => {
@@ -294,7 +297,6 @@ describe('ML - job utils', () => {
       expect(isSourceDataChartableForDetector(job, 34)).toBe(false);
       expect(isSourceDataChartableForDetector(job, 35)).toBe(false);
       expect(isSourceDataChartableForDetector(job, 36)).toBe(false);
-      expect(isSourceDataChartableForDetector(job, 37)).toBe(false);
     });
   });
 
@@ -577,6 +579,24 @@ describe('ML - job utils', () => {
     test('returns expected value when there is a gap in data at end of bucket processing', () => {
       expect(getLatestDataOrBucketTimestamp(1549929594000, 1562256600000)).toBe(1562256600000);
     });
+    test('returns expected value when job has not run', () => {
+      expect(getLatestDataOrBucketTimestamp(undefined, undefined)).toBe(undefined);
+    });
+  });
+
+  describe('getEarliestDatafeedStartTime', () => {
+    test('returns expected value when no gap in data at end of bucket processing', () => {
+      expect(getEarliestDatafeedStartTime(1549929594000, 1549928700000)).toBe(1549929594000);
+    });
+    test('returns expected value when there is a gap in data at end of bucket processing', () => {
+      expect(getEarliestDatafeedStartTime(1549929594000, 1562256600000)).toBe(1562256600000);
+    });
+    test('returns expected value when bucket span is provided', () => {
+      expect(
+        getEarliestDatafeedStartTime(1549929594000, 1562256600000, moment.duration(1, 'h'))
+      ).toBe(1562260200000);
+    });
+
     test('returns expected value when job has not run', () => {
       expect(getLatestDataOrBucketTimestamp(undefined, undefined)).toBe(undefined);
     });

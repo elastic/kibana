@@ -30,8 +30,8 @@ import {
 } from '../../../core/public';
 import { reportApplicationUsage } from './services/application_usage';
 
-interface PublicConfigType {
-  uiMetric: {
+export interface PublicConfigType {
+  uiCounters: {
     enabled: boolean;
     debug: boolean;
   };
@@ -39,7 +39,7 @@ interface PublicConfigType {
 
 export interface UsageCollectionSetup {
   allowTrackUserAgent: (allow: boolean) => void;
-  reportUiStats: Reporter['reportUiStats'];
+  reportUiCounter: Reporter['reportUiCounter'];
   METRIC_TYPE: typeof METRIC_TYPE;
   __LEGACY: {
     /**
@@ -52,12 +52,17 @@ export interface UsageCollectionSetup {
   };
 }
 
+export interface UsageCollectionStart {
+  reportUiCounter: Reporter['reportUiCounter'];
+  METRIC_TYPE: typeof METRIC_TYPE;
+}
+
 export function isUnauthenticated(http: HttpSetup) {
   const { anonymousPaths } = http;
   return anonymousPaths.isAnonymous(window.location.pathname);
 }
 
-export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
+export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, UsageCollectionStart> {
   private readonly legacyAppId$ = new Subject<string>();
   private trackUserAgent: boolean = true;
   private reporter?: Reporter;
@@ -68,7 +73,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
 
   public setup({ http }: CoreSetup): UsageCollectionSetup {
     const localStorage = new Storage(window.localStorage);
-    const debug = this.config.uiMetric.debug;
+    const debug = this.config.uiCounters.debug;
 
     this.reporter = createReporter({
       localStorage,
@@ -80,7 +85,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       allowTrackUserAgent: (allow: boolean) => {
         this.trackUserAgent = allow;
       },
-      reportUiStats: this.reporter.reportUiStats,
+      reportUiCounter: this.reporter.reportUiCounter,
       METRIC_TYPE,
       __LEGACY: {
         appChanged: (appId) => this.legacyAppId$.next(appId),
@@ -90,17 +95,23 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
 
   public start({ http, application }: CoreStart) {
     if (!this.reporter) {
-      return;
+      throw new Error('Usage collection reporter not set up correctly');
     }
 
-    if (this.config.uiMetric.enabled && !isUnauthenticated(http)) {
+    if (this.config.uiCounters.enabled && !isUnauthenticated(http)) {
       this.reporter.start();
     }
 
     if (this.trackUserAgent) {
       this.reporter.reportUserAgent('kibana');
     }
+
     reportApplicationUsage(merge(application.currentAppId$, this.legacyAppId$), this.reporter);
+
+    return {
+      reportUiCounter: this.reporter.reportUiCounter,
+      METRIC_TYPE,
+    };
   }
 
   public stop() {}

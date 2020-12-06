@@ -5,7 +5,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import { Role } from '../../../plugins/security/common/model';
+import { AuthenticatedUser, Role } from '../../../plugins/security/common/model';
 
 export function SecurityPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -16,7 +16,10 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home', 'error']);
+  const comboBox = getService('comboBox');
+  const supertest = getService('supertestWithoutAuth');
+  const deployment = getService('deployment');
+  const PageObjects = getPageObjects(['common', 'header', 'error']);
 
   interface LoginOptions {
     expectSpaceSelector?: boolean;
@@ -40,10 +43,14 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
     });
   }
 
+  async function isLoginFormVisible() {
+    return await testSubjects.exists('loginForm');
+  }
+
   async function waitForLoginForm() {
     log.debug('Waiting for Login Form to appear.');
     await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => {
-      return await testSubjects.exists('loginForm');
+      return await isLoginFormVisible();
     });
   }
 
@@ -87,10 +94,10 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
         if (await find.existsByCssSelector(rawDataTabLocator)) {
           await find.clickByCssSelector(rawDataTabLocator);
         }
-        await PageObjects.error.expectForbidden();
+        await testSubjects.existOrFail('ResetSessionButton');
       });
       log.debug(
-        `Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`
+        `Finished login process, found reset session button message. currentUrl = ${await browser.getCurrentUrl()}`
       );
       return;
     }
@@ -106,7 +113,9 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
   const loginPage = Object.freeze({
     async login(username?: string, password?: string, options: LoginOptions = {}) {
-      await PageObjects.common.navigateToApp('login');
+      if (!(await isLoginFormVisible())) {
+        await PageObjects.common.navigateToApp('login');
+      }
 
       // ensure welcome screen won't be shown. This is relevant for environments which don't allow
       // to use the yml setting, e.g. cloud
@@ -217,6 +226,21 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       await waitForLoginPage();
     }
 
+    async getCurrentUser() {
+      const sidCookie = await browser.getCookie('sid');
+      if (!sidCookie?.value) {
+        log.debug('User is not authenticated yet.');
+        return null;
+      }
+
+      const { body: user } = await supertest
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .set('Cookie', `sid=${sidCookie.value}`)
+        .expect(200);
+      return user as AuthenticatedUser;
+    }
+
     async forceLogout() {
       log.debug('SecurityPage.forceLogout');
       if (await find.existsByDisplayedByCssSelector('.login-form', 100)) {
@@ -225,7 +249,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       }
 
       log.debug('Redirecting to /logout to force the logout');
-      const url = PageObjects.common.getHostPort() + '/logout';
+      const url = deployment.getHostPort() + '/logout';
       await browser.get(url);
       log.debug('Waiting on the login form to appear');
       await waitForLoginPage();
@@ -273,11 +297,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
     async addIndexToRole(index: string) {
       log.debug(`Adding index ${index} to role`);
-      const indexInput = await retry.try(() =>
-        find.byCssSelector('[data-test-subj="indicesInput0"] input')
-      );
-      await indexInput.type(index);
-      await indexInput.type('\n');
+      await comboBox.setCustom('indicesInput0', index);
     }
 
     async addPrivilegeToRole(privilege: string) {
@@ -318,6 +338,8 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getElasticsearchUsers() {
       const users = [];
+      await testSubjects.click('tablePaginationPopoverButton');
+      await testSubjects.click('tablePagination-100-rows');
       for (const user of await testSubjects.findAll('userRow')) {
         const fullnameElement = await user.findByTestSubject('userRowFullName');
         const usernameElement = await user.findByTestSubject('userRowUserName');
@@ -342,6 +364,8 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getElasticsearchRoles() {
       const roles = [];
+      await testSubjects.click('tablePaginationPopoverButton');
+      await testSubjects.click('tablePagination-100-rows');
       for (const role of await testSubjects.findAll('roleRow')) {
         const [rolename, reserved, deprecated] = await Promise.all([
           role.findByTestSubject('roleRowName').then((el) => el.getVisibleText()),
@@ -400,104 +424,75 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       }
     }
 
-    addRole(roleName: string, roleObj: Role) {
+    async addRole(roleName: string, roleObj: Role) {
       const self = this;
 
-      return (
-        this.clickNewRole()
-          .then(function () {
-            // We have to use non-test-subject selectors because this markup is generated by ui-select.
-            log.debug('roleObj.indices[0].names = ' + roleObj.elasticsearch.indices[0].names);
-            return testSubjects.append('roleFormNameInput', roleName);
-          })
-          .then(function () {
-            return find.setValue(
-              '[data-test-subj="indicesInput0"] input',
-              roleObj.elasticsearch.indices[0].names + '\n'
-            );
-          })
-          .then(function () {
-            return testSubjects.click('restrictDocumentsQuery0');
-          })
-          .then(function () {
-            if (roleObj.elasticsearch.indices[0].query) {
-              return testSubjects.setValue('queryInput0', roleObj.elasticsearch.indices[0].query);
-            }
-          })
+      await this.clickNewRole();
 
-          // KibanaPrivilege
-          .then(async () => {
-            const globalPrivileges = (roleObj.kibana as any).global;
-            if (globalPrivileges) {
-              for (const privilegeName of globalPrivileges) {
-                const button = await testSubjects.find('addSpacePrivilegeButton');
-                await button.click();
+      // We have to use non-test-subject selectors because this markup is generated by ui-select.
+      log.debug('roleObj.indices[0].names = ' + roleObj.elasticsearch.indices[0].names);
+      await testSubjects.append('roleFormNameInput', roleName);
 
-                const spaceSelector = await testSubjects.find('spaceSelectorComboBox');
-                await spaceSelector.click();
+      for (const indexName of roleObj.elasticsearch.indices[0].names) {
+        await comboBox.setCustom('indicesInput0', indexName);
+      }
 
-                const globalSpaceOption = await find.byCssSelector(`#spaceOption_\\*`);
-                await globalSpaceOption.click();
+      if (roleObj.elasticsearch.indices[0].query) {
+        await testSubjects.click('restrictDocumentsQuery0');
+        await testSubjects.setValue('queryInput0', roleObj.elasticsearch.indices[0].query);
+      }
 
-                const basePrivilegeSelector = await testSubjects.find('basePrivilegeComboBox');
-                await basePrivilegeSelector.click();
+      const globalPrivileges = (roleObj.kibana as any).global;
+      if (globalPrivileges) {
+        for (const privilegeName of globalPrivileges) {
+          await testSubjects.click('addSpacePrivilegeButton');
 
-                const privilegeOption = await find.byCssSelector(`#basePrivilege_${privilegeName}`);
-                await privilegeOption.click();
+          await testSubjects.click('spaceSelectorComboBox');
 
-                const createPrivilegeButton = await testSubjects.find('createSpacePrivilegeButton');
-                await createPrivilegeButton.click();
-              }
-            }
-          })
+          const globalSpaceOption = await find.byCssSelector(`#spaceOption_\\*`);
+          await globalSpaceOption.click();
 
-          .then(function () {
-            function addPrivilege(privileges: string[]) {
-              return privileges.reduce(function (promise: Promise<any>, privilegeName: string) {
-                // We have to use non-test-subject selectors because this markup is generated by ui-select.
-                return promise
-                  .then(() => self.addPrivilegeToRole(privilegeName))
-                  .then(() => PageObjects.common.sleep(250));
-              }, Promise.resolve());
-            }
-            return addPrivilege(roleObj.elasticsearch.indices[0].privileges);
-          })
-          // clicking the Granted fields and removing the asterix
-          .then(async function () {
-            function addGrantedField(field: string[]) {
-              return field.reduce(function (promise: Promise<any>, fieldName: string) {
-                return promise
-                  .then(function () {
-                    return find.setValue('[data-test-subj="fieldInput0"] input', fieldName + '\n');
-                  })
-                  .then(function () {
-                    return PageObjects.common.sleep(1000);
-                  });
-              }, Promise.resolve());
-            }
+          await testSubjects.click(`basePrivilege_${privilegeName}`);
 
-            if (roleObj.elasticsearch.indices[0].field_security) {
-              // Toggle FLS switch
-              await testSubjects.click('restrictFieldsQuery0');
+          await testSubjects.click('createSpacePrivilegeButton');
+        }
+      }
 
-              // have to remove the '*'
-              return find
-                .clickByCssSelector(
-                  'div[data-test-subj="fieldInput0"] [title="Remove * from selection in this group"] svg.euiIcon'
-                )
-                .then(function () {
-                  return addGrantedField(roleObj.elasticsearch.indices[0].field_security!.grant!);
-                });
-            }
-          }) // clicking save button
-          .then(async () => {
-            log.debug('click save button');
-            await testSubjects.click('roleFormSaveButton');
-          })
-          .then(function () {
-            return PageObjects.common.sleep(5000);
-          })
-      );
+      function addPrivilege(privileges: string[]) {
+        return privileges.reduce(function (promise: Promise<any>, privilegeName: string) {
+          return promise
+            .then(() => self.addPrivilegeToRole(privilegeName))
+            .then(() => PageObjects.common.sleep(250));
+        }, Promise.resolve());
+      }
+
+      await addPrivilege(roleObj.elasticsearch.indices[0].privileges);
+
+      async function addGrantedField(fields: string[]) {
+        for (const entry of fields) {
+          await comboBox.setCustom('fieldInput0', entry);
+        }
+      }
+
+      // clicking the Granted fields and removing the asterix
+      if (roleObj.elasticsearch.indices[0].field_security) {
+        // Toggle FLS switch
+        await testSubjects.click('restrictFieldsQuery0');
+
+        // have to remove the '*'
+        await find.clickByCssSelector(
+          'div[data-test-subj="fieldInput0"] [title="Remove * from selection in this group"] svg.euiIcon'
+        );
+
+        await addGrantedField(roleObj.elasticsearch.indices[0].field_security!.grant!);
+      }
+
+      log.debug('click save button');
+      await testSubjects.click('roleFormSaveButton');
+
+      // Signifies that the role management page redirected back to the role grid page,
+      // and successfully refreshed the grid
+      await testSubjects.existOrFail('roleRow');
     }
 
     async selectRole(role: string) {

@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiScreenReaderOnly,
+  EuiPanel,
 } from '@elastic/eui';
 import { Stats } from '../../beats';
 import { formatMetric } from '../../../lib/format_number';
@@ -23,10 +24,14 @@ import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link'
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
+import { AlertsStatus } from '../../../alerts/status';
 
 export class Listing extends PureComponent {
   getColumns() {
     const setupMode = this.props.setupMode;
+    const alerts = this.props.alerts;
 
     return [
       {
@@ -36,7 +41,7 @@ export class Listing extends PureComponent {
         field: 'name',
         render: (name, beat) => {
           let setupModeStatus = null;
-          if (setupMode && setupMode.enabled) {
+          if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
             const list = get(setupMode, 'data.byUuid', {});
             const status = list[beat.uuid] || {};
             const instance = {
@@ -66,6 +71,29 @@ export class Listing extends PureComponent {
               </EuiLink>
               {setupModeStatus}
             </div>
+          );
+        },
+      },
+      {
+        name: i18n.translate('xpack.monitoring.beats.instances.alertsColumnTitle', {
+          defaultMessage: 'Alerts',
+        }),
+        field: 'alerts',
+        width: '175px',
+        sortable: true,
+        render: (_field, beat) => {
+          return (
+            <AlertsStatus
+              showBadge={true}
+              alerts={alerts}
+              stateFilter={(state) => state.stackProductUuid === beat.uuid}
+              nextStepsFilter={(nextStep) => {
+                if (nextStep.text.includes('Beat instances')) {
+                  return false;
+                }
+                return true;
+              }}
+            />
           );
         },
       },
@@ -119,10 +147,10 @@ export class Listing extends PureComponent {
   }
 
   render() {
-    const { stats, data, sorting, pagination, onTableChange, setupMode } = this.props;
+    const { stats, data, sorting, pagination, onTableChange, setupMode, alerts } = this.props;
 
     let setupModeCallOut = null;
-    if (setupMode.enabled && setupMode.data) {
+    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       setupModeCallOut = (
         <ListingCallOut
           setupModeData={setupMode.data}
@@ -151,9 +179,11 @@ export class Listing extends PureComponent {
               />
             </h1>
           </EuiScreenReaderOnly>
+          <EuiPanel>
+            <Stats stats={stats} alerts={alerts} />
+          </EuiPanel>
+          <EuiSpacer size="m" />
           <EuiPageContent>
-            <Stats stats={stats} />
-            <EuiSpacer size="m" />
             {setupModeCallOut}
             <EuiMonitoringTable
               className="beatsTable"

@@ -64,6 +64,7 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
             indexName,
           },
         }),
+        telemetryPageViewTitle: 'elasticsearch_index_advanced',
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchAdvancedIndexApp',

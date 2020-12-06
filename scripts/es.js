@@ -17,7 +17,7 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
+require('../src/setup_node_env/no_transpilation');
 
 var resolve = require('path').resolve;
 var pkg = require('../package.json');

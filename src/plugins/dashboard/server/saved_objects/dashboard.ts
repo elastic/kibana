@@ -18,9 +18,16 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
-import { dashboardSavedObjectTypeMigrations } from './dashboard_migrations';
+import {
+  createDashboardSavedObjectTypeMigrations,
+  DashboardSavedObjectTypeMigrationsDeps,
+} from './dashboard_migrations';
 
-export const dashboardSavedObjectType: SavedObjectsType = {
+export const createDashboardSavedObjectType = ({
+  migrationDeps,
+}: {
+  migrationDeps: DashboardSavedObjectTypeMigrationsDeps;
+}): SavedObjectsType => ({
   name: 'dashboard',
   hidden: false,
   namespaceType: 'single',
@@ -44,24 +51,26 @@ export const dashboardSavedObjectType: SavedObjectsType = {
   mappings: {
     properties: {
       description: { type: 'text' },
-      hits: { type: 'integer' },
-      kibanaSavedObjectMeta: { properties: { searchSourceJSON: { type: 'text' } } },
-      optionsJSON: { type: 'text' },
-      panelsJSON: { type: 'text' },
+      hits: { type: 'integer', index: false, doc_values: false },
+      kibanaSavedObjectMeta: {
+        properties: { searchSourceJSON: { type: 'text', index: false } },
+      },
+      optionsJSON: { type: 'text', index: false },
+      panelsJSON: { type: 'text', index: false },
       refreshInterval: {
         properties: {
-          display: { type: 'keyword' },
-          pause: { type: 'boolean' },
-          section: { type: 'integer' },
-          value: { type: 'integer' },
+          display: { type: 'keyword', index: false, doc_values: false },
+          pause: { type: 'boolean', index: false, doc_values: false },
+          section: { type: 'integer', index: false, doc_values: false },
+          value: { type: 'integer', index: false, doc_values: false },
         },
       },
-      timeFrom: { type: 'keyword' },
-      timeRestore: { type: 'boolean' },
-      timeTo: { type: 'keyword' },
+      timeFrom: { type: 'keyword', index: false, doc_values: false },
+      timeRestore: { type: 'boolean', index: false, doc_values: false },
+      timeTo: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
       version: { type: 'integer' },
     },
   },
-  migrations: dashboardSavedObjectTypeMigrations,
-};
+  migrations: createDashboardSavedObjectTypeMigrations(migrationDeps),
+});

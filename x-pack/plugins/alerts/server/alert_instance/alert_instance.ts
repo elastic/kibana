@@ -8,24 +8,26 @@ import {
   AlertInstanceState,
   RawAlertInstance,
   rawAlertInstance,
+  AlertInstanceContext,
 } from '../../common';
 
-import { State, Context } from '../types';
 import { parseDuration } from '../lib';
 
-interface ScheduledExecutionOptions {
-  actionGroup: string;
-  context: Context;
-  state: State;
-}
 export type AlertInstances = Record<string, AlertInstance>;
-export class AlertInstance {
-  private scheduledExecutionOptions?: ScheduledExecutionOptions;
+export class AlertInstance<
+  State extends AlertInstanceState = AlertInstanceState,
+  Context extends AlertInstanceContext = AlertInstanceContext
+> {
+  private scheduledExecutionOptions?: {
+    actionGroup: string;
+    context: Context;
+    state: State;
+  };
   private meta: AlertInstanceMeta;
-  private state: AlertInstanceState;
+  private state: State;
 
-  constructor({ state = {}, meta = {} }: RawAlertInstance = {}) {
-    this.state = state;
+  constructor({ state, meta = {} }: RawAlertInstance = {}) {
+    this.state = (state || {}) as State;
     this.meta = meta;
   }
 
@@ -49,6 +51,10 @@ export class AlertInstance {
     return false;
   }
 
+  getLastScheduledActions() {
+    return this.meta.lastScheduledActions;
+  }
+
   getScheduledActionOptions() {
     return this.scheduledExecutionOptions;
   }
@@ -62,11 +68,15 @@ export class AlertInstance {
     return this.state;
   }
 
-  scheduleActions(actionGroup: string, context: Context = {}) {
+  scheduleActions(actionGroup: string, context?: Context) {
     if (this.hasScheduledActions()) {
       throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
-    this.scheduledExecutionOptions = { actionGroup, context, state: this.state };
+    this.scheduledExecutionOptions = {
+      actionGroup,
+      context: (context || {}) as Context,
+      state: this.state,
+    };
     return this;
   }
 

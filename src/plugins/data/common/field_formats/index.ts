@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { FieldFormatsRegistry } from './field_formats_registry';
 type IFieldFormatsRegistry = PublicMethodsOf<FieldFormatsRegistry>;
 
@@ -27,7 +27,6 @@ export {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -40,7 +39,7 @@ export {
   TruncateFormat,
 } from './converters';
 
-export { getHighlightRequest, serializeFieldFormat } from './utils';
+export { getHighlightRequest } from './utils';
 
 export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 export { FIELD_FORMAT_IDS } from './types';
@@ -56,3 +55,5 @@ export {
   IFieldFormat,
   FieldFormatsStartCommon,
 } from './types';
+
+export * from './errors';

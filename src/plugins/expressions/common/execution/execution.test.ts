@@ -38,8 +38,10 @@ const createExecution = (
   const execution = new Execution({
     executor,
     ast: parseExpression(expression),
-    context,
-    debug,
+    params: {
+      ...context,
+      debug,
+    },
   });
   return execution;
 };
@@ -68,7 +70,7 @@ describe('Execution', () => {
   test('creates default ExecutionContext', () => {
     const execution = createExecution();
     expect(execution.context).toMatchObject({
-      getInitialInput: expect.any(Function),
+      getSearchContext: expect.any(Function),
       variables: expect.any(Object),
       types: expect.any(Object),
     });
@@ -143,6 +145,7 @@ describe('Execution', () => {
       const execution = new Execution({
         executor,
         expression,
+        params: {},
       });
       expect(execution.expression).toBe(expression);
     });
@@ -153,6 +156,7 @@ describe('Execution', () => {
       const execution = new Execution({
         ast: parseExpression(expression),
         executor,
+        params: {},
       });
       expect(execution.expression).toBe(expression);
     });
@@ -189,6 +193,18 @@ describe('Execution', () => {
     test('context.inspectorAdapters is an object', async () => {
       const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
       expect(typeof result).toBe('object');
+    });
+
+    test('context.getKibanaRequest is a function if provided', async () => {
+      const { result } = (await run('introspectContext key="getKibanaRequest"', {
+        kibanaRequest: {},
+      })) as any;
+      expect(typeof result).toBe('function');
+    });
+
+    test('context.getKibanaRequest is undefined if not provided', async () => {
+      const { result } = (await run('introspectContext key="getKibanaRequest"')) as any;
+      expect(typeof result).toBe('undefined');
     });
 
     test('unknown context key is undefined', async () => {
@@ -376,6 +392,38 @@ describe('Execution', () => {
         value: 5,
       });
     });
+
+    test('can use global variables', async () => {
+      const result = await run(
+        'add val={var foo}',
+        {
+          variables: {
+            foo: 3,
+          },
+        },
+        null
+      );
+
+      expect(result).toMatchObject({
+        type: 'num',
+        value: 3,
+      });
+    });
+
+    test('can modify global variables', async () => {
+      const result = await run(
+        'add val={var_set name=foo value=66 | var bar} | var foo',
+        {
+          variables: {
+            foo: 3,
+            bar: 25,
+          },
+        },
+        null
+      );
+
+      expect(result).toBe(66);
+    });
   });
 
   describe('when arguments are missing', () => {
@@ -459,7 +507,7 @@ describe('Execution', () => {
         await execution.result;
 
         for (const node of execution.state.get().ast.chain) {
-          expect(node.debug?.fn.name).toBe('add');
+          expect(node.debug?.fn).toBe('add');
         }
       });
 
@@ -473,17 +521,6 @@ describe('Execution', () => {
           expect(node.debug?.duration).toBeLessThan(100);
           expect(node.debug?.duration).toBeGreaterThanOrEqual(0);
         }
-      });
-
-      test('sets duration to 10 milliseconds when function executes 10 milliseconds', async () => {
-        const execution = createExecution('sleep 10', {}, true);
-        execution.start(-1);
-        await execution.result;
-
-        const node = execution.state.get().ast.chain[0];
-        expect(typeof node.debug?.duration).toBe('number');
-        expect(node.debug?.duration).toBeLessThan(50);
-        expect(node.debug?.duration).toBeGreaterThanOrEqual(5);
       });
 
       test('adds .debug field in expression AST on each executed function', async () => {
@@ -598,7 +635,7 @@ describe('Execution', () => {
         const execution = new Execution({
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
-          debug: true,
+          params: { debug: true },
         });
         execution.start(0);
         await execution.result;
@@ -616,7 +653,7 @@ describe('Execution', () => {
         const execution = new Execution({
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
-          debug: true,
+          params: { debug: true },
         });
         execution.start(0);
         await execution.result;
@@ -637,7 +674,7 @@ describe('Execution', () => {
         const execution = new Execution({
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
-          debug: true,
+          params: { debug: true },
         });
         execution.start(0);
         await execution.result;
@@ -646,7 +683,7 @@ describe('Execution', () => {
 
         expect(node2.debug).toMatchObject({
           success: false,
-          fn: expect.any(Object),
+          fn: 'throws',
           input: expect.any(Object),
           args: expect.any(Object),
           error: expect.any(Object),

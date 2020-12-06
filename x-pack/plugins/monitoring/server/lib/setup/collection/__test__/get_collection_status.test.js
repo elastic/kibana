@@ -10,7 +10,12 @@ import { getCollectionStatus } from '..';
 import { getIndexPatterns } from '../../../cluster/get_index_patterns';
 
 const liveClusterUuid = 'a12';
-const mockReq = (searchResult = {}, securityEnabled = true, userHasPermissions = true) => {
+const mockReq = (
+  searchResult = {},
+  securityEnabled = true,
+  userHasPermissions = true,
+  securityErrorMessage = null
+) => {
   return {
     server: {
       newPlatform: {
@@ -37,12 +42,14 @@ const mockReq = (searchResult = {}, securityEnabled = true, userHasPermissions =
         },
       },
       plugins: {
-        xpack_main: {
+        monitoring: {
           info: {
-            isAvailable: () => true,
-            feature: () => ({
-              isEnabled: () => securityEnabled,
-            }),
+            getSecurityFeature: () => {
+              return {
+                isAvailable: securityEnabled,
+                isEnabled: securityEnabled,
+              };
+            },
           },
         },
         elasticsearch: {
@@ -61,6 +68,11 @@ const mockReq = (searchResult = {}, securityEnabled = true, userHasPermissions =
                   params &&
                   params.path === '/_security/user/_has_privileges'
                 ) {
+                  if (securityErrorMessage !== null) {
+                    return Promise.reject({
+                      message: securityErrorMessage,
+                    });
+                  }
                   return Promise.resolve({ has_all_requested: userHasPermissions });
                 }
                 if (type === 'transport.request' && params && params.path === '/_nodes') {
@@ -241,6 +253,34 @@ describe('getCollectionStatus', () => {
 
   it('should work properly when security is disabled', async () => {
     const req = mockReq({ hits: { total: { value: 1 } } }, false);
+    const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
+    expect(result.kibana.detected.doesExist).to.be(true);
+  });
+
+  it('should work properly with an unknown security message', async () => {
+    const req = mockReq({ hits: { total: { value: 1 } } }, true, true, 'foobar');
+    const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
+    expect(result._meta.hasPermissions).to.be(false);
+  });
+
+  it('should work properly with a known security message', async () => {
+    const req = mockReq(
+      { hits: { total: { value: 1 } } },
+      true,
+      true,
+      'no handler found for uri [/_security/user/_has_privileges] and method [POST]'
+    );
+    const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
+    expect(result.kibana.detected.doesExist).to.be(true);
+  });
+
+  it('should work properly with another known security message', async () => {
+    const req = mockReq(
+      { hits: { total: { value: 1 } } },
+      true,
+      true,
+      'Invalid index name [_security]'
+    );
     const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
     expect(result.kibana.detected.doesExist).to.be(true);
   });

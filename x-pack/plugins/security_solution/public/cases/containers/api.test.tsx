@@ -6,6 +6,7 @@
 
 import { KibanaServices } from '../../common/lib/kibana';
 
+import { ConnectorTypes, CommentType, CaseStatuses } from '../../../../case/common/api';
 import { CASES_URL } from '../../../../case/common/constants';
 
 import {
@@ -137,7 +138,7 @@ describe('Case Configuration API', () => {
           ...DEFAULT_QUERY_PARAMS,
           reporters: [],
           tags: [],
-          status: 'open',
+          status: CaseStatuses.open,
         },
         signal: abortCtrl.signal,
       });
@@ -148,7 +149,7 @@ describe('Case Configuration API', () => {
           ...DEFAULT_FILTER_OPTIONS,
           reporters: [...respReporters, { username: null, full_name: null, email: null }],
           tags,
-          status: '',
+          status: CaseStatuses.open,
           search: 'hello',
         },
         queryParams: DEFAULT_QUERY_PARAMS,
@@ -159,8 +160,35 @@ describe('Case Configuration API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           reporters,
-          tags,
+          tags: ['"coke"', '"pepsi"'],
           search: 'hello',
+          status: CaseStatuses.open,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+    test('tags with weird chars get handled gracefully', async () => {
+      const weirdTags: string[] = ['(', '"double"'];
+
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          reporters: [...respReporters, { username: null, full_name: null, email: null }],
+          tags: weirdTags,
+          status: CaseStatuses.open,
+          search: 'hello',
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          reporters,
+          tags: ['"("', '"\\"double\\""'],
+          search: 'hello',
+          status: CaseStatuses.open,
         },
         signal: abortCtrl.signal,
       });
@@ -284,7 +312,7 @@ describe('Case Configuration API', () => {
     });
     const data = [
       {
-        status: 'closed',
+        status: CaseStatuses.closed,
         id: basicCase.id,
         version: basicCase.version,
       },
@@ -322,6 +350,7 @@ describe('Case Configuration API', () => {
         method: 'PATCH',
         body: JSON.stringify({
           comment: 'updated comment',
+          type: CommentType.user,
           id: basicCase.comments[0].id,
           version: basicCase.comments[0].version,
         }),
@@ -349,6 +378,12 @@ describe('Case Configuration API', () => {
       description: 'description',
       tags: ['tag'],
       title: 'title',
+      connector: {
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+        fields: null,
+      },
     };
 
     test('check url, method, signal', async () => {
@@ -372,6 +407,7 @@ describe('Case Configuration API', () => {
     });
     const data = {
       comment: 'comment',
+      type: CommentType.user as const,
     };
 
     test('check url, method, signal', async () => {

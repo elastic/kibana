@@ -21,7 +21,7 @@ import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiPageContentHeader } from '@elastic/eui';
 import { first } from 'rxjs/operators';
 import { IInterpreterRenderHandlers, ExpressionValue } from 'src/plugins/expressions';
-import { RequestAdapter, DataAdapter } from '../../../../../../../src/plugins/inspector';
+import { RequestAdapter, DataAdapter } from '../../../../../../../src/plugins/inspector/public';
 import { Adapters, ExpressionRenderHandler } from '../../types';
 import { getExpressions } from '../../services';
 
@@ -63,7 +63,7 @@ class Main extends React.Component<{}, State> {
       return getExpressions()
         .execute(expression, context || { type: 'null' }, {
           inspectorAdapters: adapters,
-          search: initialContext as any,
+          searchContext: initialContext as any,
         })
         .getData();
     };

@@ -1,0 +1,55 @@
+[[security-best-practices]]
+== Security best practices
+
+* XSS
+** Check for usages of `dangerouslySetInnerHtml`, `Element.innerHTML`,
+`Element.outerHTML`
+** Ensure all user input is properly escaped.
+** Ensure any input in `$.html`, `$.append`, `$.appendTo`,
+latexmath:[$.prepend`, `$].prependTo`is escaped. Instead use`$.text`, or
+don’t use jQuery at all.
+* CSRF
+** Ensure all APIs are running inside the {kib} HTTP service.
+* RCE
+** Ensure no usages of `eval`
+** Ensure no usages of dynamic requires
+** Check for template injection
+** Check for usages of templating libraries, including `_.template`, and
+ensure that user provided input isn’t influencing the template and is
+only used as data for rendering the template.
+** Check for possible prototype pollution.
+* Prototype Pollution
+** Check for instances of `anObject[a][b] = c` where a, b, and c are
+user defined. This includes code paths where the following logical code
+steps could be performed in separate files by completely different
+operations, or recursively using dynamic operations.
+** Validate any user input, including API
+url-parameters/query-parameters/payloads, preferable against a schema
+which only allows specific keys/values. At a very minimum, black-list
+`__proto__` and `prototype.constructor` for use within keys
+** When calling APIs which spawn new processes or potentially perform
+code generation from strings, defensively protect against Prototype
+Pollution by checking `Object.hasOwnProperty` if the arguments to the
+APIs originate from an Object. An example is the Code app’s
+https://github.com/elastic/kibana/blob/b49192626a8528af5d888545fb14cd1ce66a72e7/x-pack/legacy/plugins/code/server/lsp/workspace_command.ts#L40-L44[spawnProcess].
+*** Common Node.js offenders: `child_process.spawn`,
+`child_process.exec`, `eval`, `Function('some string')`,
+`vm.runIn*Context(x)`
+*** Common Client-side offenders: `eval`, `Function('some string')`,
+`setTimeout('some string', num)`, `setInterval('some string', num)`
+* Check for accidental reveal of sensitive information
+** The biggest culprit is errors which contain stack traces or other
+sensitive information which end up in the HTTP Response
+* Checked for Mishandled API requests
+** Ensure no sensitive cookies are forwarded to external resources.
+** Ensure that all user controllable variables that are used in
+constructing a URL are escaped properly. This is relevant when using
+`transport.request` with the {es} client as no automatic
+escaping is performed.
+* Reverse tabnabbing -
+https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/HTML5_Security_Cheat_Sheet.md#tabnabbing
+** When there are user controllable links or hard-coded links to
+third-party domains that specify target="_blank" or target="_window", the a tag should have the rel="noreferrer noopener" attribute specified.
+Allowing users to input markdown is a common culprit, a custom link renderer should be used
+* SSRF - https://www.owasp.org/index.php/Server_Side_Request_Forgery
+All network requests made from the {kib} server should use an explicit configuration or white-list specified in the kibana.yml

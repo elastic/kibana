@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import http from 'http';
 import { Plugin, CoreSetup, IRouter } from 'kibana/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
@@ -12,6 +13,9 @@ import { ActionType } from '../../../../../../../plugins/actions/server';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
 import { initPlugin as initJira } from './jira_simulation';
+import { initPlugin as initResilient } from './resilient_simulation';
+import { initPlugin as initSlack } from './slack_simulation';
+import { initPlugin as initWebhook } from './webhook_simulation';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
@@ -20,6 +24,7 @@ export enum ExternalServiceSimulator {
   SERVICENOW = 'servicenow',
   SLACK = 'slack',
   JIRA = 'jira',
+  RESILIENT = 'resilient',
   WEBHOOK = 'webhook',
 }
 
@@ -33,7 +38,17 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   );
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/incident`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/issue`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/createmeta`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.RESILIENT}/rest/orgs/201/incidents`);
   return allPaths;
+}
+
+export async function getWebhookServer(): Promise<http.Server> {
+  return await initWebhook();
+}
+
+export async function getSlackServer(): Promise<http.Server> {
+  return await initSlack();
 }
 
 interface FixtureSetupDeps {
@@ -57,28 +72,29 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
     };
     actions.registerType(notEnabledActionType);
-    features.registerFeature({
-      id: 'actions',
-      name: 'Actions',
+    features.registerKibanaFeature({
+      id: 'actionsSimulators',
+      name: 'actionsSimulators',
       app: ['actions', 'kibana'],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           app: ['actions', 'kibana'],
           savedObject: {
-            all: ['action', 'action_task_params'],
+            all: [],
             read: [],
           },
           ui: [],
-          api: ['actions-read', 'actions-all'],
+          api: [],
         },
         read: {
           app: ['actions', 'kibana'],
           savedObject: {
-            all: ['action_task_params'],
-            read: ['action'],
+            all: [],
+            read: [],
           },
           ui: [],
-          api: ['actions-read'],
+          api: [],
         },
       },
     });
@@ -88,6 +104,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
     initServiceNow(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW));
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
+    initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
   }
 
   public start() {}

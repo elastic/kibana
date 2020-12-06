@@ -8,7 +8,7 @@
 
 ```typescript
 esFilters: {
-    FilterLabel: typeof FilterLabel;
+    FilterLabel: (props: import("./ui/filter_bar/filter_editor/lib/filter_label").FilterLabelProps) => JSX.Element;
     FILTERS: typeof FILTERS;
     FilterStateStore: typeof FilterStateStore;
     buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("../common").Filter;
@@ -35,7 +35,7 @@ esFilters: {
             type?: string | undefined;
             key?: string | undefined;
             params?: any;
-            value?: string | ((formatter?: import("../common").FilterValueFormatter | undefined) => string) | undefined;
+            value?: string | undefined;
         };
         $state?: import("../common").FilterState | undefined;
         query?: any;
@@ -52,5 +52,6 @@ esFilters: {
     convertRangeFilterToTimeRangeString: typeof convertRangeFilterToTimeRangeString;
     mapAndFlattenFilters: (filters: import("../common").Filter[]) => import("../common").Filter[];
     extractTimeFilter: typeof extractTimeFilter;
+    extractTimeRange: typeof extractTimeRange;
 }
 ```

@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { expectType } from 'tsd';
+import { expectAssignable } from 'tsd';
 import { UnionToIntersection } from '../index';
 
 type INTERSECTED = UnionToIntersection<{ foo: 'bar' } | { baz: 'qux' }>;
 
-expectType<INTERSECTED>({
+expectAssignable<INTERSECTED>({
   foo: 'bar',
   baz: 'qux',
 });

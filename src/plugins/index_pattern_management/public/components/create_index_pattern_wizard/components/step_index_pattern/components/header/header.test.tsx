@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { Header } from '../header';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@kbn/test/jest';
 
 describe('Header', () => {
   it('should render normally', () => {
@@ -32,6 +32,8 @@ describe('Header', () => {
         onQueryChanged={() => {}}
         goToNextStep={() => {}}
         isNextStepDisabled={false}
+        onChangeIncludingSystemIndices={() => {}}
+        isIncludingSystemIndices={false}
       />
     );
 
@@ -48,6 +50,8 @@ describe('Header', () => {
         onQueryChanged={() => {}}
         goToNextStep={() => {}}
         isNextStepDisabled={true}
+        onChangeIncludingSystemIndices={() => {}}
+        isIncludingSystemIndices={false}
       />
     );
 

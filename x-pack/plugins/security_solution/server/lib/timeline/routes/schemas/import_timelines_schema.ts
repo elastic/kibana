@@ -5,9 +5,6 @@
  */
 import * as rt from 'io-ts';
 
-import { Readable } from 'stream';
-import { either } from 'fp-ts/lib/Either';
-
 import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline';
 
 import { eventNotes, globalNotes, pinnedEventIds } from './schemas';
@@ -26,21 +23,35 @@ export const ImportTimelinesSchemaRt = rt.intersection([
   }),
 ]);
 
-const ReadableRt = new rt.Type<Readable, Readable, unknown>(
-  'ReadableRt',
-  (u): u is Readable => u instanceof Readable,
-  (u, c) =>
-    either.chain(rt.object.validate(u, c), (s) => {
-      const d = s as Readable;
-      return d.readable ? rt.success(d) : rt.failure(u, c);
-    }),
-  (a) => a
-);
-export const ImportTimelinesPayloadSchemaRt = rt.type({
-  file: rt.intersection([
-    ReadableRt,
-    rt.type({
-      hapi: rt.type({ filename: rt.string }),
-    }),
-  ]),
+export type ImportTimelinesSchema = rt.TypeOf<typeof ImportTimelinesSchemaRt>;
+
+const ReadableRt = rt.partial({
+  _maxListeners: rt.unknown,
+  _readableState: rt.unknown,
+  _read: rt.unknown,
+  readable: rt.boolean,
+  _events: rt.unknown,
+  _eventsCount: rt.number,
+  _data: rt.unknown,
+  _position: rt.number,
+  _encoding: rt.string,
 });
+
+const booleanInString = rt.union([rt.literal('true'), rt.literal('false')]);
+
+export const ImportTimelinesPayloadSchemaRt = rt.intersection([
+  rt.type({
+    file: rt.intersection([
+      ReadableRt,
+      rt.type({
+        hapi: rt.type({
+          filename: rt.string,
+          headers: rt.unknown,
+        }),
+      }),
+    ]),
+  }),
+  rt.partial({ isImmutable: booleanInString }),
+]);
+
+export type ImportTimelinesPayloadSchema = rt.TypeOf<typeof ImportTimelinesPayloadSchemaRt>;

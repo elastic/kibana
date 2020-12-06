@@ -4,25 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { ActionType } from '../types';
+import Boom from '@hapi/boom';
+import { ActionType, ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
 
-export function validateParams(actionType: ActionType, value: unknown) {
+export function validateParams<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
   return validateWithSchema(actionType, 'params', value);
 }
 
-export function validateConfig(actionType: ActionType, value: unknown) {
+export function validateConfig<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
   return validateWithSchema(actionType, 'config', value);
 }
 
-export function validateSecrets(actionType: ActionType, value: unknown) {
+export function validateSecrets<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
   return validateWithSchema(actionType, 'secrets', value);
 }
 
 type ValidKeys = 'params' | 'config' | 'secrets';
 
-function validateWithSchema(
-  actionType: ActionType,
+function validateWithSchema<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+>(
+  actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   key: ValidKeys,
   value: unknown
 ): Record<string, unknown> {

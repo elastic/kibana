@@ -12,30 +12,29 @@ import { AppAction } from './actions';
 import { Immutable } from '../../../common/endpoint/types';
 import { AppState } from './app/reducer';
 import { InputsState } from './inputs/reducer';
+import { SourcererState } from './sourcerer/reducer';
 import { HostsPluginState } from '../../hosts/store';
 import { DragAndDropState } from './drag_and_drop/reducer';
 import { TimelinePluginState } from '../../timelines/store/timeline';
 import { NetworkPluginState } from '../../network/store';
-import { EndpointAlertsPluginState } from '../../endpoint_alerts';
 import { ManagementPluginState } from '../../management';
 
+export type StoreState = HostsPluginState &
+  NetworkPluginState &
+  TimelinePluginState &
+  ManagementPluginState & {
+    app: AppState;
+    dragAndDrop: DragAndDropState;
+    inputs: InputsState;
+    sourcerer: SourcererState;
+  };
 /**
  * The redux `State` type for the Security App.
  * We use `CombinedState` to wrap our shape because we create our reducer using `combineReducers`.
  * `combineReducers` returns a type wrapped in `CombinedState`.
  * `CombinedState` is required for redux to know what keys to make optional when preloaded state into a store.
  */
-export type State = CombinedState<
-  HostsPluginState &
-    NetworkPluginState &
-    TimelinePluginState &
-    EndpointAlertsPluginState &
-    ManagementPluginState & {
-      app: AppState;
-      dragAndDrop: DragAndDropState;
-      inputs: InputsState;
-    }
->;
+export type State = CombinedState<StoreState>;
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene';
 
@@ -77,7 +76,7 @@ export type ImmutableMiddleware<S, A extends Action> = (
  */
 export type ImmutableMiddlewareFactory<S = State> = (
   coreStart: CoreStart,
-  depsStart: Pick<StartPlugins, 'data' | 'ingestManager'>
+  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
 ) => ImmutableMiddleware<S, AppAction>;
 
 /**
@@ -88,7 +87,7 @@ export type ImmutableMiddlewareFactory<S = State> = (
  */
 export type SecuritySubPluginMiddlewareFactory = (
   coreStart: CoreStart,
-  depsStart: Pick<StartPlugins, 'data' | 'ingestManager'>
+  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
 ) => Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 
 /**
@@ -159,7 +158,7 @@ export type CreateStructuredSelector = <
 >(
   selectorMap: SelectorMap
 ) => (
-  state: SelectorMap[keyof SelectorMap] extends (state: infer State) => unknown ? State : never
+  state: SelectorMap[keyof SelectorMap] extends (state: infer S) => unknown ? S : never
 ) => {
   [Key in keyof SelectorMap]: ReturnType<SelectorMap[Key]>;
 };

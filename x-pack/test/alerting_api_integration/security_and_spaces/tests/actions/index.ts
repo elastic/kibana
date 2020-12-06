@@ -5,10 +5,19 @@
  */
 
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { setupSpacesAndUsers, tearDown } from '..';
 
 // eslint-disable-next-line import/no-default-export
-export default function actionsTests({ loadTestFile }: FtrProviderContext) {
+export default function actionsTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Actions', () => {
+    before(async () => {
+      await setupSpacesAndUsers(getService);
+    });
+
+    after(async () => {
+      await tearDown(getService);
+    });
+
     loadTestFile(require.resolve('./builtin_action_types/email'));
     loadTestFile(require.resolve('./builtin_action_types/es_index'));
     loadTestFile(require.resolve('./builtin_action_types/es_index_preconfigured'));
@@ -16,6 +25,7 @@ export default function actionsTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./builtin_action_types/server_log'));
     loadTestFile(require.resolve('./builtin_action_types/servicenow'));
     loadTestFile(require.resolve('./builtin_action_types/jira'));
+    loadTestFile(require.resolve('./builtin_action_types/resilient'));
     loadTestFile(require.resolve('./builtin_action_types/slack'));
     loadTestFile(require.resolve('./builtin_action_types/webhook'));
     loadTestFile(require.resolve('./create'));

@@ -39,10 +39,10 @@ import { Pager } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PER_PAGE_INCREMENTS } from '../../../../constants';
-import { MatchedIndex, Tag } from '../../../../types';
+import { MatchedItem, Tag } from '../../../../types';
 
 interface IndicesListProps {
-  indices: MatchedIndex[];
+  indices: MatchedItem[];
   query: string;
 }
 
@@ -144,7 +144,6 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
             isOpen={isPerPageControlOpen}
             closePopover={this.closePerPageControl}
             panelPaddingSize="none"
-            withTitle
           >
             <EuiContextMenuPanel items={items} />
           </EuiPopover>
@@ -187,7 +186,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
           <EuiTableRowCell>
             {index.tags.map((tag: Tag) => {
               return (
-                <EuiBadge key={`index_${key}_tag_${tag.key}`} color="primary">
+                <EuiBadge key={`index_${key}_tag_${tag.key}`} color={tag.color}>
                   {tag.name}
                 </EuiBadge>
               );
@@ -199,7 +198,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
 
     return (
       <div {...rest}>
-        <EuiTable>
+        <EuiTable responsive={false} tableLayout="auto">
           <EuiTableBody>{rows}</EuiTableBody>
         </EuiTable>
         <EuiSpacer size="m" />
