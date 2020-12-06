@@ -46,7 +46,6 @@ import {
   registerUiCounterSavedObjectType,
   registerUiCountersRollups,
 } from './collectors';
-import { ConfigSchema } from '../config';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
