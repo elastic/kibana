@@ -59,7 +59,7 @@ export interface Route<
   TReturn
 > {
   endpoint: TEndpoint;
-  options?: RouteOptions;
+  options: RouteOptions;
   params?: TRouteParamsRT;
   handler: RouteHandler<TRouteParamsRT, TReturn>;
 }

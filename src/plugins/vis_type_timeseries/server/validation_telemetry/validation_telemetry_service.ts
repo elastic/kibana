@@ -83,7 +83,7 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
           await internalRepository.incrementCounter(
             'tsvb-validation-telemetry',
             'tsvb-validation-telemetry',
-            'failedRequests'
+            ['failedRequests']
           );
         } catch (e) {
           // swallow error, validation telemetry shouldn't fail anything else

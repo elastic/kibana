@@ -38,12 +38,15 @@ import {
   setRelativeRangeDatePicker as dispatchSetRelativeRangeDatePicker,
 } from '../../../common/store/inputs/actions';
 import {
-  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../../timelines/store/timeline/actions';
-import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
+import {
+  ColumnHeaderOptions,
+  TimelineModel,
+  TimelineTabs,
+} from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 import {
@@ -308,6 +311,7 @@ export const formatTimelineResultToModel = (
 };
 
 export interface QueryTimelineById<TCache> {
+  activeTimelineTab?: TimelineTabs;
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate?: boolean;
   graphEventId?: string;
@@ -326,6 +330,7 @@ export interface QueryTimelineById<TCache> {
 }
 
 export const queryTimelineById = <TCache>({
+  activeTimelineTab = TimelineTabs.query,
   apolloClient,
   duplicate = false,
   graphEventId = '',
@@ -369,6 +374,7 @@ export const queryTimelineById = <TCache>({
             notes,
             timeline: {
               ...timeline,
+              activeTab: activeTimelineTab,
               graphEventId,
               show: openTimeline,
               dateRange: { start: from, end: to },
@@ -424,15 +430,6 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     timeline.kqlQuery.filterQuery.kuery.expression !== ''
   ) {
     dispatch(
-      dispatchSetKqlFilterQueryDraft({
-        id,
-        filterQueryDraft: {
-          kind: 'kuery',
-          expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
-        },
-      })
-    );
-    dispatch(
       dispatchApplyKqlFilterQuery({
         id,
         filterQuery: {
@@ -447,8 +444,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   }
 
   if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
-    const getNewNoteId = (): string => uuid.v4();
-    const newNote = createNote({ newNote: ruleNote, getNewNoteId });
+    const newNote = createNote({ newNote: ruleNote });
     dispatch(dispatchUpdateNote({ note: newNote }));
     dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
   }

@@ -26,7 +26,7 @@ import {
   useGetOneAgentPolicy,
   useLink,
   useBreadcrumbs,
-  useCore,
+  useStartServices,
   useFleetStatus,
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
@@ -56,7 +56,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   const { refreshAgentStatus } = agentStatusRequest;
   const {
     application: { navigateToApp },
-  } = useCore();
+  } = useStartServices();
   const routeState = useIntraAppState<AgentPolicyDetailsDeployAgentAction>();
   const agentStatus = agentStatusRequest.data?.results;
   const queryParams = new URLSearchParams(useLocation().search);

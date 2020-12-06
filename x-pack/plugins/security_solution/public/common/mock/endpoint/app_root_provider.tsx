@@ -24,7 +24,7 @@ export const AppRootProvider = memo<{
   store: Store;
   history: History;
   coreStart: CoreStart;
-  depsStart: Pick<StartPlugins, 'data' | 'ingestManager'>;
+  depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
   children: ReactNode | ReactNode[];
 }>(
   ({

@@ -46,10 +46,11 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   history,
 }) => {
   const { isDeepLink } = extractQueryParams(search);
+  const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
   const {
     core: { getUrlForApp },
-    plugins: { ingestManager },
+    plugins: { fleet },
   } = useAppContext();
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
@@ -100,7 +101,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               defaultMessage="Data streams store time-series data across multiple indices."
             />
             {' ' /* We need this space to separate these two sentences. */}
-            {ingestManager ? (
+            {fleet ? (
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
                 defaultMessage="Get started with data streams in {link}."
@@ -108,12 +109,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
                   link: (
                     <EuiLink
                       data-test-subj="dataStreamsEmptyPromptTemplateLink"
-                      href={getUrlForApp('ingestManager')}
+                      href={getUrlForApp('fleet')}
                     >
                       {i18n.translate(
                         'xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerLink',
                         {
-                          defaultMessage: 'Ingest Manager',
+                          defaultMessage: 'Fleet',
                         }
                       )}
                     </EuiLink>
@@ -241,8 +242,8 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
         <DataStreamTable
           filters={
-            isDeepLink && dataStreamName !== undefined
-              ? `name="${attemptToURIDecode(dataStreamName)}"`
+            isDeepLink && decodedDataStreamName !== undefined
+              ? `name="${decodedDataStreamName}"`
               : ''
           }
           dataStreams={filteredDataStreams}
@@ -262,9 +263,9 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         If the user has been deep-linked, they'll expect to see the detail panel because it reflects
         the URL state, even if there are no data streams or if there was an error loading them.
       */}
-      {dataStreamName && (
+      {decodedDataStreamName && (
         <DataStreamDetailPanel
-          dataStreamName={attemptToURIDecode(dataStreamName)!}
+          dataStreamName={decodedDataStreamName}
           onClose={(shouldReload?: boolean) => {
             history.push(`/${Section.DataStreams}`);
 

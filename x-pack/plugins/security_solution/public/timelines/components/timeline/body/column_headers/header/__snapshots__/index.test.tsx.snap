@@ -31,7 +31,7 @@ exports[`Header renders correctly against snapshot 1`] = `
         }
       }
       isLoading={false}
-      onColumnRemoved={[MockFunction]}
+      onColumnRemoved={[Function]}
       sort={
         Array [
           Object {

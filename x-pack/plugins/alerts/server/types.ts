@@ -32,7 +32,6 @@ import {
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
-export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 declare module 'src/core/server' {
@@ -97,6 +96,7 @@ export interface AlertType<
   };
   actionGroups: ActionGroup[];
   defaultActionGroupId: ActionGroup['id'];
+  recoveryActionGroup?: ActionGroup;
   executor: ({
     services,
     params,

@@ -6,7 +6,6 @@
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
 import { Direction } from '../../../../../graphql/types';
 import * as i18n from '../translations';

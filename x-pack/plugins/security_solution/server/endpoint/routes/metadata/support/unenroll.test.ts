@@ -8,7 +8,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { findAllUnenrolledAgentIds } from './unenroll';
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
 import { AgentService } from '../../../../../../fleet/server/services';
-import { createMockAgentService } from '../../../mocks';
+import { createMockAgentService } from '../../../../../../fleet/server/mocks';
 import { Agent } from '../../../../../../fleet/common/types/models';
 
 describe('test find all unenrolled Agent id', () => {

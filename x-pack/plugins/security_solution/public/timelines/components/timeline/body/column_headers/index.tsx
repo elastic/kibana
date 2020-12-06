@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiCheckbox, EuiDataGridSorting, EuiToolTip } from '@elastic/eui';
-import { useColumnSorting } from '@elastic/eui/lib/components/datagrid/column_sorting';
+import {
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiDataGridSorting,
+  EuiToolTip,
+  useDataGridColumnSorting,
+} from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
@@ -23,13 +29,7 @@ import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_scr
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../../common/constants';
 import { useFullScreen } from '../../../../../common/containers/use_full_screen';
 import { TimelineId } from '../../../../../../common/types/timeline';
-import {
-  OnColumnRemoved,
-  OnColumnResized,
-  OnColumnsSorted,
-  OnSelectAll,
-  OnUpdateColumns,
-} from '../../events';
+import { OnSelectAll } from '../../events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
@@ -47,6 +47,7 @@ import { EventsSelect } from './events_select';
 import { ColumnHeader } from './column_header';
 
 import * as i18n from './translations';
+import { timelineActions } from '../../../../store/timeline';
 
 const SortingColumnsContainer = styled.div`
   .euiPopover .euiButtonEmpty .euiButtonContent .euiButtonEmpty__text {
@@ -60,16 +61,11 @@ interface Props {
   columnHeaders: ColumnHeaderOptions[];
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
-  onColumnRemoved: OnColumnRemoved;
-  onColumnResized: OnColumnResized;
-  onColumnsSorted: OnColumnsSorted;
   onSelectAll: OnSelectAll;
-  onUpdateColumns: OnUpdateColumns;
   showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
   sort: Sort[];
   timelineId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 interface DraggableContainerProps {
@@ -111,17 +107,13 @@ export const ColumnHeadersComponent = ({
   columnHeaders,
   isEventViewer = false,
   isSelectAllChecked,
-  onColumnRemoved,
-  onColumnResized,
-  onColumnsSorted,
   onSelectAll,
-  onUpdateColumns,
   showEventsSelect,
   showSelectAllCheckbox,
   sort,
   timelineId,
-  toggleColumn,
 }: Props) => {
+  const dispatch = useDispatch();
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const {
     timelineFullScreen,
@@ -177,31 +169,6 @@ export const ColumnHeadersComponent = ({
     [columnHeaders, setDraggingIndex]
   );
 
-  const onColumnSorted = useCallback(
-    ({ columnId, sortDirection }) => {
-      const headerIndex = sort.findIndex((col) => col.columnId === columnId);
-      if (headerIndex === -1) {
-        onColumnsSorted!([
-          ...sort,
-          {
-            columnId,
-            sortDirection,
-          },
-        ]);
-      } else {
-        onColumnsSorted!([
-          ...sort.slice(0, headerIndex),
-          {
-            columnId,
-            sortDirection,
-          },
-          ...sort.slice(headerIndex + 1),
-        ]);
-      }
-    },
-    [sort, onColumnsSorted]
-  );
-
   const ColumnHeaderList = useMemo(
     () =>
       columnHeaders.map((header, draggableIndex) => (
@@ -211,21 +178,10 @@ export const ColumnHeadersComponent = ({
           timelineId={timelineId}
           header={header}
           isDragging={draggingIndex === draggableIndex}
-          onColumnRemoved={onColumnRemoved}
-          onColumnSorted={onColumnSorted}
-          onColumnResized={onColumnResized}
           sort={sort}
         />
       )),
-    [
-      columnHeaders,
-      timelineId,
-      draggingIndex,
-      onColumnRemoved,
-      onColumnSorted,
-      onColumnResized,
-      sort,
-    ]
+    [columnHeaders, timelineId, draggingIndex, sort]
   );
 
   const fullScreen = useMemo(
@@ -261,15 +217,17 @@ export const ColumnHeadersComponent = ({
   );
 
   const onSortColumns = useCallback(
-    (cols: EuiDataGridSorting['columns']) => {
-      onColumnsSorted(
-        cols.map(({ id, direction }) => ({
-          columnId: id,
-          sortDirection: direction as SortDirection,
-        }))
-      );
-    },
-    [onColumnsSorted]
+    (cols: EuiDataGridSorting['columns']) =>
+      dispatch(
+        timelineActions.updateSort({
+          id: timelineId,
+          sort: cols.map(({ id, direction }) => ({
+            columnId: id,
+            sortDirection: direction as SortDirection,
+          })),
+        })
+      ),
+    [dispatch, timelineId]
   );
   const sortedColumns = useMemo(
     () => ({
@@ -287,7 +245,7 @@ export const ColumnHeadersComponent = ({
     () => columnHeaders.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.label ?? ch.id }), {}),
     [columnHeaders]
   );
-  const ColumnSorting = useColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
+  const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
 
   return (
     <EventsThead data-test-subj="column-headers">
@@ -316,9 +274,7 @@ export const ColumnHeadersComponent = ({
               columnHeaders={columnHeaders}
               data-test-subj="field-browser"
               height={FIELD_BROWSER_HEIGHT}
-              onUpdateColumns={onUpdateColumns}
               timelineId={timelineId}
-              toggleColumn={toggleColumn}
               width={FIELD_BROWSER_WIDTH}
             />
           </EventsTh>
@@ -380,16 +336,11 @@ export const ColumnHeaders = React.memo(
     prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
-    prevProps.onColumnRemoved === nextProps.onColumnRemoved &&
-    prevProps.onColumnResized === nextProps.onColumnResized &&
-    prevProps.onColumnsSorted === nextProps.onColumnsSorted &&
     prevProps.onSelectAll === nextProps.onSelectAll &&
-    prevProps.onUpdateColumns === nextProps.onUpdateColumns &&
     prevProps.showEventsSelect === nextProps.showEventsSelect &&
     prevProps.showSelectAllCheckbox === nextProps.showSelectAllCheckbox &&
     deepEqual(prevProps.sort, nextProps.sort) &&
     prevProps.timelineId === nextProps.timelineId &&
-    prevProps.toggleColumn === nextProps.toggleColumn &&
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
     deepEqual(prevProps.browserFields, nextProps.browserFields)
 );

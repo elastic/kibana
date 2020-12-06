@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pick } from 'lodash/fp';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { APP_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -16,6 +17,7 @@ import { setInsertTimeline } from '../../../timelines/store/timeline/actions';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 
 import { AllCasesModal } from './all_cases_modal';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 export interface UseAllCasesModalProps {
   timelineId: string;
@@ -34,8 +36,11 @@ export const useAllCasesModal = ({
 }: UseAllCasesModalProps): UseAllCasesModalReturnedValues => {
   const dispatch = useDispatch();
   const { navigateToApp } = useKibana().services.application;
-  const timeline = useShallowEqualSelector((state) =>
-    timelineSelectors.selectTimeline(state, timelineId)
+  const { graphEventId, savedObjectId, title } = useDeepEqualSelector((state) =>
+    pick(
+      ['graphEventId', 'savedObjectId', 'title'],
+      timelineSelectors.selectTimeline(state, timelineId) ?? timelineDefaults
+    )
   );
 
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -52,16 +57,14 @@ export const useAllCasesModal = ({
 
       dispatch(
         setInsertTimeline({
-          graphEventId: timeline.graphEventId ?? '',
+          graphEventId,
           timelineId,
-          timelineSavedObjectId: timeline.savedObjectId ?? '',
-          timelineTitle: timeline.title,
+          timelineSavedObjectId: savedObjectId,
+          timelineTitle: title,
         })
       );
     },
-    // dispatch causes unnecessary rerenders
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timeline, navigateToApp, onCloseModal, timelineId]
+    [onCloseModal, navigateToApp, dispatch, graphEventId, timelineId, savedObjectId, title]
   );
 
   const Modal: React.FC = useCallback(
