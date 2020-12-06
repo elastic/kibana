@@ -321,6 +321,7 @@ export function LayerPanel(
                         <div className="lnsLayerPanel__dimension">
                           <EuiLink
                             className="lnsLayerPanel__dimensionLink"
+                            data-test-subj="lnsLayerPanel-dimensionLink"
                             onClick={() => {
                               if (activeId) {
                                 setActiveDimension(initialActiveDimensionState);
@@ -485,7 +486,9 @@ export function LayerPanel(
                 layerId,
                 columnId: activeId!,
               });
-              props.updateDatasource(datasourceId, newState);
+              if (newState) {
+                props.updateDatasource(datasourceId, newState);
+              }
             }
             setActiveDimension(initialActiveDimensionState);
           }}
