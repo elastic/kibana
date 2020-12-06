@@ -71,7 +71,6 @@ describe('_installPackage', () => {
         categories: ['cloud', 'custom'],
         format_version: 'string',
         release: 'experimental',
-        license: 'basic',
         conditions: { kibana: { version: 'x.y.z' } },
         owner: { github: 'elastic/fleet' },
       },

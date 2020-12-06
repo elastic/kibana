@@ -30,7 +30,6 @@ describe('Fleet - packageToPackagePolicy', () => {
       },
     },
     status: installationStatuses.NotInstalled,
-    license: 'basic',
     release: 'experimental',
     owner: {
       github: 'elastic/fleet',
