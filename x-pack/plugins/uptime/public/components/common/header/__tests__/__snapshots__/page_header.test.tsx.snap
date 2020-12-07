@@ -107,7 +107,7 @@ Array [
 }
 
 <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
       class="euiFlexItem"
@@ -159,6 +159,38 @@ Array [
             Settings
           </span>
         </a>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            aria-label="Open alert context menu"
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            data-test-subj="xpack.uptime.alertsPopover.toggleButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                data-euiicon-type="arrowDown"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Alerts
+              </span>
+            </span>
+          </button>
+        </div>
       </div>
     </div>
     <div
@@ -377,7 +409,7 @@ Array [
 }
 
 <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
       class="euiFlexItem"
@@ -429,6 +461,38 @@ Array [
             Settings
           </span>
         </a>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            aria-label="Open alert context menu"
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            data-test-subj="xpack.uptime.alertsPopover.toggleButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                data-euiicon-type="arrowDown"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Alerts
+              </span>
+            </span>
+          </button>
+        </div>
       </div>
     </div>
     <div
@@ -647,7 +711,7 @@ Array [
 }
 
 <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
       class="euiFlexItem"
@@ -699,6 +763,38 @@ Array [
             Settings
           </span>
         </a>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            aria-label="Open alert context menu"
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            data-test-subj="xpack.uptime.alertsPopover.toggleButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                data-euiicon-type="arrowDown"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Alerts
+              </span>
+            </span>
+          </button>
+        </div>
       </div>
     </div>
     <div
