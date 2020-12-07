@@ -47,7 +47,6 @@ export const registerUpdateScriptedFieldRoute = (
           { unknowns: 'allow' }
         ),
         body: schema.object({
-          refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
           field: schema.object({
             ...fieldSpecSchemaFields,
 
@@ -77,11 +76,6 @@ export const registerUpdateScriptedFieldRoute = (
         );
         const id = req.params.id;
         const name = req.params.name;
-        const {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          refresh_fields = true,
-        } = req.body;
-
         const field = ({ ...req.body.field, name } as unknown) as FieldSpec;
 
         const indexPattern = await indexPatternsService.get(id);
@@ -104,9 +98,6 @@ export const registerUpdateScriptedFieldRoute = (
         });
 
         await indexPatternsService.updateSavedObject(indexPattern);
-        if (refresh_fields) {
-          await indexPatternsService.refreshFields(indexPattern);
-        }
 
         fieldObject = indexPattern.fields.getByName(field.name);
         if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);

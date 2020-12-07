@@ -43,32 +43,6 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    it('returns an error field object is not provided', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
-      const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
-        index_pattern: {
-          title,
-        },
-      });
-      const id = response1.body.index_pattern.id;
-      const response2 = await supertest
-        .post(`/api/index_patterns/index_pattern/${id}/scripted_field`)
-        .send({
-          refresh_fields: 123,
-          field: {
-            name: 'bar',
-            type: 'number',
-            scripted: false,
-          },
-        });
-
-      expect(response2.status).to.be(400);
-      expect(response2.body.statusCode).to.be(400);
-      expect(response2.body.message).to.be(
-        '[request body.refresh_fields]: expected value of type [boolean] but got [number]'
-      );
-    });
-
     it('returns an error when creating a non-scripted field', async () => {
       const title = `foo-${Date.now()}-${Math.random()}*`;
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({

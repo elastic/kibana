@@ -41,7 +41,6 @@ export const registerUpdateFieldsRoute = (
           { unknowns: 'allow' }
         ),
         body: schema.object({
-          refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
           fields: schema.recordOf(
             schema.string({
               minLength: 1,
@@ -72,11 +71,7 @@ export const registerUpdateFieldsRoute = (
           elasticsearchClient
         );
         const id = req.params.id;
-        const {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          refresh_fields = true,
-          fields,
-        } = req.body;
+        const { fields } = req.body;
         const fieldNames = Object.keys(fields);
 
         if (fieldNames.length < 1) {
@@ -114,10 +109,6 @@ export const registerUpdateFieldsRoute = (
         }
 
         await indexPatternsService.updateSavedObject(indexPattern);
-
-        if (refresh_fields) {
-          await indexPatternsService.refreshFields(indexPattern);
-        }
 
         return res.ok({
           headers: {

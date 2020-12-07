@@ -41,7 +41,6 @@ export const registerPutScriptedFieldRoute = (
           { unknowns: 'allow' }
         ),
         body: schema.object({
-          refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
           field: fieldSpecSchema,
         }),
       },
@@ -55,11 +54,7 @@ export const registerPutScriptedFieldRoute = (
           elasticsearchClient
         );
         const id = req.params.id;
-        const {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          refresh_fields = true,
-          field,
-        } = req.body;
+        const { field } = req.body;
 
         if (!field.scripted) {
           throw new Error('Only scripted fields can be put.');
@@ -79,9 +74,6 @@ export const registerPutScriptedFieldRoute = (
         });
 
         await indexPatternsService.updateSavedObject(indexPattern);
-        if (refresh_fields) {
-          await indexPatternsService.refreshFields(indexPattern);
-        }
 
         const fieldObject = indexPattern.fields.getByName(field.name);
         if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);

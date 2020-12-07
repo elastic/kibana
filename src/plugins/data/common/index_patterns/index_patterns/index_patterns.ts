@@ -454,9 +454,7 @@ export class IndexPatternsService {
   }
 
   /**
-   * Create a new index pattern and save it right away and make the default
-   * index pattern.
-   *
+   * Create a new index pattern and save it right away
    * @param spec
    * @param override Overwrite if existing index pattern exists.
    * @param skipFetchFields Whether to skip field refresh step.
