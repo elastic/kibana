@@ -73,7 +73,7 @@ export function TimeseriesChart({
   const history = useHistory();
   const { annotations } = useAnnotationsContext();
   const chartTheme = useChartTheme();
-  const { setPointerEvent, chartRef } = useChartPointerEventContext(id);
+  const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const { urlParams } = useUrlParams();
   const theme = useTheme();
 

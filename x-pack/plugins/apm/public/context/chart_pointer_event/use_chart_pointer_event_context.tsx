@@ -8,7 +8,7 @@ import React, { useContext, useEffect } from 'react';
 import { Chart } from '@elastic/charts';
 import { ChartPointerEventContext } from './chart_pointer_event_context';
 
-export function useChartPointerEventContext(chartId: string) {
+export function useChartPointerEventContext() {
   const context = useContext(ChartPointerEventContext);
 
   if (!context) {
@@ -19,10 +19,10 @@ export function useChartPointerEventContext(chartId: string) {
   const chartRef = React.createRef<Chart>();
 
   useEffect(() => {
-    if (pointerEvent && pointerEvent?.chartId !== chartId && chartRef.current) {
+    if (pointerEvent && chartRef.current) {
       chartRef.current.dispatchExternalPointerEvent(pointerEvent);
     }
-  }, [pointerEvent, chartRef, chartId]);
+  }, [pointerEvent, chartRef]);
 
   return { ...context, chartRef };
 }
