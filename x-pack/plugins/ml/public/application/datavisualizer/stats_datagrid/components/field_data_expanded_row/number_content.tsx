@@ -19,6 +19,7 @@ import {
   buildChartDataFromStats,
 } from '../../../index_based/components/field_data_card/metric_distribution_chart';
 import { TopValues } from '../../../index_based/components/field_data_card/top_values';
+import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 210;
@@ -82,16 +83,12 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
   ];
 
   const summaryTableTitle = i18n.translate('xpack.ml.fieldDataCard.cardNumber.summaryTableTitle', {
-    defaultMessage: 'SUMMARY',
+    defaultMessage: 'summary',
   });
   return (
     <EuiFlexGroup direction={'row'}>
       <EuiFlexItem>
-        <EuiText size="xs" color={'subdued'}>
-          <strong>
-            <span>{summaryTableTitle}</span>
-          </strong>
-        </EuiText>
+        <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
           compressed
           items={summaryTableItems}
@@ -104,14 +101,12 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
         <EuiFlexItem>
           <EuiFlexGroup direction={'column'} alignItems={'center'}>
             <EuiFlexItem>
-              <EuiText size="xs" color={'subdued'}>
-                <strong>
-                  <FormattedMessage
-                    id={'xpack.ml.fieldDataCard.cardNumber.topValuesTitle'}
-                    defaultMessage={'TOP VALUES'}
-                  />
-                </strong>
-              </EuiText>
+              <ExpandedRowFieldHeader>
+                <FormattedMessage
+                  id={'xpack.ml.fieldDataCard.cardNumber.topValuesTitle'}
+                  defaultMessage={'top values'}
+                />
+              </ExpandedRowFieldHeader>
             </EuiFlexItem>
             <EuiFlexItem>
               <TopValues stats={stats} fieldFormat={fieldFormat} barColor="primary" />
@@ -123,14 +118,12 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
         <EuiFlexItem>
           <EuiFlexGroup direction={'column'} alignItems={'center'}>
             <EuiFlexItem>
-              <EuiText size="xs" color={'subdued'}>
-                <strong>
-                  <FormattedMessage
-                    id={'xpack.ml.fieldDataCard.cardNumber.distributionTitle'}
-                    defaultMessage={'DISTRIBUTION'}
-                  />
-                </strong>
-              </EuiText>
+              <ExpandedRowFieldHeader>
+                <FormattedMessage
+                  id={'xpack.ml.fieldDataCard.cardNumber.distributionTitle'}
+                  defaultMessage={'distribution'}
+                />
+              </ExpandedRowFieldHeader>
             </EuiFlexItem>
 
             <Fragment>

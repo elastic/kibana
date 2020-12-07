@@ -4,19 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
   CENTER_ALIGNMENT,
   EuiButtonIcon,
   EuiIcon,
   EuiInMemoryTable,
-  EuiScreenReaderOnly,
   EuiText,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { FieldTypeIcon } from '../../components/field_type_icon';
 import { FieldVisConfig } from '../index_based/common';
@@ -27,6 +25,9 @@ import { DistinctValues } from './components/field_data_column/distinct_values';
 import { NumberContentPreview } from './components/field_data_column/number_content_preview';
 import { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
+
+const FIELD_NAME = 'fieldName';
+
 interface DataVisualizerDataGrid {
   items: FieldVisConfig[];
   pageState: DataVisualizerIndexBasedAppState;
@@ -40,7 +41,7 @@ function getItemIdToExpandedRowMap(
   items: FieldVisConfig[]
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
-    const item = items.find((fieldVisConfig) => fieldVisConfig.fieldName === fieldName);
+    const item = items.find((fieldVisConfig) => fieldVisConfig[FIELD_NAME] === fieldName);
     if (item !== undefined) {
       m[fieldName] = <DataVisualizerFieldExpandedRow item={item} />;
     }
@@ -54,6 +55,8 @@ export const DataVisualizerDataGrid = ({
   updatePageState,
 }: DataVisualizerDataGrid) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
+  const [expandAll, toggleExpandAll] = useState<boolean | undefined>();
+
   const { onTableChange, pagination, sorting } = useTableSettings<FieldVisConfig>(
     items,
     pageState,
@@ -83,35 +86,40 @@ export const DataVisualizerDataGrid = ({
 
   const expanderColumn: EuiTableComputedColumnType<FieldVisConfig> = {
     name: (
-      <EuiScreenReaderOnly>
-        <p>
-          <FormattedMessage
-            id="xpack.ml.datavisualizer.dataGrid.showDetailsColumn.screenReaderDescription"
-            defaultMessage="This column contains clickable controls for showing more details on each job"
-          />
-        </p>
-      </EuiScreenReaderOnly>
+      <EuiButtonIcon
+        onClick={() => toggleExpandAll(!expandAll)}
+        aria-label={
+          !expandAll
+            ? i18n.translate('xpack.ml.datavisualizer.dataGrid.expandDetailsForAllAriaLabel', {
+                defaultMessage: 'Expand details for all fields',
+              })
+            : i18n.translate('xpack.ml.datavisualizer.dataGrid.collapseDetailsForAllAriaLabel', {
+                defaultMessage: 'Collapse details for all fields',
+              })
+        }
+        iconType={expandAll ? 'arrowUp' : 'arrowDown'}
+      />
     ),
     align: RIGHT_ALIGNMENT,
     width: '40px',
     isExpander: true,
     render: (item: FieldVisConfig) => {
-      if (item.fieldName === undefined) return null;
+      if (item[FIELD_NAME] === undefined) return null;
       return (
         <EuiButtonIcon
           onClick={() => toggleDetails(item)}
           aria-label={
-            expandedRowItemIds.includes(item.fieldName)
+            expandedRowItemIds.includes(item[FIELD_NAME])
               ? i18n.translate('xpack.ml.datavisualizer.dataGrid.rowCollapse', {
                   defaultMessage: 'Hide details for {fieldName}',
-                  values: { fieldName: item.fieldName },
+                  values: { fieldName: item[FIELD_NAME] },
                 })
               : i18n.translate('xpack.ml.datavisualizer.dataGrid.rowExpand', {
                   defaultMessage: 'Show details for {fieldName}',
-                  values: { fieldName: item.fieldName },
+                  values: { fieldName: item[FIELD_NAME] },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedRowItemIds.includes(item[FIELD_NAME]) ? 'arrowUp' : 'arrowDown'}
         />
       );
     },
@@ -203,13 +211,19 @@ export const DataVisualizerDataGrid = ({
     },
   ];
 
-  const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, items);
+  const itemIdToExpandedRowMap = useMemo(() => {
+    let itemIds = expandedRowItemIds;
+    if (expandAll) {
+      itemIds = items.map((i) => i[FIELD_NAME]).filter((f) => f !== undefined) as string[];
+    }
+    return getItemIdToExpandedRowMap(itemIds, items);
+  }, [expandAll, items, expandedRowItemIds]);
 
   return (
     <div data-test-subj="mlCalendarTableContainer">
       <EuiInMemoryTable<FieldVisConfig>
         items={items}
-        itemId={'fieldName'}
+        itemId={FIELD_NAME}
         columns={columns}
         pagination={pagination}
         sorting={sorting}

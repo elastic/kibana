@@ -22,8 +22,8 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
   const examplesContent = examples.map((example, i) => {
     return (
       <EuiListGroupItem
-        style={{ padding: 0, justifyContent: 'center' }}
-        size="xs"
+        className="mlFieldDataCard__codeContent"
+        size="s"
         key={`example_${i}`}
         label={typeof example === 'string' ? example : JSON.stringify(example)}
       />
@@ -44,7 +44,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
         </span>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiListGroup flush={true} showToolTips={true}>
+      <EuiListGroup showToolTips={true} maxWidth={'s'} gutterSize={'none'} flush={true}>
         {examplesContent}
       </EuiListGroup>
     </div>

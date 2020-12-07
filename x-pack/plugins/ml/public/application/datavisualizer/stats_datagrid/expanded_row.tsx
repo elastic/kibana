@@ -57,10 +57,11 @@ export const DataVisualizerFieldExpandedRow = ({ item }: { item: FieldVisConfig 
   }
 
   return (
-    <div style={{ width: '100%' }}>
-      <div className="mlFieldDataCard__content" data-test-subj="mlFieldDataCardContent">
-        {loading === true ? <LoadingIndicator /> : getCardContent()}
-      </div>
+    <div
+      className="mlDataVisualizerFieldExpandedRow"
+      data-test-subj="mlDataVisualizerFieldExpandedRowContent"
+    >
+      {loading === true ? <LoadingIndicator /> : getCardContent()}
     </div>
   );
 };

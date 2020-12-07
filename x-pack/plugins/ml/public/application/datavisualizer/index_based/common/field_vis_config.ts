@@ -28,6 +28,11 @@ export interface FieldVisStats {
   cardinality?: number;
   count?: number;
   sampleCount?: number;
+  trueCount?: number;
+  falseCount?: number;
+  earliest?: any;
+  latest?: any;
+  documentCounts?: number;
   avg?: number;
   distribution?: {
     percentiles: Percentile[];

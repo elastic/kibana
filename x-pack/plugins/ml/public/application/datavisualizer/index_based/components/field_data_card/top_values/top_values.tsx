@@ -68,7 +68,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor }) => {
       {isTopValuesSampled === true && (
         <Fragment>
           <EuiSpacer size="xs" />
-          <EuiText size="xs">
+          <EuiText size="xs" textAlign={'center'}>
             <FormattedMessage
               id="xpack.ml.fieldDataCard.topValues.calculatedFromSampleDescription"
               defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
