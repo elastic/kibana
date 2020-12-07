@@ -53,9 +53,8 @@ export function TransactionBreakdownChartContents({
   const history = useHistory();
   const { annotations } = useAnnotationsContext();
   const chartTheme = useChartTheme();
-  const { chartRef, setPointerEvent } = useChartPointerEventContext(
-    'timeSpentBySpan'
-  );
+  const chartId = 'timeSpentBySpan';
+  const { chartRef, setPointerEvent } = useChartPointerEventContext(chartId);
   const { urlParams } = useUrlParams();
   const theme = useTheme();
   const { start, end } = urlParams;
@@ -69,7 +68,7 @@ export function TransactionBreakdownChartContents({
 
   return (
     <ChartContainer height={height} hasData={!!timeseries} status={fetchStatus}>
-      <Chart ref={chartRef} id="timeSpentBySpan">
+      <Chart ref={chartRef} id={chartId}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           showLegend
