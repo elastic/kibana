@@ -608,7 +608,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     return stateP;
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     const res = resW as ResponseType<typeof stateP.controlState>;
-    // If the write block is sucessfully in place, proceed to the next step.
+    // If the write block is successfully in place, proceed to the next step.
     if (Either.isRight(res)) {
       stateP = { ...stateP, controlState: 'CLONE_SOURCE_TO_TARGET' };
     } else if (Either.isLeft(res)) {
