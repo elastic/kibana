@@ -33,7 +33,6 @@ export const getPolicyDataForUpdate = (
   const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
 
   // trim custom malware notification string
-  // const malwareMessage = newPolicy.input[0].config.policy.value.windows.popup.malware.message.trim();
   return {
     ...newPolicy,
     inputs: (newPolicy as Immutable<NewPolicyData>).inputs.map((input) => ({
@@ -59,7 +58,6 @@ export const getPolicyDataForUpdate = (
       },
     })),
   };
-  // return newPolicy;
 };
 
 /**
