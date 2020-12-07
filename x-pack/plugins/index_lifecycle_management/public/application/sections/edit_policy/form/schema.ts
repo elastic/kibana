@@ -287,6 +287,14 @@ export const schema: FormSchema<FormInternal> = {
             serializer: serializers.stringToNumber,
           },
         },
+        searchable_snapshot: {
+          snapshot_repository: {
+            label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
+            validations: [
+              { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
+            ],
+          },
+        },
       },
     },
     delete: {
