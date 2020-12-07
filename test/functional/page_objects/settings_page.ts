@@ -366,9 +366,6 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await this.getIndexPatternIdFromUrl();
     }
 
-    async setLegacyDiscoverTable(value = true) {
-      // currently unused
-    }
     async clickAddNewIndexPatternButton() {
       await PageObjects.common.scrollKibanaBodyTop();
       await testSubjects.click('createIndexPatternButton');

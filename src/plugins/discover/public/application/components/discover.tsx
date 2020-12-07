@@ -55,14 +55,14 @@ export const DataGridMemoized = React.memo((props: DiscoverGridProps) => (
 ));
 
 export function Discover({
-  addColumn,
   fetch,
   fetchCounter,
-  fieldCounts,
   fetchError,
+  fieldCounts,
   histogramData,
   hits,
   indexPattern,
+  onAddColumn,
   onAddFilter,
   onChangeInterval,
   onRemoveColumn,
@@ -128,7 +128,7 @@ export function Discover({
                 fieldCounts={fieldCounts}
                 hits={rows}
                 indexPatternList={indexPatternList}
-                onAddField={addColumn}
+                onAddField={onAddColumn}
                 onAddFilter={onAddFilter}
                 onRemoveField={onRemoveColumn}
                 selectedIndexPattern={searchSource && searchSource.getField('index')}
@@ -273,7 +273,7 @@ export function Discover({
                               showTimeCol={Boolean(showTimeCol)}
                               services={services}
                               settings={state.grid}
-                              onAddColumn={addColumn}
+                              onAddColumn={onAddColumn}
                               onFilter={onAddFilter}
                               onRemoveColumn={onRemoveColumn}
                               onSetColumns={onSetColumns}

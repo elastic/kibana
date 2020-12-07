@@ -17,6 +17,7 @@
  * under the License.
  */
 import './discover.scss';
+
 import React, { useState, useRef } from 'react';
 import {
   EuiButtonEmpty,
@@ -62,7 +63,6 @@ import {
 import { DocViewFilterFn, ElasticSearchHit } from '../doc_views/doc_views_types';
 
 export interface DiscoverProps {
-  addColumn: (column: string) => void;
   fetch: () => void;
   fetchCounter: number;
   fetchError: Error;
@@ -71,6 +71,7 @@ export interface DiscoverProps {
   hits: number;
   indexPattern: IndexPattern;
   minimumVisibleRows: number;
+  onAddColumn: (column: string) => void;
   onAddFilter: DocViewFilterFn;
   onChangeInterval: (interval: string) => void;
   onMoveColumn: (columns: string, newIdx: number) => void;
@@ -113,7 +114,6 @@ export const SidebarMemoized = React.memo((props: DiscoverSidebarResponsiveProps
 ));
 
 export function DiscoverLegacy({
-  addColumn,
   fetch,
   fetchCounter,
   fieldCounts,
@@ -122,6 +122,7 @@ export function DiscoverLegacy({
   hits,
   indexPattern,
   minimumVisibleRows,
+  onAddColumn,
   onAddFilter,
   onChangeInterval,
   onMoveColumn,
@@ -191,7 +192,7 @@ export function DiscoverLegacy({
                 fieldCounts={fieldCounts}
                 hits={rows}
                 indexPatternList={indexPatternList}
-                onAddField={addColumn}
+                onAddField={onAddColumn}
                 onAddFilter={onAddFilter}
                 onRemoveField={onRemoveColumn}
                 selectedIndexPattern={searchSource && searchSource.getField('index')}
@@ -299,7 +300,7 @@ export function DiscoverLegacy({
                           className="dscTimechart"
                         >
                           {opts.chartAggConfigs && rows.length !== 0 && (
-                            <div data-test-subj="discoverChart">
+                            <div className="dscHistogram" data-test-subj="discoverChart">
                               <DiscoverHistogram
                                 chartData={histogramData}
                                 timefilterUpdateHandler={timefilterUpdateHandler}
@@ -333,7 +334,7 @@ export function DiscoverLegacy({
                               sort={state.sort || []}
                               searchDescription={opts.savedSearch.description}
                               searchTitle={opts.savedSearch.lastSavedTitle}
-                              onAddColumn={addColumn}
+                              onAddColumn={onAddColumn}
                               onFilter={onAddFilter}
                               onMoveColumn={onMoveColumn}
                               onRemoveColumn={onRemoveColumn}

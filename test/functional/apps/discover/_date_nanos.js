@@ -30,10 +30,7 @@ export default function ({ getService, getPageObjects }) {
   describe('date_nanos', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('date_nanos');
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'date-nanos',
-        'doc_table:legacy': true,
-      });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);

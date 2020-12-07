@@ -21,7 +21,6 @@ import { DiscoverLegacy } from './discover_legacy';
 
 export function createDiscoverLegacyDirective(reactDirective: any) {
   return reactDirective(DiscoverLegacy, [
-    ['addColumn', { watchDepth: 'reference' }],
     ['fetch', { watchDepth: 'reference' }],
     ['fetchCounter', { watchDepth: 'reference' }],
     ['fetchError', { watchDepth: 'reference' }],
@@ -30,6 +29,7 @@ export function createDiscoverLegacyDirective(reactDirective: any) {
     ['hits', { watchDepth: 'reference' }],
     ['indexPattern', { watchDepth: 'reference' }],
     ['minimumVisibleRows', { watchDepth: 'reference' }],
+    ['onAddColumn', { watchDepth: 'reference' }],
     ['onAddFilter', { watchDepth: 'reference' }],
     ['onChangeInterval', { watchDepth: 'reference' }],
     ['onMoveColumn', { watchDepth: 'reference' }],

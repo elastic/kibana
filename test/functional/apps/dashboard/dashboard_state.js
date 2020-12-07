@@ -32,8 +32,6 @@ export default function ({ getService, getPageObjects }) {
     'tileMap',
     'visChart',
     'timePicker',
-    'settings',
-    'common',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -48,8 +46,6 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.settings.setLegacyDiscoverTable();
-      await PageObjects.common.navigateToApp('dashboard');
     });
 
     after(async function () {

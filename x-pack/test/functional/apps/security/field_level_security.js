@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('security/flstest/data'); //( data)
       await esArchiver.load('security/flstest/kibana'); //(savedobject)
       await browser.setWindowSize(1600, 1000);
-      await PageObjects.settings.setLegacyDiscoverTable();
     });
 
     it('should add new role a_viewssnrole', async function () {

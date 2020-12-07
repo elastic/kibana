@@ -64,7 +64,7 @@ export class DiscoverEnhancedPlugin
 
   setup(
     core: CoreSetup<DiscoverEnhancedStartDependencies>,
-    { uiActions, share, discover }: DiscoverEnhancedSetupDependencies
+    { uiActions, share }: DiscoverEnhancedSetupDependencies
   ) {
     const start = createStartServicesGetter(core.getStartServices);
     const isSharePluginInstalled = !!share;
