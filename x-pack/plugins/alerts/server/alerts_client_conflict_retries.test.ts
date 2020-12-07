@@ -18,6 +18,7 @@ import { ActionsAuthorization } from '../../actions/server';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '../../../plugins/task_manager/server/task';
+import { RecoveredActionGroup } from '../common';
 
 let alertsClient: AlertsClient;
 
@@ -332,6 +333,7 @@ beforeEach(() => {
     name: 'Test',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'alerts',
   }));
@@ -341,6 +343,7 @@ beforeEach(() => {
     name: 'Test',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'alerts',
   });

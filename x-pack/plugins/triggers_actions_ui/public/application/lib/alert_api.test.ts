@@ -48,6 +48,7 @@ describe('loadAlertTypes', () => {
         },
         producer: ALERTS_FEATURE_ID,
         actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         defaultActionGroupId: 'default',
         authorizedConsumers: {},
       },

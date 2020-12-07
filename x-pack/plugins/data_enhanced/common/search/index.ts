@@ -5,4 +5,5 @@
  */
 
 export * from './types';
-export * from './es_search';
+export * from './poll_search';
+export * from './session';
