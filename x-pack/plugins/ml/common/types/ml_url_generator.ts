@@ -8,6 +8,8 @@ import { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/comm
 import { JobId } from './anomaly_detection_jobs/job';
 import { ML_PAGES } from '../constants/ml_url_generator';
 import { DataFrameAnalysisConfigType } from './data_frame_analytics';
+import { SearchQueryLanguage } from '../constants/search';
+import { ListingPageUrlState } from './common';
 
 type OptionalPageState = object | undefined;
 
@@ -182,7 +184,7 @@ export type DataFrameAnalyticsExplorationUrlState = MLPageState<
     jobId: JobId;
     analysisType: DataFrameAnalysisConfigType;
     globalState?: MlCommonGlobalState;
-    defaultIsTraining?: boolean;
+    queryText?: string;
     modelId?: string;
   }
 >;
@@ -202,6 +204,14 @@ export type FilterEditUrlState = MLPageState<
     globalState?: MlCommonGlobalState;
   }
 >;
+
+export type ExpandablePanels = 'analysis' | 'evaluation' | 'feature_importance' | 'results';
+
+export type ExplorationPageUrlState = {
+  queryText: string;
+  queryLanguage: SearchQueryLanguage;
+} & Pick<ListingPageUrlState, 'pageIndex' | 'pageSize'> &
+  { [key in ExpandablePanels]: boolean };
 
 /**
  * Union type of ML URL state based on page

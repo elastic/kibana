@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorTypes, CasesPatchRequest } from '../../../common/api';
+import { ConnectorTypes, CasesPatchRequest, CaseStatuses } from '../../../common/api';
 import {
   createMockSavedObjectsRepository,
   mockCaseNoConnectorId,
@@ -27,7 +27,7 @@ describe('update', () => {
         cases: [
           {
             id: 'mock-id-1',
-            status: 'closed' as const,
+            status: CaseStatuses.closed,
             version: 'WzAsMV0=',
           },
         ],
@@ -56,7 +56,7 @@ describe('update', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           id: 'mock-id-1',
           external_service: null,
-          status: 'closed',
+          status: CaseStatuses.closed,
           tags: ['defacement'],
           title: 'Super Bad Security Issue',
           totalComment: 0,
@@ -79,8 +79,8 @@ describe('update', () => {
               username: 'awesome',
             },
             action_field: ['status'],
-            new_value: 'closed',
-            old_value: 'open',
+            new_value: CaseStatuses.closed,
+            old_value: CaseStatuses.open,
           },
           references: [
             {
@@ -98,7 +98,7 @@ describe('update', () => {
         cases: [
           {
             id: 'mock-id-1',
-            status: 'open' as const,
+            status: CaseStatuses.open,
             version: 'WzAsMV0=',
           },
         ],
@@ -106,7 +106,10 @@ describe('update', () => {
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: [
-          { ...mockCases[0], attributes: { ...mockCases[0].attributes, status: 'closed' } },
+          {
+            ...mockCases[0],
+            attributes: { ...mockCases[0].attributes, status: CaseStatuses.closed },
+          },
           ...mockCases.slice(1),
         ],
       });
@@ -130,7 +133,7 @@ describe('update', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           id: 'mock-id-1',
           external_service: null,
-          status: 'open',
+          status: CaseStatuses.open,
           tags: ['defacement'],
           title: 'Super Bad Security Issue',
           totalComment: 0,
@@ -146,7 +149,7 @@ describe('update', () => {
         cases: [
           {
             id: 'mock-no-connector_id',
-            status: 'closed' as const,
+            status: CaseStatuses.closed,
             version: 'WzAsMV0=',
           },
         ],
@@ -177,7 +180,7 @@ describe('update', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
-          status: 'closed',
+          status: CaseStatuses.closed,
           tags: ['defacement'],
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
@@ -231,7 +234,7 @@ describe('update', () => {
           description: 'Oh no, a bad meanie going LOLBins all over the place!',
           external_service: null,
           title: 'Another bad one',
-          status: 'open',
+          status: CaseStatuses.open,
           tags: ['LOLBins'],
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: {
@@ -314,7 +317,7 @@ describe('update', () => {
         cases: [
           {
             id: 'mock-id-1',
-            status: 'open' as const,
+            status: CaseStatuses.open,
             version: 'WzAsMV0=',
           },
         ],

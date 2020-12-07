@@ -47,17 +47,12 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         .sort();
 
       updatePackagePolicy({
-        name:
-          // For Endpoint packages, the user must fill in the name, thus we don't attempt to generate
-          // a default one here.
-          // FIXME: Improve package policies name uniqueness - https://github.com/elastic/kibana/issues/72948
-          packageInfo.name !== 'endpoint'
-            ? `${packageInfo.name}-${
-                pkgPoliciesWithMatchingNames.length
-                  ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-                  : 1
-              }`
-            : '',
+        // FIXME: Improve package policies name uniqueness - https://github.com/elastic/kibana/issues/72948
+        name: `${packageInfo.name}-${
+          pkgPoliciesWithMatchingNames.length
+            ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
+            : 1
+        }`,
         package: {
           name: packageInfo.name,
           title: packageInfo.title,
@@ -148,6 +143,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 description: e.target.value,
               })
             }
+            data-test-subj="packagePolicyDescriptionInput"
           />
         </EuiFormRow>
         <EuiSpacer size="m" />

@@ -10,10 +10,15 @@ import {
   ILegacyClusterClient,
   IBasePath,
 } from '../../../../../src/core/server';
-import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
+import {
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
+  LOGOUT_REASON_QUERY_STRING_PARAMETER,
+  NEXT_URL_QUERY_STRING_PARAMETER,
+} from '../../common/constants';
 import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser } from '../../common/model';
-import type { AuthenticationProvider } from '../../common/types';
+import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
+import { shouldProviderUseLoginForm } from '../../common/model';
 import { SecurityAuditLogger, AuditServiceSetup, userLoginEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
@@ -199,11 +204,6 @@ export class Authenticator {
         client: this.options.clusterClient,
         logger: this.options.loggers.get('tokens'),
       }),
-      urls: {
-        loggedOut: options.config.authc.selector.enabled
-          ? `${options.basePath.serverBasePath}/login?msg=LOGGED_OUT`
-          : `${options.basePath.serverBasePath}/security/logged_out`,
-      },
     };
 
     this.providers = new Map(
@@ -218,6 +218,7 @@ export class Authenticator {
               ...providerCommonOptions,
               name,
               logger: options.loggers.get(type, name),
+              urls: { loggedOut: (request) => this.getLoggedOutURL(request, type) },
             }),
             this.options.config.authc.providers[type]?.[name]
           ),
@@ -232,6 +233,9 @@ export class Authenticator {
           ...providerCommonOptions,
           name: '__http__',
           logger: options.loggers.get(HTTPAuthenticationProvider.type),
+          urls: {
+            loggedOut: (request) => this.getLoggedOutURL(request, HTTPAuthenticationProvider.type),
+          },
         })
       );
     }
@@ -338,7 +342,9 @@ export class Authenticator {
     if (this.shouldRedirectToLoginSelector(request, existingSessionValue)) {
       this.logger.debug('Redirecting request to Login Selector.');
       return AuthenticationResult.redirectTo(
-        `${this.options.basePath.serverBasePath}/login?next=${encodeURIComponent(
+        `${
+          this.options.basePath.serverBasePath
+        }/login?${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
           `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
         )}${
           suggestedProviderName && !existingSessionValue
@@ -385,20 +391,17 @@ export class Authenticator {
     assertRequest(request);
 
     const sessionValue = await this.getSessionValue(request);
-    if (sessionValue) {
+    const suggestedProviderName =
+      sessionValue?.provider.name ??
+      request.url.searchParams.get(LOGOUT_PROVIDER_QUERY_STRING_PARAMETER);
+    if (suggestedProviderName) {
       await this.session.clear(request);
-      return this.providers
-        .get(sessionValue.provider.name)!
-        .logout(request, sessionValue.state ?? null);
-    }
 
-    const queryStringProviderName = (request.query as Record<string, string>)?.provider;
-    if (queryStringProviderName) {
-      // provider name is passed in a query param and sourced from the browser's local storage;
-      // hence, we can't assume that this provider exists, so we have to check it
-      const provider = this.providers.get(queryStringProviderName);
+      // Provider name may be passed in a query param and sourced from the browser's local storage;
+      // hence, we can't assume that this provider exists, so we have to check it.
+      const provider = this.providers.get(suggestedProviderName);
       if (provider) {
-        return provider.logout(request, null);
+        return provider.logout(request, sessionValue?.state ?? null);
       }
     } else {
       // In case logout is called and we cannot figure out what provider is supposed to handle it,
@@ -737,7 +740,7 @@ export class Authenticator {
     // redirect URL in the `next` parameter. Redirect URL provided in authentication result, if any,
     // always takes precedence over what is specified in `redirectURL` parameter.
     if (preAccessRedirectURL) {
-      preAccessRedirectURL = `${preAccessRedirectURL}?next=${encodeURIComponent(
+      preAccessRedirectURL = `${preAccessRedirectURL}?${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
         authenticationResult.redirectURL ||
           redirectURL ||
           `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
@@ -753,5 +756,31 @@ export class Authenticator {
           authResponseHeaders: authenticationResult.authResponseHeaders,
         })
       : authenticationResult;
+  }
+
+  /**
+   * Creates a logged out URL for the specified request and provider.
+   * @param request Request that initiated logout.
+   * @param providerType Type of the provider that handles logout.
+   */
+  private getLoggedOutURL(request: KibanaRequest, providerType: string) {
+    // The app that handles logout needs to know the reason of the logout and the URL we may need to
+    // redirect user to once they log in again (e.g. when session expires).
+    const searchParams = new URLSearchParams();
+    for (const [key, defaultValue] of [
+      [NEXT_URL_QUERY_STRING_PARAMETER, null],
+      [LOGOUT_REASON_QUERY_STRING_PARAMETER, 'LOGGED_OUT'],
+    ] as Array<[string, string | null]>) {
+      const value = request.url.searchParams.get(key) || defaultValue;
+      if (value) {
+        searchParams.append(key, value);
+      }
+    }
+
+    // Query string may contain the path where logout has been called or
+    // logout reason that login page may need to know.
+    return this.options.config.authc.selector.enabled || shouldProviderUseLoginForm(providerType)
+      ? `${this.options.basePath.serverBasePath}/login?${searchParams.toString()}`
+      : `${this.options.basePath.serverBasePath}/security/logged_out?${searchParams.toString()}`;
   }
 }

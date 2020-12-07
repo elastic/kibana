@@ -26,10 +26,21 @@ export function LayerSettings({
     return null;
   }
 
-  const a11yText = i18n.translate('xpack.lens.editLayerSettings', {
-    defaultMessage: 'Edit layer settings',
-  });
+  const a11yText = (chartType?: string) => {
+    if (chartType) {
+      return i18n.translate('xpack.lens.editLayerSettingsChartType', {
+        defaultMessage: 'Edit layer settings, {chartType}',
+        values: {
+          chartType,
+        },
+      });
+    }
+    return i18n.translate('xpack.lens.editLayerSettings', {
+      defaultMessage: 'Edit layer settings',
+    });
+  };
 
+  const contextMenuIcon = activeVisualization.getLayerContextMenuIcon?.(layerConfigProps);
   return (
     <EuiPopover
       id={`lnsLayerPopover_${layerId}`}
@@ -43,9 +54,9 @@ export function LayerSettings({
         >
           <ToolbarButton
             size="s"
-            iconType={activeVisualization.getLayerContextMenuIcon?.(layerConfigProps) || 'gear'}
-            aria-label={a11yText}
-            title={a11yText}
+            iconType={contextMenuIcon?.icon || 'gear'}
+            aria-label={a11yText(contextMenuIcon?.label || '')}
+            title={a11yText(contextMenuIcon?.label || '')}
             onClick={() => setIsOpen(!isOpen)}
             data-test-subj="lns_layer_settings"
           />

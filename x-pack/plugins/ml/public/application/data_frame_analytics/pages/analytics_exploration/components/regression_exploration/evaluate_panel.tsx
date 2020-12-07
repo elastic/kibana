@@ -222,6 +222,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   return (
     <>
       <ExpandableSection
+        urlStateKey={'evaluation'}
         dataTestId="RegressionEvaluation"
         title={
           <FormattedMessage

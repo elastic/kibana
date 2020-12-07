@@ -23,9 +23,14 @@ export const StateType = t.intersection([
       up: t.number,
       down: t.number,
     }),
-    monitor: t.partial({
-      name: t.string,
-    }),
+    monitor: t.intersection([
+      t.partial({
+        name: t.string,
+      }),
+      t.type({
+        type: t.string,
+      }),
+    ]),
   }),
   t.partial({
     tls: t.partial({

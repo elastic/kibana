@@ -17,7 +17,7 @@ import {
   RectCoordinate,
   TimeSeries,
 } from '../../typings/timeseries';
-import { IUrlParams } from '../context/UrlParamsContext/types';
+import { IUrlParams } from '../context/url_params_context/types';
 import { getEmptySeries } from '../components/shared/charts/helper/get_empty_series';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
 import { asDuration, asTransactionRate } from '../../common/utils/formatters';
@@ -30,10 +30,16 @@ export interface ITpmBucket {
   color: string;
 }
 
+export interface AnomalySeries {
+  scores: TimeSeries;
+  bounderies: TimeSeries;
+}
+
 export interface ITransactionChartData {
   tpmSeries?: ITpmBucket[];
   responseTimeSeries?: TimeSeries[];
   mlJobId: string | undefined;
+  anomalySeries?: AnomalySeries;
 }
 
 const INITIAL_DATA: Partial<TimeSeriesAPIResponse> = {
@@ -58,16 +64,35 @@ export function getTransactionCharts(
 
     transactionCharts.responseTimeSeries = getResponseTimeSeries({
       apmTimeseries,
+    });
+
+    transactionCharts.anomalySeries = getResponseTimeAnnomalySeries({
       anomalyTimeseries,
     });
   }
   return transactionCharts;
 }
 
+function getResponseTimeAnnomalySeries({
+  anomalyTimeseries,
+}: {
+  anomalyTimeseries: TimeSeriesAPIResponse['anomalyTimeseries'];
+}): AnomalySeries | undefined {
+  if (anomalyTimeseries) {
+    return {
+      bounderies: getAnomalyBoundariesSeries(
+        anomalyTimeseries.anomalyBoundaries
+      ),
+      scores: getAnomalyScoreSeries(anomalyTimeseries.anomalyScore),
+    };
+  }
+}
+
 export function getResponseTimeSeries({
   apmTimeseries,
-  anomalyTimeseries,
-}: TimeSeriesAPIResponse) {
+}: {
+  apmTimeseries: TimeSeriesAPIResponse['apmTimeseries'];
+}) {
   const { overallAvgDuration } = apmTimeseries;
   const { avg, p95, p99 } = apmTimeseries.responseTimes;
 
@@ -107,16 +132,6 @@ export function getResponseTimeSeries({
     },
   ];
 
-  if (anomalyTimeseries) {
-    // insert after Avg. series
-    series.splice(
-      1,
-      0,
-      getAnomalyBoundariesSeries(anomalyTimeseries.anomalyBoundaries),
-      getAnomalyScoreSeries(anomalyTimeseries.anomalyScore)
-    );
-  }
-
   return series;
 }
 
@@ -125,12 +140,9 @@ export function getAnomalyScoreSeries(data: RectCoordinate[]) {
     title: i18n.translate('xpack.apm.transactions.chart.anomalyScoreLabel', {
       defaultMessage: 'Anomaly score',
     }),
-    hideLegend: true,
-    hideTooltipValue: true,
     data,
-    type: 'areaMaxHeight',
-    color: 'none',
-    areaColor: rgba(theme.euiColorVis9, 0.1),
+    type: 'rectAnnotation',
+    color: theme.euiColorVis9,
   };
 }
 
@@ -142,12 +154,9 @@ function getAnomalyBoundariesSeries(data: Coordinate[]) {
         defaultMessage: 'Anomaly Boundaries',
       }
     ),
-    hideLegend: true,
-    hideTooltipValue: true,
     data,
     type: 'area',
-    color: 'none',
-    areaColor: rgba(theme.euiColorVis1, 0.1),
+    color: rgba(theme.euiColorVis1, 0.5),
   };
 }
 

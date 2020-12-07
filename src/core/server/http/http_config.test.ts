@@ -165,15 +165,15 @@ test('uses os.hostname() as default for server.name', () => {
   expect(validated.name).toEqual('kibana-hostname');
 });
 
-test('throws if xsrf.whitelist element does not start with a slash', () => {
+test('throws if xsrf.allowlist element does not start with a slash', () => {
   const httpSchema = config.schema;
   const obj = {
     xsrf: {
-      whitelist: ['/valid-path', 'invalid-path'],
+      allowlist: ['/valid-path', 'invalid-path'],
     },
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-    `"[xsrf.whitelist.1]: must start with a slash"`
+    `"[xsrf.allowlist.1]: must start with a slash"`
   );
 });
 

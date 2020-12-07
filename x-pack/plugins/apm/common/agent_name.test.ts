@@ -4,43 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  getFirstTransactionType,
-  isJavaAgentName,
-  isRumAgentName,
-} from './agent_name';
+import { isJavaAgentName, isRumAgentName } from './agent_name';
 
 describe('agent name helpers', () => {
-  describe('getFirstTransactionType', () => {
-    describe('with no transaction types', () => {
-      expect(getFirstTransactionType([])).toBeUndefined();
-    });
-
-    describe('with a non-rum agent', () => {
-      it('returns "request"', () => {
-        expect(getFirstTransactionType(['worker', 'request'], 'java')).toEqual(
-          'request'
-        );
-      });
-
-      describe('with no request types', () => {
-        it('returns the first type', () => {
-          expect(
-            getFirstTransactionType(['worker', 'shirker'], 'java')
-          ).toEqual('worker');
-        });
-      });
-    });
-
-    describe('with a rum agent', () => {
-      it('returns "page-load"', () => {
-        expect(
-          getFirstTransactionType(['http-request', 'page-load'], 'js-base')
-        ).toEqual('page-load');
-      });
-    });
-  });
-
   describe('isJavaAgentName', () => {
     describe('when the agent name is java', () => {
       it('returns true', () => {

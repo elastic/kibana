@@ -5,13 +5,7 @@
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { KibanaFeature } from '../../../features/server';
-import {
-  HttpResources,
-  IBasePath,
-  ILegacyClusterClient,
-  IRouter,
-  Logger,
-} from '../../../../../src/core/server';
+import { HttpResources, IBasePath, IRouter, Logger } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { Authentication } from '../authentication';
 import { AuthorizationServiceSetup } from '../authorization';
@@ -36,7 +30,6 @@ export interface RouteDefinitionParams {
   basePath: IBasePath;
   httpResources: HttpResources;
   logger: Logger;
-  clusterClient: ILegacyClusterClient;
   config: ConfigType;
   authc: Authentication;
   authz: AuthorizationServiceSetup;
