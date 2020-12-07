@@ -45,7 +45,7 @@ export function TransactionErrorRateChart({
     if (serviceName && start && end) {
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/transaction_groups/error_rate',
+          'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',
         params: {
           path: {
             serviceName,

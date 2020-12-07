@@ -11,6 +11,7 @@ import { HostsTableType } from '../../../../hosts/store/model';
 import { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
 import { TabNavigationProps } from '../tab_navigation/types';
 import { NetworkRouteType } from '../../../../network/pages/navigation/types';
+import { TimelineTabs } from '../../../../timelines/store/timeline/model';
 
 const setBreadcrumbsMock = jest.fn();
 const chromeMock = {
@@ -79,6 +80,7 @@ const getMockObject = (
   query: { query: '', language: 'kuery' },
   filters: [],
   timeline: {
+    activeTab: TimelineTabs.query,
     id: '',
     isOpen: false,
     graphEventId: '',
