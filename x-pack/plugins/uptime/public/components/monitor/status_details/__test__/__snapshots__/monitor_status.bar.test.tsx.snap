@@ -72,6 +72,14 @@ Array [
       class="euiDescriptionList__description c1"
       data-test-subj="monitor-page-title"
     />
+    <dt
+      class="euiDescriptionList__title c0"
+    >
+      Tags
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
+    />
   </dl>,
 ]
 `;
