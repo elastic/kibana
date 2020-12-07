@@ -28,6 +28,7 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   setPreferredSearchStrategyId: jest.fn(),
   setFields: jest.fn().mockReturnThis(),
   setField: jest.fn().mockReturnThis(),
+  removeField: jest.fn().mockReturnThis(),
   getId: jest.fn(),
   getFields: jest.fn(),
   getField: jest.fn(),

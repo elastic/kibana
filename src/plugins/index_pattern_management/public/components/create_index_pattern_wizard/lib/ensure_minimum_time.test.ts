@@ -38,7 +38,7 @@ describe('ensureMinimumTime', () => {
 
   it('resolves in the amount of time provided, at minimum', async (done) => {
     const startTime = new Date().getTime();
-    const promise = new Promise((resolve) => resolve());
+    const promise = new Promise<void>((resolve) => resolve());
     await ensureMinimumTime(promise, 100);
     const endTime = new Date().getTime();
     expect(endTime - startTime).toBeGreaterThanOrEqual(100);

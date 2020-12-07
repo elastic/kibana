@@ -7,11 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare function getShardTimeout(config: SharedGlobalConfig): {
-    timeout: string;
-} | {
-    timeout?: undefined;
-};
+export declare function getShardTimeout(config: SharedGlobalConfig): Pick<Search, 'timeout'>;
 ```
 
 ## Parameters
@@ -22,9 +18,5 @@ export declare function getShardTimeout(config: SharedGlobalConfig): {
 
 <b>Returns:</b>
 
-`{
-    timeout: string;
-} | {
-    timeout?: undefined;
-}`
+`Pick<Search, 'timeout'>`
 

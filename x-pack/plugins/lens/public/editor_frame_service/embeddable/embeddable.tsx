@@ -20,6 +20,7 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
+import { RenderMode } from 'src/plugins/expressions';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -43,6 +44,7 @@ import { IndexPatternsContract } from '../../../../../../src/plugins/data/public
 import { getEditPath, DOC_TYPE } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
+import { LensInspectorAdapters } from '../types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -53,6 +55,7 @@ export type LensByValueInput = {
 export type LensByReferenceInput = SavedObjectEmbeddableInput & EmbeddableInput;
 export type LensEmbeddableInput = (LensByValueInput | LensByReferenceInput) & {
   palette?: PaletteOutput;
+  renderMode?: RenderMode;
 };
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
@@ -82,6 +85,7 @@ export class Embeddable
   private subscription: Subscription;
   private autoRefreshFetchSubscription: Subscription;
   private isInitialized = false;
+  private activeData: LensInspectorAdapters | undefined;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -129,6 +133,10 @@ export class Embeddable
     }
   }
 
+  public getInspectorAdapters() {
+    return this.activeData;
+  }
+
   async initializeSavedVis(input: LensEmbeddableInput) {
     const attributes:
       | LensSavedObjectAttributes
@@ -173,6 +181,13 @@ export class Embeddable
     }
   }
 
+  private updateActiveData = (
+    data: unknown,
+    inspectorAdapters?: LensInspectorAdapters | undefined
+  ) => {
+    this.activeData = inspectorAdapters;
+  };
+
   /**
    *
    * @param {HTMLElement} domNode
@@ -192,6 +207,8 @@ export class Embeddable
         variables={input.palette ? { theme: { palette: input.palette } } : {}}
         searchSessionId={this.input.searchSessionId}
         handleEvent={this.handleEvent}
+        onData$={this.updateActiveData}
+        renderMode={input.renderMode}
       />,
       domNode
     );

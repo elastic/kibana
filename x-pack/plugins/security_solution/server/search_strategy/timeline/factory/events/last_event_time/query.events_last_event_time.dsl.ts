@@ -40,7 +40,7 @@ export const buildLastEventTimeQuery = ({
             index: indicesToQuery.network,
             ignoreUnavailable: true,
             body: {
-              ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+              ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               aggregations: {
                 last_seen_event: { max: { field: '@timestamp' } },
               },
@@ -58,7 +58,7 @@ export const buildLastEventTimeQuery = ({
             index: indicesToQuery.hosts,
             ignoreUnavailable: true,
             body: {
-              ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+              ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               aggregations: {
                 last_seen_event: { max: { field: '@timestamp' } },
               },
@@ -76,7 +76,7 @@ export const buildLastEventTimeQuery = ({
           index: indicesToQuery[indexKey],
           ignoreUnavailable: true,
           body: {
-            ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+            ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
             aggregations: {
               last_seen_event: { max: { field: '@timestamp' } },
             },

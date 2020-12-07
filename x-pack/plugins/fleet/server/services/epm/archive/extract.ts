@@ -69,7 +69,7 @@ export function getBufferExtractor(
 function yauzlFromBuffer(buffer: Buffer, opts: yauzl.Options): Promise<yauzl.ZipFile> {
   return new Promise((resolve, reject) =>
     yauzl.fromBuffer(buffer, opts, (err?: Error, handle?: yauzl.ZipFile) =>
-      err ? reject(err) : resolve(handle)
+      err ? reject(err) : resolve(handle!)
     )
   );
 }
@@ -80,7 +80,7 @@ function getZipReadStream(
 ): Promise<NodeJS.ReadableStream> {
   return new Promise((resolve, reject) =>
     zipfile.openReadStream(entry, (err?: Error, readStream?: NodeJS.ReadableStream) =>
-      err ? reject(err) : resolve(readStream)
+      err ? reject(err) : resolve(readStream!)
     )
   );
 }

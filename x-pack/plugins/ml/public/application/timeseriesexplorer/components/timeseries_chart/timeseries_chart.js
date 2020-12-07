@@ -395,13 +395,7 @@ class TimeseriesChartIntl extends Component {
 
   contextChartInitialized = false;
   drawContextChartSelection() {
-    const {
-      contextChartData,
-      contextChartSelected,
-      contextForecastData,
-      zoomFrom,
-      zoomTo,
-    } = this.props;
+    const { contextChartData, contextForecastData, zoomFrom, zoomTo } = this.props;
 
     if (contextChartData === undefined) {
       return;
@@ -455,10 +449,6 @@ class TimeseriesChartIntl extends Component {
           new Date(contextXScaleDomain[0]),
           new Date(contextXScaleDomain[1])
         );
-        if (this.contextChartInitialized === false) {
-          this.contextChartInitialized = true;
-          contextChartSelected({ from: contextXScaleDomain[0], to: contextXScaleDomain[1] });
-        }
       }
     }
   }

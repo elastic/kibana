@@ -5,9 +5,11 @@
  */
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { storiesOf, addDecorator } from '@storybook/react';
+import { addDecorator, storiesOf } from '@storybook/react';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiCheckbox, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
+
+import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 
 import { ConfigForm } from '.';
 
@@ -18,21 +20,24 @@ addDecorator((storyFn) => (
 storiesOf('PolicyDetails/ConfigForm', module)
   .add('One OS', () => {
     return (
-      <ConfigForm type="Type 1" supportedOss={['windows']}>
+      <ConfigForm type="Type 1" supportedOss={[OperatingSystem.WINDOWS]}>
         {'Some content'}
       </ConfigForm>
     );
   })
   .add('Multiple OSs', () => {
     return (
-      <ConfigForm type="Type 1" supportedOss={['windows', 'macos', 'linux']}>
+      <ConfigForm
+        type="Type 1"
+        supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
+      >
         {'Some content'}
       </ConfigForm>
     );
   })
   .add('Complex content', () => {
     return (
-      <ConfigForm type="Type 1" supportedOss={['macos', 'linux']}>
+      <ConfigForm type="Type 1" supportedOss={[OperatingSystem.MAC, OperatingSystem.LINUX]}>
         <EuiText>
           {'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore ' +
             'et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut ' +
@@ -53,7 +58,7 @@ storiesOf('PolicyDetails/ConfigForm', module)
     const toggle = <EuiSwitch label={'Switch'} checked={true} onChange={() => {}} />;
 
     return (
-      <ConfigForm type="Type 1" supportedOss={['linux']} rightCorner={toggle}>
+      <ConfigForm type="Type 1" supportedOss={[OperatingSystem.LINUX]} rightCorner={toggle}>
         {'Some content'}
       </ConfigForm>
     );

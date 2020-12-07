@@ -31,7 +31,7 @@ import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
-import { SavedObjectsService } from './saved_objects';
+import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
 import { EnvironmentService, config as pidConfig } from './environment';
@@ -78,6 +78,9 @@ export class Server {
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
 
+  private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
+  private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
+
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
   private readonly logger: LoggerFactory;
@@ -109,6 +112,10 @@ export class Server {
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
     this.i18n = new I18nService(core);
+
+    this.savedObjectsStartPromise = new Promise((resolve) => {
+      this.resolveSavedObjectsStartPromise = resolve;
+    });
   }
 
   public async setup() {
@@ -124,7 +131,7 @@ export class Server {
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
     // rely on dev server to validate config, don't validate in the parent process
-    if (!this.env.isDevClusterMaster) {
+    if (!this.env.isDevCliParent) {
       // Immediately terminate in case of invalid configuration
       // This needs to be done after plugin discovery
       await this.configService.validate();
@@ -155,17 +162,23 @@ export class Server {
       http: httpSetup,
     });
 
+    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+
+    const coreUsageDataSetup = this.coreUsageData.setup({
+      metrics: metricsSetup,
+      savedObjectsStartPromise: this.savedObjectsStartPromise,
+    });
+
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
+      coreUsageData: coreUsageDataSetup,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({
       http: httpSetup,
       savedObjects: savedObjectsSetup,
     });
-
-    const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const statusSetup = await this.status.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -190,8 +203,6 @@ export class Server {
     const loggingSetup = this.logging.setup({
       loggingSystem: this.loggingSystem,
     });
-
-    this.coreUsageData.setup({ metrics: metricsSetup });
 
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
@@ -235,6 +246,8 @@ export class Server {
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
     });
+    await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
+
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();

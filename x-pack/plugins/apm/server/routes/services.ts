@@ -19,7 +19,7 @@ import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
-import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
+import { getThroughput } from '../lib/services/get_throughput';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -246,51 +246,32 @@ export const serviceErrorGroupsRoute = createRoute({
   },
 });
 
-export const serviceTransactionGroupsRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/overview_transaction_groups',
+export const serviceThroughputRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/throughput',
   params: t.type({
-    path: t.type({ serviceName: t.string }),
+    path: t.type({
+      serviceName: t.string,
+    }),
     query: t.intersection([
-      rangeRt,
+      t.type({ transactionType: t.string }),
       uiFiltersRt,
-      t.type({
-        size: toNumberRt,
-        numBuckets: toNumberRt,
-        pageIndex: toNumberRt,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-        sortField: t.union([
-          t.literal('latency'),
-          t.literal('throughput'),
-          t.literal('errorRate'),
-          t.literal('impact'),
-        ]),
-      }),
+      rangeRt,
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-
+    const { serviceName } = context.params.path;
+    const { transactionType } = context.params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
-    const {
-      path: { serviceName },
-      query: { size, numBuckets, pageIndex, sortDirection, sortField },
-    } = context.params;
-
-    return getServiceTransactionGroups({
-      setup,
-      serviceName,
-      pageIndex,
+    return getThroughput({
       searchAggregatedTransactions,
-      size,
-      sortDirection,
-      sortField,
-      numBuckets,
+      serviceName,
+      setup,
+      transactionType,
     });
   },
 });

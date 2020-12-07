@@ -20,7 +20,7 @@ export function getMonitoringUsageCollector(
   config: MonitoringConfig,
   legacyEsClient: ILegacyClusterClient
 ) {
-  return usageCollection.makeUsageCollector<MonitoringUsage, unknown, true>({
+  return usageCollection.makeUsageCollector<MonitoringUsage, true>({
     type: 'monitoring',
     isReady: () => true,
     schema: {

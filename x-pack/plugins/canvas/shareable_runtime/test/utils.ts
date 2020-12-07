@@ -21,7 +21,7 @@ export const takeMountedSnapshot = (mountedComponent: ReactWrapper<{}, {}, Compo
 };
 
 export const waitFor = (fn: () => boolean, stepMs = 100, failAfterMs = 1000) => {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     let waitForTimeout: NodeJS.Timeout;
 
     const tryCondition = () => {

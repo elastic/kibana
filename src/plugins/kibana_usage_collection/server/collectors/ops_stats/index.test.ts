@@ -31,7 +31,7 @@ import { loggingSystemMock } from '../../../../../core/server/mocks';
 const logger = loggingSystemMock.createLogger();
 
 describe('telemetry_ops_stats', () => {
-  let collector: Collector<unknown, unknown>;
+  let collector: Collector<unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeStatsCollector.mockImplementation((config) => {

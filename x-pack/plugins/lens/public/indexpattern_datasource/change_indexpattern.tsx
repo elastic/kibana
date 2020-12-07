@@ -6,8 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
+import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
 import { IndexPatternRef } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { ToolbarButtonProps, ToolbarButton } from '../shared_components';
@@ -63,7 +62,12 @@ export function ChangeIndexPattern({
               defaultMessage: 'Change index pattern',
             })}
           </EuiPopoverTitle>
-          <EuiSelectable
+          <EuiSelectable<{
+            key?: string;
+            label: string;
+            value?: string;
+            checked?: 'on' | 'off' | undefined;
+          }>
             {...selectableProps}
             searchable
             singleSelection="always"

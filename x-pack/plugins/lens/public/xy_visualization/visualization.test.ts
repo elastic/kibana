@@ -558,6 +558,30 @@ describe('xy_visualization', () => {
         const accessorConfig = breakdownConfig!.accessors[0];
         expect(typeof accessorConfig !== 'string' && accessorConfig.palette).toEqual(customColors);
       });
+
+      it('should respect the order of accessors coming from datasource', () => {
+        mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+          { columnId: 'c' },
+          { columnId: 'b' },
+        ]);
+        const paletteGetter = jest.spyOn(paletteServiceMock, 'get');
+        // overrite palette with a palette returning first blue, then green as color
+        paletteGetter.mockReturnValue({
+          id: 'default',
+          title: '',
+          getColors: jest.fn(),
+          toExpression: jest.fn(),
+          getColor: jest.fn().mockReturnValueOnce('blue').mockReturnValueOnce('green'),
+        });
+
+        const yConfigs = callConfigForYConfigs({});
+        expect(yConfigs?.accessors[0].columnId).toEqual('c');
+        expect(yConfigs?.accessors[0].color).toEqual('blue');
+        expect(yConfigs?.accessors[1].columnId).toEqual('b');
+        expect(yConfigs?.accessors[1].color).toEqual('green');
+
+        paletteGetter.mockClear();
+      });
     });
   });
 
@@ -773,6 +797,71 @@ describe('xy_visualization', () => {
           longMessage: 'Layer 1 requires a field for the Vertical axis.',
         },
       ]);
+    });
+  });
+
+  describe('#getWarningMessages', () => {
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource('testDatasource');
+
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'd' },
+        { columnId: 'a' },
+        { columnId: 'b' },
+        { columnId: 'c' },
+      ]);
+
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          columns: [
+            { id: 'a', name: 'A', meta: { type: 'number' } },
+            { id: 'b', name: 'B', meta: { type: 'number' } },
+          ],
+          rows: [
+            { a: 1, b: [2, 0] },
+            { a: 3, b: 4 },
+            { a: 5, b: 6 },
+            { a: 7, b: 8 },
+          ],
+        },
+      };
+    });
+    it('should return a warning when numeric accessors contain array', () => {
+      (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+        label: 'Label B',
+      });
+      const warningMessages = xyVisualization.getWarningMessages!(
+        {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: ['b'],
+            },
+          ],
+        },
+        frame
+      );
+      expect(warningMessages).toHaveLength(1);
+      expect(warningMessages && warningMessages[0]).toMatchInlineSnapshot(`
+        <React.Fragment>
+          <strong>
+            Label B
+          </strong>
+           contains array values. Your visualization may not render as expected.
+        </React.Fragment>
+      `);
     });
   });
 });

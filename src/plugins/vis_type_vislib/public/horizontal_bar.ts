@@ -42,11 +42,11 @@ import { toExpressionAst } from './to_ast';
 export const horizontalBarVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'horizontal_bar',
   title: i18n.translate('visTypeVislib.horizontalBar.horizontalBarTitle', {
-    defaultMessage: 'Horizontal Bar',
+    defaultMessage: 'Horizontal bar',
   }),
   icon: 'visBarHorizontal',
   description: i18n.translate('visTypeVislib.horizontalBar.horizontalBarDescription', {
-    defaultMessage: 'Assign a continuous variable to each axis',
+    defaultMessage: 'Present data in horizontal bars on an axis.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   toExpressionAst,

@@ -20,52 +20,18 @@ import { i18n } from '@kbn/i18n';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { VegaParser } from './data_model/vega_parser';
 import { VegaVisualizationDependencies } from './plugin';
-import { getNotifications, getData, getSavedObjects } from './services';
+import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
 
 export const createVegaVisualization = ({ getServiceSettings }: VegaVisualizationDependencies) =>
   class VegaVisualization {
     private readonly dataPlugin = getData();
-    private readonly savedObjectsClient = getSavedObjects();
     private vegaView: InstanceType<typeof VegaView> | null = null;
 
     constructor(
       private el: HTMLDivElement,
       private fireEvent: IInterpreterRenderHandlers['event']
     ) {}
-
-    /**
-     * Find index pattern by its title, of if not given, gets default
-     * @param {string} [index]
-     * @returns {Promise<string>} index id
-     */
-    async findIndex(index: string) {
-      const { indexPatterns } = this.dataPlugin;
-      let idxObj;
-
-      if (index) {
-        // @ts-expect-error
-        idxObj = indexPatterns.findByTitle(this.savedObjectsClient, index);
-        if (!idxObj) {
-          throw new Error(
-            i18n.translate('visTypeVega.visualization.indexNotFoundErrorMessage', {
-              defaultMessage: 'Index {index} not found',
-              values: { index: `"${index}"` },
-            })
-          );
-        }
-      } else {
-        idxObj = await indexPatterns.getDefault();
-        if (!idxObj) {
-          throw new Error(
-            i18n.translate('visTypeVega.visualization.unableToFindDefaultIndexErrorMessage', {
-              defaultMessage: 'Unable to find default index',
-            })
-          );
-        }
-      }
-      return idxObj.id;
-    }
 
     async render(visData: VegaParser) {
       const { toasts } = getNotifications();
@@ -112,7 +78,6 @@ export const createVegaVisualization = ({ getServiceSettings }: VegaVisualizatio
           serviceSettings,
           filterManager,
           timefilter,
-          findIndex: this.findIndex.bind(this),
         };
 
         if (vegaParser.useMap) {

@@ -8,6 +8,7 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 
+import { Filter } from 'src/plugins/data/common';
 import {
   SIGNALS_ID,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
@@ -29,6 +30,7 @@ import {
   RuleAlertAttributes,
   EqlSignalSearchResponse,
   BaseSignalHit,
+  ThresholdQueryBucket,
 } from './types';
 import {
   getGapBetweenRuns,
@@ -46,6 +48,7 @@ import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
 import { findThresholdSignals } from './find_threshold_signals';
+import { findPreviousThresholdSignals } from './find_previous_threshold_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
 import {
@@ -63,6 +66,7 @@ import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import { getIndexVersion } from '../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../routes/index/get_signals_template';
+import { filterEventsAgainstList } from './filter_events_with_list';
 
 export const signalRulesAlertType = ({
   logger,
@@ -239,9 +243,18 @@ export const signalRulesAlertType = ({
             anomalyThreshold,
             from,
             to,
+            exceptionItems: exceptionItems ?? [],
           });
 
-          const anomalyCount = anomalyResults.hits.hits.length;
+          const filteredAnomalyResults = await filterEventsAgainstList({
+            listClient,
+            exceptionsList: exceptionItems ?? [],
+            logger,
+            eventSearchResult: anomalyResults,
+            buildRuleMessage,
+          });
+
+          const anomalyCount = filteredAnomalyResults.hits.hits.length;
           if (anomalyCount) {
             logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
           }
@@ -254,7 +267,7 @@ export const signalRulesAlertType = ({
           } = await bulkCreateMlSignals({
             actions,
             throttle,
-            someResult: anomalyResults,
+            someResult: filteredAnomalyResults,
             ruleParams: params,
             services,
             logger,
@@ -273,15 +286,16 @@ export const signalRulesAlertType = ({
           });
           // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
           const shardFailures =
-            (anomalyResults._shards as typeof anomalyResults._shards & { failures: [] }).failures ??
-            [];
+            (filteredAnomalyResults._shards as typeof filteredAnomalyResults._shards & {
+              failures: [];
+            }).failures ?? [];
           const searchErrors = createErrorsFromShard({
             errors: shardFailures,
           });
           result = mergeReturns([
             result,
             createSearchAfterReturnType({
-              success: success && anomalyResults._shards.failed === 0,
+              success: success && filteredAnomalyResults._shards.failed === 0,
               errors: [...errors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
@@ -298,6 +312,46 @@ export const signalRulesAlertType = ({
             services,
             index: inputIndex,
             lists: exceptionItems ?? [],
+          });
+
+          const {
+            searchResult: previousSignals,
+            searchErrors: previousSearchErrors,
+          } = await findPreviousThresholdSignals({
+            indexPattern: [outputIndex],
+            from,
+            to,
+            services,
+            logger,
+            ruleId,
+            bucketByField: threshold.field,
+            timestampOverride,
+            buildRuleMessage,
+          });
+
+          previousSignals.aggregations.threshold.buckets.forEach((bucket: ThresholdQueryBucket) => {
+            esFilter.bool.filter.push(({
+              bool: {
+                must_not: {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          [threshold.field ?? 'signal.rule.rule_id']: bucket.key,
+                        },
+                      },
+                      {
+                        range: {
+                          [timestampOverride ?? '@timestamp']: {
+                            lte: bucket.lastSignalTimestamp.value_as_string,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            } as unknown) as Filter);
           });
 
           const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
@@ -349,7 +403,7 @@ export const signalRulesAlertType = ({
             }),
             createSearchAfterReturnType({
               success,
-              errors: [...errors, ...searchErrors],
+              errors: [...errors, ...previousSearchErrors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
             }),

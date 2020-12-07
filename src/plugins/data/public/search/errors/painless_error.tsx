@@ -25,11 +25,10 @@ import { ApplicationStart } from 'kibana/public';
 import { IEsError, isEsError } from './types';
 import { EsError } from './es_error';
 import { getRootCause } from './utils';
-import { IKibanaSearchRequest } from '..';
 
 export class PainlessError extends EsError {
   painlessStack?: string;
-  constructor(err: IEsError, request: IKibanaSearchRequest) {
+  constructor(err: IEsError) {
     super(err);
   }
 

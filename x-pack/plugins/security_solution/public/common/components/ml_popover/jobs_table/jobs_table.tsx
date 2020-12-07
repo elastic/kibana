@@ -57,9 +57,11 @@ const JobName = ({ id, description, basePath }: JobNameProps) => {
 
   return (
     <JobNameWrapper>
-      <EuiLink data-test-subj="jobs-table-link" href={jobUrl} target="_blank">
-        <EuiText size="s">{id}</EuiText>
-      </EuiLink>
+      <EuiText size="s">
+        <EuiLink data-test-subj="jobs-table-link" href={jobUrl} target="_blank">
+          {id}
+        </EuiLink>
+      </EuiText>
       <EuiText color="subdued" size="xs">
         {description.length > truncateThreshold
           ? `${description.substring(0, truncateThreshold)}...`

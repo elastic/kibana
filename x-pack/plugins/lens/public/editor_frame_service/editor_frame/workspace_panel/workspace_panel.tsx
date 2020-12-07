@@ -161,7 +161,7 @@ export function WorkspacePanel({
 
   const expression = useMemo(
     () => {
-      if (!configurationValidationError) {
+      if (!configurationValidationError || configurationValidationError.length === 0) {
         try {
           return buildExpression({
             visualization: activeVisualization,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { keys, pickBy } from 'lodash';
+import { keys, pickBy, isEmpty } from 'lodash';
 
 import { kea, MakeLogicType } from 'kea';
 
@@ -146,6 +146,7 @@ interface PreContentSourceResponse {
 }
 
 export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
+  path: ['enterprise_search', 'workplace_search', 'source_logic'],
   actions: {
     onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
     onUpdateSourceName: (name: string) => name,
@@ -485,8 +486,10 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       if (subdomain) params.append('subdomain', subdomain);
       if (indexPermissions) params.append('index_permissions', indexPermissions.toString());
 
+      const paramsString = !isEmpty(params) ? `?${params}` : '';
+
       try {
-        const response = await HttpLogic.values.http.get(`${route}?${params}`);
+        const response = await HttpLogic.values.http.get(`${route}${paramsString}`);
         actions.setSourceConnectData(response);
         successCallback(response.oauthUrl);
       } catch (e) {
@@ -601,7 +604,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       try {
         const response = await HttpLogic.values.http.post(route, {
-          body: JSON.stringify({ params }),
+          body: JSON.stringify({ ...params }),
         });
         actions.setCustomSourceData(response);
         successCallback();

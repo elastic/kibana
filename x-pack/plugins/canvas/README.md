@@ -149,7 +149,7 @@ yarn start
 
 #### Adding a server-side function
 
-> Server side functions may be deprecated in a later version of Kibana as they require using an API marked _legacy_
+> Server side functions may be deprecated in a later version of Kibana
 
 Now, let's add a function which runs on the server.
 
@@ -206,9 +206,7 @@ And then in our setup method, register it with the Expressions plugin:
 
 ```typescript
 setup(core: CoreSetup, plugins: CanvasExamplePluginsSetup) {
-  // .register requires serverFunctions and types, so pass an empty array
-  // if you don't have any custom types to register
-  plugins.expressions.__LEGACY.register({ serverFunctions, types: [] });
+  serverFunctions.forEach((f) => plugins.expressions.registerFunction(f));
 }
 ```
 

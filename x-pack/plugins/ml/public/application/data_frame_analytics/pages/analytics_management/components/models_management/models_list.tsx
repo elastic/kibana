@@ -313,14 +313,20 @@ export const ModelsList: FC = () => {
       onClick: async (item) => {
         if (item.metadata?.analytics_config === undefined) return;
 
+        const analysisType = getAnalysisType(
+          item.metadata?.analytics_config.analysis
+        ) as DataFrameAnalysisConfigType;
+
         const url = await urlGenerator.createUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
           pageState: {
             jobId: item.metadata?.analytics_config.id as string,
-            analysisType: getAnalysisType(
-              item.metadata?.analytics_config.analysis
-            ) as DataFrameAnalysisConfigType,
-            defaultIsTraining: true,
+            analysisType,
+            ...(analysisType === 'classification' || analysisType === 'regression'
+              ? {
+                  queryText: `${item.metadata?.analytics_config.dest.results_field}.is_training : true`,
+                }
+              : {}),
           },
         });
 

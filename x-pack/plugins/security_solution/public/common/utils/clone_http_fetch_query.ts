@@ -11,7 +11,7 @@ export function cloneHttpFetchQuery(query: Immutable<HttpFetchQuery>): HttpFetch
   const clone: HttpFetchQuery = {};
   for (const [key, value] of Object.entries(query)) {
     if (Array.isArray(value)) {
-      clone[key] = [...value];
+      clone[key] = [...value] as string[] | number[] | boolean[];
     } else {
       // Array.isArray is not removing ImmutableArray from the union.
       clone[key] = value as string | number | boolean;

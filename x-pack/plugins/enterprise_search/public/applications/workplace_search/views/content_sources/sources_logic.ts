@@ -14,7 +14,7 @@ import { HttpLogic } from '../../../shared/http';
 
 import {
   flashAPIErrors,
-  setSuccessMessage,
+  setQueuedSuccessMessage,
   FlashMessagesLogic,
 } from '../../../shared/flash_messages';
 
@@ -78,6 +78,7 @@ interface ISourcesServerResponse {
 }
 
 export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>({
+  path: ['enterprise_search', 'workplace_search', 'sources_logic'],
   actions: {
     setServerSourceStatuses: (statuses: ContentSourceStatus[]) => statuses,
     onInitializeSources: (serverResponse: ISourcesServerResponse) => serverResponse,
@@ -224,7 +225,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
         }
       );
 
-      setSuccessMessage(
+      setQueuedSuccessMessage(
         [
           successfullyConnectedMessage,
           additionalConfiguration ? additionalConfigurationMessage : '',

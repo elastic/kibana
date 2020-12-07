@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { HttpSetup, DocLinksStart, ToastsSetup } from 'kibana/public';
+import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ActionGroup, AlertActionParam } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
@@ -43,22 +43,17 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
   errors: IErrorObject;
-  docLinks: DocLinksStart;
-  http?: HttpSetup;
   readOnly: boolean;
   consumer?: string;
 }
 
 export interface ActionParamsProps<TParams> {
-  actionParams: TParams;
+  actionParams: Partial<TParams>;
   index: number;
   editAction: (key: string, value: AlertActionParam, index: number) => void;
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
-  docLinks: DocLinksStart;
-  http: HttpSetup;
-  toastNotifications: ToastsSetup;
   actionConnector?: ActionConnector;
 }
 
@@ -132,16 +127,19 @@ export interface ActionVariable {
   description: string;
 }
 
-export interface ActionVariables {
-  context?: ActionVariable[];
-  state: ActionVariable[];
-  params: ActionVariable[];
-}
+type AsActionVariables<Keys extends string> = {
+  [Req in Keys]: ActionVariable[];
+};
+export const REQUIRED_ACTION_VARIABLES = ['state', 'params'] as const;
+export const OPTIONAL_ACTION_VARIABLES = ['context'] as const;
+export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
+  Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
 
 export interface AlertType {
   id: string;
   name: string;
   actionGroups: ActionGroup[];
+  recoveryActionGroup: ActionGroup;
   actionVariables: ActionVariables;
   defaultActionGroupId: ActionGroup['id'];
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;

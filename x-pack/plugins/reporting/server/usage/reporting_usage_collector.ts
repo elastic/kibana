@@ -14,16 +14,6 @@ import { getReportingUsage } from './get_reporting_usage';
 import { ReportingUsageType } from './types';
 import { reportingSchema } from './schema';
 
-// places the reporting data as kibana stats
-const METATYPE = 'kibana_stats';
-
-interface XpackBulkUpload {
-  usage: {
-    xpack: {
-      reporting: ReportingUsageType;
-    };
-  };
-}
 /*
  * @return {Object} kibana usage stats type collection object
  */
@@ -34,7 +24,7 @@ export function getReportingUsageCollector(
   exportTypesRegistry: ExportTypesRegistry,
   isReady: () => Promise<boolean>
 ) {
-  return usageCollection.makeUsageCollector<ReportingUsageType, XpackBulkUpload>({
+  return usageCollection.makeUsageCollector<ReportingUsageType>({
     type: 'reporting',
     fetch: ({ callCluster }: CollectorFetchContext) => {
       const config = reporting.getConfig();
@@ -42,23 +32,6 @@ export function getReportingUsageCollector(
     },
     isReady,
     schema: reportingSchema,
-    /*
-     * Format the response data into a model for internal upload
-     * 1. Make this data part of the "kibana_stats" type
-     * 2. Organize the payload in the usage.xpack.reporting namespace of the data payload
-     */
-    formatForBulkUpload: (result: ReportingUsageType) => {
-      return {
-        type: METATYPE,
-        payload: {
-          usage: {
-            xpack: {
-              reporting: result,
-            },
-          },
-        },
-      };
-    },
   });
 }
 

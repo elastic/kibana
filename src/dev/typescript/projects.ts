@@ -27,7 +27,6 @@ export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'kibana/test' }),
   new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), { name: 'x-pack/test' }),
-  new Project(resolve(REPO_ROOT, 'src/test_utils/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/security_solution/cypress/tsconfig.json'), {
     name: 'security_solution/cypress',

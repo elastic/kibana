@@ -31,7 +31,6 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
   errors,
   consumer,
   readOnly,
-  docLinks,
 }) => {
   // TODO: remove incidentConfiguration later, when Case Resilient will move their fields to the level of action execution
   const { apiUrl, orgId, incidentConfiguration, isCaseOwned } = action.config;

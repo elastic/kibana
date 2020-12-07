@@ -2159,6 +2159,7 @@ export const formattedSearchStrategyResponse = {
           ],
           ignoreUnavailable: true,
           body: {
+            docvalue_fields: mockOptions.docValueFields,
             aggregations: {
               user_count: { cardinality: { field: 'user.name' } },
               group_by_users: {
@@ -2379,6 +2380,7 @@ export const expectedDsl = {
   ],
   ignoreUnavailable: true,
   body: {
+    docvalue_fields: mockOptions.docValueFields,
     aggregations: {
       user_count: { cardinality: { field: 'user.name' } },
       group_by_users: {

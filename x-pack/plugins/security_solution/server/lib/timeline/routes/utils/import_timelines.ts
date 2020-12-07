@@ -7,6 +7,7 @@
 import { has, chunk, omit } from 'lodash/fp';
 import { Readable } from 'stream';
 import uuid from 'uuid';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import {
   TimelineStatus,
@@ -21,7 +22,6 @@ import { createBulkErrorObject, BulkError } from '../../../detection_engine/rout
 import { createTimelines } from './create_timelines';
 import { FrameworkRequest } from '../../../framework';
 import { createTimelinesStreamFromNdJson } from '../../create_timelines_stream_from_ndjson';
-import { createPromiseFromStreams } from '../../../../../../../../src/core/server/utils';
 
 import { getTupleDuplicateErrorsAndUniqueTimeline } from './get_timelines_from_stream';
 import { CompareTimelinesStatus } from './compare_timelines_status';
