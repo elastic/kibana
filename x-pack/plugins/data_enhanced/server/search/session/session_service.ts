@@ -5,7 +5,6 @@
  */
 
 import moment, { Moment } from 'moment';
-import { orderBy } from 'lodash';
 import { from, Observable } from 'rxjs';
 import { first, switchMap } from 'rxjs/operators';
 import {
@@ -95,7 +94,7 @@ export class BackgroundSessionService implements ISessionService {
       .map((sessionId) => `"${sessionId}"`)
       .join(' | ');
     const res = await this.internalSavedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
-      perPage: INMEM_MAX_SESSIONS,
+      perPage: INMEM_MAX_SESSIONS, // If there are more sessions in memory, they will be synced when some items are cleared out.
       type: BACKGROUND_SESSION_TYPE,
       search: activeMappingIds,
       searchFields: ['sessionId'],
@@ -107,26 +106,6 @@ export class BackgroundSessionService implements ISessionService {
 
   private clearSessions = () => {
     const curTime = moment();
-
-    // Drop old items if map size exceeds max.
-    if (this.sessionSearchMap.size > INMEM_MAX_SESSIONS) {
-      const sortedSessionIds = orderBy(
-        Array.from(this.sessionSearchMap.keys()).map((sessionId) => {
-          return {
-            sessionId,
-            insertTime: this.sessionSearchMap.get(sessionId)!.insertTime,
-          };
-        }),
-        ['insertTime'],
-        ['asc']
-      );
-
-      while (this.sessionSearchMap.size > INMEM_MAX_SESSIONS) {
-        const { sessionId } = sortedSessionIds.shift()!;
-        this.logger.warn(`clearSessions | Map full | Dropping ${sessionId}`);
-        this.sessionSearchMap.delete(sessionId);
-      }
-    }
 
     this.sessionSearchMap.forEach((sessionInfo, sessionId) => {
       if (
