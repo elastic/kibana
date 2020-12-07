@@ -11,7 +11,6 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { CoreSetup, CoreStart } from '../../../../../src/core/public';
 
 import { FleetSetup } from '../../../fleet/public';
-import { IndexMgmtMetricsType } from '../types';
 import { UiMetricService, NotificationService, HttpService } from './services';
 import { ExtensionsService } from '../services';
 import { SharePluginStart } from '../../../../../src/plugins/share/public';
@@ -28,7 +27,7 @@ export interface AppDependencies {
     fleet?: FleetSetup;
   };
   services: {
-    uiMetricService: UiMetricService<IndexMgmtMetricsType>;
+    uiMetricService: UiMetricService;
     extensionsService: ExtensionsService;
     httpService: HttpService;
     notificationService: NotificationService;

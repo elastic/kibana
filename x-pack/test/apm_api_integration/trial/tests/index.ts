@@ -13,7 +13,10 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
     describe('Services', function () {
       loadTestFile(require.resolve('./services/annotations'));
       loadTestFile(require.resolve('./services/top_services.ts'));
-      loadTestFile(require.resolve('./services/transaction_groups_charts'));
+    });
+
+    describe('Transactions', function () {
+      loadTestFile(require.resolve('./transactions/transactions_charts.ts'));
     });
 
     describe('Settings', function () {

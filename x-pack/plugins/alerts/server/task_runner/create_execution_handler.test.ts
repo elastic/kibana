@@ -20,6 +20,10 @@ const alertType: AlertType = {
     { id: 'other-group', name: 'Other Group' },
   ],
   defaultActionGroupId: 'default',
+  recoveryActionGroup: {
+    id: 'recovered',
+    name: 'Recovered',
+  },
   executor: jest.fn(),
   producer: 'alerts',
 };
