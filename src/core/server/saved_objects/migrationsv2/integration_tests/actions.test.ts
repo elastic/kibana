@@ -217,7 +217,7 @@ describe('migration actions', () => {
     });
   });
 
-  describe('waitForUpdateByQueryTask', () => {
+  describe('waitForPickupUpdatedMappingsTask', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
         client,

@@ -24,49 +24,21 @@ import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { flow } from 'fp-ts/lib/function';
-import { ElasticsearchClient } from '../../elasticsearch';
-import { IndexMapping } from '../mappings';
-import { SavedObjectsRawDoc } from '../serialization';
-
-const retryResponseStatuses = [
-  503, // ServiceUnavailable
-  401, // AuthorizationException
-  403, // AuthenticationException
-  408, // RequestTimeout
-  410, // Gone
-];
-
-export interface RetryableEsClientError {
-  type: 'retryable_es_client_error';
-  message: string;
-  error?: Error;
-}
-
-export const catchRetryableEsClientErrors = (
-  e: EsErrors.ElasticsearchClientError
-): Either.Either<RetryableEsClientError, never> => {
-  if (
-    e instanceof EsErrors.NoLivingConnectionsError ||
-    e instanceof EsErrors.ConnectionError ||
-    e instanceof EsErrors.TimeoutError ||
-    (e instanceof EsErrors.ResponseError &&
-      (retryResponseStatuses.includes(e.statusCode) ||
-        e.body?.error?.type === 'snapshot_in_progress_exception'))
-  ) {
-    return Either.left({
-      type: 'retryable_es_client_error' as const,
-      message: e.message,
-      error: e,
-    });
-  } else {
-    throw e;
-  }
-};
+import { ElasticsearchClient } from '../../../elasticsearch';
+import { IndexMapping } from '../../mappings';
+import { SavedObjectsRawDoc } from '../../serialization';
+import {
+  catchRetryableEsClientErrors,
+  RetryableEsClientError,
+} from './catch_retryable_es_client_errors';
+export { RetryableEsClientError };
 
 export type FetchIndexResponse = Record<
   string,
   { aliases: Record<string, unknown>; mappings: IndexMapping; settings: unknown }
 >;
+
+const BATCH_SIZE = 100;
 
 /**
  * Fetches information about the given indices including aliases, mappings and
@@ -342,7 +314,7 @@ export const pickupUpdatedMappings = (
       index,
       // Update documents in batches of 100 documents at a time
       // TODO: profile performance to see how much difference `scroll_size` makes
-      scroll_size: 100,
+      scroll_size: BATCH_SIZE,
       // force a refresh so that we can query the updated index immediately
       // after the operation completes
       refresh: true,
@@ -387,8 +359,8 @@ export const reindex = (
         conflicts: 'proceed',
         source: {
           index: sourceIndex,
-          // Set batch size to 100
-          size: 100,
+          // Set batch size
+          size: BATCH_SIZE,
         },
         dest: {
           index: targetIndex,
@@ -716,7 +688,7 @@ export const searchForOutdatedDocuments = (
       // failures.
       // TODO (profile/tune): How much smaller can we make this number before
       // it starts impacting how long migrations take to perform?
-      size: 100,
+      size: BATCH_SIZE,
       body: {
         query,
       },
@@ -771,6 +743,14 @@ export const bulkIndex = (
       // system indices puts in place a hard control.
       require_alias: false,
       wait_for_active_shards: 'all',
+      // Wait for a refresh to happen before returning. This ensures that when
+      // this Kibana instance searches for outdated documents, it won't find
+      // documents that were already transformed by itself or another Kibna
+      // instance. However, this causes each OUTDATED_DOCUMENTS_SEARCH ->
+      // OUTDATED_DOCUMENTS_TRANSFORM cycle to take 1s so when batches are
+      // small performance will become a lot worse.
+      // The alternative is to use a search_after with either a tie_breaker
+      // field or using a Point In Time as a cursor to go through all documents.
       refresh: 'wait_for',
       filter_path: ['items.*.error'],
       body: docs.flatMap((doc) => {
@@ -792,10 +772,8 @@ export const bulkIndex = (
       }),
     })
     .then((res) => {
-      // TODO follow-up with es-distrib team: update operations can cause
-      // version conflicts even when no seq_no is specified, can we be sure
-      // that a bulk index version conflict can _only_ be caused because
-      // another Kibana has already successfully migrated this document?
+      // Filter out version_conflict_engine_exception since these just mean
+      // that another instance already updated these documents
       const errors = (res.body.items ?? []).filter(
         (item) => item.index.error.type !== 'version_conflict_engine_exception'
       );
