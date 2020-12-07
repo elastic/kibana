@@ -11,7 +11,6 @@ import { AliasTypeRequiredParameters } from './alias_type';
 import { TokenCountTypeRequiredParameters } from './token_count_type';
 import { ScaledFloatTypeRequiredParameters } from './scaled_float_type';
 import { DenseVectorRequiredParameters } from './dense_vector_type';
-import { RuntimeTypeRequiredParameters } from './runtime_type';
 
 export interface ComponentProps {
   allFields: NormalizedFields['byId'];
@@ -22,7 +21,6 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   token_count: TokenCountTypeRequiredParameters,
   scaled_float: ScaledFloatTypeRequiredParameters,
   dense_vector: DenseVectorRequiredParameters,
-  runtime: RuntimeTypeRequiredParameters,
 };
 
 export const getRequiredParametersFormForType = (
