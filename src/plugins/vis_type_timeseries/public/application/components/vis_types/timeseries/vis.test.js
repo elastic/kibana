@@ -42,8 +42,8 @@ describe('TimeseriesVisualization', () => {
 
     const setupTimeSeriesPropsWithFormatters = (...formatters) => {
       const series = formatters.map((formatter) => ({
-        id: id,
-        formatter: formatter,
+        id,
+        formatter,
         data: [],
       }));
 
@@ -51,12 +51,12 @@ describe('TimeseriesVisualization', () => {
         <TimeseriesVisualization
           getConfig={(key) => config[key]}
           model={{
-            id: id,
+            id,
             series,
           }}
           visData={{
             [id]: {
-              id: id,
+              id,
               series,
             },
           }}
