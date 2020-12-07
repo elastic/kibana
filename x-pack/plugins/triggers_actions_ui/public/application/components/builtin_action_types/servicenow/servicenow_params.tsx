@@ -46,13 +46,8 @@ const selectOptions = [
 const ServiceNowParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowActionParams>
 > = ({ actionParams, editAction, index, errors, messageVariables }) => {
-  const {
-    // short_description is a servicenow property
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    incident: { short_description, description, severity, urgency, impact },
-    comments,
-  } = useMemo(() => {
-    return (
+  const { incident, comments } = useMemo(
+    () =>
       actionParams.subActionParams ?? {
         incident: {
           short_description: null,
@@ -62,26 +57,22 @@ const ServiceNowParamsFields: React.FunctionComponent<
           impact: null,
         },
         comments: [],
-      }
-    );
-  }, [actionParams.subActionParams]);
+      },
+    [actionParams.subActionParams]
+  );
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
       const newProps =
         key !== 'comments'
           ? {
-              ...actionParams.subActionParams,
-              incident: {
-                ...(actionParams.subActionParams ? actionParams.subActionParams.incident : {}),
-                [key]: value,
-              },
+              incident: { ...incident, [key]: value },
+              comments,
             }
-          : { ...actionParams.subActionParams, [key]: value };
+          : { incident, [key]: value };
       editAction('subActionParams', newProps, index);
     },
-    [actionParams.subActionParams, editAction, index]
+    [comments, editAction, incident, index]
   );
-
   useEffect(() => {
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
@@ -122,7 +113,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
           data-test-subj="urgencySelect"
           hasNoInitialSelection
           options={selectOptions}
-          value={urgency ?? undefined}
+          value={incident.urgency ?? undefined}
           onChange={(e) => editSubActionProperty('urgency', e.target.value)}
         />
       </EuiFormRow>
@@ -141,7 +132,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
               data-test-subj="severitySelect"
               hasNoInitialSelection
               options={selectOptions}
-              value={severity ?? undefined}
+              value={incident.severity ?? undefined}
               onChange={(e) => editSubActionProperty('severity', e.target.value)}
             />
           </EuiFormRow>
@@ -159,7 +150,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
               data-test-subj="impactSelect"
               hasNoInitialSelection
               options={selectOptions}
-              value={impact ?? undefined}
+              value={incident.impact ?? undefined}
               onChange={(e) => editSubActionProperty('impact', e.target.value)}
             />
           </EuiFormRow>
@@ -169,7 +160,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
       <EuiFormRow
         fullWidth
         error={errors.short_description}
-        isInvalid={errors.short_description.length > 0 && short_description !== undefined}
+        isInvalid={errors.short_description.length > 0 && incident.short_description !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.titleFieldLabel',
           { defaultMessage: 'Short description (required)' }
@@ -180,7 +171,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'short_description'}
-          inputTargetValue={short_description ?? undefined}
+          inputTargetValue={incident.short_description ?? undefined}
           errors={errors.short_description as string[]}
         />
       </EuiFormRow>
@@ -189,7 +180,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         editAction={editSubActionProperty}
         messageVariables={messageVariables}
         paramsProperty={'description'}
-        inputTargetValue={description ?? undefined}
+        inputTargetValue={incident.description ?? undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.descriptionTextAreaFieldLabel',
           { defaultMessage: 'Description' }
@@ -198,7 +189,9 @@ const ServiceNowParamsFields: React.FunctionComponent<
       />
       <TextAreaWithMessageVariables
         index={index}
-        editAction={editSubActionProperty}
+        editAction={(key, value) => {
+          editSubActionProperty(key, [{ commentId: '1', comment: value }]);
+        }}
         messageVariables={messageVariables}
         paramsProperty={'comments'}
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}

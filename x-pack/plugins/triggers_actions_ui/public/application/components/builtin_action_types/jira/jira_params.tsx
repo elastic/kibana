@@ -39,10 +39,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const {
-    incident: { summary, description, issueType, priority, labels, parent },
-    comments,
-  } = useMemo(
+  const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ?? {
         incident: {
@@ -68,23 +65,20 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     http,
     toastNotifications: toasts,
     actionConnector,
-    issueType: issueType ?? '',
+    issueType: incident.issueType ?? '',
   });
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
       const newProps =
         key !== 'comments'
           ? {
-              ...actionParams.subActionParams,
-              incident: {
-                ...(actionParams.subActionParams ? actionParams.subActionParams.incident : {}),
-                [key]: value,
-              },
+              incident: { ...incident, [key]: value },
+              comments,
             }
-          : { ...actionParams.subActionParams, [key]: value };
+          : { incident, [key]: value };
       editAction('subActionParams', newProps, index);
     },
-    [actionParams.subActionParams, editAction, index]
+    [comments, editAction, incident, index]
   );
 
   const hasLabels = useMemo(() => Object.prototype.hasOwnProperty.call(fields, 'labels'), [fields]);
@@ -97,18 +91,18 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   ]);
   const hasParent = useMemo(() => Object.prototype.hasOwnProperty.call(fields, 'parent'), [fields]);
   const issueTypesSelectOptions: EuiSelectOption[] = useMemo(() => {
-    if (!issueType && issueTypes.length > 0) {
+    if (!incident.issueType && issueTypes.length > 0) {
       editSubActionProperty('issueType', issueTypes[0].id ?? '');
     }
     return issueTypes.map((type) => ({
       value: type.id ?? '',
       text: type.name ?? '',
     }));
-  }, [editSubActionProperty, issueType, issueTypes]);
+  }, [editSubActionProperty, incident.issueType, issueTypes]);
   const prioritiesSelectOptions: EuiSelectOption[] = useMemo(() => {
-    if (issueType != null && fields != null) {
+    if (incident.issueType != null && fields != null) {
       const priorities = fields.priority != null ? fields.priority.allowedValues : [];
-      if (!priority && priorities.length > 0) {
+      if (!incident.priority && priorities.length > 0) {
         editSubActionProperty('priority', priorities[0].id ?? '');
       }
       return priorities.map((p: { id: string; name: string }) => ({
@@ -117,11 +111,12 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
       }));
     }
     return [];
-  }, [editSubActionProperty, fields, issueType, priority]);
+  }, [editSubActionProperty, fields, incident.issueType, incident.priority]);
 
-  const labelOptions = useMemo(() => (labels ? labels.map((label: string) => ({ label })) : []), [
-    labels,
-  ]);
+  const labelOptions = useMemo(
+    () => (incident.labels ? incident.labels.map((label: string) => ({ label })) : []),
+    [incident.labels]
+  );
 
   useEffect(() => {
     if (!actionParams.subAction) {
@@ -158,7 +153,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             disabled={isLoadingIssueTypes || isLoadingFields}
             data-test-subj="issueTypeSelect"
             options={issueTypesSelectOptions}
-            value={issueType ?? undefined}
+            value={incident.issueType ?? undefined}
             onChange={(e) => editSubActionProperty('issueType', e.target.value)}
           />
         </EuiFormRow>
@@ -177,7 +172,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                   )}
                 >
                   <SearchIssues
-                    selectedValue={parent}
+                    selectedValue={incident.parent}
                     http={http}
                     toastNotifications={toasts}
                     actionConnector={actionConnector}
@@ -211,7 +206,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                       disabled={isLoadingIssueTypes || isLoadingFields}
                       data-test-subj="prioritySelect"
                       options={prioritiesSelectOptions}
-                      value={priority ?? undefined}
+                      value={incident.priority ?? undefined}
                       onChange={(e) => {
                         editSubActionProperty('priority', e.target.value);
                       }}
@@ -225,7 +220,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           <EuiFormRow
             fullWidth
             error={errors.summary}
-            isInvalid={errors.summary.length > 0 && summary !== undefined}
+            isInvalid={errors.summary.length > 0 && incident.summary !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.jira.summaryFieldLabel',
               {
@@ -238,7 +233,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               editAction={editSubActionProperty}
               messageVariables={messageVariables}
               paramsProperty={'summary'}
-              inputTargetValue={summary ?? undefined}
+              inputTargetValue={incident.summary ?? undefined}
               errors={errors.summary as string[]}
             />
           </EuiFormRow>
@@ -276,7 +271,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                         );
                       }}
                       onBlur={() => {
-                        if (!labels) {
+                        if (!incident.labels) {
                           editSubActionProperty('labels', []);
                         }
                       }}
@@ -295,7 +290,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               editAction={editSubActionProperty}
               messageVariables={messageVariables}
               paramsProperty={'description'}
-              inputTargetValue={description ?? undefined}
+              inputTargetValue={incident.description ?? undefined}
               label={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.jira.descriptionTextAreaFieldLabel',
                 {

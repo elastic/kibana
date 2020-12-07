@@ -37,10 +37,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const {
-    incident: { name, description, incidentTypes, severityCode },
-    comments,
-  } = useMemo(
+  const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ?? {
         incident: { name: null, description: null, incidentTypes: null, severityCode: null },
@@ -86,31 +83,28 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       (acc, type) => ({ ...acc, [type.id.toString()]: type.name }),
       {} as Record<string, string>
     );
-    return incidentTypes
-      ? incidentTypes
+    return incident.incidentTypes
+      ? incident.incidentTypes
           .map((type) => ({
             label: allIncidentTypesAsObject[type.toString()],
             value: type.toString(),
           }))
           .filter((type) => type.label != null)
       : [];
-  }, [allIncidentTypes, incidentTypes]);
+  }, [allIncidentTypes, incident.incidentTypes]);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
       const newProps =
         key !== 'comments'
           ? {
-              ...actionParams.subActionParams,
-              incident: {
-                ...(actionParams.subActionParams ? actionParams.subActionParams.incident : {}),
-                [key]: value,
-              },
+              incident: { ...incident, [key]: value },
+              comments,
             }
-          : { ...actionParams.subActionParams, [key]: value };
+          : { incident, [key]: value };
       editAction('subActionParams', newProps, index);
     },
-    [actionParams.subActionParams, editAction, index]
+    [comments, editAction, incident, index]
   );
 
   const incidentTypesOnChange = useCallback(
@@ -123,10 +117,10 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     [editSubActionProperty]
   );
   const incidentTypesOnBlur = useCallback(() => {
-    if (!incidentTypes) {
+    if (!incident.incidentTypes) {
       editSubActionProperty('incidentTypes', []);
     }
-  }, [editSubActionProperty, incidentTypes]);
+  }, [editSubActionProperty, incident.incidentTypes]);
 
   useEffect(() => {
     if (!actionParams.subAction) {
@@ -186,14 +180,14 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           isLoading={isLoadingSeverity}
           onChange={(e) => editSubActionProperty('severityCode', e.target.value)}
           options={severitySelectOptions}
-          value={severityCode ?? undefined}
+          value={incident.severityCode ?? undefined}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
         error={errors.name}
-        isInvalid={errors.name.length > 0 && name !== undefined}
+        isInvalid={errors.name.length > 0 && incident.name !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.nameFieldLabel',
           { defaultMessage: 'Name (required)' }
@@ -204,7 +198,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'name'}
-          inputTargetValue={name ?? undefined}
+          inputTargetValue={incident.name ?? undefined}
           errors={errors.name as string[]}
         />
       </EuiFormRow>
@@ -213,7 +207,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         editAction={editSubActionProperty}
         messageVariables={messageVariables}
         paramsProperty={'description'}
-        inputTargetValue={description ?? undefined}
+        inputTargetValue={incident.description ?? undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.descriptionTextAreaFieldLabel',
           { defaultMessage: 'Description' }

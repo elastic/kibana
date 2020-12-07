@@ -5,7 +5,6 @@
  */
 
 import {
-  ActionTypeExecutorResult,
   CaseExternalServiceRequest,
   CasePatchRequest,
   CasePostRequest,
