@@ -14,7 +14,7 @@ import {
   EuiToolTip,
   EuiIconTip,
 } from '@elastic/eui';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { useUxQuery } from '../hooks/useUxQuery';
 import { formatToSec } from '../UXMetrics/KeyUXMetrics';

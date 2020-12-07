@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import url from 'url';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
-import type { AuthenticationProvider } from '../../../../plugins/security/common/types';
+import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
 import { getStateAndNonce } from '../../fixtures/oidc/oidc_tools';
 import {
   getMutualAuthenticationResponseToken,

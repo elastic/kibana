@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import * as fetcherHook from '../../../../../../hooks/useFetcher';
+import * as fetcherHook from '../../../../../../hooks/use_fetcher';
 import { SelectableUrlList } from '../SelectableUrlList';
 import { render } from '../../../utils/test_helper';
 

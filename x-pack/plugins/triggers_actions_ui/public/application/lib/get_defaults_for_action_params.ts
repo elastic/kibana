@@ -4,21 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertActionParam, ResolvedActionGroup } from '../../../../alerts/common';
+import { AlertActionParam } from '../../../../alerts/common';
+import { EventActionOptions } from '../components/builtin_action_types/types';
 import { AlertProvidedActionVariables } from './action_variables';
 
-export const getDefaultsForActionParams = (
+export type DefaultActionParams = Record<string, AlertActionParam> | undefined;
+export type DefaultActionParamsGetter = (
   actionTypeId: string,
   actionGroupId: string
-): Record<string, AlertActionParam> | undefined => {
+) => DefaultActionParams;
+export const getDefaultsForActionParams = (
+  actionTypeId: string,
+  actionGroupId: string,
+  isRecoveryActionGroup: boolean
+): DefaultActionParams => {
   switch (actionTypeId) {
     case '.pagerduty':
       const pagerDutyDefaults = {
         dedupKey: `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`,
-        eventAction: 'trigger',
+        eventAction: EventActionOptions.TRIGGER,
       };
-      if (actionGroupId === ResolvedActionGroup.id) {
-        pagerDutyDefaults.eventAction = 'resolve';
+      if (isRecoveryActionGroup) {
+        pagerDutyDefaults.eventAction = EventActionOptions.RESOLVE;
       }
       return pagerDutyDefaults;
   }

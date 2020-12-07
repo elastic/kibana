@@ -114,8 +114,8 @@ describe('CaseView ', () => {
         data.title
       );
 
-      expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(
-        data.status
+      expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toEqual(
+        'Open'
       );
 
       expect(
@@ -136,11 +136,9 @@ describe('CaseView ', () => {
         data.createdBy.username
       );
 
-      expect(wrapper.contains(`[data-test-subj="case-view-closedAt"]`)).toBe(false);
-
-      expect(wrapper.find(`[data-test-subj="case-view-createdAt"]`).first().prop('value')).toEqual(
-        data.createdAt
-      );
+      expect(
+        wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
+      ).toEqual(data.createdAt);
 
       expect(
         wrapper
@@ -156,6 +154,7 @@ describe('CaseView ', () => {
       ...defaultUpdateCaseState,
       caseData: basicCaseClosed,
     }));
+
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -163,18 +162,18 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+
     await waitFor(() => {
-      expect(wrapper.contains(`[data-test-subj="case-view-createdAt"]`)).toBe(false);
-      expect(wrapper.find(`[data-test-subj="case-view-closedAt"]`).first().prop('value')).toEqual(
-        basicCaseClosed.closedAt
-      );
-      expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(
-        basicCaseClosed.status
+      expect(
+        wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
+      ).toEqual(basicCaseClosed.closedAt);
+      expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toEqual(
+        'Closed'
       );
     });
   });
 
-  it('should dispatch update state when button is toggled', async () => {
+  it('should dispatch update state when status is changed', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -182,8 +181,14 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+
     await waitFor(() => {
-      wrapper.find('[data-test-subj="toggle-case-status"]').first().simulate('click');
+      wrapper.find('[data-test-subj="case-view-status-dropdown"] button').first().simulate('click');
+      wrapper.update();
+      wrapper
+        .find('button[data-test-subj="case-view-status-dropdown-closed"]')
+        .first()
+        .simulate('click');
       expect(updateCaseProperty).toHaveBeenCalled();
     });
   });
@@ -208,26 +213,6 @@ describe('CaseView ', () => {
       expect(
         wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()
       ).toBeFalsy();
-    });
-  });
-
-  it('should display Toggle Status isLoading', async () => {
-    useUpdateCaseMock.mockImplementation(() => ({
-      ...defaultUpdateCaseState,
-      isLoading: true,
-      updateKey: 'status',
-    }));
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} />
-        </Router>
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="toggle-case-status"]').first().prop('isLoading')
-      ).toBeTruthy();
     });
   });
 

@@ -36,6 +36,8 @@ import { getTitle, ControlParams, CONTROL_TYPES, ControlParamsOptions } from '..
 import { IIndexPattern } from '../../../../data/public';
 import { InputControlVisDependencies } from '../../plugin';
 
+import './control_editor.scss';
+
 interface ControlEditorUiProps {
   controlIndex: number;
   controlParams: ControlParams;

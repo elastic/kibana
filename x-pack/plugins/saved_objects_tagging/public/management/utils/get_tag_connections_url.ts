@@ -12,6 +12,6 @@ import { TagWithRelations } from '../../../common/types';
  * already selected in the query/filter bar.
  */
 export const getTagConnectionsUrl = (tag: TagWithRelations, basePath: IBasePath) => {
-  const query = encodeURIComponent(`tag:(${tag.name})`);
+  const query = encodeURIComponent(`tag:("${tag.name}")`);
   return basePath.prepend(`/app/management/kibana/objects?initialQuery=${query}`);
 };

@@ -2,18 +2,11 @@
 
 exports[`Timeline should render with data 1`] = `
 <div
-  onScroll={[Function]}
-  onTouchEnd={[Function]}
-  onTouchMove={[Function]}
-  onTouchStart={[Function]}
->
-  <div
-    style={
-      Object {
-        "height": "100%",
-        "width": "100%",
-      }
+  style={
+    Object {
+      "height": "100%",
+      "width": "100%",
     }
-  />
-</div>
+  }
+/>
 `;
