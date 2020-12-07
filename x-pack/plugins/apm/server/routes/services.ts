@@ -20,6 +20,7 @@ import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_trans
 import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getThroughput } from '../lib/services/get_throughput';
+import { getServiceInstances } from '../lib/services/get_service_instances';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -272,6 +273,37 @@ export const serviceThroughputRoute = createRoute({
       serviceName,
       setup,
       transactionType,
+    });
+  },
+});
+
+export const serviceOverviewInstances = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/service_overview_instances',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      t.type({ transactionType: t.string }),
+      uiFiltersRt,
+      rangeRt,
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionType } = context.params.query;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getServiceInstances({
+      serviceName,
+      setup,
+      transactionType,
+      searchAggregatedTransactions,
     });
   },
 });
