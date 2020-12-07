@@ -21,12 +21,16 @@ import { savedObjectsRepositoryMock } from '../../../../core/server/mocks';
 import { storeReport } from './store_report';
 import { ReportSchemaType } from './schema';
 import { METRIC_TYPE } from '@kbn/analytics';
+import moment from 'moment';
 
 describe('store_report', () => {
+  const momentTimestamp = moment();
+  const date = momentTimestamp.format('DDMMYYYY');
+
   test('stores report for all types of data', async () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
     const report: ReportSchemaType = {
-      reportVersion: 1,
+      reportVersion: 2,
       userAgent: {
         'key-user-agent': {
           key: 'test-key',
@@ -35,18 +39,20 @@ describe('store_report', () => {
           userAgent: 'test-user-agent',
         },
       },
-      uiStatsMetrics: {
-        any: {
+      uiCounter: {
+        eventOneId: {
+          key: 'test-key',
+          type: METRIC_TYPE.LOADED,
+          appName: 'test-app-name',
+          eventName: 'test-event-name',
+          total: 1,
+        },
+        eventTwoId: {
           key: 'test-key',
           type: METRIC_TYPE.CLICK,
           appName: 'test-app-name',
           eventName: 'test-event-name',
-          stats: {
-            min: 1,
-            max: 2,
-            avg: 1.5,
-            sum: 3,
-          },
+          total: 2,
         },
       },
       application_usage: {
@@ -66,12 +72,25 @@ describe('store_report', () => {
         overwrite: true,
       }
     );
-    expect(savedObjectClient.incrementCounter).toHaveBeenCalledWith(
+    expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
+      1,
       'ui-metric',
       'test-app-name:test-event-name',
-      ['count']
+      [{ fieldName: 'count', incrementBy: 3 }]
     );
-    expect(savedObjectClient.bulkCreate).toHaveBeenCalledWith([
+    expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
+      2,
+      'ui-counter',
+      `test-app-name:${date}:${METRIC_TYPE.LOADED}:test-event-name`,
+      [{ fieldName: 'count', incrementBy: 1 }]
+    );
+    expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
+      3,
+      'ui-counter',
+      `test-app-name:${date}:${METRIC_TYPE.CLICK}:test-event-name`,
+      [{ fieldName: 'count', incrementBy: 2 }]
+    );
+    expect(savedObjectClient.bulkCreate).toHaveBeenNthCalledWith(1, [
       {
         type: 'application_usage_transactional',
         attributes: {
@@ -89,7 +108,7 @@ describe('store_report', () => {
     const report: ReportSchemaType = {
       reportVersion: 1,
       userAgent: void 0,
-      uiStatsMetrics: void 0,
+      uiCounter: void 0,
       application_usage: void 0,
     };
     await storeReport(savedObjectClient, report);
