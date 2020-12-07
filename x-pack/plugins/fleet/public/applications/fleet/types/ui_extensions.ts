@@ -28,13 +28,17 @@ export interface PackagePolicyEditExtensionComponentProps {
   newPolicy: NewPackagePolicy;
   /**
    * A callback that should be executed anytime a change to the Integration Policy needs to
-   * be reported back to the Fleet Policy Edit page
+   * be reported back to the Fleet Policy Edit page.
+   *
+   * **NOTE:**
+   * this callback will be recreated everytime the policy data changes, thus logic around its
+   * invocation should take that into consideration in order to avoid an endless loop.
    */
   onChange: (opts: {
     /** is current form state is valid */
     isValid: boolean;
     /** The updated Integration Policy to be merged back and included in the API call */
-    updatedPolicy: NewPackagePolicy;
+    updatedPolicy: Partial<NewPackagePolicy>;
   }) => void;
 }
 

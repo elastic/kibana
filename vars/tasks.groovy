@@ -4,8 +4,10 @@ def call(List<Closure> closures) {
 
 def check() {
   tasks([
+    kibanaPipeline.scriptTask('Quick Commit Checks', 'test/scripts/checks/commit/commit.sh'),
     kibanaPipeline.scriptTask('Check Telemetry Schema', 'test/scripts/checks/telemetry.sh'),
     kibanaPipeline.scriptTask('Check TypeScript Projects', 'test/scripts/checks/ts_projects.sh'),
+    kibanaPipeline.scriptTask('Check Jest Configs', 'test/scripts/checks/jest_configs.sh'),
     kibanaPipeline.scriptTask('Check Doc API Changes', 'test/scripts/checks/doc_api_changes.sh'),
     kibanaPipeline.scriptTask('Check Types', 'test/scripts/checks/type_check.sh'),
     kibanaPipeline.scriptTask('Check Bundle Limits', 'test/scripts/checks/bundle_limits.sh'),

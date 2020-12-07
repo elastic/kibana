@@ -120,6 +120,7 @@ describe('setupRequest', () => {
             },
           },
         },
+        ignore_unavailable: true,
         ignore_throttled: true,
       });
     });
