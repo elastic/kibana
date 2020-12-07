@@ -854,5 +854,8 @@
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
     "zlib": "^1.0.5"
+  },
+  "optionalDependencies": {
+    "fsevents": "^2.1.2"
   }
 }
