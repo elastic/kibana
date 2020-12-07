@@ -120,10 +120,20 @@ export async function runDockerGenerator(
   // created from the templates/build_docker_sh.template.js
   // and we just run that bash script
   await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
-  await exec(log, `./build_docker.sh`, [], {
-    cwd: dockerBuildDir,
-    level: 'info',
-  });
+
+  // Only build images on native targets
+  type HostArchitectureToDocker = Record<string, string>;
+  const hostTarget: HostArchitectureToDocker = {
+    x64: 'amd64',
+    arm64: 'arm64',
+  };
+  const buildImage = hostTarget[process.arch] === architecture;
+  if (buildImage) {
+    await exec(log, `./build_docker.sh`, [], {
+      cwd: dockerBuildDir,
+      level: 'info',
+    });
+  }
 
   // Pack Dockerfiles and create a target for them
   await bundleDockerFiles(config, log, scope);

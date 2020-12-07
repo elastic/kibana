@@ -31,7 +31,6 @@ export interface BuildOptions {
   createRpmPackage: boolean;
   createDebPackage: boolean;
   createDockerPackage: boolean;
-  createDockerARMPackage: boolean;
   createDockerUbiPackage: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
@@ -109,13 +108,10 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.createDockerPackage) {
     // control w/ --docker or --skip-docker-ubi or --skip-os-packages
     await run(Tasks.CreateDockerPackage);
+    await run(Tasks.CreateDockerARMPackage);
     if (options.createDockerUbiPackage) {
       await run(Tasks.CreateDockerUbiPackage);
     }
-  }
-
-  if (options.createDockerARMPackage) {
-    await run(Tasks.CreateDockerARMPackage);
   }
 
   /**
