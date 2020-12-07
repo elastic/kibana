@@ -120,6 +120,10 @@ export class Embeddable
 
     const input$ = this.getInput$();
     this.subscription = input$.subscribe((input) => this.onContainerStateChanged(input));
+
+    // Lens embeddable does not re-render when embeddable input changes in
+    // general, to improve performance. This line makes sure the Lens embeddable
+    // re-renders when anything in ".dynamicActions" (e.g. drilldowns) changes.
     input$
       .pipe(
         map((input) => input.enhancements?.dynamicActions),
@@ -129,6 +133,12 @@ export class Embeddable
       .subscribe((input) => {
         this.reload();
       });
+
+    // Lens embeddable does not re-render when embeddable input changes in
+    // general, to improve performance. This line makes sure the Lens embeddable
+    // re-renders when dashboard view mode switches between "view/edit". This is
+    // needed to see the changes to ".dynamicActions" (e.g. drilldowns) when
+    // dashboard's mode is toggled.
     input$
       .pipe(
         map((input) => input.viewMode),
