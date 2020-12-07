@@ -20,7 +20,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiSpacer,
 } from '@elastic/eui';
 
 import { SOURCES_PATH, getSourcesPath } from '../../../routes';

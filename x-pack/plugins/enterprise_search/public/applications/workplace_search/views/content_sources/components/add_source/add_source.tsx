@@ -15,7 +15,7 @@ import { Loading } from '../../../../../../applications/shared/loading';
 import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { staticSourceData } from '../../source_data';
 import { SourceLogic } from '../../source_logic';
-import { SourceDataItem, FeatureIds } from '../../../../types';
+import { SourceDataItem } from '../../../../types';
 import { SOURCE_ADDED_PATH, getSourcesPath } from '../../../../routes';
 
 import { AddSourceHeader } from './add_source_header';
