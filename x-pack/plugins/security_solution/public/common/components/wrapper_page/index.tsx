@@ -23,15 +23,15 @@ const Wrapper = styled.div`
     flex: 1 1 auto;
   }
 
-  &.siemWrapperPage--withTimeline {
-    padding-right: ${gutterTimeline};
-  }
-
   &.siemWrapperPage--noPadding {
     padding: 0;
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
+  }
+
+  &.siemWrapperPage--withTimeline {
+    padding-bottom: ${gutterTimeline};
   }
 `;
 

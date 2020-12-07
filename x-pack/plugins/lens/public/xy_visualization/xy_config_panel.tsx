@@ -51,6 +51,7 @@ import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration } from './axes_configuration';
 import { PalettePicker } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
+import { getSortedAccessors } from './to_expression';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -579,6 +580,9 @@ const ColorPicker = ({
   const currentColor = useMemo(() => {
     if (overwriteColor || !frame.activeData) return overwriteColor;
 
+    const datasource = frame.datasourceLayers[layer.layerId];
+    const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
+
     const colorAssignments = getColorAssignments(
       state.layers,
       { tables: frame.activeData },
@@ -587,11 +591,14 @@ const ColorPicker = ({
     const mappedAccessors = getAccessorColorConfig(
       colorAssignments,
       frame,
-      layer,
-      [accessor],
+      {
+        ...layer,
+        accessors: sortedAccessors.filter((sorted) => layer.accessors.includes(sorted)),
+      },
       paletteService
     );
-    return mappedAccessors[0].color;
+
+    return mappedAccessors.find((a) => a.columnId === accessor)?.color || null;
   }, [overwriteColor, frame, paletteService, state.layers, accessor, formatFactory, layer]);
 
   const [color, setColor] = useState(currentColor);
