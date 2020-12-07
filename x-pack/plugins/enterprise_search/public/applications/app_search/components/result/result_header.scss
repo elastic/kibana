@@ -11,7 +11,7 @@
   &--left {
     justify-content: flex-start;
 
-    & .appSearchResultHeaderItem {
+    .appSearchResultHeaderItem {
       margin-right: $euiSizeL;
     }
   }
@@ -19,7 +19,7 @@
   &--right {
     justify-content: flex-end;
 
-    & .appSearchResultHeaderItem + .appSearchResultHeaderItem {
+    .appSearchResultHeaderItem + .appSearchResultHeaderItem {
       margin-left: $euiSizeL;
     }
   }
