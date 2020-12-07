@@ -23,7 +23,6 @@ import {
   serviceAnnotationsCreateRoute,
   serviceErrorGroupsRoute,
   serviceThroughputRoute,
-  serviceTransactionGroupsRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -52,13 +51,13 @@ import {
   correlationsForFailedTransactionsRoute,
 } from './correlations';
 import {
-  transactionGroupsBreakdownRoute,
-  transactionGroupsChartsRoute,
-  transactionGroupsDistributionRoute,
+  transactionChartsBreakdownRoute,
+  transactionChartsRoute,
+  transactionChartsDistributionRoute,
+  transactionChartsErrorRateRoute,
   transactionGroupsRoute,
-  transactionSampleForGroupRoute,
-  transactionGroupsErrorRateRoute,
-} from './transaction_groups';
+  transactionGroupsOverviewRoute,
+} from './transactions/transactions_routes';
 import {
   errorGroupsLocalFiltersRoute,
   metricsLocalFiltersRoute,
@@ -122,7 +121,6 @@ const createApmApi = () => {
     .add(serviceAnnotationsCreateRoute)
     .add(serviceErrorGroupsRoute)
     .add(serviceThroughputRoute)
-    .add(serviceTransactionGroupsRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -152,13 +150,13 @@ const createApmApi = () => {
     .add(tracesByIdRoute)
     .add(rootTransactionByTraceIdRoute)
 
-    // Transaction groups
-    .add(transactionGroupsBreakdownRoute)
-    .add(transactionGroupsChartsRoute)
-    .add(transactionGroupsDistributionRoute)
+    // Transactions
+    .add(transactionChartsBreakdownRoute)
+    .add(transactionChartsRoute)
+    .add(transactionChartsDistributionRoute)
+    .add(transactionChartsErrorRateRoute)
     .add(transactionGroupsRoute)
-    .add(transactionSampleForGroupRoute)
-    .add(transactionGroupsErrorRateRoute)
+    .add(transactionGroupsOverviewRoute)
 
     // UI filters
     .add(errorGroupsLocalFiltersRoute)
