@@ -58,6 +58,8 @@ import { AlertActionParam, ALERTS_FEATURE_ID } from '../../../../../alerts/commo
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './alert_form.scss';
+import { recoveredActionGroupMessage } from '../../constants';
+import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 
 const ENTER_KEY = 13;
 
@@ -306,6 +308,19 @@ export const AlertForm = ({
           ? !item.alertTypeModel.requiresAppContext
           : item.alertType!.producer === alert.consumer
       );
+  const selectedAlertType = alert?.alertTypeId
+    ? alertTypesIndex?.get(alert?.alertTypeId)
+    : undefined;
+  const recoveryActionGroup = selectedAlertType?.recoveryActionGroup?.id;
+  const getDefaultActionParams = useCallback(
+    (actionTypeId: string, actionGroupId: string): Record<string, AlertActionParam> | undefined =>
+      getDefaultsForActionParams(
+        actionTypeId,
+        actionGroupId,
+        actionGroupId === recoveryActionGroup
+      ),
+    [recoveryActionGroup]
+  );
 
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
 
@@ -461,7 +476,7 @@ export const AlertForm = ({
       {AlertParamsExpressionComponent &&
       defaultActionGroupId &&
       alert.alertTypeId &&
-      alertTypesIndex?.has(alert.alertTypeId) ? (
+      selectedAlertType ? (
         <EuiErrorBoundary>
           <Suspense fallback={<CenterJustifiedSpinner />}>
             <AlertParamsExpressionComponent
@@ -473,7 +488,7 @@ export const AlertForm = ({
               setAlertProperty={setAlertProperty}
               alertsContext={alertsContext}
               defaultActionGroupId={defaultActionGroupId}
-              actionGroups={alertTypesIndex.get(alert.alertTypeId)!.actionGroups}
+              actionGroups={selectedAlertType.actionGroups}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -482,22 +497,30 @@ export const AlertForm = ({
       defaultActionGroupId &&
       alertTypeModel &&
       alert.alertTypeId &&
-      alertTypesIndex?.has(alert.alertTypeId) ? (
+      selectedAlertType ? (
         <ActionForm
           actions={alert.actions}
           setHasActionsDisabled={setHasActionsDisabled}
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          messageVariables={alertTypesIndex.get(alert.alertTypeId)!.actionVariables}
+          messageVariables={selectedAlertType.actionVariables}
           defaultActionGroupId={defaultActionGroupId}
-          actionGroups={alertTypesIndex.get(alert.alertTypeId)!.actionGroups}
+          actionGroups={selectedAlertType.actionGroups.map((actionGroup) =>
+            actionGroup.id === selectedAlertType.recoveryActionGroup.id
+              ? {
+                  ...actionGroup,
+                  omitOptionalMessageVariables: true,
+                  defaultActionMessage: recoveredActionGroupMessage,
+                }
+              : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
+          )}
+          getDefaultActionParams={getDefaultActionParams}
           setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
           setActionGroupIdByIndex={(group: string, index: number) =>
             setActionProperty('group', group, index)
           }
-          setAlertProperty={setActions}
+          setActions={setActions}
           setActionParamsProperty={setActionParamsProperty}
           actionTypeRegistry={actionTypeRegistry}
-          defaultActionMessage={alertTypeModel?.defaultActionMessage}
         />
       ) : null}
     </Fragment>
