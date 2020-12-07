@@ -457,6 +457,8 @@ async function deleteTransforms(
           destIndexPatternDeleted,
           destinationIndex,
         };
+        // No need to perform further delete attempts
+        continue;
       }
 
       // If user checks box to delete the destinationIndex associated with the job
