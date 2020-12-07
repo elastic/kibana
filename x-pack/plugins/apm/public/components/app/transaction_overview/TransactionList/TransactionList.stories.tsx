@@ -10,7 +10,7 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { TransactionList } from './';
 
-type TransactionGroup = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups'>['items'][0];
+type TransactionGroup = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups'>['items'][0];
 
 export default {
   title: 'app/TransactionOverview/TransactionList',

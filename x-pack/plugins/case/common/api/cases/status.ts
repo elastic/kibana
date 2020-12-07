@@ -8,6 +8,7 @@ import * as rt from 'io-ts';
 
 export const CasesStatusResponseRt = rt.type({
   count_open_cases: rt.number,
+  count_in_progress_cases: rt.number,
   count_closed_cases: rt.number,
 });
 
