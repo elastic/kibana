@@ -63,7 +63,7 @@ export function ServiceAlertTrigger(props: Props) {
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
-      {chartPreview && chartPreview}
+      {chartPreview}
       <EuiSpacer size="m" />
     </>
   );

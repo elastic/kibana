@@ -77,7 +77,7 @@ export function ChartPreview({
   return (
     <>
       <EuiSpacer size="m" />
-      <ChartWithHeight>
+      <ChartWithHeight data-test-subj="ChartPreview">
         <Settings tooltip="none" />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}
