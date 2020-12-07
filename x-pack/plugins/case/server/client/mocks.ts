@@ -6,7 +6,12 @@
 
 import { KibanaRequest } from 'kibana/server';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { CaseService, CaseConfigureService, CaseUserActionServiceSetup } from '../services';
+import {
+  CaseService,
+  CaseConfigureService,
+  CaseUserActionServiceSetup,
+  AlertService,
+} from '../services';
 import { CaseClient } from './types';
 import { authenticationMock } from '../routes/api/__fixtures__';
 import { createCaseClient } from '.';
@@ -16,6 +21,7 @@ export const createCaseClientMock = (): CaseClientMock => ({
   create: jest.fn(),
   update: jest.fn(),
   addComment: jest.fn(),
+  updateAlertsStatus: jest.fn(),
 });
 
 export const createCaseClientWithMockSavedObjectsClient = async (
@@ -39,6 +45,7 @@ export const createCaseClientWithMockSavedObjectsClient = async (
     postUserActions: jest.fn(),
     getUserActions: jest.fn(),
   };
+  const alertsService = new AlertService();
 
   return {
     client: createCaseClient({
@@ -47,6 +54,7 @@ export const createCaseClientWithMockSavedObjectsClient = async (
       caseService,
       caseConfigureService,
       userActionService,
+      alertsService,
     }),
     services: { userActionService },
   };
