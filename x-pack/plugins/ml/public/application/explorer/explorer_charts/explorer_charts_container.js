@@ -13,6 +13,8 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiToolTip,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import {
@@ -165,6 +167,7 @@ export const ExplorerChartsContainerUI = ({
   severity,
   tooManyBuckets,
   kibana,
+  errorMessages,
 }) => {
   const {
     services: {
@@ -177,33 +180,55 @@ export const ExplorerChartsContainerUI = ({
   } = kibana;
   const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
 
+  console.log('errorMessages', errorMessages);
   // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
   // If that's the case we trick it doing that with the following settings:
   const chartsWidth = chartsPerRow === 1 ? 'calc(100% - 20px)' : 'auto';
   const chartsColumns = chartsPerRow === 1 ? 0 : chartsPerRow;
 
   const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
-
-  return (
-    <EuiFlexGrid columns={chartsColumns}>
-      {seriesToPlot.length > 0 &&
-        seriesToPlot.map((series) => (
-          <EuiFlexItem
-            key={getChartId(series)}
-            className="ml-explorer-chart-container"
-            style={{ minWidth: chartsWidth }}
-          >
-            <ExplorerChartContainer
-              series={series}
-              severity={severity}
-              tooManyBuckets={tooManyBuckets}
-              wrapLabel={wrapLabel}
-              navigateToApp={navigateToApp}
-              mlUrlGenerator={mlUrlGenerator}
+  console.log('errorMessages', errorMessages);
+  const errorMessagesCallouts =
+    errorMessages && Object.keys(errorMessages).length > 0
+      ? Object.keys(errorMessages).map((errorType) => (
+          <EuiCallOut color={'warning'} size="s">
+            <FormattedMessage
+              id={'xpack.errorMessage'}
+              defaultMessage="You can't view records for {jobs} because there are nested terms aggregations in the datafeed and model plot is disabled."
+              values={{ jobs: [...errorMessages[errorType]].join(', ') }}
             />
-          </EuiFlexItem>
-        ))}
-    </EuiFlexGrid>
+          </EuiCallOut>
+        ))
+      : undefined;
+  return (
+    <>
+      {errorMessagesCallouts !== undefined && (
+        <>
+          {errorMessagesCallouts}
+          <EuiSpacer />
+        </>
+      )}
+
+      <EuiFlexGrid columns={chartsColumns}>
+        {seriesToPlot.length > 0 &&
+          seriesToPlot.map((series) => (
+            <EuiFlexItem
+              key={getChartId(series)}
+              className="ml-explorer-chart-container"
+              style={{ minWidth: chartsWidth }}
+            >
+              <ExplorerChartContainer
+                series={series}
+                severity={severity}
+                tooManyBuckets={tooManyBuckets}
+                wrapLabel={wrapLabel}
+                navigateToApp={navigateToApp}
+                mlUrlGenerator={mlUrlGenerator}
+              />
+            </EuiFlexItem>
+          ))}
+      </EuiFlexGrid>
+    </>
   );
 };
 

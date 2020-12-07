@@ -95,26 +95,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
     }
 
     // We don't currently support nested terms aggregation when model plot is not enabled
-    const hasDatafeed =
-      typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
-    if (hasDatafeed) {
-      const aggs = getDatafeedAggregations(job.datafeed_config);
-      if (aggs !== undefined) {
-        const aggBucketsName = getAggregationBucketsName(aggs);
-        if (aggBucketsName !== undefined) {
-          // if datafeed has any nested terms aggregations at all
-          const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
-          const termsField = findAggField(aggregations, 'terms', true);
-          if (
-            termsField !== undefined &&
-            Object.keys(termsField).length > 1 &&
-            job.model_plot_config?.enabled !== true
-          ) {
-            return false;
-          }
-        }
-      }
-    }
+    if (getDatafeedAggregationsErrorMessage(job) !== undefined) return false;
   }
 
   return isSourceDataChartable;
@@ -150,9 +131,9 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
   return isModelPlotChartable;
 }
 
-// Returns a reason to indicate why the job configuration is not supported
-// if the result is undefined, that means the single metric job should be viewable
-export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
+// Returns a reason to indicate why the datafeed aggregation configuration is not supported
+// if the result is undefined, that means the config is supported
+export function getDatafeedAggregationsErrorMessage(job: CombinedJob): string | undefined {
   const hasDatafeed =
     typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
   if (hasDatafeed) {
@@ -176,6 +157,14 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
       }
     }
   }
+  return;
+}
+
+// Returns a reason to indicate why the job configuration is not supported
+// if the result is undefined, that means the single metric job should be viewable
+export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
+  const datafeedAggregationError = getDatafeedAggregationsErrorMessage(job);
+  if (datafeedAggregationError !== undefined) return datafeedAggregationError;
 
   // only allow jobs with at least one detector whose function corresponds to
   // an ES aggregation which can be viewed in the single metric view and which

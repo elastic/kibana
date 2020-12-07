@@ -239,6 +239,7 @@ export class Explorer extends React.Component {
       selectedJobs,
       tableData,
     } = this.props.explorerState;
+    console.log('chartsData', chartsData);
     const { annotationsData, aggregations, error: annotationsError } = annotations;
 
     const jobSelectorProps = {
