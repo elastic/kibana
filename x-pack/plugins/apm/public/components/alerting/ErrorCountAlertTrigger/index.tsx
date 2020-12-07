@@ -105,7 +105,14 @@ export function ErrorCountAlertTrigger(props: Props) {
     />,
   ];
 
-  const chartPreview = <ChartPreview data={data} />;
+  const chartPreview = (
+    <ChartPreview
+      data={data}
+      threshold={threshold}
+      windowSize={windowSize}
+      windowUnit={windowUnit}
+    />
+  );
 
   return (
     <ServiceAlertTrigger

@@ -97,7 +97,7 @@ export function registerApmAlerts(
       return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
     },
     alertParamsExpression: lazy(
-      () => import('./TransactionErrorRateAlertTrigger')
+      () => import('./transaction_error_rate_alert_trigger')
     ),
     validate: () => ({
       errors: [],

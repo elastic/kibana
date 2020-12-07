@@ -134,8 +134,6 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       data={data}
       yTickFormat={(d: any) => asPercent(d, 1)}
       threshold={thresholdAsPercent}
-      windowSize={windowSize}
-      windowUnit={windowUnit}
     />
   );
 
