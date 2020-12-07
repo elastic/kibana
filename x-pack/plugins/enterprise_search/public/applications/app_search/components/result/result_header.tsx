@@ -22,7 +22,7 @@ export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta }) => {
   return (
     <div className="appSearchResultHeader">
       {showScore && (
-        <div className="appSearchResultHeaderColumn appSearchResultHeaderColumn--left">
+        <div className="appSearchResultHeader__column">
           <ResultHeaderItem
             data-test-subj="ResultScore"
             field="score"
@@ -32,7 +32,7 @@ export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta }) => {
         </div>
       )}
 
-      <div className="appSearchResultHeaderColumn appSearchResultHeaderColumn--right">
+      <div className="appSearchResultHeader__column">
         {showEngineLabel && (
           <ResultHeaderItem
             data-test-subj="ResultEngine"

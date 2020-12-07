@@ -3,23 +3,12 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: $euiSizeS;
-}
 
-.appSearchResultHeaderColumn {
-  display: flex;
-  flex-wrap: wrap;
+  &__column {
+    display: flex;
+    flex-wrap: wrap;
 
-  &--left {
-    justify-content: flex-start;
-
-    .appSearchResultHeaderItem {
-      margin-right: $euiSizeL;
-    }
-  }
-
-  &--right {
-    justify-content: flex-end;
-
+    & + &,
     .appSearchResultHeaderItem + .appSearchResultHeaderItem {
       margin-left: $euiSizeL;
     }
