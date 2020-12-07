@@ -10,20 +10,16 @@ import { getDefaultsForActionParams } from './get_defaults_for_action_params';
 
 describe('getDefaultsForActionParams', () => {
   test('pagerduty defaults', async () => {
-    expect(getDefaultsForActionParams(() => false)('.pagerduty', 'test')).toEqual({
+    expect(getDefaultsForActionParams('.pagerduty', 'test', false)).toEqual({
       dedupKey: `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`,
       eventAction: 'trigger',
     });
   });
 
   test('pagerduty defaults for recovered action group', async () => {
-    const isRecoveryActionGroup = jest.fn().mockReturnValue(true);
-    expect(
-      getDefaultsForActionParams(isRecoveryActionGroup)('.pagerduty', RecoveredActionGroup.id)
-    ).toEqual({
+    expect(getDefaultsForActionParams('.pagerduty', RecoveredActionGroup.id, true)).toEqual({
       dedupKey: `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`,
       eventAction: 'resolve',
     });
-    expect(isRecoveryActionGroup).toHaveBeenCalledWith(RecoveredActionGroup.id);
   });
 });
