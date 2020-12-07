@@ -14,7 +14,6 @@ export declare class IndexPatternsServiceProvider implements Plugin<void, IndexP
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [createIndexPatternsService(savedObjectsClient, elasticsearchClient)](./kibana-plugin-plugins-data-server.indexpatternsservice.createindexpatternsservice.md) |  |  |
 |  [setup(core, { expressions })](./kibana-plugin-plugins-data-server.indexpatternsservice.setup.md) |  |  |
 |  [start(core, { fieldFormats, logger })](./kibana-plugin-plugins-data-server.indexpatternsservice.start.md) |  |  |
 

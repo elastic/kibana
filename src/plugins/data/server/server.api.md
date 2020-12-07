@@ -739,8 +739,6 @@ export class IndexPatternsFetcher {
 //
 // @public (undocumented)
 export class IndexPatternsService implements Plugin_3<void, IndexPatternsServiceStart> {
-    // (undocumented)
-    createIndexPatternsService(savedObjectsClient: SavedObjectsClientContract_2, elasticsearchClient: ElasticsearchClient_2): Promise<IndexPatternsService_2>;
     // Warning: (ae-forgotten-export) The symbol "DataPluginStartDependencies" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "IndexPatternsServiceSetupDeps" needs to be exported by the entry point index.d.ts
     //
@@ -750,9 +748,9 @@ export class IndexPatternsService implements Plugin_3<void, IndexPatternsService
     //
     // (undocumented)
     start(core: CoreStart_2, { fieldFormats, logger }: IndexPatternsServiceStartDeps): {
-        indexPatternsServiceFactory: (savedObjectsClient: Pick<import("src/core/server").SavedObjectsClient, "update" | "find" | "get" | "delete" | "errors" | "create" | "bulkCreate" | "checkConflicts" | "bulkGet" | "addToNamespaces" | "deleteFromNamespaces" | "bulkUpdate" | "removeReferencesTo">, elasticsearchClient: ElasticsearchClient_2) => Promise<IndexPatternsService_2>;
+        indexPatternsServiceFactory: (savedObjectsClient: SavedObjectsClientContract_2, elasticsearchClient: ElasticsearchClient_2) => Promise<IndexPatternsService_2>;
     };
-    }
+}
 
 // Warning: (ae-missing-release-tag) "ISearchOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1260,7 +1258,7 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:271:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:274:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:275:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index_patterns/index_patterns_service.ts:74:14 - (ae-forgotten-export) The symbol "IndexPatternsService" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index_patterns/index_patterns_service.ts:70:14 - (ae-forgotten-export) The symbol "IndexPatternsService" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:90:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/search/types.ts:104:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
 
