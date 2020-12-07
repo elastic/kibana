@@ -1,109 +1,11 @@
 [[vega]]
-=== Add custom panels with Vega
-
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
-In this tutorial, learn how to edit Vega-Lite in {kib} to create
-=======
-=======
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
-=======
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
-<<<<<<< HEAD:docs/user/dashboard/tutorials.asciidoc
-Learn how to use *Lens*, *Vega*, and *Timelion* by going through one of the step-by-step tutorials.
-
-[[lens-tutorial]]
-=== Compare sales over time with Lens
-
-Ready to create your own visualization with *Lens*? Use the following tutorial to create a visualization that lets you compare sales over time.
-
-[float]
-[[lens-before-begin]]
-==== Before you begin
-
-To start, add the <<add-sample-data, sample ecommerce data>>.
-
-[float]
-==== Build the visualization
-
-Drag and drop your data onto the visualization builder pane.
-
-. Select the *kibana_sample_data_ecommerce* index pattern.
-
-. Click image:images/time-filter-calendar.png[], then click *Last 7 days*. 
-+
-The *Available fields* automatically update.
-
-. Drag and drop the *taxful_total_price* data field to the visualization builder pane.
-+
-[role="screenshot"]
-image::images/lens_tutorial_1.png[Lens tutorial]
-
-To display the average order prices over time, *Lens* automatically added *order_date* to the *X-axis*.
-
-To break down your data, drag and drop the *category.keyword* field to the visualization builder pane. Lens
-knows that you want to show the top categories and compare them across the dates,
-and creates a chart that compares the sales for each of the top three categories:
-
-[role="screenshot"]
-image::images/lens_tutorial_2.png[Lens tutorial]
-
-[float]
-[[customize-lens-visualization]]
-==== Customize your visualization
-
-Make your visualization look exactly how you want with the customization options.
-
-. Click *Average of taxful_total_price*, then change the *Display name* to Sales.
-+
-[role="screenshot"]
-image::images/lens_tutorial_3.1.png[Lens tutorial]
-
-. Click *Close*.
-
-. Click *Top values of category.keyword*, then change *Number of values* to `10`.
-+
-[role="screenshot"]
-image::images/lens_tutorial_3.2.png[Lens tutorial]
-
-. Click *Close*.
-+
-The visualization updates to show there are only six available categories.
-
-. Look at the *Suggestions*. An area chart is not an option, but for the sales data, a stacked area chart might be the best option. 
-To switch the chart type, click *Stacked bar chart*, then click *Stacked area* from the *Select a visualization* dropdown.
-+
-[role="screenshot"]
-image::images/lens_tutorial_3.png[Lens tutorial]
-
-[float]
-[[lens-tutorial-next-steps]]
-==== What's next?
-
-Now that you've created your *Lens* visualization, add it to a <<dashboard,dashboard>> or <<canvas,Canvas workpad>>.
-
-[[vega-lite-tutorial-create-your-first-visualizations]]
 === Create your first visualization with Vega-Lite
 
-In this tutorial, you will learn about how to edit Vega-Lite in {kib} to create
-=======
-In this tutorial, learn how to edit Vega-Lite in {kib} to create
->>>>>>> 865824bb873bceb52474b8bc279df9524077b131:docs/user/dashboard/vega.asciidoc
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
-=======
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
-=======
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
+Learn about how to edit Vega-Lite in {kib} to create
 a stacked area chart from an {es} search query. It will give you a starting point
 for a more comprehensive
 https://vega.github.io/vega-lite/tutorials/getting_started.html[introduction to Vega-Lite],
 while only covering the basics.
-
-In this tutorial, you will build a stacked area chart from one of the {kib} sample data
-sets.
 
 [role="screenshot"]
 image::visualize/images/vega_lite_tutorial_1.png[]
