@@ -296,17 +296,6 @@ POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fiel
 }
 ```
 
-- `refresh_fields` &mdash; if set to `true` reloads index pattern fields after
-  the index pattern is stored. Defaults to `false`.
-
-```
-POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fields
-{
-    "refresh_fields": true,
-    "fields": {}
-}
-```
-
 This endpoint returns the updated index pattern object.
 
 ```json
