@@ -19,7 +19,7 @@ interface Props {
 
 export const ResultField: React.FC<Props> = ({ field, raw, snippet, type }) => {
   return (
-    <div className="appSearchResultField" key={field}>
+    <div className="appSearchResultField">
       <div className="appSearchResultField__key eui-textTruncate">
         <span>{field}</span>
       </div>

@@ -34,7 +34,6 @@ export const Result: React.FC<Props> = ({ result, showScore }) => {
   return (
     <EuiPanel
       paddingSize="none"
-      key="results"
       className={'appSearchResult'}
       data-test-subj="AppSearchResult"
       title={i18n.translate('xpack.enterpriseSearch.appSearch.result.title', {

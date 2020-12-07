@@ -26,7 +26,7 @@ export const ResultHeaderItem: React.FC<Props> = ({ field, type, value }) => {
   }
 
   return (
-    <div className="appSearchResultHeaderItem" key={field}>
+    <div className="appSearchResultHeaderItem">
       <div className="appSearchResultHeaderItem__key">
         <TruncatedContent content={field} length={MAX_CHARACTER_LENGTH} tooltipType="title" />
       </div>
