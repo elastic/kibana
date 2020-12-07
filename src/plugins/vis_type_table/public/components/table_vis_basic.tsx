@@ -137,7 +137,8 @@ export const TableVisBasic = memo(
                 <TableVisControls
                   dataGridAriaLabel={dataGridAriaLabel}
                   cols={columns}
-                  rows={rows}
+                  // csv exports sorted table
+                  rows={sortedRows}
                   table={table}
                   filename={visConfig.title}
                 />
