@@ -57,7 +57,9 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   type,
 }) => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
-  const { isPtrIncluded } = useShallowEqualSelector(getNetworkDnsSelector);
+  const isPtrIncluded = useShallowEqualSelector(
+    (state) => getNetworkDnsSelector(state).isPtrIncluded
+  );
 
   useEffect(() => {
     return () => {
