@@ -11,6 +11,7 @@ import '../../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../../common/mock';
 
+import { CaseStatuses } from '../../../../../case/common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
@@ -61,7 +62,7 @@ describe('usePushToService', () => {
     },
     caseId,
     caseServices,
-    caseStatus: 'open',
+    caseStatus: CaseStatuses.open,
     connectors: connectorsMock,
     updateCase,
     userCanCrud: true,
@@ -252,7 +253,7 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseStatus: 'closed',
+            caseStatus: CaseStatuses.closed,
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,

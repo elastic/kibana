@@ -115,20 +115,19 @@ export const CREATE_CASE = i18n.translate('xpack.securitySolution.case.caseView.
   defaultMessage: 'Create case',
 });
 
-export const CLOSED_CASE = i18n.translate('xpack.securitySolution.case.caseView.closedCase', {
-  defaultMessage: 'Closed case',
-});
-
 export const CLOSE_CASE = i18n.translate('xpack.securitySolution.case.caseView.closeCase', {
   defaultMessage: 'Close case',
 });
 
+export const MARK_CASE_IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.case.caseView.markInProgress',
+  {
+    defaultMessage: 'Mark in progress',
+  }
+);
+
 export const REOPEN_CASE = i18n.translate('xpack.securitySolution.case.caseView.reopenCase', {
   defaultMessage: 'Reopen case',
-});
-
-export const REOPENED_CASE = i18n.translate('xpack.securitySolution.case.caseView.reopenedCase', {
-  defaultMessage: 'Reopened case',
 });
 
 export const CASE_NAME = i18n.translate('xpack.securitySolution.case.caseView.caseName', {
@@ -238,3 +237,22 @@ export const NO_CONNECTOR = i18n.translate('xpack.securitySolution.case.common.n
 export const UNKNOWN = i18n.translate('xpack.securitySolution.case.caseView.unknown', {
   defaultMessage: 'Unknown',
 });
+
+export const MARKED_CASE_AS = i18n.translate('xpack.securitySolution.case.caseView.markedCaseAs', {
+  defaultMessage: 'marked case as',
+});
+
+export const OPEN_CASES = i18n.translate('xpack.securitySolution.case.caseTable.openCases', {
+  defaultMessage: 'Open cases',
+});
+
+export const CLOSED_CASES = i18n.translate('xpack.securitySolution.case.caseTable.closedCases', {
+  defaultMessage: 'Closed cases',
+});
+
+export const IN_PROGRESS_CASES = i18n.translate(
+  'xpack.securitySolution.case.caseTable.inProgressCases',
+  {
+    defaultMessage: 'In progress cases',
+  }
+);

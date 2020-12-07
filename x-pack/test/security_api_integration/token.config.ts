@@ -5,6 +5,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
@@ -13,10 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('./tests/token')],
     servers: xPackAPITestsConfig.get('servers'),
     security: { disableTestUser: true },
-    services: {
-      legacyEs: xPackAPITestsConfig.get('services.legacyEs'),
-      supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
-    },
+    services,
     junit: {
       reportName: 'X-Pack Security API Integration Tests (Token)',
     },

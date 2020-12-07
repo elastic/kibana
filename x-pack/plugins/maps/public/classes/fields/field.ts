@@ -33,6 +33,7 @@ export interface IField {
   supportsFieldMeta(): boolean;
 
   canReadFromGeoJson(): boolean;
+  isEqual(field: IField): boolean;
 }
 
 export class AbstractField implements IField {
@@ -103,5 +104,9 @@ export class AbstractField implements IField {
 
   canReadFromGeoJson(): boolean {
     return true;
+  }
+
+  isEqual(field: IField) {
+    return this._origin === field.getOrigin() && this._fieldName === field.getName();
   }
 }
