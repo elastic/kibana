@@ -18,7 +18,7 @@
  */
 import React, { useState } from 'react';
 import { DocViewTableRow } from './table_row';
-import { arrayContainsObjects, trimAngularSpan } from './table_helper';
+import { trimAngularSpan } from './table_helper';
 import { isNestedFieldParent } from '../../helpers/nested_fields';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
@@ -72,11 +72,7 @@ export function DocViewTable({
                     }
                   }
                 : undefined;
-            const isArrayOfObjects =
-              Array.isArray(flattened[field]) && arrayContainsObjects(flattened[field]);
             const displayUnderscoreWarning = !mapping(field) && field.indexOf('_') === 0;
-            const displayNoMappingWarning =
-              !mapping(field) && !displayUnderscoreWarning && !isArrayOfObjects;
 
             const fieldType = isNestedFieldParent(field, indexPattern)
               ? 'nested'
@@ -89,7 +85,6 @@ export function DocViewTable({
                 fieldMapping={mapping(field)}
                 fieldType={String(fieldType)}
                 displayUnderscoreWarning={displayUnderscoreWarning}
-                displayNoMappingWarning={displayNoMappingWarning}
                 isCollapsed={isCollapsed}
                 isCollapsible={isCollapsible}
                 isColumnActive={Array.isArray(columns) && columns.includes(field)}
