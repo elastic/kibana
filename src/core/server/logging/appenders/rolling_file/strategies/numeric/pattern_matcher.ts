@@ -17,16 +17,16 @@
  * under the License.
  */
 
-const escape = (string: string) => string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+import { escapeRegExp } from 'lodash';
 
 const createNumericMatcher = (fileBaseName: string, pattern: string): RegExp => {
   let extStart = fileBaseName.indexOf('.');
   if (extStart === -1) {
     extStart = fileBaseName.length;
   }
-  const baseNameWithoutExt = escape(fileBaseName.substr(0, extStart));
-  const extension = escape(fileBaseName.substr(extStart, fileBaseName.length));
-  const processedPattern = escape(pattern)
+  const baseNameWithoutExt = escapeRegExp(fileBaseName.substr(0, extStart));
+  const extension = escapeRegExp(fileBaseName.substr(extStart, fileBaseName.length));
+  const processedPattern = escapeRegExp(pattern)
     // create matching group for `%i`
     .replace(/%i/g, '(?<counter>\\d+)');
   return new RegExp(`^${baseNameWithoutExt}${processedPattern}${extension}$`);
