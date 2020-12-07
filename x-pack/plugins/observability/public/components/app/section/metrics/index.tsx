@@ -100,7 +100,7 @@ export function MetricsSection({ bucketSize }: Props) {
           <StyledStat
             title={numeral(stats?.cpu.value).format('0.0%')}
             description={i18n.translate('xpack.observability.overview.metrics.cpuUsage', {
-              defaultMessage: 'CPU Usage',
+              defaultMessage: 'CPU usage',
             })}
             isLoading={isLoading}
             color={cpuColor}
