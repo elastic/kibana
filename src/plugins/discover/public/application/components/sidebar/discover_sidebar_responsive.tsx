@@ -16,33 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import './discover_sidebar.scss';
 import React, { useState } from 'react';
+import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { UiStatsMetricType } from '@kbn/analytics';
 import {
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiTitle,
   EuiHideFor,
   EuiShowFor,
   EuiButton,
   EuiBadge,
   EuiFlyoutHeader,
-  EuiButtonIcon,
-  EuiFlyoutBody,
   EuiFlyout,
+  EuiSpacer,
+  EuiIcon,
+  EuiLink,
+  EuiPortal,
 } from '@elastic/eui';
-import { sortBy } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { SavedObject } from '../../../../../../core/types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
+import { DiscoverServices } from '../../../build_services';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
 export interface DiscoverSidebarResponsiveProps {
+  /**
+   * Determines whether add/remove buttons are displayed non only when focused
+   */
+  alwaysShowActionButtons?: boolean;
   /**
    * the selected columns displayed in the doc table in discover
    */
@@ -54,11 +59,15 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * hits fetched from ES, displayed in the doc table
    */
-  hits: Array<Record<string, unknown>>;
+  hits: ElasticSearchHit[];
   /**
    * List of available index patterns
    */
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  /**
+   * Has been toggled closed
+   */
+  isClosed?: boolean;
   /**
    * Callback function when selecting a field
    */
@@ -77,33 +86,30 @@ export interface DiscoverSidebarResponsiveProps {
    */
   selectedIndexPattern?: IndexPattern;
   /**
+   * Discover plugin services;
+   */
+  services: DiscoverServices;
+  /**
    * Callback function to select another index pattern
    */
   setIndexPattern: (id: string) => void;
-  /**
-   * Shows Add button at all times and not only on focus
-   */
-  mobile?: boolean;
-  /**
-   * Shows index pattern and a button that displays the sidebar in a flyout
-   */
-  useFlyout?: boolean;
-  /**
-   * Adapt to legacy layout
-   */
-  legacy?: boolean;
-  /**
-   * Additional classname used for legacy
-   */
-  sidebarClassName?: string;
   /**
    * Metric tracking function
    * @param metricType
    * @param eventName
    */
   trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  /**
+   * Shows index pattern and a button that displays the sidebar in a flyout
+   */
+  useFlyout?: boolean;
 }
 
+/**
+ * Component providing 2 different renderings for the sidebar depending on available screen space
+ * Desktop: Sidebar view, all elements are visible
+ * Mobile: Index pattern selector is visible and a button to trigger a flyout with all elements
+ */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -112,21 +118,16 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     return null;
   }
 
-  const className = props.legacy
-    ? `dscSidebar dscSidebar__desktop dscCollapsibleSidebar ${props.sidebarClassName}`
-    : `dscSidebar dscSidebar__desktop`;
-
   return (
     <>
-      <EuiHideFor sizes={['xs', 's']}>
-        <div className={className}>
+      {props.isClosed ? null : (
+        <EuiHideFor sizes={['xs', 's']}>
           <DiscoverSidebar {...props} fieldFilter={fieldFilter} setFieldFilter={setFieldFilter} />
-        </div>
-      </EuiHideFor>
+        </EuiHideFor>
+      )}
       <EuiShowFor sizes={['xs', 's']}>
-        <div className="dscSidebar dscSidebar__mobile">
+        <div className="dscSidebar__mobile">
           <section
-            className="sidebar-list dscSidebar__section "
             aria-label={i18n.translate(
               'discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel',
               {
@@ -134,18 +135,15 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               }
             )}
           >
-            <div className="dscSidebar__sectionStatic">
-              <DiscoverIndexPattern
-                selectedIndexPattern={props.selectedIndexPattern}
-                setIndexPattern={props.setIndexPattern}
-                indexPatternList={sortBy(props.indexPatternList, (o) => o.attributes.title)}
-              />
-            </div>
+            <DiscoverIndexPattern
+              selectedIndexPattern={props.selectedIndexPattern}
+              setIndexPattern={props.setIndexPattern}
+              indexPatternList={sortBy(props.indexPatternList, (o) => o.attributes.title)}
+            />
           </section>
+          <EuiSpacer size="s" />
           <EuiButton
             contentProps={{ className: 'dscSidebar__mobileButton' }}
-            iconSide="right"
-            iconType="arrowRight"
             fullWidth
             onClick={() => setIsFlyoutVisible(true)}
           >
@@ -153,42 +151,53 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               id="discover.fieldChooser.fieldsMobileButtonLabel"
               defaultMessage="Fields"
             />
-            <EuiBadge className="dscSidebar__mobileBadge" color="accent">
+            <EuiBadge
+              className="dscSidebar__mobileBadge"
+              color={props.columns[0] === '_source' ? 'default' : 'accent'}
+            >
               {props.columns[0] === '_source' ? 0 : props.columns.length}
             </EuiBadge>
           </EuiButton>
         </div>
         {isFlyoutVisible && (
-          <EuiFlyout onClose={() => setIsFlyoutVisible(false)} aria-labelledby="flyoutTitle">
-            <EuiFlyoutHeader hasBorder>
-              <EuiFlexGroup
-                className="dscSidebarFlyout__header"
-                gutterSize="none"
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon onClick={() => setIsFlyoutVisible(false)} iconType="arrowLeft" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiTitle size="s">
-                    <h2 id="flyoutTitle">
-                      {i18n.translate('discover.fieldList.flyoutHeading', {
-                        defaultMessage: 'Field list',
-                      })}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlyoutHeader>
-            <EuiFlyoutBody>
-              <DiscoverSidebar
-                {...props}
-                fieldFilter={fieldFilter}
-                setFieldFilter={setFieldFilter}
-                mobile={true}
-              />
-            </EuiFlyoutBody>
-          </EuiFlyout>
+          <EuiPortal>
+            <EuiFlyout
+              size="s"
+              onClose={() => setIsFlyoutVisible(false)}
+              aria-labelledby="flyoutTitle"
+              ownFocus
+            >
+              <EuiFlyoutHeader hasBorder>
+                <EuiTitle size="s">
+                  <h2 id="flyoutTitle">
+                    <EuiLink color="text" onClick={() => setIsFlyoutVisible(false)}>
+                      <EuiIcon
+                        className="eui-alignBaseline"
+                        aria-label={i18n.translate('discover.fieldList.flyoutBackIcon', {
+                          defaultMessage: 'Back',
+                        })}
+                        type="arrowLeft"
+                      />{' '}
+                      <strong>
+                        {i18n.translate('discover.fieldList.flyoutHeading', {
+                          defaultMessage: 'Field list',
+                        })}
+                      </strong>
+                    </EuiLink>
+                  </h2>
+                </EuiTitle>
+              </EuiFlyoutHeader>
+              {/* Using only the direct flyout body class because we maintain scroll in a lower sidebar component. Needs a fix on the EUI side */}
+              <div className="euiFlyoutBody">
+                <DiscoverSidebar
+                  {...props}
+                  fieldFilter={fieldFilter}
+                  setFieldFilter={setFieldFilter}
+                  alwaysShowActionButtons={true}
+                />
+              </div>
+            </EuiFlyout>
+          </EuiPortal>
         )}
       </EuiShowFor>
     </>

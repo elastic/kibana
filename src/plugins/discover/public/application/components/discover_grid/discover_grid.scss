@@ -14,10 +14,6 @@
 .dscTable__flyoutHeader {
   white-space: nowrap;
 }
-// this is a hack than needs to be improved
-div[data-rbd-draggable-id='Time'] {
-  display: none;
-}
 
 .dscEuiDataGridRowCell .euiDataGridRowCell {
   align-items: start;

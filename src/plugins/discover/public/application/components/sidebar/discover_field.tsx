@@ -16,18 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './discover_field.scss';
+
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiStatsMetricType } from '@kbn/analytics';
+import classNames from 'classnames';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton } from '../../../../../kibana_react/public';
 import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { getFieldTypeName } from './lib/get_field_type_name';
-import './discover_field.scss';
 
 export interface DiscoverFieldProps {
+  /**
+   * Determines whether add/remove button is displayed not only when focused
+   */
+  alwaysShowActionButton?: boolean;
   /**
    * The displayed field
    */
@@ -70,6 +76,7 @@ export interface DiscoverFieldProps {
 }
 
 export function DiscoverField({
+  alwaysShowActionButton = false,
   field,
   indexPattern,
   onAddField,
@@ -125,7 +132,9 @@ export function DiscoverField({
       {wrapOnDot(field.displayName)}
     </span>
   );
-
+  const actionBtnClassName = classNames('dscSidebarItem__action', {
+    ['dscSidebarItem__mobile']: alwaysShowActionButton,
+  });
   let actionButton;
   if (field.name !== '_source' && !selected) {
     actionButton = (
@@ -137,9 +146,7 @@ export function DiscoverField({
       >
         <EuiButtonIcon
           iconType="plusInCircleFilled"
-          className={
-            mobile ? 'dscSidebarItem__action dscSidebarItem__mobile' : 'dscSidebarItem__action'
-          }
+          className={actionBtnClassName}
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
               ev.currentTarget.focus();
@@ -164,9 +171,7 @@ export function DiscoverField({
         <EuiButtonIcon
           color="danger"
           iconType="cross"
-          className={
-            mobile ? 'dscSidebarItem__action dscSidebarItem__mobile' : 'dscSidebarItem__action'
-          }
+          className={actionBtnClassName}
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
               ev.currentTarget.focus();

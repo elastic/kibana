@@ -19,7 +19,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import './discover_grid.scss';
-import { i18n } from '@kbn/i18n';
 import {
   EuiDataGridSorting,
   EuiDataGridStyle,
@@ -34,7 +33,7 @@ import {
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { getDefaultSort } from '../../angular/doc_table/lib/get_default_sort';
-import { getPopoverContents, getSchemaDetectors } from './discover_grid_helpers';
+import { getPopoverContents, getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridContext } from './discover_grid_context';
 import { getRenderCellValueFn } from './get_render_cell_value';
@@ -46,16 +45,16 @@ import {
   getVisibleColumns,
 } from './discover_grid_columns';
 import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './constants';
+import { DiscoverServices } from '../../../build_services';
 
 interface SortObj {
   id: string;
   direction: string;
 }
 
-interface DiscoverGridProps {
+export interface DiscoverGridProps {
   ariaLabelledBy: string;
   columns: string[];
-  getContextAppHref: (id: string) => string;
   indexPattern: IndexPattern;
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
@@ -68,6 +67,7 @@ interface DiscoverGridProps {
   settings?: DiscoverGridSettings;
   searchDescription?: string;
   searchTitle?: string;
+  services: DiscoverServices;
   showTimeCol: boolean;
   sort: SortPairArr[];
 }
@@ -78,38 +78,34 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => (
 
 export const DiscoverGrid = React.memo(
   ({
-    rows,
-    columns,
-    sort,
-    settings,
-    indexPattern,
     ariaLabelledBy,
-    searchTitle,
-    searchDescription,
-    onSort,
-    onResize,
-    sampleSize,
-    onFilter,
-    getContextAppHref,
-    onRemoveColumn,
+    columns,
+    indexPattern,
     onAddColumn,
-    showTimeCol,
+    onFilter,
+    onRemoveColumn,
+    onResize,
     onSetColumns,
+    onSort,
+    rows,
+    sampleSize,
+    searchDescription,
+    searchTitle,
+    services,
+    settings,
+    showTimeCol,
+    sort,
   }: DiscoverGridProps) => {
-    const [showSelected, setShowSelected] = useState(false);
-    const [viewed, setViewed] = useState<number>(-1);
-    const timeString = useMemo(
-      () =>
-        i18n.translate('discover.timeLabel', {
-          defaultMessage: 'Time',
-        }),
-      []
-    );
+    const [expanded, setExpanded] = useState<ElasticSearchHit | undefined>(undefined);
 
     /**
      * Pagination
      */
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultPageSize });
+
+    const rowsLength = rows ? rows.length : 0;
+    const pageCount = Math.ceil(rowsLength / pagination.pageSize);
+    const isOnLastPage = pagination.pageIndex === pageCount - 1;
 
     const paginationObj = useMemo(() => {
       const onChangeItemsPerPage = (pageSize: number) =>
@@ -119,12 +115,13 @@ export const DiscoverGrid = React.memo(
         setPagination((paginationData) => ({ ...paginationData, pageIndex }));
 
       return {
-        ...pagination,
         onChangeItemsPerPage,
         onChangePage,
+        pageIndex: pagination.pageIndex > pageCount - 1 ? 0 : pagination.pageIndex,
+        pageSize: pagination.pageSize,
         pageSizeOptions: pageSizeArr,
       };
-    }, [pagination]);
+    }, [pagination, pageCount]);
 
     /**
      * Sorting
@@ -155,16 +152,13 @@ export const DiscoverGrid = React.memo(
     /**
      * Render variables
      */
-    const rowsLength = rows ? rows.length : 0;
-    const pageCount = Math.ceil(rowsLength / pagination.pageSize);
-    const isOnLastPage = pagination.pageIndex === pageCount - 1;
     const showDisclaimer = rowsLength === sampleSize && isOnLastPage;
     const randomId = useMemo(() => String(htmlIdGenerator()), []);
 
     const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
     const euiGridColumns = useMemo(
-      () => getEuiGridColumns(columns, settings, indexPattern, showTimeCol, timeString),
-      [columns, indexPattern, showTimeCol, timeString, settings]
+      () => getEuiGridColumns(columns, settings, indexPattern, showTimeCol),
+      [columns, indexPattern, showTimeCol, settings]
     );
     const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
     const popoverContents = useMemo(() => getPopoverContents(), []);
@@ -181,7 +175,7 @@ export const DiscoverGrid = React.memo(
       sortingColumns,
       onTableSort,
     ]);
-    const lead = useMemo(() => getLeadControlColumns(rows), [rows]);
+    const lead = useMemo(() => getLeadControlColumns(), []);
 
     if (!rowCount || !rows) {
       return (
@@ -198,10 +192,8 @@ export const DiscoverGrid = React.memo(
     return (
       <DiscoverGridContext.Provider
         value={{
-          showSelected,
-          setShowSelected,
-          viewed,
-          setViewed,
+          expanded,
+          setExpanded,
           rows,
           onFilter,
           indexPattern,
@@ -261,18 +253,16 @@ export const DiscoverGrid = React.memo(
               </p>
             </EuiScreenReaderOnly>
           )}
-          {viewed > -1 && rows[viewed] && (
+          {expanded && (
             <DiscoverGridFlyout
               indexPattern={indexPattern}
-              getContextAppHref={getContextAppHref}
-              hit={rows[viewed]}
+              hit={expanded}
               columns={columns}
               onFilter={onFilter}
               onRemoveColumn={onRemoveColumn}
               onAddColumn={onAddColumn}
-              onClose={() => {
-                setViewed(-1);
-              }}
+              onClose={() => setExpanded(undefined)}
+              services={services}
             />
           )}
         </>

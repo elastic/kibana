@@ -16,30 +16,46 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
-import rison from 'rison-node';
-import classNames from 'classnames';
+import './discover.scss';
+import React, { useState, useRef } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHideFor,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiHideFor, EuiButtonIcon } from '@elastic/eui';
+import classNames from 'classnames';
 import { HitsCounter } from './hits_counter';
-import { DiscoverGrid } from './discover_grid/discover_grid';
 import { TimechartHeader } from './timechart_header';
 import { getServices } from '../../kibana_services';
 import { DiscoverUninitialized, DiscoverHistogram } from '../angular/directives';
-import { LoadingSpinner } from './loading_spinner/loading_spinner';
-import './discover.scss';
-import { esFilters, search } from '../../../../data/public';
-import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverNoResults } from './no_results';
+import { LoadingSpinner } from './loading_spinner/loading_spinner';
+import { search } from '../../../../data/public';
+import {
+  DiscoverSidebarResponsive,
+  DiscoverSidebarResponsiveProps,
+} from './sidebar/discover_sidebar_responsive';
+import { DiscoverGrid } from './discover_grid/discover_grid';
 import { DiscoverProps } from './discover_legacy';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
+
+export const SidebarMemoized = React.memo((props: DiscoverSidebarResponsiveProps) => (
+  <DiscoverSidebarResponsive {...props} />
+));
 
 export function Discover({
   addColumn,
   fetch,
   fetchCounter,
-  fetchError,
   fieldCounts,
+  fetchError,
   histogramData,
   hits,
   indexPattern,
@@ -62,50 +78,26 @@ export function Discover({
   updateQuery,
   updateSavedQueryId,
 }: DiscoverProps) {
+  const scrollableDesktop = useRef<HTMLDivElement>(null);
+  const collapseIcon = useRef<HTMLButtonElement>(null);
+
   const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const { trackUiMetric } = getServices();
-  if (!timeRange) {
-    return <div>Loading</div>;
-  }
-  const { TopNavMenu } = getServices().navigation.ui;
-  const { savedSearch, filterManager, indexPatternList, config } = opts;
-  const showTimeCol = !config.get('doc_table:hideTimeColumn', false) && indexPattern.timeFieldName;
+  const services = getServices();
+  const { TopNavMenu } = services.navigation.ui;
+  const { trackUiMetric } = services;
+  const { savedSearch, indexPatternList, config } = opts;
   const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
   const bucketInterval =
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
+  const contentCentered = resultState === 'uninitialized';
+  const showTimeCol = !config.get('doc_table:hideTimeColumn', false) && indexPattern.timeFieldName;
 
-  const getContextAppHref = (anchorId: string) => {
-    const path = `#/context/${encodeURIComponent(String(indexPattern.id))}/${encodeURIComponent(
-      anchorId
-    )}`;
-    const urlSearchParams = new URLSearchParams();
-
-    urlSearchParams.set(
-      'g',
-      rison.encode({
-        filters: filterManager.getGlobalFilters() || [],
-      })
-    );
-
-    urlSearchParams.set(
-      '_a',
-      rison.encode({
-        columns: state.columns,
-        filters: (filterManager.getAppFilters() || []).map(esFilters.disableFilter),
-      })
-    );
-    return `${path}?${urlSearchParams.toString()}`;
-  };
-  const sidebarClassName = classNames({
-    closed: isSidebarClosed,
-  });
   return (
     <I18nProvider>
-      <div className="dscApp" data-fetch-counter={fetchCounter}>
-        <h1 className="euiScreenReaderOnly">{savedSearch.title}</h1>
+      <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
         <TopNavMenu
           appName="discover"
           config={topNavMenu}
@@ -121,10 +113,13 @@ export function Discover({
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
-        <main className="dscApp__frame">
-          <>
-            {!isSidebarClosed && (
-              <DiscoverSidebarResponsive
+        <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
+          <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
+            {savedSearch.title}
+          </h1>
+          <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <SidebarMemoized
                 columns={state.columns || []}
                 fieldCounts={fieldCounts}
                 hits={rows}
@@ -133,135 +128,173 @@ export function Discover({
                 onAddFilter={onAddFilter}
                 onRemoveField={onRemoveColumn}
                 selectedIndexPattern={searchSource && searchSource.getField('index')}
+                services={services}
                 setIndexPattern={setIndexPattern}
-                legacy={false}
-                sidebarClassName={sidebarClassName}
+                isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
               />
-            )}
+            </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
-              <EuiButtonIcon
-                iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                iconSize="m"
-                size="s"
-                onClick={() => setIsSidebarClosed(!isSidebarClosed)}
-                data-test-subj="collapseSideBarButton"
-                aria-controls="discover-sidebar"
-                aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                aria-label="Toggle sidebar"
-                className={`dscCollapsibleSidebar__collapseButton ${sidebarClassName}`}
-              />
-            </EuiHideFor>
-            <div className="dscWrapper__content">
-              {resultState === 'none' && (
-                <DiscoverNoResults
-                  timeFieldName={opts.timefield}
-                  queryLanguage={state.query ? state.query.language : ''}
-                  data={opts.data}
-                  error={fetchError}
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
+                  iconSize="m"
+                  size="s"
+                  onClick={() => setIsSidebarClosed(!isSidebarClosed)}
+                  data-test-subj="collapseSideBarButton"
+                  aria-controls="discover-sidebar"
+                  aria-expanded={isSidebarClosed ? 'false' : 'true'}
+                  aria-label="Toggle sidebar"
+                  buttonRef={collapseIcon}
                 />
-              )}
-              {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
-              {resultState === 'loading' && <LoadingSpinner />}
-              {resultState === 'ready' && (
-                <>
-                  <div className="dscResultCount">
-                    <EuiFlexGroup justifyContent="spaceBetween">
-                      <EuiFlexItem
-                        grow={false}
-                        className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
-                      >
-                        <HitsCounter
-                          hits={hits > 0 ? hits : 0}
-                          showResetButton={!!(savedSearch && savedSearch.id)}
-                          onResetQuery={resetQuery}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem className="dscResultCount__actions">
-                        <TimechartHeader
-                          dateFormat={opts.config.get('dateFormat')}
-                          timeRange={timeRange}
-                          options={search.aggs.intervalOptions}
-                          onChangeInterval={onChangeInterval}
-                          stateInterval={state.interval || ''}
-                          bucketInterval={bucketInterval}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-                        <EuiButtonEmpty
-                          iconType={toggleOn ? 'eyeClosed' : 'eye'}
-                          onClick={() => {
-                            toggleChart(!toggleOn);
-                          }}
+              </EuiFlexItem>
+            </EuiHideFor>
+            <EuiFlexItem className="dscPageContent__wrapper">
+              <EuiPageContent
+                verticalPosition={contentCentered ? 'center' : undefined}
+                horizontalPosition={contentCentered ? 'center' : undefined}
+                paddingSize="none"
+                className={classNames('dscPageContent', {
+                  'dscPageContent--centered': contentCentered,
+                })}
+              >
+                {resultState === 'none' && (
+                  <DiscoverNoResults
+                    timeFieldName={opts.timefield}
+                    queryLanguage={state.query ? state.query.language : ''}
+                    data={opts.data}
+                    error={fetchError}
+                  />
+                )}
+                {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
+                {resultState === 'loading' && <LoadingSpinner />}
+                {resultState === 'ready' && (
+                  <EuiFlexGroup
+                    className="dscPageContent__inner"
+                    direction="column"
+                    alignItems="stretch"
+                    gutterSize="none"
+                    responsive={false}
+                  >
+                    <EuiFlexItem grow={false} className="dscResultCount">
+                      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                        <EuiFlexItem
+                          grow={false}
+                          className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
                         >
-                          {toggleOn ? 'Hide chart' : 'Show chart'}
-                        </EuiButtonEmpty>
+                          <HitsCounter
+                            hits={hits > 0 ? hits : 0}
+                            showResetButton={!!(savedSearch && savedSearch.id)}
+                            onResetQuery={resetQuery}
+                          />
+                        </EuiFlexItem>
+                        {toggleOn && (
+                          <EuiFlexItem className="dscResultCount__actions">
+                            <TimechartHeader
+                              dateFormat={opts.config.get('dateFormat')}
+                              timeRange={timeRange}
+                              options={search.aggs.intervalOptions}
+                              onChangeInterval={onChangeInterval}
+                              stateInterval={state.interval || ''}
+                              bucketInterval={bucketInterval}
+                            />
+                          </EuiFlexItem>
+                        )}
+                        <EuiFlexItem className="dscResultCount__toggle" grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            iconType={toggleOn ? 'eyeClosed' : 'eye'}
+                            onClick={() => {
+                              toggleChart(!toggleOn);
+                            }}
+                          >
+                            {toggleOn
+                              ? i18n.translate('discover.hideChart', {
+                                  defaultMessage: 'Hide chart',
+                                })
+                              : i18n.translate('discover.showChart', {
+                                  defaultMessage: 'Show chart',
+                                })}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    {toggleOn && opts.timefield && (
+                      <EuiFlexItem grow={false}>
+                        <section
+                          aria-label={i18n.translate(
+                            'discover.histogramOfFoundDocumentsAriaLabel',
+                            {
+                              defaultMessage: 'Histogram of found documents',
+                            }
+                          )}
+                          className="dscTimechart"
+                        >
+                          {opts.chartAggConfigs && rows.length !== 0 && (
+                            <div className="dscHistogramGrid" data-test-subj="discoverChart">
+                              <DiscoverHistogram
+                                chartData={histogramData}
+                                timefilterUpdateHandler={timefilterUpdateHandler}
+                              />
+                            </div>
+                          )}
+                        </section>
                       </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </div>
+                    )}
 
-                  <div className="dscResults">
-                    {opts.timefield && toggleOn && (
+                    <EuiFlexItem className="eui-yScroll">
                       <section
-                        aria-label="{{::'discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
-                        className="dscTimechart"
+                        className="dscTable eui-yScroll"
+                        aria-labelledby="documentsAriaLabel"
+                        ref={scrollableDesktop}
+                        tabIndex={-1}
                       >
-                        {opts.chartAggConfigs && rows.length !== 0 && (
-                          <div className="dscHistogramGrid" data-test-subj="discoverChart">
-                            <DiscoverHistogram
-                              chartData={histogramData}
-                              timefilterUpdateHandler={timefilterUpdateHandler}
+                        <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
+                          <FormattedMessage
+                            id="discover.documentsAriaLabel"
+                            defaultMessage="Documents"
+                          />
+                        </h2>
+                        {rows && rows.length && (
+                          <div className="dscDiscoverGrid">
+                            <DiscoverGrid
+                              ariaLabelledBy="documentsAriaLabel"
+                              columns={state.columns || []}
+                              indexPattern={indexPattern}
+                              rows={rows}
+                              sort={(state.sort as SortPairArr[]) || []}
+                              sampleSize={opts.sampleSize}
+                              searchDescription={opts.savedSearch.description}
+                              searchTitle={opts.savedSearch.lastSavedTitle}
+                              showTimeCol={Boolean(showTimeCol)}
+                              services={services}
+                              settings={state.grid}
+                              onAddColumn={addColumn}
+                              onFilter={onAddFilter}
+                              onRemoveColumn={onRemoveColumn}
+                              onSetColumns={onSetColumns}
+                              onSort={onSort}
+                              onResize={(colSettings: { columnId: string; width: number }) => {
+                                const grid = { ...state.grid } || {};
+                                const newColumns = { ...grid.columns } || {};
+                                newColumns[colSettings.columnId] = {
+                                  width: colSettings.width,
+                                };
+                                const newGrid = { ...grid, columns: newColumns };
+                                opts.setAppState({ grid: newGrid });
+                              }}
                             />
                           </div>
                         )}
                       </section>
-                    )}
-                    <section className="dscTable" aria-labelledby="documentsAriaLabel">
-                      <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
-                        <FormattedMessage
-                          id="discover.documentsAriaLabel"
-                          defaultMessage="Documents"
-                        />
-                      </h2>
-                      {rows && rows.length && (
-                        <div className="dscDiscoverGrid">
-                          <DiscoverGrid
-                            ariaLabelledBy="documentsAriaLabel"
-                            columns={state.columns || []}
-                            indexPattern={indexPattern}
-                            rows={rows}
-                            sort={(state.sort as SortPairArr[]) || []}
-                            sampleSize={opts.sampleSize}
-                            searchDescription={opts.savedSearch.description}
-                            searchTitle={opts.savedSearch.lastSavedTitle}
-                            showTimeCol={Boolean(showTimeCol)}
-                            settings={state.grid}
-                            getContextAppHref={getContextAppHref}
-                            onAddColumn={addColumn}
-                            onFilter={onAddFilter}
-                            onRemoveColumn={onRemoveColumn}
-                            onSetColumns={onSetColumns}
-                            onSort={onSort}
-                            onResize={(colSettings: { columnId: string; width: number }) => {
-                              const grid = { ...state.grid } || {};
-                              const newColumns = { ...grid.columns } || {};
-                              newColumns[colSettings.columnId] = {
-                                width: colSettings.width,
-                              };
-                              const newGrid = { ...grid, columns: newColumns };
-                              opts.setAppState({ grid: newGrid });
-                            }}
-                          />
-                        </div>
-                      )}
-                    </section>
-                  </div>
-                </>
-              )}
-            </div>
-          </>
-        </main>
-      </div>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+              </EuiPageContent>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageBody>
+      </EuiPage>
     </I18nProvider>
   );
 }

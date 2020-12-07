@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { IndexPatternField } from '../../../../../data/common/index_patterns/fields';
 import { DiscoverGridContext } from './discover_grid_context';
 
-const FilterInBtn = ({ Component, rowIndex, columnId }: any) => {
+export const FilterInBtn = ({ Component, rowIndex, columnId }: any) => {
   const context = useContext(DiscoverGridContext);
   return (
     <Component
@@ -38,6 +38,7 @@ const FilterInBtn = ({ Component, rowIndex, columnId }: any) => {
         defaultMessage: 'Filter for {value}',
         values: { value: columnId },
       })}
+      data-test-subj="filterForButton"
     >
       {i18n.translate('discover.grid.filterFor', {
         defaultMessage: 'Filter for',
@@ -46,7 +47,7 @@ const FilterInBtn = ({ Component, rowIndex, columnId }: any) => {
   );
 };
 
-const FilterOutBtn = ({ Component, rowIndex, columnId }: any) => {
+export const FilterOutBtn = ({ Component, rowIndex, columnId }: any) => {
   const context = useContext(DiscoverGridContext);
   return (
     <Component
@@ -63,6 +64,7 @@ const FilterOutBtn = ({ Component, rowIndex, columnId }: any) => {
         defaultMessage: 'Filter out {value}',
         values: { value: columnId },
       })}
+      data-test-subj="filterOutButton"
     >
       {i18n.translate('discover.grid.filterOut', {
         defaultMessage: 'Filter out',

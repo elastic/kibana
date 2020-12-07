@@ -25,30 +25,35 @@ const fields = [
     type: '_source',
     scripted: false,
     filterable: false,
+    aggregatable: false,
   },
   {
     name: '_index',
     type: 'string',
     scripted: false,
     filterable: true,
+    aggregatable: false,
   },
   {
     name: 'message',
     type: 'string',
     scripted: false,
     filterable: false,
+    aggregatable: false,
   },
   {
     name: 'extension',
     type: 'string',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'bytes',
     type: 'number',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'scripted',
@@ -73,6 +78,7 @@ const indexPattern = ({
   getComputedFields: () => ({}),
   getSourceFiltering: () => ({}),
   getFieldByName: () => ({}),
+  timeFieldName: 'date',
 } as unknown) as IndexPattern;
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);

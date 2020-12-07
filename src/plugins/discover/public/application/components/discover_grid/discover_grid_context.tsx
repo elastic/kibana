@@ -21,10 +21,8 @@ import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_typ
 import { IndexPattern } from '../../../kibana_services';
 
 export interface GridContext {
-  viewed: number;
-  setViewed: (id: number) => void;
-  showSelected: boolean;
-  setShowSelected: (value: boolean) => void;
+  expanded: ElasticSearchHit | undefined;
+  setExpanded: (hit: ElasticSearchHit | undefined) => void;
   rows: ElasticSearchHit[];
   onFilter: DocViewFilterFn;
   indexPattern: IndexPattern;

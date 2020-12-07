@@ -70,7 +70,7 @@ describe('reduceStream', () => {
     const errorStub = jest.fn();
     reduce$.on('data', dataStub);
     reduce$.on('error', errorStub);
-    const endEvent = promiseFromEvent('end', reduce$);
+    const closeEvent = promiseFromEvent('close', reduce$);
 
     reduce$.write(1);
     reduce$.write(2);
@@ -79,7 +79,7 @@ describe('reduceStream', () => {
     reduce$.write(1000);
     reduce$.end();
 
-    await endEvent;
+    await closeEvent;
     expect(reducer).toHaveBeenCalledTimes(3);
     expect(dataStub).toHaveBeenCalledTimes(0);
     expect(errorStub).toHaveBeenCalledTimes(1);

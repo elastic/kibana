@@ -33,27 +33,29 @@ import {
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DiscoverServices } from '../../../build_services';
+import { getContextUrl } from '../../helpers/get_context_url';
 
 interface Props {
-  hit: ElasticSearchHit;
   columns: string[];
-  getContextAppHref: (id: string) => string;
+  hit: ElasticSearchHit;
   indexPattern: IndexPattern;
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
+  services: DiscoverServices;
 }
 
-export const DiscoverGridFlyout = function DiscoverGridInner({
+export function DiscoverGridFlyout({
   hit,
   indexPattern,
   columns,
   onFilter,
   onClose,
-  getContextAppHref,
   onRemoveColumn,
   onAddColumn,
+  services,
 }: Props) {
   if (!hit) {
     return null;
@@ -87,12 +89,12 @@ export const DiscoverGridFlyout = function DiscoverGridInner({
             gutterSize="none"
             alignItems="flexEnd"
           >
-            {indexPattern.isTimeBased() && (
+            {indexPattern.isTimeBased() && indexPattern.id && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
                   iconType="documents"
-                  href={getContextAppHref ? getContextAppHref(hit._id) : ''}
+                  href={getContextUrl(hit._id, indexPattern.id, columns, services.filterManager)}
                   data-test-subj="docTableRowAction"
                 >
                   {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkText', {
@@ -128,4 +130,4 @@ export const DiscoverGridFlyout = function DiscoverGridInner({
       </EuiFlyout>
     </EuiPortal>
   );
-};
+}

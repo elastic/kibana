@@ -19,21 +19,24 @@
 import React, { useContext } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DiscoverGridContext, GridContext } from './discover_grid_context';
+import { DiscoverGridContext } from './discover_grid_context';
 
 export const ViewButton = ({ rowIndex }: { rowIndex: number }) => {
-  const { viewed, setViewed } = useContext<GridContext>(DiscoverGridContext);
+  const { expanded, setExpanded, rows } = useContext(DiscoverGridContext);
+
+  const current = rows[rowIndex];
+  const isCurrentRowExpanded = current === expanded;
 
   return (
     <button
       aria-label={i18n.translate('discover.grid.viewDoc', {
         defaultMessage: 'Toggle dialog with details',
       })}
-      onClick={() => setViewed(rowIndex === viewed ? -1 : rowIndex)}
+      onClick={() => setExpanded(isCurrentRowExpanded ? undefined : current)}
       className="dscTable__buttonToggle"
       data-test-subj="docTableExpandToggleColumn"
     >
-      <EuiIcon size="s" type={viewed === rowIndex ? 'expandMini' : 'expand'} />
+      <EuiIcon size="s" type={isCurrentRowExpanded ? 'expandMini' : 'expand'} />
     </button>
   );
 };

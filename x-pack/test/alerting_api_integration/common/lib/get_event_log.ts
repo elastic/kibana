@@ -8,13 +8,26 @@ import { IValidatedEvent } from '../../../../plugins/event_log/server';
 import { getUrlPrefix } from '.';
 import { FtrProviderContext } from '../ftr_provider_context';
 
+interface GreaterThanEqualCondition {
+  gte: number;
+}
+interface EqualCondition {
+  equal: number;
+}
+
+function isEqualConsition(
+  condition: GreaterThanEqualCondition | EqualCondition
+): condition is EqualCondition {
+  return Number.isInteger((condition as EqualCondition).equal);
+}
+
 interface GetEventLogParams {
   getService: FtrProviderContext['getService'];
   spaceId: string;
   type: string;
   id: string;
   provider: string;
-  actions: string[];
+  actions: Map<string, { gte: number } | { equal: number }>;
 }
 
 // Return event log entries given the specified parameters; for the `actions`
@@ -22,7 +35,6 @@ interface GetEventLogParams {
 export async function getEventLog(params: GetEventLogParams): Promise<IValidatedEvent[]> {
   const { getService, spaceId, type, id, provider, actions } = params;
   const supertest = getService('supertest');
-  const actionsSet = new Set(actions);
 
   const spacePrefix = getUrlPrefix(spaceId);
   const url = `${spacePrefix}/api/event_log/${type}/${id}/_find?per_page=5000`;
@@ -36,14 +48,35 @@ export async function getEventLog(params: GetEventLogParams): Promise<IValidated
   const events: IValidatedEvent[] = (result.data as IValidatedEvent[])
     .filter((event) => event?.event?.provider === provider)
     .filter((event) => event?.event?.action)
-    .filter((event) => actionsSet.has(event?.event?.action!));
-  const foundActions = new Set(
-    events.map((event) => event?.event?.action).filter((action) => !!action)
-  );
+    .filter((event) => actions.has(event?.event?.action!));
 
-  for (const action of actions) {
-    if (!foundActions.has(action)) {
-      throw new Error(`no event found with action "${action}"`);
+  const foundActions = events
+    .map((event) => event?.event?.action)
+    .reduce((actionsSum, action) => {
+      if (action) {
+        actionsSum.set(action, 1 + (actionsSum.get(action) ?? 0));
+      }
+      return actionsSum;
+    }, new Map<string, number>());
+
+  for (const [action, condition] of actions.entries()) {
+    if (
+      !(
+        foundActions.has(action) &&
+        (isEqualConsition(condition)
+          ? foundActions.get(action)! === condition.equal
+          : foundActions.get(action)! >= condition.gte)
+      )
+    ) {
+      throw new Error(
+        `insufficient events found with action "${action}" (${
+          foundActions.get(action) ?? 0
+        } must be ${
+          isEqualConsition(condition)
+            ? `equal to ${condition.equal}`
+            : `greater than or equal to ${condition.gte}`
+        })`
+      );
     }
   }
 

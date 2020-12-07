@@ -17,58 +17,36 @@
  * under the License.
  */
 import * as React from 'react';
-import { DiscoverGrid } from './discover_grid/discover_grid';
+import { I18nProvider } from '@kbn/i18n/react';
+import { DiscoverGrid, DiscoverGridProps } from './discover_grid/discover_grid';
+import { getServices } from '../../kibana_services';
 
-interface Props<P> {
-  [key: string]: any;
-}
-
-/**
- * TODO remove when development is finished, helper component to detect property changes
- * @param WrappedComponent
- */
-export function withPropsChecker<P>(
-  WrappedComponent: React.ComponentType<P>
-): React.ComponentClass<Props<P>> {
-  // eslint-disable-next-line react/prefer-stateless-function
-  return class PropsChecker extends React.Component<Props<P>> {
-    /**
-     componentWillReceiveProps(nextProps: Props<P>) {
-      Object.keys(nextProps)
-        .filter((key) => nextProps[key] !== this.props[key])
-        .map((key) => {
-          console.log('changed property:', key, 'from', this.props[key], 'to', nextProps[key]);
-        });
-    }
-     **/
-
-    render() {
-      // @ts-ignore
-      return <DiscoverGrid {...this.props} />;
-    }
-  };
+export function DiscoverGridEmbeddable(props: DiscoverGridProps) {
+  return (
+    <I18nProvider>
+      <DiscoverGrid {...props} services={getServices()} />
+    </I18nProvider>
+  );
 }
 
 /**
  * this is just needed for the embeddable
  */
 export function createDiscoverGridDirective(reactDirective: any) {
-  return reactDirective(withPropsChecker(DiscoverGrid), [
+  return reactDirective(DiscoverGridEmbeddable, [
     ['columns', { watchDepth: 'collection' }],
-    ['rows', { watchDepth: 'collection' }],
     ['indexPattern', { watchDepth: 'reference' }],
-    ['sort', { watchDepth: 'value' }],
+    ['onAddColumn', { watchDepth: 'reference', wrapApply: false }],
+    ['onFilter', { watchDepth: 'reference', wrapApply: false }],
+    ['onRemoveColumn', { watchDepth: 'reference', wrapApply: false }],
+    ['onSetColumns', { watchDepth: 'reference', wrapApply: false }],
+    ['onSort', { watchDepth: 'reference', wrapApply: false }],
+    ['rows', { watchDepth: 'collection' }],
     ['sampleSize', { watchDepth: 'reference' }],
     ['searchDescription', { watchDepth: 'reference' }],
     ['searchTitle', { watchDepth: 'reference' }],
-    ['useShortDots', { watchDepth: 'value' }],
-    ['showTimeCol', { watchDepth: 'value' }],
     ['settings', { watchDepth: 'reference' }],
-    ['onFilter', { watchDepth: 'reference', wrapApply: false }],
-    ['onRemoveColumn', { watchDepth: 'reference', wrapApply: false }],
-    ['onAddColumn', { watchDepth: 'reference', wrapApply: false }],
-    ['onSetColumns', { watchDepth: 'reference', wrapApply: false }],
-    ['getContextAppHref', { watchDepth: 'reference', wrapApply: false }],
-    ['onSort', { watchDepth: 'reference', wrapApply: false }],
+    ['showTimeCol', { watchDepth: 'value' }],
+    ['sort', { watchDepth: 'value' }],
   ]);
 }

@@ -1,20 +1,17 @@
 <discover-grid
   columns="columns"
-  settings="settings"
+  data-description="{{description}}"
   data-shared-item
   data-title="{{sharedItemTitle}}"
-  data-description="{{description}}"
-  render-complete
   index-pattern="indexPattern"
-  rows="hits"
-  sort="sort"
-  sample-size="500"
-  use-short-dots="useShortDots"
-  show-time-col="showTimeCol"
-  get-context-app-href="getContextAppHref"
   on-add-column="addColumn"
-  on-filter="filterQuery"
+  on-filter="filter"
   on-remove-column="removeColumn"
   on-sort="setSortOrder"
-  class="dscDiscoverGrid"
+  render-complete
+  rows="hits"
+  sample-size="500"
+  settings="settings"
+  show-time-col="showTimeCol"
+  sort="sort"
 ></discover-grid>

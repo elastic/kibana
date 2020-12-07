@@ -64,6 +64,7 @@ export async function mountManagementSection(
     setBreadcrumbs,
     uiSettings,
     urlGenerators,
+    docLinks,
   };
 
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });

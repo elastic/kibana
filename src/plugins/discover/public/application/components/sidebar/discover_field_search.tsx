@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './discover_field_search.scss';
+
 import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -166,7 +168,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     <EuiFilterButton
       aria-label={filterBtnAriaLabel}
       data-test-subj="toggleFieldFilterButton"
-      className="dscFieldSearch__toggleButton"
       iconType="arrowDown"
       isSelected={activeFiltersCount > 0}
       numFilters={0}
@@ -258,7 +259,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           <EuiFieldSearch
             aria-label={searchPlaceholder}
             data-test-subj="fieldFilterSearchInput"
-            compressed
             fullWidth
             onChange={(event) => onChange('name', event.currentTarget.value)}
             placeholder={searchPlaceholder}
@@ -273,7 +273,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
             id="dataPanelTypeFilter"
             panelClassName="euiFilterGroup__popoverPanel"
             panelPaddingSize="none"
-            anchorPosition="downLeft"
+            anchorPosition="rightUp"
             display="block"
             isOpen={isPopoverOpen}
             closePopover={() => {
