@@ -11,6 +11,7 @@ import { UptimeThemeContext } from '../../../../contexts';
 import { MonitorLocation } from '../../../../../common/runtime_types';
 import { SHORT_TIMESPAN_LOCALE, SHORT_TS_LOCALE } from '../../../../../common/constants';
 import { AvailabilityReporting } from '../index';
+import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
 
 // Set height so that it remains within panel, enough height to display 7 locations tags
 const TagContainer = styled.div`
@@ -46,7 +47,7 @@ export const LocationStatusTags = ({ locations }: Props) => {
   locations.forEach((item: MonitorLocation) => {
     allLocations.push({
       label: item.geo.name!,
-      timestamp: moment(new Date(item.timestamp).valueOf()).fromNow(),
+      timestamp: getShortTimeStamp(moment(new Date(item.timestamp).valueOf())),
       color: item.summary.down === 0 ? gray : danger,
       availability: (item.up_history / (item.up_history + item.down_history)) * 100,
       status: item.summary.down === 0 ? 'up' : 'down',

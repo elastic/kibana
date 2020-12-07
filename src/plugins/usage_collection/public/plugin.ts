@@ -31,7 +31,7 @@ import {
 import { reportApplicationUsage } from './services/application_usage';
 
 export interface PublicConfigType {
-  uiMetric: {
+  uiCounters: {
     enabled: boolean;
     debug: boolean;
   };
@@ -39,7 +39,7 @@ export interface PublicConfigType {
 
 export interface UsageCollectionSetup {
   allowTrackUserAgent: (allow: boolean) => void;
-  reportUiStats: Reporter['reportUiStats'];
+  reportUiCounter: Reporter['reportUiCounter'];
   METRIC_TYPE: typeof METRIC_TYPE;
   __LEGACY: {
     /**
@@ -53,7 +53,7 @@ export interface UsageCollectionSetup {
 }
 
 export interface UsageCollectionStart {
-  reportUiStats: Reporter['reportUiStats'];
+  reportUiCounter: Reporter['reportUiCounter'];
   METRIC_TYPE: typeof METRIC_TYPE;
 }
 
@@ -73,7 +73,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
 
   public setup({ http }: CoreSetup): UsageCollectionSetup {
     const localStorage = new Storage(window.localStorage);
-    const debug = this.config.uiMetric.debug;
+    const debug = this.config.uiCounters.debug;
 
     this.reporter = createReporter({
       localStorage,
@@ -85,7 +85,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       allowTrackUserAgent: (allow: boolean) => {
         this.trackUserAgent = allow;
       },
-      reportUiStats: this.reporter.reportUiStats,
+      reportUiCounter: this.reporter.reportUiCounter,
       METRIC_TYPE,
       __LEGACY: {
         appChanged: (appId) => this.legacyAppId$.next(appId),
@@ -98,7 +98,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       throw new Error('Usage collection reporter not set up correctly');
     }
 
-    if (this.config.uiMetric.enabled && !isUnauthenticated(http)) {
+    if (this.config.uiCounters.enabled && !isUnauthenticated(http)) {
       this.reporter.start();
     }
 
@@ -109,7 +109,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     reportApplicationUsage(merge(application.currentAppId$, this.legacyAppId$), this.reporter);
 
     return {
-      reportUiStats: this.reporter.reportUiStats,
+      reportUiCounter: this.reporter.reportUiCounter,
       METRIC_TYPE,
     };
   }
