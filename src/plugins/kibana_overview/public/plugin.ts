@@ -51,7 +51,7 @@ export class KibanaOverviewPlugin
     { home, usageCollection }: AppPluginSetupDependencies
   ): KibanaOverviewPluginSetup {
     if (usageCollection) {
-      initStatsReporter(usageCollection.reportUiStats);
+      initStatsReporter(usageCollection.reportUiCounter);
     }
 
     const appUpdater$ = from(core.getStartServices()).pipe(
