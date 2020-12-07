@@ -72,4 +72,6 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
   );
 };
 
+HostsKpiAuthenticationsComponent.displayName = 'HostsKpiAuthenticationsComponent';
+
 export const HostsKpiAuthentications = React.memo(HostsKpiAuthenticationsComponent);

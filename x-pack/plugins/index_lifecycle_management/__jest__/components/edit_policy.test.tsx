@@ -172,6 +172,9 @@ const MyComponent = ({
           existingPolicies,
           policyName,
           getUrlForApp,
+          license: {
+            canUseSearchableSnapshot: () => true,
+          },
         }}
       >
         <EditPolicy history={history} />
@@ -209,6 +212,7 @@ describe('edit policy', () => {
         getUrlForApp={jest.fn()}
         policyName="test"
         isCloudEnabled={false}
+        license={{ canUseSearchableSnapshot: () => true }}
       />
     );
 
@@ -247,6 +251,7 @@ describe('edit policy', () => {
           existingPolicies={policies}
           getUrlForApp={jest.fn()}
           isCloudEnabled={false}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
       const rendered = mountWithIntl(component);
@@ -283,6 +288,7 @@ describe('edit policy', () => {
           existingPolicies={policies}
           getUrlForApp={jest.fn()}
           isCloudEnabled={false}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
 
@@ -827,6 +833,7 @@ describe('edit policy', () => {
           existingPolicies={policies}
           getUrlForApp={jest.fn()}
           isCloudEnabled={true}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
       ({ http } = editPolicyHelpers.setup());

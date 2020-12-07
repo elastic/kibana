@@ -10,9 +10,15 @@ import { Route, Switch } from 'react-router-dom';
 import { Timelines } from './pages';
 import { NotFoundPage } from '../app/404';
 
-export const TimelinesRoutes = () => (
+const TimelinesRoutesComponent = () => (
   <Switch>
-    <Route path="/" render={() => <Timelines />} />
-    <Route render={() => <NotFoundPage />} />
+    <Route path="/">
+      <Timelines />
+    </Route>
+    <Route>
+      <NotFoundPage />
+    </Route>
   </Switch>
 );
+
+export const TimelinesRoutes = React.memo(TimelinesRoutesComponent);
