@@ -27,9 +27,7 @@ describe('StatefulFieldsBrowser', () => {
           browserFields={mockBrowserFields}
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}
-          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
@@ -46,9 +44,7 @@ describe('StatefulFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
-            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -64,9 +60,7 @@ describe('StatefulFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
-            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -89,9 +83,7 @@ describe('StatefulFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
-            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -115,9 +107,7 @@ describe('StatefulFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
-            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -152,9 +142,7 @@ describe('StatefulFieldsBrowser', () => {
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}
           isEventViewer={isEventViewer}
-          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
@@ -173,9 +161,7 @@ describe('StatefulFieldsBrowser', () => {
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}
           isEventViewer={isEventViewer}
-          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
