@@ -21,6 +21,10 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { NotificationsStart } from 'kibana/public';
 import { toastDrilldownsCRUDError } from '../../hooks/i18n';
 
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
+
 const storage = new Storage(new StubBrowserStorage());
 const toasts = coreMock.createStart().notifications.toasts;
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({

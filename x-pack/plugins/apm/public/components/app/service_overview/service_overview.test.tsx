@@ -24,7 +24,7 @@ import { waitFor } from '@testing-library/dom';
 import * as callApmApi from '../../../services/rest/createCallApmApi';
 
 const KibanaReactContext = createKibanaReactContext({
-  usageCollection: { reportUiStats: () => {} },
+  usageCollection: { reportUiCounter: () => {} },
 } as Partial<CoreStart>);
 
 function Wrapper({ children }: { children?: ReactNode }) {
@@ -72,8 +72,7 @@ describe('ServiceOverview', () => {
         error_groups: [],
         total_error_groups: 0,
       },
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      'GET /api/apm/services/{serviceName}/overview_transaction_groups': {
+      'GET /api/apm/services/{serviceName}/transactions/groups/overview': {
         transactionGroups: [],
         totalTransactionGroups: 0,
         isAggregationAccurate: true,
