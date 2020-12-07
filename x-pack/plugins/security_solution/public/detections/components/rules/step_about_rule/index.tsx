@@ -74,8 +74,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
   const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
 
-  const canUseExceptions = defineRuleData?.ruleType;
-
   const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
@@ -281,7 +279,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   'data-test-subj': 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   euiFieldProps: {
-                    disabled: isLoading || !canUseExceptions,
+                    disabled: isLoading,
                   },
                 }}
               />

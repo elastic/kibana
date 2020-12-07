@@ -103,7 +103,6 @@ enum RuleDetailTabs {
 }
 
 const getRuleDetailsTabs = (rule: Rule | null) => {
-  const canUseExceptions = rule;
   return [
     {
       id: RuleDetailTabs.alerts,
@@ -114,7 +113,7 @@ const getRuleDetailsTabs = (rule: Rule | null) => {
     {
       id: RuleDetailTabs.exceptions,
       name: i18n.EXCEPTIONS_TAB,
-      disabled: !canUseExceptions,
+      disabled: false,
       dataTestSubj: 'exceptionsTab',
     },
     {

@@ -322,10 +322,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setOpenAddExceptionModal('detection');
   }, [closePopover]);
 
-  const areExceptionsAllowed = useMemo((): boolean => {
-    return true;
-  }, []);
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const addExceptionComponent = (
     <EuiContextMenuItem
@@ -334,7 +330,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="add-exception-menu-item"
       id="addException"
       onClick={handleAddExceptionClick}
-      disabled={!canUserCRUD || !hasIndexWrite || !areExceptionsAllowed}
+      disabled={!canUserCRUD || !hasIndexWrite}
     >
       <EuiText data-test-subj="addExceptionButton" size="m">
         {i18n.ACTION_ADD_EXCEPTION}
