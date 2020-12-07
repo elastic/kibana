@@ -32,6 +32,25 @@ import { AliasAction } from './actions';
 import { ControlState, stateActionMachine } from './state_action_machine';
 import { SavedObjectsRawDoc, SavedObjectsSerializer } from '..';
 
+/**
+ * How many times to retry a failing step.
+ *
+ * Waiting for a task to complete will cause a failing step every time the
+ * wait_for_task action times out e.g. the following sequence has 3 retry
+ * attempts:
+ * LEGACY_REINDEX_WAIT_FOR_TASK (60s timeout) ->
+ * LEGACY_REINDEX_WAIT_FOR_TASK (2s delay, 60s timeout) ->
+ * LEGACY_REINDEX_WAIT_FOR_TASK (4s delay, 60s timeout) ->
+ * LEGACY_REINDEX_WAIT_FOR_TASK (success) -> ...
+ *
+ * This places an upper limit to how long we will wait for a task to complete.
+ * The duration of a step is the time it takes for the action to complete plus
+ * the exponential retry delay:
+ * max_task_runtime = 2+4+8+16+32+64*(MAX_RETRY_ATTEMPTS-5) + ACTION_DURATION*MAX_RETRY_ATTEMPTS
+ *
+ * For MAX_RETRY_ATTEMPTS=10, ACTION_DURATION=60
+ * max_task_runtime = 16.46 minutes
+ */
 const MAX_RETRY_ATTEMPTS = 10;
 
 export interface BaseState extends ControlState {
@@ -768,12 +787,12 @@ export const nextActionMap = (
       ),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),
+    LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
+      Actions.setWriteBlock(client, state.legacy),
     LEGACY_CREATE_REINDEX_TARGET: (state: LegacyCreateReindexTargetState) =>
       Actions.createIndex(client, state.source.value, state.legacyReindexTargetMappings),
     LEGACY_REINDEX: (state: LegacyReindexState) =>
       Actions.reindex(client, state.legacy, state.source.value, state.preMigrationScript),
-    LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
-      Actions.setWriteBlock(client, state.legacy),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForReindexTask(client, state.legacyReindexTaskId, '60s'),
     LEGACY_DELETE: (state: LegacyDeleteState) =>
