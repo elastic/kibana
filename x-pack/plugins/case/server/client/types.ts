@@ -31,12 +31,15 @@ export interface CaseClientAddComment {
   comment: CommentRequest;
 }
 
+type PartialExceptFor<T, K extends keyof T> = Partial<T> & Pick<T, K>;
+
 export interface CaseClientFactoryArguments {
   savedObjectsClient: SavedObjectsClientContract;
   request: KibanaRequest;
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
+  context?: PartialExceptFor<RequestHandlerContext, 'core'>;
 }
 
 export interface CaseClient {

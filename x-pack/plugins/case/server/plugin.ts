@@ -150,6 +150,7 @@ export class CasePlugin {
             caseConfigureService,
             userActionService,
             request,
+            context,
           });
         },
       };

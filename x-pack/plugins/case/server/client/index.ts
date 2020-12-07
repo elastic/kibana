@@ -17,6 +17,7 @@ export const createCaseClient = ({
   caseConfigureService,
   caseService,
   userActionService,
+  context,
 }: CaseClientFactoryArguments): CaseClient => {
   return {
     create: create({
@@ -25,6 +26,7 @@ export const createCaseClient = ({
       caseConfigureService,
       caseService,
       userActionService,
+      context,
     }),
     update: update({
       savedObjectsClient,
@@ -32,6 +34,7 @@ export const createCaseClient = ({
       caseConfigureService,
       caseService,
       userActionService,
+      context,
     }),
     addComment: addComment({
       savedObjectsClient,
@@ -39,6 +42,7 @@ export const createCaseClient = ({
       caseConfigureService,
       caseService,
       userActionService,
+      context,
     }),
   };
 };
