@@ -24,6 +24,7 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 
 import { createFilterIpRange } from './create_filter/ip_range';
 import { IpRangeKey, RangeIpRangeAggKey, CidrMaskIpRangeAggKey } from './lib/ip_range';
+import { aggIpRangeFnName } from './ip_range_fn';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { BaseAggParams } from '../types';
 
@@ -48,6 +49,7 @@ export interface AggParamsIpRange extends BaseAggParams {
 export const getIpRangeBucketAgg = () =>
   new BucketAggType({
     name: BUCKET_TYPES.IP_RANGE,
+    expressionName: aggIpRangeFnName,
     title: ipRangeTitle,
     createFilter: createFilterIpRange,
     getKey(bucket, key, agg): IpRangeKey {

@@ -14,7 +14,7 @@ describe('Pane', () => {
   test('renders correctly against snapshot', () => {
     const EmptyComponent = shallow(
       <TestProviders>
-        <Pane onClose={jest.fn()} timelineId={'test'} usersViewing={[]} />
+        <Pane timelineId={'test'} />
       </TestProviders>
     );
     expect(EmptyComponent.find('Pane')).toMatchSnapshot();

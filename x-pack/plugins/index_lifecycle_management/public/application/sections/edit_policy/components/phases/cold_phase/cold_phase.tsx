@@ -9,17 +9,23 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-import { EuiDescribedFormGroup, EuiTextColor } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiTextColor, EuiAccordion } from '@elastic/eui';
 
 import { Phases } from '../../../../../../../common/types';
 
 import { useFormData, UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
+import { useConfigurationIssues } from '../../../form';
 
 import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
 
-import { MinAgeInputField, DataTierAllocationField, SetPriorityInput } from '../shared_fields';
+import {
+  MinAgeInputField,
+  DataTierAllocationField,
+  SetPriorityInputField,
+  SearchableSnapshotField,
+} from '../shared_fields';
 
 const i18nTexts = {
   dataTierAllocation: {
@@ -34,16 +40,19 @@ const coldProperty: keyof Phases = 'cold';
 
 const formFieldPaths = {
   enabled: '_meta.cold.enabled',
+  searchableSnapshot: 'phases.cold.actions.searchable_snapshot.snapshot_repository',
 };
 
 export const ColdPhase: FunctionComponent = () => {
   const { policy } = useEditPolicyContext();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   const [formData] = useFormData({
-    watch: [formFieldPaths.enabled],
+    watch: [formFieldPaths.enabled, formFieldPaths.searchableSnapshot],
   });
 
   const enabled = get(formData, formFieldPaths.enabled);
+  const showReplicasField = get(formData, formFieldPaths.searchableSnapshot) == null;
 
   return (
     <div id="coldPhaseContent" aria-live="polite" role="region">
@@ -91,83 +100,104 @@ export const ColdPhase: FunctionComponent = () => {
         </EuiDescribedFormGroup>
         {enabled && (
           <>
-            {/* Data tier allocation section */}
-            <DataTierAllocationField
-              description={i18nTexts.dataTierAllocation.description}
-              phase={coldProperty}
-            />
+            <SearchableSnapshotField phase="cold" />
 
-            {/* Replicas section */}
-            <DescribedFormField
-              title={
-                <h3>
-                  {i18n.translate('xpack.indexLifecycleMgmt.coldPhase.replicasTitle', {
-                    defaultMessage: 'Replicas',
-                  })}
-                </h3>
-              }
-              description={i18n.translate(
-                'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasDescription',
+            <EuiAccordion
+              id="ilmWarmPhaseAdvancedSettings"
+              buttonContent={i18n.translate(
+                'xpack.indexLifecycleMgmt.warmPhase.advancedSettingsButton',
                 {
-                  defaultMessage:
-                    'Set the number of replicas. Remains the same as the previous phase by default.',
+                  defaultMessage: 'Advanced settings',
                 }
               )}
-              switchProps={{
-                'data-test-subj': 'cold-setReplicasSwitch',
-                label: i18n.translate(
-                  'xpack.indexLifecycleMgmt.editPolicy.coldPhase.numberOfReplicas.switchLabel',
-                  { defaultMessage: 'Set replicas' }
-                ),
-                initialValue: Boolean(policy.phases.cold?.actions?.allocate?.number_of_replicas),
-              }}
-              fullWidth
+              paddingSize="m"
             >
-              <UseField
-                path="phases.cold.actions.allocate.number_of_replicas"
-                component={NumericField}
-                componentProps={{
-                  fullWidth: false,
-                  euiFieldProps: {
-                    'data-test-subj': `${coldProperty}-selectedReplicaCount`,
-                    min: 0,
-                  },
-                }}
-              />
-            </DescribedFormField>
-            {/* Freeze section */}
-            <EuiDescribedFormGroup
-              title={
-                <h3>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
-                    defaultMessage="Freeze"
+              {
+                /* Replicas section */
+                showReplicasField && (
+                  <DescribedFormField
+                    title={
+                      <h3>
+                        {i18n.translate('xpack.indexLifecycleMgmt.coldPhase.replicasTitle', {
+                          defaultMessage: 'Replicas',
+                        })}
+                      </h3>
+                    }
+                    description={i18n.translate(
+                      'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasDescription',
+                      {
+                        defaultMessage:
+                          'Set the number of replicas. Remains the same as the previous phase by default.',
+                      }
+                    )}
+                    switchProps={{
+                      'data-test-subj': 'cold-setReplicasSwitch',
+                      label: i18n.translate(
+                        'xpack.indexLifecycleMgmt.editPolicy.coldPhase.numberOfReplicas.switchLabel',
+                        { defaultMessage: 'Set replicas' }
+                      ),
+                      initialValue: Boolean(
+                        policy.phases.cold?.actions?.allocate?.number_of_replicas
+                      ),
+                    }}
+                    fullWidth
+                  >
+                    <UseField
+                      path="phases.cold.actions.allocate.number_of_replicas"
+                      component={NumericField}
+                      componentProps={{
+                        fullWidth: false,
+                        euiFieldProps: {
+                          'data-test-subj': `${coldProperty}-selectedReplicaCount`,
+                          min: 0,
+                        },
+                      }}
+                    />
+                  </DescribedFormField>
+                )
+              }
+
+              {/* Freeze section */}
+              {!isUsingSearchableSnapshotInHotPhase && (
+                <EuiDescribedFormGroup
+                  title={
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
+                        defaultMessage="Freeze"
+                      />
+                    </h3>
+                  }
+                  description={
+                    <EuiTextColor color="subdued">
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
+                        defaultMessage="Make the index read-only and minimize its memory footprint."
+                      />{' '}
+                      <LearnMoreLink docPath="frozen-indices.html" />
+                    </EuiTextColor>
+                  }
+                  fullWidth
+                  titleSize="xs"
+                >
+                  <UseField
+                    path="_meta.cold.freezeEnabled"
+                    component={ToggleField}
+                    componentProps={{
+                      euiFieldProps: {
+                        'data-test-subj': 'freezeSwitch',
+                      },
+                    }}
                   />
-                </h3>
-              }
-              description={
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
-                    defaultMessage="Make the index read-only and minimize its memory footprint."
-                  />{' '}
-                  <LearnMoreLink docPath="frozen-indices.html" />
-                </EuiTextColor>
-              }
-              fullWidth
-              titleSize="xs"
-            >
-              <UseField
-                path="_meta.cold.freezeEnabled"
-                component={ToggleField}
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': 'freezeSwitch',
-                  },
-                }}
+                </EuiDescribedFormGroup>
+              )}
+              {/* Data tier allocation section */}
+              <DataTierAllocationField
+                description={i18nTexts.dataTierAllocation.description}
+                phase={coldProperty}
               />
-            </EuiDescribedFormGroup>
-            <SetPriorityInput phase={coldProperty} />
+              <SetPriorityInputField phase={coldProperty} />
+            </EuiAccordion>
           </>
         )}
       </>

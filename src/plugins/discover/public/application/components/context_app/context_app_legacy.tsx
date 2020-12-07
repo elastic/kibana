@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import './context_app_legacy.scss';
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { EuiPanel, EuiText, EuiPageContent, EuiPage } from '@elastic/eui';
+import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage } from '@elastic/eui';
 import { ContextErrorMessage } from '../context_error_message';
 import {
   DocTableLegacy,
@@ -100,14 +99,9 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   const loadingFeedback = () => {
     if (status === LOADING_STATUS.UNINITIALIZED || status === LOADING_STATUS.LOADING) {
       return (
-        <EuiPanel paddingSize="l" data-test-subj="contextApp_loadingIndicator">
-          <EuiText textAlign="center">
-            <FormattedMessage
-              id="discover.context.loadingDescription"
-              defaultMessage="Loading..."
-            />
-          </EuiText>
-        </EuiPanel>
+        <EuiText textAlign="center" data-test-subj="contextApp_loadingIndicator">
+          <FormattedMessage id="discover.context.loadingDescription" defaultMessage="Loading..." />
+        </EuiText>
       );
     }
     return null;
@@ -122,13 +116,13 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
           <EuiPageContent paddingSize="s" className="dscCxtAppContent">
             <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
             {loadingFeedback()}
+            <EuiHorizontalRule margin="xs" />
             {isLoaded ? (
-              <EuiPanel paddingSize="none">
-                <div className="discover-table">
-                  <DocTableLegacy {...docTableProps()} />
-                </div>
-              </EuiPanel>
+              <div className="discover-table">
+                <DocTableLegacy {...docTableProps()} />
+              </div>
             ) : null}
+            <EuiHorizontalRule margin="xs" />
             <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
           </EuiPageContent>
         </EuiPage>

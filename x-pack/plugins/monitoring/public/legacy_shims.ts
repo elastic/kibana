@@ -61,6 +61,7 @@ export interface IShims {
   isCloud: boolean;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  kibanaServices: CoreStart & { usageCollection: UsageCollectionSetup };
 }
 
 export class Legacy {
@@ -123,6 +124,10 @@ export class Legacy {
       isCloud,
       triggersActionsUi,
       usageCollection,
+      kibanaServices: {
+        ...core,
+        usageCollection,
+      },
     };
   }
 

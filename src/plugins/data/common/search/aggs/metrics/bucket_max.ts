@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { aggBucketMaxFnName } from './bucket_max_fn';
 import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
@@ -42,6 +43,7 @@ export const getBucketMaxMetricAgg = () => {
 
   return new MetricAggType({
     name: METRIC_TYPES.MAX_BUCKET,
+    expressionName: aggBucketMaxFnName,
     title: maxBucketTitle,
     makeLabel: (agg) => makeNestedLabel(agg, overallMaxLabel),
     subtype,

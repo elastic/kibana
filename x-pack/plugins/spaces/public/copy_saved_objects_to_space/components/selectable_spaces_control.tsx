@@ -72,7 +72,7 @@ export const SelectableSpacesControl = (props: Props) => {
         className: 'spcCopyToSpace__spacesList',
         'data-test-subj': 'cts-form-space-selector',
       }}
-      searchable
+      searchable={options.length > 6}
     >
       {(list, search) => {
         return (

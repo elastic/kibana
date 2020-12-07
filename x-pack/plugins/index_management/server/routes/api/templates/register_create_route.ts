@@ -51,9 +51,13 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
         return res.ok({ body: response });
       } catch (e) {
         if (lib.isEsError(e)) {
+          const error = lib.parseEsError(e.response);
           return res.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: {
+              message: error.message,
+              attributes: error,
+            },
           });
         }
         // Case: default

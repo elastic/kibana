@@ -27,7 +27,7 @@ import { MaybeViewTraceLink } from './MaybeViewTraceLink';
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
-type DistributionApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups/distribution'>;
+type DistributionApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/distribution'>;
 
 type DistributionBucket = DistributionApiResponse['buckets'][0];
 

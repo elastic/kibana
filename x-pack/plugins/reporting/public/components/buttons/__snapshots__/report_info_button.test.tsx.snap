@@ -50,7 +50,7 @@ Array [
       />
     </EuiOverlayMask>
     <EuiFocusTrap
-      clickOutsideDisables={true}
+      clickOutsideDisables={false}
     >
       <div
         data-eui="EuiFocusTrap"
@@ -251,7 +251,7 @@ Array [
       />
     </EuiOverlayMask>
     <EuiFocusTrap
-      clickOutsideDisables={true}
+      clickOutsideDisables={false}
     >
       <div
         data-eui="EuiFocusTrap"

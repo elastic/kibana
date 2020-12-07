@@ -304,7 +304,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                         url="/plugins/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
-                          className="euiImage "
+                          className="euiImage euiImage--original"
                         >
                           <img
                             alt=""
@@ -1023,7 +1023,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                         url="/plugins/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
-                          className="euiImage "
+                          className="euiImage euiImage--original"
                         >
                           <img
                             alt=""

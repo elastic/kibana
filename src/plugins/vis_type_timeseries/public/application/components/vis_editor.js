@@ -181,7 +181,6 @@ export class VisEditor extends Component {
                   fields={this.state.visFields}
                   model={model}
                   visData$={this.visData$}
-                  dateFormat={this.props.config.get('dateFormat')}
                   onChange={this.handleChange}
                   getConfig={this.getConfig}
                 />

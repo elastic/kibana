@@ -23,7 +23,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggIpRange';
+export const aggIpRangeFnName = 'aggIpRange';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.IP_RANGE>;
@@ -31,10 +31,15 @@ type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.IP_RANGE>;
 type Arguments = Assign<AggArgs, { ranges?: string; ipRangeType?: string }>;
 
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggIpRangeFnName,
+  Input,
+  Arguments,
+  Output
+>;
 
 export const aggIpRange = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggIpRangeFnName,
   help: i18n.translate('data.search.aggs.function.buckets.ipRange.help', {
     defaultMessage: 'Generates a serialized agg config for a Ip Range agg',
   }),

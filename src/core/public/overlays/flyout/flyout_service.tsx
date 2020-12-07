@@ -19,7 +19,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutSize } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -93,6 +93,8 @@ export interface OverlayFlyoutOpenOptions {
   closeButtonAriaLabel?: string;
   ownFocus?: boolean;
   'data-test-subj'?: string;
+  size?: EuiFlyoutSize;
+  maxWidth?: boolean | number | string;
 }
 
 interface StartDeps {
