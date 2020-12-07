@@ -29,8 +29,7 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
       // Get cluster privileges
       const {
         body: { has_all_requested: hasAllPrivileges, cluster },
-      } = await ctx.core.elasticsearch.client.asCurrentUser.transport.request({
-        path: '/_security/user/_has_privileges',
+      } = await ctx.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
         method: 'POST',
         body: {
           cluster: APP_CLUSTER_PRIVILEGES,
@@ -44,8 +43,7 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
       // Get all index privileges the user has
       const {
         body: { indices },
-      } = await ctx.core.elasticsearch.client.asCurrentUser.transport.request({
-        path: '/_security/user/_privileges',
+      } = await ctx.core.elasticsearch.client.asCurrentUser.security.getUserPrivileges({
         method: 'GET',
       });
 
