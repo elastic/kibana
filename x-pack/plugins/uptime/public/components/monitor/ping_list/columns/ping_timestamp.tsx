@@ -74,8 +74,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
 
   const { basePath } = useContext(UptimeSettingsContext);
 
-  const imgPath =
-    basePath + `/api/uptime/journey//1screenshot/${ping.monitor.check_group}/${stepNo}`;
+  const imgPath = basePath + `/api/uptime/journey/screenshot/${ping.monitor.check_group}/${stepNo}`;
 
   const intersection = useIntersection(intersectionRef, {
     root: null,
