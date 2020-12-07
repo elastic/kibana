@@ -20,5 +20,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/vis_type_vislib'],
+  roots: ['<rootDir>/src/plugins/vis_type_xy'],
 };
