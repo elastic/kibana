@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from 'x-pack/plugins/task_manager/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -60,7 +60,7 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
       eqlSearchStrategyProvider(this.logger)
     );
 
-    this.sessionService = new BackgroundSessionService();
+    this.sessionService = new BackgroundSessionService(this.logger);
 
     deps.data.__enhance({
       search: {
@@ -71,14 +71,17 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
 
     const router = core.http.createRouter();
     registerSessionRoutes(router);
-    registerBackgroundSessionsTask(core, deps.taskManager, this.logger);
+    // registerBackgroundSessionsTask(core, deps.taskManager, this.logger);
   }
 
   public start(core: CoreStart, { taskManager }: StartDependencies) {
-    scheduleBackgroundSessionsTasks(taskManager, this.logger);
+    // scheduleBackgroundSessionsTasks(taskManager, this.logger);
+    this.sessionService.start(core, this.initializerContext.config.create());
   }
 
-  public stop() {}
+  public stop() {
+    this.sessionService.stop();
+  }
 }
 
 export { EnhancedDataServerPlugin as Plugin };
