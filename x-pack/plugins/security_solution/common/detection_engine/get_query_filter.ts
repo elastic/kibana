@@ -27,8 +27,6 @@ export const getQueryFilter = (
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   excludeExceptions: boolean = true
 ): ESBoolQuery => {
-  console.log('-----------> Exception list size:', lists.length);
-  console.time('getQueryFilter');
   const indexPattern: IIndexPattern = {
     fields: [],
     title: index.join(),
@@ -59,9 +57,7 @@ export const getQueryFilter = (
   }
   const initialQuery = { query, language };
 
-  const esQuery = buildEsQuery(indexPattern, initialQuery, enabledFilters, config);
-  console.timeEnd('getQueryFilter');
-  return esQuery;
+  return buildEsQuery(indexPattern, initialQuery, enabledFilters, config);
 };
 
 interface EqlSearchRequest {

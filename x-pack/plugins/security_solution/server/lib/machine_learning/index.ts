@@ -6,8 +6,8 @@
 
 import { RequestParams } from '@elastic/elasticsearch';
 
+import { buildExceptionFilter } from '../../../common/detection_engine/build_exceptions_filter';
 import { ExceptionListItemSchema } from '../../../../lists/common';
-import { buildExceptionFilter } from '../../../common/detection_engine/get_query_filter';
 import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 import { SearchResponse } from '../types';
 

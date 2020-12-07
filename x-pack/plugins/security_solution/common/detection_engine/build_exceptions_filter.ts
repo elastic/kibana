@@ -4,16 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  buildEsQuery,
-  EsQueryConfig,
-  Filter,
-  IIndexPattern,
-} from '../../../../../src/plugins/data/common';
+import { EsQueryConfig, Filter, IIndexPattern } from '../../../../../src/plugins/data/common';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
-  Entry,
   EntryMatch,
   EntryMatchAny,
   EntryNested,
@@ -24,19 +18,31 @@ import {
   EntryExists,
 } from '../../../lists/common';
 import { BooleanFilter, NestedFilter } from './types';
+import { hasLargeValueList } from './utils';
+
+type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists;
+interface ExceptionListItemNonLargeList extends ExceptionListItemSchema {
+  entries: NonListEntry[];
+}
+
+interface CreateExceptionListItemNonLargeList extends CreateExceptionListItemSchema {
+  entries: NonListEntry[];
+}
+
+export type ExceptionItemSansLargeValueLIsts =
+  | ExceptionListItemNonLargeList
+  | CreateExceptionListItemNonLargeList;
 
 export const chunkExceptions = (
-  exceptions: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  exceptions: ExceptionItemSansLargeValueLIsts[],
   chunkSize: number
-): Array<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>> => {
+): ExceptionItemSansLargeValueLIsts[][] => {
   if (exceptions.length === 0) {
     return [];
   } else if (exceptions.length <= chunkSize) {
     return [exceptions];
   } else {
-    const chunkedFilters: Array<
-      Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
-    > = [];
+    const chunkedFilters: ExceptionItemSansLargeValueLIsts[][] = [];
     for (let index = 0; index < exceptions.length; index += chunkSize) {
       const exceptionsChunks = exceptions.slice(index, index + chunkSize);
       chunkedFilters.push(exceptionsChunks);
@@ -46,7 +52,7 @@ export const chunkExceptions = (
 };
 
 export const buildExceptionItemFilter = (
-  exceptionItem: ExceptionListItemSchema | CreateExceptionListItemSchema
+  exceptionItem: ExceptionItemSansLargeValueLIsts
 ): BooleanFilter | NestedFilter => {
   const { entries } = exceptionItem;
 
@@ -62,7 +68,7 @@ export const buildExceptionItemFilter = (
 };
 
 export const createOrClauses = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+  exceptionItems: ExceptionItemSansLargeValueLIsts[]
 ): Array<BooleanFilter | NestedFilter> => {
   return exceptionItems.map((exceptionItem) => buildExceptionItemFilter(exceptionItem));
 };
@@ -80,33 +86,13 @@ export const buildExceptionFilter = ({
   chunkSize: number;
   indexPattern?: IIndexPattern;
 }): Filter | undefined => {
-  if (lists.length === 0) {
-    return undefined;
-  }
+  // Remove exception items with large value lists. These are evaluated
+  // elsewhere for the moment being.
+  const exceptionsWithoutLargeValueLists = lists.filter(
+    ({ entries }) => !hasLargeValueList(entries)
+  ) as ExceptionItemSansLargeValueLIsts[];
 
-  const chunks = chunkExceptions(lists, chunkSize);
-
-  const filters: Filter[] = chunks.flatMap((exceptionsChunk) => {
-    const orClauses = createOrClauses(exceptionsChunk);
-    // console.log('CLAUSES', JSON.stringify(orClauses));
-    return {
-      meta: {
-        alias: null,
-        negate: false,
-        disabled: false,
-      },
-      query: {
-        bool: {
-          should: orClauses,
-        },
-      },
-    };
-  });
-
-  const clauses = buildEsQuery(indexPattern, [], filters, config).bool.filter;
-  const shouldClause = clauses.flatMap((clause) => clause.bool.should);
-
-  return {
+  const exceptionFilter: Filter = {
     meta: {
       alias: null,
       negate: excludeExceptions,
@@ -114,10 +100,52 @@ export const buildExceptionFilter = ({
     },
     query: {
       bool: {
-        should: shouldClause,
+        should: undefined,
       },
     },
   };
+
+  if (exceptionsWithoutLargeValueLists.length === 0) {
+    return undefined;
+  } else if (exceptionsWithoutLargeValueLists.length <= chunkSize) {
+    const clause = createOrClauses(exceptionsWithoutLargeValueLists);
+    exceptionFilter.query.bool.should = clause;
+    return exceptionFilter;
+  } else {
+    const chunks = chunkExceptions(exceptionsWithoutLargeValueLists, chunkSize);
+
+    const filters: Filter[] = chunks.map((exceptionsChunk) => {
+      const orClauses = createOrClauses(exceptionsChunk);
+
+      return {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+        },
+        query: {
+          bool: {
+            should: orClauses,
+          },
+        },
+      };
+    });
+
+    const clauses: BooleanFilter[] = filters.map(({ query }) => query);
+
+    return {
+      meta: {
+        alias: null,
+        negate: excludeExceptions,
+        disabled: false,
+      },
+      query: {
+        bool: {
+          should: clauses,
+        },
+      },
+    };
+  }
 };
 
 export const buildExclusionClause = (booleanFilter: BooleanFilter): BooleanFilter => {
@@ -128,7 +156,7 @@ export const buildExclusionClause = (booleanFilter: BooleanFilter): BooleanFilte
   };
 };
 
-export const buildMatchClause = (entry: EntryMatch, wrapInBooleanFilter = true): BooleanFilter => {
+export const buildMatchClause = (entry: EntryMatch): BooleanFilter => {
   const { field, operator, value } = entry;
   const matchClause = {
     bool: {
@@ -222,10 +250,19 @@ export const buildExistsClause = (entry: EntryExists): BooleanFilter => {
   }
 };
 
-export const getBaseNestedClause = (entries: Entry[], parentField: string): BooleanFilter => {
+const isBooleanFilter = (clause: object): clause is BooleanFilter => {
+  const keys = Object.keys(clause);
+  return keys.includes('bool') != null;
+};
+
+export const getBaseNestedClause = (
+  entries: NonListEntry[],
+  parentField: string
+): BooleanFilter => {
   if (entries.length === 1) {
     const [singleNestedEntry] = entries;
-    return createInnerAndClauses(singleNestedEntry, parentField);
+    const innerClause = createInnerAndClauses(singleNestedEntry, parentField);
+    return isBooleanFilter(innerClause) ? innerClause : { bool: {} };
   }
 
   return {
@@ -250,7 +287,7 @@ export const buildNestedClause = (entry: EntryNested): NestedFilter => {
 };
 
 export const createInnerAndClauses = (
-  entry: EntryMatch | EntryMatchAny | EntryNested | EntryExists,
+  entry: NonListEntry,
   parent?: string
 ): BooleanFilter | NestedFilter => {
   if (entriesExists.is(entry)) {

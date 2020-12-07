@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { buildEsQuery, EsQueryConfig, IIndexPattern } from 'src/plugins/data/common';
+import { EsQueryConfig, IIndexPattern } from 'src/plugins/data/common';
 
 import {
   getEntryMatchMock,
@@ -37,24 +37,34 @@ import {
   createOrClauses,
   chunkExceptions,
   buildExceptionFilter,
+  ExceptionItemSansLargeValueLIsts,
 } from './build_exceptions_filter';
-import { EntryMatchAny } from '../../common/shared_imports';
+import { EntryMatchAny, ExceptionListItemSchema } from '../../common/shared_imports';
+import { hasLargeValueList } from './utils';
 
 const modifiedGetEntryMatchAnyMock = (): EntryMatchAny => ({
   ...getEntryMatchAnyMock(),
   operator: 'included',
-  value: ['some host name', 'some other host name'],
+  value: ['some "host" name', 'some other host name'],
 });
 
 const mockIndexPattern: IIndexPattern = {
   fields: [],
   title: '.auditbeat',
 };
+
 const mockConfig: EsQueryConfig = {
   allowLeadingWildcards: true,
   queryStringOptions: { analyze_wildcard: true },
   ignoreFilterIfFieldNotInIndex: false,
   dateFormatTZ: 'Zulu',
+};
+
+const getExceptionListItemsWoValueLists = (num: number): ExceptionItemSansLargeValueLIsts[] => {
+  const items = getExceptionListItemSchemaXMock(num);
+  return items.filter(
+    ({ entries }) => !hasLargeValueList(entries)
+  ) as ExceptionItemSansLargeValueLIsts[];
 };
 
 describe('build_exceptions_filter', () => {
@@ -70,15 +80,194 @@ describe('build_exceptions_filter', () => {
       expect(booleanFilter).toBeUndefined();
     });
 
-    /*
-     * Some of the following tests are more sanity checks. We previously were
-     * converting exceptions to KQL by using the `buildEsQuery` util from the
-     * data plugin to create the ES DSL. Since this util is widely used by other
-     * teams and likely kept more up to date, using this util in the tests could help
-     * us keep an eye out on if anything changes in the syntax and we need to update
-     * how we build our ES queries.
-     */
-    test('it should format all exception item and their entries as expected', () => {
+    test('it should build a filter without chunking exception items', () => {
+      const exceptionItem1: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [
+          { field: 'host.name', operator: 'included', type: 'match', value: 'linux' },
+          { field: 'some.field', operator: 'included', type: 'match', value: 'value' },
+        ],
+      };
+      const exceptionItem2: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [{ field: 'user.name', operator: 'included', type: 'match', value: 'name' }],
+      };
+      const exceptionFilter = buildExceptionFilter({
+        lists: [exceptionItem1, exceptionItem2],
+        config: mockConfig,
+        excludeExceptions: true,
+        chunkSize: 2,
+        indexPattern: {
+          fields: [],
+          title: 'auditbeat-*',
+        },
+      });
+      expect(exceptionFilter).toEqual({
+        meta: {
+          alias: null,
+          negate: true,
+          disabled: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match_phrase: {
+                              'host.name': 'linux',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match_phrase: {
+                              'some.field': 'value',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match_phrase: {
+                        'user.name': 'name',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    test('it should properly chunk exception items', () => {
+      const exceptionItem1: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [
+          { field: 'host.name', operator: 'included', type: 'match', value: 'linux' },
+          { field: 'some.field', operator: 'included', type: 'match', value: 'value' },
+        ],
+      };
+      const exceptionItem2: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [{ field: 'user.name', operator: 'included', type: 'match', value: 'name' }],
+      };
+      const exceptionItem3: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [{ field: 'file.path', operator: 'included', type: 'match', value: '/safe/path' }],
+      };
+      const exceptionFilter = buildExceptionFilter({
+        lists: [exceptionItem1, exceptionItem2, exceptionItem3],
+        config: mockConfig,
+        excludeExceptions: true,
+        chunkSize: 2,
+        indexPattern: {
+          fields: [],
+          title: 'auditbeat-*',
+        },
+      });
+
+      expect(exceptionFilter).toEqual({
+        meta: {
+          alias: null,
+          negate: true,
+          disabled: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match_phrase: {
+                                    'host.name': 'linux',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match_phrase: {
+                                    'some.field': 'value',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match_phrase: {
+                              'user.name': 'name',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match_phrase: {
+                              'file.path': '/safe/path',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    test('it should format all exception items and their entries as expected', () => {
       const exceptions = [
         { ...getExceptionListItemSchemaMock(), entries: [getEntryNestedMixedEntries()] },
         { ...getExceptionListItemSchemaMock(), entries: [modifiedGetEntryMatchAnyMock()] },
@@ -87,16 +276,7 @@ describe('build_exceptions_filter', () => {
           entries: [getEntryExistsExcludedMock(), getEntryMatchMock()],
         },
       ];
-      const exceptionsAsKql = [
-        {
-          language: 'kuery',
-          query:
-            'parent.field:{ host.name:"some host name" and not host.name:("some host name" or "some other host name") and host.name:* }',
-        },
-        { language: 'kuery', query: 'host.name:("some host name" or "some other host name")' },
-        { language: 'kuery', query: 'not host.name:* and host.name:"some host name"' },
-      ];
-      const expected = buildEsQuery(mockIndexPattern, exceptionsAsKql, [], mockConfig);
+
       const booleanFilter = buildExceptionFilter({
         lists: exceptions,
         excludeExceptions: true,
@@ -104,215 +284,150 @@ describe('build_exceptions_filter', () => {
         config: mockConfig,
         indexPattern: mockIndexPattern,
       });
-      console.log('GOT', JSON.stringify(booleanFilter?.query.bool.should));
-      console.log('EXPECTED', JSON.stringify(expected.bool.filter));
-      expect(booleanFilter?.query.bool.should).toEqual(expected.bool.filter);
-    });
 
-    describe('match', () => {
-      test('it should return boolean filter when multiple exception items include "match" entries', () => {
-        const exceptions = [
-          {
-            ...getExceptionListItemSchemaMock(),
-            entries: [getEntryMatchMock(), getEntryMatchExcludeMock()],
+      expect(booleanFilter).toEqual({
+        meta: { alias: null, negate: true, disabled: false },
+        query: {
+          bool: {
+            should: [
+              {
+                bool: {
+                  should: [
+                    {
+                      nested: {
+                        path: 'parent.field',
+                        query: {
+                          bool: {
+                            filter: [
+                              {
+                                bool: {
+                                  should: [
+                                    {
+                                      match_phrase: { 'parent.field.host.name': 'some host name' },
+                                    },
+                                  ],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                              {
+                                bool: {
+                                  must_not: {
+                                    bool: {
+                                      should: [
+                                        {
+                                          bool: {
+                                            should: [
+                                              {
+                                                match_phrase: {
+                                                  'parent.field.host.name': 'some host name',
+                                                },
+                                              },
+                                            ],
+                                            minimum_should_match: 1,
+                                          },
+                                        },
+                                        {
+                                          bool: {
+                                            should: [
+                                              {
+                                                match_phrase: {
+                                                  'parent.field.host.name': 'some other host name',
+                                                },
+                                              },
+                                            ],
+                                            minimum_should_match: 1,
+                                          },
+                                        },
+                                      ],
+                                      minimum_should_match: 1,
+                                    },
+                                  },
+                                },
+                              },
+                              {
+                                bool: {
+                                  should: [{ exists: { field: 'parent.field.host.name' } }],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        score_mode: 'none',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
+                              minimum_should_match: 1,
+                            },
+                          },
+                          {
+                            bool: {
+                              should: [{ match_phrase: { 'host.name': 'some other host name' } }],
+                              minimum_should_match: 1,
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            bool: {
+                              must_not: {
+                                bool: {
+                                  should: [{ exists: { field: 'host.name' } }],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                            },
+                          },
+                          {
+                            bool: {
+                              should: [{ match_phrase: { 'host.name': 'some host name' } }],
+                              minimum_should_match: 1,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
           },
-          { ...getExceptionListItemSchemaMock(), entries: [getEntryMatchMock()] },
-        ];
-        const exceptionsAsKql = [
-          {
-            language: 'kuery',
-            query: 'host.name:"some host name" and not host.name:"some host name"',
-          },
-          { language: 'kuery', query: 'host.name:"some host name"' },
-        ];
-        const expected = buildEsQuery(mockIndexPattern, exceptionsAsKql, [], mockConfig);
-
-        const booleanFilter = buildExceptionFilter({
-          lists: exceptions,
-          excludeExceptions: true,
-          chunkSize: 1,
-          config: mockConfig,
-          indexPattern: mockIndexPattern,
-        });
-        expect(booleanFilter?.query.bool.should).toEqual(expected.bool.filter);
-      });
-
-      test('it should return boolean filter when single exception item includes "match" entries', () => {
-        const exceptions = [
-          { ...getExceptionListItemSchemaMock(), entries: [getEntryMatchMock()] },
-        ];
-        const exceptionsAsKql = [{ language: 'kuery', query: 'host.name:"some host name"' }];
-        const expected = buildEsQuery(mockIndexPattern, exceptionsAsKql, [], mockConfig);
-
-        const booleanFilter = buildExceptionFilter({
-          lists: exceptions,
-          excludeExceptions: true,
-          chunkSize: 1,
-          config: mockConfig,
-          indexPattern: mockIndexPattern,
-        });
-
-        expect(booleanFilter?.query.bool.should).toEqual(expected.bool.filter);
-      });
-    });
-
-    describe('match_any', () => {
-      test('it should return boolean filter when multiple exception items include "match_any" entries', () => {
-        const exceptions = [
-          {
-            ...getExceptionListItemSchemaMock(),
-            entries: [modifiedGetEntryMatchAnyMock(), getEntryMatchAnyExcludeMock()],
-          },
-          { ...getExceptionListItemSchemaMock(), entries: [modifiedGetEntryMatchAnyMock()] },
-        ];
-        const exceptionsAsKql = [
-          {
-            language: 'kuery',
-            query:
-              'host.name:("some host name" or "some other host name") and not host.name:("some host name" or "some other host name")',
-          },
-          { language: 'kuery', query: 'host.name:("some host name" or "some other host name")' },
-        ];
-        const expected = buildEsQuery(mockIndexPattern, exceptionsAsKql, [], mockConfig);
-
-        const booleanFilter = buildExceptionFilter({
-          lists: exceptions,
-          excludeExceptions: true,
-          chunkSize: 1,
-          config: mockConfig,
-          indexPattern: mockIndexPattern,
-        });
-        expect(booleanFilter?.query.bool.should).toEqual(expected.bool.filter);
-      });
-
-      test('it should return boolean filter when single exception item includes "match_any" entries', () => {
-        const exceptions = [
-          { ...getExceptionListItemSchemaMock(), entries: [modifiedGetEntryMatchAnyMock()] },
-        ];
-        const exceptionsAsKql = [
-          { language: 'kuery', query: 'host.name:("some host name" or "some other host name")' },
-        ];
-        const expected = buildEsQuery(mockIndexPattern, exceptionsAsKql, [], mockConfig);
-
-        const booleanFilter = buildExceptionFilter({
-          lists: exceptions,
-          excludeExceptions: true,
-          chunkSize: 1,
-          config: mockConfig,
-          indexPattern: mockIndexPattern,
-        });
-        expect(booleanFilter?.query.bool.should).toEqual(expected.bool.filter);
-      });
-    });
-
-    describe('exists', () => {
-      test('it should return boolean filter when multiple exception items include "exists" entries', () => {
-        const exceptions = [
-          {
-            ...getExceptionListItemSchemaMock(),
-            entries: [getEntryExistsMock(), getEntryExistsExcludedMock()],
-          },
-          { ...getExceptionListItemSchemaMock(), entries: [getEntryExistsMock()] },
-        ];
-        const exceptionsAsKql = [
-          { language: 'kuery', query: 'host.name:* and not host.name:*' },
-          { language: 'kuery', query: 'host.name:*' },
-        ];
-        const expected = buildEsQuery(mockIndexPattern, exceptionsAsKql, [], mockConfig);
-
-        const booleanFilter = buildExceptionFilter({
-          lists: exceptions,
-          excludeExceptions: true,
-          chunkSize: 1,
-          config: mockConfig,
-          indexPattern: mockIndexPattern,
-        });
-        expect(booleanFilter?.query.bool.should).toEqual(expected.bool.filter);
-      });
-
-      test('it should return boolean filter when single exception item includes "exists" entries', () => {
-        const exceptions = [
-          { ...getExceptionListItemSchemaMock(), entries: [getEntryExistsMock()] },
-        ];
-        const exceptionsAsKql = [{ language: 'kuery', query: 'host.name:*' }];
-        const expected = buildEsQuery(mockIndexPattern, exceptionsAsKql, [], mockConfig);
-
-        const booleanFilter = buildExceptionFilter({
-          lists: exceptions,
-          excludeExceptions: true,
-          chunkSize: 1,
-          config: mockConfig,
-          indexPattern: mockIndexPattern,
-        });
-        expect(booleanFilter?.query.bool.should).toEqual(expected.bool.filter);
-      });
-    });
-
-    describe('nested', () => {
-      test('it should return boolean filter when multiple exception items include "nested" entries', () => {
-        const exceptions = [
-          {
-            ...getExceptionListItemSchemaMock(),
-            entries: [getEntryNestedMock(), getEntryNestedExcludeMock()],
-          },
-          { ...getExceptionListItemSchemaMock(), entries: [getEntryNestedMock()] },
-        ];
-        const exceptionsAsKql = [
-          {
-            language: 'kuery',
-            query:
-              'parent.field:{ host.name:"some host name" and host.name:"some host name" } and parent.field:{ not host.name:"some host name" and not host.name:("some host name" or "some other host name") }',
-          },
-          {
-            language: 'kuery',
-            query: 'parent.field:{ host.name:"some host name" and host.name:"some host name" }',
-          },
-        ];
-        const expected = buildEsQuery(mockIndexPattern, exceptionsAsKql, [], mockConfig);
-
-        const booleanFilter = buildExceptionFilter({
-          lists: exceptions,
-          excludeExceptions: true,
-          chunkSize: 1,
-          config: mockConfig,
-          indexPattern: mockIndexPattern,
-        });
-        expect(booleanFilter?.query.bool.should).toEqual(expected.bool.filter);
-      });
-
-      test('it should return boolean filter when single exception item includes "nested" entries', () => {
-        const exceptions = [
-          { ...getExceptionListItemSchemaMock(), entries: [getEntryNestedMock()] },
-        ];
-        const exceptionsAsKql = [
-          {
-            language: 'kuery',
-            query: 'parent.field:{ host.name:"some host name" and host.name:("some host name") }',
-          },
-        ];
-        const expected = buildEsQuery(mockIndexPattern, exceptionsAsKql, [], mockConfig);
-
-        const booleanFilter = buildExceptionFilter({
-          lists: exceptions,
-          excludeExceptions: true,
-          chunkSize: 1,
-          config: mockConfig,
-          indexPattern: mockIndexPattern,
-        });
-        expect(booleanFilter?.query.bool.should).toEqual(expected.bool.filter);
+        },
       });
     });
   });
 
   describe('chunkExceptions', () => {
     test('it should NOT split a single should clause as there is nothing to split on with chunkSize 1', () => {
-      const exceptions = getExceptionListItemSchemaXMock(1);
+      const exceptions = getExceptionListItemsWoValueLists(1);
       const chunks = chunkExceptions(exceptions, 1);
       expect(chunks).toHaveLength(1);
     });
 
     test('it should NOT split a single should clause as there is nothing to split on with chunkSize 2', () => {
-      const exceptions = getExceptionListItemSchemaXMock(1);
+      const exceptions = getExceptionListItemsWoValueLists(1) as ExceptionItemSansLargeValueLIsts[];
       const chunks = chunkExceptions(exceptions, 2);
       expect(chunks).toHaveLength(1);
     });
@@ -323,31 +438,31 @@ describe('build_exceptions_filter', () => {
     });
 
     test('it should split an array of size 2 into a length 2 array with chunks on "chunkSize: 1"', () => {
-      const exceptions = getExceptionListItemSchemaXMock(2);
+      const exceptions = getExceptionListItemsWoValueLists(2);
       const chunks = chunkExceptions(exceptions, 1);
       expect(chunks).toHaveLength(2);
     });
 
     test('it should split an array of size 2 into a length 4 array with chunks on "chunkSize: 1"', () => {
-      const exceptions = getExceptionListItemSchemaXMock(4);
+      const exceptions = getExceptionListItemsWoValueLists(4);
       const chunks = chunkExceptions(exceptions, 1);
       expect(chunks).toHaveLength(4);
     });
 
     test('it should split an array of size 4 into a length 2 array with chunks on "chunkSize: 2"', () => {
-      const exceptions = getExceptionListItemSchemaXMock(4);
+      const exceptions = getExceptionListItemsWoValueLists(4);
       const chunks = chunkExceptions(exceptions, 2);
       expect(chunks).toHaveLength(2);
     });
 
     test('it should NOT split an array of size 4 into any groups on "chunkSize: 5"', () => {
-      const exceptions = getExceptionListItemSchemaXMock(4);
+      const exceptions = getExceptionListItemsWoValueLists(4);
       const chunks = chunkExceptions(exceptions, 5);
       expect(chunks).toHaveLength(1);
     });
 
     test('it should split an array of size 4 into 2 groups on "chunkSize: 3"', () => {
-      const exceptions = getExceptionListItemSchemaXMock(4);
+      const exceptions = getExceptionListItemsWoValueLists(4);
       const chunks = chunkExceptions(exceptions, 3);
       expect(chunks).toHaveLength(2);
     });
@@ -356,7 +471,10 @@ describe('build_exceptions_filter', () => {
   describe('createOrClauses', () => {
     test('it should create filter with one item if only one exception item exists', () => {
       const booleanFilter = createOrClauses([
-        getExceptionListItemSchemaMock(),
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [getEntryNestedMock(), getEntryMatchMock()],
+        },
         {
           ...getExceptionListItemSchemaMock(),
           entries: [
@@ -378,11 +496,27 @@ describe('build_exceptions_filter', () => {
             filter: [
               {
                 nested: {
-                  path: 'some.parentField',
+                  path: 'parent.field',
                   query: {
                     bool: {
-                      should: [{ match_phrase: { 'some.parentField.nested.field': 'some value' } }],
-                      minimum_should_match: 1,
+                      filter: [
+                        {
+                          bool: {
+                            should: [
+                              { match_phrase: { 'parent.field.host.name': 'some host name' } },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [
+                              { match_phrase: { 'parent.field.host.name': 'some host name' } },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
                     },
                   },
                   score_mode: 'none',
@@ -390,7 +524,7 @@ describe('build_exceptions_filter', () => {
               },
               {
                 bool: {
-                  should: [{ match_phrase: { 'some.not.nested.field': 'some value' } }],
+                  should: [{ match_phrase: { 'host.name': 'some host name' } }],
                   minimum_should_match: 1,
                 },
               },
@@ -466,7 +600,7 @@ describe('build_exceptions_filter', () => {
                   should: [
                     {
                       bool: {
-                        should: [{ match_phrase: { 'host.name': 'some host name' } }],
+                        should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
                         minimum_should_match: 1,
                       },
                     },
@@ -596,7 +730,7 @@ describe('build_exceptions_filter', () => {
                 should: [
                   {
                     bool: {
-                      should: [{ match_phrase: { 'host.name': 'some host name' } }],
+                      should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
                       minimum_should_match: 1,
                     },
                   },
@@ -663,7 +797,7 @@ describe('build_exceptions_filter', () => {
                 {
                   bool: {
                     minimum_should_match: 1,
-                    should: [{ match_phrase: { 'host.name': 'some host name' } }],
+                    should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
                   },
                 },
                 {
@@ -732,7 +866,7 @@ describe('build_exceptions_filter', () => {
             {
               bool: {
                 minimum_should_match: 1,
-                should: [{ match_phrase: { 'host.name': 'some host name' } }],
+                should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
               },
             },
             {
