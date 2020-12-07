@@ -86,6 +86,15 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
 
       return settings;
     },
+    (settings, fromPath, log) => {
+      if (settings?.xpack?.security?.enabled === false) {
+        log(
+          'Disabling the security plugin (`xpack.security.enabled`) will not be supported in the next major version (8.0). ' +
+            'To turn off security features, disable them in Elasticsearch instead.'
+        );
+      }
+      return settings;
+    },
   ],
   exposeToBrowser: {
     loginAssistanceMessage: true,
