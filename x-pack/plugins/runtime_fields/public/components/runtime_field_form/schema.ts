@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-
 import { FormSchema, fieldValidators } from '../../shared_imports';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 import { RuntimeField, RuntimeType, ComboBoxOption } from '../../types';
@@ -45,6 +44,10 @@ export const schema: FormSchema<RuntimeField> = {
     source: {
       label: i18n.translate('xpack.runtimeFields.form.defineFieldLabel', {
         defaultMessage: 'Define field (optional)',
+      }),
+      helpText: i18n.translate('xpack.runtimeFields.form.source.scriptFieldHelpText', {
+        defaultMessage:
+          'Runtime fields without a script retrieve values from a field with the same name in _source. If a field with the same name doesn’t exist, no values are returned when a search request includes the runtime field.',
       }),
     },
   },
