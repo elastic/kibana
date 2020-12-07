@@ -23,9 +23,6 @@ export const ActionMenu = ({ appMountParameters }: { appMountParameters: AppMoun
     <HeaderMenuPortal setHeaderActionMenu={appMountParameters.setHeaderActionMenu}>
       <EuiFlexGroup alignItems="flexEnd" responsive={false} style={{ paddingRight: 20 }}>
         <EuiFlexItem grow={false}>
-          <ToggleAlertFlyoutButton />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
             color="primary"

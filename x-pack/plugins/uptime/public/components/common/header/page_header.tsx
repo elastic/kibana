@@ -13,6 +13,7 @@ import { SyntheticsCallout } from '../../overview/synthetics_callout';
 import { PageTabs } from './page_tabs';
 import { CERTIFICATES_ROUTE, MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
 import { CertRefreshBtn } from '../../certificates/cert_refresh_btn';
+import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
 
 const StyledPicker = styled(EuiFlexItem)`
   &&& {
@@ -48,15 +49,12 @@ export const PageHeader = () => {
   return (
     <>
       <SyntheticsCallout />
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        wrap
-        responsive={false}
-      >
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap responsive={false}>
         <EuiFlexItem>
           <PageTabs />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ToggleAlertFlyoutButton />
         </EuiFlexItem>
         {!isSettingsRoute && <DatePickerComponent />}
       </EuiFlexGroup>
