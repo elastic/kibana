@@ -457,7 +457,6 @@ async function deleteTransforms(
           destIndexPatternDeleted,
           destinationIndex,
         };
-        continue;
       }
 
       // If user checks box to delete the destinationIndex associated with the job
@@ -498,7 +497,7 @@ async function deleteTransforms(
         transformDeleted.success = true;
       } catch (deleteTransformJobError) {
         transformDeleted.error = wrapError(deleteTransformJobError);
-        if (transformDeleted.error.statusCode === 403) {
+        if (deleteTransformJobError.statusCode === 403) {
           return response.forbidden();
         }
       }
