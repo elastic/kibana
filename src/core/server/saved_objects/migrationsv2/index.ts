@@ -783,7 +783,9 @@ export const nextActionMap = (
             throw e;
           }
         ),
-        TaskEither.chain((docs) => Actions.bulkIndex(client, state.target, docs))
+        TaskEither.chain((docs) =>
+          Actions.bulkOverwriteTransformedDocuments(client, state.target, docs)
+        )
       ),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),

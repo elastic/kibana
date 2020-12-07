@@ -23,7 +23,7 @@ import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import { SavedObjectsRawDoc } from '../../serialization';
 import {
-  bulkIndex,
+  bulkOverwriteTransformedDocuments,
   cloneIndex,
   createIndex,
   fetchIndices,
@@ -71,11 +71,15 @@ describe('migration actions', () => {
       { _source: { title: 'doc 3' } },
       { _source: { title: 'doc 4' } },
     ] as unknown) as SavedObjectsRawDoc[];
-    await bulkIndex(client, 'existing_index_1', sourceDocs)();
+    await bulkOverwriteTransformedDocuments(client, 'existing_index_1', sourceDocs)();
 
     await createIndex(client, 'existing_index_2', { properties: {} })();
     await createIndex(client, 'existing_index_with_write_block', { properties: {} })();
-    await bulkIndex(client, 'existing_index_with_write_block', sourceDocs)();
+    await bulkOverwriteTransformedDocuments(
+      client,
+      'existing_index_with_write_block',
+      sourceDocs
+    )();
     await setWriteBlock(client, 'existing_index_with_write_block')();
     await updateAliases(client, [
       { add: { index: 'existing_index_2', alias: 'existing_index_2_alias' } },
@@ -412,14 +416,14 @@ describe('migration actions', () => {
     });
   });
 
-  describe('bulkIndex', () => {
+  describe('bulkOverwriteTransformedDocuments', () => {
     it('returns right when documents do not yet exist in the index', () => {
       const newDocs = ([
         { _source: { title: 'doc 5' } },
         { _source: { title: 'doc 6' } },
         { _source: { title: 'doc 7' } },
       ] as unknown) as SavedObjectsRawDoc[];
-      const task = bulkIndex(client, 'existing_index_1', newDocs);
+      const task = bulkOverwriteTransformedDocuments(client, 'existing_index_1', newDocs);
       return expect(task()).resolves.toMatchInlineSnapshot(`
                 Object {
                   "_tag": "Right",
@@ -434,7 +438,7 @@ describe('migration actions', () => {
         undefined as any
       )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
 
-      const task = bulkIndex(client, 'existing_index_1', [
+      const task = bulkOverwriteTransformedDocuments(client, 'existing_index_1', [
         ...existingDocs,
         ({ _source: { title: 'doc 8' } } as unknown) as SavedObjectsRawDoc,
       ]);

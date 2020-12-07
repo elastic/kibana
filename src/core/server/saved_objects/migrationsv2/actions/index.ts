@@ -49,9 +49,6 @@ const BATCH_SIZE = 100;
 /**
  * Fetches information about the given indices including aliases, mappings and
  * settings.
- *
- * @param client
- * @param indexToFetch
  */
 export const fetchIndices = (
   client: ElasticsearchClient,
@@ -84,9 +81,6 @@ export interface SetIndexWriteBlockResponse {
  * The first time the write block is added to an index the response will
  * include `shards_acknowledged: true` but once the block is in place,
  * subsequent calls return `shards_acknowledged: false`
- *
- * @param client
- * @param index
  */
 export const setWriteBlock = (
   client: ElasticsearchClient,
@@ -149,10 +143,6 @@ export type CloneIndexResponse = AcknowledgeResponse;
  *    wait for the first clone operation to complete (up to 60s)
  *  - the first call will wait up to 120s for the cluster state and all shards
  *    to be updated.
- *
- * @param client
- * @param source
- * @param target
  */
 export const cloneIndex = (
   client: ElasticsearchClient,
@@ -253,10 +243,6 @@ interface WaitForTaskResponse {
  * Blocks for up to 60s or until a task completes.
  *
  * TODO: delete completed tasks
- *
- * @param client
- * @param taskId
- * @param timeout
  */
 const waitForTask = (
   client: ElasticsearchClient,
@@ -303,11 +289,6 @@ export interface UpdateByQueryResponse {
  * these the internal search indices for all existing documents.
  * This action uses `conflicts: 'proceed'` allowing several Kibana instances
  * to run this in parralel.
- *
- * @param client
- * @param index
- * @param targetIndex
- * @param script
  */
 export const pickupUpdatedMappings = (
   client: ElasticsearchClient,
@@ -346,11 +327,6 @@ export interface ReindexResponse {
  * @remarks This action is idempotent allowing several Kibana instances to run
  * this in parralel. By using `op_type: 'create', conflicts: 'proceed'` there
  * will be only one write per reindexed document.
- *
- * @param client
- * @param sourceIndex
- * @param targetIndex
- * @param reindexScript
  */
 export const reindex = (
   client: ElasticsearchClient,
@@ -468,9 +444,7 @@ export type AliasAction =
   | { add: { index: string; alias: string } };
 
 /**
- *
- * @param client
- * @param aliasActions
+ * Calls the Update index alias API `_alias` with the provided alias actions.
  */
 export const updateAliases = (
   client: ElasticsearchClient,
@@ -533,9 +507,6 @@ export interface AcknowledgeResponse {
  *    wait for the first create operation to complete (up to 60s)
  *  - the first call will wait up to 120s for the cluster state and all shards
  *    to be updated.
- * @param client
- * @param indexName
- * @param mappings
  */
 export const createIndex = (
   client: ElasticsearchClient,
@@ -636,10 +607,6 @@ export interface UpdateAndPickupMappingsResponse {
 /**
  * Updates an index's mappings and runs an pickupUpdatedMappings task so that the mapping
  * changes are "picked up". Returns a taskId to track progress.
- *
- * @param client
- * @param index
- * @param mappings
  */
 export const updateAndPickupMappings = (
   client: ElasticsearchClient,
@@ -674,6 +641,11 @@ export interface SearchResponse {
   outdatedDocuments: SavedObjectsRawDoc[];
 }
 
+/**
+ * Search for outdated saved object documents with the provided query. Will
+ * return one batch of documents. Searching should be repeated until no more
+ * outdated documents can be found.
+ */
 export const searchForOutdatedDocuments = (
   client: ElasticsearchClient,
   index: string,
@@ -724,10 +696,14 @@ export const searchForOutdatedDocuments = (
     .catch(catchRetryableEsClientErrors);
 };
 
-export const bulkIndex = (
+/**
+ * Write the up-to-date transformed documents to the index, overwriting any
+ * documents that are still on their outdated version.
+ */
+export const bulkOverwriteTransformedDocuments = (
   client: ElasticsearchClient,
   index: string,
-  docs: SavedObjectsRawDoc[]
+  transformedDocs: SavedObjectsRawDoc[]
 ): TaskEither.TaskEither<RetryableEsClientError, 'bulk_index_succeeded'> => () => {
   return client
     .bulk<{
@@ -763,7 +739,7 @@ export const bulkIndex = (
       // field or using a Point In Time as a cursor to go through all documents.
       refresh: 'wait_for',
       filter_path: ['items.*.error'],
-      body: docs.flatMap((doc) => {
+      body: transformedDocs.flatMap((doc) => {
         return [
           {
             index: {

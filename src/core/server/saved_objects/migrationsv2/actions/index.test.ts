@@ -179,9 +179,9 @@ describe('actions', () => {
     });
   });
 
-  describe('bulkIndex', () => {
+  describe('bulkOverwriteTransformedDocuments', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.bulkIndex(client, 'new_index', []);
+      const task = Actions.bulkOverwriteTransformedDocuments(client, 'new_index', []);
       try {
         await task();
       } catch (e) {
