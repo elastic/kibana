@@ -16,13 +16,40 @@ import { useLogStream } from '../../containers/logs/log_stream';
 
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
+import { JsonValue } from '../../../common/typed_json';
 
 const PAGE_THRESHOLD = 2;
 
+interface CommonColumnDefinition {
+  /** width of the column, in CSS units */
+  width?: number | string;
+  /** Content for the header. `true` renders the field name. `false` renders nothing. A string renders a custom value */
+  header?: boolean | string;
+}
+
+interface TimestampColumnDefinition extends CommonColumnDefinition {
+  type: 'timestamp';
+  /** Timestamp renderer. Takes a epoch_millis and returns a valid `ReactNode` */
+  render?: (timestamp: number) => React.ReactNode;
+}
+
+interface MessageColumnDefinition extends CommonColumnDefinition {
+  type: 'message';
+  /** Message renderer. Takes the processed message and returns a valid `ReactNode` */
+  render?: (message: string) => React.ReactNode;
+}
+
+interface FieldColumnDefinition extends CommonColumnDefinition {
+  type: 'field';
+  field: string;
+  /** Field renderer. Takes the value of the field and returns a valid `ReactNode` */
+  render?: (value: JsonValue) => React.ReactNode;
+}
+
 type LogColumnDefinition =
-  | { type: 'timestamp' }
-  | { type: 'message' }
-  | { type: 'field'; field: string };
+  | TimestampColumnDefinition
+  | MessageColumnDefinition
+  | FieldColumnDefinition;
 
 export interface LogStreamProps {
   sourceId?: string;
