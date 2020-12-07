@@ -120,7 +120,7 @@ export const IndexPattern = ({
 
   const defaults = {
     default_index_pattern: '',
-    [indexPatternName]: '*',
+    [indexPatternName]: '',
     [intervalName]: AUTO_INTERVAL,
     [dropBucketName]: 1,
     [maxBarsName]: config.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),

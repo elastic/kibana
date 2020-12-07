@@ -17,22 +17,39 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { extractIndexPatterns } from '../../../common/extract_index_patterns';
-import { getCoreStart } from '../../services';
+import { getCoreStart, getDataStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
+import { indexPatterns } from '../../../../data/public';
 
-export async function fetchFields(indexPatterns = [], signal) {
-  const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];
+export async function fetchFields(indexes: string[] = [], signal?: AbortSignal) {
+  const patterns = Array.isArray(indexes) ? indexes : [indexes];
+  const coreStart = getCoreStart();
+  const dataStart = getDataStart();
+
   try {
     const indexFields = await Promise.all(
-      patterns.map((pattern) =>
-        getCoreStart().http.get(ROUTES.FIELDS, {
+      patterns.map(async (pattern) => {
+        const kibanaIndexPattern = await dataStart.indexPatterns.find(pattern, 2);
+
+        if (kibanaIndexPattern.length === 1) {
+          const fields = kibanaIndexPattern[0].fields.getAll();
+
+          return fields
+            .filter((field) => field.aggregatable && !indexPatterns.isNestedField(field))
+            .map((field) => ({
+              name: field.name,
+              label: field.customLabel ?? field.name,
+              type: field.type,
+            }));
+        }
+
+        return coreStart.http.get(ROUTES.FIELDS, {
           query: {
             index: pattern,
           },
           signal,
-        })
-      )
+        });
+      })
     );
 
     return patterns.reduce(
@@ -53,10 +70,4 @@ export async function fetchFields(indexPatterns = [], signal) {
     }
   }
   return [];
-}
-
-export async function fetchIndexPatternFields({ params, fields = {} }) {
-  const indexPatterns = extractIndexPatterns(params, fields);
-
-  return await fetchFields(indexPatterns);
 }

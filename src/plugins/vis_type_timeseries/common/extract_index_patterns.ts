@@ -17,9 +17,13 @@
  * under the License.
  */
 import { uniq } from 'lodash';
+import { PanelSchema } from '../common/types';
 
-export function extractIndexPatterns(panel, excludedFields = {}) {
-  const patterns = [];
+export function extractIndexPatterns(
+  panel: PanelSchema,
+  excludedFields: Record<string, string[]> = {}
+) {
+  const patterns: string[] = [];
 
   if (!excludedFields[panel.index_pattern]) {
     patterns.push(panel.index_pattern);
@@ -41,9 +45,9 @@ export function extractIndexPatterns(panel, excludedFields = {}) {
     });
   }
 
-  if (patterns.length === 0) {
-    patterns.push('');
+  if (patterns.length === 0 && panel.default_index_pattern) {
+    patterns.push(panel.default_index_pattern);
   }
 
-  return uniq(patterns).sort();
+  return uniq<string>(patterns).sort();
 }
