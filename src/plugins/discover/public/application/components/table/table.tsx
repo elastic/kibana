@@ -49,6 +49,11 @@ export function DocViewTable({
     <table className="table table-condensed kbnDocViewerTable">
       <tbody>
         {Object.keys(flattened)
+          .filter((field) => {
+            const fieldMapping = mapping(field);
+            // Filter out multi fields
+            return !fieldMapping || !fieldMapping.subType;
+          })
           .sort((fieldA, fieldB) => {
             const mappingA = mapping(fieldA);
             const mappingB = mapping(fieldB);
