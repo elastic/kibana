@@ -518,11 +518,13 @@ export class SearchSource {
       );
       const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
-      // filter down script_fields to only include items specified
-      body.script_fields = pick(
-        body.script_fields,
-        Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
-      );
+      if (uniqFieldNames.indexOf('*') === -1) {
+        // filter down script_fields to only include items specified
+        body.script_fields = pick(
+          body.script_fields,
+          Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
+        );
+      }
 
       // request the remaining fields from stored_fields just in case, since the
       // fields API does not handle stored fields
