@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constants/states';
 import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/data_frame_task_state';
 import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import { JobType } from '../../../../plugins/ml/common/types/saved_objects';
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
@@ -139,6 +140,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .eql(true, 'Response for create request indices should be acknowledged.');
 
       await this.assertIndicesExist(indices);
+      log.debug('> Indices created.');
     },
 
     async deleteIndices(indices: string) {
@@ -156,6 +158,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .eql(true, 'Response for delete request should be acknowledged.');
 
       await this.assertIndicesNotToExist(indices);
+      log.debug('> Indices deleted.');
     },
 
     async cleanMlIndices() {
@@ -181,6 +184,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .expect(200)
         .then((res: any) => res.body);
 
+      log.debug('> AD job stats fetched.');
       return jobStats;
     },
 
@@ -237,6 +241,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .expect(200)
         .then((res: any) => res.body);
 
+      log.debug('> DFA job stats fetched.');
       return analyticsStats;
     },
 
@@ -352,6 +357,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug(`Creating calendar with id '${calendarId}'...`);
       await esSupertest.put(`/_ml/calendars/${calendarId}`).send(requestBody).expect(200);
       await this.waitForCalendarToExist(calendarId);
+      log.debug('> Calendar created.');
     },
 
     async deleteCalendar(calendarId: string) {
@@ -359,6 +365,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await esSupertest.delete(`/_ml/calendars/${calendarId}`);
 
       await this.waitForCalendarNotToExist(calendarId);
+      log.debug('> Calendar deleted.');
     },
 
     async waitForCalendarToExist(calendarId: string, errorMsg?: string) {
@@ -385,6 +392,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug(`Creating events for calendar with id '${calendarId}'...`);
       await esSupertest.post(`/_ml/calendars/${calendarId}/events`).send({ events }).expect(200);
       await this.waitForEventsToExistInCalendar(calendarId, events);
+      log.debug('> Calendar events created.');
     },
 
     async getCalendarEvents(calendarId: string, expectedCode = 200) {
@@ -465,16 +473,49 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async createAnomalyDetectionJob(jobConfig: Job) {
+    async createAnomalyDetectionJob(jobConfig: Job, space?: string) {
       const jobId = jobConfig.job_id;
-      log.debug(`Creating anomaly detection job with id '${jobId}'...`);
+      log.debug(
+        `Creating anomaly detection job with id '${jobId}' ${
+          space ? `in space '${space}' ` : ''
+        }...`
+      );
+
       await kbnSupertest
-        .put(`/api/ml/anomaly_detectors/${jobId}`)
+        .put(`${space ? `/s/${space}` : ''}/api/ml/anomaly_detectors/${jobId}`)
         .set(COMMON_REQUEST_HEADERS)
         .send(jobConfig)
         .expect(200);
 
       await this.waitForAnomalyDetectionJobToExist(jobId);
+      log.debug('> AD job created.');
+    },
+
+    async createAnomalyDetectionJobES(jobConfig: Job) {
+      const jobId = jobConfig.job_id;
+      log.debug(`Creating anomaly detection job with id '${jobId}' via ES API...`);
+
+      await esSupertest.put(`/_ml/anomaly_detectors/${jobId}`).send(jobConfig).expect(200);
+
+      await this.waitForAnomalyDetectionJobToExist(jobId);
+      log.debug('> AD job created.');
+    },
+
+    async deleteAnomalyDetectionJobES(jobId: string) {
+      log.debug(`Deleting anomaly detection job with id '${jobId}' ...`);
+
+      const datafeedId = `datafeed-${jobId}`;
+      if ((await this.datafeedExist(datafeedId)) === true) {
+        await this.deleteDatafeedES(datafeedId);
+      }
+
+      await esSupertest
+        .delete(`/_ml/anomaly_detectors/${jobId}`)
+        .query({ force: true })
+        .expect(200);
+
+      await this.waitForAnomalyDetectionJobNotToExist(jobId);
+      log.debug('> AD job deleted.');
     },
 
     async getDatafeed(datafeedId: string) {
@@ -482,9 +523,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       // return await kbnSupertest.get(`/api/ml/datafeeds/${datafeedId}`).expect(200);
     },
 
+    async datafeedExist(datafeedId: string) {
+      try {
+        await this.getDatafeed(datafeedId);
+        return true;
+      } catch (err) {
+        return false;
+      }
+    },
+
     async waitForDatafeedToExist(datafeedId: string) {
       await retry.waitForWithTimeout(`'${datafeedId}' to exist`, 5 * 1000, async () => {
-        if (await this.getDatafeed(datafeedId)) {
+        if ((await this.datafeedExist(datafeedId)) === true) {
           return true;
         } else {
           throw new Error(`expected datafeed '${datafeedId}' to exist`);
@@ -492,16 +542,46 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async createDatafeed(datafeedConfig: Datafeed) {
+    async waitForDatafeedToNotExist(datafeedId: string) {
+      await retry.waitForWithTimeout(`'${datafeedId}' to exist`, 5 * 1000, async () => {
+        if ((await this.datafeedExist(datafeedId)) === false) {
+          return true;
+        } else {
+          throw new Error(`expected datafeed '${datafeedId}' not to exist`);
+        }
+      });
+    },
+
+    async createDatafeed(datafeedConfig: Datafeed, space?: string) {
       const datafeedId = datafeedConfig.datafeed_id;
-      log.debug(`Creating datafeed with id '${datafeedId}'...`);
+      log.debug(
+        `Creating datafeed with id '${datafeedId}' ${space ? `in space '${space}' ` : ''}...`
+      );
       await kbnSupertest
-        .put(`/api/ml/datafeeds/${datafeedId}`)
+        .put(`${space ? `/s/${space}` : ''}/api/ml/datafeeds/${datafeedId}`)
         .set(COMMON_REQUEST_HEADERS)
         .send(datafeedConfig)
         .expect(200);
 
       await this.waitForDatafeedToExist(datafeedId);
+      log.debug('> Datafeed created.');
+    },
+
+    async createDatafeedES(datafeedConfig: Datafeed) {
+      const datafeedId = datafeedConfig.datafeed_id;
+      log.debug(`Creating datafeed with id '${datafeedId}' via ES API ...`);
+      await esSupertest.put(`/_ml/datafeeds/${datafeedId}`).send(datafeedConfig).expect(200);
+
+      await this.waitForDatafeedToExist(datafeedId);
+      log.debug('> Datafeed created.');
+    },
+
+    async deleteDatafeedES(datafeedId: string) {
+      log.debug(`Deleting datafeed with id '${datafeedId}' ...`);
+      await esSupertest.delete(`/_ml/datafeeds/${datafeedId}`).query({ force: true }).expect(200);
+
+      await this.waitForDatafeedToNotExist(datafeedId);
+      log.debug('> Datafeed deleted.');
     },
 
     async openAnomalyDetectionJob(jobId: string) {
@@ -516,6 +596,22 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       expect(openResponse)
         .to.have.property('opened')
         .eql(true, 'Response for open job request should be acknowledged');
+      log.debug('> AD job opened.');
+    },
+
+    async closeAnomalyDetectionJob(jobId: string) {
+      log.debug(`Closing anomaly detection job '${jobId}'...`);
+      const closeResponse = await esSupertest
+        .post(`/_ml/anomaly_detectors/${jobId}/_close`)
+        .send({ timeout: '10s' })
+        .set({ 'Content-Type': 'application/json' })
+        .expect(200)
+        .then((res: any) => res.body);
+
+      expect(closeResponse)
+        .to.have.property('closed')
+        .eql(true, 'Job closing should be acknowledged');
+      log.debug('> AD job closed.');
     },
 
     async startDatafeed(
@@ -535,6 +631,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       expect(startResponse)
         .to.have.property('started')
         .eql(true, 'Response for start datafeed request should be acknowledged');
+      log.debug('> Datafeed started.');
     },
 
     async stopDatafeed(datafeedId: string) {
@@ -548,6 +645,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       expect(stopResponse)
         .to.have.property('stopped')
         .eql(true, 'Response for stop datafeed request should be acknowledged');
+      log.debug('> Datafeed stopped.');
     },
 
     async createAndRunAnomalyDetectionLookbackJob(jobConfig: Job, datafeedConfig: Datafeed) {
@@ -561,7 +659,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async getDataFrameAnalyticsJob(analyticsId: string, statusCode = 200) {
       log.debug(`Fetching data frame analytics job '${analyticsId}'...`);
-      return await esSupertest.get(`/_ml/data_frame/analytics/${analyticsId}`).expect(statusCode);
+      const response = await esSupertest
+        .get(`/_ml/data_frame/analytics/${analyticsId}`)
+        .expect(statusCode);
+      log.debug('> DFA job fetched.');
+      return response;
     },
 
     async waitForDataFrameAnalyticsJobToExist(analyticsId: string) {
@@ -584,16 +686,34 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async createDataFrameAnalyticsJob(jobConfig: DataFrameAnalyticsConfig) {
+    async createDataFrameAnalyticsJob(jobConfig: DataFrameAnalyticsConfig, space?: string) {
       const { id: analyticsId, ...analyticsConfig } = jobConfig;
-      log.debug(`Creating data frame analytic job with id '${analyticsId}'...`);
+      log.debug(
+        `Creating data frame analytic job with id '${analyticsId}' ${
+          space ? `in space '${space}' ` : ''
+        }...`
+      );
       await kbnSupertest
-        .put(`/api/ml/data_frame/analytics/${analyticsId}`)
+        .put(`${space ? `/s/${space}` : ''}/api/ml/data_frame/analytics/${analyticsId}`)
         .set(COMMON_REQUEST_HEADERS)
         .send(analyticsConfig)
         .expect(200);
 
       await this.waitForDataFrameAnalyticsJobToExist(analyticsId);
+      log.debug('> DFA job created.');
+    },
+
+    async createDataFrameAnalyticsJobES(jobConfig: DataFrameAnalyticsConfig) {
+      const { id: analyticsId, ...analyticsConfig } = jobConfig;
+      log.debug(`Creating data frame analytic job with id '${analyticsId}' via ES API...`);
+      await esSupertest
+        .put(`/_ml/data_frame/analytics/${analyticsId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(analyticsConfig)
+        .expect(200);
+
+      await this.waitForDataFrameAnalyticsJobToExist(analyticsId);
+      log.debug('> DFA job created.');
     },
 
     async getADJobRecordCount(jobId: string): Promise<number> {
@@ -634,6 +754,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await esSupertest.put(`/_ml/filters/${filterId}`).send(requestBody).expect(200);
 
       await this.waitForFilterToExist(filterId, `expected filter '${filterId}' to be created`);
+      log.debug('> Filter created.');
     },
 
     async deleteFilter(filterId: string) {
@@ -641,6 +762,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await esSupertest.delete(`/_ml/filters/${filterId}`);
 
       await this.waitForFilterToNotExist(filterId, `expected filter '${filterId}' to be deleted`);
+      log.debug('> Filter deleted.');
     },
 
     async waitForFilterToExist(filterId: string, errorMsg?: string) {
@@ -678,6 +800,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
       expect(results).to.not.be(undefined);
       expect(results).to.have.property('hits');
+      log.debug('> Annotations fetched.');
       return results.hits.hits;
     },
 
@@ -695,6 +818,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           },
         },
       });
+      log.debug('> Annotation fetched.');
       // @ts-ignore due to outdated type for hits.total
       if (result.hits.total.value === 1) {
         return result?.hits?.hits[0]?._source as Annotation;
@@ -712,6 +836,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       };
       const results: EsIndexResult = await es.index(params);
       await this.waitForAnnotationToExist(results._id);
+      log.debug('> Annotation indexed.');
       return results;
     },
 
@@ -746,6 +871,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       expect(startResponse)
         .to.have.property('acknowledged')
         .eql(true, 'Response for start data frame analytics job request should be acknowledged');
+      log.debug('> DFA job started.');
     },
 
     async createAndRunDFAJob(dfaConfig: DataFrameAnalyticsConfig) {
@@ -753,6 +879,51 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await this.runDFAJob(dfaConfig.id);
       await this.waitForDFAJobTrainingRecordCountToBePositive(dfaConfig.id);
       await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED);
+    },
+
+    async asignJobToSpaces(jobId: string, jobType: JobType, spacesToAdd: string[], space?: string) {
+      const { body } = await kbnSupertest
+        .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/assign_job_to_space`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send({ jobType, jobIds: [jobId], spaces: spacesToAdd })
+        .expect(200);
+
+      expect(body).to.eql({ [jobId]: { success: true } });
+    },
+
+    async removeJobFromSpaces(
+      jobId: string,
+      jobType: JobType,
+      spacesToRemove: string[],
+      space?: string
+    ) {
+      const { body } = await kbnSupertest
+        .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/remove_job_from_space`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send({ jobType, jobIds: [jobId], spaces: spacesToRemove })
+        .expect(200);
+
+      expect(body).to.eql({ [jobId]: { success: true } });
+    },
+
+    async assertJobSpaces(jobId: string, jobType: JobType, expectedSpaces: string[]) {
+      const { body } = await kbnSupertest
+        .get('/api/ml/saved_objects/jobs_spaces')
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      if (expectedSpaces.length > 0) {
+        // Should list expected spaces correctly
+        expect(body).to.have.property(jobType);
+        expect(body[jobType]).to.have.property(jobId);
+        expect(body[jobType][jobId]).to.eql(expectedSpaces);
+      } else {
+        // The job is expected to be not connected to any space. So either the jobType
+        // section should be missing or if it exists, it should not show the jobId
+        if (jobType in body) {
+          expect(body[jobType]).to.not.have.property(jobId);
+        }
+      }
     },
   };
 }
