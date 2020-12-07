@@ -308,7 +308,19 @@ export const AlertForm = ({
           ? !item.alertTypeModel.requiresAppContext
           : item.alertType!.producer === alert.consumer
       );
-  const selectedAlertType = alert?.alertTypeId && alertTypesIndex?.get(alert?.alertTypeId);
+  const selectedAlertType = alert?.alertTypeId
+    ? alertTypesIndex?.get(alert?.alertTypeId)
+    : undefined;
+  const recoveryActionGroup = selectedAlertType?.recoveryActionGroup?.id;
+  const getDefaultActionParams = useCallback(
+    (actionTypeId: string, actionGroupId: string): Record<string, AlertActionParam> | undefined =>
+      getDefaultsForActionParams(
+        actionTypeId,
+        actionGroupId,
+        actionGroupId === recoveryActionGroup
+      ),
+    [recoveryActionGroup]
+  );
 
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
 
@@ -501,9 +513,7 @@ export const AlertForm = ({
                 }
               : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
           )}
-          getDefaultActionParams={getDefaultsForActionParams(
-            (actionGroupId) => actionGroupId === selectedAlertType.recoveryActionGroup.id
-          )}
+          getDefaultActionParams={getDefaultActionParams}
           setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
           setActionGroupIdByIndex={(group: string, index: number) =>
             setActionProperty('group', group, index)
