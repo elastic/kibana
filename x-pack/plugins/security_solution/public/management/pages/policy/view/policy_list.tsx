@@ -67,7 +67,7 @@ const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
 });
 
 const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
-  color: ${(props) => props.theme.eui.textColors.danger};
+  color: ${(props) => props.theme.eui.euiColorDangerText};
 `;
 
 // eslint-disable-next-line react/display-name

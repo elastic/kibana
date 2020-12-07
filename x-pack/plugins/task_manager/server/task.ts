@@ -166,6 +166,7 @@ export enum TaskStatus {
   Claiming = 'claiming',
   Running = 'running',
   Failed = 'failed',
+  Unrecognized = 'unrecognized',
 }
 
 export enum TaskLifecycleResult {

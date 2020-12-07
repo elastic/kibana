@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
+import { aggDateRangeFnName } from './date_range_fn';
 import { DateRangeKey } from './lib/date_range';
 
 import { KBN_FIELD_TYPES } from '../../../../common/kbn_field_types/types';
@@ -50,6 +51,7 @@ export const getDateRangeBucketAgg = ({
 }: DateRangeBucketAggDependencies) =>
   new BucketAggType({
     name: BUCKET_TYPES.DATE_RANGE,
+    expressionName: aggDateRangeFnName,
     title: dateRangeTitle,
     createFilter: createFilterDateRange,
     getKey({ from, to }): DateRangeKey {

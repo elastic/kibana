@@ -90,21 +90,6 @@ export const getColumns = ({
     ),
   },
   {
-    field: 'description',
-    name: '',
-    render: (description: string | null | undefined, data: EventFieldsData) => (
-      <EuiIconTip
-        aria-label={i18n.DESCRIPTION}
-        type="iInCircle"
-        color="subdued"
-        content={`${description || ''} ${getExampleText(data.example)}`}
-      />
-    ),
-    sortable: true,
-    truncateText: true,
-    width: '30px',
-  },
-  {
     field: 'field',
     name: i18n.FIELD,
     sortable: true,
@@ -166,6 +151,14 @@ export const getColumns = ({
               )}
             </Draggable>
           </DroppableWrapper>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            aria-label={i18n.DESCRIPTION}
+            type="iInCircle"
+            color="subdued"
+            content={`${data.description || ''} ${getExampleText(data.example)}`}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

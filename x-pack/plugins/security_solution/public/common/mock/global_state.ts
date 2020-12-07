@@ -30,6 +30,7 @@ import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
 import { mockIndexPattern } from './index_pattern';
+import { TimelineTabs } from '../../timelines/store/timeline/model';
 
 export const mockGlobalState: State = {
   app: {
@@ -202,6 +203,7 @@ export const mockGlobalState: State = {
     },
     timelineById: {
       test: {
+        activeTab: TimelineTabs.query,
         deletedEventIds: [],
         id: 'test',
         savedObjectId: null,
@@ -220,7 +222,7 @@ export const mockGlobalState: State = {
         isSelectAllChecked: false,
         isLoading: false,
         kqlMode: 'filter',
-        kqlQuery: { filterQuery: null, filterQueryDraft: null },
+        kqlQuery: { filterQuery: null },
         loadingEventIds: [],
         title: '',
         timelineType: TimelineType.default,
