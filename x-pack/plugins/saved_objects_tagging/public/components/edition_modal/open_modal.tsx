@@ -5,10 +5,11 @@
  */
 
 import React from 'react';
+import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
 import { OverlayStart, OverlayRef } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { Tag, TagAttributes } from '../../../common/types';
-import { ITagInternalClient } from '../../tags';
+import { ITagInternalClient } from '../../services';
 
 interface GetModalOpenerOptions {
   overlays: OverlayStart;
@@ -20,7 +21,21 @@ interface OpenCreateModalOptions {
   onCreate: (tag: Tag) => void;
 }
 
+const LoadingIndicator = () => (
+  <EuiDelayRender>
+    <EuiLoadingSpinner />
+  </EuiDelayRender>
+);
+
 export type CreateModalOpener = (options: OpenCreateModalOptions) => Promise<OverlayRef>;
+
+const LazyCreateTagModal = React.lazy(() =>
+  import('./create_modal').then(({ CreateTagModal }) => ({ default: CreateTagModal }))
+);
+
+const LazyEditTagModal = React.lazy(() =>
+  import('./edit_modal').then(({ EditTagModal }) => ({ default: EditTagModal }))
+);
 
 export const getCreateModalOpener = ({
   overlays,
@@ -29,20 +44,21 @@ export const getCreateModalOpener = ({
   onCreate,
   defaultValues,
 }: OpenCreateModalOptions) => {
-  const { CreateTagModal } = await import('./create_modal');
   const modal = overlays.openModal(
     toMountPoint(
-      <CreateTagModal
-        defaultValues={defaultValues}
-        onClose={() => {
-          modal.close();
-        }}
-        onSave={(tag) => {
-          modal.close();
-          onCreate(tag);
-        }}
-        tagClient={tagClient}
-      />
+      <React.Suspense fallback={<LoadingIndicator />}>
+        <LazyCreateTagModal
+          defaultValues={defaultValues}
+          onClose={() => {
+            modal.close();
+          }}
+          onSave={(tag) => {
+            modal.close();
+            onCreate(tag);
+          }}
+          tagClient={tagClient}
+        />
+      </React.Suspense>
     )
   );
   return modal;
@@ -57,22 +73,23 @@ export const getEditModalOpener = ({ overlays, tagClient }: GetModalOpenerOption
   tagId,
   onUpdate,
 }: OpenEditModalOptions) => {
-  const { EditTagModal } = await import('./edit_modal');
   const tag = await tagClient.get(tagId);
 
   const modal = overlays.openModal(
     toMountPoint(
-      <EditTagModal
-        tag={tag}
-        onClose={() => {
-          modal.close();
-        }}
-        onSave={(saved) => {
-          modal.close();
-          onUpdate(saved);
-        }}
-        tagClient={tagClient}
-      />
+      <React.Suspense fallback={<LoadingIndicator />}>
+        <LazyEditTagModal
+          tag={tag}
+          onClose={() => {
+            modal.close();
+          }}
+          onSave={(saved) => {
+            modal.close();
+            onUpdate(saved);
+          }}
+          tagClient={tagClient}
+        />
+      </React.Suspense>
     )
   );
 

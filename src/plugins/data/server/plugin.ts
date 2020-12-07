@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ConfigSchema } from '../config';
@@ -89,7 +89,7 @@ export class DataServerPlugin
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
     { bfetch, expressions, usageCollection }: DataPluginSetupDependencies
   ) {
-    this.indexPatterns.setup(core);
+    this.indexPatterns.setup(core, { expressions });
     this.scriptsService.setup(core);
     this.queryService.setup(core);
     this.autocompleteService.setup(core);

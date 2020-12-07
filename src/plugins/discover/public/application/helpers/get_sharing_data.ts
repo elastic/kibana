@@ -63,7 +63,7 @@ export async function getSharingData(
     index.timeFieldName || '',
     config.get(DOC_HIDE_TIME_COLUMN_SETTING)
   );
-  searchSource.setField('fields', searchFields);
+  searchSource.setField('fieldsFromSource', searchFields);
   searchSource.setField(
     'sort',
     getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))

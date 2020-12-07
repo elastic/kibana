@@ -34,9 +34,11 @@ import {
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
+import { ISessionService } from './session';
 
 export interface SearchEnhancements {
   defaultStrategy: string;
+  sessionService: ISessionService;
 }
 
 export interface SearchStrategyDependencies {
