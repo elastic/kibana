@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { PainlessContext, Field } from '../types';
+import { PainlessContext, PainlessAutocompleteField } from '../types';
 
 export interface EditorState {
   context: PainlessContext;
-  fields?: Field[];
+  fields?: PainlessAutocompleteField[];
 }
 
 export class EditorStateService {
   context: PainlessContext = 'painless_test';
-  fields: Field[] = [];
+  fields: PainlessAutocompleteField[] = [];
 
   public getState(): EditorState {
     return {
@@ -35,7 +35,7 @@ export class EditorStateService {
     };
   }
 
-  public setup(context: PainlessContext, fields?: Field[]) {
+  public setup(context: PainlessContext, fields?: PainlessAutocompleteField[]) {
     this.context = context;
 
     if (fields) {
