@@ -52,20 +52,7 @@ export const useHostOverview = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [overviewHostRequest, setHostRequest] = useState<HostOverviewRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: HostsQueries.overview,
-          filterQuery: createFilter(filterQuery),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        }
-      : null
-  );
+  const [overviewHostRequest, setHostRequest] = useState<HostOverviewRequestOptions | null>(null);
 
   const [overviewHostResponse, setHostOverviewResponse] = useState<HostOverviewArgs>({
     overviewHost: {},
@@ -80,7 +67,7 @@ export const useHostOverview = ({
 
   const overviewHostSearch = useCallback(
     (request: HostOverviewRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -134,7 +121,7 @@ export const useHostOverview = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -150,12 +137,12 @@ export const useHostOverview = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     overviewHostSearch(overviewHostRequest);
