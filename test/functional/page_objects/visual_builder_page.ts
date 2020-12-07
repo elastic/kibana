@@ -155,12 +155,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async waitForMarkdownTextAreaCleaned() {
-      await retry.waitFor('markdown text to be cleaned', async () => {
-        const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-        await input.clearValueWithKeyboard();
-        const text = await this.getMarkdownText();
-        return text.length === 0;
-      });
+      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
+      await input.clearValueWithKeyboard();
+      const text = await this.getMarkdownText();
+      return text.length === 0;
     }
 
     public async getMarkdownText(): Promise<string> {
