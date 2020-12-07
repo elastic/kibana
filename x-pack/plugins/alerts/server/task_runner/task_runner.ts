@@ -234,6 +234,7 @@ export class TaskRunner {
       eventLogger,
       originalAlertInstances,
       currentAlertInstances: instancesWithScheduledActions,
+      recoveredAlertInstances,
       alertId,
       alertLabel,
       namespace,
@@ -466,6 +467,7 @@ interface GenerateNewAndRecoveredInstanceEventsParams {
   eventLogger: IEventLogger;
   originalAlertInstances: Dictionary<AlertInstance>;
   currentAlertInstances: Dictionary<AlertInstance>;
+  recoveredAlertInstances: Dictionary<AlertInstance>;
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
@@ -474,14 +476,21 @@ interface GenerateNewAndRecoveredInstanceEventsParams {
 function generateNewAndRecoveredInstanceEvents(
   params: GenerateNewAndRecoveredInstanceEventsParams
 ) {
-  const { eventLogger, alertId, namespace, currentAlertInstances, originalAlertInstances } = params;
+  const {
+    eventLogger,
+    alertId,
+    namespace,
+    currentAlertInstances,
+    originalAlertInstances,
+    recoveredAlertInstances,
+  } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
+  const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
 
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
-  const recoveredIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
 
-  for (const id of recoveredIds) {
+  for (const id of recoveredAlertInstanceIds) {
     const actionGroup = originalAlertInstances[id].getLastScheduledActions()?.group;
     const message = `${params.alertLabel} instance '${id}' has recovered`;
     logInstanceEvent(id, EVENT_LOG_ACTIONS.recoveredInstance, message, actionGroup);
