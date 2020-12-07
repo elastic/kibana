@@ -47,7 +47,7 @@ export type MlSummaryJobs = MlSummaryJob[];
 
 export interface MlJobWithTimeRange extends CombinedJobWithStats {
   id: string;
-  isNotSingleMetricViewerJobMessage?: boolean;
+  isNotSingleMetricViewerJobMessage?: string;
   timeRange: {
     from: number;
     to: number;

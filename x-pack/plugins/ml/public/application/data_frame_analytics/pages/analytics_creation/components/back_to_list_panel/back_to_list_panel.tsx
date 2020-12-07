@@ -12,7 +12,7 @@ import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator
 
 export const BackToListPanel: FC = () => {
   const analyticsManagementPageLink = useMlLink({
-    page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+    page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
   });
 
   return (
