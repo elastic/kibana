@@ -31,7 +31,6 @@ import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
 import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { getUiSettings } from './ui_settings';
-import { IndexPatternsRequestHandlerContext } from './types';
 
 export interface DataEnhancements {
   search: SearchEnhancements;
