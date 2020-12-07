@@ -30,7 +30,7 @@ export const registerLegacyVis = (
   { expressions, visualizations, usageCollection }: TablePluginSetupDependencies,
   context: PluginInitializerContext
 ) => {
-  usageCollection?.reportUiStats('vis_type_table', METRIC_TYPE.LOADED, 'legacyVisEnabled');
+  usageCollection?.reportUiCounter('vis_type_table', METRIC_TYPE.LOADED, 'legacyVisEnabled');
   expressions.registerFunction(createTableVisLegacyFn);
   expressions.registerRenderer(getTableVisLegacyRenderer(core, context));
   visualizations.createBaseVisualization(tableVisLegacyTypeDefinition);
