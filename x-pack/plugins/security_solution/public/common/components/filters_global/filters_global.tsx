@@ -5,26 +5,22 @@
  */
 
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { InPortal } from 'react-reverse-portal';
 
 import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
-import { gutterTimeline } from '../../lib/helpers';
 
 const Wrapper = styled.aside`
   position: relative;
   z-index: ${({ theme }) => theme.eui.euiZNavigation};
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-  padding: ${({ theme }) => theme.eui.paddingSizes.m} ${gutterTimeline}
-    ${({ theme }) => theme.eui.paddingSizes.m} ${({ theme }) => theme.eui.paddingSizes.l};
+  padding: ${({ theme }) => theme.eui.paddingSizes.m} ${({ theme }) => theme.eui.paddingSizes.l};
 `;
 Wrapper.displayName = 'Wrapper';
 
 const FiltersGlobalContainer = styled.header<{ show: boolean }>`
-  ${({ show }) => css`
-    ${show ? '' : 'display: none;'};
-  `}
+  display: ${({ show }) => (show ? 'block' : 'none')};
 `;
 
 FiltersGlobalContainer.displayName = 'FiltersGlobalContainer';
