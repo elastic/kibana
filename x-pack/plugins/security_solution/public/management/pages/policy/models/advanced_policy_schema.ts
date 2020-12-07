@@ -33,7 +33,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'linux.advanced.artifacts.global.public_key',
     first_supported_version: '7.11',
-    documentation: 'Public key used to verify the global artifact manifest signature',
+    documentation: 'Public key used to verify the global artifact manifest signature.',
   },
   {
     key: 'linux.advanced.artifacts.global.interval',
