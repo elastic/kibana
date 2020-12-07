@@ -31,6 +31,7 @@ import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine
 import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
+import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -381,23 +382,7 @@ export const getResult = (): RuleAlertType => ({
     severityMapping: [],
     to: 'now',
     type: 'query',
-    threat: [
-      {
-        framework: 'MITRE ATT&CK',
-        tactic: {
-          id: 'TA0040',
-          name: 'impact',
-          reference: 'https://attack.mitre.org/tactics/TA0040/',
-        },
-        technique: [
-          {
-            id: 'T1499',
-            name: 'endpoint denial of service',
-            reference: 'https://attack.mitre.org/techniques/T1499/',
-          },
-        ],
-      },
-    ],
+    threat: getThreatMock(),
     threshold: undefined,
     timestampOverride: undefined,
     threatFilters: undefined,
