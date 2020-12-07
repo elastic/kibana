@@ -25,7 +25,7 @@ import { Phases } from '../../../../../../../common/types';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { useConfigurationIssues } from '../../../form';
 
-import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
+import { LearnMoreLink, ActiveBadge, DescribedFormRow } from '../../';
 
 import {
   useRolloverPath,
@@ -141,7 +141,7 @@ export const WarmPhase: FunctionComponent = () => {
             )}
             paddingSize="m"
           >
-            <DescribedFormField
+            <DescribedFormRow
               title={
                 <h3>
                   {i18n.translate('xpack.indexLifecycleMgmt.warmPhase.replicasTitle', {
@@ -177,9 +177,9 @@ export const WarmPhase: FunctionComponent = () => {
                   },
                 }}
               />
-            </DescribedFormField>
+            </DescribedFormRow>
             {!isUsingSearchableSnapshotInHotPhase && (
-              <DescribedFormField
+              <DescribedFormRow
                 title={
                   <h3>
                     <FormattedMessage
@@ -225,7 +225,7 @@ export const WarmPhase: FunctionComponent = () => {
                   </EuiFlexGroup>
                   <EuiSpacer />
                 </div>
-              </DescribedFormField>
+              </DescribedFormRow>
             )}
 
             {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="warm" />}
