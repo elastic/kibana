@@ -40,9 +40,9 @@ interface ErrorWithData {
  * }
  * ```
  */
-export const handleErrors = <A, B, C, D extends RouteMethod>(
-  handler: RequestHandler<A, B, C, D>
-): RequestHandler<A, B, C, D> => async (context, request, response) => {
+export const handleErrors = <P, Q, B, Method extends RouteMethod>(
+  handler: RequestHandler<P, Q, B, Method>
+): RequestHandler<P, Q, B, Method> => async (context, request, response) => {
   try {
     return await handler(context, request, response);
   } catch (error) {
