@@ -18,46 +18,33 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+interface Props {
+  minute?: string;
+  minuteOptions: EuiSelectOption[];
+  hour?: string;
+  hourOptions: EuiSelectOption[];
+  date?: string;
+  dateOptions: EuiSelectOption[];
+  onChange: ({ minute, hour, date }: { minute?: string; hour?: string; date?: string }) => void;
+}
 
-export const CronYearly = ({
+export const CronMonthly: React.FunctionComponent<Props> = ({
   minute,
   minuteOptions,
   hour,
   hourOptions,
   date,
   dateOptions,
-  month,
-  monthOptions,
   onChange,
 }) => (
   <Fragment>
     <EuiFormRow
       label={
-        <FormattedMessage id="esUi.cronEditor.cronYearly.fieldMonthLabel" defaultMessage="Month" />
-      }
-      fullWidth
-      data-test-subj="cronFrequencyConfiguration"
-    >
-      <EuiSelect
-        options={monthOptions}
-        value={month}
-        onChange={(e) => onChange({ month: e.target.value })}
-        fullWidth
-        prepend={i18n.translate('esUi.cronEditor.cronYearly.fieldMonth.textInLabel', {
-          defaultMessage: 'In',
-        })}
-        data-test-subj="cronFrequencyYearlyMonthSelect"
-      />
-    </EuiFormRow>
-
-    <EuiFormRow
-      label={
-        <FormattedMessage id="esUi.cronEditor.cronYearly.fieldDateLabel" defaultMessage="Date" />
+        <FormattedMessage id="esUi.cronEditor.cronMonthly.fieldDateLabel" defaultMessage="Date" />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
@@ -67,16 +54,16 @@ export const CronYearly = ({
         value={date}
         onChange={(e) => onChange({ date: e.target.value })}
         fullWidth
-        prepend={i18n.translate('esUi.cronEditor.cronYearly.fieldDate.textOnTheLabel', {
+        prepend={i18n.translate('esUi.cronEditor.cronMonthly.textOnTheLabel', {
           defaultMessage: 'On the',
         })}
-        data-test-subj="cronFrequencyYearlyDateSelect"
+        data-test-subj="cronFrequencyMonthlyDateSelect"
       />
     </EuiFormRow>
 
     <EuiFormRow
       label={
-        <FormattedMessage id="esUi.cronEditor.cronYearly.fieldTimeLabel" defaultMessage="Time" />
+        <FormattedMessage id="esUi.cronEditor.cronMonthly.fieldTimeLabel" defaultMessage="Time" />
       }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
@@ -86,15 +73,15 @@ export const CronYearly = ({
           <EuiSelect
             options={hourOptions}
             value={hour}
-            aria-label={i18n.translate('esUi.cronEditor.cronYearly.hourSelectLabel', {
+            aria-label={i18n.translate('esUi.cronEditor.cronMonthly.hourSelectLabel', {
               defaultMessage: 'Hour',
             })}
             onChange={(e) => onChange({ hour: e.target.value })}
             fullWidth
-            prepend={i18n.translate('esUi.cronEditor.cronYearly.fieldHour.textAtLabel', {
+            prepend={i18n.translate('esUi.cronEditor.cronMonthly.fieldHour.textAtLabel', {
               defaultMessage: 'At',
             })}
-            data-test-subj="cronFrequencyYearlyHourSelect"
+            data-test-subj="cronFrequencyMonthlyHourSelect"
           />
         </EuiFlexItem>
 
@@ -102,28 +89,16 @@ export const CronYearly = ({
           <EuiSelect
             options={minuteOptions}
             value={minute}
-            aria-label={i18n.translate('esUi.cronEditor.cronYearly.minuteSelectLabel', {
+            aria-label={i18n.translate('esUi.cronEditor.cronMonthly.minuteSelectLabel', {
               defaultMessage: 'Minute',
             })}
             onChange={(e) => onChange({ minute: e.target.value })}
             fullWidth
             prepend=":"
-            data-test-subj="cronFrequencyYearlyMinuteSelect"
+            data-test-subj="cronFrequencyMonthlyMinuteSelect"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
   </Fragment>
 );
-
-CronYearly.propTypes = {
-  minute: PropTypes.string.isRequired,
-  minuteOptions: PropTypes.array.isRequired,
-  hour: PropTypes.string.isRequired,
-  hourOptions: PropTypes.array.isRequired,
-  date: PropTypes.string.isRequired,
-  dateOptions: PropTypes.array.isRequired,
-  month: PropTypes.string.isRequired,
-  monthOptions: PropTypes.array.isRequired,
-  onChange: PropTypes.func.isRequired,
-};

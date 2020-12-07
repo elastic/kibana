@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { Repository } from '../../../../../common/types';
-import { CronEditor, MINUTE, SectionError } from '../../../../shared_imports';
+import { CronEditor, SectionError } from '../../../../shared_imports';
 import { useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
@@ -480,7 +480,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       ) : (
         <Fragment>
           <CronEditor
-            frequencyBlockList={[MINUTE]} // ES disallows a frequency faster than 15m
+            frequencyBlockList={['MINUTE']} // ES disallows a frequency faster than 15m
             fieldToPreferredValueMap={fieldToPreferredValueMap}
             cronExpression={simpleCron.expression}
             frequency={simpleCron.frequency}

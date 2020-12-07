@@ -19,12 +19,11 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { render } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithI18nProvider } from '@kbn/test/jest';
 
+import { Frequency } from './types';
 import { CronEditor } from './cron_editor';
-import { MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from './services';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
@@ -33,12 +32,12 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
 });
 
 describe('CronEditor', () => {
-  [MINUTE, HOUR, DAY, WEEK, MONTH, YEAR].forEach((unit) => {
+  ['MINUTE', 'HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR'].forEach((unit) => {
     test(`is rendered with a ${unit} frequency`, () => {
       const component = mountWithI18nProvider(
         <CronEditor
           fieldToPreferredValueMap={{}}
-          frequency={unit}
+          frequency={unit as Frequency}
           cronExpression="0 10 * * * ?"
           onChange={() => {}}
         />
@@ -53,9 +52,9 @@ describe('CronEditor', () => {
       it('excludes the blocked frequencies from the frequency list', () => {
         const component = mountWithI18nProvider(
           <CronEditor
-            frequencyBlockList={[HOUR, WEEK, YEAR]}
+            frequencyBlockList={['HOUR', 'WEEK', 'YEAR']}
             fieldToPreferredValueMap={{}}
-            frequency={WEEK}
+            frequency={'WEEK'}
             cronExpression="0 10 * * * ?"
             onChange={() => {}}
           />
@@ -71,7 +70,7 @@ describe('CronEditor', () => {
         const component = mountWithI18nProvider(
           <CronEditor
             fieldToPreferredValueMap={{}}
-            frequency={YEAR}
+            frequency={'YEAR'}
             cronExpression="0 20 10 5 2 ?"
             onChange={() => {}}
           />
@@ -97,14 +96,14 @@ describe('CronEditor', () => {
         const component = mountWithI18nProvider(
           <CronEditor
             fieldToPreferredValueMap={{}}
-            frequency={YEAR}
+            frequency={'YEAR'}
             cronExpression="0 10 * * * ?"
             onChange={onChangeSpy}
           />
         );
 
         const frequencySelect = findTestSubject(component, 'cronFrequencySelect');
-        frequencySelect.simulate('change', { target: { value: MONTH } });
+        frequencySelect.simulate('change', { target: { value: 'MONTH' } });
 
         sinon.assert.calledWith(onChangeSpy, {
           cronExpression: '0 0 0 1 * ?',
@@ -118,7 +117,7 @@ describe('CronEditor', () => {
         const component = mountWithI18nProvider(
           <CronEditor
             fieldToPreferredValueMap={{}}
-            frequency={YEAR}
+            frequency={'YEAR'}
             cronExpression="0 10 * * * ?"
             onChange={onChangeSpy}
           />

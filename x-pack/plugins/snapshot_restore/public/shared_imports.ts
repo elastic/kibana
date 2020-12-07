@@ -7,8 +7,6 @@
 export {
   AuthorizationProvider,
   CronEditor,
-  MINUTE,
-  DAY,
   Error,
   NotAuthorizedSection,
   SectionError,

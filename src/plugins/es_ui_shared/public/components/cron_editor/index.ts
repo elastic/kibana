@@ -17,10 +17,4 @@
  * under the License.
  */
 
-export declare const MINUTE: string;
-export declare const HOUR: string;
-export declare const DAY: string;
-export declare const WEEK: string;
-export declare const MONTH: string;
-export declare const YEAR: string;
-export declare const CronEditor: any;
+export { CronEditor } from './cron_editor';
