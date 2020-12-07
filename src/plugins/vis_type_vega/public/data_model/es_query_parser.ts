@@ -226,6 +226,7 @@ export class EsQueryParser {
       const requestObject = requests.find((item) => getRequestName(item, index) === data.name);
 
       if (requestObject) {
+        requestObject.dataObject.url = requestObject.url;
         requestObject.dataObject.values = data.rawResponse;
       }
     });

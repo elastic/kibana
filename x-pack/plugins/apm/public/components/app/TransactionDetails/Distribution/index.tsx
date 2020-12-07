@@ -27,17 +27,15 @@ import { ValuesType } from 'utility-types';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { useTheme } from '../../../../../../observability/public';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import type { IUrlParams } from '../../../../context/url_params_context/types';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../../shared/charts/chart_container';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 
-type TransactionDistributionAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups/distribution'>;
+type TransactionDistributionAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/distribution'>;
 
-type DistributionApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups/distribution'>;
-
-type DistributionBucket = DistributionApiResponse['buckets'][0];
+type DistributionBucket = TransactionDistributionAPIResponse['buckets'][0];
 
 interface IChartPoint {
   x0: number;
@@ -224,7 +222,7 @@ export function TransactionDistribution({
             id="y-axis"
             position={Position.Left}
             ticks={3}
-            showGridLines
+            gridLine={{ visible: true }}
             tickFormat={(value: number) => formatYShort(value)}
           />
           <HistogramBarSeries

@@ -570,11 +570,17 @@ exports[`Flyout should render import step 1`] = `
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
-          <FormattedMessage
-            defaultMessage="Select a file to import"
-            id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
-            values={Object {}}
-          />
+          <EuiTitle
+            size="xs"
+          >
+            <span>
+              <FormattedMessage
+                defaultMessage="Select a file to import"
+                id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
+                values={Object {}}
+              />
+            </span>
+          </EuiTitle>
         }
         labelType="label"
       >

@@ -20,7 +20,6 @@ import {
   ErrorWithReason,
 } from '../lib';
 import {
-  AlertType,
   RawAlert,
   IntervalSchedule,
   Services,
@@ -39,7 +38,8 @@ import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_l
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
-import { ResolvedActionGroup } from '../../common';
+import { ActionGroup } from '../../common';
+import { NormalizedAlertType } from '../alert_type_registry';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -58,10 +58,10 @@ export class TaskRunner {
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
-  private alertType: AlertType;
+  private alertType: NormalizedAlertType;
 
   constructor(
-    alertType: AlertType,
+    alertType: NormalizedAlertType,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext
   ) {
@@ -219,7 +219,7 @@ export class TaskRunner {
       alertInstance.hasScheduledActions()
     );
 
-    generateNewAndResolvedInstanceEvents({
+    generateNewAndRecoveredInstanceEvents({
       eventLogger,
       originalAlertInstances,
       currentAlertInstances: instancesWithScheduledActions,
@@ -229,7 +229,8 @@ export class TaskRunner {
     });
 
     if (!muteAll) {
-      scheduleActionsForResolvedInstances(
+      scheduleActionsForRecoveredInstances(
+        this.alertType.recoveryActionGroup,
         alertInstances,
         executionHandler,
         originalAlertInstances,
@@ -436,7 +437,7 @@ export class TaskRunner {
   }
 }
 
-interface GenerateNewAndResolvedInstanceEventsParams {
+interface GenerateNewAndRecoveredInstanceEventsParams {
   eventLogger: IEventLogger;
   originalAlertInstances: Dictionary<AlertInstance>;
   currentAlertInstances: Dictionary<AlertInstance>;
@@ -445,18 +446,20 @@ interface GenerateNewAndResolvedInstanceEventsParams {
   namespace: string | undefined;
 }
 
-function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInstanceEventsParams) {
+function generateNewAndRecoveredInstanceEvents(
+  params: GenerateNewAndRecoveredInstanceEventsParams
+) {
   const { eventLogger, alertId, namespace, currentAlertInstances, originalAlertInstances } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
 
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
-  const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
+  const recoveredIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
 
-  for (const id of resolvedIds) {
+  for (const id of recoveredIds) {
     const actionGroup = originalAlertInstances[id].getLastScheduledActions()?.group;
-    const message = `${params.alertLabel} resolved instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.resolvedInstance, message, actionGroup);
+    const message = `${params.alertLabel} instance '${id}' has recovered`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.recoveredInstance, message, actionGroup);
   }
 
   for (const id of newIds) {
@@ -496,7 +499,8 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
   }
 }
 
-function scheduleActionsForResolvedInstances(
+function scheduleActionsForRecoveredInstances(
+  recoveryActionGroup: ActionGroup,
   alertInstancesMap: Record<string, AlertInstance>,
   executionHandler: ReturnType<typeof createExecutionHandler>,
   originalAlertInstances: Record<string, AlertInstance>,
@@ -505,22 +509,22 @@ function scheduleActionsForResolvedInstances(
 ) {
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
-  const resolvedIds = without(
+  const recoveredIds = without(
     originalAlertInstanceIds,
     ...currentAlertInstanceIds,
     ...mutedInstanceIds
   );
-  for (const id of resolvedIds) {
+  for (const id of recoveredIds) {
     const instance = alertInstancesMap[id];
-    instance.updateLastScheduledActions(ResolvedActionGroup.id);
+    instance.updateLastScheduledActions(recoveryActionGroup.id);
     instance.unscheduleActions();
     executionHandler({
-      actionGroup: ResolvedActionGroup.id,
+      actionGroup: recoveryActionGroup.id,
       context: {},
       state: {},
       alertInstanceId: id,
     });
-    instance.scheduleActions(ResolvedActionGroup.id);
+    instance.scheduleActions(recoveryActionGroup.id);
   }
 }
 

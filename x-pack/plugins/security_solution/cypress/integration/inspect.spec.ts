@@ -13,11 +13,7 @@ import {
 import { closesModal, openStatsAndTables } from '../tasks/inspect';
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
-import {
-  executeTimelineKQL,
-  openTimelineInspectButton,
-  openTimelineSettings,
-} from '../tasks/timeline';
+import { executeTimelineKQL, openTimelineInspectButton } from '../tasks/timeline';
 
 import { HOSTS_URL, NETWORK_URL } from '../urls/navigation';
 
@@ -60,7 +56,6 @@ describe('Inspect', () => {
       loginAndWaitForPage(HOSTS_URL);
       openTimelineUsingToggle();
       executeTimelineKQL(hostExistsQuery);
-      openTimelineSettings();
       openTimelineInspectButton();
       cy.get(INSPECT_MODAL).should('be.visible');
     });

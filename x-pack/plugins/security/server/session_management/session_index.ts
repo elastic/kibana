@@ -5,7 +5,7 @@
  */
 
 import type { ILegacyClusterClient, Logger } from '../../../../../src/core/server';
-import type { AuthenticationProvider } from '../../common/types';
+import type { AuthenticationProvider } from '../../common/model';
 import type { ConfigType } from '../config';
 
 export interface SessionIndexOptions {
