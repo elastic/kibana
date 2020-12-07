@@ -75,19 +75,22 @@ describe('actions', () => {
     });
     it('ResponseError with retryable status code', async () => {
       const statusCodes = [503, 401, 403, 408, 410];
-      statusCodes.map(async (status) => {
-        const error = new esErrors.ResponseError(
-          elasticsearchClientMock.createApiResponse({
-            statusCode: status,
-          })
-        );
-        expect(
-          ((await Promise.reject(error).catch(catchRetryableEsClientErrors)) as any).left
-        ).toMatchObject({
-          message: 'reason',
-          type: 'retryable_es_client_error',
-        });
-      });
+      return Promise.all(
+        statusCodes.map(async (status) => {
+          const error = new esErrors.ResponseError(
+            elasticsearchClientMock.createApiResponse({
+              statusCode: status,
+              body: { error: { type: 'reason' } },
+            })
+          );
+          expect(
+            ((await Promise.reject(error).catch(catchRetryableEsClientErrors)) as any).left
+          ).toMatchObject({
+            message: 'reason',
+            type: 'retryable_es_client_error',
+          });
+        })
+      );
     });
   });
 });
