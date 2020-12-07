@@ -297,7 +297,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
           size="s"
           data-test-subj="searchableSnapshotFieldsNoRolloverCallout"
           title={i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledCalloutBody',
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotNoRolloverCalloutBody',
             {
               defaultMessage:
                 'Cannot perform searchable snapshot when rollover is disabled in hot phase.',
