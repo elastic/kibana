@@ -29,10 +29,12 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       return response.notFound();
     }
     return response.ok({
-      body: Buffer.from(result, 'base64'),
+      body: Buffer.from(result.blob, 'base64'),
       headers: {
         'content-type': 'image/png',
         'cache-control': 'max-age=600',
+        'caption-name': result.stepName,
+        'max-steps': result.totalSteps,
       },
     });
   },
