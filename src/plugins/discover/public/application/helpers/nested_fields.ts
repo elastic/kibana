@@ -18,7 +18,7 @@
  */
 
 import escapeRegExp from 'lodash/fp/escapeRegExp';
-import { IndexPattern } from 'src/plugins/data/public';
+import type { IndexPattern } from 'src/plugins/data/public';
 
 /**
  * This function checks if the given field in a given index pattern is a nested field's parent.
