@@ -44,7 +44,6 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
       injectedMetadata.getServerBasePath(),
       injectedMetadata.getPublicBaseUrl()
     );
-    console.log('basePath', basePath);
     const fetchService = new Fetch({ basePath, kibanaVersion });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
     loadingCount.addLoadingCountSource(fetchService.getRequestCount$());
