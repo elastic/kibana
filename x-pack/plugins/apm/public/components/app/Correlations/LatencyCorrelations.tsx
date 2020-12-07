@@ -17,7 +17,15 @@ import {
 } from '@elastic/charts';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiComboBox,
+  EuiAccordion,
+  EuiFormRow,
+  EuiFieldNumber,
+} from '@elastic/eui';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -36,12 +44,26 @@ type SignificantTerm = NonNullable<
   CorrelationsApiResponse['significantTerms']
 >[0];
 
+const initialFieldNames = [
+  'user.username',
+  'user.id',
+  'host.ip',
+  'user_agent.name',
+  'kubernetes.pod.uuid',
+  'kubernetes.pod.name',
+  'url.domain',
+  'container.id',
+  'service.node.name',
+].map((label) => ({ label }));
+
 export function LatencyCorrelations() {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
   ] = useState<SignificantTerm | null>(null);
 
+  const [fieldNames, setFieldNames] = useState(initialFieldNames);
+  const [durationPercentile, setDurationPercentile] = useState('50');
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionName, transactionType, start, end } = urlParams;
@@ -58,14 +80,22 @@ export function LatencyCorrelations() {
             start,
             end,
             uiFilters: JSON.stringify(uiFilters),
-            durationPercentile: '50',
-            fieldNames:
-              'user.username,user.id,host.ip,user_agent.name,kubernetes.pod.uuid,kubernetes.pod.name,url.domain,container.id,service.node.name',
+            durationPercentile,
+            fieldNames: fieldNames.map((field) => field.label).join(','),
           },
         },
       });
     }
-  }, [serviceName, start, end, transactionName, transactionType, uiFilters]);
+  }, [
+    serviceName,
+    start,
+    end,
+    transactionName,
+    transactionType,
+    uiFilters,
+    durationPercentile,
+    fieldNames,
+  ]);
 
   return (
     <>
@@ -74,7 +104,7 @@ export function LatencyCorrelations() {
           <EuiFlexGroup direction="row">
             <EuiFlexItem>
               <EuiTitle size="s">
-                <h4>Average latency over time</h4>
+                <h4>Latency ({durationPercentile}th percentile)</h4>
               </EuiTitle>
               <LatencyTimeseriesChart
                 data={data}
@@ -93,6 +123,39 @@ export function LatencyCorrelations() {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiAccordion id="accordion" buttonContent="Customize">
+            <EuiFlexGroup>
+              <EuiFlexItem grow={1}>
+                <EuiFormRow label="Threshold">
+                  <EuiFieldNumber
+                    value={durationPercentile}
+                    onChange={(e) =>
+                      setDurationPercentile(e.currentTarget.value)
+                    }
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={4}>
+                <EuiFormRow
+                  fullWidth={true}
+                  label="Field"
+                  helpText="Fields to analyse for significant tags"
+                >
+                  <EuiComboBox
+                    fullWidth={true}
+                    placeholder="Select or create options"
+                    selectedOptions={fieldNames}
+                    onChange={setFieldNames}
+                    onCreateOption={(term) => {
+                      setFieldNames((names) => [...names, { label: term }]);
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiAccordion>
         </EuiFlexItem>
         <EuiFlexItem>
           <SignificantTermsTable

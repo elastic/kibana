@@ -8,7 +8,7 @@ import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { TopSigTerm } from './format_top_significant_terms';
+import { TopSigTerm } from '../process_significant_term_aggs';
 
 export async function getMaxLatency({
   setup,

@@ -18,6 +18,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
+import { EuiSpacer } from '@elastic/eui';
 import { enableCorrelations } from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { LatencyCorrelations } from './LatencyCorrelations';
@@ -41,7 +42,7 @@ export function Correlations() {
           setIsFlyoutVisible(true);
         }}
       >
-        View correlations
+        View significant tags
       </EuiButton>
 
       {isFlyoutVisible && (
@@ -53,19 +54,39 @@ export function Correlations() {
           >
             <EuiFlyoutHeader hasBorder aria-labelledby="correlations-flyout">
               <EuiTitle>
-                <h2 id="correlations-flyout">Correlations</h2>
+                <h2 id="correlations-flyout">Significant tags</h2>
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
               {urlParams.kuery ? (
-                <EuiCallOut size="m">
-                  <span>Filtering by</span>
-                  <EuiCode>{urlParams.kuery}</EuiCode>
-                  <EuiLink href={createHref(history, { query: { kuery: '' } })}>
-                    <EuiButtonEmpty iconType="cross">Clear</EuiButtonEmpty>
-                  </EuiLink>
-                </EuiCallOut>
+                <>
+                  <EuiCallOut size="m">
+                    <span>Filtering by</span>
+                    <EuiCode>{urlParams.kuery}</EuiCode>
+                    <EuiLink
+                      href={createHref(history, { query: { kuery: '' } })}
+                    >
+                      <EuiButtonEmpty iconType="cross">Clear</EuiButtonEmpty>
+                    </EuiLink>
+                  </EuiCallOut>
+                  <EuiSpacer />
+                </>
               ) : null}
+
+              <EuiCallOut
+                size="s"
+                title="Experimental"
+                color="warning"
+                iconType="alert"
+              >
+                <p>
+                  Significant tags is an experimental feature and in active
+                  development. Bugs and surprises are to be expected but your
+                  feedback is very welcome so we can improve it.
+                </p>
+              </EuiCallOut>
+
+              <EuiSpacer />
 
               <LatencyCorrelations />
               <ErrorCorrelations />

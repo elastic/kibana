@@ -11,17 +11,19 @@ import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldname
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import { TopSigTerm } from './format_top_significant_terms';
+import { TopSigTerm } from '../process_significant_term_aggs';
 import { getMaxLatency } from './get_max_latency';
 
 export async function getChartsForTopSigTerms({
   setup,
   backgroundFilters,
   topSigTerms,
+  durationPercentile,
 }: {
   setup: Setup & SetupTimeRange;
   backgroundFilters: ESFilter[];
   topSigTerms: TopSigTerm[];
+  durationPercentile: number;
 }) {
   const { start, end, apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end, numBuckets: 30 });
@@ -70,10 +72,10 @@ export async function getChartsForTopSigTerms({
       extended_bounds: { min: start, max: end },
     },
     aggs: {
-      average: {
-        avg: {
-          // TODO: add support for metrics
+      percentile: {
+        percentiles: {
           field: TRANSACTION_DURATION,
+          percents: [durationPercentile],
         },
       },
     },
@@ -129,7 +131,7 @@ export async function getChartsForTopSigTerms({
   function formatTimeseries(timeseries: Agg['timeseries']) {
     return timeseries.buckets.map((bucket) => ({
       x: bucket.key,
-      y: bucket.average.value,
+      y: Object.values(bucket.percentile.values)[0],
     }));
   }
 
