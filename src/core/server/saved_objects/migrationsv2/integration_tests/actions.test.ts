@@ -37,6 +37,8 @@ import {
   waitForPickupUpdatedMappingsTask,
   pickupUpdatedMappings,
   UpdateByQueryResponse,
+  updateAndPickupMappings,
+  UpdateAndPickupMappingsResponse,
 } from '../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -52,7 +54,7 @@ describe('migration actions', () => {
   let client: ElasticsearchClient;
 
   beforeAll(async () => {
-    esServer = await startES();
+    // esServer = await startES();
     root = kbnTestServer.createRootWithCorePlugins({
       server: {
         basePath: '/hello',
@@ -69,7 +71,7 @@ describe('migration actions', () => {
       { _source: { title: 'doc 1' } },
       { _source: { title: 'doc 2' } },
       { _source: { title: 'doc 3' } },
-      { _source: { title: 'doc 4' } },
+      { _source: { title: 'saved object 4' } },
     ] as unknown) as SavedObjectsRawDoc[];
     await bulkOverwriteTransformedDocuments(client, 'existing_index_1', sourceDocs)();
 
@@ -87,7 +89,7 @@ describe('migration actions', () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
+    // await esServer.stop();
     await root.shutdown();
   });
 
@@ -221,6 +223,39 @@ describe('migration actions', () => {
     });
   });
 
+  describe('searchForOutdatedDocuments', () => {
+    it('only returns documents that match the outdatedDocumentsQuery', async () => {
+      const resultsWithQuery = ((await searchForOutdatedDocuments(client, 'existing_index_1', {
+        match: { title: { query: 'doc' } },
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      expect(resultsWithQuery.length).toBe(3);
+
+      const resultsWithoutQuery = ((await searchForOutdatedDocuments(
+        client,
+        'existing_index_1',
+        undefined as any
+      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      expect(resultsWithoutQuery.length).toBe(4);
+    });
+    it('resolves with _id, _source, _seq_no and _primary_term', async () => {
+      const results = ((await searchForOutdatedDocuments(client, 'existing_index_1', {
+        match: { title: { query: 'doc' } },
+      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      expect(results).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            _id: expect.any(String),
+            _seq_no: expect.any(Number),
+            _primary_term: expect.any(Number),
+            _source: expect.any(Object),
+          }),
+        ])
+      );
+    });
+    // TODO: I haven't been able to find a way to reproduce a partial search result
+    it.todo('rejects if only partial search results can be obtained');
+  });
+
   describe('waitForPickupUpdatedMappingsTask', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
@@ -263,6 +298,53 @@ describe('migration actions', () => {
           "right": "pickup_updated_mappings_succeeded",
         }
       `);
+    });
+  });
+
+  describe('updateAndPickupMappings', () => {
+    it('returns right when mappings were updated and picked up', async () => {
+      // Create an index without any mappings and insert documents into it
+      await createIndex(client, 'existing_index_without_mappings', {
+        dynamic: false as any,
+        properties: {},
+      })();
+      const sourceDocs = ([
+        { _source: { title: 'doc 1' } },
+        { _source: { title: 'doc 2' } },
+        { _source: { title: 'doc 3' } },
+        { _source: { title: 'doc 4' } },
+      ] as unknown) as SavedObjectsRawDoc[];
+      await bulkOverwriteTransformedDocuments(
+        client,
+        'existing_index_without_mappings',
+        sourceDocs
+      )();
+
+      // Assert that we can't search over the unmapped fields of the document
+      const originalSearchResults = ((await searchForOutdatedDocuments(
+        client,
+        'existing_index_without_mappings',
+        { match: { title: { query: 'doc' } } }
+      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      expect(originalSearchResults.length).toBe(0);
+
+      // Update and pickup mappings so that the title field is searchable
+      const res = await updateAndPickupMappings(client, 'existing_index_without_mappings', {
+        properties: {
+          title: { type: 'text' },
+        },
+      })();
+      expect(Either.isRight(res)).toBe(true);
+      const taskId = (res as Either.Right<UpdateAndPickupMappingsResponse>).right.taskId;
+      await waitForPickupUpdatedMappingsTask(client, taskId, '60s')();
+
+      // Repeat the search expecting to be able to find the existing documents
+      const pickedUpSearchResults = ((await searchForOutdatedDocuments(
+        client,
+        'existing_index_without_mappings',
+        { match: { title: { query: 'doc' } } }
+      )()) as Either.Right<SearchResponse>).right.outdatedDocuments;
+      return expect(pickedUpSearchResults.length).toBe(4);
     });
   });
 
