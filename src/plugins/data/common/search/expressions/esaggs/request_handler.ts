@@ -39,7 +39,7 @@ import {
 import { FormatFactory } from '../../../../common/field_formats/utils';
 
 /** @internal */
-interface RequestHandlerParams {
+export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
   aggs: IAggConfigs;
   deserializeFieldFormat: FormatFactory;
