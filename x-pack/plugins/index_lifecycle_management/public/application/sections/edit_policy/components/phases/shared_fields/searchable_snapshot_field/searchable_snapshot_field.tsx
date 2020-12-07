@@ -29,6 +29,8 @@ import { useConfigurationIssues } from '../../../../form';
 
 import { i18nTexts } from '../../../../i18n_texts';
 
+import { useRolloverPath } from '../../../../constants';
+
 import { FieldLoadingError, DescribedFormField, LearnMoreLink } from '../../../index';
 
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
@@ -53,12 +55,19 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   } = useKibana();
   const { getUrlForApp, policy, license } = useEditPolicyContext();
   const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
+
+  const [formData] = useFormData({ watch: [searchableSnapshotPath, useRolloverPath] });
+  const isRolloverEnabled = get(formData, useRolloverPath);
+  const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
 
   const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
   const isDisabledInColdDueToHotPhase = phase === 'cold' && isUsingSearchableSnapshotInHotPhase;
+  const isDisabledInColdDueToRollover = phase === 'cold' && !isRolloverEnabled;
 
-  const isDisabled = isDisabledDueToLicense || isDisabledInColdDueToHotPhase;
+  const isDisabled =
+    isDisabledDueToLicense || isDisabledInColdDueToHotPhase || isDisabledInColdDueToRollover;
 
   const [isFieldToggleChecked, setIsFieldToggleChecked] = useState(() =>
     Boolean(policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository)
@@ -69,9 +78,6 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
       setIsFieldToggleChecked(false);
     }
   }, [isDisabled]);
-
-  const [formData] = useFormData({ watch: searchableSnapshotPath });
-  const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
 
   const renderField = () => (
     <SearchableSnapshotDataProvider>
@@ -281,6 +287,20 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             {
               defaultMessage:
                 'Cannot perform searchable snapshot in cold when it is configured in hot phase.',
+            }
+          )}
+        />
+      );
+    } else if (isDisabledInColdDueToRollover) {
+      infoCallout = (
+        <EuiCallOut
+          size="s"
+          data-test-subj="searchableSnapshotFieldsNoRolloverCallout"
+          title={i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledCalloutBody',
+            {
+              defaultMessage:
+                'Cannot perform searchable snapshot when rollover is disabled in hot phase.',
             }
           )}
         />
