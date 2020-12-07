@@ -327,9 +327,9 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
               }}
             />
           </EuiTextColor>
-          {renderInfoCallout()}
         </>
       }
+      fieldNotices={renderInfoCallout()}
       fullWidth
     >
       {isDisabled ? <div /> : renderField}

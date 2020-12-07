@@ -20,13 +20,7 @@ import {
 
 import { Phases } from '../../../../../../../common/types';
 
-import {
-  useFormData,
-  UseField,
-  SelectField,
-  ToggleField,
-  NumericField,
-} from '../../../../../../shared_imports';
+import { useFormData, UseField, SelectField, NumericField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
@@ -36,12 +30,7 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { ROLLOVER_FORM_PATHS } from '../../../constants';
 
-import {
-  LearnMoreLink,
-  ActiveBadge,
-  DescribedFormRow,
-  ToggleFieldWithDescribedFormRow,
-} from '../../';
+import { LearnMoreLink, ActiveBadge, ToggleFieldWithDescribedFormRow } from '../../';
 
 import {
   ForcemergeField,
