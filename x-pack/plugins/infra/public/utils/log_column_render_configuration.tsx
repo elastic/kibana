@@ -39,3 +39,25 @@ export type LogColumnRenderConfiguration =
   | TimestampColumnRenderConfiguration
   | MessageColumnRenderConfiguration
   | FieldColumnRenderConfiguration;
+
+export function isTimestampColumnRenderConfiguration(
+  column: LogColumnRenderConfiguration
+): column is TimestampColumnRenderConfiguration {
+  return 'timestampColumn' in column;
+}
+
+export function isMessageColumnRenderConfiguration(
+  column: LogColumnRenderConfiguration
+): column is MessageColumnRenderConfiguration {
+  return 'messageColumn' in column;
+}
+
+export function isFieldColumnRenderConfiguration(
+  column: LogColumnRenderConfiguration
+): column is FieldColumnRenderConfiguration {
+  return 'fieldColumn' in column;
+}
+
+export function columnWidthToCSS(width: number | string) {
+  return typeof width === 'number' ? `${width}px` : width;
+}
