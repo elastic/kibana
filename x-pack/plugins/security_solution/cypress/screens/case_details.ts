@@ -14,7 +14,7 @@ export const CASE_DETAILS_PAGE_TITLE = '[data-test-subj="header-page-title"]';
 export const CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN =
   '[data-test-subj="push-to-external-service"]';
 
-export const CASE_DETAILS_STATUS = '[data-test-subj="case-view-status"]';
+export const CASE_DETAILS_STATUS = '[data-test-subj="case-view-status-dropdown"]';
 
 export const CASE_DETAILS_TAGS = '[data-test-subj="case-tags"]';
 
