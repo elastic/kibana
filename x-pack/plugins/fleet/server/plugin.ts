@@ -73,6 +73,7 @@ import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
+import { makeRouterEnforcingSuperuser } from './routes/security';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -213,6 +214,7 @@ export class FleetPlugin
     }
 
     const router = core.http.createRouter();
+
     const config = await this.config$.pipe(first()).toPromise();
 
     // Register usage collection
@@ -220,16 +222,16 @@ export class FleetPlugin
 
     // Always register app routes for permissions checking
     registerAppRoutes(router);
-
+    const routerSuperuserOnly = makeRouterEnforcingSuperuser(router);
     // Register rest of routes only if security is enabled
     if (this.security) {
-      registerSetupRoutes(router, config);
-      registerAgentPolicyRoutes(router);
-      registerPackagePolicyRoutes(router);
-      registerOutputRoutes(router);
-      registerSettingsRoutes(router);
-      registerDataStreamRoutes(router);
-      registerEPMRoutes(router);
+      registerSetupRoutes(routerSuperuserOnly, config);
+      registerAgentPolicyRoutes(routerSuperuserOnly);
+      registerPackagePolicyRoutes(routerSuperuserOnly);
+      registerOutputRoutes(routerSuperuserOnly);
+      registerSettingsRoutes(routerSuperuserOnly);
+      registerDataStreamRoutes(routerSuperuserOnly);
+      registerEPMRoutes(routerSuperuserOnly);
 
       // Conditional config routes
       if (config.agents.enabled) {
@@ -246,9 +248,9 @@ export class FleetPlugin
           // since it would run this func on *every* req (other plugins, CSS, etc)
           registerLimitedConcurrencyRoutes(core, config);
           registerAgentRoutes(router, config);
-          registerEnrollmentApiKeyRoutes(router);
+          registerEnrollmentApiKeyRoutes(routerSuperuserOnly);
           registerInstallScriptRoutes({
-            router,
+            router: routerSuperuserOnly,
             basePath: core.http.basePath,
           });
         }

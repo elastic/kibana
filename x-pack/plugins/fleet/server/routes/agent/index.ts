@@ -57,6 +57,7 @@ import { appContextService } from '../../services';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
 import { FleetConfigType } from '../..';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
+import { enforceSuperUser } from '../security';
 
 const ajv = new Ajv({
   coerceTypes: true,
@@ -89,7 +90,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: GetOneAgentRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getAgentHandler
+    enforceSuperUser(getAgentHandler)
   );
   // Update
   router.put(
@@ -98,7 +99,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: UpdateAgentRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    updateAgentHandler
+    enforceSuperUser(updateAgentHandler)
   );
   // Delete
   router.delete(
@@ -107,7 +108,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: DeleteAgentRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    deleteAgentHandler
+    enforceSuperUser(deleteAgentHandler)
   );
   // List
   router.get(
@@ -116,7 +117,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: GetAgentsRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getAgentsHandler
+    enforceSuperUser(getAgentsHandler)
   );
 
   const pollingRequestTimeout = config.agents.pollingRequestTimeout;
@@ -234,10 +235,12 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: PostNewAgentActionRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    postNewAgentActionHandlerBuilder({
-      getAgent: AgentService.getAgent,
-      createAgentAction: AgentService.createAgentAction,
-    })
+    enforceSuperUser(
+      postNewAgentActionHandlerBuilder({
+        getAgent: AgentService.getAgent,
+        createAgentAction: AgentService.createAgentAction,
+      })
+    )
   );
 
   router.post(
@@ -246,7 +249,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: PostAgentUnenrollRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    postAgentUnenrollHandler
+    enforceSuperUser(postAgentUnenrollHandler)
   );
 
   router.put(
@@ -255,7 +258,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: PutAgentReassignRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    putAgentsReassignHandler
+    enforceSuperUser(putAgentsReassignHandler)
   );
 
   // Get agent events
@@ -265,7 +268,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: GetOneAgentEventsRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getAgentEventsHandler
+    enforceSuperUser(getAgentEventsHandler)
   );
 
   // Get agent status for policy
@@ -275,7 +278,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: GetAgentStatusRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getAgentStatusForAgentPolicyHandler
+    enforceSuperUser(getAgentStatusForAgentPolicyHandler)
   );
   // upgrade agent
   router.post(
@@ -284,7 +287,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: PostAgentUpgradeRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    postAgentUpgradeHandler
+    enforceSuperUser(postAgentUpgradeHandler)
   );
   // bulk upgrade
   router.post(
@@ -293,7 +296,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: PostBulkAgentUpgradeRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    postBulkAgentsUpgradeHandler
+    enforceSuperUser(postBulkAgentsUpgradeHandler)
   );
   // Bulk reassign
   router.post(
@@ -302,7 +305,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: PostBulkAgentReassignRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    postBulkAgentsReassignHandler
+    enforceSuperUser(postBulkAgentsReassignHandler)
   );
 
   // Bulk unenroll
@@ -312,6 +315,6 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: PostBulkAgentUnenrollRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    postBulkAgentsUnenrollHandler
+    enforceSuperUser(postBulkAgentsUnenrollHandler)
   );
 };
