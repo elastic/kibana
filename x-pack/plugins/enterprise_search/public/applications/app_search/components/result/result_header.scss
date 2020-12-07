@@ -2,25 +2,25 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+}
 
-  &Column {
-    display: flex;
-    flex-wrap: wrap;
+.appSearchResultHeaderColumn {
+  display: flex;
+  flex-wrap: wrap;
 
-    &--left {
-      justify-content: flex-start;
+  &--left {
+    justify-content: flex-start;
 
-      & > div {
-        margin-right: $euiSizeL;
-      }
+    & > div {
+      margin-right: $euiSizeL;
     }
+  }
 
-    &--right {
-      justify-content: flex-end;
+  &--right {
+    justify-content: flex-end;
 
-      & > div + div {
-        margin-left: $euiSizeL;
-      }
+    & > div + div {
+      margin-left: $euiSizeL;
     }
   }
 }
