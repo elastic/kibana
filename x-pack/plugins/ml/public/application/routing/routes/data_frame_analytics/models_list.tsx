@@ -34,7 +34,7 @@ export const modelsListRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { context } = useResolver('', undefined, deps.config, basicResolvers(deps));
+  const { context } = useResolver(undefined, undefined, deps.config, basicResolvers(deps));
   return (
     <PageLoader context={context}>
       <Page />
