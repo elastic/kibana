@@ -7,9 +7,12 @@
 import React, { useState } from 'react';
 import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import { MonitorSummary } from '../../../../../common/runtime_types/monitor';
+import { Ping } from '../../../../../common/runtime_types/ping';
 
 interface Props {
-  summary: MonitorSummary;
+  detailsPage?: boolean;
+  ping?: MonitorSummary;
+  summary?: Ping;
 }
 
 const getTagsFromSummary = (summary: MonitorSummary) => {
@@ -21,10 +24,19 @@ const getTagsFromSummary = (summary: MonitorSummary) => {
   return [...tags];
 };
 
-export const MonitorTags = ({ summary }: Props) => {
-  const [toDisplay, setToDisplay] = useState(5);
+const getTagsFromPing = (ping: Ping) => {
+  return ping?.tags ?? [];
+};
 
-  const tags = getTagsFromSummary(summary);
+export const MonitorTags = ({ ping, summary }: Props) => {
+  const [toDisplay, setToDisplay] = useState(5);
+  let tags: string[];
+
+  if (summary) {
+    tags = getTagsFromSummary(summary!);
+  } else {
+    tags = getTagsFromPing(ping!);
+  }
 
   const tagsToDisplay = tags.slice(0, toDisplay);
 
