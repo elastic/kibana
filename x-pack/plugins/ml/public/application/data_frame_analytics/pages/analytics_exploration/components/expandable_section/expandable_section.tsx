@@ -6,7 +6,7 @@
 
 import './expandable_section.scss';
 
-import React, { useState, FC, ReactNode } from 'react';
+import React, { FC, ReactNode, useCallback } from 'react';
 
 import {
   EuiBadge,
@@ -17,6 +17,11 @@ import {
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
+import {
+  getDefaultExplorationPageUrlState,
+  useExplorationUrlState,
+} from '../../hooks/use_exploration_url_state';
+import { ExpandablePanels } from '../../../../../../../common/types/ml_url_generator';
 
 interface HeaderItem {
   // id is used as the React key and to construct a data-test-subj
@@ -39,25 +44,30 @@ export interface ExpandableSectionProps {
   isExpanded?: boolean;
   dataTestId: string;
   title: ReactNode;
+  urlStateKey: ExpandablePanels;
 }
 
 export const ExpandableSection: FC<ExpandableSectionProps> = ({
   headerItems,
-  // For now we don't have a need for complete external control
-  // and just want to pass in a default value. If we wanted
-  // full external control we'd also need to add a onToggleExpanded()
-  // callback.
-  isExpanded: isExpandedDefault = true,
   content,
+  isExpanded: isExpandedDefault,
   contentPadding = false,
   dataTestId,
   title,
   docsLink,
+  urlStateKey,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(isExpandedDefault);
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
-  };
+  const [pageUrlState, setPageUrlState] = useExplorationUrlState();
+
+  const isExpanded =
+    isExpandedDefault !== undefined &&
+    pageUrlState[urlStateKey] === getDefaultExplorationPageUrlState()[urlStateKey]
+      ? isExpandedDefault
+      : pageUrlState[urlStateKey];
+
+  const toggleExpanded = useCallback(() => {
+    setPageUrlState({ [urlStateKey]: !isExpanded });
+  }, [isExpanded, setPageUrlState, urlStateKey]);
 
   return (
     <EuiPanel paddingSize="none" data-test-subj={`mlDFExpandableSection-${dataTestId}`}>

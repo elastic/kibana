@@ -6,23 +6,17 @@
 
 import Boom from '@hapi/boom';
 import { LicenseCheck } from '../../../../licensing/server';
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+import { kibanaResponseFactory } from '../../../../../../src/core/server';
 
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineCheckPrivilegesRoutes } from './privileges';
-import { APIKeys } from '../../authentication/api_keys';
 
 interface TestOptions {
   licenseCheckResult?: LicenseCheck;
-  callAsInternalUserResponses?: Array<() => Promise<unknown>>;
-  callAsCurrentUserResponses?: Array<() => Promise<unknown>>;
-  asserts: {
-    statusCode: number;
-    result?: Record<string, any>;
-    callAsInternalUserAPIArguments?: unknown[][];
-    callAsCurrentUserAPIArguments?: unknown[][];
-  };
+  areAPIKeysEnabled?: boolean;
+  apiResponse?: () => Promise<unknown>;
+  asserts: { statusCode: number; result?: Record<string, any>; apiArguments?: unknown };
 }
 
 describe('Check API keys privileges', () => {
@@ -30,32 +24,23 @@ describe('Check API keys privileges', () => {
     description: string,
     {
       licenseCheckResult = { state: 'valid' },
-      callAsInternalUserResponses = [],
-      callAsCurrentUserResponses = [],
+      areAPIKeysEnabled = true,
+      apiResponse,
       asserts,
     }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      const mockContext = {
+        core: coreMock.createRequestHandlerContext(),
+        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
+      };
 
-      const apiKeys = new APIKeys({
-        logger: mockRouteDefinitionParams.logger,
-        clusterClient: mockRouteDefinitionParams.clusterClient,
-        license: mockRouteDefinitionParams.license,
-      });
+      mockRouteDefinitionParams.authc.areAPIKeysEnabled.mockResolvedValue(areAPIKeysEnabled);
 
-      mockRouteDefinitionParams.authc.areAPIKeysEnabled.mockImplementation(() =>
-        apiKeys.areAPIKeysEnabled()
-      );
-
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
-      for (const apiResponse of callAsCurrentUserResponses) {
-        mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
-      }
-      for (const apiResponse of callAsInternalUserResponses) {
-        mockRouteDefinitionParams.clusterClient.callAsInternalUser.mockImplementationOnce(
-          apiResponse
+      if (apiResponse) {
+        mockContext.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockImplementation(
+          (async () => ({ body: await apiResponse() })) as any
         );
       }
 
@@ -68,33 +53,15 @@ describe('Check API keys privileges', () => {
         path: '/internal/security/api_key/privileges',
         headers,
       });
-      const mockContext = ({
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-      } as unknown) as RequestHandlerContext;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(asserts.statusCode);
       expect(response.payload).toEqual(asserts.result);
 
-      if (Array.isArray(asserts.callAsCurrentUserAPIArguments)) {
-        for (const apiArguments of asserts.callAsCurrentUserAPIArguments) {
-          expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(
-            mockRequest
-          );
-          expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(...apiArguments);
-        }
-      } else {
-        expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
-      }
-
-      if (Array.isArray(asserts.callAsInternalUserAPIArguments)) {
-        for (const apiArguments of asserts.callAsInternalUserAPIArguments) {
-          expect(mockRouteDefinitionParams.clusterClient.callAsInternalUser).toHaveBeenCalledWith(
-            ...apiArguments
-          );
-        }
-      } else {
-        expect(mockRouteDefinitionParams.clusterClient.callAsInternalUser).not.toHaveBeenCalled();
+      if (asserts.apiArguments) {
+        expect(
+          mockContext.core.elasticsearch.client.asCurrentUser.security.hasPrivileges
+        ).toHaveBeenCalledWith(asserts.apiArguments);
       }
 
       expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
@@ -109,22 +76,13 @@ describe('Check API keys privileges', () => {
 
     const error = Boom.notAcceptable('test not acceptable message');
     getPrivilegesTest('returns error from cluster client', {
-      callAsCurrentUserResponses: [
-        async () => {
-          throw error;
-        },
-      ],
-      callAsInternalUserResponses: [async () => {}],
+      apiResponse: async () => {
+        throw error;
+      },
       asserts: {
-        callAsCurrentUserAPIArguments: [
-          [
-            'shield.hasPrivileges',
-            { body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] } },
-          ],
-        ],
-        callAsInternalUserAPIArguments: [
-          ['shield.invalidateAPIKey', { body: { id: expect.any(String) } }],
-        ],
+        apiArguments: {
+          body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
+        },
         statusCode: 406,
         result: error,
       },
@@ -133,40 +91,17 @@ describe('Check API keys privileges', () => {
 
   describe('success', () => {
     getPrivilegesTest('returns areApiKeysEnabled and isAdmin', {
-      callAsCurrentUserResponses: [
-        async () => ({
-          username: 'elastic',
-          has_all_requested: true,
-          cluster: { manage_api_key: true, manage_security: true, manage_own_api_key: false },
-          index: {},
-          application: {},
-        }),
-      ],
-      callAsInternalUserResponses: [
-        async () => ({
-          api_keys: [
-            {
-              id: 'si8If24B1bKsmSLTAhJV',
-              name: 'my-api-key',
-              creation: 1574089261632,
-              expiration: 1574175661632,
-              invalidated: false,
-              username: 'elastic',
-              realm: 'reserved',
-            },
-          ],
-        }),
-      ],
+      apiResponse: async () => ({
+        username: 'elastic',
+        has_all_requested: true,
+        cluster: { manage_api_key: true, manage_security: true, manage_own_api_key: false },
+        index: {},
+        application: {},
+      }),
       asserts: {
-        callAsCurrentUserAPIArguments: [
-          [
-            'shield.hasPrivileges',
-            { body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] } },
-          ],
-        ],
-        callAsInternalUserAPIArguments: [
-          ['shield.invalidateAPIKey', { body: { id: expect.any(String) } }],
-        ],
+        apiArguments: {
+          body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
+        },
         statusCode: 200,
         result: { areApiKeysEnabled: true, isAdmin: true, canManage: true },
       },
@@ -175,36 +110,18 @@ describe('Check API keys privileges', () => {
     getPrivilegesTest(
       'returns areApiKeysEnabled=false when API Keys are disabled in Elasticsearch',
       {
-        callAsCurrentUserResponses: [
-          async () => ({
-            username: 'elastic',
-            has_all_requested: true,
-            cluster: { manage_api_key: true, manage_security: true, manage_own_api_key: true },
-            index: {},
-            application: {},
-          }),
-        ],
-        callAsInternalUserResponses: [
-          async () => {
-            const error = new Error();
-            (error as any).body = {
-              error: {
-                'disabled.feature': 'api_keys',
-              },
-            };
-            throw error;
-          },
-        ],
+        apiResponse: async () => ({
+          username: 'elastic',
+          has_all_requested: true,
+          cluster: { manage_api_key: true, manage_security: true, manage_own_api_key: true },
+          index: {},
+          application: {},
+        }),
+        areAPIKeysEnabled: false,
         asserts: {
-          callAsCurrentUserAPIArguments: [
-            [
-              'shield.hasPrivileges',
-              { body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] } },
-            ],
-          ],
-          callAsInternalUserAPIArguments: [
-            ['shield.invalidateAPIKey', { body: { id: expect.any(String) } }],
-          ],
+          apiArguments: {
+            body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
+          },
           statusCode: 200,
           result: { areApiKeysEnabled: false, isAdmin: true, canManage: true },
         },
@@ -212,52 +129,34 @@ describe('Check API keys privileges', () => {
     );
 
     getPrivilegesTest('returns isAdmin=false when user has insufficient privileges', {
-      callAsCurrentUserResponses: [
-        async () => ({
-          username: 'elastic',
-          has_all_requested: true,
-          cluster: { manage_api_key: false, manage_security: false, manage_own_api_key: false },
-          index: {},
-          application: {},
-        }),
-      ],
-      callAsInternalUserResponses: [async () => ({})],
+      apiResponse: async () => ({
+        username: 'elastic',
+        has_all_requested: true,
+        cluster: { manage_api_key: false, manage_security: false, manage_own_api_key: false },
+        index: {},
+        application: {},
+      }),
       asserts: {
-        callAsCurrentUserAPIArguments: [
-          [
-            'shield.hasPrivileges',
-            { body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] } },
-          ],
-        ],
-        callAsInternalUserAPIArguments: [
-          ['shield.invalidateAPIKey', { body: { id: expect.any(String) } }],
-        ],
+        apiArguments: {
+          body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
+        },
         statusCode: 200,
         result: { areApiKeysEnabled: true, isAdmin: false, canManage: false },
       },
     });
 
     getPrivilegesTest('returns canManage=true when user can manage their own API Keys', {
-      callAsCurrentUserResponses: [
-        async () => ({
-          username: 'elastic',
-          has_all_requested: true,
-          cluster: { manage_api_key: false, manage_security: false, manage_own_api_key: true },
-          index: {},
-          application: {},
-        }),
-      ],
-      callAsInternalUserResponses: [async () => ({})],
+      apiResponse: async () => ({
+        username: 'elastic',
+        has_all_requested: true,
+        cluster: { manage_api_key: false, manage_security: false, manage_own_api_key: true },
+        index: {},
+        application: {},
+      }),
       asserts: {
-        callAsCurrentUserAPIArguments: [
-          [
-            'shield.hasPrivileges',
-            { body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] } },
-          ],
-        ],
-        callAsInternalUserAPIArguments: [
-          ['shield.invalidateAPIKey', { body: { id: expect.any(String) } }],
-        ],
+        apiArguments: {
+          body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
+        },
         statusCode: 200,
         result: { areApiKeysEnabled: true, isAdmin: false, canManage: true },
       },

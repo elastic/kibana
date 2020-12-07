@@ -9,11 +9,11 @@ import produce from 'immer';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { routes } from '../components/app/Main/route_config';
-import { ApmPluginContextValue } from '../context/ApmPluginContext';
+import { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../context/ApmPluginContext/MockApmPluginContext';
+} from '../context/apm_plugin/mock_apm_plugin_context';
 import { useBreadcrumbs } from './use_breadcrumbs';
 
 function createWrapper(path: string) {
