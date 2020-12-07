@@ -8,18 +8,15 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { Map as MapboxMap, MapboxOptions, MapMouseEvent } from 'mapbox-gl';
 // @ts-expect-error
-// @ts-expect-error
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
-// @ts-expect-error
-// @ts-expect-error
 // @ts-expect-error
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
-// @ts-expect-error
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+// @ts-expect-error
 import { DrawControl } from './draw_control';
 // @ts-expect-error
 import { TooltipControl } from './tooltip_control';
@@ -37,12 +34,15 @@ import {
 } from '../../../common/constants';
 import { getGlyphUrl, isRetina } from '../../meta';
 import { syncLayerOrder } from './sort_layers';
+// @ts-expect-error
 import { removeOrphanedSourcesAndLayers, addSpritesheetToMap } from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapExtentState } from '../../actions';
+// @ts-expect-error
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
+// @ts-expect-error
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 
 mapboxgl.workerUrl = mbWorkerUrl;
@@ -324,7 +324,7 @@ export class MBMap extends Component<Props, State> {
   };
 
   _syncMbMapWithLayerList = () => {
-    if (this.state.mbMap === undefined) {
+    if (!this.state.mbMap) {
       return;
     }
 
