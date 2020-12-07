@@ -30,7 +30,7 @@ async function popularizeField(
     return;
   }
 
-  field.count = 1 + (field.count || 0);
+  field.count++;
 
   // Catch 409 errors caused by user adding columns in a higher frequency that the changes can be persisted to Elasticsearch
   try {

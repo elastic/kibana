@@ -369,7 +369,8 @@ export class IndexPattern implements IIndexPattern {
     const newCount: number | undefined = count === null ? undefined : count;
 
     if (fieldObject) {
-      fieldObject.count = newCount;
+      if (!newCount) fieldObject.deleteCount();
+      else fieldObject.count = newCount;
       return;
     }
 
