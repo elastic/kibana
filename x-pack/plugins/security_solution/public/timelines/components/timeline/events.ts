@@ -42,9 +42,6 @@ export type OnColumnRemoved = (columnId: ColumnId) => void;
 
 export type OnColumnResized = ({ columnId, delta }: { columnId: ColumnId; delta: number }) => void;
 
-/** Invoked when a user clicks to change the number items to show per page */
-export type OnChangeItemsPerPage = (itemsPerPage: number) => void;
-
 /** Invoked when a user clicks to load more item */
 export type OnChangePage = (nextPage: number) => void;
 

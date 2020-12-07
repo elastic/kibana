@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PainlessCompletionResult, PainlessContext, Field } from '../types';
+import { PainlessCompletionResult, PainlessContext, PainlessAutocompleteField } from '../types';
 
 import { getAutocompleteSuggestions } from './lib';
 
@@ -25,7 +25,7 @@ export class PainlessWorker {
   public provideAutocompleteSuggestions(
     currentLineChars: string,
     context: PainlessContext,
-    fields?: Field[]
+    fields?: PainlessAutocompleteField[]
   ): PainlessCompletionResult {
     // Array of the active line words, e.g., [boolean, isTrue, =, true]
     const words = currentLineChars.replace('\t', '').split(' ');

@@ -13,7 +13,18 @@ import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/s
 import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 
-jest.mock('uuid', () => ({ v4: jest.fn().mockReturnValue('uuid-v4-id') }));
+jest.mock('../../../../../src/core/server/saved_objects/service/lib/utils', () => {
+  const { SavedObjectsUtils } = jest.requireActual(
+    '../../../../../src/core/server/saved_objects/service/lib/utils'
+  );
+  return {
+    SavedObjectsUtils: {
+      namespaceStringToId: SavedObjectsUtils.namespaceStringToId,
+      isRandomId: SavedObjectsUtils.isRandomId,
+      generateId: () => 'mock-saved-object-id',
+    },
+  };
+});
 
 let wrapper: EncryptedSavedObjectsClientWrapper;
 let mockBaseClient: jest.Mocked<SavedObjectsClientContract>;
@@ -29,11 +40,6 @@ beforeEach(() => {
         'attrSecret',
         { key: 'attrNotSoSecret', dangerouslyExposeValue: true },
       ]),
-    },
-    {
-      type: 'known-type-predefined-id',
-      attributesToEncrypt: new Set(['attrSecret']),
-      allowPredefinedID: true,
     },
   ]);
 
@@ -77,34 +83,14 @@ describe('#create', () => {
     expect(mockBaseClient.create).toHaveBeenCalledWith('unknown-type', attributes, options);
   });
 
-  it('fails if type is registered without allowPredefinedID and ID is specified', async () => {
+  it('fails if type is registered and ID is specified', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
 
     await expect(wrapper.create('known-type', attributes, { id: 'some-id' })).rejects.toThrowError(
-      'Predefined IDs are not allowed for encrypted saved objects of type "known-type".'
+      'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `SavedObjectsUtils.generateId`.'
     );
 
     expect(mockBaseClient.create).not.toHaveBeenCalled();
-  });
-
-  it('succeeds if type is registered with allowPredefinedID and ID is specified', async () => {
-    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const mockedResponse = {
-      id: 'some-id',
-      type: 'known-type-predefined-id',
-      attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
-      references: [],
-    };
-
-    mockBaseClient.create.mockResolvedValue(mockedResponse);
-    await expect(
-      wrapper.create('known-type-predefined-id', attributes, { id: 'some-id' })
-    ).resolves.toEqual({
-      ...mockedResponse,
-      attributes: { attrOne: 'one', attrThree: 'three' },
-    });
-
-    expect(mockBaseClient.create).toHaveBeenCalled();
   });
 
   it('allows a specified ID when overwriting an existing object', async () => {
@@ -168,7 +154,7 @@ describe('#create', () => {
     };
     const options = { overwrite: true };
     const mockedResponse = {
-      id: 'uuid-v4-id',
+      id: 'mock-saved-object-id',
       type: 'known-type',
       attributes: {
         attrOne: 'one',
@@ -188,7 +174,7 @@ describe('#create', () => {
 
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
-      { type: 'known-type', id: 'uuid-v4-id' },
+      { type: 'known-type', id: 'mock-saved-object-id' },
       {
         attrOne: 'one',
         attrSecret: 'secret',
@@ -207,7 +193,7 @@ describe('#create', () => {
         attrNotSoSecret: '*not-so-secret*',
         attrThree: 'three',
       },
-      { id: 'uuid-v4-id', overwrite: true }
+      { id: 'mock-saved-object-id', overwrite: true }
     );
   });
 
@@ -216,7 +202,7 @@ describe('#create', () => {
       const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
       const options = { overwrite: true, namespace };
       const mockedResponse = {
-        id: 'uuid-v4-id',
+        id: 'mock-saved-object-id',
         type: 'known-type',
         attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
         references: [],
@@ -233,7 +219,7 @@ describe('#create', () => {
       expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
         {
           type: 'known-type',
-          id: 'uuid-v4-id',
+          id: 'mock-saved-object-id',
           namespace: expectNamespaceInDescriptor ? namespace : undefined,
         },
         { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
@@ -244,7 +230,7 @@ describe('#create', () => {
       expect(mockBaseClient.create).toHaveBeenCalledWith(
         'known-type',
         { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
-        { id: 'uuid-v4-id', overwrite: true, namespace }
+        { id: 'mock-saved-object-id', overwrite: true, namespace }
       );
     };
 
@@ -270,7 +256,7 @@ describe('#create', () => {
     expect(mockBaseClient.create).toHaveBeenCalledWith(
       'known-type',
       { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
-      { id: 'uuid-v4-id' }
+      { id: 'mock-saved-object-id' }
     );
   });
 });
@@ -282,7 +268,7 @@ describe('#bulkCreate', () => {
     const mockedResponse = {
       saved_objects: [
         {
-          id: 'uuid-v4-id',
+          id: 'mock-saved-object-id',
           type: 'known-type',
           attributes,
           references: [],
@@ -315,7 +301,7 @@ describe('#bulkCreate', () => {
       [
         {
           ...bulkCreateParams[0],
-          id: 'uuid-v4-id',
+          id: 'mock-saved-object-id',
           attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
         },
         bulkCreateParams[1],
@@ -324,7 +310,7 @@ describe('#bulkCreate', () => {
     );
   });
 
-  it('fails if ID is specified for registered type without allowPredefinedID', async () => {
+  it('fails if ID is specified for registered type', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
 
     const bulkCreateParams = [
@@ -333,46 +319,10 @@ describe('#bulkCreate', () => {
     ];
 
     await expect(wrapper.bulkCreate(bulkCreateParams)).rejects.toThrowError(
-      'Predefined IDs are not allowed for encrypted saved objects of type "known-type".'
+      'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `SavedObjectsUtils.generateId`.'
     );
 
     expect(mockBaseClient.bulkCreate).not.toHaveBeenCalled();
-  });
-
-  it('succeeds if ID is specified for registered type with allowPredefinedID', async () => {
-    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { namespace: 'some-namespace' };
-    const mockedResponse = {
-      saved_objects: [
-        {
-          id: 'some-id',
-          type: 'known-type-predefined-id',
-          attributes,
-          references: [],
-        },
-        {
-          id: 'some-id',
-          type: 'unknown-type',
-          attributes,
-          references: [],
-        },
-      ],
-    };
-    mockBaseClient.bulkCreate.mockResolvedValue(mockedResponse);
-
-    const bulkCreateParams = [
-      { id: 'some-id', type: 'known-type-predefined-id', attributes },
-      { type: 'unknown-type', attributes },
-    ];
-
-    await expect(wrapper.bulkCreate(bulkCreateParams, options)).resolves.toEqual({
-      saved_objects: [
-        { ...mockedResponse.saved_objects[0], attributes: { attrOne: 'one', attrThree: 'three' } },
-        mockedResponse.saved_objects[1],
-      ],
-    });
-
-    expect(mockBaseClient.bulkCreate).toHaveBeenCalled();
   });
 
   it('allows a specified ID when overwriting an existing object', async () => {
@@ -456,7 +406,7 @@ describe('#bulkCreate', () => {
     const mockedResponse = {
       saved_objects: [
         {
-          id: 'uuid-v4-id',
+          id: 'mock-saved-object-id',
           type: 'known-type',
           attributes: { ...attributes, attrSecret: '*secret*', attrNotSoSecret: '*not-so-secret*' },
           references: [],
@@ -489,7 +439,7 @@ describe('#bulkCreate', () => {
 
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
-      { type: 'known-type', id: 'uuid-v4-id' },
+      { type: 'known-type', id: 'mock-saved-object-id' },
       {
         attrOne: 'one',
         attrSecret: 'secret',
@@ -504,7 +454,7 @@ describe('#bulkCreate', () => {
       [
         {
           ...bulkCreateParams[0],
-          id: 'uuid-v4-id',
+          id: 'mock-saved-object-id',
           attributes: {
             attrOne: 'one',
             attrSecret: '*secret*',
@@ -523,7 +473,9 @@ describe('#bulkCreate', () => {
       const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
       const options = { namespace };
       const mockedResponse = {
-        saved_objects: [{ id: 'uuid-v4-id', type: 'known-type', attributes, references: [] }],
+        saved_objects: [
+          { id: 'mock-saved-object-id', type: 'known-type', attributes, references: [] },
+        ],
       };
 
       mockBaseClient.bulkCreate.mockResolvedValue(mockedResponse);
@@ -542,7 +494,7 @@ describe('#bulkCreate', () => {
       expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
         {
           type: 'known-type',
-          id: 'uuid-v4-id',
+          id: 'mock-saved-object-id',
           namespace: expectNamespaceInDescriptor ? namespace : undefined,
         },
         { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
@@ -554,7 +506,7 @@ describe('#bulkCreate', () => {
         [
           {
             ...bulkCreateParams[0],
-            id: 'uuid-v4-id',
+            id: 'mock-saved-object-id',
             attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
           },
         ],
@@ -590,7 +542,7 @@ describe('#bulkCreate', () => {
       [
         {
           type: 'known-type',
-          id: 'uuid-v4-id',
+          id: 'mock-saved-object-id',
           attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
         },
       ],

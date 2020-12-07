@@ -9,7 +9,7 @@ import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } 
 import {
   CommentResponse,
   ServiceConnectorCaseResponse,
-  Status,
+  CaseStatuses,
   UserAction,
   UserActionField,
   CaseResponse,
@@ -69,7 +69,7 @@ export const basicCase: Case = {
   },
   description: 'Security banana Issue',
   externalService: null,
-  status: 'open',
+  status: CaseStatuses.open,
   tags,
   title: 'Another horrible breach!!',
   totalComment: 1,
@@ -98,8 +98,9 @@ export const basicCaseCommentPatch = {
 };
 
 export const casesStatus: CasesStatus = {
-  countClosedCases: 130,
   countOpenCases: 20,
+  countInProgressCases: 40,
+  countClosedCases: 130,
 };
 
 export const basicPush = {
@@ -203,7 +204,7 @@ export const basicCommentSnake: CommentResponse = {
 
 export const basicCaseSnake: CaseResponse = {
   ...basicCase,
-  status: 'open' as Status,
+  status: CaseStatuses.open,
   closed_at: null,
   closed_by: null,
   comments: [basicCommentSnake],
@@ -222,6 +223,7 @@ export const basicCaseSnake: CaseResponse = {
 
 export const casesStatusSnake: CasesStatusResponse = {
   count_closed_cases: 130,
+  count_in_progress_cases: 40,
   count_open_cases: 20,
 };
 
@@ -325,5 +327,5 @@ export const basicCaseClosed: Case = {
   ...basicCase,
   closedAt: '2020-02-25T23:06:33.798Z',
   closedBy: elasticUser,
-  status: 'closed',
+  status: CaseStatuses.closed,
 };
