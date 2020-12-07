@@ -21,7 +21,7 @@ interface ClientArgs {
 }
 
 interface GetConnectorMappingsArgs extends ClientArgs {
-  caseConfigureId: string;
+  mappingsId: string;
 }
 interface FindConnectorMappingsArgs extends ClientArgs {
   options?: SavedObjectFindOptions;
@@ -33,7 +33,7 @@ interface PostConnectorMappingsArgs extends ClientArgs {
 }
 
 interface PatchConnectorMappingsArgs extends ClientArgs {
-  caseConfigureId: string;
+  mappingsId: string;
   updatedAttributes: Partial<ConnectorMappings>;
 }
 
@@ -48,21 +48,21 @@ export interface ConnectorMappingsServiceSetup {
 export class ConnectorMappingsService {
   constructor(private readonly log: Logger) {}
   public setup = async (): Promise<ConnectorMappingsServiceSetup> => ({
-    delete: async ({ client, caseConfigureId }: GetConnectorMappingsArgs) => {
+    delete: async ({ client, mappingsId }: GetConnectorMappingsArgs) => {
       try {
-        this.log.debug(`Attempting to DELETE case configure ${caseConfigureId}`);
-        return await client.delete(CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT, caseConfigureId);
+        this.log.debug(`Attempting to DELETE connector mapping ${mappingsId}`);
+        return await client.delete(CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT, mappingsId);
       } catch (error) {
-        this.log.debug(`Error on DELETE case configure ${caseConfigureId}: ${error}`);
+        this.log.debug(`Error on DELETE connector mapping ${mappingsId}: ${error}`);
         throw error;
       }
     },
-    get: async ({ client, caseConfigureId }: GetConnectorMappingsArgs) => {
+    get: async ({ client, mappingsId }: GetConnectorMappingsArgs) => {
       try {
-        this.log.debug(`Attempting to GET connector mappings ${caseConfigureId}`);
-        return await client.get(CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT, caseConfigureId);
+        this.log.debug(`Attempting to GET connector mappings ${mappingsId}`);
+        return await client.get(CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT, mappingsId);
       } catch (error) {
-        this.log.debug(`Error on GET connector mappings ${caseConfigureId}: ${error}`);
+        this.log.debug(`Error on GET connector mappings ${mappingsId}: ${error}`);
         throw error;
       }
     },
@@ -86,14 +86,14 @@ export class ConnectorMappingsService {
         throw error;
       }
     },
-    patch: async ({ client, caseConfigureId, updatedAttributes }: PatchConnectorMappingsArgs) => {
+    patch: async ({ client, mappingsId, updatedAttributes }: PatchConnectorMappingsArgs) => {
       try {
-        this.log.debug(`Attempting to UPDATE connector mappings ${caseConfigureId}`);
-        return await client.update(CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT, caseConfigureId, {
+        this.log.debug(`Attempting to UPDATE connector mappings ${mappingsId}`);
+        return await client.update(CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT, mappingsId, {
           ...updatedAttributes,
         });
       } catch (error) {
-        this.log.debug(`Error on UPDATE connector mappings ${caseConfigureId}: ${error}`);
+        this.log.debug(`Error on UPDATE connector mappings ${mappingsId}: ${error}`);
         throw error;
       }
     },

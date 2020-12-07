@@ -12,12 +12,24 @@ import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
 import { CaseConnectorRt, ESCaseConnector } from '../connectors';
 
-const StatusRt = rt.union([rt.literal('open'), rt.literal('closed')]);
+export enum CaseStatuses {
+  open = 'open',
+  'in-progress' = 'in-progress',
+  closed = 'closed',
+}
+
+const CaseStatusRt = rt.union([
+  rt.literal(CaseStatuses.open),
+  rt.literal(CaseStatuses['in-progress']),
+  rt.literal(CaseStatuses.closed),
+]);
+
+export const caseStatuses = Object.values(CaseStatuses);
 
 const CaseBasicRt = rt.type({
   connector: CaseConnectorRt,
   description: rt.string,
-  status: StatusRt,
+  status: CaseStatusRt,
   tags: rt.array(rt.string),
   title: rt.string,
 });
@@ -65,7 +77,7 @@ export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
 
 export const CasesFindRequestRt = rt.partial({
   tags: rt.union([rt.array(rt.string), rt.string]),
-  status: StatusRt,
+  status: CaseStatusRt,
   reporters: rt.union([rt.array(rt.string), rt.string]),
   defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
   fields: rt.array(rt.string),
@@ -114,7 +126,6 @@ export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
-export type Status = rt.TypeOf<typeof StatusRt>;
 export type CaseExternalServiceRequest = rt.TypeOf<typeof CaseExternalServiceRequestRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
 

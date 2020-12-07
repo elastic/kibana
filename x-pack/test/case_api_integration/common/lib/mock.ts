@@ -13,6 +13,7 @@ import {
   CommentRequestUserType,
   CommentRequestAlertType,
   CommentType,
+  CaseStatuses,
 } from '../../../../plugins/case/common/api';
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 export const postCaseReq: CasePostRequest = {
@@ -49,7 +50,7 @@ export const postCaseResp = (
   closed_by: null,
   created_by: defaultUser,
   external_service: null,
-  status: 'open',
+  status: CaseStatuses.open,
   updated_by: null,
 });
 
@@ -78,4 +79,5 @@ export const findCasesResp: CasesFindResponse = {
   cases: [],
   count_open_cases: 0,
   count_closed_cases: 0,
+  count_in_progress_cases: 0,
 };

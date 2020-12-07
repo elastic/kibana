@@ -6,6 +6,7 @@
 
 import { KibanaServices } from '../../common/lib/kibana';
 
+import { ConnectorTypes, CommentType, CaseStatuses } from '../../../../case/common/api';
 import { CASES_URL } from '../../../../case/common/constants';
 
 import {
@@ -51,7 +52,6 @@ import {
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import * as i18n from './translations';
-import { ConnectorTypes, CommentType } from '../../../../case/common/api';
 import { getCaseConfigurePushUrl } from '../../../../case/common/api/helpers';
 
 const abortCtrl = new AbortController();
@@ -139,7 +139,7 @@ describe('Case Configuration API', () => {
           ...DEFAULT_QUERY_PARAMS,
           reporters: [],
           tags: [],
-          status: 'open',
+          status: CaseStatuses.open,
         },
         signal: abortCtrl.signal,
       });
@@ -150,7 +150,7 @@ describe('Case Configuration API', () => {
           ...DEFAULT_FILTER_OPTIONS,
           reporters: [...respReporters, { username: null, full_name: null, email: null }],
           tags,
-          status: '',
+          status: CaseStatuses.open,
           search: 'hello',
         },
         queryParams: DEFAULT_QUERY_PARAMS,
@@ -163,6 +163,7 @@ describe('Case Configuration API', () => {
           reporters,
           tags: ['"coke"', '"pepsi"'],
           search: 'hello',
+          status: CaseStatuses.open,
         },
         signal: abortCtrl.signal,
       });
@@ -175,7 +176,7 @@ describe('Case Configuration API', () => {
           ...DEFAULT_FILTER_OPTIONS,
           reporters: [...respReporters, { username: null, full_name: null, email: null }],
           tags: weirdTags,
-          status: '',
+          status: CaseStatuses.open,
           search: 'hello',
         },
         queryParams: DEFAULT_QUERY_PARAMS,
@@ -188,6 +189,7 @@ describe('Case Configuration API', () => {
           reporters,
           tags: ['"("', '"\\"double\\""'],
           search: 'hello',
+          status: CaseStatuses.open,
         },
         signal: abortCtrl.signal,
       });
@@ -311,7 +313,7 @@ describe('Case Configuration API', () => {
     });
     const data = [
       {
-        status: 'closed',
+        status: CaseStatuses.closed,
         id: basicCase.id,
         version: basicCase.version,
       },
