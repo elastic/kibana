@@ -13,9 +13,9 @@ import {
   DataProviderType,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import { SerializedFilterQuery } from '../../../common/store/types';
 
-import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
+import { KqlMode, TimelineModel, ColumnHeaderOptions, TimelineTabs } from './model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
@@ -70,7 +70,6 @@ export interface TimelineInput {
   indexNames: string[];
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
-    filterQueryDraft: KueryFilterQuery | null;
   };
   show?: boolean;
   sort?: Sort;
@@ -181,11 +180,6 @@ export const updateDescription = actionCreator<{
 
 export const updateKqlMode = actionCreator<{ id: string; kqlMode: KqlMode }>('UPDATE_KQL_MODE');
 
-export const setKqlFilterQueryDraft = actionCreator<{
-  id: string;
-  filterQueryDraft: KueryFilterQuery;
-}>('SET_KQL_FILTER_QUERY_DRAFT');
-
 export const applyKqlFilterQuery = actionCreator<{
   id: string;
   filterQuery: SerializedFilterQuery;
@@ -285,3 +279,8 @@ export const updateIndexNames = actionCreator<{
   id: string;
   indexNames: string[];
 }>('UPDATE_INDEXES_NAME');
+
+export const setActiveTabTimeline = actionCreator<{
+  id: string;
+  activeTab: TimelineTabs;
+}>('SET_ACTIVE_TAB_TIMELINE');

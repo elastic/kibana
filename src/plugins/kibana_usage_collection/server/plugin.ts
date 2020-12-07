@@ -42,6 +42,9 @@ import {
   registerCspCollector,
   registerCoreUsageCollector,
   registerLocalizationUsageCollector,
+  registerUiCountersUsageCollector,
+  registerUiCounterSavedObjectType,
+  registerUiCountersRollups,
 } from './collectors';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
@@ -65,8 +68,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
-    this.registerUsageCollectors(usageCollection, coreSetup, this.metric$, (opts) =>
-      coreSetup.savedObjects.registerType(opts)
+    this.registerUsageCollectors(
+      usageCollection,
+      coreSetup,
+      this.metric$,
+      coreSetup.savedObjects.registerType.bind(coreSetup.savedObjects)
     );
   }
 
@@ -92,6 +98,10 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
     const getCoreUsageDataService = () => this.coreUsageData!;
+
+    registerUiCounterSavedObjectType(coreSetup.savedObjects);
+    registerUiCountersRollups(this.logger.get('ui-counters'), getSavedObjectsClient);
+    registerUiCountersUsageCollector(usageCollection);
 
     registerOpsStatsCollector(usageCollection, metric$);
     registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
