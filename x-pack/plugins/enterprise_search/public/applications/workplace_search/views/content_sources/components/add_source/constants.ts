@@ -71,3 +71,30 @@ export const ADD_SOURCE_EMPTY_BODY = i18n.translate(
       'Sources will be available for search when an administrator adds them to this organization.',
   }
 );
+
+export const AVAILABLE_SOURCE_EMPTY_STATE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.emptyState',
+  {
+    defaultMessage: 'No available sources matching your query.',
+  }
+);
+
+export const AVAILABLE_SOURCE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.title',
+  {
+    defaultMessage: 'Available for configuration',
+  }
+);
+
+export const AVAILABLE_SOURCE_BODY = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.body',
+  {
+    defaultMessage: 'Configure an available source or build your own with the ',
+  }
+);
+export const AVAILABLE_SOURCE_CUSTOM_SOURCE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.customSource.button',
+  {
+    defaultMessage: 'Custom API Source',
+  }
+);
