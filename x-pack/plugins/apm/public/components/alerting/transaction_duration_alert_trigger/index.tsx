@@ -3,34 +3,56 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import { EuiSelect } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { map } from 'lodash';
+import React from 'react';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { asPercent } from '../../../../common/utils/formatters';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
-import { ChartPreview } from '../chart_preview';
-import { ALERT_TYPES_CONFIG, AlertType } from '../../../../common/alert_types';
+import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { ServiceAlertTrigger } from '../service_alert_trigger';
+import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {
   EnvironmentField,
-  IsAboveField,
   ServiceField,
   TransactionTypeField,
+  IsAboveField,
 } from '../fields';
-import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 interface AlertParams {
   windowSize: number;
   windowUnit: string;
   threshold: number;
+  aggregationType: 'avg' | '95th' | '99th';
   serviceName: string;
   transactionType: string;
   environment: string;
 }
+
+const TRANSACTION_ALERT_AGGREGATION_TYPES = {
+  avg: i18n.translate(
+    'xpack.apm.transactionDurationAlert.aggregationType.avg',
+    {
+      defaultMessage: 'Average',
+    }
+  ),
+  '95th': i18n.translate(
+    'xpack.apm.transactionDurationAlert.aggregationType.95th',
+    {
+      defaultMessage: '95th percentile',
+    }
+  ),
+  '99th': i18n.translate(
+    'xpack.apm.transactionDurationAlert.aggregationType.99th',
+    {
+      defaultMessage: '99th percentile',
+    }
+  ),
+};
 
 interface Props {
   alertParams: AlertParams;
@@ -38,7 +60,7 @@ interface Props {
   setAlertProperty: (key: string, value: any) => void;
 }
 
-export function TransactionErrorRateAlertTrigger(props: Props) {
+export function TransactionDurationAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
   const { transactionTypes } = useApmServiceContext();
@@ -50,49 +72,23 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     end,
   });
 
-  const { threshold, windowSize, windowUnit, environment } = alertParams;
-
-  const thresholdAsPercent = (threshold ?? 0) / 100;
-
-  const { data } = useFetcher(() => {
-    if (windowSize && windowUnit) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
-        params: {
-          query: {
-            windowSize,
-            windowUnit,
-            threshold: thresholdAsPercent,
-            environment,
-            serviceName,
-            transactionType,
-          },
-        },
-      });
-    }
-  }, [
-    windowSize,
-    windowUnit,
-    environment,
-    serviceName,
-    transactionType,
-    thresholdAsPercent,
-  ]);
-
-  if (serviceName && !transactionTypes.length) {
+  if (!transactionTypes.length || !serviceName) {
     return null;
   }
 
-  const defaultParams = {
-    threshold: 30,
+  const defaults = {
+    threshold: 1500,
+    aggregationType: 'avg',
     windowSize: 5,
     windowUnit: 'm',
+
+    // use the current transaction type or default to the first in the list
     transactionType: transactionType || transactionTypes[0],
     environment: urlParams.environment || ENVIRONMENT_ALL.value,
   };
 
   const params = {
-    ...defaultParams,
+    ...defaults,
     ...alertParams,
   };
 
@@ -108,9 +104,29 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       options={environmentOptions}
       onChange={(e) => setAlertParams('environment', e.target.value)}
     />,
+    <PopoverExpression
+      value={params.aggregationType}
+      title={i18n.translate('xpack.apm.transactionDurationAlertTrigger.when', {
+        defaultMessage: 'When',
+      })}
+    >
+      <EuiSelect
+        value={params.aggregationType}
+        options={map(TRANSACTION_ALERT_AGGREGATION_TYPES, (label, key) => {
+          return {
+            text: label,
+            value: key,
+          };
+        })}
+        onChange={(e) => setAlertParams('aggregationType', e.target.value)}
+        compressed
+      />
+    </PopoverExpression>,
     <IsAboveField
       value={params.threshold}
-      unit="%"
+      unit={i18n.translate('xpack.apm.transactionDurationAlertTrigger.ms', {
+        defaultMessage: 'ms',
+      })}
       onChange={(value) => setAlertParams('threshold', value)}
     />,
     <ForLastExpression
@@ -129,22 +145,13 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     />,
   ];
 
-  const chartPreview = (
-    <ChartPreview
-      data={data}
-      yTickFormat={(d: any) => asPercent(d, 1)}
-      threshold={thresholdAsPercent}
-    />
-  );
-
   return (
     <ServiceAlertTrigger
-      alertTypeName={ALERT_TYPES_CONFIG[AlertType.TransactionErrorRate].name}
+      alertTypeName={ALERT_TYPES_CONFIG['apm.transaction_duration'].name}
       fields={fields}
-      defaults={defaultParams}
+      defaults={defaults}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}
-      chartPreview={chartPreview}
     />
   );
 }
@@ -152,4 +159,4 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
 // Default export is required for React.lazy loading
 //
 // eslint-disable-next-line import/no-default-export
-export default TransactionErrorRateAlertTrigger;
+export default TransactionDurationAlertTrigger;

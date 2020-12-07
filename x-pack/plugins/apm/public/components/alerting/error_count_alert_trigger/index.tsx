@@ -17,7 +17,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
+import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 export interface AlertParams {
   windowSize: number;
