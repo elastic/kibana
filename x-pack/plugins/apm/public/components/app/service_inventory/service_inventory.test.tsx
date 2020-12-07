@@ -26,7 +26,7 @@ import { MockUrlParamsContextProvider } from '../../../context/url_params_contex
 import * as hook from './use_anomaly_detection_jobs_fetcher';
 
 const KibanaReactContext = createKibanaReactContext({
-  usageCollection: { reportUiStats: () => {} },
+  usageCollection: { reportUiCounter: () => {} },
 } as Partial<CoreStart>);
 
 const addWarning = jest.fn();
