@@ -41,12 +41,10 @@ export const getSignalsMigrationStatusRoute = (router: IRouter) => {
         const signalsAlias = appClient.getSignalsIndex();
         const currentVersion = await getTemplateVersion({ alias: signalsAlias, esClient });
         const indexAliases = await getIndexAliases({ alias: signalsAlias, esClient });
-        const nonWriteIndices = indexAliases
-          .filter((indexAlias) => !indexAlias.isWriteIndex)
-          .map((indexAlias) => indexAlias.index);
+        const signalsIndices = indexAliases.map((indexAlias) => indexAlias.index);
         const indicesInRange = await getSignalsIndicesInRange({
           esClient,
-          index: nonWriteIndices,
+          index: signalsIndices,
           from,
         });
         const migrationStatuses = await getMigrationStatus({ esClient, index: indicesInRange });

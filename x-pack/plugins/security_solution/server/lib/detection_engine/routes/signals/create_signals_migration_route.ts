@@ -13,6 +13,8 @@ import { buildSiemResponse, transformError } from '../utils';
 import { getTemplateVersion } from '../index/check_template_version';
 import { getMigrationStatus } from '../../migrations/get_migration_status';
 import { encodeMigrationToken, indexIsOutdated } from '../../migrations/helpers';
+import { getIndexAliases } from '../../index/get_index_aliases';
+import { BadRequestError } from '../../errors/bad_request_error';
 
 export const createSignalsMigrationRoute = (router: IRouter) => {
   router.post(
@@ -36,12 +38,32 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
+        const signalsAlias = appClient.getSignalsIndex();
         const currentVersion = await getTemplateVersion({
-          alias: appClient.getSignalsIndex(),
+          alias: signalsAlias,
           esClient,
         });
-        const migrationStatuses = await getMigrationStatus({ esClient, index: indices });
+        const signalsIndexAliases = await getIndexAliases({ esClient, alias: signalsAlias });
 
+        const nonSignalsIndices = indices.filter(
+          (index) => !signalsIndexAliases.some((alias) => alias.index === index)
+        );
+        if (nonSignalsIndices.length > 0) {
+          throw new BadRequestError(
+            `The following indices are not signals indices and cannot be migrated: [${nonSignalsIndices.join()}]`
+          );
+        }
+
+        const writeIndices = indices.filter((index) =>
+          signalsIndexAliases.some((alias) => alias.index === index && alias.isWriteIndex)
+        );
+        if (writeIndices.length > 0) {
+          throw new BadRequestError(
+            `The following indices are write indices and cannot be migrated: [${writeIndices.join()}]`
+          );
+        }
+
+        const migrationStatuses = await getMigrationStatus({ esClient, index: indices });
         const migrationResults = await Promise.all(
           indices.map(async (index) => {
             const status = migrationStatuses.find(({ name }) => name === index);

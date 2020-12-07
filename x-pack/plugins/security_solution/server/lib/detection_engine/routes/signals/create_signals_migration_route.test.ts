@@ -29,6 +29,12 @@ describe('query for signal', () => {
     });
 
     // @ts-expect-error mocking the bare minimum of our queries
+    // get our signals aliases
+    clients.newClusterClient.asCurrentUser.indices.getAlias.mockResolvedValueOnce({
+      body: { 'my-index': { aliases: {} } },
+    });
+
+    // @ts-expect-error mocking the bare minimum of our queries
     // get our index version
     clients.newClusterClient.asCurrentUser.indices.getMapping.mockResolvedValueOnce({
       body: getIndexMappingsResponseMock('my-index'),
