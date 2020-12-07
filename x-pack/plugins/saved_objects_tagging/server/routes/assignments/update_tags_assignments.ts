@@ -21,12 +21,12 @@ export const registerUpdateTagsAssignmentsRoute = (router: IRouter) => {
         body: schema.object(
           {
             tags: schema.arrayOf(schema.string(), { minSize: 1 }),
-            assign: schema.maybe(schema.arrayOf(objectReferenceSchema)),
-            unassign: schema.maybe(schema.arrayOf(objectReferenceSchema)),
+            assign: schema.arrayOf(objectReferenceSchema, { defaultValue: [] }),
+            unassign: schema.arrayOf(objectReferenceSchema, { defaultValue: [] }),
           },
           {
             validate: ({ assign, unassign }) => {
-              if (!assign && !unassign) {
+              if (assign.length === 0 && unassign.length === 0) {
                 return 'either `assign` or `unassign` must be specified';
               }
             },
@@ -41,8 +41,8 @@ export const registerUpdateTagsAssignmentsRoute = (router: IRouter) => {
 
         await assignmentService.updateTagAssignments({
           tags,
-          assign: assign ?? [],
-          unassign: unassign ?? [],
+          assign,
+          unassign,
         });
 
         return res.ok({
