@@ -18,7 +18,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
         className="canvasAsset__thumb canvasCheckered"
       >
         <figure
-          className="euiImage canvasAsset__img "
+          className="euiImage canvasAsset__img euiImage--original"
         >
           <img
             alt="Asset thumbnail"
@@ -196,7 +196,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
         className="canvasAsset__thumb canvasCheckered"
       >
         <figure
-          className="euiImage canvasAsset__img "
+          className="euiImage canvasAsset__img euiImage--original"
         >
           <img
             alt="Asset thumbnail"

@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
@@ -16,7 +15,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 
-import * as i18n from './translations';
+import { CaseStatuses } from '../../../../../case/common/api';
 import { Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
@@ -29,7 +28,7 @@ import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
 import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
-import { CaseStatus } from '../case_status';
+import { CaseActionBar } from '../case_action_bar';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { usePushToService } from '../use_push_to_service';
@@ -41,6 +40,9 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
+import { StatusActionButton } from '../status/button';
+
+import * as i18n from './translations';
 
 interface Props {
   caseId: string;
@@ -55,10 +57,8 @@ export interface OnUpdateFields {
 }
 
 const MyWrapper = styled.div`
-  padding: ${({
-    theme,
-  }) => `${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}
-  ${theme.eui.paddingSizes.l}`};
+  padding: ${({ theme }) =>
+    `${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}`};
 `;
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -159,7 +159,7 @@ export const CaseComponent = React.memo<CaseProps>(
             });
             break;
           case 'status':
-            const statusUpdate = getTypedPayload<string>(value);
+            const statusUpdate = getTypedPayload<CaseStatuses>(value);
             if (caseData.status !== value) {
               updateCaseProperty({
                 fetchCaseUserActions,
@@ -241,11 +241,11 @@ export const CaseComponent = React.memo<CaseProps>(
       [onUpdateField]
     );
 
-    const toggleStatusCase = useCallback(
-      (nextStatus) =>
+    const changeStatus = useCallback(
+      (status: CaseStatuses) =>
         onUpdateField({
           key: 'status',
-          value: nextStatus ? 'closed' : 'open',
+          value: status,
         }),
       [onUpdateField]
     );
@@ -256,32 +256,6 @@ export const CaseComponent = React.memo<CaseProps>(
     }, [caseData.id, fetchCase, fetchCaseUserActions]);
 
     const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
-
-    const caseStatusData = useMemo(
-      () =>
-        caseData.status === 'open'
-          ? {
-              'data-test-subj': 'case-view-createdAt',
-              value: caseData.createdAt,
-              title: i18n.CASE_OPENED,
-              buttonLabel: i18n.CLOSE_CASE,
-              status: caseData.status,
-              icon: 'folderCheck',
-              badgeColor: 'secondary',
-              isSelected: false,
-            }
-          : {
-              'data-test-subj': 'case-view-closedAt',
-              value: caseData.closedAt ?? '',
-              title: i18n.CASE_CLOSED,
-              buttonLabel: i18n.REOPEN_CASE,
-              status: caseData.status,
-              icon: 'folderExclamation',
-              badgeColor: 'danger',
-              isSelected: true,
-            },
-      [caseData.closedAt, caseData.createdAt, caseData.status]
-    );
 
     const emailContent = useMemo(
       () => ({
@@ -307,11 +281,6 @@ export const CaseComponent = React.memo<CaseProps>(
       [allCasesLink]
     );
 
-    const isSelected = useMemo(() => caseStatusData.isSelected, [caseStatusData]);
-    const handleToggleStatusCase = useCallback(() => {
-      toggleStatusCase(!isSelected);
-    }, [toggleStatusCase, isSelected]);
-
     return (
       <>
         <HeaderWrapper>
@@ -329,14 +298,13 @@ export const CaseComponent = React.memo<CaseProps>(
             }
             title={caseData.title}
           >
-            <CaseStatus
+            <CaseActionBar
               currentExternalIncident={currentExternalIncident}
               caseData={caseData}
               disabled={!userCanCrud}
               isLoading={isLoading && updateKey === 'status'}
               onRefresh={handleRefresh}
-              toggleStatusCase={handleToggleStatusCase}
-              {...caseStatusData}
+              onStatusChanged={changeStatus}
             />
           </HeaderPage>
         </HeaderWrapper>
@@ -363,16 +331,12 @@ export const CaseComponent = React.memo<CaseProps>(
                     <MyEuiHorizontalRule margin="s" />
                     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
                       <EuiFlexItem grow={false}>
-                        <EuiButton
-                          data-test-subj={caseStatusData['data-test-subj']}
-                          iconType={caseStatusData.icon}
-                          isDisabled={!userCanCrud}
+                        <StatusActionButton
+                          status={caseData.status}
+                          onStatusChanged={changeStatus}
+                          disabled={!userCanCrud}
                           isLoading={isLoading && updateKey === 'status'}
-                          fill={caseStatusData.isSelected}
-                          onClick={handleToggleStatusCase}
-                        >
-                          {caseStatusData.buttonLabel}
-                        </EuiButton>
+                        />
                       </EuiFlexItem>
                       {hasDataToPush && (
                         <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>

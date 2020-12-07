@@ -5,48 +5,49 @@
  */
 
 import { EuiFlyout } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 
-import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { StatefulTimeline } from '../../timeline';
 import * as i18n from './translations';
+import { timelineActions } from '../../../store/timeline';
 
 interface FlyoutPaneComponentProps {
-  onClose: () => void;
   timelineId: string;
-  usersViewing: string[];
 }
 
 const EuiFlyoutContainer = styled.div`
   .timeline-flyout {
-    z-index: 4001;
+    z-index: ${({ theme }) => theme.eui.euiZLevel8};
     min-width: 150px;
     width: 100%;
     animation: none;
   }
 `;
 
-const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
-  onClose,
-  timelineId,
-  usersViewing,
-}) => (
-  <EuiFlyoutContainer data-test-subj="flyout-pane">
-    <EuiFlyout
-      aria-label={i18n.TIMELINE_DESCRIPTION}
-      className="timeline-flyout"
-      data-test-subj="eui-flyout"
-      hideCloseButton={true}
-      onClose={onClose}
-      size="l"
-    >
-      <EventDetailsWidthProvider>
-        <StatefulTimeline onClose={onClose} usersViewing={usersViewing} id={timelineId} />
-      </EventDetailsWidthProvider>
-    </EuiFlyout>
-  </EuiFlyoutContainer>
-);
+const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId }) => {
+  const dispatch = useDispatch();
+  const handleClose = useCallback(
+    () => dispatch(timelineActions.showTimeline({ id: timelineId, show: false })),
+    [dispatch, timelineId]
+  );
+
+  return (
+    <EuiFlyoutContainer data-test-subj="flyout-pane">
+      <EuiFlyout
+        aria-label={i18n.TIMELINE_DESCRIPTION}
+        className="timeline-flyout"
+        data-test-subj="eui-flyout"
+        hideCloseButton={true}
+        onClose={handleClose}
+        size="l"
+      >
+        <StatefulTimeline timelineId={timelineId} />
+      </EuiFlyout>
+    </EuiFlyoutContainer>
+  );
+};
 
 export const Pane = React.memo(FlyoutPaneComponent);
 

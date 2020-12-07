@@ -17,11 +17,40 @@
  * under the License.
  */
 
+import { CoreUsageStatsClient } from './core_usage_stats_client';
+import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from '..';
+
+/**
+ * @internal
+ *
+ * CoreUsageStats are collected over time while Kibana is running. This is related to CoreUsageData, which is a superset of this that also
+ * includes point-in-time configuration information.
+ * */
+export interface CoreUsageStats {
+  'apiCalls.savedObjectsImport.total'?: number;
+  'apiCalls.savedObjectsImport.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsImport.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsImport.createNewCopiesEnabled.yes'?: number;
+  'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'?: number;
+  'apiCalls.savedObjectsImport.overwriteEnabled.yes'?: number;
+  'apiCalls.savedObjectsImport.overwriteEnabled.no'?: number;
+  'apiCalls.savedObjectsResolveImportErrors.total'?: number;
+  'apiCalls.savedObjectsResolveImportErrors.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsResolveImportErrors.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes'?: number;
+  'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no'?: number;
+  'apiCalls.savedObjectsExport.total'?: number;
+  'apiCalls.savedObjectsExport.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsExport.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsExport.allTypesSelected.yes'?: number;
+  'apiCalls.savedObjectsExport.allTypesSelected.no'?: number;
+}
+
 /**
  * Type describing Core's usage data payload
  * @internal
  */
-export interface CoreUsageData {
+export interface CoreUsageData extends CoreUsageStats {
   config: CoreConfigUsageData;
   services: CoreServicesUsageData;
   environment: CoreEnvironmentUsageData;
@@ -139,6 +168,14 @@ export interface CoreConfigUsageData {
   // uiSettings: {
   //   overridesCount: number;
   // };
+}
+
+/** @internal */
+export interface CoreUsageDataSetup {
+  registerType(
+    typeRegistry: ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
+  ): void;
+  getClient(): CoreUsageStatsClient;
 }
 
 /**

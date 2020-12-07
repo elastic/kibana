@@ -89,8 +89,7 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
         // @ts-ignore
         'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
         'border-width': (el: cytoscape.NodeSingular) => (el.selected() ? 2 : 1),
-        // @ts-ignore
-        color: theme.textColors.default,
+        color: theme.euiTextColors.default,
         'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
         'font-size': theme.euiFontSizeXS,
         'min-zoomed-font-size': parseInt(theme.euiSizeL, 10),

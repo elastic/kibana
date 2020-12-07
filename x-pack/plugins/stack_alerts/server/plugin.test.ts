@@ -27,7 +27,7 @@ describe('AlertingBuiltins Plugin', () => {
       const featuresSetup = featuresPluginMock.createSetup();
       await plugin.setup(coreSetup, { alerts: alertingSetup, features: featuresSetup });
 
-      expect(alertingSetup.registerType).toHaveBeenCalledTimes(2);
+      expect(alertingSetup.registerType).toHaveBeenCalledTimes(3);
 
       const indexThresholdArgs = alertingSetup.registerType.mock.calls[0][0];
       const testedIndexThresholdArgs = {

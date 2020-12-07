@@ -43,6 +43,10 @@ describe('transformActionVariables', () => {
           "description": "The alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroup",
         },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
+        },
       ]
     `);
   });
@@ -85,6 +89,10 @@ describe('transformActionVariables', () => {
         Object {
           "description": "The alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroup",
+        },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
         },
         Object {
           "description": "foo-description",
@@ -136,6 +144,10 @@ describe('transformActionVariables', () => {
         Object {
           "description": "The alert action group that was used to scheduled actions for the alert.",
           "name": "alertActionGroup",
+        },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
         },
         Object {
           "description": "foo-description",
@@ -192,6 +204,10 @@ describe('transformActionVariables', () => {
           "name": "alertActionGroup",
         },
         Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
+        },
+        Object {
           "description": "fooC-description",
           "name": "context.fooC",
         },
@@ -223,6 +239,7 @@ function getAlertType(actionVariables: ActionVariables): AlertType {
     actionVariables,
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     authorizedConsumers: {},
     producer: ALERTS_FEATURE_ID,
   };
