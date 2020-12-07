@@ -7,8 +7,8 @@
 import { requestContextMock, requestMock, serverMock } from '../__mocks__';
 import { createSignalsMigrationRoute } from './create_signals_migration_route';
 import {
-  getIndexMappingsResponse,
-  getMigrationStatusSearchResponse,
+  getIndexMappingsResponseMock,
+  getMigrationStatusSearchResponseMock,
 } from '../../migrations/get_migration_status.mock';
 import { SignalsReindexOptions } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
@@ -25,13 +25,13 @@ describe('query for signal', () => {
     // @ts-expect-error mocking the bare minimum of our queries
     // get our migration status
     clients.newClusterClient.asCurrentUser.search.mockResolvedValueOnce({
-      body: getMigrationStatusSearchResponse('my-index'),
+      body: getMigrationStatusSearchResponseMock(['my-index']),
     });
 
     // @ts-expect-error mocking the bare minimum of our queries
     // get our index version
     clients.newClusterClient.asCurrentUser.indices.getMapping.mockResolvedValueOnce({
-      body: getIndexMappingsResponse('my-index'),
+      body: getIndexMappingsResponseMock('my-index'),
     });
 
     createSignalsMigrationRoute(server.router);

@@ -62,7 +62,8 @@ export const getMigrationStatus = async ({
   const indexBuckets = response.body.aggregations.signals_indices.buckets;
   return indexBuckets.reduce<MigrationStatus[]>((statuses, bucket) => {
     const indexName = bucket.key;
-    const indexVersion = indexVersions[indexName].mappings._meta.version;
+    const indexVersion = indexVersions[indexName]?.mappings?._meta?.version ?? 0;
+
     return [
       ...statuses,
       {
