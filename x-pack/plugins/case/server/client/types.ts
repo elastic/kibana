@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from '../../../../../src/core/server';
+import { KibanaRequest, SavedObjectsClientContract, RequestHandlerContext } from 'kibana/server';
 import {
   CasePostRequest,
   CasesPatchRequest,
   CommentRequest,
   CaseResponse,
   CasesResponse,
+  CaseStatuses,
 } from '../../common/api';
 import {
   CaseConfigureServiceSetup,
@@ -32,6 +33,11 @@ export interface CaseClientAddComment {
   comment: CommentRequest;
 }
 
+export interface CaseClientUpdateAlertsStatus {
+  ids: string[];
+  status: CaseStatuses;
+}
+
 type PartialExceptFor<T, K extends keyof T> = Partial<T> & Pick<T, K>;
 
 export interface CaseClientFactoryArguments {
@@ -48,4 +54,5 @@ export interface CaseClient {
   create: (args: CaseClientCreate) => Promise<CaseResponse>;
   update: (args: CaseClientUpdate) => Promise<CasesResponse>;
   addComment: (args: CaseClientAddComment) => Promise<CaseResponse>;
+  updateAlertsStatus: (args: CaseClientUpdateAlertsStatus) => Promise<void>;
 }
