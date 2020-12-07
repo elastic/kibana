@@ -93,6 +93,18 @@ describe('updateTagReferences', () => {
     ).toEqual([tagRef('tag-1'), tagRef('tag-3')]);
   });
 
+  it('throws if the same id is present in both `toAdd` and `toRemove`', () => {
+    expect(() =>
+      updateTagReferences({
+        references: [tagRef('tag-1'), tagRef('tag-2'), tagRef('tag-3')],
+        toAdd: ['tag-1', 'tag-2'],
+        toRemove: ['tag-2', 'tag-3'],
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Some ids from 'toAdd' also present in 'toRemove': [tag-2]"`
+    );
+  });
+
   it('preserves the non-tag references', () => {
     expect(
       updateTagReferences({

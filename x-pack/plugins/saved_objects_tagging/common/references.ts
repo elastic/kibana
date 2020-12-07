@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq } from 'lodash';
+import { uniq, intersection } from 'lodash';
 import { SavedObjectReference } from '../../../../src/core/types';
 import { tagSavedObjectTypeName } from './constants';
 
@@ -34,7 +34,9 @@ export const replaceTagReferences = (
 /**
  * Update the given `references` array, adding references to `toAdd` tag ids and removing references
  * to `toRemove` tag ids.
- * All references to non-tag objects will be preserved
+ * All references to non-tag objects will be preserved.
+ *
+ * @remarks: Having the same id(s) in `toAdd` and `toRemove` will result in an error.
  */
 export const updateTagReferences = ({
   references,
@@ -45,6 +47,11 @@ export const updateTagReferences = ({
   toAdd?: string[];
   toRemove?: string[];
 }): SavedObjectReference[] => {
+  const duplicates = intersection(toAdd, toRemove);
+  if (duplicates.length > 0) {
+    throw new Error(`Some ids from 'toAdd' also present in 'toRemove': [${duplicates.join(', ')}]`);
+  }
+
   const nonTagReferences = references.filter(({ type }) => type !== tagSavedObjectTypeName);
   const newTagIds = uniq([
     ...references
