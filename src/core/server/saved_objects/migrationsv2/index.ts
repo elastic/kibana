@@ -18,7 +18,6 @@
  */
 
 import { gt, valid } from 'semver';
-import chalk from 'chalk';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
@@ -137,14 +136,23 @@ export type MarkVersionIndexReady = PostInitState & {
 };
 
 /**
- * If there's a legacy index prepare it for migration.
+ * If we're migrating from a legacy index we need to perform some additional
+ * steps to prepare this index so that it can be used as a migration 'source'.
  */
 export type LegacyBaseState = PostInitState & {
+  /**
+   * A legacy index that requires a pre-migration
+   *
+   * (This value will always be the same as state.indexPrefix but we're using
+   * a dedicated state property to make the code a bit more explicit)
+   */
   legacy: string;
   source: Option.Some<string>;
   legacyPreMigrationDoneActions: AliasAction[];
-  /** The mappings read from the legacy index, used to create a new reindex
-   * target index  */
+  /**
+   * The mappings read from the legacy index, used to create a new reindex
+   * target index.
+   */
   legacyReindexTargetMappings: IndexMapping;
 };
 
@@ -154,23 +162,34 @@ export type LegacySetWriteBlockState = LegacyBaseState & {
 };
 
 export type LegacyCreateReindexTargetState = LegacyBaseState & {
-  /** Prepare a new 'source' index for the migration by cloning the legacy index */
+  /**
+   * Create a new index into which we can reindex the legacy index. This
+   * index will have the same mappings as the legacy index. Once the legacy
+   * pre-migration is complete, this index will be used a migration 'source'.
+   */
   controlState: 'LEGACY_CREATE_REINDEX_TARGET';
 };
 
 export type LegacyReindexState = LegacyBaseState & {
-  /** Apply the pre-migration script to the legacy clone to prepare it for a migration */
+  /**
+   * Reindex the legacy index into the new index created in the
+   * LEGACY_CREATE_REINDEX_TARGET step (and apply the preMigration script).
+   */
   controlState: 'LEGACY_REINDEX';
 };
 
 export type LegacyReindexWaitForTaskState = LegacyBaseState & {
-  /** Apply the pre-migration script to the legacy clone to prepare it for a migration */
+  /** Wait for the reindex operation to complete */
   controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK';
   legacyReindexTaskId: string;
 };
 
 export type LegacyDeleteState = LegacyBaseState & {
-  /** Delete the legacy index */
+  /**
+   * After reindexed has completed, delete the legacy index so that it won't
+   * conflict with the `currentAlias` that we want to create in a later step
+   * e.g. `.kibana`.
+   */
   controlState: 'LEGACY_DELETE';
 };
 
@@ -296,7 +315,10 @@ const delayRetryState = <S extends State>(state: S, left: Actions.RetryableEsCli
       controlState: 'FATAL',
       logs: [
         ...state.logs,
-        { level: 'error', message: 'Unable to complete action after 5 attempts, terminating.' },
+        {
+          level: 'error',
+          message: `Unable to complete action after ${MAX_RETRY_ATTEMPTS} attempts, terminating.`,
+        },
       ],
     };
   } else {
@@ -311,13 +333,11 @@ const delayRetryState = <S extends State>(state: S, left: Actions.RetryableEsCli
         ...state.logs,
         {
           level: 'error',
-          message:
-            chalk.red('ERROR: ') +
-            `Action failed with '${
-              left.message
-            }'. Retrying attempt ${retryCount} out of ${MAX_RETRY_ATTEMPTS} in ${
-              retryDelay / 1000
-            } seconds.`,
+          message: `Action failed with '${
+            left.message
+          }'. Retrying attempt ${retryCount} out of ${MAX_RETRY_ATTEMPTS} in ${
+            retryDelay / 1000
+          } seconds.`,
         },
       ],
     };
@@ -539,8 +559,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         (res.left.type === 'index_not_found_exception' && res.left.index === stateP.legacy) ||
         res.left.type === 'target_index_had_write_block'
       ) {
-        // index_not_found_exception for the legacy index, another instance
-        // already complete the LEGACY_DELETE step.
+        // index_not_found_exception for the LEGACY_REINDEX source index:
+        // another instance already complete the LEGACY_DELETE step.
         //
         // target_index_had_write_block: another instance already completed the
         // SET_SOURCE_WRITE_BLOCK step.
@@ -554,6 +574,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         res.left.type === 'index_not_found_exception' &&
         res.left.index === stateP.source.value
       ) {
+        // index_not_found_exception for the LEGACY_REINDEX target index
+        // (stateP.source.value): the migration algorithm will never delete
+        // this index so it must be caused by something external
         return {
           ...stateP,
           controlState: 'FATAL',
