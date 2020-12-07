@@ -86,7 +86,7 @@ describe('SearchBar', () => {
 
     component = mountWithIntl(
       <SearchBar
-        globalSearch={searchService.find}
+        globalSearch={searchService}
         navigateToUrl={applications.navigateToUrl}
         basePathUrl={basePathUrl}
         darkMode={darkMode}
@@ -114,7 +114,7 @@ describe('SearchBar', () => {
   it('supports keyboard shortcuts', () => {
     mountWithIntl(
       <SearchBar
-        globalSearch={searchService.find}
+        globalSearch={searchService}
         navigateToUrl={applications.navigateToUrl}
         basePathUrl={basePathUrl}
         darkMode={darkMode}
@@ -146,7 +146,7 @@ describe('SearchBar', () => {
 
     component = mountWithIntl(
       <SearchBar
-        globalSearch={searchService.find}
+        globalSearch={searchService}
         navigateToUrl={applications.navigateToUrl}
         basePathUrl={basePathUrl}
         darkMode={darkMode}

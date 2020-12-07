@@ -45,6 +45,7 @@ describe('SearchService', () => {
   ): jest.Mocked<GlobalSearchResultProvider> => ({
     id,
     find: jest.fn().mockImplementation((term, options, context) => source),
+    getSearchableTypes: jest.fn().mockReturnValue(['test-type']),
   });
 
   const expectedResult = (id: string) => expect.objectContaining({ id });

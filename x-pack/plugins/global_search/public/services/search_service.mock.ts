@@ -16,8 +16,10 @@ const createSetupMock = (): jest.Mocked<SearchServiceSetup> => {
 const createStartMock = (): jest.Mocked<SearchServiceStart> => {
   const mock = {
     find: jest.fn(),
+    getSearchableTypes: jest.fn(),
   };
   mock.find.mockReturnValue(of({ results: [] }));
+  mock.getSearchableTypes.mockReturnValue(of([]));
 
   return mock;
 };

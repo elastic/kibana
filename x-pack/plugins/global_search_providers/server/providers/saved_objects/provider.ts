@@ -51,6 +51,15 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
         map(([res, cap]) => mapToResults(res.saved_objects, typeRegistry, cap))
       );
     },
+    getSearchableTypes: ({ core }) => {
+      const {
+        savedObjects: { typeRegistry },
+      } = core;
+      return typeRegistry
+        .getVisibleTypes()
+        .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl)
+        .map((type) => type.name);
+    },
   };
 };
 
