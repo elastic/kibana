@@ -241,9 +241,14 @@ describe('migrations v2', () => {
           const newState = model(initState, res) as FatalState;
 
           expect(newState.controlState).toEqual('FATAL');
-          expect(newState.error?.message).toMatchInlineSnapshot(
-            `"The .kibana alias is pointing to a newer version of Kibana: v7.12.0"`
-          );
+          expect(newState.logs).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "level": "error",
+                "message": "The .kibana alias is pointing to a newer version of Kibana: v7.12.0",
+              },
+            ]
+          `);
         });
         test('INIT -> SET_SOURCE_WRITE_BLOCK when migrating from a v2 migrations index (>= 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
@@ -262,8 +267,8 @@ describe('migrations v2', () => {
 
           expect(newState).toMatchObject({
             controlState: 'SET_SOURCE_WRITE_BLOCK',
-            source: Option.some('.kibana_7.11.0_001'),
-            target: '.kibana_7.12.0_001',
+            sourceIndex: Option.some('.kibana_7.11.0_001'),
+            targetIndex: '.kibana_7.12.0_001',
           });
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
@@ -282,8 +287,8 @@ describe('migrations v2', () => {
 
           expect(newState).toMatchObject({
             controlState: 'SET_SOURCE_WRITE_BLOCK',
-            source: Option.some('.kibana_3'),
-            target: '.kibana_7.11.0_001',
+            sourceIndex: Option.some('.kibana_3'),
+            targetIndex: '.kibana_7.11.0_001',
           });
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
@@ -300,8 +305,8 @@ describe('migrations v2', () => {
 
           expect(newState).toMatchObject({
             controlState: 'LEGACY_SET_WRITE_BLOCK',
-            source: Option.some('.kibana_pre6.5.0_001'),
-            target: '.kibana_7.11.0_001',
+            sourceIndex: Option.some('.kibana_pre6.5.0_001'),
+            targetIndex: '.kibana_7.11.0_001',
           });
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
@@ -312,8 +317,8 @@ describe('migrations v2', () => {
 
           expect(newState).toMatchObject({
             controlState: 'CREATE_NEW_TARGET',
-            source: Option.none,
-            target: '.kibana_7.11.0_001',
+            sourceIndex: Option.none,
+            targetIndex: '.kibana_7.11.0_001',
           });
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
@@ -324,11 +329,11 @@ describe('migrations v2', () => {
           ...baseState,
           controlState: 'LEGACY_SET_WRITE_BLOCK',
           versionIndexReadyActions: Option.none,
-          source: Option.some('.kibana') as Option.Some<string>,
-          target: '.kibana_7.11.0_001',
+          sourceIndex: Option.some('.kibana') as Option.Some<string>,
+          targetIndex: '.kibana_7.11.0_001',
           legacyReindexTargetMappings: { properties: {} },
           legacyPreMigrationDoneActions: [],
-          legacy: '',
+          legacyIndex: '',
         };
         test('LEGACY_SET_WRITE_BLOCK -> LEGACY_SET_WRITE_BLOCK if action fails with set_write_block_failed', () => {
           const res: ResponseType<'LEGACY_SET_WRITE_BLOCK'> = Either.left({
@@ -364,11 +369,11 @@ describe('migrations v2', () => {
           ...baseState,
           controlState: 'LEGACY_CREATE_REINDEX_TARGET',
           versionIndexReadyActions: Option.none,
-          source: Option.some('.kibana') as Option.Some<string>,
-          target: '.kibana_7.11.0_001',
+          sourceIndex: Option.some('.kibana') as Option.Some<string>,
+          targetIndex: '.kibana_7.11.0_001',
           legacyReindexTargetMappings: { properties: {} },
           legacyPreMigrationDoneActions: [],
-          legacy: '',
+          legacyIndex: '',
         };
         test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_REINDEX', () => {
           const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> = Either.right(
@@ -388,11 +393,11 @@ describe('migrations v2', () => {
           ...baseState,
           controlState: 'LEGACY_REINDEX',
           versionIndexReadyActions: Option.none,
-          source: Option.some('.kibana') as Option.Some<string>,
-          target: '.kibana_7.11.0_001',
+          sourceIndex: Option.some('.kibana') as Option.Some<string>,
+          targetIndex: '.kibana_7.11.0_001',
           legacyReindexTargetMappings: { properties: {} },
           legacyPreMigrationDoneActions: [],
-          legacy: '',
+          legacyIndex: '',
         };
         test('LEGACY_REINDEX -> LEGACY_REINDEX_WAIT_FOR_TASK', () => {
           const res: ResponseType<'LEGACY_REINDEX'> = Either.right({ taskId: 'task id' });
@@ -407,11 +412,11 @@ describe('migrations v2', () => {
           ...baseState,
           controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK',
           versionIndexReadyActions: Option.none,
-          source: Option.some('source_index_name') as Option.Some<string>,
-          target: '.kibana_7.11.0_001',
+          sourceIndex: Option.some('source_index_name') as Option.Some<string>,
+          targetIndex: '.kibana_7.11.0_001',
           legacyReindexTargetMappings: { properties: {} },
           legacyPreMigrationDoneActions: [],
-          legacy: 'legacy_index_name',
+          legacyIndex: 'legacy_index_name',
           legacyReindexTaskId: 'test_task_id',
         };
         test('LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_DELETE if action succeeds', () => {
@@ -462,11 +467,11 @@ describe('migrations v2', () => {
           ...baseState,
           controlState: 'LEGACY_DELETE',
           versionIndexReadyActions: Option.none,
-          source: Option.some('source_index_name') as Option.Some<string>,
-          target: '.kibana_7.11.0_001',
+          sourceIndex: Option.some('source_index_name') as Option.Some<string>,
+          targetIndex: '.kibana_7.11.0_001',
           legacyReindexTargetMappings: { properties: {} },
           legacyPreMigrationDoneActions: [],
-          legacy: 'legacy_index_name',
+          legacyIndex: 'legacy_index_name',
         };
         test('LEGACY_DELETE -> SET_SOURCE_WRITE_BLOCK if action succeeds', () => {
           const res: ResponseType<'LEGACY_DELETE'> = Either.right('update_aliases_succeeded');
@@ -514,8 +519,8 @@ describe('migrations v2', () => {
           ...baseState,
           controlState: 'SET_SOURCE_WRITE_BLOCK',
           versionIndexReadyActions: Option.none,
-          source: Option.some('.kibana') as Option.Some<string>,
-          target: '.kibana_7.11.0_001',
+          sourceIndex: Option.some('.kibana') as Option.Some<string>,
+          targetIndex: '.kibana_7.11.0_001',
         };
         test('SET_SOURCE_WRITE_BLOCK -> SET_SOURCE_WRITE_BLOCK if action fails with set_write_block_failed', () => {
           const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.left({
@@ -551,8 +556,8 @@ describe('migrations v2', () => {
           ...baseState,
           controlState: 'CLONE_SOURCE_TO_TARGET',
           versionIndexReadyActions: Option.none,
-          source: Option.some('.kibana') as Option.Some<string>,
-          target: '.kibana_7.11.0_001',
+          sourceIndex: Option.some('.kibana') as Option.Some<string>,
+          targetIndex: '.kibana_7.11.0_001',
         };
         test('CLONE_SOURCE_TO_TARGET -> UPDATE_TARGET_MAPPINGS', () => {
           const res: ResponseType<'CLONE_SOURCE_TO_TARGET'> = Either.right({
@@ -570,8 +575,8 @@ describe('migrations v2', () => {
           ...baseState,
           controlState: 'UPDATE_TARGET_MAPPINGS',
           versionIndexReadyActions: Option.none,
-          source: Option.some('.kibana') as Option.Some<string>,
-          target: '.kibana_7.11.0_001',
+          sourceIndex: Option.some('.kibana') as Option.Some<string>,
+          targetIndex: '.kibana_7.11.0_001',
         };
         test('UPDATE_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK', () => {
           const res: ResponseType<'UPDATE_TARGET_MAPPINGS'> = Either.right({
@@ -592,8 +597,8 @@ describe('migrations v2', () => {
           ...baseState,
           controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
           versionIndexReadyActions: Option.none,
-          source: Option.some('.kibana') as Option.Some<string>,
-          target: '.kibana_7.11.0_001',
+          sourceIndex: Option.some('.kibana') as Option.Some<string>,
+          targetIndex: '.kibana_7.11.0_001',
           updateTargetMappingsTaskId: 'update target mappings task',
         };
         test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> OUTDATED_DOCUMENTS_SEARCH', () => {
@@ -614,8 +619,8 @@ describe('migrations v2', () => {
           ...baseState,
           controlState: 'OUTDATED_DOCUMENTS_SEARCH',
           versionIndexReadyActions: Option.none,
-          source: Option.some('.kibana') as Option.Some<string>,
-          target: '.kibana_7.11.0_001',
+          sourceIndex: Option.some('.kibana') as Option.Some<string>,
+          targetIndex: '.kibana_7.11.0_001',
         };
         test('OUTDATED_DOCUMENTS_SEARCH -> OUTDATED_DOCUMENTS_TRANSFORM if some outdated documents were found', () => {
           const outdatedDocuments = ([
@@ -668,8 +673,8 @@ describe('migrations v2', () => {
           ...baseState,
           controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
           versionIndexReadyActions: Option.none,
-          source: Option.some('.kibana') as Option.Some<string>,
-          target: '.kibana_7.11.0_001',
+          sourceIndex: Option.some('.kibana') as Option.Some<string>,
+          targetIndex: '.kibana_7.11.0_001',
           outdatedDocuments,
         };
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH if action succeeds', () => {
@@ -690,8 +695,8 @@ describe('migrations v2', () => {
           ...baseState,
           controlState: 'CREATE_NEW_TARGET',
           versionIndexReadyActions: aliasActions,
-          source: Option.none as Option.None,
-          target: '.kibana_7.11.0_001',
+          sourceIndex: Option.none as Option.None,
+          targetIndex: '.kibana_7.11.0_001',
         };
         test('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY', () => {
           const res: ResponseType<'CREATE_NEW_TARGET'> = Either.right('create_index_succeeded');

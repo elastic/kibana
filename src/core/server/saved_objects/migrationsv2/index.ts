@@ -55,21 +55,21 @@ const MAX_RETRY_ATTEMPTS = 10;
 
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
-  indexPrefix: string;
+  readonly indexPrefix: string;
   /** Kibana version number */
-  kibanaVersion: string;
+  readonly kibanaVersion: string;
   /** The mappings to apply to the target index */
-  targetMappings: IndexMapping;
+  readonly targetMappings: IndexMapping;
   /** Script to apply to a legacy index before it can be used as a migration source */
-  preMigrationScript: Option.Option<string>;
-  outdatedDocumentsQuery: Record<string, unknown>;
-  retryCount: number;
-  retryDelay: number;
-  logs: Array<{ level: 'error' | 'info'; message: string }>;
+  readonly preMigrationScript: Option.Option<string>;
+  readonly outdatedDocumentsQuery: Record<string, unknown>;
+  readonly retryCount: number;
+  readonly retryDelay: number;
+  readonly logs: Array<{ level: 'error' | 'info'; message: string }>;
 }
 
 export type InitState = BaseState & {
-  controlState: 'INIT';
+  readonly controlState: 'INIT';
 };
 
 export type PostInitState = BaseState & {
@@ -81,63 +81,62 @@ export type PostInitState = BaseState & {
    *  - another Kibana instance already did the source migration and finished
    *    the MARK_VERSION_INDEX_READY step
    */
-  source: Option.Option<string>;
+  readonly sourceIndex: Option.Option<string>;
   /** The target index is the index to which the migration writes */
-  target: string;
-  versionIndexReadyActions: Option.Option<AliasAction[]>;
-  outdatedDocumentsQuery: Record<string, unknown>;
+  readonly targetIndex: string;
+  readonly versionIndexReadyActions: Option.Option<AliasAction[]>;
+  readonly outdatedDocumentsQuery: Record<string, unknown>;
 };
 
 export type DoneState = BaseState & {
   /** Migration completed successfully */
-  controlState: 'DONE';
+  readonly controlState: 'DONE';
 };
 
 export type FatalState = BaseState & {
   /** Migration terminated with a failure */
-  controlState: 'FATAL';
-  error?: Error;
+  readonly controlState: 'FATAL';
 };
 
 export type SetSourceWriteBlockState = PostInitState & {
   /** Set a write block on the source index to prevent any further writes */
-  controlState: 'SET_SOURCE_WRITE_BLOCK';
-  source: Option.Some<string>;
+  readonly controlState: 'SET_SOURCE_WRITE_BLOCK';
+  readonly sourceIndex: Option.Some<string>;
 };
 
 export type CreateNewTargetState = PostInitState & {
   /** Blank ES cluster, create a new version-specific target index */
-  controlState: 'CREATE_NEW_TARGET';
-  source: Option.None;
-  versionIndexReadyActions: Option.Some<AliasAction[]>;
+  readonly controlState: 'CREATE_NEW_TARGET';
+  readonly sourceIndex: Option.None;
+  readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 };
 
 export type CloneSourceToTargetState = PostInitState & {
   /** Create the target index by cloning the source index */
-  controlState: 'CLONE_SOURCE_TO_TARGET';
-  source: Option.Some<string>;
+  readonly controlState: 'CLONE_SOURCE_TO_TARGET';
+  readonly sourceIndex: Option.Some<string>;
 };
 
 export type UpdateTargetMappingsState = PostInitState & {
   /** Update the mappings of the target index */
-  controlState: 'UPDATE_TARGET_MAPPINGS';
+  readonly controlState: 'UPDATE_TARGET_MAPPINGS';
 };
 
 export type UpdateTargetMappingsWaitForTaskState = PostInitState & {
   /** Update the mappings of the target index */
-  controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK';
-  updateTargetMappingsTaskId: string;
+  readonly controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK';
+  readonly updateTargetMappingsTaskId: string;
 };
 
 export type OutdatedDocumentsSearch = PostInitState & {
   /** Search for outdated documents in the target index */
-  controlState: 'OUTDATED_DOCUMENTS_SEARCH';
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH';
 };
 
 export type OutdatedDocumentsTransform = PostInitState & {
   /** Transform a batch of outdated documents to their latest version and write them to the target index */
-  controlState: 'OUTDATED_DOCUMENTS_TRANSFORM';
-  outdatedDocuments: SavedObjectsRawDoc[];
+  readonly controlState: 'OUTDATED_DOCUMENTS_TRANSFORM';
+  readonly outdatedDocuments: SavedObjectsRawDoc[];
 };
 
 export type MarkVersionIndexReady = PostInitState & {
@@ -150,8 +149,8 @@ export type MarkVersionIndexReady = PostInitState & {
    * perform the `UPDATE_TARGET_MAPPINGS*` and `OUTDATED_DOCUMENTS_*` steps
    * every time it is restarted.
    */
-  controlState: 'MARK_VERSION_INDEX_READY';
-  versionIndexReadyActions: Option.Some<AliasAction[]>;
+  readonly controlState: 'MARK_VERSION_INDEX_READY';
+  readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 };
 
 /**
@@ -165,19 +164,19 @@ export type LegacyBaseState = PostInitState & {
    * (This value will always be the same as state.indexPrefix but we're using
    * a dedicated state property to make the code a bit more explicit)
    */
-  legacy: string;
-  source: Option.Some<string>;
-  legacyPreMigrationDoneActions: AliasAction[];
+  readonly legacyIndex: string;
+  readonly sourceIndex: Option.Some<string>;
+  readonly legacyPreMigrationDoneActions: AliasAction[];
   /**
    * The mappings read from the legacy index, used to create a new reindex
    * target index.
    */
-  legacyReindexTargetMappings: IndexMapping;
+  readonly legacyReindexTargetMappings: IndexMapping;
 };
 
 export type LegacySetWriteBlockState = LegacyBaseState & {
   /** Set a write block on the legacy index to prevent any further writes */
-  controlState: 'LEGACY_SET_WRITE_BLOCK';
+  readonly controlState: 'LEGACY_SET_WRITE_BLOCK';
 };
 
 export type LegacyCreateReindexTargetState = LegacyBaseState & {
@@ -186,7 +185,7 @@ export type LegacyCreateReindexTargetState = LegacyBaseState & {
    * index will have the same mappings as the legacy index. Once the legacy
    * pre-migration is complete, this index will be used a migration 'source'.
    */
-  controlState: 'LEGACY_CREATE_REINDEX_TARGET';
+  readonly controlState: 'LEGACY_CREATE_REINDEX_TARGET';
 };
 
 export type LegacyReindexState = LegacyBaseState & {
@@ -194,13 +193,13 @@ export type LegacyReindexState = LegacyBaseState & {
    * Reindex the legacy index into the new index created in the
    * LEGACY_CREATE_REINDEX_TARGET step (and apply the preMigration script).
    */
-  controlState: 'LEGACY_REINDEX';
+  readonly controlState: 'LEGACY_REINDEX';
 };
 
 export type LegacyReindexWaitForTaskState = LegacyBaseState & {
   /** Wait for the reindex operation to complete */
-  controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK';
-  legacyReindexTaskId: string;
+  readonly controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK';
+  readonly legacyReindexTaskId: string;
 };
 
 export type LegacyDeleteState = LegacyBaseState & {
@@ -209,7 +208,7 @@ export type LegacyDeleteState = LegacyBaseState & {
    * conflict with the `currentAlias` that we want to create in a later step
    * e.g. `.kibana`.
    */
-  controlState: 'LEGACY_DELETE';
+  readonly controlState: 'LEGACY_DELETE';
 };
 
 export type State =
@@ -417,8 +416,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'UPDATE_TARGET_MAPPINGS',
           // Source is a none because we didn't do any migration from a source
           // index
-          source: Option.none,
-          target: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          sourceIndex: Option.none,
+          targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
           targetMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetMappings,
             indices[aliases[currentAlias(stateP)]].mappings
@@ -434,13 +433,17 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         stateP = {
           ...stateP,
           controlState: 'FATAL',
-          error: new Error(
-            `The ${currentAlias(
-              stateP
-            )} alias is pointing to a newer version of Kibana: v${indexVersion(
-              aliases[currentAlias(stateP)]
-            )}`
-          ),
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'error',
+              message: `The ${currentAlias(
+                stateP
+              )} alias is pointing to a newer version of Kibana: v${indexVersion(
+                aliases[currentAlias(stateP)]
+              )}`,
+            },
+          ],
         };
       } else if (
         // If the `.kibana` alias exists
@@ -452,8 +455,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         stateP = {
           ...stateP,
           controlState: 'SET_SOURCE_WRITE_BLOCK',
-          source: Option.some(source) as Option.Some<string>,
-          target,
+          sourceIndex: Option.some(source) as Option.Some<string>,
+          targetIndex: target,
           targetMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetMappings,
             indices[source].mappings
@@ -488,13 +491,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         stateP = {
           ...stateP,
           controlState: 'LEGACY_SET_WRITE_BLOCK',
-          source: Option.some(legacyReindexTarget) as Option.Some<string>,
-          target,
+          sourceIndex: Option.some(legacyReindexTarget) as Option.Some<string>,
+          targetIndex: target,
           targetMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetMappings,
             indices[legacyIndex(stateP)].mappings
           ),
-          legacy: legacyIndex(stateP),
+          legacyIndex: legacyIndex(stateP),
           legacyReindexTargetMappings: indices[legacyIndex(stateP)].mappings,
           legacyPreMigrationDoneActions: [
             { remove_index: { index: legacyIndex(stateP) } },
@@ -524,8 +527,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         stateP = {
           ...stateP,
           controlState: 'CREATE_NEW_TARGET',
-          source: Option.none as Option.None,
-          target,
+          sourceIndex: Option.none as Option.None,
+          targetIndex: target,
           versionIndexReadyActions: Option.some([
             { add: { index: target, alias: currentAlias(stateP) } },
             { add: { index: target, alias: versionAlias(stateP) } },
@@ -579,7 +582,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       };
     } else {
       if (
-        (res.left.type === 'index_not_found_exception' && res.left.index === stateP.legacy) ||
+        (res.left.type === 'index_not_found_exception' && res.left.index === stateP.legacyIndex) ||
         res.left.type === 'target_index_had_write_block'
       ) {
         // index_not_found_exception for the LEGACY_REINDEX source index:
@@ -595,7 +598,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return { ...stateP, controlState: 'LEGACY_DELETE' };
       } else if (
         res.left.type === 'index_not_found_exception' &&
-        res.left.index === stateP.source.value
+        res.left.index === stateP.sourceIndex.value
       ) {
         // index_not_found_exception for the LEGACY_REINDEX target index
         // (stateP.source.value): the migration algorithm will never delete
@@ -607,7 +610,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ...stateP.logs,
             {
               level: 'error',
-              message: `LEGACY_REINDEX failed because the reindex destination index [${stateP.source.value}] does not exist.`,
+              message: `LEGACY_REINDEX failed because the reindex destination index [${stateP.sourceIndex.value}] does not exist.`,
             },
           ],
         };
@@ -619,7 +622,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isLeft(res)) {
       if (
         res.left.type === 'remove_index_not_a_concrete_index' ||
-        (res.left.type === 'index_not_found_exception' && res.left.index === stateP.legacy)
+        (res.left.type === 'index_not_found_exception' && res.left.index === stateP.legacyIndex)
       ) {
         // index_not_found_exception, another Kibana instance already
         // deleted the legacy index
@@ -634,7 +637,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
       } else if (
         res.left.type === 'index_not_found_exception' &&
-        res.left.index === stateP.source.value
+        res.left.index === stateP.sourceIndex.value
       ) {
         return {
           ...stateP,
@@ -643,7 +646,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ...stateP.logs,
             {
               level: 'error',
-              message: `LEGACY_DELETE failed because the source index [${stateP.source.value}] does not exist.`,
+              message: `LEGACY_DELETE failed because the source index [${stateP.sourceIndex.value}] does not exist.`,
             },
           ],
         };
@@ -764,17 +767,17 @@ export const nextActionMap = (
     INIT: (state: InitState) =>
       Actions.fetchIndices(client, [currentAlias(state), versionAlias(state)]),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
-      Actions.setWriteBlock(client, state.source.value),
+      Actions.setWriteBlock(client, state.sourceIndex.value),
     CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
-      Actions.createIndex(client, state.target, state.targetMappings),
+      Actions.createIndex(client, state.targetIndex, state.targetMappings),
     CLONE_SOURCE_TO_TARGET: (state: CloneSourceToTargetState) =>
-      Actions.cloneIndex(client, state.source.value, state.target),
+      Actions.cloneIndex(client, state.sourceIndex.value, state.targetIndex),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
-      Actions.updateAndPickupMappings(client, state.target, state.targetMappings),
+      Actions.updateAndPickupMappings(client, state.targetIndex, state.targetMappings),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
       Actions.waitForPickupUpdatedMappingsTask(client, state.updateTargetMappingsTaskId, '60s'),
     OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>
-      Actions.searchForOutdatedDocuments(client, state.target, state.outdatedDocumentsQuery),
+      Actions.searchForOutdatedDocuments(client, state.targetIndex, state.outdatedDocumentsQuery),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
       pipe(
         TaskEither.tryCatch(
@@ -784,17 +787,17 @@ export const nextActionMap = (
           }
         ),
         TaskEither.chain((docs) =>
-          Actions.bulkOverwriteTransformedDocuments(client, state.target, docs)
+          Actions.bulkOverwriteTransformedDocuments(client, state.targetIndex, docs)
         )
       ),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),
     LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
-      Actions.setWriteBlock(client, state.legacy),
+      Actions.setWriteBlock(client, state.legacyIndex),
     LEGACY_CREATE_REINDEX_TARGET: (state: LegacyCreateReindexTargetState) =>
-      Actions.createIndex(client, state.source.value, state.legacyReindexTargetMappings),
+      Actions.createIndex(client, state.sourceIndex.value, state.legacyReindexTargetMappings),
     LEGACY_REINDEX: (state: LegacyReindexState) =>
-      Actions.reindex(client, state.legacy, state.source.value, state.preMigrationScript),
+      Actions.reindex(client, state.legacyIndex, state.sourceIndex.value, state.preMigrationScript),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForReindexTask(client, state.legacyReindexTaskId, '60s'),
     LEGACY_DELETE: (state: LegacyDeleteState) =>
