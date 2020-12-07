@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
+          `/api/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
         );
         expect(response.status).to.be(200);
         expect(response.body).to.eql({ timeseries: [] });
@@ -37,7 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the transaction breakdown for a service', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
+          `/api/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
         );
 
         expect(response.status).to.be(200);
@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
       it('returns the transaction breakdown for a transaction group', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}&transactionName=${transactionName}`
+          `/api/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}&transactionName=${transactionName}`
         );
 
         expect(response.status).to.be(200);
@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
       it('returns the transaction breakdown sorted by name', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
+          `/api/apm/services/opbeans-node/transaction/charts/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
         );
 
         expect(response.status).to.be(200);

@@ -14,8 +14,7 @@ import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
-// TODO: rename from "getErrorGroup"  to "getErrorGroupSample" (since a single error is returned, not an errorGroup)
-export async function getErrorGroup({
+export async function getErrorGroupSample({
   serviceName,
   groupId,
   setup,

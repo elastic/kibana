@@ -17,12 +17,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
 
-  describe('Service overview transaction groups', () => {
+  describe('Transactions groups overview', () => {
     describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/overview_transaction_groups`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/overview`,
             query: {
               start,
               end,
@@ -52,7 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the correct data', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/overview_transaction_groups`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/overview`,
             query: {
               start,
               end,
@@ -128,7 +128,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('sorts items in the correct order', async () => {
         const descendingResponse = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/overview_transaction_groups`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/overview`,
             query: {
               start,
               end,
@@ -152,7 +152,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const ascendingResponse = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/overview_transaction_groups`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/overview`,
             query: {
               start,
               end,
@@ -176,7 +176,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('sorts items by the correct field', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/overview_transaction_groups`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/overview`,
             query: {
               start,
               end,
@@ -202,7 +202,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const firstPage = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/overview_transaction_groups`,
+            pathname: `/api/apm/services/opbeans-java/transactions/groups/overview`,
             query: {
               start,
               end,
@@ -229,7 +229,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             const thisPage = await supertest.get(
               url.format({
-                pathname: '/api/apm/services/opbeans-java/overview_transaction_groups',
+                pathname: '/api/apm/services/opbeans-java/transactions/groups/overview',
                 query: {
                   start,
                   end,
