@@ -48,7 +48,7 @@ export function Correlations() {
       {isFlyoutVisible && (
         <EuiPortal>
           <EuiFlyout
-            size="l"
+            size="m"
             ownFocus
             onClose={() => setIsFlyoutVisible(false)}
           >

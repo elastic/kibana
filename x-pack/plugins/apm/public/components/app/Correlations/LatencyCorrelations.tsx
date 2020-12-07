@@ -102,7 +102,7 @@ export function LatencyCorrelations() {
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFlexGroup direction="row">
-            <EuiFlexItem>
+            {/* <EuiFlexItem>
               <EuiTitle size="s">
                 <h4>Latency ({durationPercentile}th percentile)</h4>
               </EuiTitle>
@@ -111,7 +111,7 @@ export function LatencyCorrelations() {
                 status={status}
                 selectedSignificantTerm={selectedSignificantTerm}
               />
-            </EuiFlexItem>
+            </EuiFlexItem> */}
             <EuiFlexItem>
               <EuiTitle size="s">
                 <h4>Latency distribution</h4>
@@ -159,6 +159,7 @@ export function LatencyCorrelations() {
         </EuiFlexItem>
         <EuiFlexItem>
           <SignificantTermsTable
+            cardinalityColumnName="# of slow transactions"
             significantTerms={data?.significantTerms}
             status={status}
             setSelectedSignificantTerm={setSelectedSignificantTerm}

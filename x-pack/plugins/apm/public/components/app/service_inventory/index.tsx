@@ -23,7 +23,6 @@ import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { SearchBar } from '../../shared/search_bar';
-import { Correlations } from '../Correlations';
 import { NoServicesMessage } from './no_services_message';
 import { ServiceList } from './ServiceList';
 import { MLCallout } from './ServiceList/MLCallout';

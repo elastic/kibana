@@ -122,6 +122,7 @@ export function ErrorCorrelations() {
         </EuiFlexItem>
         <EuiFlexItem>
           <SignificantTermsTable
+            cardinalityColumnName="# of failed transactions"
             significantTerms={data?.significantTerms}
             status={status}
             setSelectedSignificantTerm={setSelectedSignificantTerm}

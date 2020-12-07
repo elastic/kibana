@@ -26,12 +26,14 @@ type SignificantTerm = NonNullable<
 interface Props<T> {
   significantTerms?: T[];
   status: FETCH_STATUS;
+  cardinalityColumnName: string;
   setSelectedSignificantTerm: (term: T | null) => void;
 }
 
 export function SignificantTermsTable<T extends SignificantTerm>({
   significantTerms,
   status,
+  cardinalityColumnName,
   setSelectedSignificantTerm,
 }: Props<T>) {
   const history = useHistory();
@@ -46,7 +48,7 @@ export function SignificantTermsTable<T extends SignificantTerm>({
     },
     {
       field: 'cardinality',
-      name: '# of [slow/failed] transactions',
+      name: cardinalityColumnName,
       render: (_: any, term: T) => {
         const matches = asPercent(term.fgCount, term.bgCount);
         return `${asInteger(term.fgCount)} (${matches})`;
@@ -79,6 +81,7 @@ export function SignificantTermsTable<T extends SignificantTerm>({
             >
               <EuiIcon type="magnifyWithPlus" />
             </EuiLink>
+            &nbsp;/&nbsp;
             <EuiLink
               href={createHref(history, {
                 query: {
