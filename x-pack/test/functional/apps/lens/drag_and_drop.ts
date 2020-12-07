@@ -60,7 +60,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       ]);
     });
 
-    it.skip('should move the column to compatible dimension group', async () => {
+    it('should move the column to compatible dimension group', async () => {
       await PageObjects.lens.switchToVisualization('bar');
       expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
         'Top values of @message.raw',

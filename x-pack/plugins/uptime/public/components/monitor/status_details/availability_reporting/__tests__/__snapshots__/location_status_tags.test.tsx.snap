@@ -11,21 +11,21 @@ exports[`LocationStatusTags component renders properly against props 1`] = `
             "color": "#d3dae6",
             "label": "Berlin",
             "status": "up",
-            "timestamp": "1 Mon ago",
+            "timestamp": "Sept 4, 2020  9:31:38 AM",
           },
           Object {
             "availability": 100,
             "color": "#bd271e",
             "label": "Berlin",
             "status": "down",
-            "timestamp": "1 Mon ago",
+            "timestamp": "Sept 4, 2020  9:31:38 AM",
           },
           Object {
             "availability": 100,
             "color": "#d3dae6",
             "label": "Islamabad",
             "status": "up",
-            "timestamp": "1 Mon ago",
+            "timestamp": "Sept 4, 2020  9:31:38 AM",
           },
         ]
       }
@@ -142,7 +142,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 >
                   <span
                     class="euiBadge euiBadge--iconLeft"
-                    style="background-color:#bd271e;color:#fff"
+                    style="background-color:#ff7e62;color:#000"
                   >
                     <span
                       class="euiBadge__content"
@@ -150,13 +150,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                       <span
                         class="euiBadge__text"
                       >
-                        <span
-                          class="euiTextColor euiTextColor--ghost"
-                        >
-                          <h4>
-                            Berlin
-                          </h4>
-                        </span>
+                        Berlin
                       </span>
                     </span>
                   </span>
@@ -195,7 +189,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 <span
                   class="euiTableCellContent__text"
                 >
-                  5m ago
+                  Sept 4, 2020  9:31:38 AM
                 </span>
               </div>
             </td>
@@ -219,7 +213,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 >
                   <span
                     class="euiBadge euiBadge--iconLeft"
-                    style="background-color:#bd271e;color:#fff"
+                    style="background-color:#ff7e62;color:#000"
                   >
                     <span
                       class="euiBadge__content"
@@ -227,13 +221,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                       <span
                         class="euiBadge__text"
                       >
-                        <span
-                          class="euiTextColor euiTextColor--ghost"
-                        >
-                          <h4>
-                            Islamabad
-                          </h4>
-                        </span>
+                        Islamabad
                       </span>
                     </span>
                   </span>
@@ -272,7 +260,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
                 <span
                   class="euiTableCellContent__text"
                 >
-                  5s ago
+                  Sept 4, 2020  9:31:38 AM
                 </span>
               </div>
             </td>
@@ -392,7 +380,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 >
                   <span
                     class="euiBadge euiBadge--iconLeft"
-                    style="background-color:#d3dae6;color:#000"
+                    style="background-color:#6dccb1;color:#000"
                   >
                     <span
                       class="euiBadge__content"
@@ -400,13 +388,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                       <span
                         class="euiBadge__text"
                       >
-                        <span
-                          class="euiTextColor euiTextColor--default"
-                        >
-                          <h4>
-                            Berlin
-                          </h4>
-                        </span>
+                        Berlin
                       </span>
                     </span>
                   </span>
@@ -445,7 +427,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 <span
                   class="euiTableCellContent__text"
                 >
-                  5d ago
+                  Sept 4, 2020  9:31:38 AM
                 </span>
               </div>
             </td>
@@ -469,7 +451,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 >
                   <span
                     class="euiBadge euiBadge--iconLeft"
-                    style="background-color:#d3dae6;color:#000"
+                    style="background-color:#6dccb1;color:#000"
                   >
                     <span
                       class="euiBadge__content"
@@ -477,13 +459,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                       <span
                         class="euiBadge__text"
                       >
-                        <span
-                          class="euiTextColor euiTextColor--default"
-                        >
-                          <h4>
-                            Islamabad
-                          </h4>
-                        </span>
+                        Islamabad
                       </span>
                     </span>
                   </span>
@@ -522,7 +498,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
                 <span
                   class="euiTableCellContent__text"
                 >
-                  5s ago
+                  Sept 4, 2020  9:31:38 AM
                 </span>
               </div>
             </td>
@@ -642,7 +618,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 >
                   <span
                     class="euiBadge euiBadge--iconLeft"
-                    style="background-color:#bd271e;color:#fff"
+                    style="background-color:#ff7e62;color:#000"
                   >
                     <span
                       class="euiBadge__content"
@@ -650,13 +626,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                       <span
                         class="euiBadge__text"
                       >
-                        <span
-                          class="euiTextColor euiTextColor--ghost"
-                        >
-                          <h4>
-                            Berlin
-                          </h4>
-                        </span>
+                        Berlin
                       </span>
                     </span>
                   </span>
@@ -695,7 +665,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class="euiTableCellContent__text"
                 >
-                  5m ago
+                  Sept 4, 2020  9:31:38 AM
                 </span>
               </div>
             </td>
@@ -719,7 +689,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 >
                   <span
                     class="euiBadge euiBadge--iconLeft"
-                    style="background-color:#bd271e;color:#fff"
+                    style="background-color:#ff7e62;color:#000"
                   >
                     <span
                       class="euiBadge__content"
@@ -727,13 +697,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                       <span
                         class="euiBadge__text"
                       >
-                        <span
-                          class="euiTextColor euiTextColor--ghost"
-                        >
-                          <h4>
-                            Islamabad
-                          </h4>
-                        </span>
+                        Islamabad
                       </span>
                     </span>
                   </span>
@@ -772,7 +736,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class="euiTableCellContent__text"
                 >
-                  5s ago
+                  Sept 4, 2020  9:31:38 AM
                 </span>
               </div>
             </td>
@@ -796,7 +760,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 >
                   <span
                     class="euiBadge euiBadge--iconLeft"
-                    style="background-color:#bd271e;color:#fff"
+                    style="background-color:#ff7e62;color:#000"
                   >
                     <span
                       class="euiBadge__content"
@@ -804,13 +768,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                       <span
                         class="euiBadge__text"
                       >
-                        <span
-                          class="euiTextColor euiTextColor--ghost"
-                        >
-                          <h4>
-                            New York
-                          </h4>
-                        </span>
+                        New York
                       </span>
                     </span>
                   </span>
@@ -849,7 +807,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class="euiTableCellContent__text"
                 >
-                  1 Mon ago
+                  Sept 4, 2020  9:31:38 AM
                 </span>
               </div>
             </td>
@@ -873,7 +831,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 >
                   <span
                     class="euiBadge euiBadge--iconLeft"
-                    style="background-color:#bd271e;color:#fff"
+                    style="background-color:#ff7e62;color:#000"
                   >
                     <span
                       class="euiBadge__content"
@@ -881,13 +839,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                       <span
                         class="euiBadge__text"
                       >
-                        <span
-                          class="euiTextColor euiTextColor--ghost"
-                        >
-                          <h4>
-                            Paris
-                          </h4>
-                        </span>
+                        Paris
                       </span>
                     </span>
                   </span>
@@ -926,7 +878,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class="euiTableCellContent__text"
                 >
-                  5 Yr ago
+                  Sept 4, 2020  9:31:38 AM
                 </span>
               </div>
             </td>
@@ -950,7 +902,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 >
                   <span
                     class="euiBadge euiBadge--iconLeft"
-                    style="background-color:#bd271e;color:#fff"
+                    style="background-color:#ff7e62;color:#000"
                   >
                     <span
                       class="euiBadge__content"
@@ -958,13 +910,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                       <span
                         class="euiBadge__text"
                       >
-                        <span
-                          class="euiTextColor euiTextColor--ghost"
-                        >
-                          <h4>
-                            Sydney
-                          </h4>
-                        </span>
+                        Sydney
                       </span>
                     </span>
                   </span>
@@ -1003,7 +949,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 <span
                   class="euiTableCellContent__text"
                 >
-                  5 Yr ago
+                  Sept 4, 2020  9:31:38 AM
                 </span>
               </div>
             </td>
