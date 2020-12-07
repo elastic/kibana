@@ -89,9 +89,9 @@ export class BackgroundSessionService implements ISessionService {
     if (!appId) throw new Error('AppId is required');
     if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
 
-    const realmType = user?.authentication_realm.type ?? null;
-    const realmName = user?.authentication_realm.name ?? null;
-    const username = user?.username ?? null;
+    const realmType = user?.authentication_realm.type;
+    const realmName = user?.authentication_realm.name;
+    const username = user?.username;
 
     // Get the mapping of request hash/search ID for this session
     const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();

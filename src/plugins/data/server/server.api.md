@@ -66,7 +66,7 @@ import { ToastInputFields } from 'src/core/public/notifications';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { Unit } from '@elastic/datemath';
 
 // Warning: (ae-forgotten-export) The symbol "AggConfigSerialized" needs to be exported by the entry point index.d.ts
