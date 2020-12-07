@@ -68,31 +68,6 @@ export enum ElasticsearchAssetType {
 
 export type DataType = typeof dataTypes;
 
-export type RegistryRelease = 'ga' | 'beta' | 'experimental';
-
-// Registry packages do have extra fields.
-// cf. type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
-type RegistryOverridesToOptional = Pick<PackageSpecManifest, 'title' | 'release'>;
-
-// our current types have these as all required, buy they're are all optional (have `omitempty`) according to
-// https://github.com/elastic/package-registry/blob/master/util/package.go#L57
-// & https://github.com/elastic/package-registry/blob/master/util/package.go#L80-L81
-// However, are always present in every registry response I checked. Chose to keep types unchanged for now
-// and confirm with Registry if they are really optional. Can update types and ~4 places in code later if neccessary
-interface RegistryAdditionalProperties {
-  assets?: string[];
-  download: string;
-  path: string;
-  readme?: string;
-  internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]
-  data_streams?: RegistryDataStream[]; // Registry addition [0] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L65
-}
-
-interface RegistryOverridePropertyValue {
-  icons?: RegistryImage[];
-  screenshots?: RegistryImage[];
-}
-
 export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type ArchivePackage = PackageSpecManifest &
@@ -104,6 +79,29 @@ export type RegistryPackage = PackageSpecManifest &
   RegistryAdditionalProperties &
   RegistryOverridePropertyValue;
 
+// Registry packages do have extra fields.
+// cf. type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
+type RegistryOverridesToOptional = Pick<PackageSpecManifest, 'title' | 'release'>;
+
+// our current types have `download`, & `path` as required but they're are optional (have `omitempty`) according to
+// https://github.com/elastic/package-registry/blob/master/util/package.go#L57
+// & https://github.com/elastic/package-registry/blob/master/util/package.go#L80-L81
+// However, they are always present in every registry response I checked. Chose to keep types unchanged for now
+// and confirm with Registry if they are really optional. Can update types and ~4 places in code later if neccessary
+interface RegistryAdditionalProperties {
+  assets?: string[];
+  download: string;
+  path: string;
+  readme?: string;
+  internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]
+  data_streams?: RegistryDataStream[]; // Registry addition [0] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L65
+}
+interface RegistryOverridePropertyValue {
+  icons?: RegistryImage[];
+  screenshots?: RegistryImage[];
+}
+
+export type RegistryRelease = PackageSpecManifest['release'];
 export interface RegistryImage {
   src: string;
   path: string;
