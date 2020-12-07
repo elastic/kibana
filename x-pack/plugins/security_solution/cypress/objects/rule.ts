@@ -31,7 +31,7 @@ interface Interval {
 }
 
 export interface CustomRule {
-  customQuery: string;
+  customQuery?: string;
   name: string;
   description: string;
   index?: string[];
@@ -61,6 +61,12 @@ export interface OverrideRule extends CustomRule {
   timestampOverride: string;
 }
 
+export interface ThreatIndicatorRule extends CustomRule {
+  indicatorIndexPattern: string[];
+  indicatorMapping: string;
+  indicatorIndexField: string;
+}
+
 export interface MachineLearningRule {
   machineLearningJob: string;
   anomalyScoreThreshold: string;
@@ -77,6 +83,16 @@ export interface MachineLearningRule {
   runsEvery: Interval;
   lookBack: Interval;
 }
+
+export const indexPatterns = [
+  'apm-*-transaction*',
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'logs-*',
+  'packetbeat-*',
+  'winlogbeat-*',
+];
 
 const mitre1: Mitre = {
   tactic: 'Discovery (TA0007)',
@@ -122,6 +138,7 @@ const lookBack: Interval = {
 
 export const newRule: CustomRule = {
   customQuery: 'host.name: *',
+  index: indexPatterns,
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -163,6 +180,7 @@ export const existingRule: CustomRule = {
 
 export const newOverrideRule: OverrideRule = {
   customQuery: 'host.name: *',
+  index: indexPatterns,
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -183,6 +201,7 @@ export const newOverrideRule: OverrideRule = {
 
 export const newThresholdRule: ThresholdRule = {
   customQuery: 'host.name: *',
+  index: indexPatterns,
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -218,6 +237,7 @@ export const machineLearningRule: MachineLearningRule = {
 export const eqlRule: CustomRule = {
   customQuery: 'any where process.name == "which"',
   name: 'New EQL Rule',
+  index: indexPatterns,
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',
@@ -237,6 +257,7 @@ export const eqlSequenceRule: CustomRule = {
      [any where process.name == "which"]\
      [any where process.name == "xargs"]',
   name: 'New EQL Sequence Rule',
+  index: indexPatterns,
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',
@@ -250,15 +271,24 @@ export const eqlSequenceRule: CustomRule = {
   timeline,
 };
 
-export const indexPatterns = [
-  'apm-*-transaction*',
-  'auditbeat-*',
-  'endgame-*',
-  'filebeat-*',
-  'logs-*',
-  'packetbeat-*',
-  'winlogbeat-*',
-];
+export const newThreatIndicatorRule: ThreatIndicatorRule = {
+  name: 'Threat Indicator Rule Test',
+  description: 'The threat indicator rule description.',
+  index: ['threat-data-*'],
+  severity: 'Critical',
+  riskScore: '20',
+  tags: ['test', 'threat'],
+  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  runsEvery,
+  lookBack,
+  indicatorIndexPattern: ['threat-indicator-*'],
+  indicatorMapping: 'agent.id',
+  indicatorIndexField: 'agent.threat',
+  timeline,
+};
 
 export const severitiesOverride = ['Low', 'Medium', 'High', 'Critical'];
 

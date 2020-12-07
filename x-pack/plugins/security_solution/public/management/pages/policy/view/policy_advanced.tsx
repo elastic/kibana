@@ -15,6 +15,8 @@ import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
 
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
   let newPolicyConfig = obj;
+
+  // First set the value.
   for (let i = 0; i < path.length - 1; i++) {
     if (!newPolicyConfig[path[i]]) {
       newPolicyConfig[path[i]] = {} as Record<string, unknown>;
@@ -22,6 +24,36 @@ function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
     newPolicyConfig = newPolicyConfig[path[i]] as Record<string, unknown>;
   }
   newPolicyConfig[path[path.length - 1]] = value;
+
+  // Then, if the user is deleting the value, we need to ensure we clean up the config.
+  // We delete any sections that are empty, whether that be an empty string, empty object, or undefined.
+  if (value === '' || value === undefined) {
+    newPolicyConfig = obj;
+    for (let k = path.length; k >= 0; k--) {
+      const nextPath = path.slice(0, k);
+      for (let i = 0; i < nextPath.length - 1; i++) {
+        // Traverse and find the next section
+        newPolicyConfig = newPolicyConfig[nextPath[i]] as Record<string, unknown>;
+      }
+      if (
+        newPolicyConfig[nextPath[nextPath.length - 1]] === undefined ||
+        newPolicyConfig[nextPath[nextPath.length - 1]] === '' ||
+        Object.keys(newPolicyConfig[nextPath[nextPath.length - 1]] as object).length === 0
+      ) {
+        // If we're looking at the `advanced` field, we leave it undefined as opposed to deleting it.
+        // This is because the UI looks for this field to begin rendering.
+        if (nextPath[nextPath.length - 1] === 'advanced') {
+          newPolicyConfig[nextPath[nextPath.length - 1]] = undefined;
+          // In all other cases, if field is empty, we'll delete it to clean up.
+        } else {
+          delete newPolicyConfig[nextPath[nextPath.length - 1]];
+        }
+        newPolicyConfig = obj;
+      } else {
+        break; // We are looking at a non-empty section, so we can terminate.
+      }
+    }
+  }
 }
 
 function getValue(obj: Record<string, unknown>, path: string[]) {

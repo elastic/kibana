@@ -28,6 +28,9 @@ interface Libs {
   config: InfraConfig;
 }
 
+// extract public interface
+export type IInfraSources = Pick<InfraSources, keyof InfraSources>;
+
 export class InfraSources {
   private internalSourceConfigurations: Map<string, InfraStaticSourceConfiguration> = new Map();
   private readonly libs: Libs;

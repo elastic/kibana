@@ -12,6 +12,8 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { getBeforeSetup } from './lib';
 
 const taskManager = taskManagerMock.createStart();
@@ -20,6 +22,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertsAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
@@ -37,10 +40,12 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  auditLogger,
 };
 
 beforeEach(() => {
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  (auditLogger.log as jest.Mock).mockClear();
 });
 
 describe('delete()', () => {
@@ -237,6 +242,45 @@ describe('delete()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'delete');
+    });
+  });
+
+  describe('auditLogger', () => {
+    test('logs audit event when deleting an alert', async () => {
+      await alertsClient.delete({ id: '1' });
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'alert_delete',
+            outcome: 'unknown',
+          }),
+          kibana: { saved_object: { id: '1', type: 'alert' } },
+        })
+      );
+    });
+
+    test('logs audit event when not authorised to delete an alert', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(alertsClient.delete({ id: '1' })).rejects.toThrow();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'alert_delete',
+            outcome: 'failure',
+          }),
+          kibana: {
+            saved_object: {
+              id: '1',
+              type: 'alert',
+            },
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized',
+          },
+        })
+      );
     });
   });
 });

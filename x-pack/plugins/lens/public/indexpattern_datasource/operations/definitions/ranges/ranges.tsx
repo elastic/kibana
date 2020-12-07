@@ -17,6 +17,7 @@ import { mergeLayer } from '../../../state_helpers';
 import { supportedFormats } from '../../../format_column';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 import { IndexPattern, IndexPatternField } from '../../../types';
+import { getInvalidFieldMessage } from '../helpers';
 
 type RangeType = Omit<Range, 'type'>;
 // Try to cover all possible serialized states for ranges
@@ -109,6 +110,8 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
   }),
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'number' &&

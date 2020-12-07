@@ -219,7 +219,6 @@ const loginViaConfig = () => {
  */
 export const loginAndWaitForPage = (url: string, role?: RolesType) => {
   login(role);
-  cy.viewport('macbook-15');
   cy.visit(
     `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
   );
@@ -228,7 +227,6 @@ export const loginAndWaitForPage = (url: string, role?: RolesType) => {
 
 export const loginAndWaitForPageWithoutDateRange = (url: string, role?: RolesType) => {
   login(role);
-  cy.viewport('macbook-15');
   cy.visit(role ? getUrlWithRoute(role, url) : url);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
@@ -237,7 +235,6 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: RolesType) =>
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
 
   login(role);
-  cy.viewport('macbook-15');
   cy.visit(role ? getUrlWithRoute(role, route) : route);
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');

@@ -61,6 +61,7 @@ describe('alert_add', () => {
           },
         ],
         defaultActionGroupId: 'testActionGroup',
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers: {
           [ALERTS_FEATURE_ID]: { read: true, all: true },
