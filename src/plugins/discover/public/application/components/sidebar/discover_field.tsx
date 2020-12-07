@@ -197,7 +197,6 @@ export function DiscoverField({
 
   return (
     <EuiPopover
-      ownFocus
       display="block"
       button={
         <FieldButton

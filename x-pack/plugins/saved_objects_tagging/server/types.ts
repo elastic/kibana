@@ -5,9 +5,11 @@
  */
 
 import { ITagsClient } from '../common/types';
+import { IAssignmentService } from './services';
 
 export interface ITagsRequestHandlerContext {
   tagsClient: ITagsClient;
+  assignmentService: IAssignmentService;
 }
 
 declare module 'src/core/server' {

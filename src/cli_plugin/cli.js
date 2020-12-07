@@ -23,9 +23,7 @@ import { listCommand } from './list';
 import { installCommand } from './install';
 import { removeCommand } from './remove';
 
-const argv = process.env.kbnWorkerArgv
-  ? JSON.parse(process.env.kbnWorkerArgv)
-  : process.argv.slice();
+const argv = process.argv.slice();
 const program = new Command('bin/kibana-plugin');
 
 program
