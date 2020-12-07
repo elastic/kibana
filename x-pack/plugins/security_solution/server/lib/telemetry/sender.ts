@@ -103,8 +103,8 @@ export class TelemetryEventsSender {
 
   public async fetchDiagnosticAlerts(fromTimestamp: string, toTimestamp: string) {
     const query = {
-      // logs-diagnostic.endpoint.collection-default
       expand_wildcards: 'open,hidden',
+      // logs-diagnostic.endpoint.collection-default
       index: 'pete-hampton-test-index*',
       ignore_unavailable: true,
       size: 100,
