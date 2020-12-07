@@ -19,5 +19,6 @@
 
 module.exports = {
   rootDir: '.',
+  coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
   projects: [...require('./jest.config.oss').projects, ...require('./x-pack/jest.config').projects],
 };
