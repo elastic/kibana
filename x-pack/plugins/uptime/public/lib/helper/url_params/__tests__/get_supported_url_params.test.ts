@@ -46,7 +46,6 @@ describe('getSupportedUrlParams', () => {
       DATE_RANGE_END,
       FILTERS,
       SEARCH,
-      SELECTED_PING_LIST_STATUS,
       STATUS_FILTER,
     } = CLIENT_DEFAULTS;
     const result = getSupportedUrlParams({});
@@ -62,7 +61,6 @@ describe('getSupportedUrlParams', () => {
       focusConnectorField: false,
       pagination: undefined,
       search: SEARCH,
-      selectedPingStatus: SELECTED_PING_LIST_STATUS,
       statusFilter: STATUS_FILTER,
     });
   });
