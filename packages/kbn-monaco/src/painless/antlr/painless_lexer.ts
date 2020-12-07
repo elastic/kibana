@@ -184,11 +184,13 @@ export class painless_lexer extends Lexer {
 	// @Override
 	public sempred(_localctx: RuleContext, ruleIndex: number, predIndex: number): boolean {
 		switch (ruleIndex) {
-    // Manual fix to handle / appropriately
+    // DO NOT CHANGE
+    // This is a manual fix to handle slashes appropriately
 		case 31:
 			return this.DIV_sempred(_localctx, predIndex);
 
-    // Manual fix to handle / appropriately
+    // DO NOT CHANGE
+    // This is a manual fix to handle regexes appropriately
 		case 77:
 			return this.REGEX_sempred(_localctx, predIndex);
 		}

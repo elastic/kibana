@@ -20,6 +20,11 @@
 import { CharStream } from 'antlr4ts';
 import { painless_lexer as PainlessLexer } from '../../antlr/painless_lexer';
 
+/*
+ * This extends the PainlessLexer class in order to handle backslashes appropriately
+ * It is being invoked in painless_lexer.g4
+ * Based on the Java implementation: https://github.com/elastic/elasticsearch/blob/feab123ba400b150f3dcd04dd27cf57474b70d5a/modules/lang-painless/src/main/java/org/elasticsearch/painless/antlr/EnhancedPainlessLexer.java#L73
+ */
 export class PainlessLexerEnhanced extends PainlessLexer {
   constructor(input: CharStream) {
     super(input);
