@@ -25,6 +25,7 @@ import { Status, statuses } from '../status';
 import { UserActionShowAlert } from './user_action_show_alert';
 import * as i18n from './translations';
 import { Alert } from '../case_view';
+import { AlertRuleLink } from './user_action_rule_link';
 
 interface LabelTitle {
   action: CaseUserActions;
@@ -189,24 +190,13 @@ export const getUpdateAction = ({
 export const getAlertComment = ({
   action,
   alert,
-  alertUrl,
   onShowAlertDetails,
-  history,
 }: {
   action: CaseUserActions;
   alert: Alert | undefined;
-  alertUrl: string;
   history: History;
   onShowAlertDetails: (alertId: string, index: string) => void;
 }): EuiCommentProps => {
-  const eventLabel = `${i18n.ALERT_COMMENT_LABEL_TITLE}`;
-  const ruleName = alert?.rule?.name ?? '';
-  // TODO: Convert event to component so you can use useCallback
-  const onLinkClick = (ev: { preventDefault: () => void }) => {
-    ev.preventDefault();
-    history.push(alertUrl ?? '');
-  };
-
   return {
     username: (
       <UserActionUsernameWithAvatar
@@ -216,12 +206,7 @@ export const getAlertComment = ({
     ),
     className: 'comment-alert',
     type: 'update',
-    event: (
-      <>
-        {`${eventLabel} `}
-        <EuiLink onClick={onLinkClick}>{ruleName}</EuiLink>
-      </>
-    ),
+    event: <AlertRuleLink alert={alert} />,
     'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
     timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
     timelineIcon: 'bell',
