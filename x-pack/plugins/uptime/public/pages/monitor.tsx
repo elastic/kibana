@@ -82,7 +82,7 @@ export const MonitorPage: React.FC = () => {
       <EuiSpacer size="s" />
       <MonitorCharts monitorId={monitorId} />
       <EuiSpacer size="s" />
-      <PingList monitorId={monitorId} />
+      <PingList />
     </>
   );
 };
