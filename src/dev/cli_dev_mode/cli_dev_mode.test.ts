@@ -95,6 +95,7 @@ it('passes correct args to sub-classes', () => {
           ],
           "gracefulTimeout": 5000,
           "log": <TestLog>,
+          "mapLogLine": [Function],
           "script": <absolute path>/scripts/kibana,
           "watcher": Watcher {
             "serverShouldRestart$": [MockFunction],

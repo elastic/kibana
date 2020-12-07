@@ -157,7 +157,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect(res.error.text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest: one or more fields missing of name, version, description, type, categories, format_version"}'
+        '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest: one or more fields missing of name, version, description, title, format_version, release, owner"}'
       );
     });
 

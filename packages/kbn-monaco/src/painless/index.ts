@@ -23,4 +23,4 @@ import { getSuggestionProvider } from './language';
 
 export const PainlessLang = { ID, getSuggestionProvider, lexerRules };
 
-export { PainlessContext } from './types';
+export { PainlessContext, PainlessAutocompleteField } from './types';

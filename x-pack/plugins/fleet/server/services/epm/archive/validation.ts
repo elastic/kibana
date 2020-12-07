@@ -40,20 +40,23 @@ const requiredArchivePackageProps: readonly RequiredPackageProp[] = [
   'name',
   'version',
   'description',
-  'type',
-  'categories',
+  'title',
   'format_version',
+  'release',
+  'owner',
 ] as const;
 
 const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
-  'title',
-  'release',
   'readme',
+  'assets',
+  'data_streams',
+  'internal',
+  'license',
+  'type',
+  'categories',
+  'conditions',
   'screenshots',
   'icons',
-  'assets',
-  'internal',
-  'data_streams',
   'policy_templates',
 ] as const;
 
