@@ -31,12 +31,6 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'Relative URL from which to download global artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
   },
   {
-    key: 'linux.advanced.artifacts.global.ca_cert',
-    first_supported_version: '7.11',
-    documentation:
-      'Optional certificate used to establish trust of the global artifact manifest server (drop?)',
-  },
-  {
     key: 'linux.advanced.artifacts.global.public_key',
     first_supported_version: '7.11',
     documentation: 'Public key used to verify the global artifact manifest signature',
@@ -46,17 +40,6 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     first_supported_version: '7.11',
     documentation:
       'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
-  },
-  {
-    key: 'linux.advanced.artifacts.user.base_url',
-    first_supported_version: '7.11',
-    documentation: 'Not used, drop?',
-  },
-  {
-    key: 'linux.advanced.artifacts.user.ca_cert',
-    first_supported_version: '7.11',
-    documentation:
-      'Optional certificate used to establish trust of the user artifact manifest server. (drop?)',
   },
   {
     key: 'linux.advanced.artifacts.user.public_key',
@@ -108,12 +91,6 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'Relative URL from which to download global artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
   },
   {
-    key: 'mac.advanced.artifacts.global.ca_cert',
-    first_supported_version: '7.11',
-    documentation:
-      'Optional certificate used to establish trust of the global artifact manifest server. (drop?)',
-  },
-  {
     key: 'mac.advanced.artifacts.global.public_key',
     first_supported_version: '7.11',
     documentation: 'Public key used to verify the global artifact manifest signature.',
@@ -123,17 +100,6 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     first_supported_version: '7.11',
     documentation:
       'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
-  },
-  {
-    key: 'mac.advanced.artifacts.user.base_url',
-    first_supported_version: '7.11',
-    documentation: 'Not used, drop?',
-  },
-  {
-    key: 'mac.advanced.artifacts.user.ca_cert',
-    first_supported_version: '7.11',
-    documentation:
-      'Optional certificate used to establish trust of the user artifact manifest server. (drop?)',
   },
   {
     key: 'mac.advanced.artifacts.user.public_key',
@@ -214,12 +180,6 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'Relative URL from which to download global artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
   },
   {
-    key: 'windows.advanced.artifacts.global.ca_cert',
-    first_supported_version: '7.11',
-    documentation:
-      'Optional certificate used to establish trust of the global artifact manifest server. (drop?)',
-  },
-  {
     key: 'windows.advanced.artifacts.global.public_key',
     first_supported_version: '7.11',
     documentation: 'Public key used to verify the global artifact manifest signature.',
@@ -229,17 +189,6 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     first_supported_version: '7.11',
     documentation:
       'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
-  },
-  {
-    key: 'windows.advanced.artifacts.user.base_url',
-    first_supported_version: '7.11',
-    documentation: 'Not used, drop?',
-  },
-  {
-    key: 'windows.advanced.artifacts.user.ca_cert',
-    first_supported_version: '7.11',
-    documentation:
-      'Optional certificate used to establish trust of the user artifact manifest server. (drop?)',
   },
   {
     key: 'windows.advanced.artifacts.user.public_key',
