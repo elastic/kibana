@@ -11,7 +11,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { UptimeDatePicker } from '../uptime_date_picker';
 import { SyntheticsCallout } from '../../overview/synthetics_callout';
 import { PageTabs } from './page_tabs';
-import { CERTIFICATES_ROUTE, MONITOR_ROUTE } from '../../../../common/constants';
+import { CERTIFICATES_ROUTE, MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
 import { CertRefreshBtn } from '../../certificates/cert_refresh_btn';
 
 const StyledPicker = styled(EuiFlexItem)`
@@ -32,6 +32,7 @@ const StyledPicker = styled(EuiFlexItem)`
 
 export const PageHeader = () => {
   const isCertRoute = useRouteMatch(CERTIFICATES_ROUTE);
+  const isSettingsRoute = useRouteMatch(SETTINGS_ROUTE);
 
   const DatePickerComponent = () =>
     isCertRoute ? (
@@ -57,7 +58,7 @@ export const PageHeader = () => {
         <EuiFlexItem>
           <PageTabs />
         </EuiFlexItem>
-        <DatePickerComponent />
+        {!isSettingsRoute && <DatePickerComponent />}
       </EuiFlexGroup>
       {isMonRoute && <EuiHorizontalRule margin="m" />}
       {!isMonRoute && <EuiSpacer size="m" />}

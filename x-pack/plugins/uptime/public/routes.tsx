@@ -77,7 +77,7 @@ export const PageRouter: FC = () => {
       <PageHeader />
       <Switch>
         {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
-          <Route path={path} key={telemetryId}>
+          <Route path={path} key={telemetryId} exact={true}>
             <div data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
               <RouteComponent />

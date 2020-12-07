@@ -28,9 +28,7 @@ const tabs = [
   {
     id: SETTINGS_ROUTE,
     dataTestSubj: 'settings-page-link',
-    name: i18n.translate('xpack.uptime.page_header.settingsLink', {
-      defaultMessage: 'Settings',
-    }),
+    name: 'Settings',
   },
 ];
 
