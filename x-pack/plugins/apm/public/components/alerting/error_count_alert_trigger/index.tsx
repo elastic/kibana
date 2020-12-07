@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { getParsedDate } from '../../../context/url_params_context/helpers';
+import { asInteger } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -52,11 +52,11 @@ export function ErrorCountAlertTrigger(props: Props) {
         endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
         params: {
           query: {
-            start: getParsedDate(`now-${windowSize}${windowUnit}`)!,
-            end: getParsedDate('now')!,
-            threshold,
             environment,
             serviceName,
+            threshold,
+            windowSize,
+            windowUnit,
           },
         },
       });
@@ -106,12 +106,7 @@ export function ErrorCountAlertTrigger(props: Props) {
   ];
 
   const chartPreview = (
-    <ChartPreview
-      data={data}
-      threshold={threshold}
-      windowSize={windowSize}
-      windowUnit={windowUnit}
-    />
+    <ChartPreview data={data} threshold={threshold} yTickFormat={asInteger} />
   );
 
   return (
