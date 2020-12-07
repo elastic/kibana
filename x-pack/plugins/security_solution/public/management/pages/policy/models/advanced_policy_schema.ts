@@ -33,57 +33,60 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'linux.advanced.artifacts.global.ca_cert',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'Optional certificate used to establish trust of the global artifact manifest server (drop?)',
   },
   {
     key: 'linux.advanced.artifacts.global.public_key',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Public key used to verify the global artifact manifest signature',
   },
   {
     key: 'linux.advanced.artifacts.global.interval',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Interval between global artifact manifest download attempts, in seconds.',
   },
   {
     key: 'linux.advanced.artifacts.user.base_url',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Not used, drop?',
   },
   {
     key: 'linux.advanced.artifacts.user.ca_cert',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'Optional certificate used to establish trust of the user artifact manifest server (drop?)',
   },
   {
     key: 'linux.advanced.artifacts.user.public_key',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Public key used to verify the user artifact manifest signature',
   },
   {
     key: 'linux.advanced.artifacts.user.interval',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Interval between user artifact manifest download attempts, in seconds.',
   },
   {
     key: 'linux.advanced.elasticsearch.delay',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Delay for sending events to elasticsearch, in seconds. Default is 120.',
   },
   {
     key: 'linux.advanced.elasticsearch.tls.verify_peer',
     first_supported_version: '7.11',
-    documentation: 'default is true',
+    documentation: 'Whether to verify the certificates presented by the peer. Default is true.',
   },
   {
     key: 'linux.advanced.elasticsearch.tls.verify_hostname',
     first_supported_version: '7.11',
-    documentation: 'default is true',
+    documentation:
+      "Whether to verify the hostname of the peer is what's in the certificate. Default is true.",
   },
   {
     key: 'linux.advanced.elasticsearch.tls.ca_cert',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Text blob of a certificate authority.',
   },
   {
     key: 'mac.advanced.agent.connection_delay',
@@ -105,82 +108,89 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'mac.advanced.artifacts.global.ca_cert',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'Optional certificate used to establish trust of the global artifact manifest server (drop?)',
   },
   {
     key: 'mac.advanced.artifacts.global.public_key',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Public key used to verify the global artifact manifest signature',
   },
   {
     key: 'mac.advanced.artifacts.global.interval',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Interval between global artifact manifest download attempts, in seconds.',
   },
   {
     key: 'mac.advanced.artifacts.user.base_url',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Not used, drop?',
   },
   {
     key: 'mac.advanced.artifacts.user.ca_cert',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'Optional certificate used to establish trust of the user artifact manifest server (drop?)',
   },
   {
     key: 'mac.advanced.artifacts.user.public_key',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Public key used to verify the user artifact manifest signature',
   },
   {
     key: 'mac.advanced.artifacts.user.interval',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Interval between user artifact manifest download attempts, in seconds.',
   },
   {
     key: 'mac.advanced.elasticsearch.delay',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Delay for sending events to elasticsearch, in seconds. Default is 120.',
   },
   {
     key: 'mac.advanced.elasticsearch.tls.verify_peer',
     first_supported_version: '7.11',
-    documentation: 'default is true',
+    documentation: 'Whether to verify the certificates presented by the peer. Default is true.',
   },
   {
     key: 'mac.advanced.elasticsearch.tls.verify_hostname',
     first_supported_version: '7.11',
-    documentation: 'default is true',
+    documentation:
+      "Whether to verify the hostname of the peer is what's in the certificate. Default is true.",
   },
   {
     key: 'mac.advanced.elasticsearch.tls.ca_cert',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Text blob of a certificate authority.',
   },
   {
     key: 'mac.advanced.malware.quarantine',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'Whether quarantine should be enabled when malware prevention is enabled. Default is true.',
   },
   {
     key: 'mac.advanced.kernel.connect',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Whether to connect to the kernel driver. Default is true.',
   },
   {
     key: 'mac.advanced.kernel.process',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      "A value of 'false' overrides other config settings that would enable kernel process events. Default is true.",
   },
   {
     key: 'mac.advanced.kernel.filewrite',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      "A value of 'false' overrides other config settings that would enable kernel file write events. Default is true.",
   },
   {
     key: 'mac.advanced.kernel.network',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      "A value of 'false' overrides other config settings that would enable kernel network events. Default is true.",
   },
   {
     key: 'windows.advanced.agent.connection_delay',
@@ -202,111 +212,124 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'windows.advanced.artifacts.global.ca_cert',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'Optional certificate used to establish trust of the global artifact manifest server (drop?)',
   },
   {
     key: 'windows.advanced.artifacts.global.public_key',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Public key used to verify the global artifact manifest signature',
   },
   {
     key: 'windows.advanced.artifacts.global.interval',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Interval between global artifact manifest download attempts, in seconds.',
   },
   {
     key: 'windows.advanced.artifacts.user.base_url',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Not used, drop?',
   },
   {
     key: 'windows.advanced.artifacts.user.ca_cert',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'Optional certificate used to establish trust of the user artifact manifest server (drop?)',
   },
   {
     key: 'windows.advanced.artifacts.user.public_key',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Public key used to verify the user artifact manifest signature',
   },
   {
     key: 'windows.advanced.artifacts.user.interval',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Interval between user artifact manifest download attempts, in seconds.',
   },
   {
     key: 'windows.advanced.elasticsearch.delay',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Delay for sending events to elasticsearch, in seconds. Default is 120.',
   },
   {
     key: 'windows.advanced.elasticsearch.tls.verify_peer',
     first_supported_version: '7.11',
-    documentation: 'default is true',
+    documentation: 'Whether to verify the certificates presented by the peer. Default is true.',
   },
   {
     key: 'windows.advanced.elasticsearch.tls.verify_hostname',
     first_supported_version: '7.11',
-    documentation: 'default is true',
+    documentation:
+      "Whether to verify the hostname of the peer is what's in the certificate. Default is true.",
   },
   {
     key: 'windows.advanced.elasticsearch.tls.ca_cert',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Text blob of a certificate authority.',
   },
   {
     key: 'windows.advanced.malware.quarantine',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'Whether quarantine should be enabled when malware prevention is enabled. Default is true.',
   },
   {
     key: 'windows.advanced.ransomware.mbr',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      "A value of 'false' overrides other config settings that would enable ransomware MBR. Default is true.",
   },
   {
     key: 'windows.advanced.ransomware.canary',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      "A value of 'false' overrides other config settings that would enable ransomware canary. Default is true.",
   },
   {
     key: 'windows.advanced.kernel.connect',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'Whether to connect to the kernel driver. Default is true.',
   },
   {
     key: 'windows.advanced.kernel.process',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      "A value of 'false' overrides other config settings that would enable kernel process events. Default is true.",
   },
   {
     key: 'windows.advanced.kernel.filewrite',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      "A value of 'false' overrides other config settings that would enable kernel file write events. Default is true.",
   },
   {
     key: 'windows.advanced.kernel.network',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      "A value of 'false' overrides other config settings that would enable kernel network events. Default is true.",
   },
   {
     key: 'windows.advanced.kernel.fileopen',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      "A value of 'false' overrides other config settings that would enable kernel file open events. Default is true.",
   },
   {
     key: 'windows.advanced.kernel.asyncimageload',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      "A value of 'false' overrides other config settings that would enable kernel async image load events. Default is true.",
   },
   {
     key: 'windows.advanced.kernel.syncimageload',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      "A value of 'false' overrides other config settings that would enable kernel sync image load events. Default is true.",
   },
   {
     key: 'windows.advanced.kernel.registry',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      "A value of 'false' overrides other config settings that would enable kernel registry events. Default is true.",
   },
 ];
