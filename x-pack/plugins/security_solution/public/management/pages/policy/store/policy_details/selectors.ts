@@ -31,7 +31,35 @@ export const getPolicyDataForUpdate = (
 ): NewPolicyData | Immutable<NewPolicyData> => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
-  return newPolicy;
+
+  // trim custom malware notification string
+  // const malwareMessage = newPolicy.input[0].config.policy.value.windows.popup.malware.message.trim();
+  return {
+    ...newPolicy,
+    inputs: (newPolicy as Immutable<NewPolicyData>).inputs.map((input) => ({
+      ...input,
+      config: input.config && {
+        ...input.config,
+        policy: {
+          ...input.config.policy,
+          value: {
+            ...input.config.policy.value,
+            windows: {
+              ...input.config.policy.value.windows,
+              popup: {
+                ...input.config.policy.value.windows.popup,
+                malware: {
+                  ...input.config.policy.value.windows.popup.malware,
+                  message: input.config.policy.value.windows.popup.malware.message.trim(),
+                },
+              },
+            },
+          },
+        },
+      },
+    })),
+  };
+  // return newPolicy;
 };
 
 /**
