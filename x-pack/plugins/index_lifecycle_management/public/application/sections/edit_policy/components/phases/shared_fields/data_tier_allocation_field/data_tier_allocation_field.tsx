@@ -54,8 +54,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
   const [formData] = useFormData({ watch: dataTierAllocationTypePath });
   const allocationType: DataTierAllocationType = get(formData, dataTierAllocationTypePath);
 
-  const { data, resendRequest, error } = useLoadNodes();
-  const isLoading = true;
+  const { data, resendRequest, error, isLoading } = useLoadNodes();
 
   const { nodesByRoles, nodesByAttributes, isUsingDeprecatedDataRoleConfig } = data!;
 
