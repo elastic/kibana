@@ -404,7 +404,7 @@ describe('filterEventsAgainstList', () => {
       ]).toEqual(ipVals);
     });
 
-    it('should respond with less items in the list given one exception item with two entries of type list and array of values in document', async () => {
+    it('should respond with same items in the list given one exception item with two entries of type list and array of values in document', async () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [
         {
@@ -428,12 +428,12 @@ describe('filterEventsAgainstList', () => {
       ];
 
       // this call represents an exception list with a value list containing ['2.2.2.2']
-      (listClient.getListItemByValues as jest.Mock).mockResolvedValueOnce([
-        { ...getListItemResponseMock(), value: '2.2.2.2' },
+      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+        { ...getSearchListItemResponseMock(), value: ['2.2.2.2', '3.3.3.3'] },
       ]);
       // this call represents an exception list with a value list containing ['4.4.4.4']
-      (listClient.getListItemByValues as jest.Mock).mockResolvedValueOnce([
-        { ...getListItemResponseMock(), value: '4.4.4.4' },
+      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+        { ...getSearchListItemResponseMock(), value: ['3.3.3.3', '4.4.4.4'] },
       ]);
 
       const res = await filterEventsAgainstList({
@@ -457,17 +457,16 @@ describe('filterEventsAgainstList', () => {
         ),
         buildRuleMessage,
       });
-      expect(listClient.getListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
-      expect((listClient.getListItemByValues as jest.Mock).mock.calls[0][0].value).toEqual([
-        '1.1.1.1',
-        '2.2.2.2',
-        '3.3.3.3',
+      expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
+      expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].value).toEqual([
+        ['1.1.1.1', '1.1.1.1'],
+        ['1.1.1.1', '2.2.2.2'],
+        ['2.2.2.2', '3.3.3.3'],
       ]);
-      expect((listClient.getListItemByValues as jest.Mock).mock.calls[1][0].value).toEqual([
-        '1.1.1.1',
-        '2.2.2.2',
-        '3.3.3.3',
-        '4.4.4.4',
+      expect((listClient.searchListItemByValues as jest.Mock).mock.calls[1][0].value).toEqual([
+        ['1.1.1.1', '2.2.2.2'],
+        ['2.2.2.2', '3.3.3.3'],
+        ['3.3.3.3', '4.4.4.4'],
       ]);
       expect(res.hits.hits.length).toEqual(2);
 
@@ -548,7 +547,7 @@ describe('filterEventsAgainstList', () => {
       expect(res.hits.hits.length).toEqual(2);
     });
 
-    it('should respond with less items in the list given one exception item with two entries of type list and array of values in document', async () => {
+    it('should respond with the same items in the list given one exception item with two entries of type list and array of values in document', async () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [
         {
@@ -571,13 +570,16 @@ describe('filterEventsAgainstList', () => {
         },
       ];
 
-      // this call represents an exception list with a value list containing ['2.2.2.2']
-      (listClient.getListItemByValues as jest.Mock).mockResolvedValueOnce([
-        { ...getListItemResponseMock(), value: '2.2.2.2' },
+      // this call represents an exception list with a value list containing ['2.2.2.2', '3.3.3.3']
+      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+        {
+          ...getSearchListItemResponseMock(),
+          value: ['1.1.1.1', '2.2.2.2'],
+        },
       ]);
-      // this call represents an exception list with a value list containing ['4.4.4.4']
-      (listClient.getListItemByValues as jest.Mock).mockResolvedValueOnce([
-        { ...getListItemResponseMock(), value: '4.4.4.4' },
+      // this call represents an exception list with a value list containing ['3.3.3.3', '4.4.4.4']
+      (listClient.searchListItemByValues as jest.Mock).mockResolvedValueOnce([
+        { ...getSearchListItemResponseMock(), value: ['3.3.3.3', '4.4.4.4'] },
       ]);
 
       const res = await filterEventsAgainstList({
@@ -601,17 +603,16 @@ describe('filterEventsAgainstList', () => {
         ),
         buildRuleMessage,
       });
-      expect(listClient.getListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
-      expect((listClient.getListItemByValues as jest.Mock).mock.calls[0][0].value).toEqual([
-        '1.1.1.1',
-        '2.2.2.2',
-        '3.3.3.3',
+      expect(listClient.searchListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
+      expect((listClient.searchListItemByValues as jest.Mock).mock.calls[0][0].value).toEqual([
+        ['1.1.1.1', '1.1.1.1'],
+        ['1.1.1.1', '2.2.2.2'],
+        ['2.2.2.2', '3.3.3.3'],
       ]);
-      expect((listClient.getListItemByValues as jest.Mock).mock.calls[1][0].value).toEqual([
-        '1.1.1.1',
-        '2.2.2.2',
-        '3.3.3.3',
-        '4.4.4.4',
+      expect((listClient.searchListItemByValues as jest.Mock).mock.calls[1][0].value).toEqual([
+        ['1.1.1.1', '2.2.2.2'],
+        ['2.2.2.2', '3.3.3.3'],
+        ['3.3.3.3', '4.4.4.4'],
       ]);
       expect(res.hits.hits.length).toEqual(2);
 

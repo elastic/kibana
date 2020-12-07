@@ -5,10 +5,10 @@
  */
 import { ExceptionListItemSchema, entriesList } from '../../../../../../lists/common/schemas';
 import { hasLargeValueList } from '../../../../../common/detection_engine/utils';
-import { SignalSearchResponse } from '../types';
 import { FilterEventsAgainstListOptions } from './types';
 import { filterEvents } from './filter_events';
 import { createFieldAndSetTuples } from './create_field_and_set_tuples';
+import { SearchResponse } from '../../../types';
 
 /**
  * Filters events against a large value based list. It does this through these
@@ -29,15 +29,15 @@ import { createFieldAndSetTuples } from './create_field_and_set_tuples';
  * @param listClient The list client to use for queries
  * @param exceptionsList The exception list
  * @param logger Logger for messages
- * @param eventSearchResult
+ * @param eventSearchResult The current events from the search
  */
-export const filterEventsAgainstList = async ({
+export const filterEventsAgainstList = async <T>({
   listClient,
   exceptionsList,
   logger,
   eventSearchResult,
   buildRuleMessage,
-}: FilterEventsAgainstListOptions): Promise<SignalSearchResponse> => {
+}: FilterEventsAgainstListOptions<T>): Promise<SearchResponse<T>> => {
   try {
     const atLeastOneLargeValueList = exceptionsList.some(({ entries }) =>
       hasLargeValueList(entries)
@@ -54,9 +54,9 @@ export const filterEventsAgainstList = async ({
       return listItem.entries.every((entry) => entriesList.is(entry));
     });
 
-    const res = await valueListExceptionItems.reduce<Promise<SignalSearchResponse['hits']['hits']>>(
+    const res = await valueListExceptionItems.reduce<Promise<SearchResponse<T>['hits']['hits']>>(
       async (
-        filteredAccum: Promise<SignalSearchResponse['hits']['hits']>,
+        filteredAccum: Promise<SearchResponse<T>['hits']['hits']>,
         exceptionItem: ExceptionListItemSchema
       ) => {
         const events = await filteredAccum;
@@ -73,7 +73,7 @@ export const filterEventsAgainstList = async ({
         );
         return filteredEvents;
       },
-      Promise.resolve<SignalSearchResponse['hits']['hits']>(eventSearchResult.hits.hits)
+      Promise.resolve<SearchResponse<T>['hits']['hits']>(eventSearchResult.hits.hits)
     );
 
     return {

@@ -7,14 +7,27 @@
 import { get } from 'lodash/fp';
 import { CreateSetToFilterAgainstOptions } from './types';
 
-export const createSetToFilterAgainst = async ({
+/**
+ * Creates a field set to filter against using the stringed version of the
+ * data type for compare. Creates a set of list values that are stringified that
+ * are easier to work with as well as ensures that deep values can work since it turns
+ * things into a string using JSON.stringify().
+ *
+ * @param events The events to filter against
+ * @param field The field checking against the list
+ * @param listId The list id for the list function call
+ * @param listType The type of list for the list function call
+ * @param listClient The list client API
+ * @param logger logger for errors, debug, etc...
+ */
+export const createSetToFilterAgainst = async <T>({
   events,
   field,
   listId,
   listType,
   listClient,
   logger,
-}: CreateSetToFilterAgainstOptions): Promise<Set<unknown>> => {
+}: CreateSetToFilterAgainstOptions<T>): Promise<Set<unknown>> => {
   const valuesFromSearchResultField = events.reduce((acc, searchResultItem) => {
     const valueField = get(field, searchResultItem._source);
     if (valueField != null) {
@@ -27,8 +40,6 @@ export const createSetToFilterAgainst = async ({
     `number of distinct values from ${field}: ${[...valuesFromSearchResultField].length}`
   );
 
-  // matched will contain any list items that matched with the
-  // values passed in from the Set.
   const matchedListItems = await listClient.searchListItemByValues({
     listId,
     type: listType,
@@ -36,6 +47,5 @@ export const createSetToFilterAgainst = async ({
   });
 
   logger.debug(`number of matched items from list with id ${listId}: ${matchedListItems.length}`);
-  // create a set of list values that were a hit - easier to work with
-  return new Set<unknown>(matchedListItems.map((item) => item.value));
+  return new Set<unknown>(matchedListItems.map((item) => JSON.stringify(item.value)));
 };

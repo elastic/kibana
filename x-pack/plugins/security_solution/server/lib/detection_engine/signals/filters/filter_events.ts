@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash/fp';
-import { SignalSearchResponse } from '../types';
+import { SearchResponse } from '../../../types';
 import { FilterEventsOptions } from './types';
 
 /**
@@ -13,10 +13,10 @@ import { FilterEventsOptions } from './types';
  * @param events The events to check against
  * @param fieldAndSetTuples The field and set tuples
  */
-export const filterEvents = ({
+export const filterEvents = <T>({
   events,
   fieldAndSetTuples,
-}: FilterEventsOptions): SignalSearchResponse['hits']['hits'] => {
+}: FilterEventsOptions<T>): SearchResponse<T>['hits']['hits'] => {
   return events.filter((item) => {
     return fieldAndSetTuples
       .map((tuple) => {
@@ -25,10 +25,10 @@ export const filterEvents = ({
           return true;
         } else if (tuple.operator === 'included') {
           // only create a signal if the event is not in the value list
-          return !tuple.matchedSet.has(eventItem);
+          return !tuple.matchedSet.has(JSON.stringify(eventItem));
         } else if (tuple.operator === 'excluded') {
           // only create a signal if the event is in the value list
-          return tuple.matchedSet.has(eventItem);
+          return tuple.matchedSet.has(JSON.stringify(eventItem));
         } else {
           return false;
         }

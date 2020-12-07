@@ -8,12 +8,12 @@ import { EntryList, entriesList } from '../../../../../../lists/common';
 import { createSetToFilterAgainst } from './create_set_to_filter_against';
 import { CreateFieldAndSetTuplesOptions, FieldSet } from './types';
 
-export const createFieldAndSetTuples = async ({
+export const createFieldAndSetTuples = async <T>({
   events,
   exceptionItem,
   listClient,
   logger,
-}: CreateFieldAndSetTuplesOptions): Promise<FieldSet[]> => {
+}: CreateFieldAndSetTuplesOptions<T>): Promise<FieldSet[]> => {
   const typedEntries = exceptionItem.entries.filter((entry): entry is EntryList =>
     entriesList.is(entry)
   );

@@ -7,20 +7,20 @@
 import { Logger } from 'src/core/server';
 
 import { ListClient } from '../../../../../../lists/server';
-import { SignalSearchResponse } from '../types';
 import { BuildRuleMessage } from '../rule_messages';
 import { ExceptionListItemSchema, Type } from '../../../../../../lists/common/schemas';
+import { SearchResponse } from '../../../types';
 
-export interface FilterEventsAgainstListOptions {
+export interface FilterEventsAgainstListOptions<T> {
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
-  eventSearchResult: SignalSearchResponse;
+  eventSearchResult: SearchResponse<T>;
   buildRuleMessage: BuildRuleMessage;
 }
 
-export interface CreateSetToFilterAgainstOptions {
-  events: SignalSearchResponse['hits']['hits'];
+export interface CreateSetToFilterAgainstOptions<T> {
+  events: SearchResponse<T>['hits']['hits'];
   field: string;
   listId: string;
   listType: Type;
@@ -28,8 +28,8 @@ export interface CreateSetToFilterAgainstOptions {
   logger: Logger;
 }
 
-export interface FilterEventsOptions {
-  events: SignalSearchResponse['hits']['hits'];
+export interface FilterEventsOptions<T> {
+  events: SearchResponse<T>['hits']['hits'];
   fieldAndSetTuples: Array<{
     field: string;
     operator: 'excluded' | 'included';
@@ -37,8 +37,8 @@ export interface FilterEventsOptions {
   }>;
 }
 
-export interface CreateFieldAndSetTuplesOptions {
-  events: SignalSearchResponse['hits']['hits'];
+export interface CreateFieldAndSetTuplesOptions<T> {
+  events: SearchResponse<T>['hits']['hits'];
   exceptionItem: ExceptionListItemSchema;
   listClient: ListClient;
   logger: Logger;
