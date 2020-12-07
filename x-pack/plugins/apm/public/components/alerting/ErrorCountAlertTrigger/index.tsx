@@ -8,15 +8,15 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { ALERT_TYPES_CONFIG, AlertType } from '../../../../common/alert_types';
+import { AlertType, ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { getParsedDate } from '../../../context/UrlParamsContext/helpers';
-import { useEnvironments } from '../../../hooks/useEnvironments';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { getParsedDate } from '../../../context/url_params_context/helpers';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
-import { EnvironmentField, ServiceField, IsAboveField } from '../fields';
+import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 
 export interface AlertParams {
@@ -38,7 +38,11 @@ export function ErrorCountAlertTrigger(props: Props) {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
-  const { environmentOptions } = useEnvironments({ serviceName, start, end });
+  const { environmentOptions } = useEnvironmentsFetcher({
+    serviceName,
+    start,
+    end,
+  });
 
   const { threshold, windowSize, windowUnit, environment } = alertParams;
 

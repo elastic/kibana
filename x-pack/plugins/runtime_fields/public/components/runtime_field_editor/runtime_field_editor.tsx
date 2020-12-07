@@ -15,10 +15,13 @@ export interface Props {
   docLinks: DocLinksStart;
   defaultValue?: RuntimeField;
   onChange?: FormProps['onChange'];
+  ctx?: FormProps['ctx'];
 }
 
-export const RuntimeFieldEditor = ({ defaultValue, onChange, docLinks }: Props) => {
+export const RuntimeFieldEditor = ({ defaultValue, onChange, docLinks, ctx }: Props) => {
   const links = getLinks(docLinks);
 
-  return <RuntimeFieldForm links={links} defaultValue={defaultValue} onChange={onChange} />;
+  return (
+    <RuntimeFieldForm links={links} defaultValue={defaultValue} onChange={onChange} ctx={ctx} />
+  );
 };

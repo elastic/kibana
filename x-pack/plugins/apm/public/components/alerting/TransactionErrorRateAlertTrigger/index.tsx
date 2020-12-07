@@ -6,15 +6,14 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
-import { useEnvironments } from '../../../hooks/useEnvironments';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
+import { ALERT_TYPES_CONFIG, AlertType } from '../../../../common/alert_types';
+import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {
   EnvironmentField,
   IsAboveField,
@@ -22,6 +21,7 @@ import {
   TransactionTypeField,
 } from '../fields';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 interface AlertParams {
   windowSize: number;
@@ -41,10 +41,14 @@ interface Props {
 export function TransactionErrorRateAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
-  const transactionTypes = useServiceTransactionTypes(urlParams);
+  const { transactionTypes } = useApmServiceContext();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end, transactionType } = urlParams;
-  const { environmentOptions } = useEnvironments({ serviceName, start, end });
+  const { environmentOptions } = useEnvironmentsFetcher({
+    serviceName,
+    start,
+    end,
+  });
 
   const { threshold, windowSize, windowUnit, environment } = alertParams;
 

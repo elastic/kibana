@@ -12,6 +12,7 @@ import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
+import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
 import { History } from 'history';
@@ -38,7 +39,7 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
@@ -59,6 +60,8 @@ export interface App<HistoryLocationState = unknown> {
     mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppSubLink"
+    searchDeepLinks?: AppSearchDeepLink[];
     status?: AppStatus;
     title: string;
     tooltip?: string;
@@ -176,6 +179,18 @@ export enum AppNavLinkStatus {
 }
 
 // @public
+export type AppSearchDeepLink = {
+    id: string;
+    title: string;
+} & ({
+    path: string;
+    searchDeepLinks?: AppSearchDeepLink[];
+} | {
+    path?: string;
+    searchDeepLinks: AppSearchDeepLink[];
+});
+
+// @public
 export enum AppStatus {
     accessible = 0,
     inaccessible = 1
@@ -185,7 +200,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'searchDeepLinks'>;
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
@@ -871,7 +886,11 @@ export interface OverlayFlyoutOpenOptions {
     // (undocumented)
     closeButtonAriaLabel?: string;
     // (undocumented)
+    maxWidth?: boolean | number | string;
+    // (undocumented)
     ownFocus?: boolean;
+    // (undocumented)
+    size?: EuiFlyoutSize;
 }
 
 // @public
@@ -967,10 +986,16 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // @public
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'searchDeepLinks'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
+    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+};
+
+// @public
+export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks'> & {
+    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
 };
 
 // @public
@@ -1414,7 +1439,7 @@ export interface UiSettingsParams<T = unknown> {
     description?: string;
     // @deprecated
     metric?: {
-        type: UiStatsMetricType;
+        type: UiCounterMetricType;
         name: string;
     };
     name?: string;
