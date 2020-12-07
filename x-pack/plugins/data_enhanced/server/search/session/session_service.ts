@@ -222,8 +222,6 @@ export class BackgroundSessionService implements ISessionService {
     this.logger.debug(`save | ${sessionId}`);
 
     // Get the mapping of request hash/search ID for this session
-    const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
-    const idMapping = Object.fromEntries(searchMap.entries());
     const attributes = {
       name,
       created,
