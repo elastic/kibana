@@ -25,7 +25,8 @@ describe('state action machine', () => {
 
   const next = jest.fn((s: typeof state) => {
     if (s.controlState === 'INIT') return () => Promise.resolve(E.right('response'));
-    else return null;
+    if (s.controlState === 'DONE') return null;
+    else throw new Error('Invalid control state');
   });
 
   const countUntilModel = (maxCount: number) =>
@@ -40,7 +41,7 @@ describe('state action machine', () => {
   const countUntilThree = countUntilModel(3);
   const finalStateP = stateActionMachine(state, next, countUntilThree);
 
-  test('await the next action and passes the result to the model with the updated state from the previous step', async () => {
+  test('await the next action and passes the result to the model with the updated state from the previous step', () => {
     expect(countUntilThree.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -77,7 +78,7 @@ describe('state action machine', () => {
     `);
   });
 
-  test('calls next for each step until next returns null', async () => {
+  test('calls next for each step until next returns null', () => {
     expect(next).toHaveBeenCalledTimes(4);
     expect(next.mock.results[3]).toMatchObject({
       type: 'return',
@@ -85,8 +86,14 @@ describe('state action machine', () => {
     });
   });
 
-  test('returns the final state once all steps are completed', async () => {
-    expect(finalStateP).resolves.toMatchInlineSnapshot(`
+  test('rejects if an exception is throw from inside an action', () => {
+    return expect(
+      stateActionMachine({ ...state, controlState: 'THROW' }, next, countUntilThree)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid control state"`);
+  });
+
+  test('resolve with the final state once all steps are completed', () => {
+    return expect(finalStateP).resolves.toMatchInlineSnapshot(`
       Object {
         "controlState": "DONE",
         "count": 3,
@@ -94,11 +101,11 @@ describe('state action machine', () => {
     `);
   });
 
-  test("throws if control state doesn't change after 10 steps", async () => {
-    expect(
-      stateActionMachine(state, next, countUntilModel(11))
+  test("rejects if control state doesn't change after 51 steps", () => {
+    return expect(
+      stateActionMachine(state, next, countUntilModel(51))
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Control state didn't change after 10 steps aborting."`
+      `"Control state didn't change after 50 steps aborting."`
     );
   });
 });

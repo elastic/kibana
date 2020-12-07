@@ -288,7 +288,7 @@ export interface UpdateByQueryResponse {
  * existing documents. By running an update by query we essentially refresh
  * these the internal search indices for all existing documents.
  * This action uses `conflicts: 'proceed'` allowing several Kibana instances
- * to run this in parralel.
+ * to run this in parallel.
  */
 export const pickupUpdatedMappings = (
   client: ElasticsearchClient,
@@ -296,7 +296,7 @@ export const pickupUpdatedMappings = (
 ): TaskEither.TaskEither<RetryableEsClientError, UpdateByQueryResponse> => () => {
   return client
     .updateByQuery({
-      // Ignore version conflicts that can occur from parralel update by query operations
+      // Ignore version conflicts that can occur from parallel update by query operations
       conflicts: 'proceed',
       // Return an error when targeting missing or closed indices
       allow_no_indices: false,
@@ -325,7 +325,7 @@ export interface ReindexResponse {
  * task ID which can be tracked for progress.
  *
  * @remarks This action is idempotent allowing several Kibana instances to run
- * this in parralel. By using `op_type: 'create', conflicts: 'proceed'` there
+ * this in parallel. By using `op_type: 'create', conflicts: 'proceed'` there
  * will be only one write per reindexed document.
  */
 export const reindex = (
