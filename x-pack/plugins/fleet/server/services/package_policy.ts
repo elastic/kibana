@@ -374,6 +374,9 @@ class PackagePolicyService {
     }
   }
 
+  /**
+   * Compile pkg policy input with info fro the pkg registry, like template, condition
+   */
   public async compilePackagePolicyInputs(
     pkgInfo: PackageInfo,
     inputs: PackagePolicyInput[]
@@ -417,23 +420,34 @@ async function _compilePackagePolicyInput(
     throw new Error(`Input template not found, unable to find input type ${input.type}`);
   }
 
-  if (!packageInput.template_path) {
-    return undefined;
+  let compiledTemplate;
+  if (packageInput.template_path) {
+    const [pkgInputTemplate] = await getAssetsData(registryPkgInfo, (path: string) =>
+      path.endsWith(`/agent/input/${packageInput.template_path!}`)
+    );
+
+    if (!pkgInputTemplate || !pkgInputTemplate.buffer) {
+      throw new Error(
+        `Unable to load input template at /agent/input/${packageInput.template_path!}`
+      );
+    }
+
+    compiledTemplate = compileTemplate(
+      // Populate template variables from input vars
+      Object.assign({}, input.vars),
+      pkgInputTemplate.buffer.toString()
+    );
   }
 
-  const [pkgInputTemplate] = await getAssetsData(registryPkgInfo, (path: string) =>
-    path.endsWith(`/agent/input/${packageInput.template_path!}`)
-  );
+  const compiledCondition = packageInput.condition && { condition: packageInput.condition };
 
-  if (!pkgInputTemplate || !pkgInputTemplate.buffer) {
-    throw new Error(`Unable to load input template at /agent/input/${packageInput.template_path!}`);
-  }
+  return [compiledCondition, compiledTemplate].reduce((acc, val) => {
+    if (!val) {
+      return acc;
+    }
 
-  return compileTemplate(
-    // Populate template variables from input vars
-    Object.assign({}, input.vars),
-    pkgInputTemplate.buffer.toString()
-  );
+    return Object.assign(acc || {}, val);
+  });
 }
 
 async function _compilePackageStreams(

@@ -43,6 +43,7 @@ export interface FullAgentPolicyInput {
   name: string;
   revision: number;
   type: string;
+  condition?: string;
   data_stream: { namespace: string };
   use_output: string;
   meta?: {

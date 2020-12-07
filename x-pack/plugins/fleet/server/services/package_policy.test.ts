@@ -118,6 +118,75 @@ describe('Package policy service', () => {
       ]);
     });
 
+    it('should work with input condition', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'package.dataset1',
+              streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+            },
+          ],
+          policy_templates: [
+            {
+              inputs: [
+                {
+                  type: 'log',
+                  condition: "${host.platform} != 'linux'",
+                },
+              ],
+            },
+          ],
+        } as unknown) as PackageInfo,
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'datastream01',
+                data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: {
+                    value: ['/var/log/set.log'],
+                  },
+                },
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(inputs).toEqual([
+        {
+          type: 'log',
+          enabled: true,
+          compiled_input: {
+            condition: "${host.platform} != 'linux'",
+          },
+          streams: [
+            {
+              id: 'datastream01',
+              data_stream: { dataset: 'package.dataset1', type: 'logs' },
+              enabled: true,
+              vars: {
+                paths: {
+                  value: ['/var/log/set.log'],
+                },
+              },
+              compiled_stream: {
+                metricset: ['dataset1'],
+                paths: ['/var/log/set.log'],
+                type: 'log',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should work with config variables at the input level', async () => {
       const inputs = await packagePolicyService.compilePackagePolicyInputs(
         ({
