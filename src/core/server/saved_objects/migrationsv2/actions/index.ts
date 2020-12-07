@@ -33,6 +33,12 @@ import {
 } from './catch_retryable_es_client_errors';
 export { RetryableEsClientError };
 
+export const isRetryableEsClientResponse = (
+  res: Either.Either<any, unknown>
+): res is Either.Left<RetryableEsClientError> => {
+  return Either.isLeft(res) && res.left.type === 'retryable_es_client_error';
+};
+
 export type FetchIndexResponse = Record<
   string,
   { aliases: Record<string, unknown>; mappings: IndexMapping; settings: unknown }
@@ -162,20 +168,22 @@ export const cloneIndex = (
           wait_for_active_shards: 'all',
           body: {
             settings: {
-              // The source we're cloning from will have a write block set, so
-              // we need to remove it to allow writes to our newly cloned index
-              'index.blocks.write': false,
-              // ES rule of thumb: shards should be several GB to 10's of GB, so
-              // Kibana is unlikely to cross that limit.
-              number_of_shards: 1,
-              // Allocate 1 replica if there are enough data nodes
-              auto_expand_replicas: '0-1',
-              // Set an explicit refresh interval so that we don't inherit the
-              // value from incorrectly configured index templates (not required
-              // after we adopt system indices)
-              refresh_interval: '1s',
-              // Bump priority so that recovery happens before newer indices
-              'index.priority': 10,
+              index: {
+                // The source we're cloning from will have a write block set, so
+                // we need to remove it to allow writes to our newly cloned index
+                'blocks.write': false,
+                // ES rule of thumb: shards should be several GB to 10's of GB, so
+                // Kibana is unlikely to cross that limit.
+                number_of_shards: 1,
+                // Allocate 1 replica if there are enough data nodes
+                auto_expand_replicas: '0-1',
+                // Set an explicit refresh interval so that we don't inherit the
+                // value from incorrectly configured index templates (not required
+                // after we adopt system indices)
+                refresh_interval: '1s',
+                // Bump priority so that recovery happens before newer indices
+                priority: 10,
+              },
             },
           },
           timeout: '60s',
@@ -551,17 +559,19 @@ export const createIndex = (
           body: {
             mappings,
             settings: {
-              // ES rule of thumb: shards should be several GB to 10's of GB, so
-              // Kibana is unlikely to cross that limit.
-              number_of_shards: 1,
-              // Allocate 1 replica if there are enough data nodes
-              auto_expand_replicas: '0-1',
-              // Set an explicit refresh interval so that we don't inherit the
-              // value from incorrectly configured index templates (not required
-              // after we adopt system indices)
-              refresh_interval: '1s',
-              // Bump priority so that recovery happens before newer indices
-              'index.priority': 10,
+              index: {
+                // ES rule of thumb: shards should be several GB to 10's of GB, so
+                // Kibana is unlikely to cross that limit.
+                number_of_shards: 1,
+                // Allocate 1 replica if there are enough data nodes
+                auto_expand_replicas: '0-1',
+                // Set an explicit refresh interval so that we don't inherit the
+                // value from incorrectly configured index templates (not required
+                // after we adopt system indices)
+                refresh_interval: '1s',
+                // Bump priority so that recovery happens before newer indices
+                priority: 10,
+              },
             },
           },
         },
