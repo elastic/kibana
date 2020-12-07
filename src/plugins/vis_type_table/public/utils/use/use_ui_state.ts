@@ -123,7 +123,7 @@ export const useUiState = (
       }
 
       if (!isEqual(vis?.params.sort, uiStateValues.current.sort)) {
-        uiStateValues.current.columnsWidth = vis?.params.sort;
+        uiStateValues.current.sort = vis?.params.sort;
         setSortState(vis?.params.sort || defaultSort);
       }
     });
