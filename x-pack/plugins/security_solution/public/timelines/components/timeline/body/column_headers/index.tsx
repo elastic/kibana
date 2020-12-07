@@ -304,9 +304,11 @@ export const ColumnHeadersComponent = ({
             </EventsThContent>
           </EventsTh>
           <EventsTh>
-            <EuiToolTip content={i18n.SORT_FIELDS}>
-              <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
-            </EuiToolTip>
+            <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+              <EuiToolTip content={i18n.SORT_FIELDS}>
+                <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
+              </EuiToolTip>
+            </EventsThContent>
           </EventsTh>
 
           {showEventsSelect && (
