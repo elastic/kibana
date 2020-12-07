@@ -1,0 +1,26 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="infra/dataSearch/Overview" />
+
+# The `data` plugin and `SearchStrategies`
+
+The search functionality abstraction provided by the `search` service of the
+`data` plugin is pretty powerful:
+
+- The execution of the request is delegated to a search strategy, which is
+    executed on the Kibana server side.
+- Any plugin can register custom search strategies with custom parameters and
+    response shapes.
+- Requests can be cancelled via an `AbortSignal`.
+- Partial responses can be returned as they become available if the search
+    takes longer.
+
+# Working with `data.search.search` in the Browser
+
+The following chapters describe a set of React components and hooks that aim to
+make it easy to take advantage of these characteristics from client-side React
+code.
+
+## Issuing new requests
+
+
