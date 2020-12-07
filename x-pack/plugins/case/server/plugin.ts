@@ -33,6 +33,7 @@ import {
   CaseServiceSetup,
   CaseUserActionService,
   CaseUserActionServiceSetup,
+  AlertService,
 } from './services';
 import { createCaseClient } from './client';
 import { registerConnectors } from './connectors';
@@ -51,6 +52,7 @@ export class CasePlugin {
   private caseService?: CaseServiceSetup;
   private caseConfigureService?: CaseConfigureServiceSetup;
   private userActionService?: CaseUserActionServiceSetup;
+  private alertsService?: AlertService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.log = this.initializerContext.logger.get();
@@ -79,6 +81,7 @@ export class CasePlugin {
     });
     this.caseConfigureService = await new CaseConfigureService(this.log).setup();
     this.userActionService = await new CaseUserActionService(this.log).setup();
+    this.alertsService = new AlertService();
 
     core.http.registerRouteHandlerContext(
       APP_ID,
@@ -87,6 +90,7 @@ export class CasePlugin {
         caseService: this.caseService,
         caseConfigureService: this.caseConfigureService,
         userActionService: this.userActionService,
+        alertsService: this.alertsService,
       })
     );
 
@@ -109,6 +113,7 @@ export class CasePlugin {
 
   public async start(core: CoreStart) {
     this.log.debug(`Starting Case Workflow`);
+    this.alertsService!.initialize(core.elasticsearch.client);
 
     const getCaseClientWithRequest = async (request: KibanaRequest) => {
       return createCaseClient({
@@ -117,6 +122,7 @@ export class CasePlugin {
         caseService: this.caseService!,
         caseConfigureService: this.caseConfigureService!,
         userActionService: this.userActionService!,
+        alertsService: this.alertsService!,
       });
     };
 
@@ -134,11 +140,13 @@ export class CasePlugin {
     caseService,
     caseConfigureService,
     userActionService,
+    alertsService,
   }: {
     core: CoreSetup;
     caseService: CaseServiceSetup;
     caseConfigureService: CaseConfigureServiceSetup;
     userActionService: CaseUserActionServiceSetup;
+    alertsService: AlertService;
   }): IContextProvider<RequestHandler<unknown, unknown, unknown>, typeof APP_ID> => {
     return async (context, request) => {
       const [{ savedObjects }] = await core.getStartServices();
@@ -149,6 +157,7 @@ export class CasePlugin {
             caseService,
             caseConfigureService,
             userActionService,
+            alertsService,
             request,
             context,
           });

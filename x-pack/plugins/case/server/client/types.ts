@@ -16,6 +16,7 @@ import {
   CaseConfigureServiceSetup,
   CaseServiceSetup,
   CaseUserActionServiceSetup,
+  AlertService,
 } from '../services';
 
 export interface CaseClientCreate {
@@ -39,6 +40,7 @@ export interface CaseClientFactoryArguments {
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
+  alertsService: AlertService;
   context?: PartialExceptFor<RequestHandlerContext, 'core'>;
 }
 
