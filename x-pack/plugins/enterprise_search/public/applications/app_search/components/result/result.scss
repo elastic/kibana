@@ -11,18 +11,16 @@
   width: 100%;
 
   &__contentWrap {
-    display: flex;
-    flex-direction: column;
     width: 100%;
     padding: $euiSize;
     display: grid;
     grid-template-rows: 1fr $euiSize * 1.25 /* 20px */;
-    border-right: 1px solid $euiColorLightShade;
+    border-right: $euiBorderThin;
   }
 
   &__contentInner {
     display: grid;
-    grid-gap: 7px;
+    grid-gap: $euiSizeS;
     overflow: hidden;
   }
 
@@ -32,7 +30,7 @@
   }
 
   &__hiddenFieldsIndicator {
-    font-size: $euiSizeM;
+    font-size: $euiFontSizeXS;
     color: $euiColorDarkShade;
     align-self: end;
     padding-top: 0;

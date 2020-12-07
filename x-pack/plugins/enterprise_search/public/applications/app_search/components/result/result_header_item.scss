@@ -3,13 +3,13 @@
 
   &__key,
   &__value {
-    line-height: 1.5;
-    font-size: $euiSizeM;
+    line-height: $euiLineHeight;
+    font-size: $euiFontSizeXS;
   }
 
   &__key {
     text-transform: uppercase;
-    font-weight: 300;
+    font-weight: $euiFontWeightLight;
     color: $euiColorDarkShade;
     margin-right: $euiSizeXS;
   }

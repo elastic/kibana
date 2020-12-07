@@ -11,7 +11,7 @@
       justify-content: flex-start;
 
       & > div {
-        margin-right: 27px;
+        margin-right: $euiSizeL;
       }
     }
 
@@ -19,7 +19,7 @@
       justify-content: flex-end;
 
       & > div + div {
-        margin-left: 27px;
+        margin-left: $euiSizeL;
       }
     }
   }
