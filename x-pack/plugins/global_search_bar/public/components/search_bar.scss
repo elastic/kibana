@@ -3,8 +3,10 @@
   width: 400px;
   max-width: 100%;
   will-change: width;
+}
 
-  &:focus {
+@include euiBreakpoint('l', 'xl') {
+  .kbnSearchBar:focus {
     animation: kbnAnimateSearchBar $euiAnimSpeedFast forwards;
   }
 }
