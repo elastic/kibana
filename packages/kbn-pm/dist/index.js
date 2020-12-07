@@ -8814,7 +8814,7 @@ module.exports = (chalk, temporary) => {
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseLogLevel = exports.pickLevelFromFlags = void 0;
-const LEVELS = ['silent', 'error', 'warning', 'info', 'debug', 'verbose'];
+const LEVELS = ['silent', 'error', 'warning', 'success', 'info', 'debug', 'verbose'];
 function pickLevelFromFlags(flags, options = {}) {
     if (flags.verbose)
         return 'verbose';
