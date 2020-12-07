@@ -2519,7 +2519,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
 export class SavedObjectsSerializer {
     // @internal
     constructor(registry: ISavedObjectTypeRegistry);
-    generateRawId(namespace: string | undefined, type: string, id?: string): string;
+    generateRawId(namespace: string | undefined, type: string, id: string): string;
     isRawSavedObject(rawDoc: SavedObjectsRawDoc): boolean;
     rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc;
     savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
@@ -2601,6 +2601,8 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 // @public (undocumented)
 export class SavedObjectsUtils {
     static createEmptyFindResponse: <T>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T>;
+    static generateId(): string;
+    static isRandomId(id: string | undefined): boolean;
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }

@@ -36,7 +36,6 @@ export interface CliArgs {
   quiet: boolean;
   silent: boolean;
   watch: boolean;
-  repl: boolean;
   basePath: boolean;
   oss: boolean;
   /** @deprecated use disableOptimizer to know if the @kbn/optimizer is disabled in development */
