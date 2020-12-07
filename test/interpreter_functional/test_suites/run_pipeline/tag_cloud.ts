@@ -34,11 +34,8 @@ export default function ({
       let dataContext: ExpressionResult;
       before(async () => {
         const expression = `kibana | kibana_context | esaggs index={indexPatternLoad id='logstash-*'}
-          aggConfigs='[
-            {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
-            {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
-              {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
-          }]'`;
+          aggs={aggCount id="1" enabled=true schema="metric"}
+          aggs={aggTerms id="2" enabled=true schema="segment" field="response.raw" size=4 order="desc" orderBy="1"}`;
         // we execute the part of expression that fetches the data and store its response
         dataContext = await expectExpression('partial_tagcloud_test', expression).getResponse();
       });

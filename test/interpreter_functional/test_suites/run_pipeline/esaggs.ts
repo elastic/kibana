@@ -41,48 +41,45 @@ export default function ({
 
     describe('correctly renders tagcloud', () => {
       it('filters on index pattern primary date field by default', async () => {
-        const aggConfigs = [{ id: 1, enabled: true, type: 'count', schema: 'metric', params: {} }];
         const timeRange = {
           from: '2006-09-21T00:00:00Z',
           to: '2015-09-22T00:00:00Z',
         };
         const expression = `
           kibana_context timeRange='${JSON.stringify(timeRange)}'
-          | esaggs index={indexPatternLoad id='logstash-*'} aggConfigs='${JSON.stringify(
-            aggConfigs
-          )}'
+          | esaggs index={indexPatternLoad id='logstash-*'}
+          aggs={aggCount id="1" enabled=true schema="metric"}
         `;
         const result = await expectExpression('esaggs_primary_timefield', expression).getResponse();
         expect(getCell(result, 0, 0)).to.be(9375);
       });
 
       it('filters on the specified date field', async () => {
-        const aggConfigs = [{ id: 1, enabled: true, type: 'count', schema: 'metric', params: {} }];
         const timeRange = {
           from: '2006-09-21T00:00:00Z',
           to: '2015-09-22T00:00:00Z',
         };
         const expression = `
           kibana_context timeRange='${JSON.stringify(timeRange)}'
-          | esaggs index={indexPatternLoad id='logstash-*'} timeFields='relatedContent.article:published_time' aggConfigs='${JSON.stringify(
-            aggConfigs
-          )}'
+          | esaggs index={indexPatternLoad id='logstash-*'}
+          timeFields='relatedContent.article:published_time'
+          aggs={aggCount id="1" enabled=true schema="metric"}
         `;
         const result = await expectExpression('esaggs_other_timefield', expression).getResponse();
         expect(getCell(result, 0, 0)).to.be(11134);
       });
 
       it('filters on multiple specified date field', async () => {
-        const aggConfigs = [{ id: 1, enabled: true, type: 'count', schema: 'metric', params: {} }];
         const timeRange = {
           from: '2006-09-21T00:00:00Z',
           to: '2015-09-22T00:00:00Z',
         };
         const expression = `
           kibana_context timeRange='${JSON.stringify(timeRange)}'
-          | esaggs index={indexPatternLoad id='logstash-*'} timeFields='relatedContent.article:published_time' timeFields='@timestamp' aggConfigs='${JSON.stringify(
-            aggConfigs
-          )}'
+          | esaggs index={indexPatternLoad id='logstash-*'}
+          timeFields='relatedContent.article:published_time'
+          timeFields='@timestamp'
+          aggs={aggCount id="1" enabled=true schema="metric"}
         `;
         const result = await expectExpression(
           'esaggs_multiple_timefields',
