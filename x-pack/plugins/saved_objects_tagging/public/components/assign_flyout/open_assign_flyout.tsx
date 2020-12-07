@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
 import { NotificationsStart, OverlayStart, OverlayRef } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { ITagAssignmentService, ITagsCache } from '../../services';
@@ -26,6 +27,16 @@ export interface OpenAssignFlyoutOptions {
 
 export type AssignFlyoutOpener = (options: OpenAssignFlyoutOptions) => Promise<OverlayRef>;
 
+const LoadingIndicator = () => (
+  <EuiDelayRender>
+    <EuiLoadingSpinner />
+  </EuiDelayRender>
+);
+
+const LazyAssignFlyout = React.lazy(() =>
+  import('./assign_flyout').then(({ AssignFlyout }) => ({ default: AssignFlyout }))
+);
+
 export const getAssignFlyoutOpener = ({
   overlays,
   notifications,
@@ -33,17 +44,18 @@ export const getAssignFlyoutOpener = ({
   assignmentService,
   assignableTypes,
 }: GetAssignFlyoutOpenerOptions): AssignFlyoutOpener => async ({ tagIds }) => {
-  const { AssignFlyout } = await import('./assign_flyout');
   const flyout = overlays.openFlyout(
     toMountPoint(
-      <AssignFlyout
-        tagIds={tagIds}
-        tagCache={tagCache}
-        notifications={notifications}
-        allowedTypes={assignableTypes}
-        assignmentService={assignmentService}
-        onClose={() => flyout.close()}
-      />
+      <React.Suspense fallback={<LoadingIndicator />}>
+        <LazyAssignFlyout
+          tagIds={tagIds}
+          tagCache={tagCache}
+          notifications={notifications}
+          allowedTypes={assignableTypes}
+          assignmentService={assignmentService}
+          onClose={() => flyout.close()}
+        />
+      </React.Suspense>
     ),
     { size: 'm', maxWidth: 600 }
   );
