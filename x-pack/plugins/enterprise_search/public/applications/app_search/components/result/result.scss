@@ -1,11 +1,5 @@
-.appSearchResultContainer {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  width: 100%;
-}
-
 .appSearchResult {
+  overflow: hidden;
   display: flex;
   justify-content: space-between;
   width: 100%;

@@ -35,74 +35,65 @@ export const Result: React.FC<Props> = ({ result, showScore }) => {
     <EuiPanel
       paddingSize="none"
       key="results"
-      className={'appSearchResultContainer'}
+      className={'appSearchResult'}
       data-test-subj="AppSearchResult"
+      title={i18n.translate('xpack.enterpriseSearch.appSearch.result.title', {
+        defaultMessage: 'View document details',
+      })}
     >
-      <div
-        className="appSearchResult"
-        title={i18n.translate('xpack.enterpriseSearch.appSearch.result.title', {
-          defaultMessage: 'View document details',
-        })}
-      >
-        <div className="appSearchResult__contentWrap">
-          <div className="appSearchResult__contentInner">
-            <ResultHeader resultMeta={resultMeta} showScore={!!showScore} />
-            <div className="appSearchResult__fieldsetContainer">
-              <div>
-                {resultFields
-                  .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
-                  .map(([field, value]: [string, FieldValue]) => (
-                    <ResultField
-                      key={field}
-                      field={field}
-                      raw={value.raw}
-                      snippet={value.snippet}
-                    />
-                  ))}
-              </div>
+      <div className="appSearchResult__contentWrap">
+        <div className="appSearchResult__contentInner">
+          <ResultHeader resultMeta={resultMeta} showScore={!!showScore} />
+          <div className="appSearchResult__fieldsetContainer">
+            <div>
+              {resultFields
+                .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
+                .map(([field, value]: [string, FieldValue]) => (
+                  <ResultField key={field} field={field} raw={value.raw} snippet={value.snippet} />
+                ))}
             </div>
           </div>
-          {numResults > RESULT_CUTOFF && !isOpen && (
-            <div className="appSearchResult__hiddenFieldsIndicator">
-              {i18n.translate('xpack.enterpriseSearch.appSearch.result.numberOfAdditionalFields', {
-                defaultMessage: '{numberOfAdditionalFields} more fields',
-                values: {
-                  numberOfAdditionalFields: numResults - RESULT_CUTOFF,
-                },
-              })}
-            </div>
-          )}
         </div>
-        {numResults > RESULT_CUTOFF && (
-          <button
-            className="appSearchResult__toggleExpandButton"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label={
-              isOpen
-                ? i18n.translate('xpack.enterpriseSearch.appSearch.result.hideAdditionalFields', {
-                    defaultMessage: 'Hide additional fields',
-                  })
-                : i18n.translate('xpack.enterpriseSearch.appSearch.result.showAdditionalFields', {
-                    defaultMessage: 'Show additional fields',
-                  })
-            }
-          >
-            {isOpen ? (
-              <EuiIcon
-                data-test-subj="CollapseResult"
-                type="arrowUp"
-                className="appSearchResult__toggleIcon"
-              />
-            ) : (
-              <EuiIcon
-                data-test-subj="ExpandResult"
-                type="arrowDown"
-                className="appSearchResult__toggleIcon"
-              />
-            )}
-          </button>
+        {numResults > RESULT_CUTOFF && !isOpen && (
+          <div className="appSearchResult__hiddenFieldsIndicator">
+            {i18n.translate('xpack.enterpriseSearch.appSearch.result.numberOfAdditionalFields', {
+              defaultMessage: '{numberOfAdditionalFields} more fields',
+              values: {
+                numberOfAdditionalFields: numResults - RESULT_CUTOFF,
+              },
+            })}
+          </div>
         )}
       </div>
+      {numResults > RESULT_CUTOFF && (
+        <button
+          className="appSearchResult__toggleExpandButton"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label={
+            isOpen
+              ? i18n.translate('xpack.enterpriseSearch.appSearch.result.hideAdditionalFields', {
+                  defaultMessage: 'Hide additional fields',
+                })
+              : i18n.translate('xpack.enterpriseSearch.appSearch.result.showAdditionalFields', {
+                  defaultMessage: 'Show additional fields',
+                })
+          }
+        >
+          {isOpen ? (
+            <EuiIcon
+              data-test-subj="CollapseResult"
+              type="arrowUp"
+              className="appSearchResult__toggleIcon"
+            />
+          ) : (
+            <EuiIcon
+              data-test-subj="ExpandResult"
+              type="arrowDown"
+              className="appSearchResult__toggleIcon"
+            />
+          )}
+        </button>
+      )}
     </EuiPanel>
   );
 };
