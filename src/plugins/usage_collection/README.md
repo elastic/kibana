@@ -328,27 +328,22 @@ There are a few ways you can test that your usage collector is working properly.
 
 # UI Metric app
 
-The UI metrics implementation in its current state is not useful. We are working on improving the implementation to enable teams to use the data to visualize and gather information from what is being reported. Please refer to the telemetry team if you are interested in adding ui_metrics to your plugin.
+UI_metric is deprecated in favor of UI Counters.
 
-**Until a better implementation is introduced, please defer from adding any new ui metrics.**
+# UI Counters
 
 ## Purpose
 
-The purpose of the UI Metric app is to provide a tool for gathering data on how users interact with
-various UIs within Kibana. It's useful for gathering _aggregate_ information, e.g. "How many times
-has Button X been clicked" or "How many times has Page Y been viewed".
+UI Counters provides instrumentation in the UI to count triggered events such as component loaded, button clicked, or counting when an event occurs. It's useful for gathering _aggregate_ information, e.g. "How many times has Button X been clicked" or "How many times has Page Y been viewed".
 
 With some finagling, it's even possible to add more meaning to the info you gather, such as "How many
 visualizations were created in less than 5 minutes".
 
-### What it doesn't do
-
-The UI Metric app doesn't gather any metadata around a user interaction, e.g. the user's identity,
-the name of a dashboard they've viewed, or the timestamp of the interaction.
+The events have a per day granularity.
 
 ## How to use it
 
-To track a user interaction, use the `reportUiStats` method exposed by the plugin `usageCollection` in the public side:
+To track a user interaction, use the `usageCollection.reportUiCounter` method exposed by the plugin `usageCollection` in the public side:
 
 1. Similarly to the server-side usage collection, make sure `usageCollection` is in your optional Plugins:
 
@@ -364,34 +359,49 @@ To track a user interaction, use the `reportUiStats` method exposed by the plugi
 
     ```ts
     // public/plugin.ts
+    import { METRIC_TYPE } from '@kbn/analytics';
+
     class Plugin {
       setup(core, { usageCollection }) {
         if (usageCollection) {
           // Call the following method as many times as you want to report an increase in the count for this event
-          usageCollection.reportUiStats(`<AppName>`, usageCollection.METRIC_TYPE.CLICK, `<EventName>`);
+          usageCollection.reportUiCounter(`<AppName>`, METRIC_TYPE.CLICK, `<EventName>`);
         }
       }
     }
     ```
 
-Metric Types:
+### Metric Types:
 
-- `METRIC_TYPE.CLICK` for tracking clicks `trackMetric(METRIC_TYPE.CLICK, 'my_button_clicked');`
-- `METRIC_TYPE.LOADED` for a component load or page load `trackMetric(METRIC_TYPE.LOADED', 'my_component_loaded');`
-- `METRIC_TYPE.COUNT` for a tracking a misc count `trackMetric(METRIC_TYPE.COUNT', 'my_counter', <count> });`
+- `METRIC_TYPE.CLICK` for tracking clicks.
+- `METRIC_TYPE.LOADED` for a component load, a page load, or a request load.
+- `METRIC_TYPE.COUNT` is the generic counter for miscellaneous events.
 
 Call this function whenever you would like to track a user interaction within your app. The function
-accepts two arguments, `metricType` and `eventNames`. These should be underscore-delimited strings.
-For example, to track the `my_event` metric in the app `my_app` call `trackUiMetric(METRIC_TYPE.*, 'my_event)`.
+accepts three arguments, `AppName`, `metricType` and `eventNames`. These should be underscore-delimited strings.
 
 That's all you need to do!
 
-To track multiple metrics within a single request, provide an array of events, e.g. `trackMetric(METRIC_TYPE.*, ['my_event1', 'my_event2', 'my_event3'])`.
+### Reporting multiple events at once
+
+To track multiple metrics within a single request, provide an array of events
+
+```
+usageCollection.reportUiCounter(`<AppName>`, METRIC_TYPE.CLICK, [`<EventName1>`, `<EventName2>`]);
+```
+
+### Increamenting counter by more than 1
+
+To track an event occurance more than once in the same call, provide a 4th argument to the `reportUiCounter` function:
+
+```
+usageCollection.reportUiCounter(`<AppName>`, METRIC_TYPE.CLICK, `<EventName>`, 3);
+```
 
 ### Disallowed characters
 
-The colon character (`:`) should not be used in app name or event names. Colons play
-a special role in how metrics are stored as saved objects.
+The colon character (`:`) should not be used in the app name. Colons play
+a special role for `appName` in how metrics are stored as saved objects.
 
 ### Tracking timed interactions
 
@@ -402,34 +412,7 @@ measure interactions that take less than 1 minute, 1-5 minutes, 5-20 minutes, an
 To track these interactions, you'd use the timed length of the interaction to determine whether to
 use a `eventName` of  `create_vis_1m`, `create_vis_5m`, `create_vis_20m`, or `create_vis_infinity`.
 
-## How it works
-
-Under the hood, your app and metric type will be stored in a saved object of type `user-metric` and the
-ID `ui-metric:my_app:my_metric`. This saved object will have a `count` property which will be incremented
-every time the above URI is hit.
-
-These saved objects are automatically consumed by the stats API and surfaced under the
-`ui_metric` namespace.
-
-```json
-{
-  "ui_metric": {
-    "my_app": [
-      {
-        "key": "my_metric",
-        "value": 3
-      }
-    ]
-  }
-}
-```
-
-By storing these metrics and their counts as key-value pairs, we can add more metrics without having
-to worry about exceeding the 1000-field soft limit in Elasticsearch.
-
-The only caveat is that it makes it harder to consume in Kibana when analysing each entry in the array separately. In the telemetry team we are working to find a solution to this.
-
 # Routes registered by this plugin
 
-- `/api/ui_metric/report`: Used by `ui_metrics` usage collector instances to report their usage data to the server
+- `/api/ui_counters/_report`: Used by `ui_metrics` and `ui_counters` usage collector instances to report their usage data to the server
 - `/api/stats`: Get the metrics and usage ([details](./server/routes/stats/README.md))
