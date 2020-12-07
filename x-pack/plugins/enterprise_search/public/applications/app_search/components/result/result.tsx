@@ -80,17 +80,9 @@ export const Result: React.FC<Props> = ({ result, showScore }) => {
           }
         >
           {isOpen ? (
-            <EuiIcon
-              data-test-subj="CollapseResult"
-              type="arrowUp"
-              className="appSearchResult__toggleIcon"
-            />
+            <EuiIcon data-test-subj="CollapseResult" type="arrowUp" />
           ) : (
-            <EuiIcon
-              data-test-subj="ExpandResult"
-              type="arrowDown"
-              className="appSearchResult__toggleIcon"
-            />
+            <EuiIcon data-test-subj="ExpandResult" type="arrowDown" />
           )}
         </button>
       )}

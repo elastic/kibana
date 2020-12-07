@@ -9,7 +9,6 @@
     padding: $euiSize;
     display: grid;
     grid-template-rows: 1fr $euiSizeXS * 5;
-    border-right: $euiBorderThin;
   }
 
   &__contentInner {
@@ -31,10 +30,11 @@
   }
 
   &__toggleExpandButton {
-    justify-self: stretch;
-    align-self: stretch;
     display: flex;
+    justify-content: center;
+    align-items: center;
     width: $euiSizeL * 2;
+    border-left: $euiBorderThin;
 
     &:hover,
     &:focus,
@@ -42,14 +42,5 @@
       background-color: $euiPageBackgroundColor;
       cursor: pointer;
     }
-  }
-
-  &__toggleExpandButton {
-    grid-column: 2;
-  }
-
-  &__toggleIcon {
-    align-self: center;
-    margin: auto;
   }
 }
