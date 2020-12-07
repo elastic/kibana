@@ -54,7 +54,7 @@ describe('migration actions', () => {
   let client: ElasticsearchClient;
 
   beforeAll(async () => {
-    // esServer = await startES();
+    esServer = await startES();
     root = kbnTestServer.createRootWithCorePlugins({
       server: {
         basePath: '/hello',
@@ -89,7 +89,7 @@ describe('migration actions', () => {
   });
 
   afterAll(async () => {
-    // await esServer.stop();
+    await esServer.stop();
     await root.shutdown();
   });
 
