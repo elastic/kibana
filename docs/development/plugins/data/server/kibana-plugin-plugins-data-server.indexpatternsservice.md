@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class IndexPatternsService implements Plugin<void, IndexPatternsServiceStart> 
+export declare class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> 
 ```
 
 ## Methods
