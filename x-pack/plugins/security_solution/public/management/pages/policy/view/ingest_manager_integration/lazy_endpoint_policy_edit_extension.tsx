@@ -14,7 +14,7 @@ import { StartPlugins } from '../../../../../types';
 
 export const getLazyEndpointPolicyEditExtension = (
   coreStart: CoreStart,
-  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
+  depsStart: Pick<StartPlugins, 'data' | 'fleet' | 'licensing'>
 ) => {
   return lazy<PackagePolicyEditExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPolicyEditExtension }] = await Promise.all([

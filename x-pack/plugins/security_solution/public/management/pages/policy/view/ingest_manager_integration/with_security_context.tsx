@@ -22,7 +22,7 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 interface WithSecurityContextProps<P extends {}> {
   coreStart: CoreStart;
-  depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
+  depsStart: Pick<StartPlugins, 'data' | 'fleet' | 'licensing'>;
   WrappedComponent: ComponentType<P>;
 }
 

@@ -24,7 +24,7 @@ export const AppRootProvider = memo<{
   store: Store;
   history: History;
   coreStart: CoreStart;
-  depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
+  depsStart: Pick<StartPlugins, 'data' | 'fleet' | 'licensing'>;
   children: ReactNode | ReactNode[];
 }>(
   ({

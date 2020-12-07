@@ -6,6 +6,8 @@
 
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
+import { ILicense } from '../../../../../../../licensing/common/types';
+import { unsetPolicyFeaturesAboveLicenseLevel } from '../../../../../../common/license/policy_config';
 import { PolicyDetailsState } from '../../types';
 import {
   Immutable,
@@ -20,6 +22,8 @@ import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
+/** Returns current active license */
+export const licenseState = (state: Immutable<PolicyDetailsState>) => state.license;
 
 /**
  * Given a Policy Data (package policy) object, return back a new object with only the field
@@ -81,17 +85,32 @@ export const fullPolicy: (s: Immutable<PolicyDetailsState>) => PolicyConfig = cr
   }
 );
 
+/**
+ * Returns the full Endpoint Policy, with any paid/licensed features that are not
+ * currently allowed for the current license level reset to defaults.
+ */
+const policyStrippedUnlicensedFeatures: (s: PolicyDetailsState) => PolicyConfig = createSelector(
+  fullPolicy,
+  licenseState,
+  (policyData, license) => {
+    return unsetPolicyFeaturesAboveLicenseLevel(policyData, license as ILicense);
+  }
+);
+
 const fullWindowsPolicySettings: (
   s: PolicyDetailsState
-) => PolicyConfig['windows'] = createSelector(fullPolicy, (policy) => policy?.windows);
+) => PolicyConfig['windows'] = createSelector(
+  policyStrippedUnlicensedFeatures,
+  (policy) => policy?.windows
+);
 
 const fullMacPolicySettings: (s: PolicyDetailsState) => PolicyConfig['mac'] = createSelector(
-  fullPolicy,
+  policyStrippedUnlicensedFeatures,
   (policy) => policy?.mac
 );
 
 const fullLinuxPolicySettings: (s: PolicyDetailsState) => PolicyConfig['linux'] = createSelector(
-  fullPolicy,
+  policyStrippedUnlicensedFeatures,
   (policy) => policy?.linux
 );
 

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LicensingPluginStart } from '../../../../../licensing/public';
+import { licensingMock } from '../../../../../licensing/public/mocks';
 import { FleetStart } from '../../../../../fleet/public';
 import {
   dataPluginMock,
@@ -35,6 +37,7 @@ type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
 export interface DepsStartMock {
   data: DataMock;
   fleet: FleetStart;
+  licensing: LicensingPluginStart;
 }
 
 /**
@@ -58,5 +61,6 @@ export const depsStartMock: () => DepsStartMock = () => {
   return {
     data: dataMock,
     fleet: fleetMock.createStartMock(),
+    licensing: licensingMock.createStart(),
   };
 };

@@ -23,11 +23,26 @@ import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/typ
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
-  coreStart
+  coreStart,
+  depsStart
 ) => {
   const http = coreStart.http;
+  const licensing = depsStart.licensing;
+  let didSubscribeLicensing = false;
 
   return ({ getState, dispatch }) => (next) => async (action) => {
+    if (!didSubscribeLicensing) {
+      didSubscribeLicensing = true;
+      licensing.license$.subscribe((newLicense) => {
+        // populate changes in the store
+        dispatch({
+          type: 'licenseChanged',
+          payload: newLicense,
+        });
+      });
+      await licensing.refresh(); // trigger immediately
+    }
+
     next(action);
     const state = getState();
 

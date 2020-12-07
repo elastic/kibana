@@ -76,7 +76,7 @@ export type ImmutableMiddleware<S, A extends Action> = (
  */
 export type ImmutableMiddlewareFactory<S = State> = (
   coreStart: CoreStart,
-  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
+  depsStart: Pick<StartPlugins, 'data' | 'fleet' | 'licensing'>
 ) => ImmutableMiddleware<S, AppAction>;
 
 /**
@@ -87,7 +87,7 @@ export type ImmutableMiddlewareFactory<S = State> = (
  */
 export type SecuritySubPluginMiddlewareFactory = (
   coreStart: CoreStart,
-  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
+  depsStart: Pick<StartPlugins, 'data' | 'fleet' | 'licensing'>
 ) => Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 
 /**
