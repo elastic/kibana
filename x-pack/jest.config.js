@@ -5,7 +5,7 @@
  */
 
 module.exports = {
-  coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
+  preset: '@kbn/test',
   rootDir: '..',
   projects: ['<rootDir>/x-pack/plugins/*/jest.config.js'],
   reporters: [
