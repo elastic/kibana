@@ -250,6 +250,7 @@ export function Detail() {
                       pkgkey,
                     })}
                     onClick={handleAddIntegrationPolicyClick}
+                    data-test-subj="addIntegrationPolicyButton"
                   >
                     <FormattedMessage
                       id="xpack.fleet.epm.addPackagePolicyButtonText"
