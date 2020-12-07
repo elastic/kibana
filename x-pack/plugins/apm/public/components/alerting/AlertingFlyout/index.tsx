@@ -23,7 +23,7 @@ export function AlertingFlyout(props: Props) {
   const {
     services: { triggersActionsUi },
   } = useKibana<KibanaDeps>();
-  const AddAlertFlyout = useMemo(
+  const addAlertFlyout = useMemo(
     () =>
       alertType &&
       triggersActionsUi.getAddAlertFlyout({
@@ -33,8 +33,7 @@ export function AlertingFlyout(props: Props) {
         alertTypeId: alertType,
         canChangeTrigger: false,
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [addFlyoutVisible, alertType]
+    [addFlyoutVisible, alertType, setAddFlyoutVisibility, triggersActionsUi]
   );
-  return <>{AddAlertFlyout}</>;
+  return <>{addAlertFlyout}</>;
 }
