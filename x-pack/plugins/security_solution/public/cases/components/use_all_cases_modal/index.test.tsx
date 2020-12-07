@@ -13,9 +13,21 @@ import { useKibana } from '../../../common/lib/kibana';
 import '../../../common/mock/match_media';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useAllCasesModal, UseAllCasesModalProps, UseAllCasesModalReturnedValues } from '.';
-import { TestProviders } from '../../../common/mock';
+import { mockTimelineModel, TestProviders } from '../../../common/mock';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 jest.mock('../../../common/lib/kibana');
+
+jest.mock('../../../common/hooks/use_selector');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
@@ -25,6 +37,7 @@ describe('useAllCasesModal', () => {
   beforeEach(() => {
     navigateToApp = jest.fn();
     useKibanaMock().services.application.navigateToApp = navigateToApp;
+    (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
   });
 
   it('init', async () => {
@@ -81,7 +94,7 @@ describe('useAllCasesModal', () => {
     act(() => rerender());
     const result2 = result.current;
 
-    expect(result1).toBe(result2);
+    expect(Object.is(result1, result2)).toBe(true);
   });
 
   it('closes the modal when clicking a row', async () => {
