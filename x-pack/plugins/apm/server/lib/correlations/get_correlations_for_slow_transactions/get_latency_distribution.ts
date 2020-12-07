@@ -10,23 +10,19 @@ import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { getBucketSize } from '../../helpers/get_bucket_size';
 import { TopSigTerm } from '../process_significant_term_aggs';
 import { getMaxLatency } from './get_max_latency';
 
-export async function getChartsForTopSigTerms({
+export async function getLatencyDistribution({
   setup,
   backgroundFilters,
   topSigTerms,
-  durationPercentile,
 }: {
   setup: Setup & SetupTimeRange;
   backgroundFilters: ESFilter[];
   topSigTerms: TopSigTerm[];
-  durationPercentile: number;
 }) {
-  const { start, end, apmEventClient } = setup;
-  const { intervalString } = getBucketSize({ start, end, numBuckets: 30 });
+  const { apmEventClient } = setup;
 
   if (isEmpty(topSigTerms)) {
     return {};
@@ -64,30 +60,12 @@ export async function getChartsForTopSigTerms({
     },
   };
 
-  const timeseriesAgg = {
-    date_histogram: {
-      field: '@timestamp',
-      fixed_interval: intervalString,
-      min_doc_count: 0,
-      extended_bounds: { min: start, max: end },
-    },
-    aggs: {
-      percentile: {
-        percentiles: {
-          field: TRANSACTION_DURATION,
-          percents: [durationPercentile],
-        },
-      },
-    },
-  };
-
   const perTermAggs = topSigTerms.reduce(
     (acc, term, index) => {
       acc[`term_${index}`] = {
         filter: { term: { [term.fieldName]: term.fieldValue } },
         aggs: {
           distribution: distributionAgg,
-          timeseries: timeseriesAgg,
         },
       };
       return acc;
@@ -98,7 +76,6 @@ export async function getChartsForTopSigTerms({
         filter: AggregationOptionsByType['filter'];
         aggs: {
           distribution: typeof distributionAgg;
-          timeseries: typeof timeseriesAgg;
         };
       }
     >
@@ -113,7 +90,6 @@ export async function getChartsForTopSigTerms({
       aggs: {
         // overall aggs
         distribution: distributionAgg,
-        timeseries: timeseriesAgg,
 
         // per term aggs
         ...perTermAggs,
@@ -128,13 +104,6 @@ export async function getChartsForTopSigTerms({
     return;
   }
 
-  function formatTimeseries(timeseries: Agg['timeseries']) {
-    return timeseries.buckets.map((bucket) => ({
-      x: bucket.key,
-      y: Object.values(bucket.percentile.values)[0],
-    }));
-  }
-
   function formatDistribution(distribution: Agg['distribution']) {
     const total = distribution.doc_count;
     return distribution.dist_filtered_by_latency.buckets.map((bucket) => ({
@@ -146,7 +115,6 @@ export async function getChartsForTopSigTerms({
   return {
     distributionInterval,
     overall: {
-      timeseries: formatTimeseries(response.aggregations.timeseries),
       distribution: formatDistribution(response.aggregations.distribution),
     },
     significantTerms: topSigTerms.map((topSig, index) => {
@@ -155,7 +123,6 @@ export async function getChartsForTopSigTerms({
 
       return {
         ...topSig,
-        timeseries: formatTimeseries(agg.timeseries),
         distribution: formatDistribution(agg.distribution),
       };
     }),

@@ -17,7 +17,7 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getDurationForPercentile } from './get_duration_for_percentile';
 import { processSignificantTermAggs } from '../process_significant_term_aggs';
-import { getChartsForTopSigTerms } from './get_charts_for_top_sig_terms';
+import { getLatencyDistribution } from './get_latency_distribution';
 
 export async function getCorrelationsForSlowTransactions({
   serviceName,
@@ -100,10 +100,9 @@ export async function getCorrelationsForSlowTransactions({
     thresholdPercentage: 100 - durationPercentile,
   });
 
-  return getChartsForTopSigTerms({
+  return getLatencyDistribution({
     setup,
     backgroundFilters,
     topSigTerms,
-    durationPercentile,
   });
 }

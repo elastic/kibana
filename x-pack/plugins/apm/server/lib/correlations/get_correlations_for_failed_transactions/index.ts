@@ -107,10 +107,10 @@ export async function getCorrelationsForFailedTransactions({
     sigTermAggs,
     thresholdPercentage: avgErrorRate,
   });
-  return getChartsForTopSigTerms({ setup, backgroundFilters, topSigTerms });
+  return getErrorRateTimeSeries({ setup, backgroundFilters, topSigTerms });
 }
 
-export async function getChartsForTopSigTerms({
+export async function getErrorRateTimeSeries({
   setup,
   backgroundFilters,
   topSigTerms,

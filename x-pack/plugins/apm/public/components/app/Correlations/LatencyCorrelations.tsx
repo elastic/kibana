@@ -7,12 +7,9 @@
 import {
   ScaleType,
   Chart,
-  LineSeries,
   Axis,
-  CurveType,
   BarSeries,
   Position,
-  timeFormatter,
   Settings,
 } from '@elastic/charts';
 import React, { useState } from 'react';
@@ -102,16 +99,6 @@ export function LatencyCorrelations() {
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFlexGroup direction="row">
-            {/* <EuiFlexItem>
-              <EuiTitle size="s">
-                <h4>Latency ({durationPercentile}th percentile)</h4>
-              </EuiTitle>
-              <LatencyTimeseriesChart
-                data={data}
-                status={status}
-                selectedSignificantTerm={selectedSignificantTerm}
-              />
-            </EuiFlexItem> */}
             <EuiFlexItem>
               <EuiTitle size="s">
                 <h4>Latency distribution</h4>
@@ -170,20 +157,6 @@ export function LatencyCorrelations() {
   );
 }
 
-function getTimeseriesYMax(data?: CorrelationsApiResponse) {
-  if (!data?.overall) {
-    return 0;
-  }
-
-  const yValues = [
-    ...data.overall.timeseries.map((p) => p.y ?? 0),
-    ...data.significantTerms.flatMap((term) =>
-      term.timeseries.map((p) => p.y ?? 0)
-    ),
-  ];
-  return Math.max(...yValues);
-}
-
 function getDistributionYMax(data?: CorrelationsApiResponse) {
   if (!data?.overall) {
     return 0;
@@ -196,65 +169,6 @@ function getDistributionYMax(data?: CorrelationsApiResponse) {
     ),
   ];
   return Math.max(...yValues);
-}
-
-function LatencyTimeseriesChart({
-  data,
-  selectedSignificantTerm,
-  status,
-}: {
-  data?: CorrelationsApiResponse;
-  selectedSignificantTerm: SignificantTerm | null;
-  status: FETCH_STATUS;
-}) {
-  const dateFormatter = timeFormatter('HH:mm:ss');
-
-  const yMax = getTimeseriesYMax(data);
-  const durationFormatter = getDurationFormatter(yMax);
-
-  return (
-    <ChartContainer height={200} hasData={!!data} status={status}>
-      <Chart>
-        <Settings showLegend legendPosition={Position.Bottom} />
-
-        <Axis
-          id="bottom"
-          position={Position.Bottom}
-          showOverlappingTicks
-          tickFormat={dateFormatter}
-        />
-        <Axis
-          id="left"
-          position={Position.Left}
-          domain={{ min: 0, max: yMax }}
-          tickFormat={(d) => durationFormatter(d).formatted}
-        />
-
-        <LineSeries
-          id="Overall latency"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor={'x'}
-          yAccessors={['y']}
-          data={data?.overall?.timeseries || []}
-          curve={CurveType.CURVE_MONOTONE_X}
-        />
-
-        {selectedSignificantTerm !== null ? (
-          <LineSeries
-            id="Latency for selected term"
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor={'x'}
-            yAccessors={['y']}
-            color="red"
-            data={selectedSignificantTerm.timeseries}
-            curve={CurveType.CURVE_MONOTONE_X}
-          />
-        ) : null}
-      </Chart>
-    </ChartContainer>
-  );
 }
 
 function LatencyDistributionChart({
