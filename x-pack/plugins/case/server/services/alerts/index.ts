@@ -4,19 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { AppClient as SecurityClient } from '../../../../security_solution/server';
+import { IClusterClient, KibanaRequest } from 'kibana/server';
+import { CaseStatuses } from '../../../common/api';
+
+interface UpdateAlertsStatusArgs {
+  request: KibanaRequest;
+  ids: string[];
+  status: CaseStatuses;
+  index: string;
+}
 
 export class AlertService {
-  constructor(
-    private readonly esClient: IScopedClusterClient,
-    private readonly securityClient: SecurityClient
-  ) {}
+  private isInitialized = false;
+  private esClient?: IClusterClient;
 
-  // TODO: When https://github.com/elastic/kibana/pull/84321 is merged change the type of status to CaseStatuses
-  public async updateAlerts(ids: string[], status: string) {
-    const result = await this.esClient.asCurrentUser.updateByQuery({
-      index: this.securityClient.getSignalsIndex(),
+  constructor() {}
+
+  public initialize(esClient: IClusterClient) {
+    if (this.isInitialized) {
+      throw new Error('AlertService already initialized');
+    }
+
+    this.isInitialized = true;
+    this.esClient = esClient;
+  }
+
+  public async updateAlertsStatus({ request, ids, status, index }: UpdateAlertsStatusArgs) {
+    if (!this.isInitialized) {
+      throw new Error('AlertService not initialized');
+    }
+
+    // The above check makes sure that esClient is defined.
+    const result = await this.esClient!.asScoped(request).asCurrentUser.updateByQuery({
+      index,
       conflicts: 'abort',
       body: {
         script: {
