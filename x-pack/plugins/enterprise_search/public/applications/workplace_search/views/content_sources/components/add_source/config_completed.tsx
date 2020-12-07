@@ -6,8 +6,6 @@
 
 import React from 'react';
 
-import { Link } from 'react-router-dom';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -25,6 +23,8 @@ import {
   SECURITY_PATH,
   PRIVATE_SOURCES_DOCS_URL,
 } from '../../../../routes';
+
+import { EuiLinkTo, EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
 interface ConfigCompletedProps {
   header: React.ReactNode;
@@ -71,9 +71,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
                     {!privateSourcesEnabled && (
                       <p>
                         Remember to{' '}
-                        <Link to={SECURITY_PATH}>
-                          <EuiLink>enable private source connection</EuiLink>
-                        </Link>{' '}
+                        <EuiLinkTo to={SECURITY_PATH}>enable private source connection</EuiLinkTo>{' '}
                         in Security settings.
                       </p>
                     )}
@@ -93,11 +91,13 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
     <EuiSpacer />
     <EuiFlexGroup justifyContent="center" alignItems="center" direction="row" responsive={false}>
       <EuiFlexItem grow={false}>
-        <Link to={getSourcesPath(ADD_SOURCE_PATH, true)}>
-          <EuiButton fill={accountContextOnly} color={accountContextOnly ? 'primary' : undefined}>
-            Configure&nbsp;a&nbsp;new&nbsp;content&nbsp;source
-          </EuiButton>
-        </Link>
+        <EuiButtonTo
+          to={getSourcesPath(ADD_SOURCE_PATH, true)}
+          fill={accountContextOnly}
+          color={accountContextOnly ? 'primary' : undefined}
+        >
+          Configure&nbsp;a&nbsp;new&nbsp;content&nbsp;source
+        </EuiButtonTo>
       </EuiFlexItem>
       {!accountContextOnly && (
         <EuiFlexItem grow={false}>

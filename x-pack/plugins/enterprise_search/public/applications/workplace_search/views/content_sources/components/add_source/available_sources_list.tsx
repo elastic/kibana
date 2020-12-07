@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 
@@ -21,7 +20,8 @@ import {
 
 import { useValues } from 'kea';
 
-import { LicensingLogic } from '../../../../../../applications/shared/licensing';
+import { LicensingLogic } from '../../../../../shared/licensing';
+import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 
 import { SourceIcon } from '../../../../components/shared/source_icon';
 import { SourceDataItem } from '../../../../types';
@@ -76,7 +76,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
         </EuiToolTip>
       );
     }
-    return <Link to={getSourcesPath(addPath, true)}>{card}</Link>;
+    return <EuiLinkTo to={getSourcesPath(addPath, true)}>{card}</EuiLinkTo>;
   };
 
   const visibleSources = (
@@ -89,7 +89,9 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
     </EuiFlexGrid>
   );
 
-  const emptyState = <p>{AVAILABLE_SOURCE_EMPTY_STATE}</p>;
+  const emptyState = (
+    <p data-test-subj="AvailableSourceEmptyState">{AVAILABLE_SOURCE_EMPTY_STATE}</p>
+  );
 
   return (
     <>
@@ -99,9 +101,12 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
       <EuiText>
         <p>
           {AVAILABLE_SOURCE_BODY}
-          <Link to={getSourcesPath(ADD_CUSTOM_PATH, true)} data-test-subj="CustomAPISourceLink">
+          <EuiLinkTo
+            to={getSourcesPath(ADD_CUSTOM_PATH, true)}
+            data-test-subj="CustomAPISourceLink"
+          >
             {AVAILABLE_SOURCE_CUSTOM_SOURCE_BUTTON}
-          </Link>
+          </EuiLinkTo>
           .
         </p>
       </EuiText>
