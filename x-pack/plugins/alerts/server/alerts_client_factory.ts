@@ -100,6 +100,7 @@ export class AlertsClientFactory {
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
       namespace: this.spaceIdToNamespace(spaceId),
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
+      auditLogger: securityPluginSetup?.audit.asScoped(request),
       async getUserName() {
         if (!securityPluginSetup) {
           return null;

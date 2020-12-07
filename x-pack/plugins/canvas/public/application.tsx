@@ -137,7 +137,7 @@ export const initializeCanvas = async (
   });
 
   if (setupPlugins.usageCollection) {
-    initStatsReporter(setupPlugins.usageCollection.reportUiStats);
+    initStatsReporter(setupPlugins.usageCollection.reportUiCounter);
   }
 
   return canvasStore;

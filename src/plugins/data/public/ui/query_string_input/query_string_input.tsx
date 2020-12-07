@@ -138,9 +138,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
     const currentAbortController = this.fetchIndexPatternsAbortController;
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
-      this.services.savedObjects!.client,
-      stringPatterns,
-      this.services.uiSettings!
+      this.services.data.indexPatterns,
+      stringPatterns
     )) as IIndexPattern[];
 
     if (!currentAbortController.signal.aborted) {
