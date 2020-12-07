@@ -54,10 +54,6 @@ export interface IndexPatternsServiceStartDeps {
 }
 
 export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> {
-  private uiSettings?: CoreStart['uiSettings'];
-  private fieldFormats?: FieldFormatsStart;
-  private logger?: Logger;
-
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
     { expressions }: IndexPatternsServiceSetupDeps
@@ -65,43 +61,35 @@ export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsS
     core.savedObjects.registerType(indexPatternSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
 
-    registerRoutes(core.http, this);
+    registerRoutes(core.http, core.getStartServices);
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
   }
 
   public start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps) {
-    this.uiSettings = core.uiSettings;
-    this.fieldFormats = fieldFormats;
-    this.logger = logger;
+    const { uiSettings } = core;
 
     return {
-      indexPatternsServiceFactory: this.createIndexPatternsService.bind(this),
+      indexPatternsServiceFactory: async (
+        savedObjectsClient: SavedObjectsClientContract,
+        elasticsearchClient: ElasticsearchClient
+      ) => {
+        const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+        const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
+
+        return new IndexPatternsCommonService({
+          uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
+          savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
+          apiClient: new IndexPatternsApiServer(elasticsearchClient),
+          fieldFormats: formats,
+          onError: (error) => {
+            logger.error(error);
+          },
+          onNotification: ({ title, text }) => {
+            logger.warn(`${title} : ${text}`);
+          },
+        });
+      },
     };
-  }
-
-  public async createIndexPatternsService(
-    savedObjectsClient: SavedObjectsClientContract,
-    elasticsearchClient: ElasticsearchClient
-  ) {
-    if (!this.uiSettings) throw new Error('UI Settings not set in IndexPatternsService.');
-    if (!this.fieldFormats) throw new Error('Field formats not set in IndexPatternsService.');
-    if (!this.logger) throw new Error('Logger not set in IndexPatternsService.');
-
-    const uiSettingsClient = this.uiSettings.asScopedToClient(savedObjectsClient);
-    const formats = await this.fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
-
-    return new IndexPatternsCommonService({
-      uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
-      savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
-      apiClient: new IndexPatternsApiServer(elasticsearchClient),
-      fieldFormats: formats,
-      onError: (error) => {
-        this.logger!.error(error);
-      },
-      onNotification: ({ title, text }) => {
-        this.logger!.warn(`${title} : ${text}`);
-      },
-    });
   }
 }

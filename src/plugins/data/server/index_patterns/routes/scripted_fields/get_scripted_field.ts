@@ -18,14 +18,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../../../../../core/server';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
-import type { IndexPatternsServiceProvider } from '../../index_patterns_service';
+import { IRouter, StartServicesAccessor } from '../../../../../../core/server';
+import type { DataPluginStart, DataPluginStartDependencies } from '../../../plugin';
 
 export const registerGetScriptedFieldRoute = (
   router: IRouter,
-  indexPatternsProvider: IndexPatternsServiceProvider
+  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
 ) => {
   router.get(
     {
@@ -50,7 +50,8 @@ export const registerGetScriptedFieldRoute = (
       handleErrors(async (ctx, req, res) => {
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+        const [, , { indexPatterns }] = await getStartServices();
+        const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
           savedObjectsClient,
           elasticsearchClient
         );

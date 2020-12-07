@@ -19,10 +19,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { IndexPatternSpec } from 'src/plugins/data/common';
-import { IRouter } from '../../../../../core/server';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, serializedFieldFormatSchema } from './util/schemas';
-import type { IndexPatternsServiceProvider } from '../index_patterns_service';
+import { IRouter, StartServicesAccessor } from '../../../../../core/server';
+import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
 const indexPatternSpecSchema = schema.object({
   title: schema.string(),
@@ -54,7 +54,7 @@ const indexPatternSpecSchema = schema.object({
 
 export const registerCreateIndexPatternRoute = (
   router: IRouter,
-  indexPatternsProvider: IndexPatternsServiceProvider
+  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
 ) => {
   router.post(
     {
@@ -71,7 +71,8 @@ export const registerCreateIndexPatternRoute = (
       handleErrors(async (ctx, req, res) => {
         const savedObjectsClient = ctx.core.savedObjects.client;
         const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const indexPatternsService = await indexPatternsProvider.createIndexPatternsService(
+        const [, , { indexPatterns }] = await getStartServices();
+        const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
           savedObjectsClient,
           elasticsearchClient
         );

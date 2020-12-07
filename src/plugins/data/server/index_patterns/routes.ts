@@ -18,7 +18,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { HttpServiceSetup, RequestHandlerContext } from 'kibana/server';
+import { HttpServiceSetup, RequestHandlerContext, StartServicesAccessor } from 'kibana/server';
 import { IndexPatternsFetcher } from './fetcher';
 import { registerCreateIndexPatternRoute } from './routes/create_index_pattern';
 import { registerGetIndexPatternRoute } from './routes/get_index_pattern';
@@ -30,11 +30,11 @@ import { registerPutScriptedFieldRoute } from './routes/scripted_fields/put_scri
 import { registerGetScriptedFieldRoute } from './routes/scripted_fields/get_scripted_field';
 import { registerDeleteScriptedFieldRoute } from './routes/scripted_fields/delete_scripted_field';
 import { registerUpdateScriptedFieldRoute } from './routes/scripted_fields/update_scripted_field';
-import type { IndexPatternsServiceProvider } from './index_patterns_service';
+import type { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 
 export function registerRoutes(
   http: HttpServiceSetup,
-  indexPatternsProvider: IndexPatternsServiceProvider
+  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>
 ) {
   const parseMetaFields = (metaFields: string | string[]) => {
     let parsedFields: string[] = [];
@@ -49,20 +49,20 @@ export function registerRoutes(
   const router = http.createRouter();
 
   // Index Patterns API
-  registerCreateIndexPatternRoute(router, indexPatternsProvider);
-  registerGetIndexPatternRoute(router, indexPatternsProvider);
-  registerDeleteIndexPatternRoute(router, indexPatternsProvider);
-  registerUpdateIndexPatternRoute(router, indexPatternsProvider);
+  registerCreateIndexPatternRoute(router, getStartServices);
+  registerGetIndexPatternRoute(router, getStartServices);
+  registerDeleteIndexPatternRoute(router, getStartServices);
+  registerUpdateIndexPatternRoute(router, getStartServices);
 
   // Fields API
-  registerUpdateFieldsRoute(router, indexPatternsProvider);
+  registerUpdateFieldsRoute(router, getStartServices);
 
   // Scripted Field API
-  registerCreateScriptedFieldRoute(router, indexPatternsProvider);
-  registerPutScriptedFieldRoute(router, indexPatternsProvider);
-  registerGetScriptedFieldRoute(router, indexPatternsProvider);
-  registerDeleteScriptedFieldRoute(router, indexPatternsProvider);
-  registerUpdateScriptedFieldRoute(router, indexPatternsProvider);
+  registerCreateScriptedFieldRoute(router, getStartServices);
+  registerPutScriptedFieldRoute(router, getStartServices);
+  registerGetScriptedFieldRoute(router, getStartServices);
+  registerDeleteScriptedFieldRoute(router, getStartServices);
+  registerUpdateScriptedFieldRoute(router, getStartServices);
 
   router.get(
     {
