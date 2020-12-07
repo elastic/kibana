@@ -195,9 +195,12 @@ export function FieldSelect({
           return;
         }
 
-        trackUiEvent('indexpattern_dimension_field_changed');
+        const choice = (choices[0].value as unknown) as FieldChoice;
 
-        onChoose((choices[0].value as unknown) as FieldChoice);
+        if (choice.field !== selectedField) {
+          trackUiEvent('indexpattern_dimension_field_changed');
+          onChoose(choice);
+        }
       }}
       renderOption={(option, searchValue) => {
         return (

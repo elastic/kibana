@@ -5,6 +5,7 @@
  */
 
 import { useCallback, useEffect, useReducer } from 'react';
+import { CaseStatuses } from '../../../../case/common/api';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
 import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case } from './types';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
@@ -94,7 +95,7 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   search: '',
   reporters: [],
-  status: 'open',
+  status: CaseStatuses.open,
   tags: [],
 };
 
@@ -108,6 +109,7 @@ export const DEFAULT_QUERY_PARAMS: QueryParams = {
 export const initialData: AllCases = {
   cases: [],
   countClosedCases: null,
+  countInProgressCases: null,
   countOpenCases: null,
   page: 0,
   perPage: 0,

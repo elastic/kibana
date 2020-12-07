@@ -24,11 +24,8 @@ import {
 } from '../../../../usage_collection/server/usage_collection.mock';
 
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
-import {
-  ROLL_INDICES_START,
-  ROLL_TOTAL_INDICES_INTERVAL,
-  registerApplicationUsageCollector,
-} from './telemetry_application_usage_collector';
+import { ROLL_TOTAL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
+import { registerApplicationUsageCollector } from './telemetry_application_usage_collector';
 import {
   SAVED_OBJECTS_DAILY_TYPE,
   SAVED_OBJECTS_TOTAL_TYPE,
