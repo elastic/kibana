@@ -51,23 +51,14 @@ export function TransactionBreakdownChartContents({
   timeseries,
 }: Props) {
   const history = useHistory();
-  const chartRef = React.createRef<Chart>();
   const { annotations } = useAnnotationsContext();
   const chartTheme = useChartTheme();
-  const { pointerEvent, setPointerEvent } = useChartPointerEventContext();
+  const { chartRef, setPointerEvent } = useChartPointerEventContext(
+    'timeSpentBySpan'
+  );
   const { urlParams } = useUrlParams();
   const theme = useTheme();
   const { start, end } = urlParams;
-
-  useEffect(() => {
-    if (
-      pointerEvent &&
-      pointerEvent.chartId !== 'timeSpentBySpan' &&
-      chartRef.current
-    ) {
-      chartRef.current.dispatchExternalPointerEvent(pointerEvent);
-    }
-  }, [chartRef, pointerEvent]);
 
   const min = moment.utc(start).valueOf();
   const max = moment.utc(end).valueOf();

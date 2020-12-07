@@ -4,15 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
+import { Chart } from '@elastic/charts';
 import { ChartPointerEventContext } from './chart_pointer_event_context';
 
-export function useChartPointerEventContext() {
+export function useChartPointerEventContext(id: string) {
   const context = useContext(ChartPointerEventContext);
 
   if (!context) {
     throw new Error('Missing ChartPointerEventContext provider');
   }
 
-  return context;
+  const { pointerEvent } = context;
+  const chartRef = React.createRef<Chart>();
+
+  useEffect(() => {
+    if (pointerEvent && pointerEvent?.chartId !== id && chartRef.current) {
+      chartRef.current.dispatchExternalPointerEvent(pointerEvent);
+    }
+  }, [pointerEvent, chartRef, id]);
+
+  return { ...context, chartRef };
 }
