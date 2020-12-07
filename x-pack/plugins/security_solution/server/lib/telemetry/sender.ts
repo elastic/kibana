@@ -83,16 +83,16 @@ export class TelemetryEventsSender {
     this.telemetryStart = telemetryStart;
     this.core = core;
 
+    if (taskManager && this.diagTask) {
+      this.logger.debug(`Starting diag task`);
+      this.diagTask.start(taskManager);
+    }
+
     this.logger.debug(`Starting local task`);
     setTimeout(() => {
       this.sendIfDue();
       this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
     }, this.initialCheckDelayMs);
-
-    if (taskManager && this.diagTask) {
-      this.logger.debug(`Starting diag task`);
-      this.diagTask.start(taskManager);
-    }
   }
 
   public stop() {
@@ -104,14 +104,25 @@ export class TelemetryEventsSender {
   public async fetchDiagnosticAlerts() {
     const query = {
       expand_wildcards: 'open,hidden',
-      // logs-diagnostic.endpoint.collection-default
-      index: 'pete-hampton-test-index*',
+      index: 'logs-endpoint.diagnostic.collection-default*',
       ignore_unavailable: true,
-      size: 100,
+      size: this.maxQueueSize,
       body: {
         query: {
-          match_all: {},
+          range: {
+            'event.ingested': {
+              gte: 'now-5m',
+              lt: 'now',
+            },
+          },
         },
+        sort: [
+          {
+            'event.ingested': {
+              order: 'asc',
+            },
+          },
+        ],
       },
     };
 

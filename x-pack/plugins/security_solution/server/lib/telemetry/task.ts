@@ -13,8 +13,8 @@ import { TelemetryEventsSender, TelemetryEvent } from './sender';
 
 export const TelemetryDiagTaskConstants = {
   TIMEOUT: '1m',
-  TYPE: 'security:telemetry-diagnostics',
-  INTERVAL: '2m', // TODO: update to 5m
+  TYPE: 'security:endpoint-diagnostics',
+  INTERVAL: '5m',
   VERSION: '1.0.0',
 };
 
@@ -68,8 +68,7 @@ export class TelemetryDiagTask {
   };
 
   public runTask = async (taskId: string) => {
-    this.logger.debug(`running task ${taskId}`);
-    // Check that this task is current
+    this.logger.debug(`Running task ${taskId}`);
     if (taskId !== this.getTaskId()) {
       this.logger.debug(`Outdated task running: ${taskId}`);
       return;
@@ -89,7 +88,8 @@ export class TelemetryDiagTask {
       return;
     }
 
-    const alerts: TelemetryEvent[] = hits.map((h) => h._source);
-    this.sender.queueTelemetryEvents(alerts);
+    const diagAlerts: TelemetryEvent[] = hits.map((h) => h._source);
+    this.logger.debug(`Received ${diagAlerts.length} diagnostic alerts`);
+    this.sender.queueTelemetryEvents(diagAlerts);
   };
 }
