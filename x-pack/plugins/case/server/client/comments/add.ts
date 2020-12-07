@@ -11,17 +11,27 @@ import { identity } from 'fp-ts/lib/function';
 
 import { decodeComment, flattenCaseSavedObject, transformNewComment } from '../../routes/api/utils';
 
-import { throwErrors, CaseResponseRt, CommentRequestRt, CaseResponse } from '../../../common/api';
+import {
+  throwErrors,
+  CaseResponseRt,
+  CommentRequestRt,
+  CaseResponse,
+  CommentType,
+} from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
 import { CaseClientAddComment, CaseClientFactoryArguments } from '../types';
 import { CASE_SAVED_OBJECT } from '../../saved_object_types';
+import { updateAlertsStatus as alertsFactory } from '../alerts/update_status';
 
 export const addComment = ({
   savedObjectsClient,
   caseService,
+  alertsService,
+  caseConfigureService,
   userActionService,
   request,
+  context,
 }: CaseClientFactoryArguments) => async ({
   caseId,
   comment,
@@ -71,6 +81,22 @@ export const addComment = ({
       version: myCase.version,
     }),
   ]);
+
+  // Is this gonna create memory issues on multiple requests?
+  const updateAlertsStatus = alertsFactory({
+    savedObjectsClient,
+    request,
+    alertsService,
+    caseService,
+    caseConfigureService,
+    userActionService,
+    context,
+  });
+
+  // If the case is synced with alerts the newly attached alert must match the status of the case.
+  if (newComment.attributes.type === CommentType.alert && myCase.attributes.settings.syncAlerts) {
+    updateAlertsStatus({ ids: [newComment.attributes.alertId], status: myCase.attributes.status });
+  }
 
   const totalCommentsFindByCases = await caseService.getAllCaseComments({
     client: savedObjectsClient,
