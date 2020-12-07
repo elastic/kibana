@@ -94,7 +94,7 @@ const testSuggestions: Suggestion[] = [
 describe('Autocomplete lib', () => {
   describe('Static suggestions', () => {
     test('returns static suggestions', () => {
-      expect(getStaticSuggestions(testSuggestions, false, false)).toEqual({
+      expect(getStaticSuggestions({ suggestions: testSuggestions })).toEqual({
         isIncomplete: false,
         suggestions: [
           {
@@ -127,7 +127,10 @@ describe('Autocomplete lib', () => {
     });
 
     test('returns doc keyword when fields exist', () => {
-      const autocompletion = getStaticSuggestions(testSuggestions, true, false);
+      const autocompletion = getStaticSuggestions({
+        suggestions: testSuggestions,
+        hasFields: true,
+      });
       const docSuggestion = autocompletion.suggestions.find(
         (suggestion) => suggestion.label === 'doc'
       );
@@ -135,7 +138,10 @@ describe('Autocomplete lib', () => {
     });
 
     test('returns emit keyword for runtime fields', () => {
-      const autocompletion = getStaticSuggestions(testSuggestions, true, true);
+      const autocompletion = getStaticSuggestions({
+        suggestions: testSuggestions,
+        isRuntimeContext: true,
+      });
       const emitSuggestion = autocompletion.suggestions.find(
         (suggestion) => suggestion.label === 'emit'
       );

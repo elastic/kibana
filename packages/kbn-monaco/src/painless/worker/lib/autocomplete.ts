@@ -58,7 +58,7 @@ export const getKeywords = (): PainlessCompletionItem[] => {
     return {
       label: keyword,
       kind: 'keyword',
-      documentation: 'Keyword: char',
+      documentation: `Keyword: ${keyword}`,
       insertText: keyword,
     };
   });
@@ -103,11 +103,15 @@ const mapContextToData: { [key: string]: { suggestions: any[] } } = {
   string_script_field_script_field: stringScriptFieldScriptFieldContext,
 };
 
-export const getStaticSuggestions = (
-  suggestions: Suggestion[],
-  hasFields: boolean,
-  isRuntimeContext: boolean
-): PainlessCompletionResult => {
+export const getStaticSuggestions = ({
+  suggestions,
+  hasFields,
+  isRuntimeContext,
+}: {
+  suggestions: Suggestion[];
+  hasFields?: boolean;
+  isRuntimeContext?: boolean;
+}): PainlessCompletionResult => {
   const classSuggestions: PainlessCompletionItem[] = suggestions.map((suggestion) => {
     const { properties, constructorDefinition, ...rootSuggestion } = suggestion;
     return rootSuggestion;
@@ -242,7 +246,7 @@ export const getAutocompleteSuggestions = (
     const className = activeTyping.substring(0, activeTyping.length - 1).split('.')[0];
     autocompleteSuggestions = getClassMemberSuggestions(suggestions, className);
   } else if (showStaticSuggestions(activeTyping, words, primitives)) {
-    autocompleteSuggestions = getStaticSuggestions(suggestions, hasFields, isRuntimeContext);
+    autocompleteSuggestions = getStaticSuggestions({ suggestions, hasFields, isRuntimeContext });
   }
   return autocompleteSuggestions;
 };
