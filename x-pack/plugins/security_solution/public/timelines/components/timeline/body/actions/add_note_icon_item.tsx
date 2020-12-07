@@ -7,39 +7,33 @@
 import React from 'react';
 
 import { TimelineType, TimelineStatus } from '../../../../../../common/types/timeline';
-import { AssociateNote, UpdateNote } from '../../../notes/helpers';
+import { AssociateNote } from '../../../notes/helpers';
 import * as i18n from '../translations';
 import { NotesButton } from '../../properties/helpers';
-import { Note } from '../../../../../common/lib/note';
 import { ActionIconItem } from './action_icon_item';
 
 interface AddEventNoteActionProps {
   associateNote: AssociateNote;
-  getNotesByIds: (noteIds: string[]) => Note[];
   noteIds: string[];
   showNotes: boolean;
   status: TimelineStatus;
   timelineType: TimelineType;
   toggleShowNotes: () => void;
-  updateNote: UpdateNote;
 }
 
 const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   associateNote,
-  getNotesByIds,
   noteIds,
   showNotes,
   status,
   timelineType,
   toggleShowNotes,
-  updateNote,
 }) => (
   <ActionIconItem id="add-note">
     <NotesButton
       animate={false}
       associateNote={associateNote}
       data-test-subj="add-note"
-      getNotesByIds={getNotesByIds}
       noteIds={noteIds}
       showNotes={showNotes}
       size="s"
@@ -49,7 +43,6 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
       toolTip={
         timelineType === TimelineType.template ? i18n.NOTES_DISABLE_TOOLTIP : i18n.NOTES_TOOLTIP
       }
-      updateNote={updateNote}
     />
   </ActionIconItem>
 );
