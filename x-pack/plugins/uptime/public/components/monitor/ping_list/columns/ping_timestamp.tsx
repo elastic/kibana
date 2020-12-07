@@ -9,6 +9,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiImage,
   EuiLink,
   EuiSpacer,
@@ -17,9 +18,10 @@ import {
 import useIntersection from 'react-use/lib/useIntersection';
 import moment from 'moment';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
-import { useFetcher } from '../../../../../../observability/public';
+import { euiStyled, useFetcher } from '../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../contexts';
 
@@ -72,7 +74,8 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
 
   const { basePath } = useContext(UptimeSettingsContext);
 
-  const imgPath = basePath + `/api/uptime/journey/screenshot/${ping.monitor.check_group}/${stepNo}`;
+  const imgPath =
+    basePath + `/api/uptime/journey//1screenshot/${ping.monitor.check_group}/${stepNo}`;
 
   const intersection = useIntersection(intersectionRef, {
     root: null,
@@ -93,56 +96,69 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
 
   const imgSrc = stepImages[stepNo] || data?.src;
 
+  const ImageCaption = (
+    <>
+      <div
+        className="stepArrowsFullScreen"
+        style={{ position: 'absolute', bottom: 32, width: '100%' }}
+      >
+        {imgSrc && (
+          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                disabled={stepNo === 1}
+                size="m"
+                onClick={() => {
+                  setStepNo(stepNo - 1);
+                }}
+                iconType="arrowLeft"
+                aria-label="Next"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                Step:{stepNo} {data?.stepName}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                disabled={stepNo === data?.maxSteps}
+                size="m"
+                onClick={() => {
+                  setStepNo(stepNo + 1);
+                }}
+                iconType="arrowRight"
+                aria-label="Next"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </div>
+      <EuiLink className="eui-textNoWrap" href={'/step/details'}>
+        {getShortTimeStamp(moment(timestamp))}
+      </EuiLink>
+      <EuiSpacer size="s" />
+    </>
+  );
+
   return (
     <StepDiv ref={intersectionRef}>
-      {imgSrc && (
+      {imgSrc ? (
         <StepImage
           allowFullScreen={true}
           size="s"
           hasShadow
-          caption={
-            <>
-              <div
-                className="stepArrowsFullScreen"
-                style={{ position: 'absolute', bottom: 32, width: '100%' }}
-              >
-                <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      disabled={stepNo === 1}
-                      size="m"
-                      onClick={() => {
-                        setStepNo(stepNo - 1);
-                      }}
-                      iconType="arrowLeft"
-                      aria-label="Next"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText>
-                      Step:{stepNo} {data?.stepName}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      disabled={stepNo === data?.maxSteps}
-                      size="m"
-                      onClick={() => {
-                        setStepNo(stepNo + 1);
-                      }}
-                      iconType="arrowRight"
-                      aria-label="Next"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-              <EuiLink href={'/step/details'}>{getShortTimeStamp(moment(timestamp))}</EuiLink>
-              <EuiSpacer size="s" />
-            </>
-          }
+          caption={ImageCaption}
           alt="No image available"
           url={imgSrc}
         />
+      ) : (
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem>
+            <NoImageAvailable />
+          </EuiFlexItem>
+          <EuiFlexItem> {ImageCaption}</EuiFlexItem>
+        </EuiFlexGroup>
       )}
       <EuiFlexGroup
         className="stepArrows"
@@ -176,5 +192,29 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </StepDiv>
+  );
+};
+
+const BorderedFlexGroup = euiStyled(EuiFlexGroup)`
+  border: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
+`;
+
+export const NoImageAvailable = () => {
+  return (
+    <BorderedFlexGroup alignItems="center" direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiIcon color="subdued" size="xl" type="image" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText>
+          <strong>
+            <FormattedMessage
+              id="xpack.uptime.synthetics.screenshot.noImageMessage"
+              defaultMessage="No image available"
+            />
+          </strong>
+        </EuiText>
+      </EuiFlexItem>
+    </BorderedFlexGroup>
   );
 };
