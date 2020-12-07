@@ -94,7 +94,7 @@ function LayerPanels(
           {...props}
           key={layerId}
           layerId={layerId}
-          dataTestSubj={`lns-layerPanel-${index}`}
+          index={index}
           visualizationState={visualizationState}
           updateVisualization={setVisualizationState}
           updateDatasource={updateDatasource}

@@ -15,11 +15,11 @@ import {
 } from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import { KeyUXMetrics } from './KeyUXMetrics';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
 import { CoreVitals } from '../../../../../../observability/public';
 import { CsmSharedContext } from '../CsmSharedContext';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getPercentileLabel } from './translations';
 
 export function UXMetrics() {

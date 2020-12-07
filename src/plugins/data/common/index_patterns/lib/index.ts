@@ -19,7 +19,6 @@
 
 export { IndexPatternMissingIndices } from './errors';
 export { getTitle } from './get_title';
-export { getFromSavedObject } from './get_from_saved_object';
 export { isDefault } from './is_default';
 
 export * from './types';

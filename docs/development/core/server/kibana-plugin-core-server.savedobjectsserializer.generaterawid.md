@@ -9,7 +9,7 @@ Given a saved object type and id, generates the compound id that is stored in th
 <b>Signature:</b>
 
 ```typescript
-generateRawId(namespace: string | undefined, type: string, id?: string): string;
+generateRawId(namespace: string | undefined, type: string, id: string): string;
 ```
 
 ## Parameters
