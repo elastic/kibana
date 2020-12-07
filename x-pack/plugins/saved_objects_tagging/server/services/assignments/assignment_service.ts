@@ -53,9 +53,10 @@ export class AssignmentService {
     types,
     maxResults = 100,
   }: FindAssignableObjectsOptions): Promise<AssignableObject[]> {
-    const searchedTypes = types
+    const searchedTypes = (types
       ? types.filter((type) => taggableTypes.includes(type))
-      : taggableTypes;
+      : taggableTypes
+    ).filter((type) => this.typeRegistry.getType(type) !== undefined);
     const assignableTypes = await this.getAssignableTypes(searchedTypes);
 
     // if no provided type was assignable, return an empty list instead of throwing an error
