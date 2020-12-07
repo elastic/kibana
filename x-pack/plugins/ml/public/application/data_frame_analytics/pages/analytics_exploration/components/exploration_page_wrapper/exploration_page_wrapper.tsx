@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useUrlState } from '../../../../../util/url_state';
-
 import {
   defaultSearchQuery,
-  getDefaultTrainingFilterQuery,
   useResultsViewConfig,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
@@ -27,6 +24,8 @@ import { ExplorationQueryBar } from '../exploration_query_bar';
 import { JobConfigErrorCallout } from '../job_config_error_callout';
 import { LoadingPanel } from '../loading_panel';
 import { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
+import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
+import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
 
 const filters = {
   options: [
@@ -58,7 +57,6 @@ interface Props {
   title: string;
   EvaluatePanel: FC<EvaluatePanelProps>;
   FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps>;
-  defaultIsTraining?: boolean;
 }
 
 export const ExplorationPageWrapper: FC<Props> = ({
@@ -66,7 +64,6 @@ export const ExplorationPageWrapper: FC<Props> = ({
   title,
   EvaluatePanel,
   FeatureImportanceSummaryPanel,
-  defaultIsTraining,
 }) => {
   const {
     indexPattern,
@@ -81,24 +78,26 @@ export const ExplorationPageWrapper: FC<Props> = ({
     totalFeatureImportance,
   } = useResultsViewConfig(jobId);
 
-  const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
-  const [globalState, setGlobalState] = useUrlState('_g');
-  const [defaultQueryString, setDefaultQueryString] = useState<string | undefined>();
+  const [pageUrlState, setPageUrlState] = useExplorationUrlState();
 
-  useEffect(() => {
-    if (defaultIsTraining !== undefined && jobConfig !== undefined) {
-      // Apply defaultIsTraining filter
-      setSearchQuery(
-        getDefaultTrainingFilterQuery(jobConfig.dest.results_field, defaultIsTraining)
-      );
-      setDefaultQueryString(`${jobConfig.dest.results_field}.is_training : ${defaultIsTraining}`);
-      // Clear defaultIsTraining from url
-      setGlobalState('ml', {
-        analysisType: globalState.ml.analysisType,
-        jobId: globalState.ml.jobId,
-      });
-    }
-  }, [jobConfig?.dest.results_field]);
+  const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
+
+  const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = useCallback(
+    (update) => {
+      if (update.query) {
+        setSearchQuery(update.query);
+      }
+      if (update.queryString !== pageUrlState.queryText) {
+        setPageUrlState({ queryText: update.queryString, queryLanguage: update.language });
+      }
+    },
+    [pageUrlState, setPageUrlState]
+  );
+
+  const query: ExplorationQueryBarProps['query'] = {
+    query: pageUrlState.queryText,
+    language: pageUrlState.queryLanguage,
+  };
 
   if (indexPatternErrorMessage !== undefined) {
     return (
@@ -144,8 +143,8 @@ export const ExplorationPageWrapper: FC<Props> = ({
                 <EuiFlexItem>
                   <ExplorationQueryBar
                     indexPattern={indexPattern}
-                    setSearchQuery={setSearchQuery}
-                    defaultQueryString={defaultQueryString}
+                    setSearchQuery={searchQueryUpdateHandler}
+                    query={query}
                     filters={filters}
                   />
                 </EuiFlexItem>

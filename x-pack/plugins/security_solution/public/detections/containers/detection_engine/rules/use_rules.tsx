@@ -42,6 +42,7 @@ export const useRules = ({
   const [loading, setLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
 
+  const filterTags = filterOptions.tags?.sort().join();
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
@@ -96,8 +97,7 @@ export const useRules = ({
     filterOptions.filter,
     filterOptions.sortField,
     filterOptions.sortOrder,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    filterOptions.tags?.sort().join(),
+    filterTags,
     filterOptions.showCustomRules,
     filterOptions.showElasticRules,
     refetchPrePackagedRulesStatus,

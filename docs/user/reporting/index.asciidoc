@@ -55,6 +55,8 @@ click the share icon image:user/reporting/images/canvas-share-button.png["Canvas
 +
 A notification appears when the report is complete.
 
+NOTE: When you export a data table or saved search from a dashboard report, the PDF includes only the visible data.
+
 [float]
 [[reporting-layout-sizing]]
 == Layout and sizing

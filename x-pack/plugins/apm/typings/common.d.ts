@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { UnwrapPromise } from '@kbn/utility-types';
 import '../../../typings/rison_node';
 import '../../infra/types/eui';
 // EUIBasicTable
@@ -21,8 +21,6 @@ type AllowUnknownObjectProperties<T> = T extends object
     }
   : T;
 
-export type PromiseValueType<Value> = Value extends Promise<infer Value>
-  ? Value
-  : Value;
+export type PromiseValueType<T extends Promise<any>> = UnwrapPromise<T>;
 
 export type Maybe<T> = T | null | undefined;

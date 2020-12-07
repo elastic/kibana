@@ -31,13 +31,20 @@ describe('RuleActionsField', () => {
         },
       },
     });
+
+    const messageVariables = {
+      context: [],
+      state: [],
+      params: [],
+    };
+
     const Component = () => {
       const field = useFormFieldMock();
       const { form } = useForm();
 
       return (
         <Form form={form}>
-          <RuleActionsField euiFieldProps={{ options: [] }} field={field} />
+          <RuleActionsField field={field} messageVariables={messageVariables} />
         </Form>
       );
     };

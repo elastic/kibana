@@ -13,6 +13,7 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup } from './lib';
+import { RecoveredActionGroup } from '../../../common';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -33,7 +34,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -51,6 +51,7 @@ describe('listAlertTypes', () => {
     actionGroups: [],
     actionVariables: undefined,
     defaultActionGroupId: 'default',
+    recoveryActionGroup: RecoveredActionGroup,
     id: 'alertingAlertType',
     name: 'alertingAlertType',
     producer: 'alerts',
@@ -59,6 +60,7 @@ describe('listAlertTypes', () => {
     actionGroups: [],
     actionVariables: undefined,
     defaultActionGroupId: 'default',
+    recoveryActionGroup: RecoveredActionGroup,
     id: 'myAppAlertType',
     name: 'myAppAlertType',
     producer: 'myApp',
@@ -97,6 +99,7 @@ describe('listAlertTypes', () => {
         actionGroups: [],
         actionVariables: undefined,
         defaultActionGroupId: 'default',
+        recoveryActionGroup: RecoveredActionGroup,
         id: 'myType',
         name: 'myType',
         producer: 'myApp',
@@ -106,6 +109,7 @@ describe('listAlertTypes', () => {
         name: 'Test',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
+        recoveryActionGroup: RecoveredActionGroup,
         producer: 'alerts',
       },
     ]);
@@ -120,6 +124,7 @@ describe('listAlertTypes', () => {
           name: 'Test',
           actionGroups: [{ id: 'default', name: 'Default' }],
           defaultActionGroupId: 'default',
+          recoveryActionGroup: RecoveredActionGroup,
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },

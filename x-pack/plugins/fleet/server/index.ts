@@ -5,7 +5,7 @@
  */
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
-import { IngestManagerPlugin } from './plugin';
+import { FleetPlugin } from './plugin';
 import {
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
@@ -13,13 +13,14 @@ import {
 } from '../common';
 
 export { default as apm } from 'elastic-apm-node';
-export { AgentService, ESIndexPatternService, getRegistryUrl, PackageService } from './services';
 export {
-  IngestManagerSetupContract,
-  IngestManagerSetupDeps,
-  IngestManagerStartContract,
-  ExternalCallback,
-} from './plugin';
+  AgentService,
+  ESIndexPatternService,
+  getRegistryUrl,
+  PackageService,
+  AgentPolicyServiceInterface,
+} from './services';
+export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -65,10 +66,10 @@ export const config: PluginConfigDescriptor = {
   }),
 };
 
-export type IngestManagerConfigType = TypeOf<typeof config.schema>;
+export type FleetConfigType = TypeOf<typeof config.schema>;
 
 export { PackagePolicyServiceInterface } from './services/package_policy';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
-  return new IngestManagerPlugin(initializerContext);
+  return new FleetPlugin(initializerContext);
 };

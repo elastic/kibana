@@ -263,7 +263,7 @@ export class Field extends PureComponent<FieldProps> {
 
     return new Promise((resolve, reject) => {
       reader.onload = () => {
-        resolve(reader.result || undefined);
+        resolve(reader.result!);
       };
       reader.onerror = (err) => {
         reject(err);

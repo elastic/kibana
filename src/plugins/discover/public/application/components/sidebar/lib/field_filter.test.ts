@@ -59,6 +59,7 @@ describe('field_filter', function () {
     const fieldList = [
       {
         name: 'bytes',
+        displayName: 'Bye,bye,Bytes',
         type: 'number',
         esTypes: ['long'],
         count: 10,
@@ -68,6 +69,7 @@ describe('field_filter', function () {
       },
       {
         name: 'extension',
+        displayName: 'Extension',
         type: 'string',
         esTypes: ['text'],
         count: 10,
@@ -80,6 +82,8 @@ describe('field_filter', function () {
     [
       { filter: {}, result: ['bytes', 'extension'] },
       { filter: { name: 'by' }, result: ['bytes'] },
+      { filter: { name: 'Ext' }, result: ['extension'] },
+      { filter: { name: 'Bytes' }, result: ['bytes'] },
       { filter: { aggregatable: true }, result: ['extension'] },
       { filter: { aggregatable: true, searchable: false }, result: [] },
       { filter: { type: 'string' }, result: ['extension'] },

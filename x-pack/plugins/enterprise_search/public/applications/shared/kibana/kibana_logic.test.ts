@@ -34,6 +34,12 @@ describe('KibanaLogic', () => {
 
       expect(KibanaLogic.values.config).toEqual({});
     });
+
+    it('gracefully handles non-cloud installs', () => {
+      mountKibanaLogic({ ...mockKibanaValues, cloud: undefined } as any);
+
+      expect(KibanaLogic.values.cloud).toEqual({});
+    });
   });
 
   describe('navigateToUrl()', () => {

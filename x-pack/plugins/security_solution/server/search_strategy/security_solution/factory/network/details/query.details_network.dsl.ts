@@ -106,7 +106,7 @@ export const buildNetworkDetailsQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggs: {
         ...getAggs('source', ip),
         ...getAggs('destination', ip),

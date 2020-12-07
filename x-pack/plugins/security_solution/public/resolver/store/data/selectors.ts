@@ -83,29 +83,29 @@ export const originID: (state: DataState) => string | undefined = createSelector
 /**
  * Process events that will be displayed as terminated.
  */
-export const terminatedProcesses = createSelector(resolverTreeResponse, function (
-  tree?: ResolverTree
-) {
-  if (!tree) {
-    return new Set();
+export const terminatedProcesses = createSelector(
+  resolverTreeResponse,
+  function (tree?: ResolverTree) {
+    if (!tree) {
+      return new Set();
+    }
+    return new Set(
+      resolverTreeModel
+        .lifecycleEvents(tree)
+        .filter(isTerminatedProcess)
+        .map((terminatedEvent) => {
+          return eventModel.entityIDSafeVersion(terminatedEvent);
+        })
+    );
   }
-  return new Set(
-    resolverTreeModel
-      .lifecycleEvents(tree)
-      .filter(isTerminatedProcess)
-      .map((terminatedEvent) => {
-        return eventModel.entityIDSafeVersion(terminatedEvent);
-      })
-  );
-});
+);
 
 /**
  * A function that given an entity id returns a boolean indicating if the id is in the set of terminated processes.
  */
 export const isProcessTerminated = createSelector(terminatedProcesses, function (
-  /* eslint-disable no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   terminatedProcesses
-  /* eslint-enable no-shadow */
 ) {
   return (entityID: string) => {
     return terminatedProcesses.has(entityID);
@@ -137,9 +137,8 @@ export const graphableProcesses = createSelector(resolverTreeResponse, function 
  * The 'indexed process tree' contains the tree data, indexed in helpful ways. Used for O(1) access to stuff during graph layout.
  */
 export const tree = createSelector(graphableProcesses, function indexedTree(
-  /* eslint-disable no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   graphableProcesses
-  /* eslint-enable no-shadow */
 ) {
   return indexedProcessTreeModel.factory(graphableProcesses);
 });
@@ -248,9 +247,8 @@ export const relatedEventsByCategory: (
 ) => (node: string, eventCategory: string) => SafeResolverEvent[] = createSelector(
   relatedEventsByEntityId,
   function (
-    /* eslint-disable no-shadow */
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     relatedEventsByEntityId
-    /* eslint-enable no-shadow */
   ) {
     // A map of nodeID -> event category -> SafeResolverEvent[]
     const nodeMap: Map<string, Map<string, SafeResolverEvent[]>> = new Map();
@@ -351,10 +349,9 @@ export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
   originID,
   function processNodePositionsAndEdgeLineSegments(
-    /* eslint-disable no-shadow */
     indexedProcessTree,
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     originID
-    /* eslint-enable no-shadow */
   ) {
     // use the isometric taxi layout as a base
     const taxiLayout = isometricTaxiLayoutModel.isometricTaxiLayoutFactory(indexedProcessTree);
@@ -650,7 +647,7 @@ export const relatedEventCountOfTypeForNode: (
 export const panelViewAndParameters = createSelector(
   (state: DataState) => state.locationSearch,
   resolverComponentInstanceID,
-  /* eslint-disable-next-line no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   (locationSearch, resolverComponentInstanceID) => {
     return panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID({
       locationSearch,
@@ -670,7 +667,7 @@ export const nodeEventsInCategory = (state: DataState) => {
 export const lastRelatedEventResponseContainsCursor = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
-  /* eslint-disable-next-line no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function (nodeEventsInCategory, panelViewAndParameters) {
     if (
       nodeEventsInCategory !== undefined &&
@@ -689,7 +686,7 @@ export const lastRelatedEventResponseContainsCursor = createSelector(
 export const hadErrorLoadingNodeEventsInCategory = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
-  /* eslint-disable-next-line no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function (nodeEventsInCategory, panelViewAndParameters) {
     if (
       nodeEventsInCategory !== undefined &&
@@ -708,7 +705,7 @@ export const hadErrorLoadingNodeEventsInCategory = createSelector(
 export const isLoadingNodeEventsInCategory = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
-  /* eslint-disable-next-line no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function (nodeEventsInCategory, panelViewAndParameters) {
     const { panelView } = panelViewAndParameters;
     return panelView === 'nodeEventsInCategory' && nodeEventsInCategory === undefined;
@@ -718,7 +715,7 @@ export const isLoadingNodeEventsInCategory = createSelector(
 export const isLoadingMoreNodeEventsInCategory = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
-  /* eslint-disable-next-line no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function (nodeEventsInCategory, panelViewAndParameters) {
     if (
       nodeEventsInCategory !== undefined &&

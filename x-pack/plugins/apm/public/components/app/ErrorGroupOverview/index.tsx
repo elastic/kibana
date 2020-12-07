@@ -16,13 +16,14 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { SearchBar } from '../../shared/search_bar';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
+import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 
 interface ErrorGroupOverviewProps {
   serviceName: string;
@@ -30,33 +31,18 @@ interface ErrorGroupOverviewProps {
 
 function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   const { urlParams, uiFilters } = useUrlParams();
-
   const { start, end, sortField, sortDirection } = urlParams;
-
-  const { data: errorDistributionData } = useFetcher(() => {
-    if (start && end) {
-      return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors/distribution',
-        params: {
-          path: {
-            serviceName,
-          },
-          query: {
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters),
-          },
-        },
-      });
-    }
-  }, [serviceName, start, end, uiFilters]);
+  const { errorDistributionData } = useErrorGroupDistributionFetcher({
+    serviceName,
+    groupId: undefined,
+  });
 
   const { data: errorGroupListData } = useFetcher(() => {
     const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
 
     if (start && end) {
       return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors',
+        endpoint: 'GET /api/apm/services/{serviceName}/errors',
         params: {
           path: {
             serviceName,

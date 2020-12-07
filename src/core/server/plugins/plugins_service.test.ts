@@ -102,7 +102,7 @@ const createPlugin = (
   });
 };
 
-async function testSetup(options: { isDevClusterMaster?: boolean } = {}) {
+async function testSetup(options: { isDevCliParent?: boolean } = {}) {
   mockPackage.raw = {
     branch: 'feature-v1',
     version: 'v1',
@@ -116,7 +116,7 @@ async function testSetup(options: { isDevClusterMaster?: boolean } = {}) {
   coreId = Symbol('core');
   env = Env.createDefault(REPO_ROOT, {
     ...getEnvOptions(),
-    isDevClusterMaster: options.isDevClusterMaster ?? false,
+    isDevCliParent: options.isDevCliParent ?? false,
   });
 
   config$ = new BehaviorSubject<Record<string, any>>({ plugins: { initialize: true } });
@@ -638,10 +638,10 @@ describe('PluginsService', () => {
   });
 });
 
-describe('PluginService when isDevClusterMaster is true', () => {
+describe('PluginService when isDevCliParent is true', () => {
   beforeEach(async () => {
     await testSetup({
-      isDevClusterMaster: true,
+      isDevCliParent: true,
     });
   });
 

@@ -8,6 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
+import { getInvalidFieldMessage } from './helpers';
+
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
 const SCALE = 'ratio';
@@ -42,6 +44,8 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
     }
   },
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 
@@ -52,6 +56,8 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
+  getDefaultLabel: (column, indexPattern) =>
+    ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
   buildColumn({ field, previousColumn }) {
     return {
       label: ofName(field.displayName),

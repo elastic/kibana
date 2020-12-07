@@ -22,7 +22,6 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   describe('export_rules', () => {
     describe('exporting rules', () => {
@@ -32,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
       });
 
       it('should set the response content types to be expected', async () => {

@@ -110,21 +110,21 @@ export const validateDatasourceAndVisualization = (
       longMessage: string;
     }>
   | undefined => {
-  const layersGroups =
-    currentVisualizationState &&
-    currentVisualization
-      ?.getLayerIds(currentVisualizationState)
-      .reduce<Record<string, VisualizationDimensionGroupConfig[]>>((memo, layerId) => {
-        const groups = currentVisualization?.getConfiguration({
-          frame: frameAPI,
-          layerId,
-          state: currentVisualizationState,
-        }).groups;
-        if (groups) {
-          memo[layerId] = groups;
-        }
-        return memo;
-      }, {});
+  const layersGroups = currentVisualizationState
+    ? currentVisualization
+        ?.getLayerIds(currentVisualizationState)
+        .reduce<Record<string, VisualizationDimensionGroupConfig[]>>((memo, layerId) => {
+          const groups = currentVisualization?.getConfiguration({
+            frame: frameAPI,
+            layerId,
+            state: currentVisualizationState,
+          }).groups;
+          if (groups) {
+            memo[layerId] = groups;
+          }
+          return memo;
+        }, {})
+    : undefined;
 
   const datasourceValidationErrors = currentDatasourceState
     ? currentDataSource?.getErrorMessages(currentDatasourceState, layersGroups)
@@ -134,7 +134,7 @@ export const validateDatasourceAndVisualization = (
     ? currentVisualization?.getErrorMessages(currentVisualizationState, frameAPI)
     : undefined;
 
-  if (datasourceValidationErrors || visualizationValidationErrors) {
+  if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
     return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
   }
   return undefined;

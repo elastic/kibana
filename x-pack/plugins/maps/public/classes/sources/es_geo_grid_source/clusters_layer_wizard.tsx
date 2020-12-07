@@ -29,7 +29,7 @@ import {
   STYLE_TYPE,
 } from '../../../../common/constants';
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
-import { ClustersLayerIcon } from './clusters_layer_icon';
+import { ClustersLayerIcon } from '../../layers/icons/clusters_layer_icon';
 
 export const clustersLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
@@ -77,7 +77,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
           [VECTOR_STYLES.ICON_SIZE]: {
             type: STYLE_TYPE.DYNAMIC,
             options: {
-              ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
+              ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
@@ -87,7 +87,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
           [VECTOR_STYLES.LABEL_TEXT]: {
             type: STYLE_TYPE.DYNAMIC,
             options: {
-              ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]!.options,
+              ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,

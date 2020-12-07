@@ -25,10 +25,11 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 import { CytoscapeContext } from './cytoscape';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
-// import { DeleteButton } from './delete_button';
+// import { DeleteButton } from './delete_button'; // TODO: add delete functionality in followup
 
 interface Props {
-  analyticsId: string;
+  analyticsId?: string;
+  modelId?: string;
   details: any;
   getNodeData: any;
 }
@@ -56,7 +57,7 @@ function getListItems(details: object): EuiDescriptionListProps['listItems'] {
   });
 }
 
-export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
+export const Controls: FC<Props> = ({ analyticsId, modelId, details, getNodeData }) => {
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
   const [selectedNode, setSelectedNode] = useState<cytoscape.NodeSingular | undefined>();
 
@@ -98,10 +99,12 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
   }
 
   const nodeDataButton =
-    analyticsId !== nodeLabel && nodeType === JOB_MAP_NODE_TYPES.ANALYTICS ? (
+    analyticsId !== nodeLabel &&
+    modelId !== nodeLabel &&
+    (nodeType === JOB_MAP_NODE_TYPES.ANALYTICS || nodeType === JOB_MAP_NODE_TYPES.INDEX) ? (
       <EuiButtonEmpty
         onClick={() => {
-          getNodeData(nodeLabel);
+          getNodeData({ id: nodeLabel, type: nodeType });
           setShowFlyout(false);
         }}
         iconType="branch"

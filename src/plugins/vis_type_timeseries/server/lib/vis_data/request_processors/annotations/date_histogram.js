@@ -29,11 +29,17 @@ export function dateHistogram(
   annotation,
   esQueryConfig,
   indexPatternObject,
-  capabilities
+  capabilities,
+  { barTargetUiSettings }
 ) {
   return (next) => (doc) => {
     const timeField = annotation.time_field;
-    const { bucketSize, intervalString } = getBucketSize(req, 'auto', capabilities);
+    const { bucketSize, intervalString } = getBucketSize(
+      req,
+      'auto',
+      capabilities,
+      barTargetUiSettings
+    );
     const { from, to } = getTimerange(req);
     const timezone = capabilities.searchTimezone;
 

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiFormRow } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CopyOptions } from '../types';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
@@ -45,14 +45,18 @@ export const CopyToSpaceForm = (props: Props) => {
         updateSelection={(newValues: CopyMode) => changeCopyMode(newValues)}
       />
 
-      <EuiSpacer />
+      <EuiSpacer size="m" />
 
       <EuiFormRow
         label={
-          <FormattedMessage
-            id="xpack.spaces.management.copyToSpace.selectSpacesLabel"
-            defaultMessage="Select spaces"
-          />
+          <EuiTitle size="xs">
+            <span>
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpace.selectSpacesLabel"
+                defaultMessage="Select spaces"
+              />
+            </span>
+          </EuiTitle>
         }
         fullWidth
       >

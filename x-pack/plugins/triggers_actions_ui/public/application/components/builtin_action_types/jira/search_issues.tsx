@@ -14,7 +14,7 @@ import { useGetSingleIssue } from './use_get_single_issue';
 import * as i18n from './translations';
 
 interface Props {
-  selectedValue: string | null;
+  selectedValue?: string | null;
   http: HttpSetup;
   toastNotifications: Pick<
     ToastsApi,

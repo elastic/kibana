@@ -60,7 +60,7 @@ export function SavedViewListModal<ViewState extends { id: string; name: string 
       key: v.id,
       checked: currentView?.id === v.id ? 'on' : undefined,
     }));
-  }, [views, currentView]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [views, currentView]);
 
   return (
     <EuiOverlayMask>

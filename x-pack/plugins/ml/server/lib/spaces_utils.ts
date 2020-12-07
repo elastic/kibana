@@ -5,32 +5,52 @@
  */
 
 import { Legacy } from 'kibana';
-import { KibanaRequest } from 'kibana/server';
-import { SpacesPluginSetup } from '../../../spaces/server';
+import { KibanaRequest } from '../../../../../src/core/server';
+import { SpacesPluginStart } from '../../../spaces/server';
+import { PLUGIN_ID } from '../../common/constants/app';
 
 export type RequestFacade = KibanaRequest | Legacy.Request;
 
 export function spacesUtilsProvider(
-  spacesPlugin: SpacesPluginSetup | undefined,
+  getSpacesPlugin: (() => Promise<SpacesPluginStart>) | undefined,
   request: RequestFacade
 ) {
   async function isMlEnabledInSpace(): Promise<boolean> {
-    if (spacesPlugin === undefined) {
+    if (getSpacesPlugin === undefined) {
       // if spaces is disabled force isMlEnabledInSpace to be true
       return true;
     }
-    const space = await spacesPlugin.spacesService.getActiveSpace(request);
-    return space.disabledFeatures.includes('ml') === false;
+    const space = await (await getSpacesPlugin()).spacesService.getActiveSpace(
+      request instanceof KibanaRequest ? request : KibanaRequest.from(request)
+    );
+    return space.disabledFeatures.includes(PLUGIN_ID) === false;
   }
 
-  async function getAllSpaces(): Promise<string[] | null> {
-    if (spacesPlugin === undefined) {
+  async function getAllSpaces() {
+    if (getSpacesPlugin === undefined) {
       return null;
     }
-    const client = await spacesPlugin.spacesService.scopedClient(request);
-    const spaces = await client.getAll();
+    const client = (await getSpacesPlugin()).spacesService.createSpacesClient(
+      request instanceof KibanaRequest ? request : KibanaRequest.from(request)
+    );
+    return await client.getAll();
+  }
+
+  async function getAllSpaceIds(): Promise<string[] | null> {
+    const spaces = await getAllSpaces();
+    if (spaces === null) {
+      return null;
+    }
     return spaces.map((s) => s.id);
   }
 
-  return { isMlEnabledInSpace, getAllSpaces };
+  async function getMlSpaceIds(): Promise<string[] | null> {
+    const spaces = await getAllSpaces();
+    if (spaces === null) {
+      return null;
+    }
+    return spaces.filter((s) => s.disabledFeatures.includes(PLUGIN_ID) === false).map((s) => s.id);
+  }
+
+  return { isMlEnabledInSpace, getAllSpaces, getAllSpaceIds, getMlSpaceIds };
 }

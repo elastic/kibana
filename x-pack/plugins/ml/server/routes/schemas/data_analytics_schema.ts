@@ -89,5 +89,5 @@ export const jobsExistSchema = schema.object({
 });
 
 export const analyticsMapQuerySchema = schema.maybe(
-  schema.object({ treatAsRoot: schema.maybe(schema.any()) })
+  schema.object({ treatAsRoot: schema.maybe(schema.any()), type: schema.maybe(schema.string()) })
 );

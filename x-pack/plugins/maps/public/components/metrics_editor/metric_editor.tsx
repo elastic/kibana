@@ -57,30 +57,31 @@ export function MetricEditor({
     if (!metricAggregationType) {
       return;
     }
-    const newMetricProps = {
-      ...metric,
+
+    const descriptor = {
       type: metricAggregationType,
+      label: metric.label,
     };
 
-    // unset field when new agg type does not support currently selected field.
-    if (metric.field && metricAggregationType !== AGG_TYPE.COUNT) {
-      const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
-      const found = fieldsForNewAggType.find((field) => {
-        return field.name === metric.field;
-      });
-      if (!found) {
-        newMetricProps.field = undefined;
-      }
+    if (metricAggregationType === AGG_TYPE.COUNT || !('field' in metric) || !metric.field) {
+      onChange(descriptor);
+      return;
     }
 
-    onChange(newMetricProps);
+    const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
+    const found = fieldsForNewAggType.find((field) => field.name === metric.field);
+    onChange({
+      ...descriptor,
+      field: found ? metric.field : undefined,
+    });
   };
   const onFieldChange = (fieldName?: string) => {
-    if (!fieldName) {
+    if (!fieldName || metric.type === AGG_TYPE.COUNT) {
       return;
     }
     onChange({
-      ...metric,
+      label: metric.label,
+      type: metric.type,
       field: fieldName,
     });
   };

@@ -10,6 +10,7 @@ Get last saved saved object fields
 
 ```typescript
 getOriginalSavedObjectBody: () => {
+        fieldAttrs?: string | undefined;
         title?: string | undefined;
         timeFieldName?: string | undefined;
         intervalName?: string | undefined;

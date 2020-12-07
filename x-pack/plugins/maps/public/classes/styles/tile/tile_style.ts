@@ -21,7 +21,7 @@ export class TileStyle implements IStyle {
     return LAYER_STYLE_TYPE.TILE;
   }
 
-  renderEditor(/* { layer, onStyleDescriptorChange } */) {
+  renderEditor(/* onStyleDescriptorChange */) {
     return null;
   }
 }

@@ -7,8 +7,8 @@
 import React from 'react';
 
 import { ActionType } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
 import { loadActionTypes } from '../../../lib/action_connector_api';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
   loadActionTypes: () => Promise<ActionType[]>;
@@ -20,7 +20,10 @@ export function withActionOperations<T>(
   WrappedComponent: React.ComponentType<T & ComponentOpts>
 ): React.FunctionComponent<PropsWithOptionalApiHandlers<T>> {
   return (props: PropsWithOptionalApiHandlers<T>) => {
-    const { http } = useAppDependencies();
+    const { http } = useKibana().services;
+    if (!http) {
+      throw new Error('KibanaContext has not been initalized correctly.');
+    }
     return (
       <WrappedComponent {...(props as T)} loadActionTypes={async () => loadActionTypes({ http })} />
     );

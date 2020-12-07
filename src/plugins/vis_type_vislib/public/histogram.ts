@@ -44,11 +44,11 @@ import { toExpressionAst } from './to_ast';
 export const histogramVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'histogram',
   title: i18n.translate('visTypeVislib.histogram.histogramTitle', {
-    defaultMessage: 'Vertical Bar',
+    defaultMessage: 'Vertical bar',
   }),
   icon: 'visBarVertical',
   description: i18n.translate('visTypeVislib.histogram.histogramDescription', {
-    defaultMessage: 'Assign a continuous variable to each axis',
+    defaultMessage: 'Present data in vertical bars on an axis.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   toExpressionAst,

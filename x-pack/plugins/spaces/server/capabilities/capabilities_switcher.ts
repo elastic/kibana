@@ -7,12 +7,12 @@ import _ from 'lodash';
 import { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
 import { KibanaFeature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
-import { SpacesServiceSetup } from '../spaces_service';
+import { SpacesServiceStart } from '../spaces_service';
 import { PluginsStart } from '../plugin';
 
 export function setupCapabilitiesSwitcher(
   core: CoreSetup<PluginsStart>,
-  spacesService: SpacesServiceSetup,
+  getSpacesService: () => SpacesServiceStart,
   logger: Logger
 ): CapabilitiesSwitcher {
   return async (request, capabilities) => {
@@ -24,7 +24,7 @@ export function setupCapabilitiesSwitcher(
 
     try {
       const [activeSpace, [, { features }]] = await Promise.all([
-        spacesService.getActiveSpace(request),
+        getSpacesService().getActiveSpace(request),
         core.getStartServices(),
       ]);
 

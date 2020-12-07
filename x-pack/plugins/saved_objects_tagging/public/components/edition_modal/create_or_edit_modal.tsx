@@ -22,6 +22,7 @@ import {
   EuiTextArea,
   EuiSpacer,
   EuiText,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -52,6 +53,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   tag,
   mode,
 }) => {
+  const optionalMessageId = htmlIdGenerator()();
   const ifMounted = useIfMounted();
   const [submitting, setSubmitting] = useState<boolean>(false);
 
@@ -139,6 +141,12 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                     onClick={() => setColor(getRandomColor())}
                     size="xs"
                     style={{ height: '18px', fontSize: '0.75rem' }}
+                    aria-label={i18n.translate(
+                      'xpack.savedObjectsTagging.management.createModal.color.randomizeAriaLabel',
+                      {
+                        defaultMessage: 'Randomize tag color',
+                      }
+                    )}
                   >
                     <FormattedMessage
                       id="xpack.savedObjectsTagging.management.createModal.color.randomize"
@@ -165,7 +173,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
               defaultMessage: 'Description',
             })}
             labelAppend={
-              <EuiText size="xs" color="subdued">
+              <EuiText size="xs" color="subdued" id={optionalMessageId}>
                 <FormattedMessage
                   id="xpack.savedObjectsTagging.management.optionalFieldText"
                   defaultMessage="Optional"
@@ -184,6 +192,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
               resize="none"
               fullWidth={true}
               compressed={true}
+              aria-describedby={optionalMessageId}
             />
           </EuiFormRow>
         </EuiForm>

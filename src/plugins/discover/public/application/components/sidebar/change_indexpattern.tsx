@@ -20,16 +20,16 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiButton,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiButtonEmptyProps,
+  EuiButtonProps,
 } from '@elastic/eui';
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
 import { IndexPatternRef } from './types';
 
-export type ChangeIndexPatternTriggerProps = EuiButtonEmptyProps & {
+export type ChangeIndexPatternTriggerProps = EuiButtonProps & {
   label: string;
   title?: string;
 };
@@ -47,16 +47,15 @@ export function ChangeIndexPattern({
   indexPatternRefs: IndexPatternRef[];
   onChangeIndexPattern: (newId: string) => void;
   indexPatternId?: string;
-  selectableProps?: EuiSelectableProps;
+  selectableProps?: EuiSelectableProps<{ value: string }>;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
   const createTrigger = function () {
     const { label, title, ...rest } = trigger;
     return (
-      <EuiButtonEmpty
-        className="eui-textTruncate"
-        flush="left"
+      <EuiButton
+        fullWidth
         color="text"
         iconSide="right"
         iconType="arrowDown"
@@ -64,8 +63,8 @@ export function ChangeIndexPattern({
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         {...rest}
       >
-        {label}
-      </EuiButtonEmpty>
+        <strong>{label}</strong>
+      </EuiButton>
     );
   };
 
@@ -74,11 +73,8 @@ export function ChangeIndexPattern({
       button={createTrigger()}
       isOpen={isPopoverOpen}
       closePopover={() => setPopoverIsOpen(false)}
-      className="eui-textTruncate"
-      anchorClassName="eui-textTruncate"
       display="block"
       panelPaddingSize="s"
-      ownFocus
     >
       <div style={{ width: 320 }}>
         <EuiPopoverTitle>
@@ -86,7 +82,7 @@ export function ChangeIndexPattern({
             defaultMessage: 'Change index pattern',
           })}
         </EuiPopoverTitle>
-        <EuiSelectable
+        <EuiSelectable<{ value: string }>
           data-test-subj="indexPattern-switcher"
           {...selectableProps}
           searchable

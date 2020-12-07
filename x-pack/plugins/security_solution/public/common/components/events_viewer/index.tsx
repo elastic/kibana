@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
@@ -12,18 +12,14 @@ import styled from 'styled-components';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
-import {
-  ColumnHeaderOptions,
-  SubsetTimelineModel,
-  TimelineModel,
-} from '../../../timelines/store/timeline/model';
-import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
+import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { EventsViewer } from './events_viewer';
 import { InspectButtonContainer } from '../inspect';
 import { useFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
+import { EventDetailsFlyout } from './event_details_flyout';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
 
@@ -66,13 +62,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   pageFilters,
   query,
   onRuleChange,
-  removeColumn,
   start,
   scopeId,
   showCheckboxes,
   sort,
-  updateItemsPerPage,
-  upsertColumn,
   utilityBar,
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
@@ -104,66 +97,44 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
-    (itemsChangedPerPage) => updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }),
-    [id, updateItemsPerPage]
-  );
-
-  const toggleColumn = useCallback(
-    (column: ColumnHeaderOptions) => {
-      const exists = columns.findIndex((c) => c.id === column.id) !== -1;
-
-      if (!exists && upsertColumn != null) {
-        upsertColumn({
-          column,
-          id,
-          index: 1,
-        });
-      }
-
-      if (exists && removeColumn != null) {
-        removeColumn({
-          columnId: column.id,
-          id,
-        });
-      }
-    },
-    [columns, id, upsertColumn, removeColumn]
-  );
-
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
 
   return (
-    <FullScreenContainer $isFullScreen={globalFullScreen}>
-      <InspectButtonContainer>
-        <EventsViewer
-          browserFields={browserFields}
-          columns={columns}
-          docValueFields={docValueFields}
-          id={id}
-          dataProviders={dataProviders!}
-          deletedEventIds={deletedEventIds}
-          end={end}
-          isLoadingIndexPattern={isLoadingIndexPattern}
-          filters={globalFilters}
-          headerFilterGroup={headerFilterGroup}
-          indexNames={selectedPatterns}
-          indexPattern={indexPattern}
-          isLive={isLive}
-          itemsPerPage={itemsPerPage!}
-          itemsPerPageOptions={itemsPerPageOptions!}
-          kqlMode={kqlMode}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          query={query}
-          onRuleChange={onRuleChange}
-          start={start}
-          sort={sort}
-          toggleColumn={toggleColumn}
-          utilityBar={utilityBar}
-          graphEventId={graphEventId}
-        />
-      </InspectButtonContainer>
-    </FullScreenContainer>
+    <>
+      <FullScreenContainer $isFullScreen={globalFullScreen}>
+        <InspectButtonContainer>
+          <EventsViewer
+            browserFields={browserFields}
+            columns={columns}
+            docValueFields={docValueFields}
+            id={id}
+            dataProviders={dataProviders!}
+            deletedEventIds={deletedEventIds}
+            end={end}
+            isLoadingIndexPattern={isLoadingIndexPattern}
+            filters={globalFilters}
+            headerFilterGroup={headerFilterGroup}
+            indexNames={selectedPatterns}
+            indexPattern={indexPattern}
+            isLive={isLive}
+            itemsPerPage={itemsPerPage!}
+            itemsPerPageOptions={itemsPerPageOptions!}
+            kqlMode={kqlMode}
+            query={query}
+            onRuleChange={onRuleChange}
+            start={start}
+            sort={sort}
+            utilityBar={utilityBar}
+            graphEventId={graphEventId}
+          />
+        </InspectButtonContainer>
+      </FullScreenContainer>
+      <EventDetailsFlyout
+        browserFields={browserFields}
+        docValueFields={docValueFields}
+        timelineId={id}
+      />
+    </>
   );
 };
 
@@ -213,9 +184,6 @@ const makeMapStateToProps = () => {
 const mapDispatchToProps = {
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
-  updateItemsPerPage: timelineActions.updateItemsPerPage,
-  removeColumn: timelineActions.removeColumn,
-  upsertColumn: timelineActions.upsertColumn,
 };
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

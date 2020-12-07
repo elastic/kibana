@@ -35,7 +35,7 @@ export async function writeServerFiles({
   buildDir,
   kibanaVersion,
 }: BuildContext) {
-  log.info('copying source into the build and converting with babel');
+  log.info('copying server source into the build and converting with babel');
 
   // copy source files and apply some babel transformations in the process
   await asyncPipeline(

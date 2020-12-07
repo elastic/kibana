@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCore } from './';
+import { useStartServices } from './';
 
 const KIBANA_BASE_PATH = '/app/kibana';
 
 export function useKibanaLink(path: string = '/') {
-  const core = useCore();
+  const core = useStartServices();
   return core.http.basePath.prepend(`${KIBANA_BASE_PATH}#${path}`);
 }

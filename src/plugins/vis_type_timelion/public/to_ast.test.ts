@@ -37,4 +37,10 @@ describe('timelion vis toExpressionAst function', () => {
     const actual = toExpressionAst(vis);
     expect(actual).toMatchSnapshot();
   });
+
+  it('should not escape single quotes', () => {
+    vis.params.expression = `.es(index=my*,timefield="date",split='test field:3',metric='avg:value')`;
+    const actual = toExpressionAst(vis);
+    expect(actual).toMatchSnapshot();
+  });
 });

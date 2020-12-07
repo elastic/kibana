@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
-<AnnotationsTableUI
+<Component
   annotations={
     Array [
       Object {
@@ -141,7 +141,7 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
 `;
 
 exports[`AnnotationsTable Initialization with job config prop. 1`] = `
-<AnnotationsTableUI
+<Component
   intl={
     Object {
       "defaultFormats": Object {},
@@ -403,7 +403,7 @@ exports[`AnnotationsTable Initialization with job config prop. 1`] = `
 `;
 
 exports[`AnnotationsTable Minimal initialization without props. 1`] = `
-<AnnotationsTableUI
+<Component
   intl={
     Object {
       "defaultFormats": Object {},

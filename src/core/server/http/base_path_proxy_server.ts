@@ -199,8 +199,13 @@ export class BasePathProxyServer {
         const isGet = request.method === 'get';
         const isBasepathLike = oldBasePath.length === 3;
 
+        const newUrl = Url.format({
+          pathname: `${this.httpConfig.basePath}/${kbnPath}`,
+          query: request.query,
+        });
+
         return isGet && isBasepathLike && shouldRedirectFromOldBasePath(kbnPath)
-          ? responseToolkit.redirect(`${this.httpConfig.basePath}/${kbnPath}`)
+          ? responseToolkit.redirect(newUrl)
           : responseToolkit.response('Not Found').code(404);
       },
       method: '*',

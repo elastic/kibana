@@ -4,24 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, useEffect, FC } from 'react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
-import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
+import React, { useRef, useEffect, FC, ReactNode } from 'react';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TagsCapabilities, TagWithRelations } from '../../../common';
 import { TagBadge } from '../../components';
+import { TagAction } from '../actions';
 
 interface TagTableProps {
   loading: boolean;
   capabilities: TagsCapabilities;
   tags: TagWithRelations[];
+  initialQuery?: Query;
+  allowSelection: boolean;
+  onQueryChange: (query?: Query) => void;
   selectedTags: TagWithRelations[];
   onSelectionChange: (selection: TagWithRelations[]) => void;
-  onEdit: (tag: TagWithRelations) => void;
-  onDelete: (tag: TagWithRelations) => void;
   getTagRelationUrl: (tag: TagWithRelations) => string;
   onShowRelations: (tag: TagWithRelations) => void;
+  actions: TagAction[];
+  actionBar: ReactNode;
 }
 
 const tablePagination = {
@@ -43,11 +46,15 @@ export const TagTable: FC<TagTableProps> = ({
   loading,
   capabilities,
   tags,
+  initialQuery,
+  allowSelection,
+  onQueryChange,
   selectedTags,
-  onEdit,
-  onDelete,
+  onSelectionChange,
   onShowRelations,
   getTagRelationUrl,
+  actionBar,
+  actions,
 }) => {
   const tableRef = useRef<EuiInMemoryTable<TagWithRelations>>(null);
 
@@ -56,42 +63,6 @@ export const TagTable: FC<TagTableProps> = ({
       tableRef.current.setSelection(selectedTags);
     }
   }, [selectedTags]);
-
-  const actions: Array<EuiTableAction<TagWithRelations>> = [];
-  if (capabilities.edit) {
-    actions.push({
-      name: i18n.translate('xpack.savedObjectsTagging.management.table.actions.edit.title', {
-        defaultMessage: 'Edit',
-      }),
-      description: i18n.translate(
-        'xpack.savedObjectsTagging.management.table.actions.edit.description',
-        {
-          defaultMessage: 'Edit this tag',
-        }
-      ),
-      type: 'icon',
-      icon: 'pencil',
-      onClick: (object: TagWithRelations) => onEdit(object),
-      'data-test-subj': 'tagsTableAction-edit',
-    });
-  }
-  if (capabilities.delete) {
-    actions.push({
-      name: i18n.translate('xpack.savedObjectsTagging.management.table.actions.delete.title', {
-        defaultMessage: 'Delete',
-      }),
-      description: i18n.translate(
-        'xpack.savedObjectsTagging.management.table.actions.delete.description',
-        {
-          defaultMessage: 'Delete this tag',
-        }
-      ),
-      type: 'icon',
-      icon: 'trash',
-      onClick: (object: TagWithRelations) => onDelete(object),
-      'data-test-subj': 'tagsTableAction-delete',
-    });
-  }
 
   const columns: Array<EuiBasicTableColumn<TagWithRelations>> = [
     {
@@ -171,13 +142,30 @@ export const TagTable: FC<TagTableProps> = ({
     <EuiInMemoryTable
       data-test-subj="tagsManagementTable"
       ref={tableRef}
+      childrenBetween={actionBar}
       loading={loading}
       itemId={'id'}
       columns={columns}
       items={tags}
       pagination={tablePagination}
       sorting={sorting}
+      tableCaption={i18n.translate('xpack.savedObjectsTagging.management.table.columns.caption', {
+        defaultMessage: 'Tags',
+      })}
+      rowHeader="name"
+      selection={
+        allowSelection
+          ? {
+              initialSelected: selectedTags,
+              onSelectionChange,
+            }
+          : undefined
+      }
       search={{
+        defaultQuery: initialQuery,
+        onChange: ({ query }) => {
+          onQueryChange(query || undefined);
+        },
         box: {
           'data-test-subj': 'tagsManagementSearchBar',
           incremental: true,

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alert, AlertType } from '../../types';
+import { AlertType } from '../../types';
+import { InitialAlert } from '../sections/alert_form/alert_reducer';
 
 /**
  * NOTE: Applications that want to show the alerting UIs will need to add
@@ -21,9 +22,9 @@ export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
 export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.delete;
 
-export function hasAllPrivilege(alert: Alert, alertType?: AlertType): boolean {
+export function hasAllPrivilege(alert: InitialAlert, alertType?: AlertType): boolean {
   return alertType?.authorizedConsumers[alert.consumer]?.all ?? false;
 }
-export function hasReadPrivilege(alert: Alert, alertType?: AlertType): boolean {
+export function hasReadPrivilege(alert: InitialAlert, alertType?: AlertType): boolean {
   return alertType?.authorizedConsumers[alert.consumer]?.read ?? false;
 }

@@ -57,6 +57,7 @@ export class JobsListView extends Component {
       deletingJobIds: [],
     };
 
+    this.spacesEnabled = props.spacesEnabled ?? false;
     this.updateFunctions = {};
 
     this.showEditJobFlyout = () => {};
@@ -67,6 +68,12 @@ export class JobsListView extends Component {
     // used to block timeouts for results polling
     // which can run after unmounting
     this._isMounted = false;
+    /**
+     * Indicates if the filters has been initialized by {@link JobFilterBar} component
+     * @type {boolean}
+     * @private
+     */
+    this._isFiltersSet = false;
   }
 
   componentDidMount() {
@@ -226,9 +233,15 @@ export class JobsListView extends Component {
     const filterClauses = (query && query.ast && query.ast.clauses) || [];
     const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
 
-    this.props.onJobsViewStateUpdate({
-      queryText: query?.text,
-    });
+    this.props.onJobsViewStateUpdate(
+      {
+        queryText: query?.text,
+      },
+      // Replace the URL state on filters initialization
+      this._isFiltersSet === false
+    );
+
+    this._isFiltersSet = true;
 
     this.setState({ filteredJobsSummaryList, filterClauses }, () => {
       this.refreshSelectedJobs();
@@ -253,7 +266,7 @@ export class JobsListView extends Component {
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
       try {
         let spaces = {};
-        if (this.props.isManagementTable) {
+        if (this.props.spacesEnabled && this.props.isManagementTable) {
           const allSpaces = await ml.savedObjects.jobsSpaces();
           spaces = allSpaces['anomaly-detector'];
         }
@@ -266,8 +279,11 @@ export class JobsListView extends Component {
             delete job.fullJob;
           }
           job.latestTimestampSortValue = job.latestTimestampMs || 0;
-          job.spaces =
-            this.props.isManagementTable && spaces && spaces[job.id] !== undefined
+          job.spaceIds =
+            this.props.spacesEnabled &&
+            this.props.isManagementTable &&
+            spaces &&
+            spaces[job.id] !== undefined
               ? spaces[job.id]
               : [];
           return job;
@@ -379,8 +395,10 @@ export class JobsListView extends Component {
             loading={loading}
             isManagementTable={true}
             isMlEnabledInSpace={this.props.isMlEnabledInSpace}
+            spacesEnabled={this.props.spacesEnabled}
             jobsViewState={this.props.jobsViewState}
             onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
+            refreshJobs={() => this.refreshJobSummaryList(true)}
           />
         </div>
       </div>

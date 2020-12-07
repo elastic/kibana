@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   staticIndexPatternRoute,
   dynamicIndexPatternRoute,
   apmIndexPatternTitleRoute,
 } from './index_pattern';
+import { createApi } from './create_api';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
@@ -22,6 +22,7 @@ import {
   serviceAnnotationsRoute,
   serviceAnnotationsCreateRoute,
   serviceErrorGroupsRoute,
+  serviceThroughputRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -40,20 +41,23 @@ import {
 } from './settings/apm_indices';
 import { metricsChartsRoute } from './metrics';
 import { serviceNodesRoute } from './service_nodes';
-import { tracesRoute, tracesByIdRoute } from './traces';
-import { transactionByTraceIdRoute } from './transaction';
 import {
-  correlationsForRangesRoute,
+  tracesRoute,
+  tracesByIdRoute,
+  rootTransactionByTraceIdRoute,
+} from './traces';
+import {
   correlationsForSlowTransactionsRoute,
+  correlationsForFailedTransactionsRoute,
 } from './correlations';
 import {
-  transactionGroupsBreakdownRoute,
-  transactionGroupsChartsRoute,
-  transactionGroupsDistributionRoute,
+  transactionChartsBreakdownRoute,
+  transactionChartsRoute,
+  transactionChartsDistributionRoute,
+  transactionChartsErrorRateRoute,
   transactionGroupsRoute,
-  transactionSampleForGroupRoute,
-  transactionGroupsErrorRateRoute,
-} from './transaction_groups';
+  transactionGroupsOverviewRoute,
+} from './transactions/transactions_routes';
 import {
   errorGroupsLocalFiltersRoute,
   metricsLocalFiltersRoute,
@@ -65,7 +69,6 @@ import {
   uiFiltersEnvironmentsRoute,
   rumOverviewLocalFiltersRoute,
 } from './ui_filters';
-import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
   createCustomLinkRoute,
@@ -117,6 +120,7 @@ const createApmApi = () => {
     .add(serviceAnnotationsRoute)
     .add(serviceAnnotationsCreateRoute)
     .add(serviceErrorGroupsRoute)
+    .add(serviceThroughputRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -130,7 +134,7 @@ const createApmApi = () => {
 
     // Correlations
     .add(correlationsForSlowTransactionsRoute)
-    .add(correlationsForRangesRoute)
+    .add(correlationsForFailedTransactionsRoute)
 
     // APM indices
     .add(apmIndexSettingsRoute)
@@ -144,14 +148,15 @@ const createApmApi = () => {
     // Traces
     .add(tracesRoute)
     .add(tracesByIdRoute)
+    .add(rootTransactionByTraceIdRoute)
 
-    // Transaction groups
-    .add(transactionGroupsBreakdownRoute)
-    .add(transactionGroupsChartsRoute)
-    .add(transactionGroupsDistributionRoute)
+    // Transactions
+    .add(transactionChartsBreakdownRoute)
+    .add(transactionChartsRoute)
+    .add(transactionChartsDistributionRoute)
+    .add(transactionChartsErrorRateRoute)
     .add(transactionGroupsRoute)
-    .add(transactionSampleForGroupRoute)
-    .add(transactionGroupsErrorRateRoute)
+    .add(transactionGroupsOverviewRoute)
 
     // UI filters
     .add(errorGroupsLocalFiltersRoute)
@@ -162,9 +167,6 @@ const createApmApi = () => {
     .add(transactionsLocalFiltersRoute)
     .add(serviceNodesLocalFiltersRoute)
     .add(uiFiltersEnvironmentsRoute)
-
-    // Transaction
-    .add(transactionByTraceIdRoute)
 
     // Service map
     .add(serviceMapRoute)

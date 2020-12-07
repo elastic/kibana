@@ -58,7 +58,7 @@ export const buildTimelineEventsAllQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       query: {
         bool: {
           filter,

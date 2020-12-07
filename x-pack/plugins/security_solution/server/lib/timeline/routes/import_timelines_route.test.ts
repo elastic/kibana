@@ -79,7 +79,7 @@ describe('import timelines', () => {
       };
     });
 
-    jest.doMock('../../../../../../../src/core/server/utils', () => {
+    jest.doMock('@kbn/utils', () => {
       return {
         createPromiseFromStreams: jest.fn().mockReturnValue(mockParsedObjects),
       };
@@ -545,7 +545,7 @@ describe('import timeline templates', () => {
       };
     });
 
-    jest.doMock('../../../../../../../src/core/server/utils', () => {
+    jest.doMock('@kbn/utils', () => {
       return {
         createPromiseFromStreams: jest.fn().mockReturnValue(mockParsedTemplateTimelineObjects),
       };

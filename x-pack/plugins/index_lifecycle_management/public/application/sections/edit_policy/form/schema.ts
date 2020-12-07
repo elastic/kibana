@@ -23,7 +23,7 @@ import { i18nTexts } from '../i18n_texts';
 const { emptyField, numberGreaterThanField } = fieldValidators;
 
 const serializers = {
-  stringToNumber: (v: string): any => (v ? parseInt(v, 10) : undefined),
+  stringToNumber: (v: string): any => (v != null ? parseInt(v, 10) : undefined),
 };
 
 export const schema: FormSchema<FormInternal> = {
@@ -285,6 +285,14 @@ export const schema: FormSchema<FormInternal> = {
             label: i18nTexts.editPolicy.setPriorityFieldLabel,
             validations: [{ validator: ifExistsNumberNonNegative }],
             serializer: serializers.stringToNumber,
+          },
+        },
+        searchable_snapshot: {
+          snapshot_repository: {
+            label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
+            validations: [
+              { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
+            ],
           },
         },
       },

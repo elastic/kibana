@@ -17,6 +17,7 @@ import { getActionType as getWebhookActionType } from './webhook';
 import { getActionType as getServiceNowActionType } from './servicenow';
 import { getActionType as getJiraActionType } from './jira';
 import { getActionType as getResilientActionType } from './resilient';
+import { getActionType as getTeamsActionType } from './teams';
 
 export function registerBuiltInActionTypes({
   actionsConfigUtils: configurationUtilities,
@@ -36,4 +37,5 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getServiceNowActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getJiraActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getResilientActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(getTeamsActionType({ logger, configurationUtilities }));
 }

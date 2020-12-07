@@ -58,7 +58,7 @@ describe('LayerPanel', () => {
       onRemoveLayer: jest.fn(),
       dispatch: jest.fn(),
       core: coreMock.createStart(),
-      dataTestSubj: 'lns_layerPanel-0',
+      index: 0,
     };
   }
 
@@ -137,7 +137,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['x'],
+            accessors: [{ columnId: 'x' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -177,7 +177,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['x'],
+            accessors: [{ columnId: 'x' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -209,7 +209,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['newid'],
+            accessors: [{ columnId: 'newid' }],
             filterOperations: () => true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',
@@ -257,7 +257,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['newid'],
+            accessors: [{ columnId: 'newid' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -302,7 +302,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['newid'],
+            accessors: [{ columnId: 'newid' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -322,6 +322,47 @@ describe('LayerPanel', () => {
       });
       component.update();
       expect(component.find('EuiFlyoutHeader').exists()).toBe(false);
+    });
+
+    it('should only update the state on close when needed', () => {
+      const updateDatasource = jest.fn();
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const component = mountWithIntl(
+        <LayerPanel {...getDefaultProps()} updateDatasource={updateDatasource} />
+      );
+
+      // Close without a state update
+      mockDatasource.updateStateOnCloseDimension = jest.fn();
+      component.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+      act(() => {
+        (component.find('DimensionContainer').first().prop('handleClose') as () => void)();
+      });
+      component.update();
+      expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
+      expect(updateDatasource).not.toHaveBeenCalled();
+
+      // Close with a state update
+      mockDatasource.updateStateOnCloseDimension = jest.fn().mockReturnValue({ newState: true });
+
+      component.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+      act(() => {
+        (component.find('DimensionContainer').first().prop('handleClose') as () => void)();
+      });
+      component.update();
+      expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
+      expect(updateDatasource).toHaveBeenCalledWith('ds1', { newState: true });
     });
   });
 
@@ -377,7 +418,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['a'],
+            accessors: [{ columnId: 'a' }],
             filterOperations: () => true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',
@@ -416,7 +457,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['a'],
+            accessors: [{ columnId: 'a' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroupA',
@@ -424,7 +465,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'B',
             groupId: 'b',
-            accessors: ['b'],
+            accessors: [{ columnId: 'b' }],
             filterOperations: () => true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroupB',
@@ -480,7 +521,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['a', 'b'],
+            accessors: [{ columnId: 'a' }, { columnId: 'b' }],
             filterOperations: () => true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',

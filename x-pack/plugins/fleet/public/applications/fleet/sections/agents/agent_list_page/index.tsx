@@ -278,6 +278,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     perPage: 1000,
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
   const agentPoliciesIndexedById = useMemo(() => {
     return agentPolicies.reduce((acc, agentPolicy) => {

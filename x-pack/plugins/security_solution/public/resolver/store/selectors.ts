@@ -257,10 +257,10 @@ export const relatedEventTotalForProcess = composeSelectors(
  * animated. So in order to get the currently visible entities, we need to pass in time.
  */
 export const visibleNodesAndEdgeLines = createSelector(nodesAndEdgelines, boundingBox, function (
-  /* eslint-disable no-shadow */
+  /* eslint-disable @typescript-eslint/no-shadow */
   nodesAndEdgelines,
   boundingBox
-  /* eslint-enable no-shadow */
+  /* eslint-enable @typescript-eslint/no-shadow */
 ) {
   // `boundingBox` and `nodesAndEdgelines` are each memoized.
   return (time: number) => nodesAndEdgelines(boundingBox(time));

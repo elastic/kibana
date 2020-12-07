@@ -16,7 +16,7 @@ import {
 import { findIndex } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
 
-import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
+import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
 import {
   RuleStep,
   RuleStepProps,
@@ -38,7 +38,7 @@ import { APP_ID } from '../../../../../common/constants';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
-  actionMessageParams: ActionVariable[];
+  actionMessageParams: ActionVariables;
 }
 
 const stepActionsDefaultValue: ActionsStepRule = {

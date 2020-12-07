@@ -284,7 +284,7 @@ describe('Datatable Visualization', () => {
           state: { layers: [layer] },
           frame,
         }).groups[1].accessors
-      ).toEqual(['c', 'b']);
+      ).toEqual([{ columnId: 'c' }, { columnId: 'b' }]);
     });
   });
 
@@ -410,7 +410,7 @@ describe('Datatable Visualization', () => {
 
       const error = datatableVisualization.getErrorMessages({ layers: [layer] }, frame);
 
-      expect(error).not.toBeDefined();
+      expect(error).toBeUndefined();
     });
 
     it('returns undefined if the metric dimension is defined', () => {
@@ -427,7 +427,7 @@ describe('Datatable Visualization', () => {
 
       const error = datatableVisualization.getErrorMessages({ layers: [layer] }, frame);
 
-      expect(error).not.toBeDefined();
+      expect(error).toBeUndefined();
     });
   });
 });

@@ -48,7 +48,7 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
               values={{
                 docsLink: (
                   <EuiLink
-                    href="https://www.elastic.co/guide/en/ingest-management/current/index.html"
+                    href="https://www.elastic.co/guide/en/fleet/current/index.html"
                     external
                     target="_blank"
                   >

@@ -78,7 +78,7 @@ export async function getErrorRate({
         timeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: getBucketSize(start, end).intervalString,
+            fixed_interval: getBucketSize({ start, end }).intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },

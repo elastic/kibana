@@ -44,6 +44,7 @@ export {
   EpmPackageInstallStatus,
   InstallationStatus,
   PackageInfo,
+  ArchivePackage,
   RegistryVarsEntry,
   RegistryDataStream,
   RegistryElasticsearch,

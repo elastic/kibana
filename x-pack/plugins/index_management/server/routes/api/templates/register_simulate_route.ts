@@ -29,9 +29,13 @@ export function registerSimulateRoute({ router, license, lib }: RouteDependencie
         return res.ok({ body: templatePreview });
       } catch (e) {
         if (lib.isEsError(e)) {
+          const error = lib.parseEsError(e.response);
           return res.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: {
+              message: error.message,
+              attributes: error,
+            },
           });
         }
         // Case: default

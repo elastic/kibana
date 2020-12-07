@@ -129,9 +129,9 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   fetchExistingIndexPatterns = async () => {
-    const { savedObjects } = await this.context.services.savedObjects.client.find<
-      IndexPatternAttributes
-    >({
+    const {
+      savedObjects,
+    } = await this.context.services.savedObjects.client.find<IndexPatternAttributes>({
       type: 'index-pattern',
       fields: ['title'],
       perPage: 10000,

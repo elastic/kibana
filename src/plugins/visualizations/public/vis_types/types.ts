@@ -20,10 +20,11 @@
 import { IconType } from '@elastic/eui';
 import React from 'react';
 import { Adapters } from 'src/plugins/inspector';
+import { IndexPattern } from 'src/plugins/data/public';
 import { VisEditorConstructor } from 'src/plugins/visualize/public';
 import { ISchemas } from 'src/plugins/vis_default_editor/public';
 import { TriggerContextMapping } from '../../../ui_actions/public';
-import { Vis, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
+import { Vis, VisParams, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 
 export interface VisTypeOptions {
   showTimePicker: boolean;
@@ -64,6 +65,13 @@ export interface VisType<TVisParams = unknown> {
    * If given, it will return the supported triggers for this vis.
    */
   readonly getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
+
+  /**
+   * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.
+   * Using this method we can rewrite the standard mechanism for getting used indexes
+   */
+  readonly getUsedIndexPattern?: (visParams: VisParams) => IndexPattern[] | Promise<IndexPattern[]>;
+
   readonly isAccessible?: boolean;
   readonly requestHandler?: string | unknown;
   readonly responseHandler?: string | unknown;

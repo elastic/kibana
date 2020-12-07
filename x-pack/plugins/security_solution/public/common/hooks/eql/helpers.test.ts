@@ -19,7 +19,11 @@ import {
   formatInspect,
   getEventsToBucket,
 } from './helpers';
-import { getMockEqlResponse, getMockEqlSequenceResponse } from './eql_search_response.mock';
+import {
+  getMockEndgameEqlResponse,
+  getMockEqlResponse,
+  getMockEqlSequenceResponse,
+} from './eql_search_response.mock';
 
 describe('eql/helpers', () => {
   describe('calculateBucketForHour', () => {
@@ -145,6 +149,62 @@ describe('eql/helpers', () => {
 
   describe('getEqlAggsData', () => {
     describe('non-sequence', () => {
+      // NOTE: We previously expected @timestamp to be a string, however,
+      // date can also be a number (like for endgame-*)
+      test('it works when @timestamp is a number', () => {
+        const mockResponse = getMockEndgameEqlResponse();
+
+        const aggs = getEqlAggsData(
+          mockResponse,
+          'h',
+          '2020-10-04T16:00:00.368707900Z',
+          jest.fn() as inputsModel.Refetch,
+          ['foo-*'],
+          false
+        );
+
+        const date1 = moment(aggs.data[0].x);
+        const date2 = moment(aggs.data[1].x);
+        // This will be in ms
+        const diff = date1.diff(date2);
+
+        expect(diff).toEqual(120000);
+        expect(aggs.data).toHaveLength(31);
+        expect(aggs.data).toEqual([
+          { g: 'hits', x: 1601827200368, y: 0 },
+          { g: 'hits', x: 1601827080368, y: 0 },
+          { g: 'hits', x: 1601826960368, y: 0 },
+          { g: 'hits', x: 1601826840368, y: 0 },
+          { g: 'hits', x: 1601826720368, y: 0 },
+          { g: 'hits', x: 1601826600368, y: 1 },
+          { g: 'hits', x: 1601826480368, y: 0 },
+          { g: 'hits', x: 1601826360368, y: 0 },
+          { g: 'hits', x: 1601826240368, y: 0 },
+          { g: 'hits', x: 1601826120368, y: 0 },
+          { g: 'hits', x: 1601826000368, y: 0 },
+          { g: 'hits', x: 1601825880368, y: 0 },
+          { g: 'hits', x: 1601825760368, y: 0 },
+          { g: 'hits', x: 1601825640368, y: 0 },
+          { g: 'hits', x: 1601825520368, y: 0 },
+          { g: 'hits', x: 1601825400368, y: 0 },
+          { g: 'hits', x: 1601825280368, y: 0 },
+          { g: 'hits', x: 1601825160368, y: 0 },
+          { g: 'hits', x: 1601825040368, y: 0 },
+          { g: 'hits', x: 1601824920368, y: 0 },
+          { g: 'hits', x: 1601824800368, y: 0 },
+          { g: 'hits', x: 1601824680368, y: 0 },
+          { g: 'hits', x: 1601824560368, y: 2 },
+          { g: 'hits', x: 1601824440368, y: 0 },
+          { g: 'hits', x: 1601824320368, y: 0 },
+          { g: 'hits', x: 1601824200368, y: 0 },
+          { g: 'hits', x: 1601824080368, y: 0 },
+          { g: 'hits', x: 1601823960368, y: 1 },
+          { g: 'hits', x: 1601823840368, y: 0 },
+          { g: 'hits', x: 1601823720368, y: 0 },
+          { g: 'hits', x: 1601823600368, y: 0 },
+        ]);
+      });
+
       test('it returns results bucketed into 2 min intervals when range is "h"', () => {
         const mockResponse = getMockEqlResponse();
 

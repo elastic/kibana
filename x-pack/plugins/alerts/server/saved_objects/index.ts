@@ -16,6 +16,7 @@ export const AlertAttributesExcludedFromAAD = [
   'muteAll',
   'mutedInstanceIds',
   'updatedBy',
+  'updatedAt',
   'executionStatus',
 ];
 
@@ -28,6 +29,7 @@ export type AlertAttributesExcludedFromAADType =
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'updatedBy'
+  | 'updatedAt'
   | 'executionStatus';
 
 export function setupSavedObjects(
@@ -42,10 +44,32 @@ export function setupSavedObjects(
     mappings: mappings.alert,
   });
 
+  savedObjects.registerType({
+    name: 'api_key_pending_invalidation',
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        apiKeyId: {
+          type: 'keyword',
+        },
+        createdAt: {
+          type: 'date',
+        },
+      },
+    },
+  });
+
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey']),
     attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
+  });
+
+  // Encrypted attributes
+  encryptedSavedObjects.registerType({
+    type: 'api_key_pending_invalidation',
+    attributesToEncrypt: new Set(['apiKeyId']),
   });
 }

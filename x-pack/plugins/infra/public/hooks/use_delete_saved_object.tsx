@@ -29,7 +29,6 @@ export const useDeleteSavedObject = (type: string) => {
       };
       dobj();
     },
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [type, kibana.services.savedObjects]
   );
 

@@ -38,7 +38,6 @@ function HasExtendedBoundsParamEditor(props: AggParamEditorProps<boolean>) {
 
       setValue(value && agg.params.min_doc_count);
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [agg.params.min_doc_count, setValue, value]);
 
   return (

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import semver from 'semver';
+import semverSatisfies from 'semver/functions/satisfies';
 import uuid from 'uuid';
 import {
   GridData,
@@ -60,23 +60,23 @@ function isPre61Panel(
 }
 
 function is61Panel(panel: unknown | RawSavedDashboardPanel610): panel is RawSavedDashboardPanel610 {
-  return semver.satisfies((panel as RawSavedDashboardPanel610).version, '6.1.x');
+  return semverSatisfies((panel as RawSavedDashboardPanel610).version, '6.1.x');
 }
 
 function is62Panel(panel: unknown | RawSavedDashboardPanel620): panel is RawSavedDashboardPanel620 {
-  return semver.satisfies((panel as RawSavedDashboardPanel620).version, '6.2.x');
+  return semverSatisfies((panel as RawSavedDashboardPanel620).version, '6.2.x');
 }
 
 function is63Panel(panel: unknown | RawSavedDashboardPanel630): panel is RawSavedDashboardPanel630 {
-  return semver.satisfies((panel as RawSavedDashboardPanel630).version, '6.3.x');
+  return semverSatisfies((panel as RawSavedDashboardPanel630).version, '6.3.x');
 }
 
 function is640To720Panel(
   panel: unknown | RawSavedDashboardPanel640To720
 ): panel is RawSavedDashboardPanel640To720 {
   return (
-    semver.satisfies((panel as RawSavedDashboardPanel630).version, '>6.3') &&
-    semver.satisfies((panel as RawSavedDashboardPanel630).version, '<7.3')
+    semverSatisfies((panel as RawSavedDashboardPanel630).version, '>6.3') &&
+    semverSatisfies((panel as RawSavedDashboardPanel630).version, '<7.3')
   );
 }
 

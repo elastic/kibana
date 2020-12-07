@@ -14,14 +14,19 @@ import { getJobsListBreadcrumbs } from '../breadcrumbs';
 import { setDependencyCache, clearCache } from '../../util/dependency_cache';
 import './_index.scss';
 import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
+import { SpacesPluginStart } from '../../../../../spaces/public';
 
 const renderApp = (
   element: HTMLElement,
   history: ManagementAppMountParams['history'],
   coreStart: CoreStart,
-  share: SharePluginStart
+  share: SharePluginStart,
+  spaces?: SpacesPluginStart
 ) => {
-  ReactDOM.render(React.createElement(JobsListPage, { coreStart, history, share }), element);
+  ReactDOM.render(
+    React.createElement(JobsListPage, { coreStart, history, share, spaces }),
+    element
+  );
   return () => {
     unmountComponentAtNode(element);
     clearCache();
@@ -42,6 +47,11 @@ export async function mountApp(
   });
 
   params.setBreadcrumbs(getJobsListBreadcrumbs());
-
-  return renderApp(params.element, params.history, coreStart, pluginsStart.share);
+  return renderApp(
+    params.element,
+    params.history,
+    coreStart,
+    pluginsStart.share,
+    pluginsStart.spaces
+  );
 }

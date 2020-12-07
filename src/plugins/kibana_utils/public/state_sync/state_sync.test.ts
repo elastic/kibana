@@ -354,7 +354,7 @@ describe('state_sync', () => {
 
 function withDefaultState<State extends BaseState>(
   stateContainer: BaseStateContainer<State>,
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   defaultState: State
 ): INullableBaseStateContainer<State> {
   return {

@@ -19,6 +19,6 @@ test('MLLink produces the correct URL', async () => {
   );
 
   expect(href).toMatchInlineSnapshot(
-    `"/app/ml/jobs?_a=(queryText:'id:(something)%20groups:(apm)')&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-5h,to:now-2h))"`
+    `"/app/ml/jobs?_a=(jobs:(queryText:'id:(something)%20groups:(apm)'))&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-5h,to:now-2h))"`
   );
 });

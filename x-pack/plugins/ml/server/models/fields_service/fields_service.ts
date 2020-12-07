@@ -9,6 +9,10 @@ import { IScopedClusterClient } from 'kibana/server';
 import { duration } from 'moment';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
+import { AggCardinality } from '../../../common/types/fields';
+import { isValidAggregationField } from '../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 
 /**
  * Service for carrying out queries to obtain data
@@ -35,14 +39,29 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
    */
   async function getAggregatableFields(
     index: string | string[],
-    fieldNames: string[]
+    fieldNames: string[],
+    datafeedConfig?: Datafeed
   ): Promise<string[]> {
     const { body } = await asCurrentUser.fieldCaps({
       index,
       fields: fieldNames,
     });
     const aggregatableFields: string[] = [];
+    const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
+
     fieldNames.forEach((fieldName) => {
+      if (
+        typeof datafeedConfig?.script_fields === 'object' &&
+        datafeedConfig.script_fields.hasOwnProperty(fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      if (
+        datafeedAggregations !== undefined &&
+        isValidAggregationField(datafeedAggregations, fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
       const fieldInfo = body.fields[fieldName];
       const typeKeys = fieldInfo !== undefined ? Object.keys(fieldInfo) : [];
       if (typeKeys.length > 0) {
@@ -67,10 +86,12 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     query: any,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    datafeedConfig?: Datafeed
   ): Promise<{ [key: string]: number }> {
-    const aggregatableFields = await getAggregatableFields(index, fieldNames);
+    const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);
 
+    // getAggregatableFields doesn't account for scripted or aggregated fields
     if (aggregatableFields.length === 0) {
       return {};
     }
@@ -112,10 +133,22 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       mustCriteria.push(query);
     }
 
-    const aggs = fieldsToAgg.reduce((obj, field) => {
-      obj[field] = { cardinality: { field } };
-      return obj;
-    }, {} as { [field: string]: { cardinality: { field: string } } });
+    const aggs = fieldsToAgg.reduce(
+      (obj, field) => {
+        if (
+          typeof datafeedConfig?.script_fields === 'object' &&
+          datafeedConfig.script_fields.hasOwnProperty(field)
+        ) {
+          obj[field] = { cardinality: { script: datafeedConfig.script_fields[field].script } };
+        } else {
+          obj[field] = { cardinality: { field } };
+        }
+        return obj;
+      },
+      {} as {
+        [field: string]: AggCardinality;
+      }
+    );
 
     const body = {
       query: {

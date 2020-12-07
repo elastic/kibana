@@ -27,8 +27,7 @@ export async function createJobs({
 }) {
   try {
     await callApmApi({
-      pathname: '/api/apm/settings/anomaly-detection/jobs',
-      method: 'POST',
+      endpoint: 'POST /api/apm/settings/anomaly-detection/jobs',
       params: {
         body: { environments },
       },

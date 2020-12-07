@@ -136,6 +136,8 @@ const SuggestionPreview = ({
           paddingSize="none"
           data-test-subj="lnsSuggestion"
           onClick={onSelect}
+          aria-current={!!selected}
+          aria-label={preview.title}
         >
           {preview.expression || preview.error ? (
             <PreviewRenderer
@@ -273,6 +275,7 @@ export function SuggestionPanel({
     return (props: ReactExpressionRendererProps) => (
       <ExpressionRendererComponent {...props} searchContext={context} reload$={autoRefreshFetch$} />
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plugins.data.query.timefilter.timefilter, context]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
@@ -355,7 +358,7 @@ export function SuggestionPanel({
                 visualizationMap[currentVisualizationId].getDescription(currentVisualizationState)
                   .icon || 'empty',
               title: i18n.translate('xpack.lens.suggestions.currentVisLabel', {
-                defaultMessage: 'Current',
+                defaultMessage: 'Current visualization',
               }),
             }}
             ExpressionRenderer={AutoRefreshExpressionRenderer}

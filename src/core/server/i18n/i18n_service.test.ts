@@ -17,13 +17,18 @@
  * under the License.
  */
 
-import { getKibanaTranslationFilesMock, initTranslationsMock } from './i18n_service.test.mocks';
+import {
+  getKibanaTranslationFilesMock,
+  initTranslationsMock,
+  registerRoutesMock,
+} from './i18n_service.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { I18nService } from './i18n_service';
 
 import { configServiceMock } from '../config/mocks';
 import { mockCoreContext } from '../core_context.mock';
+import { httpServiceMock } from '../http/http_service.mock';
 
 const getConfigService = (locale = 'en') => {
   const configService = configServiceMock.create();
@@ -41,6 +46,7 @@ const getConfigService = (locale = 'en') => {
 describe('I18nService', () => {
   let service: I18nService;
   let configService: ReturnType<typeof configServiceMock.create>;
+  let http: ReturnType<typeof httpServiceMock.createInternalSetupContract>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,6 +54,8 @@ describe('I18nService', () => {
 
     const coreContext = mockCoreContext.create({ configService });
     service = new I18nService(coreContext);
+
+    http = httpServiceMock.createInternalSetupContract();
   });
 
   describe('#setup', () => {
@@ -55,7 +63,7 @@ describe('I18nService', () => {
       getKibanaTranslationFilesMock.mockResolvedValue([]);
 
       const pluginPaths = ['/pathA', '/pathB'];
-      await service.setup({ pluginPaths });
+      await service.setup({ pluginPaths, http });
 
       expect(getKibanaTranslationFilesMock).toHaveBeenCalledTimes(1);
       expect(getKibanaTranslationFilesMock).toHaveBeenCalledWith('en', pluginPaths);
@@ -65,17 +73,27 @@ describe('I18nService', () => {
       const translationFiles = ['/path/to/file', 'path/to/another/file'];
       getKibanaTranslationFilesMock.mockResolvedValue(translationFiles);
 
-      await service.setup({ pluginPaths: [] });
+      await service.setup({ pluginPaths: [], http });
 
       expect(initTranslationsMock).toHaveBeenCalledTimes(1);
       expect(initTranslationsMock).toHaveBeenCalledWith('en', translationFiles);
+    });
+
+    it('calls `registerRoutesMock` with the correct parameters', async () => {
+      await service.setup({ pluginPaths: [], http });
+
+      expect(registerRoutesMock).toHaveBeenCalledTimes(1);
+      expect(registerRoutesMock).toHaveBeenCalledWith({
+        locale: 'en',
+        router: expect.any(Object),
+      });
     });
 
     it('returns accessors for locale and translation files', async () => {
       const translationFiles = ['/path/to/file', 'path/to/another/file'];
       getKibanaTranslationFilesMock.mockResolvedValue(translationFiles);
 
-      const { getLocale, getTranslationFiles } = await service.setup({ pluginPaths: [] });
+      const { getLocale, getTranslationFiles } = await service.setup({ pluginPaths: [], http });
 
       expect(getLocale()).toEqual('en');
       expect(getTranslationFiles()).toEqual(translationFiles);

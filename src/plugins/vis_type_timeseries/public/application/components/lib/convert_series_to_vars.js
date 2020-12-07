@@ -19,7 +19,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import { getLastValue } from '../../../../../../plugins/vis_type_timeseries/common/get_last_value';
+import { getLastValue } from '../../../../common/get_last_value';
 import { createTickFormatter } from './tick_formatter';
 import { labelDateFormatter } from './label_date_formatter';
 import moment from 'moment';

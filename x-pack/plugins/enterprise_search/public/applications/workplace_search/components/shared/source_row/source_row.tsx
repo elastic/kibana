@@ -23,7 +23,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { EuiLink } from '../../../../shared/react_router_helpers';
+import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { SOURCE_STATUSES as statuses } from '../../../constants';
 import { ContentSourceDetails } from '../../../types';
 import { ADD_SOURCE_PATH, SOURCE_DETAILS_PATH, getContentSourcePath } from '../../../routes';
@@ -77,9 +77,9 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   const imageClass = classNames('source-row__icon', { 'source-row__icon--loading': isIndexing });
 
   const fixLink = (
-    <EuiLink to={`${ADD_SOURCE_PATH}/${_kebabCase(serviceType)}/re-authenticate?sourceId=${id}`}>
+    <EuiLinkTo to={`${ADD_SOURCE_PATH}/${_kebabCase(serviceType)}/re-authenticate?sourceId=${id}`}>
       Fix
-    </EuiLink>
+    </EuiLinkTo>
   );
 
   const remoteTooltip = (
@@ -159,13 +159,13 @@ export const SourceRow: React.FC<SourceRowProps> = ({
           {showFix && <EuiFlexItem grow={false}>{fixLink}</EuiFlexItem>}
           <EuiFlexItem grow={false}>
             {showDetails && (
-              <EuiLink
+              <EuiLinkTo
                 className="eui-textNoWrap"
                 data-test-subj="SourceDetailsLink"
                 to={getContentSourcePath(SOURCE_DETAILS_PATH, id, !!isOrganization)}
               >
                 Details
-              </EuiLink>
+              </EuiLinkTo>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

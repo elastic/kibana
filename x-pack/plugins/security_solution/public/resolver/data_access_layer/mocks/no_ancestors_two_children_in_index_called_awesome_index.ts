@@ -115,7 +115,18 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
       entities({ indices }): Promise<ResolverEntityIndex> {
         // Only return values if the `indices` array contains exactly `'awesome_index'`
         if (indices.length === 1 && indices[0] === 'awesome_index') {
-          return Promise.resolve([{ entity_id: metadata.entityIDs.origin }]);
+          return Promise.resolve([
+            {
+              name: 'endpoint',
+              schema: {
+                id: 'process.entity_id',
+                parent: 'process.parent.entity_id',
+                ancestry: 'process.Ext.ancestry',
+                name: 'process.name',
+              },
+              id: metadata.entityIDs.origin,
+            },
+          ]);
         }
         return Promise.resolve([]);
       },

@@ -5,6 +5,8 @@
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
+import type { Request } from '@hapi/hapi';
+import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
@@ -18,7 +20,6 @@ import {
   ErrorWithReason,
 } from '../lib';
 import {
-  AlertType,
   RawAlert,
   IntervalSchedule,
   Services,
@@ -37,6 +38,8 @@ import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_l
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
+import { ActionGroup } from '../../common';
+import { NormalizedAlertType } from '../alert_type_registry';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -55,10 +58,10 @@ export class TaskRunner {
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
-  private alertType: AlertType;
+  private alertType: NormalizedAlertType;
 
   constructor(
-    alertType: AlertType,
+    alertType: NormalizedAlertType,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext
   ) {
@@ -90,9 +93,10 @@ export class TaskRunner {
       requestHeaders.authorization = `ApiKey ${apiKey}`;
     }
 
-    return ({
+    const path = addSpaceIdToPath('/', spaceId);
+
+    const fakeRequest = KibanaRequest.from(({
       headers: requestHeaders,
-      getBasePath: () => this.context.getBasePath(spaceId),
       path: '/',
       route: { settings: {} },
       url: {
@@ -103,7 +107,11 @@ export class TaskRunner {
           url: '/',
         },
       },
-    } as unknown) as KibanaRequest;
+    } as unknown) as Request);
+
+    this.context.basePathService.set(fakeRequest, path);
+
+    return fakeRequest;
   }
 
   private getServicesWithSpaceLevelPermissions(
@@ -210,7 +218,8 @@ export class TaskRunner {
     const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
       alertInstance.hasScheduledActions()
     );
-    generateNewAndResolvedInstanceEvents({
+
+    generateNewAndRecoveredInstanceEvents({
       eventLogger,
       originalAlertInstances,
       currentAlertInstances: instancesWithScheduledActions,
@@ -220,6 +229,15 @@ export class TaskRunner {
     });
 
     if (!muteAll) {
+      scheduleActionsForRecoveredInstances(
+        this.alertType.recoveryActionGroup,
+        alertInstances,
+        executionHandler,
+        originalAlertInstances,
+        instancesWithScheduledActions,
+        alert.mutedInstanceIds
+      );
+
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
       await Promise.all(
@@ -419,7 +437,7 @@ export class TaskRunner {
   }
 }
 
-interface GenerateNewAndResolvedInstanceEventsParams {
+interface GenerateNewAndRecoveredInstanceEventsParams {
   eventLogger: IEventLogger;
   originalAlertInstances: Dictionary<AlertInstance>;
   currentAlertInstances: Dictionary<AlertInstance>;
@@ -428,18 +446,20 @@ interface GenerateNewAndResolvedInstanceEventsParams {
   namespace: string | undefined;
 }
 
-function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInstanceEventsParams) {
+function generateNewAndRecoveredInstanceEvents(
+  params: GenerateNewAndRecoveredInstanceEventsParams
+) {
   const { eventLogger, alertId, namespace, currentAlertInstances, originalAlertInstances } = params;
   const originalAlertInstanceIds = Object.keys(originalAlertInstances);
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
 
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
-  const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
+  const recoveredIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
 
-  for (const id of resolvedIds) {
+  for (const id of recoveredIds) {
     const actionGroup = originalAlertInstances[id].getLastScheduledActions()?.group;
-    const message = `${params.alertLabel} resolved instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.resolvedInstance, message, actionGroup);
+    const message = `${params.alertLabel} instance '${id}' has recovered`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.recoveredInstance, message, actionGroup);
   }
 
   for (const id of newIds) {
@@ -476,6 +496,35 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
       message,
     };
     eventLogger.logEvent(event);
+  }
+}
+
+function scheduleActionsForRecoveredInstances(
+  recoveryActionGroup: ActionGroup,
+  alertInstancesMap: Record<string, AlertInstance>,
+  executionHandler: ReturnType<typeof createExecutionHandler>,
+  originalAlertInstances: Record<string, AlertInstance>,
+  currentAlertInstances: Dictionary<AlertInstance>,
+  mutedInstanceIds: string[]
+) {
+  const currentAlertInstanceIds = Object.keys(currentAlertInstances);
+  const originalAlertInstanceIds = Object.keys(originalAlertInstances);
+  const recoveredIds = without(
+    originalAlertInstanceIds,
+    ...currentAlertInstanceIds,
+    ...mutedInstanceIds
+  );
+  for (const id of recoveredIds) {
+    const instance = alertInstancesMap[id];
+    instance.updateLastScheduledActions(recoveryActionGroup.id);
+    instance.unscheduleActions();
+    executionHandler({
+      actionGroup: recoveryActionGroup.id,
+      context: {},
+      state: {},
+      alertInstanceId: id,
+    });
+    instance.scheduleActions(recoveryActionGroup.id);
   }
 }
 

@@ -9,7 +9,7 @@ import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { Visualization, OperationMetadata } from '../types';
+import { Visualization, OperationMetadata, AccessorConfig } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import { LayerState, PieVisualizationState } from './types';
 import { suggestions } from './suggestions';
@@ -113,7 +113,18 @@ export const getPieVisualization = ({
       .map(({ columnId }) => columnId)
       .filter((columnId) => columnId !== layer.metric);
     // When we add a column it could be empty, and therefore have no order
-    const sortedColumns = Array.from(new Set(originalOrder.concat(layer.groups)));
+    const sortedColumns: AccessorConfig[] = Array.from(
+      new Set(originalOrder.concat(layer.groups))
+    ).map((accessor) => ({ columnId: accessor }));
+    if (sortedColumns.length > 0) {
+      sortedColumns[0] = {
+        columnId: sortedColumns[0].columnId,
+        triggerIcon: 'colorBy',
+        palette: paletteService
+          .get(state.palette?.name || 'default')
+          .getColors(10, state.palette?.params),
+      };
+    }
 
     if (state.shape === 'treemap') {
       return {
@@ -137,7 +148,7 @@ export const getPieVisualization = ({
               defaultMessage: 'Size by',
             }),
             layerId,
-            accessors: layer.metric ? [layer.metric] : [],
+            accessors: layer.metric ? [{ columnId: layer.metric }] : [],
             supportsMoreColumns: !layer.metric,
             filterOperations: numberMetricOperations,
             required: true,
@@ -168,7 +179,7 @@ export const getPieVisualization = ({
             defaultMessage: 'Size by',
           }),
           layerId,
-          accessors: layer.metric ? [layer.metric] : [],
+          accessors: layer.metric ? [{ columnId: layer.metric }] : [],
           supportsMoreColumns: !layer.metric,
           filterOperations: numberMetricOperations,
           required: true,
@@ -232,6 +243,34 @@ export const getPieVisualization = ({
       </I18nProvider>,
       domElement
     );
+  },
+
+  getWarningMessages(state, frame) {
+    if (state?.layers.length === 0 || !frame.activeData) {
+      return;
+    }
+
+    const metricColumnsWithArrayValues = [];
+
+    for (const layer of state.layers) {
+      const { layerId, metric } = layer;
+      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      if (!rows || !metric) {
+        break;
+      }
+      const columnToLabel = frame.datasourceLayers[layerId].getOperationForColumnId(metric)?.label;
+
+      const hasArrayValues = rows.some((row) => Array.isArray(row[metric]));
+      if (hasArrayValues) {
+        metricColumnsWithArrayValues.push(columnToLabel || metric);
+      }
+    }
+    return metricColumnsWithArrayValues.map((label) => (
+      <>
+        <strong>{label}</strong> contains array values. Your visualization may not render as
+        expected.
+      </>
+    ));
   },
 
   getErrorMessages(state, frame) {

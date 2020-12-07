@@ -29,3 +29,15 @@
   min-height: 0;
   min-width: 0;
 }
+
+.vislib__wrapper {
+  position: relative;
+}
+
+.vislib__container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}

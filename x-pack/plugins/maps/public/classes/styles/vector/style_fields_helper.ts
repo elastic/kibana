@@ -34,7 +34,7 @@ export async function createStyleFieldsHelper(fields: IField[]): Promise<StyleFi
   return new StyleFieldsHelper(styleFields);
 }
 
-class StyleFieldsHelper {
+export class StyleFieldsHelper {
   private readonly _styleFields: StyleField[];
   private readonly _ordinalAndCategoricalFields: StyleField[];
   private readonly _numberFields: StyleField[];
@@ -67,6 +67,11 @@ class StyleFieldsHelper {
     this._ordinalAndCategoricalFields = ordinalAndCategoricalFields;
     this._numberFields = numberFields;
     this._ordinalFields = ordinalFields;
+  }
+
+  hasFieldForStyle(field: IField, styleName: VECTOR_STYLES): boolean {
+    const fieldList = this.getFieldsForStyle(styleName);
+    return fieldList.some((styleField) => field.getName() === styleField.name);
   }
 
   getFieldsForStyle(styleName: VECTOR_STYLES): StyleField[] {

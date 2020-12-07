@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { PercentileRange } from './index';
 
 interface Props {
@@ -25,7 +25,7 @@ export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
     (callApmApi) => {
       if (start && end && field && value) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/page-load-distribution/breakdown',
+          endpoint: 'GET /api/apm/rum-client/page-load-distribution/breakdown',
           params: {
             query: {
               start,

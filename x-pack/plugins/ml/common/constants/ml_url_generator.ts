@@ -11,6 +11,7 @@ export const ML_PAGES = {
   ANOMALY_EXPLORER: 'explorer',
   SINGLE_METRIC_VIEWER: 'timeseriesexplorer',
   DATA_FRAME_ANALYTICS_JOBS_MANAGE: 'data_frame_analytics',
+  DATA_FRAME_ANALYTICS_MODELS_MANAGE: 'data_frame_analytics/models',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
   DATA_FRAME_ANALYTICS_MAP: 'data_frame_analytics/map',
   /**
@@ -45,3 +46,5 @@ export const ML_PAGES = {
   ACCESS_DENIED: 'access-denied',
   OVERVIEW: 'overview',
 } as const;
+
+export type MlPages = typeof ML_PAGES[keyof typeof ML_PAGES];

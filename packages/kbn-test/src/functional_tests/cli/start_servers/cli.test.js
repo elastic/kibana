@@ -126,6 +126,15 @@ describe('start servers CLI', () => {
       checkMockConsoleLogSnapshot(logMock);
     });
 
+    it('accepts boolean value for updateSnapshots', async () => {
+      global.process.argv.push('--updateSnapshots');
+
+      await startServersCli('foo');
+
+      expect(exitMock).toHaveBeenCalledWith(1);
+      checkMockConsoleLogSnapshot(logMock);
+    });
+
     it('accepts source value for esFrom', async () => {
       global.process.argv.push('--esFrom', 'source');
 

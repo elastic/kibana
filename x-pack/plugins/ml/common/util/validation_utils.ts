@@ -31,3 +31,22 @@ export function isValidJson(json: string) {
     return false;
   }
 }
+
+export function findAggField(aggs: Record<string, any>, fieldName: string): any {
+  let value;
+  Object.keys(aggs).some(function (k) {
+    if (k === fieldName) {
+      value = aggs[k];
+      return true;
+    }
+    if (aggs.hasOwnProperty(k) && typeof aggs[k] === 'object') {
+      value = findAggField(aggs[k], fieldName);
+      return value !== undefined;
+    }
+  });
+  return value;
+}
+
+export function isValidAggregationField(aggs: Record<string, any>, fieldName: string): boolean {
+  return findAggField(aggs, fieldName) !== undefined;
+}

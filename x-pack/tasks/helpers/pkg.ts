@@ -5,7 +5,7 @@
  */
 
 import Fs from 'fs';
-import semver from 'semver';
+import semverValid from 'semver/functions/valid';
 
 interface PackageJson {
   name: string;
@@ -28,6 +28,6 @@ if (!PKG_NAME) {
   throw new Error('No "name" found in package.json');
 }
 
-if (!semver.valid(PKG_VERSION)) {
+if (!semverValid(PKG_VERSION)) {
   throw new Error(`Version is not valid semver: ${PKG_VERSION}`);
 }

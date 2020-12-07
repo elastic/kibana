@@ -17,31 +17,28 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
+export interface BackgroundSessionSavedObjectAttributes {
+  /**
+   * User-facing session name to be displayed in session management
+   */
+  name: string;
+  /**
+   * App that created the session. e.g 'discover'
+   */
+  appId: string;
+  created: string;
+  expires: string;
+  status: string;
+  urlGeneratorId: string;
+  initialState: Record<string, unknown>;
+  restoreState: Record<string, unknown>;
+  idMapping: Record<string, string>;
+}
 
-export interface ISessionService {
-  /**
-   * Returns the active session ID
-   * @returns The active session ID
-   */
-  getSessionId: () => string | undefined;
-  /**
-   * Returns the observable that emits an update every time the session ID changes
-   * @returns `Observable`
-   */
-  getSession$: () => Observable<string | undefined>;
-  /**
-   * Starts a new session
-   */
-  start: () => string;
-
-  /**
-   * Restores existing session
-   */
-  restore: (sessionId: string) => void;
-
-  /**
-   * Clears the active session.
-   */
-  clear: () => void;
+export interface SearchSessionFindOptions {
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: string;
+  filter?: string;
 }

@@ -6,8 +6,8 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageViewsChart } from '../Charts/PageViewsChart';
@@ -26,7 +26,7 @@ export function PageViewsTrend() {
 
       if (start && end && serviceName) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/page-view-trends',
+          endpoint: 'GET /api/apm/rum-client/page-view-trends',
           params: {
             query: {
               start,

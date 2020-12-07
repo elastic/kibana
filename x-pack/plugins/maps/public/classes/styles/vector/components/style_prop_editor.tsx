@@ -25,12 +25,12 @@ export interface Props<StaticOptions, DynamicOptions> {
   customStaticOptionLabel?: string;
   defaultStaticStyleOptions: StaticOptions;
   defaultDynamicStyleOptions: DynamicOptions;
-  disabled: boolean;
+  disabled?: boolean;
   disabledBy?: VECTOR_STYLES;
   fields: StyleField[];
   onDynamicStyleChange: (propertyName: VECTOR_STYLES, options: DynamicOptions) => void;
   onStaticStyleChange: (propertyName: VECTOR_STYLES, options: StaticOptions) => void;
-  styleProperty: IStyleProperty<any>;
+  styleProperty: IStyleProperty<StaticOptions | DynamicOptions>;
 }
 
 export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
@@ -42,7 +42,7 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
   _onTypeToggle = () => {
     if (this.props.styleProperty.isDynamic()) {
       // preserve current dynmaic style
-      this._prevDynamicStyleOptions = this.props.styleProperty.getOptions();
+      this._prevDynamicStyleOptions = this.props.styleProperty.getOptions() as DynamicOptions;
       // toggle to static style
       this.props.onStaticStyleChange(
         this.props.styleProperty.getStyleName(),
@@ -50,7 +50,7 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
       );
     } else {
       // preserve current static style
-      this._prevStaticStyleOptions = this.props.styleProperty.getOptions();
+      this._prevStaticStyleOptions = this.props.styleProperty.getOptions() as StaticOptions;
       // toggle to dynamic style
       this.props.onDynamicStyleChange(
         this.props.styleProperty.getStyleName(),
@@ -61,7 +61,7 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
 
   _onFieldMetaOptionsChange = (fieldMetaOptions: FieldMetaOptions) => {
     const options = {
-      ...this.props.styleProperty.getOptions(),
+      ...(this.props.styleProperty.getOptions() as DynamicOptions),
       fieldMetaOptions,
     };
     this.props.onDynamicStyleChange(this.props.styleProperty.getStyleName(), options);

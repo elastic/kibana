@@ -198,7 +198,10 @@ server.route({
 === Example 3: Discover
 
 Discover takes advantage of subfeature privileges to allow fine-grained access control. In this example,
-a single "Create Short URLs" subfeature privilege is defined, which allows users to grant access to this feature without having to grant the `all` privilege to Discover. In other words, you can grant `read` access to Discover, and also grant the ability to create short URLs.
+two subfeature privileges are defined: "Create Short URLs", and "Generate PDF Reports". These allow users to grant access to this feature without having to grant the `all` privilege to Discover. In other words, you can grant `read` access to Discover, and also grant the ability to create short URLs or generate PDF reports.
+
+Notice the "Generate PDF Reports" subfeature privilege has an additional `minimumPrivilege` option. Kibana will only offer this subfeature privilege if the
+license requirement is satisfied.
 
 ["source","javascript"]
 -----------
@@ -256,6 +259,28 @@ public setup(core, { features }) {
                     read: [],
                   },
                   ui: ['createShortUrl'],
+                },
+              ],
+            },
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'pdf_generate',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.discoverGeneratePDFReportsPrivilegeName',
+                    {
+                      defaultMessage: 'Generate PDF Reports',
+                    }
+                  ),
+                  minimumLicense: 'platinum',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  api: ['generatePDFReports'],
+                  ui: ['generatePDFReports'],
                 },
               ],
             },

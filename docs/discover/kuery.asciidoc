@@ -147,7 +147,7 @@ To match multiple fields:
 machine.os*:windows 10
 -------------------
 
-This sytax is handy when you have text and keyword
+This syntax is handy when you have text and keyword
 versions of a field. The query checks machine.os and machine.os.keyword
 for the term
 `windows 10`.

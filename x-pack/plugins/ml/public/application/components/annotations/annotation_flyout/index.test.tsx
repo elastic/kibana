@@ -5,58 +5,102 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-
 import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.json';
-
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 
 import { Annotation } from '../../../../../common/types/annotations';
-import { annotation$ } from '../../../services/annotations_service';
+import { AnnotationUpdatesService } from '../../../services/annotations_service';
 
 import { AnnotationFlyout } from './index';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
+
+jest.mock('../../../util/dependency_cache', () => ({
+  getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
+}));
+
+const MlAnnotationUpdatesContextProvider = ({
+  annotationUpdatesService,
+  children,
+}: {
+  annotationUpdatesService: AnnotationUpdatesService;
+  children: React.ReactElement;
+}) => {
+  return (
+    <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
+      <IntlProvider>{children}</IntlProvider>
+    </MlAnnotationUpdatesContext.Provider>
+  );
+};
+
+const ObservableComponent = (props: any) => {
+  const { annotationUpdatesService } = props;
+  const annotationProp = useObservable(annotationUpdatesService!.isAnnotationInitialized$());
+  if (annotationProp === undefined) {
+    return null;
+  }
+  return (
+    <AnnotationFlyout
+      annotation={annotationProp}
+      annotationUpdatesService={annotationUpdatesService}
+      {...props}
+    />
+  );
+};
 
 describe('AnnotationFlyout', () => {
-  test('Initialization.', () => {
-    const wrapper = shallowWithIntl(<AnnotationFlyout />);
-    expect(wrapper).toMatchSnapshot();
+  let annotationUpdatesService: AnnotationUpdatesService | null = null;
+  beforeEach(() => {
+    annotationUpdatesService = new AnnotationUpdatesService();
   });
 
-  test('Update button is disabled with empty annotation', () => {
+  test('Update button is disabled with empty annotation', async () => {
     const annotation = mockAnnotations[1] as Annotation;
-    annotation$.next(annotation);
 
-    // useObservable wraps the observable in a new component
-    const ObservableComponent = (props: any) => {
-      const annotationProp = useObservable(annotation$);
-      if (annotationProp === undefined) {
-        return null;
-      }
-      return <AnnotationFlyout annotation={annotationProp} {...props} />;
-    };
+    annotationUpdatesService!.setValue(annotation);
 
-    const wrapper = mountWithIntl(<ObservableComponent />);
-    const updateBtn = wrapper.find('EuiButton').first();
-    expect(updateBtn.prop('isDisabled')).toEqual(true);
+    const { getByTestId } = render(
+      <MlAnnotationUpdatesContextProvider annotationUpdatesService={annotationUpdatesService!}>
+        <ObservableComponent annotationUpdatesService={annotationUpdatesService!} />
+      </MlAnnotationUpdatesContextProvider>
+    );
+    const updateBtn = getByTestId('annotationFlyoutUpdateButton');
+    expect(updateBtn).toBeDisabled();
   });
 
-  test('Error displayed and update button displayed if annotation text is longer than max chars', () => {
+  test('Error displayed and update button displayed if annotation text is longer than max chars', async () => {
     const annotation = mockAnnotations[2] as Annotation;
-    annotation$.next(annotation);
+    annotationUpdatesService!.setValue(annotation);
 
-    // useObservable wraps the observable in a new component
-    const ObservableComponent = (props: any) => {
-      const annotationProp = useObservable(annotation$);
-      if (annotationProp === undefined) {
-        return null;
-      }
-      return <AnnotationFlyout annotation={annotationProp} {...props} />;
-    };
+    const { getByTestId } = render(
+      <MlAnnotationUpdatesContextProvider annotationUpdatesService={annotationUpdatesService!}>
+        <ObservableComponent annotationUpdatesService={annotationUpdatesService!} />
+      </MlAnnotationUpdatesContextProvider>
+    );
+    const updateBtn = getByTestId('annotationFlyoutUpdateButton');
+    expect(updateBtn).toBeDisabled();
+    await waitFor(() => {
+      const errorText = screen.queryByText(/characters above maximum length/);
+      expect(errorText).not.toBe(undefined);
+    });
+  });
 
-    const wrapper = mountWithIntl(<ObservableComponent />);
-    const updateBtn = wrapper.find('EuiButton').first();
-    expect(updateBtn.prop('isDisabled')).toEqual(true);
+  test('Flyout disappears when annotation is updated', async () => {
+    const annotation = mockAnnotations[0] as Annotation;
 
-    expect(wrapper.find('EuiFormErrorText')).toHaveLength(1);
+    annotationUpdatesService!.setValue(annotation);
+
+    const { getByTestId } = render(
+      <MlAnnotationUpdatesContextProvider annotationUpdatesService={annotationUpdatesService!}>
+        <ObservableComponent annotationUpdatesService={annotationUpdatesService!} />
+      </MlAnnotationUpdatesContextProvider>
+    );
+    const updateBtn = getByTestId('annotationFlyoutUpdateButton');
+    expect(updateBtn).not.toBeDisabled();
+    expect(screen.queryByTestId('mlAnnotationFlyout')).toBeInTheDocument();
+
+    await fireEvent.click(updateBtn);
+    expect(screen.queryByTestId('mlAnnotationFlyout')).not.toBeInTheDocument();
   });
 });

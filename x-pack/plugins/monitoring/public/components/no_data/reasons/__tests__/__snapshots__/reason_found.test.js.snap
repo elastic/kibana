@@ -185,6 +185,16 @@ Array [
           target="_blank"
         >
           cloud dashboard.
+          <span
+            aria-label="External link"
+            class="euiLink__externalIcon"
+            data-euiicon-type="popout"
+          />
+          <span
+            class="euiScreenReaderOnly"
+          >
+            (opens in a new tab or window)
+          </span>
         </a>
          For more information on Monitoring in Elastic Cloud, please see 
         <a
@@ -194,6 +204,16 @@ Array [
           target="_blank"
         >
           the documentation.
+          <span
+            aria-label="External link"
+            class="euiLink__externalIcon"
+            data-euiicon-type="popout"
+          />
+          <span
+            class="euiScreenReaderOnly"
+          >
+            (opens in a new tab or window)
+          </span>
         </a>
       </p>
     </div>

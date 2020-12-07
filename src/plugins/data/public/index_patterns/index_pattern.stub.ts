@@ -20,20 +20,9 @@
 import sinon from 'sinon';
 
 import { CoreSetup } from 'src/core/public';
-import { FieldFormat as FieldFormatImpl } from '../../common/field_formats';
 import { IFieldType, FieldSpec } from '../../common/index_patterns';
-import { FieldFormatsStart } from '../field_formats';
 import { IndexPattern, indexPatterns, KBN_FIELD_TYPES, fieldList } from '../';
 import { getFieldFormatsRegistry } from '../test_utils';
-import { setFieldFormats } from '../services';
-
-setFieldFormats(({
-  getDefaultInstance: () =>
-    ({
-      getConverterFor: () => (value: any) => value,
-      convert: (value: any) => JSON.stringify(value),
-    } as FieldFormatImpl),
-} as unknown) as FieldFormatsStart);
 
 export function getStubIndexPattern(
   pattern: string,

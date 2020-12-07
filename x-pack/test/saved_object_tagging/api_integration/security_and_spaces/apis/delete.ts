@@ -53,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
         USERS.DEFAULT_SPACE_DASHBOARD_READ_USER,
         USERS.DEFAULT_SPACE_VISUALIZE_READ_USER,
         USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER,
+        USERS.DEFAULT_SPACE_MAPS_READ_USER,
         USERS.NOT_A_KIBANA_USER,
       ],
     };

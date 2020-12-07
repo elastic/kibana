@@ -156,8 +156,75 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
     }
   }
 
+  /**
+   * Sub page object to manipulate the assign flyout.
+   */
+  class TagAssignmentFlyout {
+    constructor(private readonly page: TagManagementPage) {}
+
+    /**
+     * Open the tag assignment flyout, by selected given `tagNames` in the table, then clicking on the `assign`
+     * action in the bulk action menu.
+     */
+    async open(tagNames: string[]) {
+      for (const tagName of tagNames) {
+        await this.page.selectTagByName(tagName);
+      }
+      await this.page.clickOnBulkAction('assign');
+      await this.waitUntilResultsAreLoaded();
+    }
+
+    /**
+     * Click on the 'cancel' button in the assign flyout.
+     */
+    async clickCancel() {
+      await testSubjects.click('assignFlyoutCancelButton');
+      await this.page.waitUntilTableIsLoaded();
+    }
+
+    /**
+     * Click on the 'confirm' button in the assign flyout.
+     */
+    async clickConfirm() {
+      await testSubjects.click('assignFlyoutConfirmButton');
+      await this.waitForFlyoutToClose();
+      await this.page.waitUntilTableIsLoaded();
+    }
+
+    /**
+     * Click on an assignable object result line in the flyout result list.
+     */
+    async clickOnResult(type: string, id: string) {
+      await testSubjects.click(`assign-result-${type}-${id}`);
+    }
+
+    /**
+     * Wait until the assignable object results are displayed in the flyout.
+     */
+    async waitUntilResultsAreLoaded() {
+      return find.waitForDeletedByCssSelector(
+        '*[data-test-subj="assignFlyoutResultList"] .euiLoadingSpinner'
+      );
+    }
+
+    /**
+     * Wait until the flyout is closed.
+     */
+    async waitForFlyoutToClose() {
+      return testSubjects.waitForDeleted('assignFlyoutResultList');
+    }
+  }
+
+  /**
+   * Tag management page object.
+   *
+   * @remarks All the table manipulation helpers makes the assumption
+   *          that all tags are displayed on a single page. Pagination
+   *          and finding / interacting with a tag on another page is not supported.
+   */
   class TagManagementPage {
     public readonly tagModal = new TagModal(this);
+    public readonly assignFlyout = new TagAssignmentFlyout(this);
 
     /**
      * Navigate to the tag management section, by accessing the management app, then clicking
@@ -206,17 +273,28 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     /**
-     * Return true if the `Delete tag` action button in the tag rows is visible, false otherwise.
+     * Returns true if given action is available from the table action column
      */
-    async isDeleteButtonVisible() {
-      return await testSubjects.exists('tagsTableAction-delete');
-    }
-
-    /**
-     * Return true if the `Edit tag` action button in the tag rows is visible, false otherwise.
-     */
-    async isEditButtonVisible() {
-      return await testSubjects.exists('tagsTableAction-edit');
+    async isActionAvailable(action: string) {
+      const rows = await testSubjects.findAll('tagsTableRow');
+      const firstRow = rows[0];
+      // if there is more than 2 actions, they are wrapped in a popover that opens from a new action.
+      const menuActionPresent = await testSubjects.descendantExists(
+        'euiCollapsedItemActionsButton',
+        firstRow
+      );
+      if (menuActionPresent) {
+        const actionButton = await testSubjects.findDescendant(
+          'euiCollapsedItemActionsButton',
+          firstRow
+        );
+        await actionButton.click();
+        const actionPresent = await testSubjects.exists(`tagsTableAction-${action}`);
+        await actionButton.click();
+        return actionPresent;
+      } else {
+        return await testSubjects.exists(`tagsTableAction-${action}`);
+      }
     }
 
     /**
@@ -246,7 +324,7 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
       const tagRow = await this.getRowByName(tagName);
       if (tagRow) {
         const editButton = await testSubjects.findDescendant('tagsTableAction-edit', tagRow);
-        editButton?.click();
+        await editButton?.click();
       }
     }
 
@@ -273,11 +351,100 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     /**
+     * Return true if the selection column is displayed on the table, false otherwise.
+     */
+    async isSelectionColumnDisplayed() {
+      const firstRow = await testSubjects.find('tagsTableRow');
+      const checkbox = await firstRow.findAllByCssSelector(
+        '.euiTableRowCellCheckbox .euiCheckbox__input'
+      );
+      return Boolean(checkbox.length);
+    }
+
+    /**
+     * Click on the selection checkbox of the tag matching given tag name.
+     */
+    async selectTagByName(tagName: string) {
+      const tagRow = await this.getRowByName(tagName);
+      const checkbox = await tagRow.findByCssSelector(
+        '.euiTableRowCellCheckbox .euiCheckbox__input'
+      );
+      await checkbox.click();
+    }
+
+    /**
+     * Returns true if the tag bulk action menu is displayed, false otherwise.
+     */
+    async isActionMenuButtonDisplayed() {
+      return testSubjects.exists('actionBar-contextMenuButton');
+    }
+
+    /**
+     * Open the bulk action menu if not already opened.
+     */
+    async openActionMenu() {
+      if (!(await this.isActionMenuOpened())) {
+        await this.toggleActionMenu();
+      }
+    }
+
+    /**
+     * Check if the action for given `actionId` is present in the bulk action menu.
+     *
+     * The menu will automatically be opened if not already, but the test must still
+     * select tags to make the action menu button appear.
+     */
+    async isBulkActionPresent(actionId: string) {
+      if (!(await this.isActionMenuButtonDisplayed())) {
+        return false;
+      }
+      const menuWasOpened = await this.isActionMenuOpened();
+      if (!menuWasOpened) {
+        await this.openActionMenu();
+      }
+
+      const actionExists = await testSubjects.exists(`actionBar-button-${actionId}`);
+
+      if (!menuWasOpened) {
+        await this.toggleActionMenu();
+      }
+
+      return actionExists;
+    }
+
+    /**
+     * Click on given bulk action button
+     */
+    async clickOnBulkAction(actionId: string) {
+      await this.openActionMenu();
+      await testSubjects.click(`actionBar-button-${actionId}`);
+    }
+
+    /**
+     * Toggle (close if opened, open if closed) the bulk action menu.
+     */
+    async toggleActionMenu() {
+      await testSubjects.click('actionBar-contextMenuButton');
+    }
+
+    /**
+     * Return true if the bulk action menu is opened, false otherwise.
+     */
+    async isActionMenuOpened() {
+      return testSubjects.exists('actionBar-contextMenuPopover');
+    }
+
+    /**
      * Return the info of all the tags currently displayed in the table (in table's order)
      */
     async getDisplayedTagsInfo() {
       const rows = await testSubjects.findAll('tagsTableRow');
       return Promise.all([...rows.map(parseTableRow)]);
+    }
+
+    async getDisplayedTagInfo(tagName: string) {
+      const rows = await this.getDisplayedTagsInfo();
+      return rows.find((row) => row.name === tagName);
     }
 
     /**

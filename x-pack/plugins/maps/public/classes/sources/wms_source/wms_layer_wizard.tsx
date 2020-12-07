@@ -13,13 +13,14 @@ import { sourceTitle, WMSSource } from './wms_source';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { TileLayer } from '../../layers/tile_layer/tile_layer';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import { WebMapServiceLayerIcon } from '../../layers/icons/web_map_service_layer_icon';
 
 export const wmsLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   description: i18n.translate('xpack.maps.source.wmsDescription', {
     defaultMessage: 'Maps from OGC Standard WMS',
   }),
-  icon: 'grid',
+  icon: WebMapServiceLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       if (!sourceConfig) {

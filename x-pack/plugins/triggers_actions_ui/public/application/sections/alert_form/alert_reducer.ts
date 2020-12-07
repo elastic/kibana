@@ -3,38 +3,93 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SavedObjectAttribute } from 'kibana/public';
 import { isEqual } from 'lodash';
+import { Reducer } from 'react';
+import { AlertActionParam, IntervalSchedule } from '../../../../../alerts/common';
+import { Alert, AlertAction } from '../../../types';
 
-interface CommandType {
-  type:
+export type InitialAlert = Partial<Alert> &
+  Pick<Alert, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
+
+interface CommandType<
+  T extends
     | 'setAlert'
     | 'setProperty'
     | 'setScheduleProperty'
     | 'setAlertParams'
     | 'setAlertActionParams'
-    | 'setAlertActionProperty';
+    | 'setAlertActionProperty'
+> {
+  type: T;
 }
 
 export interface AlertState {
-  alert: any;
+  alert: InitialAlert;
 }
 
-export interface AlertReducerAction {
-  command: CommandType;
-  payload: {
-    key: string;
-    value: {};
-    index?: number;
-  };
+interface Payload<Keys, Value> {
+  key: Keys;
+  value: Value;
+  index?: number;
 }
 
-export const alertReducer = (state: any, action: AlertReducerAction) => {
-  const { command, payload } = action;
+interface AlertPayload<Key extends keyof Alert> {
+  key: Key;
+  value: Alert[Key] | null;
+  index?: number;
+}
+
+interface AlertActionPayload<Key extends keyof AlertAction> {
+  key: Key;
+  value: AlertAction[Key] | null;
+  index?: number;
+}
+
+interface AlertSchedulePayload<Key extends keyof IntervalSchedule> {
+  key: Key;
+  value: IntervalSchedule[Key];
+  index?: number;
+}
+
+export type AlertReducerAction =
+  | {
+      command: CommandType<'setAlert'>;
+      payload: Payload<'alert', InitialAlert>;
+    }
+  | {
+      command: CommandType<'setProperty'>;
+      payload: AlertPayload<keyof Alert>;
+    }
+  | {
+      command: CommandType<'setScheduleProperty'>;
+      payload: AlertSchedulePayload<keyof IntervalSchedule>;
+    }
+  | {
+      command: CommandType<'setAlertParams'>;
+      payload: Payload<string, unknown>;
+    }
+  | {
+      command: CommandType<'setAlertActionParams'>;
+      payload: Payload<string, AlertActionParam>;
+    }
+  | {
+      command: CommandType<'setAlertActionProperty'>;
+      payload: AlertActionPayload<keyof AlertAction>;
+    };
+
+export type InitialAlertReducer = Reducer<{ alert: InitialAlert }, AlertReducerAction>;
+export type ConcreteAlertReducer = Reducer<{ alert: Alert }, AlertReducerAction>;
+
+export const alertReducer = <AlertPhase extends InitialAlert | Alert>(
+  state: { alert: AlertPhase },
+  action: AlertReducerAction
+) => {
   const { alert } = state;
 
-  switch (command.type) {
+  switch (action.command.type) {
     case 'setAlert': {
-      const { key, value } = payload;
+      const { key, value } = action.payload as Payload<'alert', AlertPhase>;
       if (key === 'alert') {
         return {
           ...state,
@@ -45,7 +100,7 @@ export const alertReducer = (state: any, action: AlertReducerAction) => {
       }
     }
     case 'setProperty': {
-      const { key, value } = payload;
+      const { key, value } = action.payload as AlertPayload<keyof Alert>;
       if (isEqual(alert[key], value)) {
         return state;
       } else {
@@ -59,8 +114,8 @@ export const alertReducer = (state: any, action: AlertReducerAction) => {
       }
     }
     case 'setScheduleProperty': {
-      const { key, value } = payload;
-      if (isEqual(alert.schedule[key], value)) {
+      const { key, value } = action.payload as AlertSchedulePayload<keyof IntervalSchedule>;
+      if (alert.schedule && isEqual(alert.schedule[key], value)) {
         return state;
       } else {
         return {
@@ -76,7 +131,7 @@ export const alertReducer = (state: any, action: AlertReducerAction) => {
       }
     }
     case 'setAlertParams': {
-      const { key, value } = payload;
+      const { key, value } = action.payload as Payload<string, Record<string, unknown>>;
       if (isEqual(alert.params[key], value)) {
         return state;
       } else {
@@ -93,7 +148,10 @@ export const alertReducer = (state: any, action: AlertReducerAction) => {
       }
     }
     case 'setAlertActionParams': {
-      const { key, value, index } = payload;
+      const { key, value, index } = action.payload as Payload<
+        keyof AlertAction,
+        SavedObjectAttribute
+      >;
       if (index === undefined || isEqual(alert.actions[index][key], value)) {
         return state;
       } else {
@@ -116,7 +174,7 @@ export const alertReducer = (state: any, action: AlertReducerAction) => {
       }
     }
     case 'setAlertActionProperty': {
-      const { key, value, index } = payload;
+      const { key, value, index } = action.payload as AlertActionPayload<keyof AlertAction>;
       if (index === undefined || isEqual(alert.actions[index][key], value)) {
         return state;
       } else {

@@ -12,26 +12,26 @@ import {
 } from '../../../encrypted_saved_objects/server';
 import packageJSON from '../../../../../package.json';
 import { SecurityPluginSetup } from '../../../security/server';
-import { IngestManagerConfigType } from '../../common';
-import { ExternalCallback, ExternalCallbacksStorage, IngestManagerAppContext } from '../plugin';
+import { FleetConfigType } from '../../common';
+import { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
 import { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
   private security: SecurityPluginSetup | undefined;
-  private config$?: Observable<IngestManagerConfigType>;
-  private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
+  private config$?: Observable<FleetConfigType>;
+  private configSubject$?: BehaviorSubject<FleetConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
-  private isProductionMode: IngestManagerAppContext['isProductionMode'] = false;
-  private kibanaVersion: IngestManagerAppContext['kibanaVersion'] = packageJSON.version;
-  private kibanaBranch: IngestManagerAppContext['kibanaBranch'] = packageJSON.branch;
+  private isProductionMode: FleetAppContext['isProductionMode'] = false;
+  private kibanaVersion: FleetAppContext['kibanaVersion'] = packageJSON.version;
+  private kibanaBranch: FleetAppContext['kibanaBranch'] = packageJSON.branch;
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
 
-  public async start(appContext: IngestManagerAppContext) {
+  public async start(appContext: FleetAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
     this.security = appContext.security;

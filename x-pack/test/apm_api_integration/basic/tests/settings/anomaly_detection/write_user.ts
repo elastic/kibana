@@ -5,14 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { expectSnapshot } from '../../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
   const apmWriteUser = getService('supertestAsApmWriteUser');
 
   function getAnomalyDetectionJobs() {
-    return apmWriteUser.get(`/api/apm/settings/anomaly-detection`).set('kbn-xsrf', 'foo');
+    return apmWriteUser.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
   }
 
   function createAnomalyDetectionJobs(environments: string[]) {

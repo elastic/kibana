@@ -17,7 +17,8 @@ interface EventDatasetHit {
 export const getDatasetForField = async (
   client: ESSearchClient,
   field: string,
-  indexPattern: string
+  indexPattern: string,
+  timerange: { field: string; to: number; from: number }
 ) => {
   const params = {
     allowNoIndices: true,
@@ -25,9 +26,25 @@ export const getDatasetForField = async (
     terminateAfter: 1,
     index: indexPattern,
     body: {
-      query: { exists: { field } },
+      query: {
+        bool: {
+          filter: [
+            { exists: { field } },
+            {
+              range: {
+                [timerange.field]: {
+                  gte: timerange.from,
+                  lte: timerange.to,
+                  format: 'epoch_millis',
+                },
+              },
+            },
+          ],
+        },
+      },
       size: 1,
       _source: ['event.dataset'],
+      sort: [{ [timerange.field]: { order: 'desc' } }],
     },
   };
 

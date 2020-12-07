@@ -74,6 +74,9 @@ status codes, you could enter `status:[400 TO 499]`.
 codes and have an extension of `php` or `html`, you could enter `status:[400 TO
 499] AND (extension:php OR extension:html)`.
 
+IMPORTANT: When you use the Lucene Query Syntax in the *KQL* search bar, {kib} is unable to search on nested objects and perform aggregations across fields that contain nested objects. 
+Using `include_in_parent` or `copy_to` as a workaround can cause {kib} to fail.
+
 For more detailed information about the Lucene query syntax, see the
 {ref}/query-dsl-query-string-query.html#query-string-syntax[Query String Query]
 docs.

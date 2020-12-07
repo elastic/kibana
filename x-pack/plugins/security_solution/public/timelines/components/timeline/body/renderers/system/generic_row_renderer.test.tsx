@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../../../../common/test_utils';
 import { BrowserFields } from '../../../../../../common/containers/source';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../../common/ecs';
@@ -541,7 +542,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'SYSTEM\\NT AUTHORITY@HD-gqf-0af7b4feaccepted a connection viaAmSvc.exe(1084)tcp1:network-community_idSource127.0.0.1:49306Destination127.0.0.1:49305'
       );
     });
@@ -569,7 +570,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'SYSTEM\\NT AUTHORITY@HD-55b-3ec87f66accepted a connection via(4)tcp1:network-community_idSource::1:51324Destination::1:5357'
       );
     });
@@ -597,7 +598,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'Arun\\Anvi-Acer@HD-obe-8bf77f54disconnected viachrome.exe(11620)8.1KBtcp1:LxYHJJv98b2O0fNccXu6HheXmwk=Source192.168.0.6:59356(25.78%)2.1KB(74.22%)6KBDestination10.156.162.53:443'
       );
     });
@@ -625,7 +626,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'SYSTEM\\NT AUTHORITY@HD-55b-3ec87f66disconnected via(4)7.9KBtcp1:ZylzQhsB1dcptA2t4DY8S6l9o8E=Source::1:51338(96.92%)7.7KB(3.08%)249BDestination::1:2869'
       );
     });
@@ -653,7 +654,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'root@foohostopened a socket withgoogle_accounts(2166)Outbound socket (10.4.20.1:59554 -> 10.1.2.3:80) Ooutboundtcp1:network-community_idSource10.4.20.1:59554Destination10.1.2.3:80'
       );
     });
@@ -681,7 +682,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'root@foohostclosed a socket withgoogle_accounts(2166)Outbound socket (10.4.20.1:59508 -> 10.1.2.3:80) Coutboundtcp1:network-community_idSource10.4.20.1:59508Destination10.1.2.3:80'
       );
     });
@@ -875,7 +876,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'iot.example.comasked forlookup.example.comwith question typeA, which resolved to10.1.2.3(response code:NOERROR)viaan unknown process6.937500msOct 8, 2019 @ 10:05:23.241Oct 8, 2019 @ 10:05:23.248outbounddns177Budp1:network-community_idSource10.9.9.9:58732(22.60%)40B(77.40%)137BDestination10.1.1.1:53OceaniaAustralia🇦🇺AU'
       );
     });

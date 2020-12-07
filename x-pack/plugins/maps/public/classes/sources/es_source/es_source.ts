@@ -134,7 +134,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   destroy() {
     const inspectorAdapters = this.getInspectorAdapters();
-    if (inspectorAdapters) {
+    if (inspectorAdapters?.requests) {
       inspectorAdapters.requests.resetRequest(this.getId());
     }
   }
@@ -164,7 +164,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
     const inspectorAdapters = this.getInspectorAdapters();
     let inspectorRequest: RequestResponder | undefined;
-    if (inspectorAdapters) {
+    if (inspectorAdapters?.requests) {
       inspectorRequest = inspectorAdapters.requests.start(requestName, {
         id: requestId,
         description: requestDescription,

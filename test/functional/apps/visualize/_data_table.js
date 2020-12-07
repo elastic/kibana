@@ -209,6 +209,29 @@ export default function ({ getService, getPageObjects }) {
       ]);
     });
 
+    it('should show correct data when selecting a field by its custom name', async () => {
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.visEditor.clickBucket('Split rows');
+      await PageObjects.visEditor.selectAggregation('Date Histogram');
+      await PageObjects.visEditor.selectField('UTC time');
+      await PageObjects.visEditor.setInterval('Day');
+      await PageObjects.visEditor.clickGo();
+      const data = await PageObjects.visChart.getTableVisData();
+      expect(data.trim().split('\n')).to.be.eql([
+        '2015-09-20',
+        '4,757',
+        '2015-09-21',
+        '4,614',
+        '2015-09-22',
+        '4,633',
+      ]);
+      const header = await PageObjects.visChart.getTableVisHeader();
+      expect(header).to.contain('UTC time');
+    });
+
     it('should correctly filter for applied time filter on the main timefield', async () => {
       await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();

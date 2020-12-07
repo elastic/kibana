@@ -59,24 +59,12 @@ export const useNetworkKpiNetworkEvents = ({
   const [
     networkKpiNetworkEventsRequest,
     setNetworkKpiNetworkEventsRequest,
-  ] = useState<NetworkKpiNetworkEventsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkKpiQueries.networkEvents,
-          filterQuery: createFilter(filterQuery),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        }
-      : null
-  );
+  ] = useState<NetworkKpiNetworkEventsRequestOptions | null>(null);
 
-  const [networkKpiNetworkEventsResponse, setNetworkKpiNetworkEventsResponse] = useState<
-    NetworkKpiNetworkEventsArgs
-  >({
+  const [
+    networkKpiNetworkEventsResponse,
+    setNetworkKpiNetworkEventsResponse,
+  ] = useState<NetworkKpiNetworkEventsArgs>({
     networkEvents: 0,
     id: ID,
     inspect: {
@@ -89,7 +77,7 @@ export const useNetworkKpiNetworkEvents = ({
 
   const networkKpiNetworkEventsSearch = useCallback(
     (request: NetworkKpiNetworkEventsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -146,7 +134,7 @@ export const useNetworkKpiNetworkEvents = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -162,12 +150,12 @@ export const useNetworkKpiNetworkEvents = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     networkKpiNetworkEventsSearch(networkKpiNetworkEventsRequest);

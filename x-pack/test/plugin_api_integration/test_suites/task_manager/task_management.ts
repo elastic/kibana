@@ -260,6 +260,28 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should schedule the retry of recurring tasks to run at the next schedule when they time out', async () => {
+      const intervalInMinutes = 30;
+      const intervalInMilliseconds = intervalInMinutes * 60 * 1000;
+      const task = await scheduleTask({
+        taskType: 'sampleRecurringTaskWhichHangs',
+        schedule: { interval: `${intervalInMinutes}m` },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const [scheduledTask] = (await currentTasks()).docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        const retryAt = Date.parse(scheduledTask.retryAt!);
+        expect(isNaN(retryAt)).to.be(false);
+
+        const buffer = 10000; // 10 second buffer
+        const retryDelay = retryAt - Date.parse(task.runAt);
+        expect(retryDelay).to.be.greaterThan(intervalInMilliseconds - buffer);
+        expect(retryDelay).to.be.lessThan(intervalInMilliseconds + buffer);
+      });
+    });
+
     it('should reschedule if task returns runAt', async () => {
       const nextRunMilliseconds = _.random(60000, 200000);
       const count = _.random(1, 20);

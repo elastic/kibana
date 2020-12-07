@@ -108,6 +108,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     );
 
     const testsuitesEl = builder.ele('testsuite', {
+      name: reportName,
       timestamp: new Date(stats.startTime).toISOString().slice(0, -5),
       time: getDuration(stats),
       tests: allTests.length + failedHooks.length,

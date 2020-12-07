@@ -286,7 +286,7 @@ export function resultsServiceProvider(mlApiServices) {
                       influencerFieldValues: {
                         terms: {
                           field: 'influencer_field_value',
-                          size: maxFieldValues,
+                          size: !!maxFieldValues ? maxFieldValues : ANOMALY_SWIM_LANE_HARD_LIMIT,
                           order: {
                             maxAnomalyScore: 'desc',
                           },
@@ -416,7 +416,7 @@ export function resultsServiceProvider(mlApiServices) {
                   influencerFieldValues: {
                     terms: {
                       field: 'influencer_field_value',
-                      size: maxResults !== undefined ? maxResults : 2,
+                      size: !!maxResults ? maxResults : 2,
                       order: {
                         maxAnomalyScore: 'desc',
                       },

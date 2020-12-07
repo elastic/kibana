@@ -39,7 +39,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -77,6 +76,7 @@ const BaseAlertInstanceSummarySavedObject: SavedObject<RawAlert> = {
     createdBy: null,
     updatedBy: null,
     createdAt: mockedDateString,
+    updatedAt: mockedDateString,
     apiKey: null,
     apiKeyOwner: null,
     throttle: null,
@@ -122,7 +122,7 @@ describe('getAlertInstanceSummary()', () => {
       .addActiveInstance('instance-previously-active', 'action group B')
       .advanceTime(10000)
       .addExecute()
-      .addResolvedInstance('instance-previously-active')
+      .addRecoveredInstance('instance-previously-active')
       .addActiveInstance('instance-currently-active', 'action group A')
       .getEvents();
     const eventsResult = {

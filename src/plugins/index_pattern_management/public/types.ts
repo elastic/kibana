@@ -47,9 +47,7 @@ export interface IndexPatternManagmentContext {
   getMlCardState: () => MlCardState;
 }
 
-export type IndexPatternManagmentContextValue = KibanaReactContextValue<
-  IndexPatternManagmentContext
->;
+export type IndexPatternManagmentContextValue = KibanaReactContextValue<IndexPatternManagmentContext>;
 
 export enum MlCardState {
   HIDDEN,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defer, Defer } from '../../../kibana_utils/public';
+import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
 import {
   ItemBufferParams,
   TimedItemBufferParams,
@@ -27,13 +27,7 @@ import {
 } from '../../common';
 import { fetchStreaming, split } from '../streaming';
 import { normalizeError } from '../../common';
-
-export interface BatchItem<Payload, Result> {
-  payload: Payload;
-  future: Defer<Result>;
-}
-
-export type BatchedFunc<Payload, Result> = (payload: Payload) => Promise<Result>;
+import { BatchedFunc, BatchItem } from './types';
 
 export interface BatchedFunctionProtocolError extends ErrorLike {
   code: string;
@@ -82,43 +76,84 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     flushOnMaxItems = 25,
     maxItemAge = 10,
   } = params;
-  const [fn] = createBatchedFunction<BatchedFunc<Payload, Result>, BatchItem<Payload, Result>>({
-    onCall: (payload: Payload) => {
+  const [fn] = createBatchedFunction({
+    onCall: (payload: Payload, signal?: AbortSignal) => {
       const future = defer<Result>();
       const entry: BatchItem<Payload, Result> = {
         payload,
         future,
+        signal,
       };
       return [future.promise, entry];
     },
     onBatch: async (items) => {
       try {
-        let responsesReceived = 0;
-        const batch = items.map(({ payload }) => payload);
+        // Filter out any items whose signal is already aborted
+        items = items.filter((item) => {
+          if (item.signal?.aborted) item.future.reject(new AbortError());
+          return !item.signal?.aborted;
+        });
+
+        const donePromises: Array<Promise<any>> = items.map((item) => {
+          return new Promise<void>((resolve) => {
+            const { promise: abortPromise, cleanup } = item.signal
+              ? abortSignalToPromise(item.signal)
+              : {
+                  promise: undefined,
+                  cleanup: () => {},
+                };
+
+            const onDone = () => {
+              resolve();
+              cleanup();
+            };
+            if (abortPromise)
+              abortPromise.catch(() => {
+                item.future.reject(new AbortError());
+                onDone();
+              });
+            item.future.promise.then(onDone, onDone);
+          });
+        });
+
+        // abort when all items were either resolved, rejected or aborted
+        const abortController = new AbortController();
+        let isBatchDone = false;
+        Promise.all(donePromises).then(() => {
+          isBatchDone = true;
+          abortController.abort();
+        });
+        const batch = items.map((item) => item.payload);
+
         const { stream } = fetchStreamingInjected({
           url,
           body: JSON.stringify({ batch }),
           method: 'POST',
+          signal: abortController.signal,
         });
+
+        const handleStreamError = (error: any) => {
+          const normalizedError = normalizeError<BatchedFunctionProtocolError>(error);
+          normalizedError.code = 'STREAM';
+          for (const { future } of items) future.reject(normalizedError);
+        };
+
         stream.pipe(split('\n')).subscribe({
           next: (json: string) => {
-            const response = JSON.parse(json) as BatchResponseItem<Result, ErrorLike>;
-            if (response.error) {
-              responsesReceived++;
-              items[response.id].future.reject(response.error);
-            } else if (response.result !== undefined) {
-              responsesReceived++;
-              items[response.id].future.resolve(response.result);
+            try {
+              const response = JSON.parse(json) as BatchResponseItem<Result, ErrorLike>;
+              if (response.error) {
+                items[response.id].future.reject(response.error);
+              } else if (response.result !== undefined) {
+                items[response.id].future.resolve(response.result);
+              }
+            } catch (e) {
+              handleStreamError(e);
             }
           },
-          error: (error) => {
-            const normalizedError = normalizeError<BatchedFunctionProtocolError>(error);
-            normalizedError.code = 'STREAM';
-            for (const { future } of items) future.reject(normalizedError);
-          },
+          error: handleStreamError,
           complete: () => {
-            const streamTerminatedPrematurely = responsesReceived !== items.length;
-            if (streamTerminatedPrematurely) {
+            if (!isBatchDone) {
               const error: BatchedFunctionProtocolError = {
                 message: 'Connection terminated prematurely.',
                 code: 'CONNECTION',

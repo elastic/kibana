@@ -70,6 +70,14 @@ export interface OverlayModalConfirmOptions {
   'data-test-subj'?: string;
   defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];
   buttonColor?: EuiConfirmModalProps['buttonColor'];
+  /**
+   * Sets the max-width of the modal.
+   * Set to `true` to use the default (`euiBreakpoints 'm'`),
+   * set to `false` to not restrict the width,
+   * set to a number for a custom width in px,
+   * set to a string for a custom width in custom measurement.
+   */
+  maxWidth?: boolean | number | string;
 }
 
 /**

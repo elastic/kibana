@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { FormattedData } from './formatted_data';
-export { DataAdapter } from './data_adapter';
+export * from './data_adapter';
+export * from './formatted_data';
+export * from './types';

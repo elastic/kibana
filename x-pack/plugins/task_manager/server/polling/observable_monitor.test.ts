@@ -25,7 +25,7 @@ describe('Poll Monitor', () => {
 
     expect(instantiator).not.toHaveBeenCalled();
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       const next = jest.fn();
       monitoredObservable.pipe(take(3)).subscribe({
         next,
@@ -45,7 +45,7 @@ describe('Poll Monitor', () => {
     const instantiator = jest.fn(() => interval(100));
     const monitoredObservable = createObservableMonitor(instantiator, { heartbeatInterval });
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       const next = jest.fn();
       monitoredObservable.pipe(take(3)).subscribe({
         next,
@@ -79,7 +79,7 @@ describe('Poll Monitor', () => {
     const onError = jest.fn();
     const monitoredObservable = createObservableMonitor(instantiator, { onError });
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       const next = jest.fn();
       const error = jest.fn();
       monitoredObservable
@@ -135,7 +135,7 @@ describe('Poll Monitor', () => {
       inactivityTimeout: 500,
     });
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       const next = jest.fn();
       const error = jest.fn();
       monitoredObservable

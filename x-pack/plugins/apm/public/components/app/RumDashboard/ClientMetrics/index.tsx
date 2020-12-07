@@ -14,7 +14,7 @@ import {
   EuiToolTip,
   EuiIconTip,
 } from '@elastic/eui';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { useUxQuery } from '../hooks/useUxQuery';
 import { formatToSec } from '../UXMetrics/KeyUXMetrics';
@@ -53,7 +53,7 @@ export function ClientMetrics() {
     (callApmApi) => {
       if (uxQuery) {
         return callApmApi({
-          pathname: '/api/apm/rum/client-metrics',
+          endpoint: 'GET /api/apm/rum/client-metrics',
           params: {
             query: {
               ...uxQuery,

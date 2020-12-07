@@ -41,9 +41,9 @@ export const getPackagePoliciesHandler: RequestHandler<
   }
 };
 
-export const getOnePackagePolicyHandler: RequestHandler<TypeOf<
-  typeof GetOnePackagePolicyRequestSchema.params
->> = async (context, request, response) => {
+export const getOnePackagePolicyHandler: RequestHandler<
+  TypeOf<typeof GetOnePackagePolicyRequestSchema.params>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const { packagePolicyId } = request.params;
   const notFoundResponse = () =>

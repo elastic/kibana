@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../../../../common/test_utils';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData } from '../../../../../../common/mock';
@@ -58,7 +59,7 @@ describe('suricata_row_renderer', () => {
         <span>{children}</span>
       </TestProviders>
     );
-    expect(wrapper.text()).toContain(
+    expect(removeExternalLinkText(wrapper.text())).toContain(
       '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
     );
   });

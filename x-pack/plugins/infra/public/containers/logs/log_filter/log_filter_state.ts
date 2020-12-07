@@ -82,7 +82,6 @@ export const useLogFilterState: (props: {
     }
 
     return true;
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [filterQueryDraft]);
 
   const serializedFilterQuery = useMemo(() => (filterQuery ? filterQuery.serializedQuery : null), [

@@ -18,7 +18,7 @@ import {
   TestProviders,
 } from '../../../common/mock';
 
-import { StatefulTimeline, OwnProps as StatefulTimelineOwnProps } from './index';
+import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
 import { useTimelineEvents } from '../../containers/index';
 
 jest.mock('../../containers/index', () => ({
@@ -40,7 +40,6 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
-jest.mock('../flyout/header_with_close_button');
 jest.mock('../../../common/containers/sourcerer', () => {
   const originalModule = jest.requireActual('../../../common/containers/sourcerer');
 
@@ -57,9 +56,7 @@ jest.mock('../../../common/containers/sourcerer', () => {
 });
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
-    id: 'id',
-    onClose: jest.fn(),
-    usersViewing: [],
+    timelineId: 'id',
   };
 
   beforeEach(() => {
