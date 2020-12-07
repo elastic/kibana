@@ -23,7 +23,7 @@ import { TimeSeries } from '../../../visualizations/views/timeseries';
 import TimeseriesVisualization from './vis';
 import { setFieldFormats } from '../../../../services';
 import { UI_SETTINGS } from '../../../../../../data/public';
-import { getFieldFormatsRegistry } from '../../../../../../data/public/field_formats/field_formats_registry.stub';
+import { getFieldFormatsRegistry } from '../../../../../../data/public/test_utils';
 
 describe('TimeseriesVisualization', () => {
   describe('TimeSeries Y-Axis formatted value', () => {
