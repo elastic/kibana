@@ -5,24 +5,23 @@
  */
 
 import React, { FC } from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldDataCardProps } from '../field_data_card';
 import { TopValues } from '../top_values';
+import { ExpandedRowFieldHeader } from '../../../../stats_datagrid/components/expanded_row_field_header';
 
 export const KeywordContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats, fieldFormat } = config;
 
   return (
     <div className="mlFieldDataCard__stats">
-      <EuiTitle size="xxxs" className="mlFieldDataCard__valuesTitle">
-        <span>
-          <FormattedMessage
-            id="xpack.ml.fieldDataCard.cardKeyword.topValuesLabel"
-            defaultMessage="Top values"
-          />
-        </span>
-      </EuiTitle>
+      <ExpandedRowFieldHeader>
+        <FormattedMessage
+          id="xpack.ml.fieldDataCard.cardKeyword.topValuesLabel"
+          defaultMessage="Top values"
+        />
+      </ExpandedRowFieldHeader>{' '}
       <EuiSpacer size="xs" />
       <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
     </div>

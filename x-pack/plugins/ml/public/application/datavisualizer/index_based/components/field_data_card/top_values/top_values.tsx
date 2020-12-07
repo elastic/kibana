@@ -43,7 +43,6 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor }) => {
     isTopValuesSampled,
   } = stats;
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
-
   return (
     <div data-test-subj="mlFieldDataCardTopValues">
       {topValues.map((value: any) => (
