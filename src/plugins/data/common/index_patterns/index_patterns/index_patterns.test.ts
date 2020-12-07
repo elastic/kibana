@@ -191,6 +191,20 @@ describe('IndexPatterns', () => {
     expect(indexPatterns.refreshFields).toBeCalled();
   });
 
+  test('find', async () => {
+    const search = 'kibana*';
+    const size = 10;
+    await indexPatterns.find('kibana*', size);
+
+    expect(savedObjectsClient.find).lastCalledWith({
+      type: 'index-pattern',
+      fields: ['title'],
+      search,
+      searchFields: ['title'],
+      perPage: size,
+    });
+  });
+
   test('createAndSave', async () => {
     const title = 'kibana-*';
     indexPatterns.createSavedObject = jest.fn();
