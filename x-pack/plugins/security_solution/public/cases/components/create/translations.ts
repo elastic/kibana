@@ -35,11 +35,3 @@ export const SYNC_ALERTS_LABEL = i18n.translate(
     defaultMessage: 'Sync alert status with case status',
   }
 );
-
-export const SYNC_ALERTS_HELP = i18n.translate(
-  'xpack.securitySolution.components.create.syncAlertHelpText',
-  {
-    defaultMessage:
-      'Enabling this option will sync the status of alerts in this case with the case status.',
-  }
-);

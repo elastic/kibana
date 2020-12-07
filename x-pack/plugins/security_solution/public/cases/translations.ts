@@ -270,3 +270,11 @@ export const SYNC_ALERTS_SWITCH_LABEL_OFF = i18n.translate(
     defaultMessage: 'Off',
   }
 );
+
+export const SYNC_ALERTS_HELP = i18n.translate(
+  'xpack.securitySolution.components.create.syncAlertHelpText',
+  {
+    defaultMessage:
+      'Enabling this option will sync the status of alerts in this case with the case status.',
+  }
+);

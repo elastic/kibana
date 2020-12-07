@@ -12,12 +12,14 @@ import * as i18n from '../../translations';
 interface Props {
   disabled: boolean;
   isSynced?: boolean;
+  showLabel?: boolean;
   onSwitchChange?: (isSynced: boolean) => void;
 }
 
 const SyncAlertsSwitchComponent: React.FC<Props> = ({
   disabled,
   isSynced = true,
+  showLabel = false,
   onSwitchChange,
 }) => {
   const [isOn, setIsOn] = useState(isSynced);
@@ -33,6 +35,7 @@ const SyncAlertsSwitchComponent: React.FC<Props> = ({
   return (
     <EuiSwitch
       label={isOn ? i18n.SYNC_ALERTS_SWITCH_LABEL_ON : i18n.SYNC_ALERTS_SWITCH_LABEL_OFF}
+      showLabel={showLabel}
       checked={isOn}
       onChange={onChange}
       disabled={disabled}
