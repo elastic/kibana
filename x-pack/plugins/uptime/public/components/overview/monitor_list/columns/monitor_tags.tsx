@@ -8,10 +8,10 @@ import React, { useState } from 'react';
 import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import { MonitorSummary } from '../../../../../common/runtime_types/monitor';
 import { Ping } from '../../../../../common/runtime_types/ping';
+import { EXPAND_TAGS_LABEL } from './translations';
 
 interface Props {
-  detailsPage?: boolean;
-  ping?: Ping;
+  ping?: Ping | null;
   summary?: MonitorSummary;
 }
 
@@ -57,6 +57,7 @@ export const MonitorTags = ({ ping, summary }: Props) => {
           onClick={() => {
             setToDisplay(tags.length);
           }}
+          onClickAriaLabel={EXPAND_TAGS_LABEL}
         >
           +{tags.length - 5}
         </EuiBadge>
