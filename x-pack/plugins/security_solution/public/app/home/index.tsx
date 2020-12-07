@@ -23,6 +23,7 @@ import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
 import { useThrottledResizeObserver } from '../../common/components/utils';
+import { AppLeaveHandler } from '../../../../../../src/core/public';
 
 const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   style: {
@@ -41,9 +42,10 @@ const usersViewing = ['elastic']; // TODO: get the users viewing this timeline f
 
 interface HomePageProps {
   children: React.ReactNode;
+  onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
+const HomePageComponent: React.FC<HomePageProps> = ({ children, onAppLeave }) => {
   const { application, overlays } = useKibana().services;
   const subPluginId = useRef<string>('');
   const { ref, height = 0 } = useThrottledResizeObserver(300);
@@ -89,7 +91,11 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
           {indicesExist && showTimeline && (
             <>
               <AutoSaveWarningMsg />
-              <Flyout timelineId={TimelineId.active} usersViewing={usersViewing} />
+              <Flyout
+                timelineId={TimelineId.active}
+                onAppLeave={onAppLeave}
+                usersViewing={usersViewing}
+              />
             </>
           )}
 

@@ -18,7 +18,7 @@ exports[`TagLabel component renders correctly against snapshot 1`] = `
 >
   <span
     class="euiBadge euiBadge--iconLeft"
-    style="background-color:#fff;color:#000"
+    style="background-color:#ff7e62;color:#000"
   >
     <span
       class="euiBadge__content"
@@ -26,13 +26,7 @@ exports[`TagLabel component renders correctly against snapshot 1`] = `
       <span
         class="euiBadge__text"
       >
-        <span
-          class="euiTextColor euiTextColor--ghost"
-        >
-          <h4>
-            US-East
-          </h4>
-        </span>
+        US-East
       </span>
     </span>
   </span>
@@ -42,15 +36,9 @@ exports[`TagLabel component renders correctly against snapshot 1`] = `
 exports[`TagLabel component shallow render correctly against snapshot 1`] = `
 <styled.div>
   <EuiBadge
-    color="#fff"
+    color="secondary"
   >
-    <EuiTextColor
-      color="default"
-    >
-      <h4>
-        US-East
-      </h4>
-    </EuiTextColor>
+    US-East
   </EuiBadge>
 </styled.div>
 `;
