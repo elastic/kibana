@@ -21,6 +21,8 @@ import React, { useState, useRef } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiDataGrid,
+  EuiDataGridProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHideFor,
@@ -42,12 +44,16 @@ import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
 } from './sidebar/discover_sidebar_responsive';
-import { DiscoverGrid } from './discover_grid/discover_grid';
 import { DiscoverProps } from './discover_legacy';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
+import { DiscoverGrid, DiscoverGridProps } from './discover_grid/discover_grid';
 
 export const SidebarMemoized = React.memo((props: DiscoverSidebarResponsiveProps) => (
   <DiscoverSidebarResponsive {...props} />
+));
+
+export const DataGridMemoized = React.memo((props: DiscoverGridProps) => (
+  <DiscoverGrid {...props} />
 ));
 
 export function Discover({
@@ -257,7 +263,7 @@ export function Discover({
                         </h2>
                         {rows && rows.length && (
                           <div className="dscDiscoverGrid">
-                            <DiscoverGrid
+                            <DataGridMemoized
                               ariaLabelledBy="documentsAriaLabel"
                               columns={state.columns || []}
                               indexPattern={indexPattern}

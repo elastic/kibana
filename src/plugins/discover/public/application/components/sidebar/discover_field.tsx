@@ -21,7 +21,7 @@ import './discover_field.scss';
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton } from '../../../../../kibana_react/public';
@@ -68,11 +68,7 @@ export interface DiscoverFieldProps {
    * @param metricType
    * @param eventName
    */
-  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
-  /**
-   * Shows Add button at all times and not only on focus
-   */
-  mobile?: boolean;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 export function DiscoverField({
@@ -202,7 +198,6 @@ export function DiscoverField({
 
   return (
     <EuiPopover
-      ownFocus
       display="block"
       button={
         <FieldButton

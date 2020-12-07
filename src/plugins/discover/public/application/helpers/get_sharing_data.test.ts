@@ -38,7 +38,9 @@ describe('getSharingData', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "conflictedTypesFields": Array [],
-        "fields": Array [],
+        "fields": Array [
+          "date",
+        ],
         "indexPatternId": "the-index-pattern-id",
         "metaFields": Array [
           "_index",
@@ -46,8 +48,11 @@ describe('getSharingData', () => {
         ],
         "searchRequest": Object {
           "body": Object {
-            "_source": Object {},
-            "fields": undefined,
+            "_source": Object {
+              "includes": Array [
+                "date",
+              ],
+            },
             "query": Object {
               "bool": Object {
                 "filter": Array [],
@@ -58,7 +63,9 @@ describe('getSharingData', () => {
             },
             "script_fields": Object {},
             "sort": Array [],
-            "stored_fields": undefined,
+            "stored_fields": Array [
+              "date",
+            ],
           },
           "index": "the-index-pattern-title",
         },

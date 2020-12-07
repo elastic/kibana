@@ -79,6 +79,7 @@ const indexPattern = ({
   getSourceFiltering: () => ({}),
   getFieldByName: () => ({}),
   timeFieldName: 'date',
+  docvalueFields: [],
 } as unknown) as IndexPattern;
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);

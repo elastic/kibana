@@ -23,7 +23,6 @@ import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import rison from 'rison-node';
 import { createSearchSessionRestorationDataProvider, getState, splitState } from './discover_state';
 import { RequestAdapter } from '../../../../inspector/public';
 import {
@@ -388,29 +387,6 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     services,
     state,
   });
-
-  $scope.getContextAppHref = (anchorId) => {
-    const path = `#/discover/context/${encodeURIComponent(
-      $scope.indexPattern.id
-    )}/${encodeURIComponent(anchorId)}`;
-    const urlSearchParams = new URLSearchParams();
-
-    urlSearchParams.set(
-      'g',
-      rison.encode({
-        filters: filterManager.getGlobalFilters() || [],
-      })
-    );
-
-    urlSearchParams.set(
-      '_a',
-      rison.encode({
-        columns: $scope.state.columns,
-        filters: (filterManager.getAppFilters() || []).map(esFilters.disableFilter),
-      })
-    );
-    return `${path}?${urlSearchParams.toString()}`;
-  };
 
   $scope.searchSource
     .setField('index', $scope.indexPattern)
