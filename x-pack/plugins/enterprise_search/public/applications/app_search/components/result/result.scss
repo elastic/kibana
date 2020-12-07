@@ -1,32 +1,16 @@
 .appSearchResult {
-  overflow: hidden;
   display: flex;
-  justify-content: space-between;
-  width: 100%;
 
   &__contentWrap {
     width: 100%;
     padding: $euiSize;
-    display: grid;
-    grid-template-rows: 1fr $euiSizeXS * 5;
-  }
-
-  &__contentInner {
-    display: grid;
-    grid-gap: $euiSizeS;
     overflow: hidden;
-  }
-
-  &__fieldsetContainer {
-    display: flex;
-    flex-direction: column;
   }
 
   &__hiddenFieldsIndicator {
     font-size: $euiFontSizeXS;
     color: $euiColorDarkShade;
-    align-self: end;
-    padding-top: 0;
+    margin-top: $euiSizeS;
   }
 
   &__toggleExpandButton {

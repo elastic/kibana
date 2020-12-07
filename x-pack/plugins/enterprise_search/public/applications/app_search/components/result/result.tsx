@@ -42,17 +42,13 @@ export const Result: React.FC<Props> = ({ result, showScore }) => {
       })}
     >
       <div className="appSearchResult__contentWrap">
+        <ResultHeader resultMeta={resultMeta} showScore={!!showScore} />
         <div className="appSearchResult__contentInner">
-          <ResultHeader resultMeta={resultMeta} showScore={!!showScore} />
-          <div className="appSearchResult__fieldsetContainer">
-            <div>
-              {resultFields
-                .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
-                .map(([field, value]: [string, FieldValue]) => (
-                  <ResultField key={field} field={field} raw={value.raw} snippet={value.snippet} />
-                ))}
-            </div>
-          </div>
+          {resultFields
+            .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
+            .map(([field, value]: [string, FieldValue]) => (
+              <ResultField key={field} field={field} raw={value.raw} snippet={value.snippet} />
+            ))}
         </div>
         {numResults > RESULT_CUTOFF && !isOpen && (
           <div className="appSearchResult__hiddenFieldsIndicator">
