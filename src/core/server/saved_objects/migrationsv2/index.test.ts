@@ -38,13 +38,16 @@ import {
   OutdatedDocumentsTransform,
   MarkVersionIndexReady,
   CreateNewTargetState,
+  BaseState,
 } from '.';
 import { SavedObjectsRawDoc } from '..';
 import { ElasticsearchClient } from '../../elasticsearch';
 import { AliasAction, RetryableEsClientError } from './actions';
 
 describe('migrations v2', () => {
-  const baseState = {
+  const baseState: BaseState = {
+    controlState: '',
+    legacyIndex: '.kibana',
     kibanaVersion: '7.11.0',
     logs: [],
     retryCount: 0,
@@ -72,7 +75,13 @@ describe('migrations v2', () => {
 
   describe('model', () => {
     describe('exponential retry delays for retryable_es_client_error', () => {
-      let state: State = { ...baseState, controlState: 'INIT' };
+      let state: State = {
+        ...baseState,
+        controlState: 'INIT',
+        currentAlias: '.kibana',
+        versionAlias: '.kibana_7.11.0',
+        versionIndex: '.kibana_7.11.0_001',
+      };
       const retryableError: RetryableEsClientError = {
         type: 'retryable_es_client_error',
         message: 'snapshot_in_progress_exception',
@@ -172,7 +181,13 @@ describe('migrations v2', () => {
 
     describe('transitions from', () => {
       describe('INIT', () => {
-        const initState: State = { ...baseState, controlState: 'INIT' };
+        const initState: State = {
+          ...baseState,
+          controlState: 'INIT',
+          currentAlias: '.kibana',
+          versionAlias: '.kibana_7.11.0',
+          versionIndex: '.kibana_7.11.0_001',
+        };
         test('INIT -> UPDATE_TARGET_MAPPINGS if .kibana is already pointing to the target index', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana_7.11.0_001': {
@@ -250,6 +265,38 @@ describe('migrations v2', () => {
             ]
           `);
         });
+        test('INIT -> SET_SOURCE_WRITE_BLOCK when .kibana points to an index with an invalid version', () => {
+          // If users tamper with our index version naming scheme we can no
+          // longer accurately detect a newer version. Older Kibana versions
+          // will have indices like `.kibana_10` and users might choose an
+          // invalid name when restoring from a snapshot. So we try to be
+          // lenient and assume it's an older index and perform a migration.
+          // If the tampered index belonged to a newer version the migration
+          // will fail when we start transforming documents.
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.invalid.0_001': {
+              aliases: {
+                '.kibana': {},
+                '.kibana_7.12.0': {},
+              },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana_7.11.0': {} },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+          });
+          const newState = model(initState, res) as FatalState;
+
+          expect(newState.controlState).toEqual('SET_SOURCE_WRITE_BLOCK');
+          expect(newState).toMatchObject({
+            controlState: 'SET_SOURCE_WRITE_BLOCK',
+            sourceIndex: Option.some('.kibana_7.invalid.0_001'),
+            targetIndex: '.kibana_7.11.0_001',
+          });
+        });
         test('INIT -> SET_SOURCE_WRITE_BLOCK when migrating from a v2 migrations index (>= 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana_7.11.0_001': {
@@ -263,7 +310,17 @@ describe('migrations v2', () => {
               settings: {},
             },
           });
-          const newState = model({ ...initState, ...{ kibanaVersion: '7.12.0' } }, res);
+          const newState = model(
+            {
+              ...initState,
+              ...{
+                kibanaVersion: '7.12.0',
+                versionAlias: '.kibana_7.12.0',
+                versionIndex: '.kibana_7.12.0_001',
+              },
+            },
+            res
+          );
 
           expect(newState).toMatchObject({
             controlState: 'SET_SOURCE_WRITE_BLOCK',

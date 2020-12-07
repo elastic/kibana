@@ -68,11 +68,6 @@ export const fetchIndices = (
     .catch(catchRetryableEsClientErrors);
 };
 
-export interface SetIndexWriteBlockResponse {
-  acknowledged: boolean;
-  shards_acknowledged: boolean;
-}
-
 /**
  * Sets a write block in place for the given index. If the response includes
  * `acknowledged: true` all in-progress writes have drained and no further
