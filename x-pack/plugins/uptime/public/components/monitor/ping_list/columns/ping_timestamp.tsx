@@ -194,26 +194,21 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
   );
 };
 
-const BorderedFlexGroup = euiStyled(EuiFlexGroup)`
+const BorderedText = euiStyled(EuiText)`
+  width: 120px;
+  text-align: center;
   border: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
 `;
 
 export const NoImageAvailable = () => {
   return (
-    <BorderedFlexGroup alignItems="center" direction="column" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiIcon color="subdued" size="xl" type="image" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText>
-          <strong>
-            <FormattedMessage
-              id="xpack.uptime.synthetics.screenshot.noImageMessage"
-              defaultMessage="No image available"
-            />
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
-    </BorderedFlexGroup>
+    <BorderedText>
+      <strong>
+        <FormattedMessage
+          id="xpack.uptime.synthetics.screenshot.noImageMessage"
+          defaultMessage="No image available"
+        />
+      </strong>
+    </BorderedText>
   );
 };
