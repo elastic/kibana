@@ -42,6 +42,7 @@ import { UpdateIcon } from '../../components/icons';
 import { Content } from './content';
 import './index.scss';
 import { useUIExtension } from '../../../../hooks/use_ui_extension';
+import { PLUGIN_ID } from '../../../../../../../common/constants';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
@@ -185,10 +186,16 @@ export function Detail() {
     (ev) => {
       ev.preventDefault();
 
-      const currentPath = history.createHref(location);
+      // The object below, given to `createHref` is explicitly accessing keys of `location` in order
+      // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
+      const currentPath = history.createHref({
+        pathname: location.pathname,
+        search: location.search,
+        hash: location.hash,
+      });
       const redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
         CreatePackagePolicyRouteState['onCancelNavigateTo'] = [
-        'fleet',
+        PLUGIN_ID,
         {
           path: currentPath,
         },
@@ -206,7 +213,7 @@ export function Detail() {
         state: redirectBackRouteState,
       });
     },
-    [getPath, history, location, pkgkey]
+    [getPath, history, location.hash, location.pathname, location.search, pkgkey]
   );
 
   const headerRightContent = useMemo(
