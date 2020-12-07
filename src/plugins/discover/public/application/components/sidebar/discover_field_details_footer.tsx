@@ -41,7 +41,10 @@ export function DiscoverFieldDetailsFooter({
     <EuiPopoverFooter>
       <EuiText size="xs" textAlign="center">
         {!indexPattern.metaFields.includes(field.name) && !field.scripted ? (
-          <EuiLink onClick={() => onAddFilter('_exists_', field.name, '+')}>
+          <EuiLink
+            onClick={() => onAddFilter('_exists_', field.name, '+')}
+            data-test-subj="onAddFilterButton"
+          >
             <FormattedMessage
               id="discover.fieldChooser.detailViews.existsText"
               defaultMessage="Exists in"
