@@ -7,5 +7,5 @@
   "configPath": ["xpack", "saved_object_tagging"],
   "requiredPlugins": ["features", "management", "savedObjectsTaggingOss"],
   "requiredBundles": ["kibanaReact"],
-  "optionalPlugins": ["usageCollection"]
+  "optionalPlugins": ["usageCollection", "security"]
 }
