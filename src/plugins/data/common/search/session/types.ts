@@ -39,6 +39,6 @@ export interface SearchSessionFindOptions {
   page?: number;
   perPage?: number;
   sortField?: string;
-  sortOrder?: string;
+  sortOrder?: 'asc' | 'desc';
   filter?: string;
 }

@@ -113,7 +113,7 @@ export type SavedObjectsFieldMapping =
 
 /** @internal */
 export interface IndexMapping {
-  dynamic?: string;
+  dynamic?: boolean | 'strict';
   properties: SavedObjectsMappingProperties;
   _meta?: IndexMappingMeta;
 }
@@ -124,6 +124,7 @@ export interface IndexMappingMeta {
   // with each key being a root-level mapping property, and each value being
   // the md5 hash of that mapping's value when the index was created.
   migrationMappingPropertyHashes?: { [k: string]: string };
+  [name: string]: any;
 }
 
 /**
@@ -162,5 +163,5 @@ export interface SavedObjectsComplexFieldMapping {
   enabled?: boolean;
   doc_values?: boolean;
   type?: string;
-  properties: SavedObjectsMappingProperties;
+  properties?: SavedObjectsMappingProperties;
 }

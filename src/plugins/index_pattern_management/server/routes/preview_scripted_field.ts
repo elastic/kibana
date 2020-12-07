@@ -41,8 +41,10 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
       try {
         const response = await client.search({
           index,
-          _source: additionalFields && additionalFields.length > 0 ? additionalFields : undefined,
+          _source_includes:
+            additionalFields && additionalFields.length > 0 ? additionalFields : undefined,
           size: 10,
+          // @ts-expect-error unknown property
           timeout: '30s',
           body: {
             query: query ?? { match_all: {} },

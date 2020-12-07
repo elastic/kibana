@@ -80,7 +80,7 @@ export async function callFieldCapsApi(
   try {
     return await callCluster.fieldCaps<FieldCapsResponse>({
       index: indices,
-      fields: '*',
+      fields: ['*'],
       ignore_unavailable: true,
       ...fieldCapsOptions,
     });

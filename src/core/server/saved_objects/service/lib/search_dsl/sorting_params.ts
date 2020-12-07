@@ -18,6 +18,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { types as esTypes } from '@elastic/elasticsearch';
 import { getProperty, IndexMapping } from '../../../mappings';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
@@ -26,7 +27,7 @@ export function getSortingParams(
   mappings: IndexMapping,
   type: string | string[],
   sortField?: string,
-  sortOrder?: string
+  sortOrder?: esTypes.IndexSortOrder
 ) {
   if (!sortField) {
     return {};

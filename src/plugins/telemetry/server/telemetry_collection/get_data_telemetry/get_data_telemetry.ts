@@ -263,6 +263,7 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
     };
     const [{ body: indexMappings }, { body: indexStats }] = await Promise.all([
       esClient.indices.getMapping<IndexMappings>(indexMappingsParams),
+      // @ts-expect-error doesn't support metric: string[]
       esClient.indices.stats<IndexStats>(indicesStatsParams),
     ]);
 
@@ -271,14 +272,18 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
     const indices = indexNames.map((name) => {
       const baseIndexInfo = {
         name,
-        isECS: !!indexMappings[name]?.mappings?.properties.ecs?.properties.version?.type,
+        // @ts-expect-error IProeprty doesn't contain properties
+        isECS: !!indexMappings[name]?.mappings?.properties?.ecs?.properties?.version?.type,
         shipper: indexMappings[name]?.mappings?._meta?.beat,
+        // @ts-expect-error name is not exist on object
         packageName: indexMappings[name]?.mappings?._meta?.package?.name,
         managedBy: indexMappings[name]?.mappings?._meta?.managed_by,
         dataStreamDataset:
-          indexMappings[name]?.mappings?.properties.data_stream?.properties.dataset?.value,
+          // @ts-expect-error IProeprty doesn't contain properties
+          indexMappings[name]?.mappings?.properties?.data_stream?.properties.dataset?.value,
         dataStreamType:
-          indexMappings[name]?.mappings?.properties.data_stream?.properties.type?.value,
+          // @ts-expect-error IProeprty doesn't contain properties
+          indexMappings[name]?.mappings?.properties?.data_stream?.properties.type?.value,
       };
 
       const stats = (indexStats?.indices || {})[name];
@@ -291,6 +296,7 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
       }
       return baseIndexInfo;
     });
+    // @ts-expect-error managedBy object is not assignable to string
     return buildDataTelemetryPayload(indices);
   } catch (e) {
     return [];

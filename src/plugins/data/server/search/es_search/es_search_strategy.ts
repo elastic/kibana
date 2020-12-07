@@ -18,7 +18,6 @@
  */
 import { from, Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
-import type { SearchResponse } from 'elasticsearch';
 import type { Logger, SharedGlobalConfig } from 'kibana/server';
 import type { ISearchStrategy } from '../types';
 import type { SearchUsage } from '../collectors';
@@ -45,8 +44,10 @@ export const esSearchStrategyProvider = (
         ...getShardTimeout(config),
         ...request.params,
       };
-      const promise = esClient.asCurrentUser.search<SearchResponse<unknown>>(params);
+      // @ts-expect-error  `AsyncSearchSubmit.docvalue_fields: string | string[]` but `SearchRequest.docvalue_fields: string[]`
+      const promise = esClient.asCurrentUser.search<unknown>(params);
       const { body } = await shimAbortSignal(promise, abortSignal);
+      // @ts-expect-error Types of property 'took' are incompatible. optonal property
       return toKibanaSearchResponse(body);
     };
 

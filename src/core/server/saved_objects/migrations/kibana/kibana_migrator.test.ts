@@ -70,7 +70,7 @@ describe('KibanaMigrator', () => {
 
       options.client.cat.templates.mockReturnValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
-          { templates: [] },
+          { records: [] },
           { statusCode: 404 }
         )
       );
@@ -94,7 +94,7 @@ describe('KibanaMigrator', () => {
 
       options.client.cat.templates.mockReturnValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
-          { templates: [] },
+          { records: [] },
           { statusCode: 404 }
         )
       );

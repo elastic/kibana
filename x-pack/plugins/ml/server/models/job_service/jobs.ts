@@ -141,7 +141,10 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
     }
 
-    const { body } = await mlClient.stopDatafeed({ datafeed_id: datafeedId, force: true });
+    const { body } = await mlClient.stopDatafeed({
+      datafeed_id: datafeedId,
+      body: { force: true },
+    });
     if (body.stopped !== true) {
       return { success: false };
     }

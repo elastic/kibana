@@ -43,6 +43,7 @@ export const registerHitsStatusRoute = (router: IRouter) => {
             query,
           },
         });
+        // @ts-expect-error optional property
         const count = body.hits.hits.length;
 
         return res.ok({

@@ -77,7 +77,7 @@ export interface SavedObjectsFindOptions {
   page?: number;
   perPage?: number;
   sortField?: string;
-  sortOrder?: string;
+  sortOrder?: 'asc' | 'desc';
   /**
    * An array of fields to include in the results
    * @example

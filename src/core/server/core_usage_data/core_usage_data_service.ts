@@ -106,19 +106,21 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         // to map back from the index to the alias. So we have to make an API
         // call for every alias
         return elasticsearch.client.asInternalUser.cat
-          .indices<any[]>({
+          .indices({
             index,
             format: 'JSON',
             bytes: 'b',
           })
           .then(({ body }) => {
-            const stats = body[0];
+            const stats = body.records![0];
             return {
               alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
-              docsCount: stats['docs.count'],
-              docsDeleted: stats['docs.deleted'],
-              storeSizeBytes: stats['store.size'],
-              primaryStoreSizeBytes: stats['pri.store.size'],
+              // TODO fix me: must be numbers? or we handle "long" as strings in js code?
+              // https://github.com/elastic/kibana/blob/master/src/plugins/kibana_usage_collection/server/collectors/core/core_usage_collector.ts#L109-L113
+              docsCount: Number(stats['docs.count']!),
+              docsDeleted: Number(stats['docs.deleted']!),
+              storeSizeBytes: Number(stats['store.size']!),
+              primaryStoreSizeBytes: Number(stats['pri.store.size']!),
             };
           });
       })

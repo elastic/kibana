@@ -25,16 +25,16 @@ export const createClusterDataCheck = () => {
   return async function doesClusterHaveUserData(esClient: ElasticsearchClient, log: Logger) {
     if (!clusterHasUserData) {
       try {
-        const indices = await esClient.cat.indices<
-          Array<{ index: string; ['docs.count']: string }>
-        >({
+        const indices = await esClient.cat.indices({
           format: 'json',
+          // @ts-expect-error doesn't contain h
           h: ['index', 'docs.count'],
         });
-        clusterHasUserData = indices.body.some((indexCount) => {
+        clusterHasUserData = indices.body.records!.some((indexCount) => {
           const isInternalIndex =
+            // @ts-expect-error optional property
             indexCount.index.startsWith('.') || indexCount.index.startsWith('kibana_sample_');
-
+          // @ts-expect-error optional property
           return !isInternalIndex && parseInt(indexCount['docs.count'], 10) > 0;
         });
       } catch (e) {

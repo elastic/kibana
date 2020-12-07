@@ -39,6 +39,7 @@ import { callIndexAliasApi, IndicesAliasResponse } from './es_api';
 export async function resolveTimePattern(callCluster: ElasticsearchClient, timePattern: string) {
   const aliases = await callIndexAliasApi(callCluster, timePatternToWildcard(timePattern));
 
+  // @ts-expect-error optional property
   const allIndexDetails = chain<IndicesAliasResponse>(aliases.body)
     .reduce(
       (acc: string[], index: any, indexName: string) =>

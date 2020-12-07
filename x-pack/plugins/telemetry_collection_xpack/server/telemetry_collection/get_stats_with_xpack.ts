@@ -28,6 +28,7 @@ export const getStatsWithXpack: StatsGetter<TelemetryAggregatedStats> = async fu
 
   return clustersLocalStats
     .map((localStats) => {
+      // @ts-expect-error start_date_in_millis is not defined
       const localStatsWithLicense: TelemetryAggregatedStats = {
         ...localStats,
         ...(license && { license }),

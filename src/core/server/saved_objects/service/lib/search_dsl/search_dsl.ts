@@ -18,6 +18,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { types } from '@elastic/elasticsearch';
 
 import { IndexMapping } from '../../../mappings';
 import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
@@ -33,7 +34,7 @@ interface GetSearchDslOptions {
   searchFields?: string[];
   rootSearchFields?: string[];
   sortField?: string;
-  sortOrder?: string;
+  sortOrder?: types.IndexSortOrder;
   namespaces?: string[];
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];

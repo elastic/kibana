@@ -40,7 +40,7 @@ export function buildActiveMappings(
 ): IndexMapping {
   const mapping = defaultMapping();
 
-  const mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
+  const mergedProperties = validateAndMerge(mapping.properties!, typeDefinitions);
 
   return cloneDeep({
     ...mapping,

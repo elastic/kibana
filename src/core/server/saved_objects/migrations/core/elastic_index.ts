@@ -23,20 +23,21 @@
  */
 
 import _ from 'lodash';
+import type { types } from '@elastic/elasticsearch';
+import type { ApiResponse, TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { MigrationEsClient } from './migration_es_client';
-import { CountResponse, SearchResponse } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
 import { AliasAction, RawDoc, ShardsInfo } from './call_cluster';
 import { SavedObjectsRawDocSource } from '../../serialization';
 
-const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
+const settings = { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } };
 
 export interface FullIndexInfo {
-  aliases: { [name: string]: object };
+  aliases?: Record<types.IndexName, types.Alias>;
   exists: boolean;
   indexName: string;
-  mappings: IndexMapping;
+  mappings?: IndexMapping;
 }
 
 /**
@@ -57,7 +58,8 @@ export async function fetchInfo(client: MigrationEsClient, index: string): Promi
 
   const [indexName, indexInfo] = Object.entries(body)[0];
 
-  return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
+  assertIsSupportedIndex(indexInfo, indexName);
+  return { ...indexInfo, exists: true, indexName } as FullIndexInfo;
 }
 
 /**
@@ -78,17 +80,25 @@ export function reader(
   const scroll = scrollDuration;
   let scrollId: string | undefined;
 
-  const nextBatch = () =>
-    scrollId !== undefined
-      ? client.scroll<SearchResponse<SavedObjectsRawDocSource>>({
+  const nextBatch = () => {
+    if (scrollId) {
+      return (client.scroll({
+        body: {
+          // scroll param defined in body only
           scroll,
           scroll_id: scrollId,
-        })
-      : client.search<SearchResponse<SavedObjectsRawDocSource>>({
-          body: { size: batchSize },
-          index,
-          scroll,
-        });
+        },
+        // @elastic/elasticsearch doesn't provide types for scroll
+      }) as unknown) as TransportRequestPromise<
+        ApiResponse<types.SearchResponse<SavedObjectsRawDocSource>>
+      >;
+    }
+    return client.search<SavedObjectsRawDocSource>({
+      body: { size: batchSize },
+      index,
+      scroll,
+    });
+  };
 
   const close = async () => scrollId && (await client.clearScroll({ scroll_id: scrollId }));
 
@@ -97,8 +107,8 @@ export function reader(
     assertResponseIncludeAllShards(result.body);
 
     scrollId = result.body._scroll_id;
-    const docs = result.body.hits.hits;
-    if (!docs.length) {
+    const docs = result.body.hits?.hits;
+    if (!docs || !docs.length) {
       await close();
     }
 
@@ -136,7 +146,7 @@ export async function write(client: MigrationEsClient, index: string, docs: RawD
     return;
   }
 
-  const exception: any = new Error(err.index.error!.reason);
+  const exception: any = new Error(err.index?.error!.reason);
   exception.detail = err;
   throw exception;
 }
@@ -163,7 +173,7 @@ export async function migrationsUpToDate(
   try {
     const indexInfo = await fetchInfo(client, index);
 
-    if (!indexInfo.mappings.properties?.migrationVersion) {
+    if (!indexInfo.mappings?.properties?.migrationVersion) {
       return false;
     }
 
@@ -172,7 +182,7 @@ export async function migrationsUpToDate(
       return true;
     }
 
-    const { body } = await client.count<CountResponse>({
+    const { body } = await client.count({
       body: {
         query: {
           bool: {
@@ -288,13 +298,12 @@ export async function claimAlias(
  *
  * @param {FullIndexInfo} indexInfo
  */
-function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
-  const mappings = indexInfo.mappings as any;
-  const isV7Index = !!mappings.properties;
+function assertIsSupportedIndex(indexInfo: types.IndexState, indexName: string) {
+  const isV7Index = !!indexInfo.mappings?.properties;
 
   if (!isV7Index) {
     throw new Error(
-      `Index ${indexInfo.indexName} belongs to a version of Kibana ` +
+      `Index ${indexName} belongs to a version of Kibana ` +
         `that cannot be automatically migrated. Reset it or use the X-Pack upgrade assistant.`
     );
   }
@@ -308,8 +317,8 @@ function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
  * Object indices should only ever have a single shard. This is more to handle
  * instances where customers manually expand the shards of an index.
  */
-function assertResponseIncludeAllShards({ _shards }: { _shards: ShardsInfo }) {
-  if (!_.has(_shards, 'total') || !_.has(_shards, 'successful')) {
+function assertResponseIncludeAllShards({ _shards }: { _shards?: Partial<ShardsInfo> }) {
+  if (!_shards || _shards.total === undefined || _shards.successful === undefined) {
     return;
   }
 
@@ -361,14 +370,16 @@ async function reindex(
     await new Promise((r) => setTimeout(r, pollInterval));
 
     const { body } = await client.tasks.get({
-      task_id: task,
+      task_id: task!,
     });
 
+    // @ts-expect-error unknown property
     if (body.error) {
+      // @ts-expect-error
       const e = body.error;
       throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);
     }
 
-    completed = body.completed;
+    completed = body.completed!;
   }
 }

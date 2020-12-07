@@ -418,7 +418,7 @@ function withIndex(
   const { index = defaultIndex } = opts;
   const { docs = [] } = opts;
   const searchResult = (i: number) => ({
-    _scroll_id: i,
+    _scroll_id: String(i),
     _shards: {
       successful: 1,
       total: 1,

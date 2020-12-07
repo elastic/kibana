@@ -28,13 +28,7 @@ export function defineCheckPrivilegesRoutes({ router, authc }: RouteDefinitionPa
           },
           areApiKeysEnabled,
         ] = await Promise.all([
-          context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges<{
-            cluster: {
-              manage_security: boolean;
-              manage_api_key: boolean;
-              manage_own_api_key: boolean;
-            };
-          }>({
+          context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
             body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
           }),
           authc.areAPIKeysEnabled(),

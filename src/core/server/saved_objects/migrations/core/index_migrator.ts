@@ -86,12 +86,12 @@ async function requiresMigration(context: Context): Promise<boolean> {
   // Is our index aliased?
   const refreshedSource = await Index.fetchInfo(client, alias);
 
-  if (!refreshedSource.aliases[alias]) {
+  if (!refreshedSource.aliases || !refreshedSource.aliases[alias]) {
     return true;
   }
 
   // Do the actual index mappings match our expectations?
-  const diffResult = diffMappings(refreshedSource.mappings, dest.mappings);
+  const diffResult = diffMappings(refreshedSource.mappings!, dest.mappings!);
 
   if (diffResult) {
     log.info(`Detected mapping change in "${diffResult.changedProp}"`);
@@ -143,16 +143,16 @@ async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern 
     return;
   }
 
-  const { body: templates } = await client.cat.templates<Array<{ name: string }>>({
+  const { body: templates } = await client.cat.templates({
     format: 'json',
     name: obsoleteIndexTemplatePattern,
   });
 
-  if (!templates.length) {
+  if (!templates.records || !templates.records.length) {
     return;
   }
 
-  const templateNames = templates.map((t) => t.name);
+  const templateNames = templates.records.map((t) => t.name) as string[];
 
   log.info(`Removing index templates: ${templateNames}`);
 
@@ -172,7 +172,7 @@ async function migrateSourceToDest(context: Context) {
     return;
   }
 
-  if (!source.aliases[alias]) {
+  if (!source.aliases || !source.aliases[alias]) {
     log.info(`Reindexing ${alias} to ${source.indexName}`);
 
     await Index.convertToAlias(client, source, alias, batchSize, context.convertToAliasScript);
@@ -189,11 +189,13 @@ async function migrateSourceToDest(context: Context) {
       return;
     }
 
+    // @ts-expect-error Hit generics doesn't use passed TDocument
     log.debug(`Migrating saved objects ${docs.map((d) => d._id).join(', ')}`);
 
     await Index.write(
       client,
       dest.indexName,
+      // @ts-expect-error Hit generics doesn't use passed TDocument
       await migrateRawDocs(serializer, documentMigrator.migrate, docs, log)
     );
   }

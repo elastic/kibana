@@ -1411,10 +1411,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/elasticsearch@7.10.0":
-  version "7.10.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.10.0.tgz#da105a9c1f14146f9f2cab4e7026cb7949121b8d"
-  integrity sha512-vXtMAQf5/DwqeryQgRriMtnFppJNLc/R7/R0D8E+wG5/kGM5i7mg+Hi7TM4NZEuXgtzZ2a/Nf7aR0vLyrxOK/w==
+"@elastic/elasticsearch@github:elastic/elasticsearch-js#type-definitions":
+  version "8.0.0-SNAPSHOT.9f33e3c7"
+  resolved "https://codeload.github.com/elastic/elasticsearch-js/tar.gz/e25ea2fd675e221dd7364a31e5a560db7ac0b91b"
   dependencies:
     debug "^4.1.1"
     hpagent "^0.1.1"

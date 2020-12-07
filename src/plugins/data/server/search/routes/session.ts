@@ -113,7 +113,7 @@ export function registerSessionRoutes(router: IRouter): void {
           page: schema.maybe(schema.number()),
           perPage: schema.maybe(schema.number()),
           sortField: schema.maybe(schema.string()),
-          sortOrder: schema.maybe(schema.string()),
+          sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
           filter: schema.maybe(schema.string()),
         }),
       },

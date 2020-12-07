@@ -118,7 +118,7 @@ function createDestContext(
 ): Index.FullIndexInfo {
   const targetMappings = disableUnknownTypeMappingFields(
     buildActiveMappings(typeMappingDefinitions),
-    source.mappings
+    source.mappings!
   );
 
   return {

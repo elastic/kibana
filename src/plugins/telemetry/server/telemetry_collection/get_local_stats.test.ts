@@ -62,6 +62,7 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
               search_action: 19,
               nodes_info_action: 36,
             },
+            // @ts-expect-error aggregations is not declared
             aggregations: {
               terms: {
                 bytes: 2,

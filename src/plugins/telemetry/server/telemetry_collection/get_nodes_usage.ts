@@ -53,10 +53,8 @@ export type NodesUsageGetter = (
  *
  * The Nodes usage API was introduced in v6.0.0
  */
-export async function fetchNodesUsage(
-  esClient: ElasticsearchClient
-): Promise<NodesFeatureUsageResponse> {
-  const { body } = await esClient.nodes.usage<NodesFeatureUsageResponse>({
+export async function fetchNodesUsage(esClient: ElasticsearchClient) {
+  const { body } = await esClient.nodes.usage({
     timeout: TIMEOUT,
   });
   return body;

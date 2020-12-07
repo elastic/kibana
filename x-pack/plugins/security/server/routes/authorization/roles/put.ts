@@ -65,9 +65,10 @@ export function definePutRolesRoutes({
       try {
         const {
           body: rawRoles,
-        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole<
-          Record<string, ElasticsearchRole>
-        >({ name: request.params.name }, { ignore: [404] });
+        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole(
+          { name: request.params.name },
+          { ignore: [404] }
+        );
 
         const body = transformPutPayloadToElasticsearchRole(
           request.body,

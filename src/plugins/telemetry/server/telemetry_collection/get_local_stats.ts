@@ -83,6 +83,7 @@ export const getLocalStats: StatsGetter<TelemetryLocalStats> = async (
         getDataTelemetry(esClient),
       ]);
       return handleLocalStats(
+        // @ts-expect-error optional property
         clusterInfo,
         {
           ...clusterStats,

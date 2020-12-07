@@ -42,6 +42,7 @@ export async function getFieldCapabilities(
   fieldCapsOptions?: { allow_no_indices: boolean }
 ) {
   const esFieldCaps = await callFieldCapsApi(callCluster, indices, fieldCapsOptions);
+  // @ts-expect-error optional property
   const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)

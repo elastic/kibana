@@ -394,7 +394,9 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
         const duration = request.body.duration;
         const { body } = await mlClient.forecast({
           job_id: jobId,
-          duration,
+          body: {
+            duration,
+          },
         });
         return response.ok({
           body,
@@ -512,10 +514,12 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       try {
         const { body } = await mlClient.getOverallBuckets({
           job_id: request.params.jobId,
-          top_n: request.body.topN,
-          bucket_span: request.body.bucketSpan,
-          start: request.body.start,
-          end: request.body.end,
+          body: {
+            top_n: request.body.topN,
+            bucket_span: request.body.bucketSpan,
+            start: request.body.start,
+            end: request.body.end,
+          },
         });
         return response.ok({
           body,

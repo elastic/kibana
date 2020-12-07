@@ -145,9 +145,10 @@ export const pollEsNodesVersion = ({
 }: PollEsNodesVersionOptions): Observable<NodesVersionCompatibility> => {
   log.debug('Checking Elasticsearch version');
   return timer(0, healthCheckInterval).pipe(
+    // @ts-expect-error Type 'Record<string, NodeInfo> | undefined' is not assignable to type '{ [key: string]: NodeInfo; }'
     exhaustMap(() => {
       return from(
-        internalClient.nodes.info<NodesInfo>({
+        internalClient.nodes.info({
           filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
         })
       ).pipe(
