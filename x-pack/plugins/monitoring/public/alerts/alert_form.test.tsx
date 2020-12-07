@@ -18,7 +18,6 @@ import { alertTypeRegistryMock } from '../../../triggers_actions_ui/public/appli
 import { ValidationResult, Alert } from '../../../triggers_actions_ui/public/types';
 import { AlertForm } from '../../../triggers_actions_ui/public/application/sections/alert_form/alert_form';
 import ActionForm from '../../../triggers_actions_ui/public/application/sections/action_connector_form/action_form';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public/application/context/alerts_context';
 import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n/react';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
@@ -131,18 +130,14 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       wrapper = mountWithIntl(
-        <AlertsContextProvider
-          value={{
-            ...monitoringDependencies,
-          }}
-        >
-          <AlertForm
-            alert={initialAlert}
-            dispatch={() => {}}
-            errors={{ name: [], interval: [] }}
-            operation="create"
-          />
-        </AlertsContextProvider>
+        <AlertForm
+          alert={initialAlert}
+          dispatch={() => {}}
+          errors={{ name: [], interval: [] }}
+          operation="create"
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
+        />
       );
 
       await act(async () => {
