@@ -14,7 +14,7 @@ import {
   RequestHandlerContext,
 } from '../../../../../../src/core/server';
 import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
-import { AuthenticationProvider } from '../../../common/types';
+import type { AuthenticationProvider } from '../../../common/model';
 import { ConfigType } from '../../config';
 import { Session } from '../../session_management';
 import { defineAccessAgreementRoutes } from './access_agreement';

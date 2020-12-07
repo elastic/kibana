@@ -124,7 +124,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       }
     }
 
-    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
   }
 
   /**

@@ -11,6 +11,7 @@ import {
   getIndexPatternById,
   getIndexPatternsContract,
   getIndexPatternAndSavedSearch,
+  IndexPatternAndSavedSearch,
 } from '../util/index_utils';
 import { createSearchItems } from '../jobs/new_job/utils/new_job_utils';
 import { ResolverResults, Resolvers } from './resolvers';
@@ -19,6 +20,14 @@ import { useNotifications } from '../contexts/kibana';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../common/constants/ml_url_generator';
 
+/**
+ * Hook to resolve route specific requirements
+ * @param indexPatternId optional Kibana index pattern id, used for wizards
+ * @param savedSearchId optional Kibana saved search id, used for wizards
+ * @param config Kibana UI Settings
+ * @param resolvers an array of resolvers to be executed for the route
+ * @return { context, results } returns the ML context and resolver results
+ */
 export const useResolver = (
   indexPatternId: string | undefined,
   savedSearchId: string | undefined,
@@ -52,36 +61,49 @@ export const useResolver = (
         return;
       }
 
-      if (indexPatternId !== undefined || savedSearchId !== undefined) {
-        try {
-          // note, currently we're using our own kibana context that requires a current index pattern to be set
-          // this means, if the page uses this context, useResolver must be passed a string for the index pattern id
-          // and loadIndexPatterns must be part of the resolvers.
-          const { indexPattern, savedSearch } =
-            savedSearchId !== undefined
-              ? await getIndexPatternAndSavedSearch(savedSearchId)
-              : { savedSearch: null, indexPattern: await getIndexPatternById(indexPatternId!) };
-
-          const { combinedQuery } = createSearchItems(config, indexPattern!, savedSearch);
-
-          setContext({
-            combinedQuery,
-            currentIndexPattern: indexPattern,
-            currentSavedSearch: savedSearch,
-            indexPatterns: getIndexPatternsContract()!,
-            kibanaConfig: config,
-          });
-        } catch (error) {
-          // an unexpected error has occurred. This could be caused by an incorrect index pattern or saved search ID
-          notifications.toasts.addError(new Error(error), {
-            title: i18n.translate('xpack.ml.useResolver.errorTitle', {
-              defaultMessage: 'An error has occurred',
-            }),
-          });
-          await redirectToJobsManagementPage();
+      try {
+        if (indexPatternId === '') {
+          throw new Error(
+            i18n.translate('xpack.ml.useResolver.errorIndexPatternIdEmptyString', {
+              defaultMessage: 'indexPatternId must not be empty string.',
+            })
+          );
         }
-      } else {
-        setContext({});
+
+        let indexPatternAndSavedSearch: IndexPatternAndSavedSearch = {
+          savedSearch: null,
+          indexPattern: null,
+        };
+
+        if (savedSearchId !== undefined) {
+          indexPatternAndSavedSearch = await getIndexPatternAndSavedSearch(savedSearchId);
+        } else if (indexPatternId !== undefined) {
+          indexPatternAndSavedSearch.indexPattern = await getIndexPatternById(indexPatternId);
+        }
+
+        const { savedSearch, indexPattern } = indexPatternAndSavedSearch;
+
+        const { combinedQuery } = createSearchItems(
+          config,
+          indexPattern !== null ? indexPattern : undefined,
+          savedSearch
+        );
+
+        setContext({
+          combinedQuery,
+          currentIndexPattern: indexPattern,
+          currentSavedSearch: savedSearch,
+          indexPatterns: getIndexPatternsContract(),
+          kibanaConfig: config,
+        });
+      } catch (error) {
+        // an unexpected error has occurred. This could be caused by an incorrect index pattern or saved search ID
+        notifications.toasts.addError(new Error(error), {
+          title: i18n.translate('xpack.ml.useResolver.errorTitle', {
+            defaultMessage: 'An error has occurred',
+          }),
+        });
+        await redirectToJobsManagementPage();
       }
     })();
   }, []);

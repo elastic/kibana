@@ -5,22 +5,41 @@
  */
 
 import levenshtein from 'js-levenshtein';
-import { PublicAppInfo } from 'src/core/public';
+import { PublicAppInfo, PublicAppSearchDeepLinkInfo } from 'src/core/public';
 import { GlobalSearchProviderResult } from '../../../global_search/public';
+
+/** Type used internally to represent an application unrolled into its separate searchDeepLinks */
+export interface AppLink {
+  id: string;
+  app: PublicAppInfo;
+  subLinkTitles: string[];
+  path: string;
+}
 
 export const getAppResults = (
   term: string,
   apps: PublicAppInfo[]
 ): GlobalSearchProviderResult[] => {
-  return apps
-    .map((app) => ({ app, score: scoreApp(term, app) }))
-    .filter(({ score }) => score > 0)
-    .map(({ app, score }) => appToResult(app, score));
+  return (
+    apps
+      // Unroll all searchDeepLinks, only if there is a search term
+      .flatMap((app) =>
+        term.length > 0
+          ? flattenDeepLinks(app)
+          : [{ id: app.id, app, path: app.appRoute, subLinkTitles: [] }]
+      )
+      .map((appLink) => ({
+        appLink,
+        score: scoreApp(term, appLink),
+      }))
+      .filter(({ score }) => score > 0)
+      .map(({ appLink, score }) => appToResult(appLink, score))
+  );
 };
 
-export const scoreApp = (term: string, { title }: PublicAppInfo): number => {
+export const scoreApp = (term: string, appLink: AppLink): number => {
   term = term.toLowerCase();
-  title = title.toLowerCase();
+  const title = [appLink.app.title, ...appLink.subLinkTitles].join(' ').toLowerCase();
 
   // shortcuts to avoid calculating the distance when there is an exact match somewhere.
   if (title === term) {
@@ -43,17 +62,61 @@ export const scoreApp = (term: string, { title }: PublicAppInfo): number => {
   return 0;
 };
 
-export const appToResult = (app: PublicAppInfo, score: number): GlobalSearchProviderResult => {
+export const appToResult = (appLink: AppLink, score: number): GlobalSearchProviderResult => {
+  const titleParts =
+    // Stack Management app should not include the app title in the concatenated link label
+    appLink.app.id === 'management' && appLink.subLinkTitles.length > 0
+      ? appLink.subLinkTitles
+      : [appLink.app.title, ...appLink.subLinkTitles];
+
   return {
-    id: app.id,
-    title: app.title,
+    id: appLink.id,
+    // Concatenate title using slashes
+    title: titleParts.join(' / '),
     type: 'application',
-    icon: app.euiIconType,
-    url: app.appRoute,
+    icon: appLink.app.euiIconType,
+    url: appLink.path,
     meta: {
-      categoryId: app.category?.id ?? null,
-      categoryLabel: app.category?.label ?? null,
+      categoryId: appLink.app.category?.id ?? null,
+      categoryLabel: appLink.app.category?.label ?? null,
     },
     score,
   };
+};
+
+const flattenDeepLinks = (
+  app: PublicAppInfo,
+  deepLink?: PublicAppSearchDeepLinkInfo
+): AppLink[] => {
+  if (!deepLink) {
+    return [
+      {
+        id: app.id,
+        app,
+        path: app.appRoute,
+        subLinkTitles: [],
+      },
+      ...app.searchDeepLinks.flatMap((appDeepLink) => flattenDeepLinks(app, appDeepLink)),
+    ];
+  }
+
+  return [
+    ...(deepLink.path
+      ? [
+          {
+            id: `${app.id}-${deepLink.id}`,
+            app,
+            subLinkTitles: [deepLink.title],
+            path: `${app.appRoute}${deepLink.path}`,
+          },
+        ]
+      : []),
+    ...deepLink.searchDeepLinks
+      .flatMap((deepDeepLink) => flattenDeepLinks(app, deepDeepLink))
+      .map((deepAppLink) => ({
+        ...deepAppLink,
+        // shift current sublink title into array of sub-sublink titles
+        subLinkTitles: [deepLink.title, ...deepAppLink.subLinkTitles],
+      })),
+  ];
 };

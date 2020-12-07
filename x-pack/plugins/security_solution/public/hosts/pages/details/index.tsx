@@ -7,7 +7,7 @@
 import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { HostItem, LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
@@ -30,9 +30,9 @@ import { HostOverviewByNameQuery } from '../../containers/hosts/details';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { inputsSelectors, State } from '../../../common/store';
-import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../store/actions';
-import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
+import { inputsSelectors } from '../../../common/store';
+import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 
@@ -46,201 +46,185 @@ import { showGlobalFilters } from '../../../timelines/components/timeline/helper
 import { useFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../display';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 
 const HostOverviewManage = manageQuery(HostOverview);
 
-const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
-  ({
-    filters,
-    graphEventId,
-    query,
-    setAbsoluteRangeDatePicker,
-    setHostDetailsTablesActivePageToZero,
+const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
+  const dispatch = useDispatch();
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const graphEventId = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
+  );
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
+  const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
+  const { globalFullScreen } = useFullScreen();
+
+  const capabilities = useMlCapabilities();
+  const kibana = useKibana();
+  const hostDetailsPageFilters: Filter[] = useMemo(() => getHostDetailsPageFilters(detailName), [
     detailName,
-    hostDetailsPagePath,
-  }) => {
-    const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
-    const { globalFullScreen } = useFullScreen();
-    useEffect(() => {
-      setHostDetailsTablesActivePageToZero();
-    }, [setHostDetailsTablesActivePageToZero, detailName]);
-    const capabilities = useMlCapabilities();
-    const kibana = useKibana();
-    const hostDetailsPageFilters: Filter[] = useMemo(() => getHostDetailsPageFilters(detailName), [
-      detailName,
-    ]);
-    const getFilters = () => [...hostDetailsPageFilters, ...filters];
-    const narrowDateRange = useCallback<UpdateDateRange>(
-      ({ x }) => {
-        if (!x) {
-          return;
-        }
-        const [min, max] = x;
+  ]);
+  const getFilters = () => [...hostDetailsPageFilters, ...filters];
+
+  const narrowDateRange = useCallback<UpdateDateRange>(
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [min, max] = x;
+      dispatch(
         setAbsoluteRangeDatePicker({
           id: 'global',
           from: new Date(min).toISOString(),
           to: new Date(max).toISOString(),
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-    const filterQuery = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-      indexPattern,
-      queries: [query],
-      filters: getFilters(),
-    });
+        })
+      );
+    },
+    [dispatch]
+  );
 
-    return (
-      <>
-        {indicesExist ? (
-          <>
-            <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-              <SiemSearchBar indexPattern={indexPattern} id="global" />
-            </FiltersGlobal>
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const filterQuery = convertToBuildEsQuery({
+    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    indexPattern,
+    queries: [query],
+    filters: getFilters(),
+  });
 
-            <WrapperPage noPadding={globalFullScreen}>
-              <Display show={!globalFullScreen}>
-                <HeaderPage
-                  border
-                  subtitle={
-                    <LastEventTime
-                      docValueFields={docValueFields}
-                      indexKey={LastEventIndexKey.hostDetails}
-                      hostName={detailName}
-                      indexNames={selectedPatterns}
-                    />
-                  }
-                  title={detailName}
-                />
+  useEffect(() => {
+    dispatch(setHostDetailsTablesActivePageToZero());
+  }, [dispatch, detailName]);
 
-                <HostOverviewByNameQuery
-                  indexNames={selectedPatterns}
-                  sourceId="default"
-                  hostName={detailName}
-                  skip={isInitializing}
-                  startDate={from}
-                  endDate={to}
-                >
-                  {({ hostOverview, loading, id, inspect, refetch }) => (
-                    <AnomalyTableProvider
-                      criteriaFields={hostToCriteria(hostOverview)}
-                      startDate={from}
-                      endDate={to}
-                      skip={isInitializing}
-                    >
-                      {({ isLoadingAnomaliesData, anomaliesData }) => (
-                        <HostOverviewManage
-                          docValueFields={docValueFields}
-                          id={id}
-                          inspect={inspect}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          data={hostOverview as HostItem}
-                          anomaliesData={anomaliesData}
-                          isLoadingAnomaliesData={isLoadingAnomaliesData}
-                          indexNames={selectedPatterns}
-                          loading={loading}
-                          startDate={from}
-                          endDate={to}
-                          narrowDateRange={(score, interval) => {
-                            const fromTo = scoreIntervalToDateTime(score, interval);
-                            setAbsoluteRangeDatePicker({
-                              id: 'global',
-                              from: fromTo.from,
-                              to: fromTo.to,
-                            });
-                          }}
-                        />
-                      )}
-                    </AnomalyTableProvider>
-                  )}
-                </HostOverviewByNameQuery>
+  return (
+    <>
+      {indicesExist ? (
+        <>
+          <EuiWindowEvent event="resize" handler={noop} />
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+            <SiemSearchBar indexPattern={indexPattern} id="global" />
+          </FiltersGlobal>
 
-                <EuiHorizontalRule />
-
-                <HostsDetailsKpiComponent
-                  filterQuery={filterQuery}
-                  from={from}
-                  indexNames={selectedPatterns}
-                  setQuery={setQuery}
-                  to={to}
-                  narrowDateRange={narrowDateRange}
-                  skip={isInitializing}
-                />
-
-                <EuiSpacer />
-
-                <SiemNavigation
-                  navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
-                />
-
-                <EuiSpacer />
-              </Display>
-
-              <HostDetailsTabs
-                docValueFields={docValueFields}
-                indexNames={selectedPatterns}
-                isInitializing={isInitializing}
-                deleteQuery={deleteQuery}
-                pageFilters={hostDetailsPageFilters}
-                to={to}
-                from={from}
-                detailName={detailName}
-                type={type}
-                setQuery={setQuery}
-                filterQuery={filterQuery}
-                hostDetailsPagePath={hostDetailsPagePath}
-                indexPattern={indexPattern}
-                setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+          <WrapperPage noPadding={globalFullScreen}>
+            <Display show={!globalFullScreen}>
+              <HeaderPage
+                border
+                subtitle={
+                  <LastEventTime
+                    docValueFields={docValueFields}
+                    indexKey={LastEventIndexKey.hostDetails}
+                    hostName={detailName}
+                    indexNames={selectedPatterns}
+                  />
+                }
+                title={detailName}
               />
-            </WrapperPage>
-          </>
-        ) : (
-          <WrapperPage>
-            <HeaderPage border title={detailName} />
 
-            <OverviewEmpty />
+              <HostOverviewByNameQuery
+                indexNames={selectedPatterns}
+                sourceId="default"
+                hostName={detailName}
+                skip={isInitializing}
+                startDate={from}
+                endDate={to}
+              >
+                {({ hostOverview, loading, id, inspect, refetch }) => (
+                  <AnomalyTableProvider
+                    criteriaFields={hostToCriteria(hostOverview)}
+                    startDate={from}
+                    endDate={to}
+                    skip={isInitializing}
+                  >
+                    {({ isLoadingAnomaliesData, anomaliesData }) => (
+                      <HostOverviewManage
+                        docValueFields={docValueFields}
+                        id={id}
+                        inspect={inspect}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        data={hostOverview as HostItem}
+                        anomaliesData={anomaliesData}
+                        isLoadingAnomaliesData={isLoadingAnomaliesData}
+                        indexNames={selectedPatterns}
+                        loading={loading}
+                        startDate={from}
+                        endDate={to}
+                        narrowDateRange={(score, interval) => {
+                          const fromTo = scoreIntervalToDateTime(score, interval);
+                          setAbsoluteRangeDatePicker({
+                            id: 'global',
+                            from: fromTo.from,
+                            to: fromTo.to,
+                          });
+                        }}
+                      />
+                    )}
+                  </AnomalyTableProvider>
+                )}
+              </HostOverviewByNameQuery>
+
+              <EuiHorizontalRule />
+
+              <HostsDetailsKpiComponent
+                filterQuery={filterQuery}
+                from={from}
+                indexNames={selectedPatterns}
+                setQuery={setQuery}
+                to={to}
+                narrowDateRange={narrowDateRange}
+                skip={isInitializing}
+              />
+
+              <EuiSpacer />
+
+              <SiemNavigation
+                navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
+              />
+
+              <EuiSpacer />
+            </Display>
+
+            <HostDetailsTabs
+              docValueFields={docValueFields}
+              indexNames={selectedPatterns}
+              isInitializing={isInitializing}
+              deleteQuery={deleteQuery}
+              pageFilters={hostDetailsPageFilters}
+              to={to}
+              from={from}
+              detailName={detailName}
+              type={type}
+              setQuery={setQuery}
+              filterQuery={filterQuery}
+              hostDetailsPagePath={hostDetailsPagePath}
+              indexPattern={indexPattern}
+              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+            />
           </WrapperPage>
-        )}
+        </>
+      ) : (
+        <WrapperPage>
+          <HeaderPage border title={detailName} />
 
-        <SpyRoute pageName={SecurityPageName.hosts} />
-      </>
-    );
-  }
-);
+          <OverviewEmpty />
+        </WrapperPage>
+      )}
+
+      <SpyRoute pageName={SecurityPageName.hosts} />
+    </>
+  );
+};
+
 HostDetailsComponent.displayName = 'HostDetailsComponent';
 
-export const makeMapStateToProps = () => {
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  return (state: State) => {
-    const timeline: TimelineModel =
-      getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults;
-    const { graphEventId } = timeline;
-
-    return {
-      query: getGlobalQuerySelector(state),
-      filters: getGlobalFiltersQuerySelector(state),
-      graphEventId,
-    };
-  };
-};
-
-const mapDispatchToProps = {
-  setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
-  setHostDetailsTablesActivePageToZero: dispatchHostDetailsTablesActivePageToZero,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const HostDetails = connector(HostDetailsComponent);
+export const HostDetails = React.memo(HostDetailsComponent);

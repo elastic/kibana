@@ -11,7 +11,13 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { isEmpty } from 'lodash';
-import { CasesFindResponseRt, CasesFindRequestRt, throwErrors } from '../../../../common/api';
+import {
+  CasesFindResponseRt,
+  CasesFindRequestRt,
+  throwErrors,
+  CaseStatuses,
+  caseStatuses,
+} from '../../../../common/api';
 import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
 import { RouteDeps, TotalCommentByCase } from '../types';
 import { CASE_SAVED_OBJECT } from '../../../saved_object_types';
@@ -20,7 +26,7 @@ import { CASES_URL } from '../../../../common/constants';
 const combineFilters = (filters: string[], operator: 'OR' | 'AND'): string =>
   filters?.filter((i) => i !== '').join(` ${operator} `);
 
-const getStatusFilter = (status: 'open' | 'closed', appendFilter?: string) =>
+const getStatusFilter = (status: CaseStatuses, appendFilter?: string) =>
   `${CASE_SAVED_OBJECT}.attributes.status: ${status}${
     !isEmpty(appendFilter) ? ` AND ${appendFilter}` : ''
   }`;
@@ -75,30 +81,21 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
               client,
             };
 
-        const argsOpenCases = {
+        const statusArgs = caseStatuses.map((caseStatus) => ({
           client,
           options: {
             fields: [],
             page: 1,
             perPage: 1,
-            filter: getStatusFilter('open', myFilters),
+            filter: getStatusFilter(caseStatus, myFilters),
           },
-        };
+        }));
 
-        const argsClosedCases = {
-          client,
-          options: {
-            fields: [],
-            page: 1,
-            perPage: 1,
-            filter: getStatusFilter('closed', myFilters),
-          },
-        };
-        const [cases, openCases, closesCases] = await Promise.all([
+        const [cases, openCases, inProgressCases, closedCases] = await Promise.all([
           caseService.findCases(args),
-          caseService.findCases(argsOpenCases),
-          caseService.findCases(argsClosedCases),
+          ...statusArgs.map((arg) => caseService.findCases(arg)),
         ]);
+
         const totalCommentsFindByCases = await Promise.all(
           cases.saved_objects.map((c) =>
             caseService.getAllCaseComments({
@@ -133,7 +130,8 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
             transformCases(
               cases,
               openCases.total ?? 0,
-              closesCases.total ?? 0,
+              inProgressCases.total ?? 0,
+              closedCases.total ?? 0,
               totalCommentsByCases
             )
           ),

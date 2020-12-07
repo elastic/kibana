@@ -7,6 +7,7 @@
 import Boom from '@hapi/boom';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { isInternalURL } from '../../../common/is_internal_url';
+import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -282,7 +283,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       }
     }
 
-    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
   }
 
   /**
@@ -606,14 +607,18 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    */
   private captureRedirectURL(request: KibanaRequest) {
+    const searchParams = new URLSearchParams([
+      [
+        NEXT_URL_QUERY_STRING_PARAMETER,
+        `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`,
+      ],
+      ['providerType', this.type],
+      ['providerName', this.options.name],
+    ]);
     return AuthenticationResult.redirectTo(
       `${
         this.options.basePath.serverBasePath
-      }/internal/security/capture-url?next=${encodeURIComponent(
-        `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
-      )}&providerType=${encodeURIComponent(this.type)}&providerName=${encodeURIComponent(
-        this.options.name
-      )}`,
+      }/internal/security/capture-url?${searchParams.toString()}`,
       // Here we indicate that current session, if any, should be invalidated. It is a no-op for the
       // initial handshake, but is essential when both access and refresh tokens are expired.
       { state: null }

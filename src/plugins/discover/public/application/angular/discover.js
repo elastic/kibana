@@ -23,7 +23,7 @@ import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { getState, splitState } from './discover_state';
+import { createSearchSessionRestorationDataProvider, getState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../inspector/public';
 import {
@@ -33,7 +33,6 @@ import {
   syncQueryStateWithUrl,
 } from '../../../../data/public';
 import { getSortArray } from './doc_table';
-import { createFixedScroll } from './directives/fixed_scroll';
 import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
@@ -60,14 +59,14 @@ import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_patte
 import { addFatalError } from '../../../../kibana_legacy/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
-import { removeQueryParam, getQueryParams } from '../../../../kibana_utils/public';
+import { getQueryParams, removeQueryParam } from '../../../../kibana_utils/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
 } from '../../../common';
-import { resolveIndexPattern, loadIndexPattern } from '../helpers/resolve_index_pattern';
+import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_pattern';
 import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
 import { updateSearchSource } from '../helpers/update_search_source';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
@@ -85,7 +84,7 @@ const {
   toastNotifications,
   uiSettings: config,
   trackUiMetric,
-} = services;
+} = getServices();
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -181,7 +180,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($element, $route, $scope, $timeout, $window, Promise, uiCapabilities) {
+function discoverController($element, $route, $scope, $timeout, Promise, uiCapabilities) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
@@ -204,12 +203,20 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   // used for restoring background session
   let isInitialSearch = true;
 
+  // search session requested a data refresh
+  subscriptions.add(
+    data.search.session.onRefresh$.subscribe(() => {
+      refetch$.next();
+    })
+  );
+
   const state = getState({
     getStateDefaults,
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
     toasts: core.notifications.toasts,
   });
+
   const {
     appStateContainer,
     startSync: startStateSync,
@@ -279,6 +286,14 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       $route.reload();
     }
   });
+
+  data.search.session.setSearchSessionInfoProvider(
+    createSearchSessionRestorationDataProvider({
+      appStateContainer,
+      data,
+      getSavedSearchId: () => savedSearch.id,
+    })
+  );
 
   $scope.setIndexPattern = async (id) => {
     const nextIndexPattern = await indexPatterns.get(id);
@@ -418,7 +433,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
     config: config,
-    fixedScroll: createFixedScroll($scope, $timeout),
     setHeaderActionMenu: getHeaderActionMenuMounter(),
     data,
   };
