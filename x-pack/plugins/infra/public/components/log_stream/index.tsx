@@ -208,13 +208,22 @@ function convertLogColumnDefinitionToLogSourceColumnDefinition(
   columns: LogColumnDefinition[]
 ): LogColumnRenderConfiguration[] {
   return columns.map((column) => {
+    // We extract the { width, header, render } inside each block so the TS compiler uses the right type for `render`
     switch (column.type) {
-      case 'timestamp':
-        return { timestampColumn: { id: '___#timestamp' } };
-      case 'message':
-        return { messageColumn: { id: '___#message' } };
-      case 'field':
-        return { fieldColumn: { id: `___#${column.field}`, field: column.field } };
+      case 'timestamp': {
+        const { width, header, render } = column;
+        return { timestampColumn: { id: '___#timestamp', width, header, render } };
+      }
+      case 'message': {
+        const { width, header, render } = column;
+        return { messageColumn: { id: '___#message', width, header, render } };
+      }
+      case 'field': {
+        const { width, header, render } = column;
+        return {
+          fieldColumn: { id: `___#${column.field}`, field: column.field, width, header, render },
+        };
+      }
     }
   });
 }
