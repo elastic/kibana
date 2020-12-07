@@ -300,50 +300,50 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 },
               })
               .expect(200);
-
-            const response = await alertUtils.getDisableRequest(createdAlert.id);
-
-            switch (scenario.id) {
-              case 'no_kibana_privileges at space1':
-              case 'space_1_all at space2':
-              case 'global_read at space1':
-                expect(response.statusCode).to.eql(403);
-                expect(response.body).to.eql({
-                  error: 'Forbidden',
-                  message: getConsumerUnauthorizedErrorMessage(
-                    'disable',
-                    'test.noop',
-                    'alertsFixture'
-                  ),
-                  statusCode: 403,
-                });
-                // Ensure task still exists
-                await getScheduledTask(createdAlert.scheduledTaskId);
-                break;
-              case 'superuser at space1':
-              case 'space_1_all at space1':
-              case 'space_1_all_alerts_none_actions at space1':
-              case 'space_1_all_with_restricted_fixture at space1':
-                expect(response.statusCode).to.eql(204);
-                expect(response.body).to.eql('');
-                try {
-                  await getScheduledTask(createdAlert.scheduledTaskId);
-                  throw new Error('Should have removed scheduled task');
-                } catch (e) {
-                  expect(e.status).to.eql(404);
-                }
-                // Ensure AAD isn't broken
-                await checkAAD({
-                  supertest,
-                  spaceId: space.id,
-                  type: 'alert',
-                  id: createdAlert.id,
-                });
-                break;
-              default:
-                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-            }
           });
+
+          const response = await alertUtils.getDisableRequest(createdAlert.id);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'disable',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              // Ensure task still exists
+              await getScheduledTask(createdAlert.scheduledTaskId);
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              try {
+                await getScheduledTask(createdAlert.scheduledTaskId);
+                throw new Error('Should have removed scheduled task');
+              } catch (e) {
+                expect(e.status).to.eql(404);
+              }
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
 
         it(`shouldn't disable alert from another space`, async () => {

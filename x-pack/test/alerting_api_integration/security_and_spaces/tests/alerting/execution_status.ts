@@ -39,9 +39,6 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       let executionStatus = await waitForStatus(alertId, new Set(['ok']), 10000);
 
       await retry.try(async () => {
-        // Delay before performing update to avoid 409 errors
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
         // break AAD
         await supertest
           .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${alertId}`)
@@ -52,12 +49,12 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
             },
           })
           .expect(200);
-
-        executionStatus = await waitForStatus(alertId, new Set(['error']));
-        expect(executionStatus.error).to.be.ok();
-        expect(executionStatus.error.reason).to.be(AlertExecutionStatusErrorReasons.Decrypt);
-        expect(executionStatus.error.message).to.be('Unable to decrypt attribute "apiKey"');
       });
+
+      executionStatus = await waitForStatus(alertId, new Set(['error']));
+      expect(executionStatus.error).to.be.ok();
+      expect(executionStatus.error.reason).to.be(AlertExecutionStatusErrorReasons.Decrypt);
+      expect(executionStatus.error.message).to.be('Unable to decrypt attribute "apiKey"');
     });
   });
 

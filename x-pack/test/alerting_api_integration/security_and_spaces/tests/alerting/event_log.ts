@@ -48,38 +48,38 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
+      });
 
-        const events = await retry.try(async () => {
-          // there can be a successful execute before the error one
-          const someEvents = await getEventLog({
-            getService,
-            spaceId,
-            type: 'alert',
-            id: alertId,
-            provider: 'alerting',
-            actions: new Map([['execute', { gte: 1 }]]),
-          });
-          const errorEvents = someEvents.filter(
-            (event) => event?.kibana?.alerting?.status === 'error'
-          );
-          if (errorEvents.length === 0) {
-            throw new Error('no execute/error events yet');
-          }
-          return errorEvents;
-        });
-
-        const event = events[0];
-        expect(event).to.be.ok();
-
-        validateEvent(event, {
+      const events = await retry.try(async () => {
+        // there can be a successful execute before the error one
+        const someEvents = await getEventLog({
+          getService,
           spaceId,
-          savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
-          outcome: 'failure',
-          message: `test.noop:${alertId}: execution failed`,
-          errorMessage: 'Unable to decrypt attribute "apiKey"',
-          status: 'error',
-          reason: 'decrypt',
+          type: 'alert',
+          id: alertId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 1 }]]),
         });
+        const errorEvents = someEvents.filter(
+          (event) => event?.kibana?.alerting?.status === 'error'
+        );
+        if (errorEvents.length === 0) {
+          throw new Error('no execute/error events yet');
+        }
+        return errorEvents;
+      });
+
+      const event = events[0];
+      expect(event).to.be.ok();
+
+      validateEvent(event, {
+        spaceId,
+        savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
+        outcome: 'failure',
+        message: `test.noop:${alertId}: execution failed`,
+        errorMessage: 'Unable to decrypt attribute "apiKey"',
+        status: 'error',
+        reason: 'decrypt',
       });
     });
   });
