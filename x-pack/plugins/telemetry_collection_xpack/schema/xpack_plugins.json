@@ -3156,6 +3156,16 @@
                 }
               }
             },
+            "lens": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
             "visualization": {
               "properties": {
                 "usedTags": {
