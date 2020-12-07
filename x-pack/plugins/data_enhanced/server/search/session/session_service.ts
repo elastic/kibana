@@ -219,6 +219,8 @@ export class BackgroundSessionService implements ISessionService {
     if (!appId) throw new Error('AppId is required');
     if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
 
+    this.logger.debug(`save | ${sessionId}`);
+
     const attributes = {
       name,
       created,
@@ -237,14 +239,12 @@ export class BackgroundSessionService implements ISessionService {
       { id: sessionId }
     );
 
-    // Clear out the entries for this session ID so they don't get saved next time
-    this.sessionSearchMap.delete(sessionId);
-
     return session;
   };
 
   // TODO: Throw an error if this session doesn't belong to this user
   public get = (sessionId: string, { savedObjectsClient }: BackgroundSessionDependencies) => {
+    this.logger.debug(`get | ${sessionId}`);
     return savedObjectsClient.get<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       sessionId
@@ -268,6 +268,7 @@ export class BackgroundSessionService implements ISessionService {
     attributes: Partial<BackgroundSessionSavedObjectAttributes>,
     { savedObjectsClient }: BackgroundSessionDependencies
   ) => {
+    this.logger.debug(`update | ${sessionId}`);
     return savedObjectsClient.update<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       sessionId,
@@ -292,6 +293,7 @@ export class BackgroundSessionService implements ISessionService {
     deps: BackgroundSessionDependencies
   ) => {
     if (!sessionId || !searchId) return;
+    this.logger.debug(`trackId | ${sessionId} | ${searchId}`);
     const requestHash = createRequestHash(searchRequest.params);
 
     // If there is already a saved object for this session, update it to include this request/ID.
