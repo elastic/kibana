@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
+import { staticSourceData } from '../views/content_sources/source_data';
+
 export const contentSources = [
   {
     id: '123',
@@ -193,3 +196,14 @@ export const availableSources = [
     privateSourcesEnabled: false,
   },
 ];
+
+export const mergedAvailableSources = mergeServerAndStaticData(
+  availableSources,
+  staticSourceData,
+  contentSources
+);
+export const mergedConfiguredSources = mergeServerAndStaticData(
+  configuredSources,
+  staticSourceData,
+  contentSources
+);
