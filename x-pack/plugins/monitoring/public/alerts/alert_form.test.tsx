@@ -99,7 +99,6 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     beforeEach(async () => {
-      const coreStart = coreMock.createStart();
       alertTypeRegistry.list.mockReturnValue([alertType]);
       alertTypeRegistry.get.mockReturnValue(alertType);
       alertTypeRegistry.has.mockReturnValue(true);
@@ -107,12 +106,7 @@ describe('alert_form', () => {
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
 
-      const monitoringDependencies = {
-        toastNotifications: coreStart.notifications.toasts,
-        ...Legacy.shims.kibanaServices,
-        actionTypeRegistry,
-        alertTypeRegistry,
-      } as any;
+      const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
 
       const initialAlert = ({
         name: 'test',
@@ -130,14 +124,18 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       wrapper = mountWithIntl(
-        <AlertForm
-          alert={initialAlert}
-          dispatch={() => {}}
-          errors={{ name: [], interval: [] }}
-          operation="create"
-          actionTypeRegistry={actionTypeRegistry}
-          alertTypeRegistry={alertTypeRegistry}
-        />
+        <I18nProvider>
+          <KibanaReactContext.Provider>
+            <AlertForm
+              alert={initialAlert}
+              dispatch={() => {}}
+              errors={{ name: [], interval: [] }}
+              operation="create"
+              actionTypeRegistry={actionTypeRegistry}
+              alertTypeRegistry={alertTypeRegistry}
+            />
+          </KibanaReactContext.Provider>
+        </I18nProvider>
       );
 
       await act(async () => {
