@@ -19,6 +19,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function createDeleteTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
+  const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('delete', () => {
@@ -301,17 +302,19 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             .send(getTestAlertData())
             .expect(200);
 
-          await supertest
-            .put(
-              `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
-            )
-            .set('kbn-xsrf', 'foo')
-            .send({
-              attributes: {
-                name: 'bar',
-              },
-            })
-            .expect(200);
+          await retry.try(async () => {
+            await supertest
+              .put(
+                `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
+              )
+              .set('kbn-xsrf', 'foo')
+              .send({
+                attributes: {
+                  name: 'bar',
+                },
+              })
+              .expect(200);
+          });
 
           const response = await supertestWithoutAuth
             .delete(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)

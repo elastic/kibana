@@ -5,12 +5,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isLeft } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
-import { GetPingsParamsType } from '../../../common/runtime_types';
 
 export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -19,7 +16,7 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
     query: schema.object({
       from: schema.string(),
       to: schema.string(),
-      location: schema.maybe(schema.string()),
+      locations: schema.maybe(schema.string()),
       monitorId: schema.maybe(schema.string()),
       index: schema.maybe(schema.number()),
       size: schema.maybe(schema.number()),
@@ -28,17 +25,17 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
     }),
   },
   handler: async ({ uptimeEsClient }, _context, request, response): Promise<any> => {
-    const { from, to, ...optional } = request.query;
-    const params = GetPingsParamsType.decode({ dateRange: { from, to }, ...optional });
-    if (isLeft(params)) {
-      // eslint-disable-next-line no-console
-      console.error(new Error(PathReporter.report(params).join(';')));
-      return response.badRequest({ body: { message: 'Received invalid request parameters.' } });
-    }
+    const { from, to, index, monitorId, status, sort, size, locations } = request.query;
 
     const result = await libs.requests.getPings({
       uptimeEsClient,
-      ...params.right,
+      dateRange: { from, to },
+      index,
+      monitorId,
+      status,
+      sort,
+      size,
+      locations: locations ? JSON.parse(locations) : [],
     });
 
     return response.ok({

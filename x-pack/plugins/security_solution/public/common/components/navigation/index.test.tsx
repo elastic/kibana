@@ -14,6 +14,7 @@ import { navTabs } from '../../../app/home/home_navigations';
 import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
+import { TimelineTabs } from '../../../timelines/store/timeline/model';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -80,6 +81,7 @@ describe('SIEM Navigation', () => {
       [CONSTANTS.filters]: [],
       [CONSTANTS.sourcerer]: {},
       [CONSTANTS.timeline]: {
+        activeTab: TimelineTabs.query,
         id: '',
         isOpen: false,
         graphEventId: '',
@@ -154,6 +156,7 @@ describe('SIEM Navigation', () => {
         flowTarget: undefined,
         savedQuery: undefined,
         timeline: {
+          activeTab: TimelineTabs.query,
           id: '',
           isOpen: false,
           graphEventId: '',
@@ -257,7 +260,7 @@ describe('SIEM Navigation', () => {
         sourcerer: {},
         state: undefined,
         tabName: 'authentications',
-        timeline: { id: '', isOpen: false, graphEventId: '' },
+        timeline: { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' },
         timerange: {
           global: {
             linkTo: ['timeline'],
