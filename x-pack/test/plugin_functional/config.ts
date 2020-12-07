@@ -5,6 +5,7 @@
  */
 import { resolve } from 'path';
 import fs from 'fs';
+import { KIBANA_ROOT } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 import { pageObjects } from './page_objects';
@@ -39,6 +40,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${resolve(
+          KIBANA_ROOT,
+          'test/plugin_functional/plugins/core_provider_plugin'
+        )}`,
         ...plugins.map((pluginDir) => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
       ],
     },

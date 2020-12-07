@@ -29,6 +29,7 @@ export const serviceMapRoute = createRoute({
       rangeRt,
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     if (!context.config['xpack.apm.serviceMapEnabled']) {
       throw Boom.notFound();
@@ -69,6 +70,7 @@ export const serviceMapServiceNodeRoute = createRoute({
     }),
     query: t.intersection([rangeRt, uiFiltersRt]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     if (!context.config['xpack.apm.serviceMapEnabled']) {
       throw Boom.notFound();

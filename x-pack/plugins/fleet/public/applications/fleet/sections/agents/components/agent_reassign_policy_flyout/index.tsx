@@ -25,7 +25,7 @@ import { Agent } from '../../../../types';
 import {
   sendPutAgentReassign,
   sendPostBulkAgentReassign,
-  useCore,
+  useStartServices,
   useGetAgentPolicies,
 } from '../../../../hooks';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
@@ -39,7 +39,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agents,
 }) => {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
 
   const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<string | undefined>(

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
+import { ROLES } from '../../common/test';
+import { deleteRoleAndUser, loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { DETECTIONS_URL } from '../urls/navigation';
 import {
   waitForAlertsPanelToBeLoaded,
@@ -24,7 +25,7 @@ import {
   deleteValueListsFile,
   exportValueList,
 } from '../tasks/lists';
-import { VALUE_LISTS_TABLE, VALUE_LISTS_ROW } from '../screens/lists';
+import { VALUE_LISTS_TABLE, VALUE_LISTS_ROW, VALUE_LISTS_MODAL_ACTIVATOR } from '../screens/lists';
 
 describe('value lists', () => {
   describe('management modal', () => {
@@ -147,7 +148,7 @@ describe('value lists', () => {
 
       it('deletes a "ip_range" from an uploaded file', () => {
         const listName = 'cidr_list.txt';
-        importValueList(listName, 'ip_range');
+        importValueList(listName, 'ip_range', ['192.168.100.0']);
         openValueListsModal();
         deleteValueListsFile(listName);
         cy.get(VALUE_LISTS_TABLE)
@@ -208,7 +209,7 @@ describe('value lists', () => {
 
       it('exports a "ip_range" list from an uploaded file', () => {
         const listName = 'cidr_list.txt';
-        importValueList(listName, 'ip_range');
+        importValueList(listName, 'ip_range', ['192.168.100.0']);
         openValueListsModal();
         exportValueList();
         cy.wait('@exportList').then((xhr) => {
@@ -218,6 +219,21 @@ describe('value lists', () => {
           });
         });
       });
+    });
+  });
+
+  describe('user with restricted access role', () => {
+    beforeEach(() => {
+      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL, ROLES.t1_analyst);
+      goToManageAlertsDetectionRules();
+    });
+
+    afterEach(() => {
+      deleteRoleAndUser(ROLES.t1_analyst);
+    });
+
+    it('Does not allow a t1 analyst user to upload a value list', () => {
+      cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('have.attr', 'disabled');
     });
   });
 });

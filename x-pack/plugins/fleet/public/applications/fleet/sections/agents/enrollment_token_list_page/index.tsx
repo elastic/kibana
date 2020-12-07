@@ -26,7 +26,7 @@ import {
   useGetEnrollmentAPIKeys,
   useGetAgentPolicies,
   sendGetOneEnrollmentAPIKey,
-  useCore,
+  useStartServices,
   sendDeleteOneEnrollmentAPIKey,
 } from '../../../hooks';
 import { EnrollmentAPIKey } from '../../../types';
@@ -35,7 +35,7 @@ import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 
 const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }) => {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const [state, setState] = useState<'VISIBLE' | 'HIDDEN' | 'LOADING'>('HIDDEN');
   const [key, setKey] = useState<string | undefined>();
 
@@ -106,7 +106,7 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
   apiKey,
   refresh,
 }) => {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const [state, setState] = useState<'CONFIRM_VISIBLE' | 'CONFIRM_HIDDEN'>('CONFIRM_HIDDEN');
 
   const onCancel = () => setState('CONFIRM_HIDDEN');

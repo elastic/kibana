@@ -63,7 +63,7 @@ export const DEFAULT_UI_RESTRICTION: UIRestrictions = {
  * @constant
  * @public
  */
-export const limitOfSeries = {
+export const limitOfSeries: Partial<Record<PANEL_TYPES, number>> = {
   [PANEL_TYPES.GAUGE]: 1,
   [PANEL_TYPES.METRIC]: 2,
 };

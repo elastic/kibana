@@ -12,8 +12,9 @@ import { Loading } from '../../../components';
 const PanelWrapper = styled.div`
   // NOTE: changes to the width here will impact navigation tabs page layout under integration package details
   width: ${(props) =>
-    parseFloat(props.theme.eui.euiSize) * 6 + parseFloat(props.theme.eui.spacerSizes.xl) * 2}px;
+    parseFloat(props.theme.eui.euiSize) * 6 + parseFloat(props.theme.eui.euiSizeXL) * 2}px;
   height: 1px;
+  z-index: 1;
 `;
 
 const Panel = styled(EuiPanel)`

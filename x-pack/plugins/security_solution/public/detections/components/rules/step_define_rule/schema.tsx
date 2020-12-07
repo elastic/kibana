@@ -221,7 +221,7 @@ export const schema: FormSchema<DefineStepRule> = {
             message: i18n.translate(
               'xpack.securitySolution.detectionEngine.validations.thresholdValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
               {
-                defaultMessage: 'Value must be greater than or equal one.',
+                defaultMessage: 'Value must be greater than or equal to one.',
               }
             ),
             allowEquality: true,

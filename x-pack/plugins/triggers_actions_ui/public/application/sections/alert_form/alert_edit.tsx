@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { useAlertsContext } from '../../context/alerts_context';
 import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
-import { alertReducer } from './alert_reducer';
+import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
@@ -34,7 +34,9 @@ interface AlertEditProps {
 }
 
 export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
-  const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
+  const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
+    alert: initialAlert,
+  });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] = useState<boolean>(

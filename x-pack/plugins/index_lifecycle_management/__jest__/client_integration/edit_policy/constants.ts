@@ -195,3 +195,41 @@ export const POLICY_WITH_NODE_ROLE_ALLOCATION: PolicyFromES = {
   },
   name: POLICY_NAME,
 };
+
+export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    foo: 'bar',
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            unknown_setting: 123,
+            max_size: '50gb',
+          },
+        },
+      },
+      warm: {
+        actions: {
+          my_unfollow_action: {},
+          set_priority: {
+            priority: 22,
+            unknown_setting: true,
+          },
+        },
+      },
+      delete: {
+        wait_for_snapshot: {
+          policy: SNAPSHOT_POLICY_NAME,
+        },
+        delete: {
+          delete_searchable_snapshot: true,
+        },
+      },
+    },
+    name: POLICY_NAME,
+  },
+  name: POLICY_NAME,
+} as any) as PolicyFromES;

@@ -9,7 +9,7 @@ export type ObservabilityApp =
   | 'infra_logs'
   | 'apm'
   | 'uptime'
-  | 'observability'
+  | 'observability-overview'
   | 'stack_monitoring'
   | 'ux';
 

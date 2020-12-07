@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "optionalPlugins": ["alerts", "features", "home"],
-  "requiredPlugins": ["management", "charts", "data", "kibanaReact", "savedObjects"],
+  "requiredPlugins": ["management", "charts", "data", "kibanaReact", "kibanaUtils", "savedObjects"],
   "configPath": ["xpack", "trigger_actions_ui"],
   "extraPublicDirs": ["public/common", "public/common/constants"],
   "requiredBundles": ["home", "alerts", "esUiShared", "kibanaReact", "kibanaUtils"]

@@ -25,9 +25,16 @@ export const CreateDebPackage: Task = {
   description: 'Creating deb package',
 
   async run(config, log, build) {
-    await runFpm(config, log, build, 'deb', [
+    await runFpm(config, log, build, 'deb', 'x64', [
       '--architecture',
       'amd64',
+      '--deb-priority',
+      'optional',
+    ]);
+
+    await runFpm(config, log, build, 'deb', 'arm64', [
+      '--architecture',
+      'arm64',
       '--deb-priority',
       'optional',
     ]);
@@ -38,7 +45,18 @@ export const CreateRpmPackage: Task = {
   description: 'Creating rpm package',
 
   async run(config, log, build) {
-    await runFpm(config, log, build, 'rpm', ['--architecture', 'x86_64', '--rpm-os', 'linux']);
+    await runFpm(config, log, build, 'rpm', 'x64', [
+      '--architecture',
+      'x86_64',
+      '--rpm-os',
+      'linux',
+    ]);
+    await runFpm(config, log, build, 'rpm', 'arm64', [
+      '--architecture',
+      'aarch64',
+      '--rpm-os',
+      'linux',
+    ]);
   },
 };
 

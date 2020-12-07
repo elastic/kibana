@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IndexPattern } from 'src/plugins/data/common';
 import { existingFields, Field, buildFieldList } from './existing_fields';
 
 describe('existingFields', () => {
@@ -71,25 +72,20 @@ describe('existingFields', () => {
 
 describe('buildFieldList', () => {
   const indexPattern = {
-    id: '',
-    type: 'indexpattern',
-    attributes: {
-      title: 'testpattern',
-      type: 'type',
-      typeMeta: 'typemeta',
-      fields: JSON.stringify([
-        { name: 'foo', scripted: true, lang: 'painless', script: '2+2' },
-        { name: 'bar' },
-        { name: '@bar' },
-        { name: 'baz' },
-        { name: '_mymeta' },
-      ]),
-    },
-    references: [],
+    title: 'testpattern',
+    type: 'type',
+    typeMeta: 'typemeta',
+    fields: [
+      { name: 'foo', scripted: true, lang: 'painless', script: '2+2' },
+      { name: 'bar' },
+      { name: '@bar' },
+      { name: 'baz' },
+      { name: '_mymeta' },
+    ],
   };
 
   it('supports scripted fields', () => {
-    const fields = buildFieldList(indexPattern, []);
+    const fields = buildFieldList((indexPattern as unknown) as IndexPattern, []);
     expect(fields.find((f) => f.isScript)).toMatchObject({
       isScript: true,
       name: 'foo',
@@ -99,7 +95,7 @@ describe('buildFieldList', () => {
   });
 
   it('supports meta fields', () => {
-    const fields = buildFieldList(indexPattern, ['_mymeta']);
+    const fields = buildFieldList((indexPattern as unknown) as IndexPattern, ['_mymeta']);
     expect(fields.find((f) => f.isMeta)).toMatchObject({
       isScript: false,
       isMeta: true,

@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
-    it('should create dashboard to URL drilldown and use it to navigate to discover', async () => {
+    it.skip('should create dashboard to URL drilldown and use it to navigate to discover', async () => {
       await PageObjects.dashboard.gotoDashboardEditMode(
         dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
       );

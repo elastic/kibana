@@ -10,6 +10,7 @@ import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
 import { ObservabilityPluginSetupDeps } from '../../plugin';
@@ -52,7 +53,9 @@ const withCore = makeDecorator({
             } as unknown) as ObservabilityPluginSetupDeps,
           }}
         >
-          <EuiThemeProvider>{storyFn(context)}</EuiThemeProvider>
+          <EuiThemeProvider>
+            <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
+          </EuiThemeProvider>
         </PluginContext.Provider>
       </MemoryRouter>
     );

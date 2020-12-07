@@ -6,6 +6,7 @@
 
 import { KibanaRequest } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../../security/server';
+import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 
 export function authorizationProvider(authorization: SecurityPluginSetup['authz']) {
   async function authorizationCheck(request: KibanaRequest) {
@@ -18,7 +19,7 @@ export function authorizationProvider(authorization: SecurityPluginSetup['authz'
       request
     );
     const createMLJobAuthorizationAction = authorization.actions.savedObject.get(
-      'ml-job',
+      ML_SAVED_OBJECT_TYPE,
       'create'
     );
     const canCreateGlobally = (

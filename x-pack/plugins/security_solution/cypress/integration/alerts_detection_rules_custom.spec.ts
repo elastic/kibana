@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { newRule, existingRule, indexPatterns, editedRule } from '../objects/rule';
 import {
   ALERT_RULE_METHOD,
@@ -38,6 +39,7 @@ import {
   SCHEDULE_INTERVAL_AMOUNT_INPUT,
   SCHEDULE_INTERVAL_UNITS_INPUT,
   SEVERITY_DROPDOWN,
+  TAGS_CLEAR_BUTTON,
   TAGS_FIELD,
 } from '../screens/create_new_rule';
 import {
@@ -104,18 +106,13 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = newRule.referenceUrls.join('');
 const expectedFalsePositives = newRule.falsePositivesExamples.join('');
 const expectedTags = newRule.tags.join('');
-const expectedMitre = newRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
+const expectedMitre = formatMitreAttackDescription(newRule.mitre);
 const expectedNumberOfRules = 1;
 const expectedEditedtags = editedRule.tags.join('');
 const expectedEditedIndexPatterns =
   editedRule.index && editedRule.index.length ? editedRule.index : indexPatterns;
 
-// SKIP: https://github.com/elastic/kibana/issues/83769
-describe.skip('Custom detection rules creation', () => {
+describe('Custom detection rules creation', () => {
   before(() => {
     esArchiverLoad('timeline');
   });
@@ -216,8 +213,7 @@ describe.skip('Custom detection rules creation', () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/83793
-describe.skip('Custom detection rules deletion and edition', () => {
+describe('Custom detection rules deletion and edition', () => {
   beforeEach(() => {
     esArchiverLoad('custom_rules');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
@@ -226,7 +222,7 @@ describe.skip('Custom detection rules deletion and edition', () => {
     goToManageAlertsDetectionRules();
   });
 
-  after(() => {
+  afterEach(() => {
     esArchiverUnload('custom_rules');
   });
 
@@ -329,6 +325,7 @@ describe.skip('Custom detection rules deletion and edition', () => {
       cy.get(ACTIONS_THROTTLE_INPUT).invoke('val').should('eql', 'no_actions');
 
       goToAboutStepTab();
+      cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
       fillAboutRule(editedRule);
       saveEditedRule();
 

@@ -47,7 +47,7 @@ Object {
     ],
   },
   "count": 1,
-  "customName": undefined,
+  "customLabel": undefined,
   "esTypes": Array [
     "text",
   ],

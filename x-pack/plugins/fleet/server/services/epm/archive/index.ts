@@ -49,7 +49,7 @@ export async function unpackBufferToCache({
       paths.push(path);
     }
   });
-  setArchiveFilelist({ name, version, installSource }, paths);
+  setArchiveFilelist({ name, version }, paths);
 
   return paths;
 }
@@ -85,18 +85,18 @@ export async function unpackBufferEntries(
   return entries;
 }
 
-export const deletePackageCache = ({ name, version, installSource }: SharedKey) => {
+export const deletePackageCache = ({ name, version }: SharedKey) => {
   // get cached archive filelist
-  const paths = getArchiveFilelist({ name, version, installSource });
+  const paths = getArchiveFilelist({ name, version });
 
   // delete cached archive filelist
-  deleteArchiveFilelist({ name, version, installSource });
+  deleteArchiveFilelist({ name, version });
 
   // delete cached archive files
   // this has been populated in unpackBufferToCache()
   paths?.forEach(deleteArchiveEntry);
 
-  deletePackageInfo({ name, version, installSource });
+  deletePackageInfo({ name, version });
 };
 
 export function getPathParts(path: string): AssetParts {

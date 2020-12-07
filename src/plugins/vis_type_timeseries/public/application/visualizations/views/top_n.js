@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { getLastValue } from '../../../../../../plugins/vis_type_timeseries/common/get_last_value';
+import { getLastValue } from '../../../../common/get_last_value';
 import { labelDateFormatter } from '../../components/lib/label_date_formatter';
 import reactcss from 'reactcss';
 

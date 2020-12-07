@@ -155,14 +155,10 @@ describe('IndexPatterns', () => {
 
     // Create a normal index patterns
     const pattern = await indexPatterns.get('foo');
-
-    expect(pattern.version).toBe('fooa');
     indexPatterns.clearCache();
 
     // Create the same one - we're going to handle concurrency
     const samePattern = await indexPatterns.get('foo');
-
-    expect(samePattern.version).toBe('fooaa');
 
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine
@@ -193,6 +189,20 @@ describe('IndexPatterns', () => {
 
     await indexPatterns.create({ title });
     expect(indexPatterns.refreshFields).toBeCalled();
+  });
+
+  test('find', async () => {
+    const search = 'kibana*';
+    const size = 10;
+    await indexPatterns.find('kibana*', size);
+
+    expect(savedObjectsClient.find).lastCalledWith({
+      type: 'index-pattern',
+      fields: ['title'],
+      search,
+      searchFields: ['title'],
+      perPage: size,
+    });
   });
 
   test('createAndSave', async () => {

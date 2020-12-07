@@ -66,10 +66,9 @@ const expressionFieldsWithValidation = [
   'timeWindowSize',
 ];
 
-export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
-  IndexThresholdAlertParams,
-  AlertsContextValue
->> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, alertsContext }) => {
+export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
+  AlertTypeParamsExpressionProps<IndexThresholdAlertParams, AlertsContextValue>
+> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, alertsContext }) => {
   const {
     index,
     timeField,

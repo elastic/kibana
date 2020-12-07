@@ -25,7 +25,7 @@ export async function getMetricsChartDataByAgent({
 }): Promise<MetricsChartsByAgentAPIResponse> {
   switch (agentName) {
     case 'java': {
-      return getJavaMetricsCharts(setup, serviceName, serviceNodeName);
+      return getJavaMetricsCharts({ setup, serviceName, serviceNodeName });
     }
 
     default: {

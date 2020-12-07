@@ -23,6 +23,7 @@ export {
   EntryList,
   EntriesArray,
   NamespaceType,
+  NestedEntriesArray,
   Operator,
   OperatorEnum,
   OperatorTypeEnum,

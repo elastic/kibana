@@ -8,8 +8,8 @@ import React, { ReactNode } from 'react';
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BackgroundSessionIndicator } from './background_session_indicator';
-import { BackgroundSessionViewState } from '../connected_background_session_indicator';
 import { IntlProvider } from 'react-intl';
+import { SessionState } from '../../../../../../../src/plugins/data/public';
 
 function Container({ children }: { children?: ReactNode }) {
   return <IntlProvider locale="en">{children}</IntlProvider>;
@@ -19,7 +19,7 @@ test('Loading state', async () => {
   const onCancel = jest.fn();
   render(
     <Container>
-      <BackgroundSessionIndicator state={BackgroundSessionViewState.Loading} onCancel={onCancel} />
+      <BackgroundSessionIndicator state={SessionState.Loading} onCancel={onCancel} />
     </Container>
   );
 
@@ -33,10 +33,7 @@ test('Completed state', async () => {
   const onSave = jest.fn();
   render(
     <Container>
-      <BackgroundSessionIndicator
-        state={BackgroundSessionViewState.Completed}
-        onSaveResults={onSave}
-      />
+      <BackgroundSessionIndicator state={SessionState.Completed} onSaveResults={onSave} />
     </Container>
   );
 
@@ -50,10 +47,7 @@ test('Loading in the background state', async () => {
   const onCancel = jest.fn();
   render(
     <Container>
-      <BackgroundSessionIndicator
-        state={BackgroundSessionViewState.BackgroundLoading}
-        onCancel={onCancel}
-      />
+      <BackgroundSessionIndicator state={SessionState.BackgroundLoading} onCancel={onCancel} />
     </Container>
   );
 
@@ -64,30 +58,26 @@ test('Loading in the background state', async () => {
 });
 
 test('BackgroundCompleted state', async () => {
-  const onViewSession = jest.fn();
   render(
     <Container>
       <BackgroundSessionIndicator
-        state={BackgroundSessionViewState.BackgroundCompleted}
-        onViewBackgroundSessions={onViewSession}
+        state={SessionState.BackgroundCompleted}
+        viewBackgroundSessionsLink={'__link__'}
       />
     </Container>
   );
 
   await userEvent.click(screen.getByLabelText('Results loaded in the background'));
-  await userEvent.click(screen.getByText('View background sessions'));
-
-  expect(onViewSession).toBeCalled();
+  expect(screen.getByRole('link', { name: 'View background sessions' }).getAttribute('href')).toBe(
+    '__link__'
+  );
 });
 
 test('Restored state', async () => {
   const onRefresh = jest.fn();
   render(
     <Container>
-      <BackgroundSessionIndicator
-        state={BackgroundSessionViewState.Restored}
-        onRefresh={onRefresh}
-      />
+      <BackgroundSessionIndicator state={SessionState.Restored} onRefresh={onRefresh} />
     </Container>
   );
 
@@ -95,4 +85,28 @@ test('Restored state', async () => {
   await userEvent.click(screen.getByText('Refresh'));
 
   expect(onRefresh).toBeCalled();
+});
+
+test('Canceled state', async () => {
+  const onRefresh = jest.fn();
+  render(
+    <Container>
+      <BackgroundSessionIndicator state={SessionState.Canceled} onRefresh={onRefresh} />
+    </Container>
+  );
+
+  await userEvent.click(screen.getByLabelText('Canceled'));
+  await userEvent.click(screen.getByText('Refresh'));
+
+  expect(onRefresh).toBeCalled();
+});
+
+test('Disabled state', async () => {
+  render(
+    <Container>
+      <BackgroundSessionIndicator state={SessionState.Loading} disabled={true} />
+    </Container>
+  );
+
+  expect(screen.getByTestId('backgroundSessionIndicator').querySelector('button')).toBeDisabled();
 });

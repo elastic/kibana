@@ -11,14 +11,14 @@ import {
   DynamicPagePathValues,
   pagePathGetters,
 } from '../constants';
-import { useCore } from './';
+import { useStartServices } from './';
 
 const getPath = (page: StaticPage | DynamicPage, values: DynamicPagePathValues = {}): string => {
   return values ? pagePathGetters[page](values) : pagePathGetters[page as StaticPage]();
 };
 
 export const useLink = () => {
-  const core = useCore();
+  const core = useStartServices();
   return {
     getPath,
     getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => {

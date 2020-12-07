@@ -77,7 +77,7 @@ export default function ({ getService }) {
         const { body } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
-          .send({ timestamp, unencrypted: true })
+          .send({ unencrypted: true })
           .expect(200);
 
         expect(body).length(4);
@@ -100,7 +100,7 @@ export default function ({ getService }) {
         const { body } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
-          .send({ timestamp, unencrypted: true })
+          .send({ unencrypted: true })
           .expect(200);
 
         expect(body).length(2);

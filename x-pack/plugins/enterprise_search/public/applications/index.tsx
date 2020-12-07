@@ -41,6 +41,7 @@ export const renderApp = (
 
   const unmountKibanaLogic = mountKibanaLogic({
     config,
+    cloud: plugins.cloud || {},
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
     setBreadcrumbs: core.chrome.setBreadcrumbs,

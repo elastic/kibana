@@ -7,7 +7,7 @@ import * as t from 'io-ts';
 import { useLocation, useParams } from 'react-router-dom';
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { Params } from '../routes';
+import { Params, RouteParams, routes } from '../routes';
 
 function getQueryParams(location: ReturnType<typeof useLocation>) {
   const urlSearchParms = new URLSearchParams(location.search);
@@ -23,14 +23,15 @@ function getQueryParams(location: ReturnType<typeof useLocation>) {
  * It removes any aditional item which is not declared in the type.
  * @param params
  */
-export function useRouteParams(params: Params) {
+export function useRouteParams<T extends keyof typeof routes>(pathName: T): RouteParams<T> {
   const location = useLocation();
   const pathParams = useParams();
   const queryParams = getQueryParams(location);
+  const { query, path } = routes[pathName].params as Params;
 
   const rts = {
-    queryRt: params.query ? t.exact(params.query) : t.strict({}),
-    pathRt: params.path ? t.exact(params.path) : t.strict({}),
+    queryRt: query ? t.exact(query) : t.strict({}),
+    pathRt: path ? t.exact(path) : t.strict({}),
   };
 
   const queryResult = rts.queryRt.decode(queryParams);
@@ -43,8 +44,8 @@ export function useRouteParams(params: Params) {
     console.error(PathReporter.report(pathResult)[0]);
   }
 
-  return {
+  return ({
     query: isLeft(queryResult) ? {} : queryResult.right,
     path: isLeft(pathResult) ? {} : pathResult.right,
-  };
+  } as unknown) as RouteParams<T>;
 }

@@ -192,6 +192,18 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Retrieves the cookie with the given name. Returns null if there is no such cookie. The cookie will be returned as
+     * a JSON object as described by the WebDriver wire protocol.
+     * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Options.html
+     *
+     * @param {string} cookieName
+     * @return {Promise<IWebDriverCookie>}
+     */
+    public async getCookie(cookieName: string) {
+      return await driver.manage().getCookie(cookieName);
+    }
+
+    /**
      * Pauses the execution in the browser, similar to setting a breakpoint for debugging.
      * @return {Promise<void>}
      */

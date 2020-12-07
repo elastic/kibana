@@ -28,6 +28,7 @@ const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.visible,
   chromeless: false,
+  searchDeepLinks: [],
   ...props,
 });
 
@@ -61,6 +62,10 @@ describe('applicationResultProvider', () => {
     getAppResultsMock.mockReturnValue([]);
   });
 
+  afterEach(() => {
+    getAppResultsMock.mockReset();
+  });
+
   it('has the correct id', () => {
     const provider = createApplicationResultProvider(Promise.resolve(application));
     expect(provider.id).toBe('application');
@@ -76,7 +81,7 @@ describe('applicationResultProvider', () => {
     );
     const provider = createApplicationResultProvider(Promise.resolve(application));
 
-    await provider.find('term', defaultOption).toPromise();
+    await provider.find({ term: 'term' }, defaultOption).toPromise();
 
     expect(getAppResultsMock).toHaveBeenCalledTimes(1);
     expect(getAppResultsMock).toHaveBeenCalledWith('term', [
@@ -84,6 +89,59 @@ describe('applicationResultProvider', () => {
       expectApp('app2'),
       expectApp('app3'),
     ]);
+  });
+
+  it('calls `getAppResults` when filtering by type with `application` included', async () => {
+    application.applications$ = of(
+      createAppMap([
+        createApp({ id: 'app1', title: 'App 1' }),
+        createApp({ id: 'app2', title: 'App 2' }),
+      ])
+    );
+    const provider = createApplicationResultProvider(Promise.resolve(application));
+
+    await provider
+      .find({ term: 'term', types: ['dashboard', 'application'] }, defaultOption)
+      .toPromise();
+
+    expect(getAppResultsMock).toHaveBeenCalledTimes(1);
+    expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1'), expectApp('app2')]);
+  });
+
+  it('does not call `getAppResults` and return no results when filtering by type with `application` not included', async () => {
+    application.applications$ = of(
+      createAppMap([
+        createApp({ id: 'app1', title: 'App 1' }),
+        createApp({ id: 'app2', title: 'App 2' }),
+        createApp({ id: 'app3', title: 'App 3' }),
+      ])
+    );
+    const provider = createApplicationResultProvider(Promise.resolve(application));
+
+    const results = await provider
+      .find({ term: 'term', types: ['dashboard', 'map'] }, defaultOption)
+      .toPromise();
+
+    expect(getAppResultsMock).not.toHaveBeenCalled();
+    expect(results).toEqual([]);
+  });
+
+  it('does not call `getAppResults` and returns no results when filtering by tag', async () => {
+    application.applications$ = of(
+      createAppMap([
+        createApp({ id: 'app1', title: 'App 1' }),
+        createApp({ id: 'app2', title: 'App 2' }),
+        createApp({ id: 'app3', title: 'App 3' }),
+      ])
+    );
+    const provider = createApplicationResultProvider(Promise.resolve(application));
+
+    const results = await provider
+      .find({ term: 'term', tags: ['some-tag-id'] }, defaultOption)
+      .toPromise();
+
+    expect(getAppResultsMock).not.toHaveBeenCalled();
+    expect(results).toEqual([]);
   });
 
   it('ignores inaccessible apps', async () => {
@@ -94,7 +152,7 @@ describe('applicationResultProvider', () => {
       ])
     );
     const provider = createApplicationResultProvider(Promise.resolve(application));
-    await provider.find('term', defaultOption).toPromise();
+    await provider.find({ term: 'term' }, defaultOption).toPromise();
 
     expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
   });
@@ -108,7 +166,7 @@ describe('applicationResultProvider', () => {
       ])
     );
     const provider = createApplicationResultProvider(Promise.resolve(application));
-    await provider.find('term', defaultOption).toPromise();
+    await provider.find({ term: 'term' }, defaultOption).toPromise();
 
     expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
   });
@@ -122,7 +180,7 @@ describe('applicationResultProvider', () => {
     );
 
     const provider = createApplicationResultProvider(Promise.resolve(application));
-    await provider.find('term', defaultOption).toPromise();
+    await provider.find({ term: 'term' }, defaultOption).toPromise();
 
     expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
   });
@@ -136,7 +194,7 @@ describe('applicationResultProvider', () => {
     ]);
 
     const provider = createApplicationResultProvider(Promise.resolve(application));
-    const results = await provider.find('term', defaultOption).toPromise();
+    const results = await provider.find({ term: 'term' }, defaultOption).toPromise();
 
     expect(results).toEqual([
       expectResult('r100'),
@@ -160,7 +218,7 @@ describe('applicationResultProvider', () => {
       ...defaultOption,
       maxResults: 2,
     };
-    const results = await provider.find('term', options).toPromise();
+    const results = await provider.find({ term: 'term' }, options).toPromise();
 
     expect(results).toEqual([expectResult('r100'), expectResult('r75')]);
   });
@@ -173,9 +231,9 @@ describe('applicationResultProvider', () => {
 
       // test scheduler doesnt play well with promises. need to workaround by passing
       // an observable instead. Behavior with promise is asserted in previous tests of the suite
-      const applicationPromise = (hot('a', { a: application }) as unknown) as Promise<
-        ApplicationStart
-      >;
+      const applicationPromise = (hot('a', {
+        a: application,
+      }) as unknown) as Promise<ApplicationStart>;
 
       const provider = createApplicationResultProvider(applicationPromise);
 
@@ -184,7 +242,7 @@ describe('applicationResultProvider', () => {
         aborted$: hot<undefined>('|'),
       };
 
-      const resultObs = provider.find('term', options);
+      const resultObs = provider.find({ term: 'term' }, options);
 
       expectObservable(resultObs).toBe('--(a|)', { a: [] });
     });
@@ -198,9 +256,9 @@ describe('applicationResultProvider', () => {
 
       // test scheduler doesnt play well with promises. need to workaround by passing
       // an observable instead. Behavior with promise is asserted in previous tests of the suite
-      const applicationPromise = (hot('a', { a: application }) as unknown) as Promise<
-        ApplicationStart
-      >;
+      const applicationPromise = (hot('a', {
+        a: application,
+      }) as unknown) as Promise<ApplicationStart>;
 
       const provider = createApplicationResultProvider(applicationPromise);
 
@@ -209,7 +267,7 @@ describe('applicationResultProvider', () => {
         aborted$: hot<undefined>('-(a|)', { a: undefined }),
       };
 
-      const resultObs = provider.find('term', options);
+      const resultObs = provider.find({ term: 'term' }, options);
 
       expectObservable(resultObs).toBe('-|');
     });

@@ -284,9 +284,10 @@ export const useLogEntryAnomaliesResults = ({
   );
 
   // Anomalies datasets
-  const [logEntryAnomaliesDatasets, setLogEntryAnomaliesDatasets] = useState<
-    LogEntryAnomaliesDatasets
-  >([]);
+  const [
+    logEntryAnomaliesDatasets,
+    setLogEntryAnomaliesDatasets,
+  ] = useState<LogEntryAnomaliesDatasets>([]);
 
   const [getLogEntryAnomaliesDatasetsRequest, getLogEntryAnomaliesDatasets] = useTrackedPromise(
     {

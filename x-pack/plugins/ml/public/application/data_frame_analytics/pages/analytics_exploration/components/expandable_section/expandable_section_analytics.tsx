@@ -132,7 +132,7 @@ export const ExpandableSectionAnalytics: FC<ExpandableSectionAnalyticsProps> = (
         dataTestId="analysis"
         content={analyticsSectionContent}
         headerItems={analyticsSectionHeaderItems}
-        isExpanded={false}
+        urlStateKey={'analysis'}
         title={
           <FormattedMessage
             id="xpack.ml.dataframe.analytics.exploration.analysisSectionTitle"

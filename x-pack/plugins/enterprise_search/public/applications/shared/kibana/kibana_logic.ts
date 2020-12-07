@@ -9,6 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 import { FC } from 'react';
 import { History } from 'history';
 import { ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
+import { CloudSetup } from '../../../../../cloud/public';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
@@ -16,6 +17,7 @@ import { createHref, CreateHrefOptions } from '../react_router_helpers';
 interface KibanaLogicProps {
   config: { host?: string };
   history: History;
+  cloud: Partial<CloudSetup>;
   navigateToUrl: ApplicationStart['navigateToUrl'];
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setDocTitle(title: string): void;
@@ -30,6 +32,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   reducers: ({ props }) => ({
     config: [props.config || {}, {}],
     history: [props.history, {}],
+    cloud: [props.cloud || {}, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
         const deps = { history: props.history, http: HttpLogic.values.http };

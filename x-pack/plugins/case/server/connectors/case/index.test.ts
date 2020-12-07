@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash/fp';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../../actions/server/mocks';
 import { validateParams } from '../../../../actions/server/lib';
-import { ConnectorTypes, CommentType } from '../../../common/api';
+import { ConnectorTypes, CommentType, CaseStatuses } from '../../../common/api';
 import {
   createCaseServiceMock,
   createConfigureServiceMock,
@@ -614,12 +615,31 @@ describe('case connector', () => {
     });
 
     describe('add comment', () => {
-      it('succeeds when params is valid', () => {
+      it('succeeds when type is user', () => {
         const params: Record<string, unknown> = {
           subAction: 'addComment',
           subActionParams: {
             caseId: 'case-id',
-            comment: { comment: 'a comment', type: CommentType.user },
+            comment: {
+              comment: 'a comment',
+              type: CommentType.user,
+            },
+          },
+        };
+
+        expect(validateParams(caseActionType, params)).toEqual(params);
+      });
+
+      it('succeeds when type is an alert', () => {
+        const params: Record<string, unknown> = {
+          subAction: 'addComment',
+          subActionParams: {
+            caseId: 'case-id',
+            comment: {
+              type: CommentType.alert,
+              alertId: 'test-id',
+              index: 'test-index',
+            },
           },
         };
 
@@ -634,6 +654,89 @@ describe('case connector', () => {
         expect(() => {
           validateParams(caseActionType, params);
         }).toThrow();
+      });
+
+      it('fails when missing attributes: type user', () => {
+        const allParams = {
+          type: CommentType.user,
+          comment: 'a comment',
+        };
+
+        ['comment'].forEach((attribute) => {
+          const comment = omit(attribute, allParams);
+          const params: Record<string, unknown> = {
+            subAction: 'addComment',
+            subActionParams: {
+              caseId: 'case-id',
+              comment,
+            },
+          };
+
+          expect(() => {
+            validateParams(caseActionType, params);
+          }).toThrow();
+        });
+      });
+
+      it('fails when missing attributes: type alert', () => {
+        const allParams = {
+          type: CommentType.alert,
+          comment: 'a comment',
+          alertId: 'test-id',
+          index: 'test-index',
+        };
+
+        ['alertId', 'index'].forEach((attribute) => {
+          const comment = omit(attribute, allParams);
+          const params: Record<string, unknown> = {
+            subAction: 'addComment',
+            subActionParams: {
+              caseId: 'case-id',
+              comment,
+            },
+          };
+
+          expect(() => {
+            validateParams(caseActionType, params);
+          }).toThrow();
+        });
+      });
+
+      it('fails when excess attributes are provided: type user', () => {
+        ['alertId', 'index'].forEach((attribute) => {
+          const params: Record<string, unknown> = {
+            subAction: 'addComment',
+            subActionParams: {
+              caseId: 'case-id',
+              [attribute]: attribute,
+              type: CommentType.user,
+              comment: 'a comment',
+            },
+          };
+
+          expect(() => {
+            validateParams(caseActionType, params);
+          }).toThrow();
+        });
+      });
+
+      it('fails when excess attributes are provided: type alert', () => {
+        ['comment'].forEach((attribute) => {
+          const params: Record<string, unknown> = {
+            subAction: 'addComment',
+            subActionParams: {
+              caseId: 'case-id',
+              [attribute]: attribute,
+              type: CommentType.alert,
+              alertId: 'test-id',
+              index: 'test-index',
+            },
+          };
+
+          expect(() => {
+            validateParams(caseActionType, params);
+          }).toThrow();
+        });
       });
     });
   });
@@ -682,7 +785,7 @@ describe('case connector', () => {
           tags: ['case', 'connector'],
           description: 'Yo fields!!',
           external_service: null,
-          status: 'open' as const,
+          status: CaseStatuses.open,
           updated_at: null,
           updated_by: null,
           version: 'WzksMV0=',
@@ -765,7 +868,7 @@ describe('case connector', () => {
             description: 'This is a brand new case of a bad meanie defacing data',
             id: 'mock-id-1',
             external_service: null,
-            status: 'open' as const,
+            status: CaseStatuses.open,
             tags: ['defacement'],
             title: 'Update title',
             totalComment: 0,
@@ -834,7 +937,7 @@ describe('case connector', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
-          status: 'open' as const,
+          status: CaseStatuses.open,
           tags: ['defacement'],
           updated_at: null,
           updated_by: null,
@@ -866,7 +969,10 @@ describe('case connector', () => {
           subAction: 'addComment',
           subActionParams: {
             caseId: 'case-id',
-            comment: { comment: 'a comment', type: CommentType.user },
+            comment: {
+              comment: 'a comment',
+              type: CommentType.user,
+            },
           },
         };
 
@@ -883,7 +989,10 @@ describe('case connector', () => {
         expect(result).toEqual({ actionId, status: 'ok', data: commentReturn });
         expect(mockCaseClient.addComment).toHaveBeenCalledWith({
           caseId: 'case-id',
-          comment: { comment: 'a comment', type: CommentType.user },
+          comment: {
+            comment: 'a comment',
+            type: CommentType.user,
+          },
         });
       });
     });

@@ -99,7 +99,18 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
        * Get entities matching a document.
        */
       entities(): Promise<ResolverEntityIndex> {
-        return Promise.resolve([{ entity_id: metadata.entityIDs.origin }]);
+        return Promise.resolve([
+          {
+            name: 'endpoint',
+            schema: {
+              id: 'process.entity_id',
+              parent: 'process.parent.entity_id',
+              ancestry: 'process.Ext.ancestry',
+              name: 'process.name',
+            },
+            id: metadata.entityIDs.origin,
+          },
+        ]);
       },
     },
   };

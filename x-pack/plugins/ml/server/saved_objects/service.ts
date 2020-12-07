@@ -5,7 +5,12 @@
  */
 
 import RE2 from 're2';
-import { KibanaRequest, SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/server';
+import {
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResult,
+} from 'kibana/server';
 import type { SecurityPluginSetup } from '../../../security/server';
 import { JobType, ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 import { MLJobNotFound } from '../lib/ml_client';
@@ -131,6 +136,15 @@ export function jobSavedObjectServiceFactory(
 
   async function getAllJobObjects(jobType?: JobType, currentSpaceOnly: boolean = true) {
     return await _getJobObjects(jobType, undefined, undefined, currentSpaceOnly);
+  }
+
+  async function getJobObject(
+    jobType: JobType,
+    jobId: string,
+    currentSpaceOnly: boolean = true
+  ): Promise<SavedObjectsFindResult<JobObject> | undefined> {
+    const [jobObject] = await _getJobObjects(jobType, jobId, undefined, currentSpaceOnly);
+    return jobObject;
   }
 
   async function getAllJobObjectsForAllSpaces(jobType?: JobType) {
@@ -307,6 +321,7 @@ export function jobSavedObjectServiceFactory(
 
   return {
     getAllJobObjects,
+    getJobObject,
     createAnomalyDetectionJob,
     createDataFrameAnalyticsJob,
     deleteAnomalyDetectionJob,

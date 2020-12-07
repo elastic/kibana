@@ -11,13 +11,15 @@ import {
   CasePatchRequest,
   CasePostRequest,
   CasesStatusResponse,
-  CommentRequest,
+  CommentRequestUserType,
   User,
   CaseUserActionsResponse,
   CaseExternalServiceRequest,
   ServiceConnectorCaseParams,
   ServiceConnectorCaseResponse,
   ActionTypeExecutorResult,
+  CommentType,
+  CaseStatuses,
 } from '../../../../case/common/api';
 
 import {
@@ -119,7 +121,7 @@ export const getCases = async ({
   filterOptions = {
     search: '',
     reporters: [],
-    status: 'open',
+    status: CaseStatuses.open,
     tags: [],
   },
   queryParams = {
@@ -133,7 +135,7 @@ export const getCases = async ({
   const query = {
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
     tags: filterOptions.tags.map((t) => `"${t.replace(/"/g, '\\"')}"`),
-    ...(filterOptions.status !== '' ? { status: filterOptions.status } : {}),
+    status: filterOptions.status,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...queryParams,
   };
@@ -181,7 +183,7 @@ export const patchCasesStatus = async (
 };
 
 export const postComment = async (
-  newComment: CommentRequest,
+  newComment: CommentRequestUserType,
   caseId: string,
   signal: AbortSignal
 ): Promise<Case> => {
@@ -205,7 +207,12 @@ export const patchComment = async (
 ): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(getCaseCommentsUrl(caseId), {
     method: 'PATCH',
-    body: JSON.stringify({ comment: commentUpdate, id: commentId, version }),
+    body: JSON.stringify({
+      comment: commentUpdate,
+      type: CommentType.user,
+      id: commentId,
+      version,
+    }),
     signal,
   });
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));

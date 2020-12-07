@@ -102,6 +102,6 @@ describe('addSpaceIdToPath', () => {
   test('it throws an error when the requested path does not start with a slash', () => {
     expect(() => {
       addSpaceIdToPath('', '', 'foo');
-    }).toThrowErrorMatchingSnapshot();
+    }).toThrowErrorMatchingInlineSnapshot(`"path must start with a /"`);
   });
 });

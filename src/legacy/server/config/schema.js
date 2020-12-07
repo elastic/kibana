@@ -19,6 +19,7 @@
 
 import Joi from 'joi';
 import os from 'os';
+import { legacyLoggingConfigSchema } from '@kbn/legacy-logging';
 
 const HANDLED_IN_NEW_PLATFORM = Joi.any().description(
   'This key is handled in the new platform ONLY'
@@ -77,51 +78,7 @@ export default () =>
 
     uiSettings: HANDLED_IN_NEW_PLATFORM,
 
-    logging: Joi.object()
-      .keys({
-        appenders: HANDLED_IN_NEW_PLATFORM,
-        loggers: HANDLED_IN_NEW_PLATFORM,
-        root: HANDLED_IN_NEW_PLATFORM,
-
-        silent: Joi.boolean().default(false),
-
-        quiet: Joi.boolean().when('silent', {
-          is: true,
-          then: Joi.default(true).valid(true),
-          otherwise: Joi.default(false),
-        }),
-
-        verbose: Joi.boolean().when('quiet', {
-          is: true,
-          then: Joi.valid(false).default(false),
-          otherwise: Joi.default(false),
-        }),
-        events: Joi.any().default({}),
-        dest: Joi.string().default('stdout'),
-        filter: Joi.any().default({}),
-        json: Joi.boolean().when('dest', {
-          is: 'stdout',
-          then: Joi.default(!process.stdout.isTTY),
-          otherwise: Joi.default(true),
-        }),
-        timezone: Joi.string(),
-        rotate: Joi.object()
-          .keys({
-            enabled: Joi.boolean().default(false),
-            everyBytes: Joi.number()
-              // > 1MB
-              .greater(1048576)
-              // < 1GB
-              .less(1073741825)
-              // 10MB
-              .default(10485760),
-            keepFiles: Joi.number().greater(2).less(1024).default(7),
-            pollingInterval: Joi.number().greater(5000).less(3600000).default(10000),
-            usePolling: Joi.boolean().default(false),
-          })
-          .default(),
-      })
-      .default(),
+    logging: legacyLoggingConfigSchema,
 
     ops: Joi.object({
       interval: Joi.number().default(5000),

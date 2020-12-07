@@ -11,6 +11,9 @@ export interface Error {
   cause?: string[];
   message?: string;
   statusText?: string;
+  attributes?: {
+    cause: string[];
+  };
 }
 
 interface Props {
@@ -20,10 +23,13 @@ interface Props {
 
 export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...rest }) => {
   const {
-    cause, // wrapEsError() on the server adds a "cause" array
+    cause: causeRoot, // wrapEsError() on the server adds a "cause" array
     message,
     statusText,
+    attributes: { cause: causeAttributes } = {},
   } = error;
+
+  const cause = causeAttributes ?? causeRoot;
 
   return (
     <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>

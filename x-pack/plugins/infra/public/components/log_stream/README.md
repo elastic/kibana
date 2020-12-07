@@ -68,6 +68,36 @@ By default the `<LogStream />` uses the `"default"` source confiuration, but if 
 <LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} sourceId="my_source" />
 ```
 
+### Custom columns
+
+It is possible to change what columns are loaded without creating a whole new source configuration. To do so the component supports the `columns` prop. The default configuration can be replicated as follows.
+
+```tsx
+<LogStream
+  startTimestamp={...}
+  endTimetsamp={...}
+  columns={[
+    { type: 'timestamp' },
+    { type: 'field', field: 'event.dataset' }
+    { type: 'message' },
+  ]}
+/>
+```
+
+There are three column types:
+
+<table>
+  <tr>
+    <td>`type: "timestamp"`
+    <td>The configured timestamp field. Defaults to `@timestamp`.
+  <tr>
+    <td>`type: "message"`
+    <td>The value of the `message` field if it exists. If it doesn't, the component will try to recompose the original log line using values of other fields.
+  <tr>
+    <td>`type: "field"`
+    <td>A specific field specified in the `field` property.
+</table>
+
 ### Considerations
 
 As mentioned in the prerequisites, the component relies on `kibana-react` to access kibana's core services. If this is not the case the component will throw an exception when rendering. We advise to use an `<EuiErrorBoundary>` in your component hierarchy to catch this error if necessary.

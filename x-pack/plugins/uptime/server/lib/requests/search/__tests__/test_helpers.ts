@@ -8,13 +8,6 @@ import { CursorPagination } from '../types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
 import { QueryContext } from '../query_context';
 
-export const prevPagination = (key: any): CursorPagination => {
-  return {
-    cursorDirection: CursorDirection.BEFORE,
-    sortOrder: SortOrder.ASC,
-    cursorKey: key,
-  };
-};
 export const nextPagination = (key: any): CursorPagination => {
   return {
     cursorDirection: CursorDirection.AFTER,
@@ -23,14 +16,5 @@ export const nextPagination = (key: any): CursorPagination => {
   };
 };
 export const simpleQueryContext = (): QueryContext => {
-  return new QueryContext(
-    undefined,
-    'indexName',
-    '',
-    '',
-    nextPagination('something'),
-    undefined,
-    0,
-    ''
-  );
+  return new QueryContext(undefined, '', '', nextPagination('something'), undefined, 0, '');
 };

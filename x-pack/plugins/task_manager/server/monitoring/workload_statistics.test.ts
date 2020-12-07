@@ -86,7 +86,7 @@ describe('Workload Statistics Aggregator', () => {
       loggingSystemMock.create().get()
     );
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       workloadAggregator.pipe(first()).subscribe(() => {
         expect(taskStore.aggregate).toHaveBeenCalledWith({
           aggs: {
@@ -253,7 +253,7 @@ describe('Workload Statistics Aggregator', () => {
       loggingSystemMock.create().get()
     );
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       workloadAggregator.pipe(first()).subscribe((result) => {
         expect(result.key).toEqual('workload');
         expect(result.value).toMatchObject({
@@ -283,7 +283,7 @@ describe('Workload Statistics Aggregator', () => {
       loggingSystemMock.create().get()
     );
 
-    return new Promise(async (resolve) => {
+    return new Promise<void>(async (resolve) => {
       workloadAggregator.pipe(first()).subscribe((result) => {
         expect(result.key).toEqual('workload');
         expect(result.value).toMatchObject({
@@ -319,7 +319,7 @@ describe('Workload Statistics Aggregator', () => {
       loggingSystemMock.create().get()
     );
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       workloadAggregator.pipe(first()).subscribe((result) => {
         expect(result.key).toEqual('workload');
         expect(result.value).toMatchObject({
@@ -342,7 +342,7 @@ describe('Workload Statistics Aggregator', () => {
       loggingSystemMock.create().get()
     );
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       workloadAggregator.pipe(first()).subscribe((result) => {
         expect(result.key).toEqual('workload');
         expect(result.value).toMatchObject({
@@ -370,7 +370,7 @@ describe('Workload Statistics Aggregator', () => {
       loggingSystemMock.create().get()
     );
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       workloadAggregator.pipe(first()).subscribe(() => {
         expect(taskStore.aggregate.mock.calls[0][0]).toMatchObject({
           aggs: {
@@ -408,7 +408,7 @@ describe('Workload Statistics Aggregator', () => {
       loggingSystemMock.create().get()
     );
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       workloadAggregator.pipe(first()).subscribe((result) => {
         expect(taskStore.aggregate.mock.calls[0][0]).toMatchObject({
           aggs: {
@@ -453,7 +453,7 @@ describe('Workload Statistics Aggregator', () => {
     const logger = loggingSystemMock.create().get();
     const workloadAggregator = createWorkloadAggregator(taskStore, of(true), 10, 3000, logger);
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       workloadAggregator.pipe(take(2), bufferCount(2)).subscribe((results) => {
         expect(results[0].key).toEqual('workload');
         expect(results[0].value).toMatchObject({
@@ -473,6 +473,41 @@ describe('Workload Statistics Aggregator', () => {
             session_cleanup: { count: 1, status: { idle: 1 } },
           },
         });
+        resolve();
+      }, reject);
+    });
+  });
+
+  test('recovery after errors occurrs at the next interval', async () => {
+    const refreshInterval = 1000;
+
+    const taskStore = taskStoreMock.create({});
+    const logger = loggingSystemMock.create().get();
+    const workloadAggregator = createWorkloadAggregator(
+      taskStore,
+      of(true),
+      refreshInterval,
+      3000,
+      logger
+    );
+
+    return new Promise<void>((resolve, reject) => {
+      let errorWasThrowAt = 0;
+      taskStore.aggregate.mockImplementation(async () => {
+        if (errorWasThrowAt === 0) {
+          errorWasThrowAt = Date.now();
+          throw new Error(`Elasticsearch has gone poof`);
+        } else if (Date.now() - errorWasThrowAt < refreshInterval) {
+          reject(new Error(`Elasticsearch is still poof`));
+        }
+
+        return setTaskTypeCount(mockAggregatedResult(), 'alerting_telemetry', {
+          idle: 2,
+        });
+      });
+
+      workloadAggregator.pipe(take(2), bufferCount(2)).subscribe((results) => {
+        expect(results.length).toEqual(2);
         resolve();
       }, reject);
     });

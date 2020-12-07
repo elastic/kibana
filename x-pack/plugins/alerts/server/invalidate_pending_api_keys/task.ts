@@ -202,9 +202,10 @@ async function invalidateApiKeys(
   let totalInvalidated = 0;
   await Promise.all(
     apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
-      const decryptedApiKey = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-        InvalidatePendingApiKey
-      >('api_key_pending_invalidation', apiKeyObj.id);
+      const decryptedApiKey = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<InvalidatePendingApiKey>(
+        'api_key_pending_invalidation',
+        apiKeyObj.id
+      );
       const apiKeyId = decryptedApiKey.attributes.apiKeyId;
       const response = await invalidateAPIKey({ id: apiKeyId }, securityPluginSetup);
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {

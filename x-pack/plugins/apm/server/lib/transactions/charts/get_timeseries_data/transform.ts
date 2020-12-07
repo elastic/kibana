@@ -42,9 +42,7 @@ export function timeseriesTransformer({
   };
 }
 
-type TransactionResultBuckets = Required<
-  ESResponse
->['aggregations']['transaction_results']['buckets'];
+type TransactionResultBuckets = Required<ESResponse>['aggregations']['transaction_results']['buckets'];
 
 export function getTpmBuckets({
   transactionResultBuckets = [],
@@ -86,9 +84,7 @@ export function getTpmBuckets({
   );
 }
 
-type ResponseTimeBuckets = Required<
-  ESResponse
->['aggregations']['response_times']['buckets'];
+type ResponseTimeBuckets = Required<ESResponse>['aggregations']['response_times']['buckets'];
 
 function getResponseTime(responseTimeBuckets: ResponseTimeBuckets = []) {
   return responseTimeBuckets.reduce(

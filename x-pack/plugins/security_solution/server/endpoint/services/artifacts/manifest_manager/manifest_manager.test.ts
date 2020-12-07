@@ -271,7 +271,9 @@ describe('manifest_manager', () => {
     });
 
     test('ManifestManager can commit manifest', async () => {
-      const savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create> = savedObjectsClientMock.create();
+      const savedObjectsClient: ReturnType<
+        typeof savedObjectsClientMock.create
+      > = savedObjectsClientMock.create();
       const manifestManager = getManifestManagerMock({
         savedObjectsClient,
       });

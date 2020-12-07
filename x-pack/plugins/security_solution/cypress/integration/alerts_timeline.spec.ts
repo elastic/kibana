@@ -17,8 +17,7 @@ import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/83771
-describe.skip('Alerts timeline', () => {
+describe('Alerts timeline', () => {
   beforeEach(() => {
     esArchiverLoad('timeline_alerts');
     loginAndWaitForPage(DETECTIONS_URL);
@@ -36,7 +35,7 @@ describe.skip('Alerts timeline', () => {
       .invoke('text')
       .then((eventId) => {
         investigateFirstAlertInTimeline();
-        cy.get(PROVIDER_BADGE).should('have.text', `_id: "${eventId}"`);
+        cy.get(PROVIDER_BADGE).filter(':visible').should('have.text', `_id: "${eventId}"`);
       });
   });
 });

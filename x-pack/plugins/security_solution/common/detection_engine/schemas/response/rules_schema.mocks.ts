@@ -115,12 +115,12 @@ export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): R
  * Useful for e2e backend tests where it doesn't have date time and other
  * server side properties attached to it.
  */
-export const getThreatMatchingSchemaPartialMock = (): Partial<RulesSchema> => {
+export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<RulesSchema> => {
   return {
     author: [],
     created_by: 'elastic',
     description: 'Detecting root and admin users',
-    enabled: true,
+    enabled,
     false_positives: [],
     from: 'now-6m',
     immutable: false,

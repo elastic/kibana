@@ -10,9 +10,7 @@ import { ESResponse } from './fetcher';
 
 type IBucket = ReturnType<typeof getBucket>;
 function getBucket(
-  bucket: Required<
-    ESResponse
-  >['aggregations']['ml_avg_response_times']['buckets'][0]
+  bucket: Required<ESResponse>['aggregations']['ml_avg_response_times']['buckets'][0]
 ) {
   return {
     x: bucket.key,

@@ -9,10 +9,9 @@ import { cryptoFactory } from '../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../types';
 import { IndexPatternSavedObject, JobParamsCSV, TaskPayloadCSV } from './types';
 
-export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
-  JobParamsCSV,
-  TaskPayloadCSV
->> = function createJobFactoryFn(reporting, parentLogger) {
+export const createJobFnFactory: CreateJobFnFactory<
+  CreateJobFn<JobParamsCSV, TaskPayloadCSV>
+> = function createJobFactoryFn(reporting, parentLogger) {
   const logger = parentLogger.clone([CSV_JOB_TYPE, 'create-job']);
 
   const config = reporting.getConfig();

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
-import { useLink, useGetDataStreams, useStartDeps } from '../../../hooks';
+import { useLink, useGetDataStreams, useStartServices } from '../../../hooks';
 import { Loading } from '../../agents/components';
 
 export const OverviewDatastreamSection: React.FC = () => {
@@ -23,7 +23,7 @@ export const OverviewDatastreamSection: React.FC = () => {
   const datastreamRequest = useGetDataStreams();
   const {
     data: { fieldFormats },
-  } = useStartDeps();
+  } = useStartServices();
 
   const total = datastreamRequest.data?.data_streams?.length ?? 0;
   let sizeBytes = 0;

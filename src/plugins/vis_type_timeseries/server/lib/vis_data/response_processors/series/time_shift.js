@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { startsWith } from 'lodash';
 import moment from 'moment';
 
 export function timeShift(resp, panel, series) {
@@ -26,13 +26,15 @@ export function timeShift(resp, panel, series) {
       const matches = series.offset_time.match(/^([+-]?[\d]+)([shmdwMy]|ms)$/);
 
       if (matches) {
-        const offsetValue = Number(matches[1]);
+        const offsetValue = matches[1];
         const offsetUnit = matches[2];
-        const offset = moment.duration(offsetValue, offsetUnit).valueOf();
 
         results.forEach((item) => {
-          if (_.startsWith(item.id, series.id)) {
-            item.data = item.data.map(([time, value]) => [time + offset, value]);
+          if (startsWith(item.id, series.id)) {
+            item.data = item.data.map((row) => [
+              moment.utc(row[0]).add(offsetValue, offsetUnit).valueOf(),
+              row[1],
+            ]);
           }
         });
       }

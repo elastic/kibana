@@ -9,7 +9,7 @@ import { InternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetActiveSpaceApi(deps: InternalRouteDeps) {
-  const { internalRouter, spacesService } = deps;
+  const { internalRouter, getSpacesService } = deps;
 
   internalRouter.get(
     {
@@ -18,7 +18,7 @@ export function initGetActiveSpaceApi(deps: InternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const space = await spacesService.getActiveSpace(request);
+        const space = await getSpacesService().getActiveSpace(request);
         return response.ok({ body: space });
       } catch (error) {
         return response.customError(wrapError(error));

@@ -8,6 +8,8 @@ import { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/comm
 import { JobId } from './anomaly_detection_jobs/job';
 import { ML_PAGES } from '../constants/ml_url_generator';
 import { DataFrameAnalysisConfigType } from './data_frame_analytics';
+import { SearchQueryLanguage } from '../constants/search';
+import { ListingPageUrlState } from './common';
 
 type OptionalPageState = object | undefined;
 
@@ -66,7 +68,7 @@ export type AnomalyDetectionUrlState = MLPageState<
 >;
 export interface ExplorerAppState {
   mlExplorerSwimlane: {
-    selectedType?: string;
+    selectedType?: 'overall' | 'viewBy';
     selectedLanes?: string[];
     selectedTimes?: number[];
     showTopFieldValues?: boolean;
@@ -81,6 +83,7 @@ export interface ExplorerAppState {
     queryString?: string;
   };
   query?: any;
+  mlShowCharts?: boolean;
 }
 export interface ExplorerGlobalState {
   ml: { jobIds: JobId[] };
@@ -124,21 +127,21 @@ export interface TimeSeriesExplorerGlobalState {
 }
 
 export interface TimeSeriesExplorerAppState {
-  zoom?: {
-    from?: string;
-    to?: string;
-  };
   mlTimeSeriesExplorer?: {
     forecastId?: string;
     detectorIndex?: number;
     entities?: Record<string, string>;
+    zoom?: {
+      from?: string;
+      to?: string;
+    };
     functionDescription?: string;
   };
   query?: any;
 }
 
 export interface TimeSeriesExplorerPageState
-  extends Pick<TimeSeriesExplorerAppState, 'zoom' | 'query'>,
+  extends Pick<TimeSeriesExplorerAppState, 'query'>,
     Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
   jobIds?: JobId[];
   timeRange?: TimeRange;
@@ -156,6 +159,7 @@ export type TimeSeriesExplorerUrlState = MLPageState<
 
 export interface DataFrameAnalyticsQueryState {
   jobId?: JobId | JobId[];
+  modelId?: string;
   groupIds?: string[];
   globalState?: MlCommonGlobalState;
 }
@@ -170,6 +174,7 @@ export interface DataFrameAnalyticsExplorationQueryState {
     jobId: JobId;
     analysisType: DataFrameAnalysisConfigType;
     defaultIsTraining?: boolean;
+    modelId?: string;
   };
 }
 
@@ -179,7 +184,8 @@ export type DataFrameAnalyticsExplorationUrlState = MLPageState<
     jobId: JobId;
     analysisType: DataFrameAnalysisConfigType;
     globalState?: MlCommonGlobalState;
-    defaultIsTraining?: boolean;
+    queryText?: string;
+    modelId?: string;
   }
 >;
 
@@ -198,6 +204,14 @@ export type FilterEditUrlState = MLPageState<
     globalState?: MlCommonGlobalState;
   }
 >;
+
+export type ExpandablePanels = 'analysis' | 'evaluation' | 'feature_importance' | 'results';
+
+export type ExplorationPageUrlState = {
+  queryText: string;
+  queryLanguage: SearchQueryLanguage;
+} & Pick<ListingPageUrlState, 'pageIndex' | 'pageSize'> &
+  { [key in ExpandablePanels]: boolean };
 
 /**
  * Union type of ML URL state based on page

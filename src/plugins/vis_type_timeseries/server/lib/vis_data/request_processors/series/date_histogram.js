@@ -25,10 +25,27 @@ import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { search } from '../../../../../../../plugins/data/server';
 const { dateHistogramInterval } = search.aggs;
 
-export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
+export function dateHistogram(
+  req,
+  panel,
+  series,
+  esQueryConfig,
+  indexPatternObject,
+  capabilities,
+  { maxBarsUiSettings, barTargetUiSettings }
+) {
   return (next) => (doc) => {
-    const { timeField, interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
-    const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
+    const { timeField, interval, maxBars } = getIntervalAndTimefield(
+      panel,
+      series,
+      indexPatternObject
+    );
+    const { bucketSize, intervalString } = getBucketSize(
+      req,
+      interval,
+      capabilities,
+      maxBars ? Math.min(maxBarsUiSettings, maxBars) : barTargetUiSettings
+    );
 
     const getDateHistogramForLastBucketMode = () => {
       const { from, to } = offsetTime(req, series.offset_time);

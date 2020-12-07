@@ -148,7 +148,7 @@ describe('useTimelineEvents', () => {
       // useEffect on params request
       await waitForNextUpdate();
 
-      expect(mockSearch).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(2);
       expect(result.current).toEqual([
         false,
         {
@@ -190,7 +190,7 @@ describe('useTimelineEvents', () => {
         },
       ]);
 
-      expect(mockSearch).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledTimes(2);
 
       expect(result.current).toEqual([
         false,

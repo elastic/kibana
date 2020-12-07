@@ -76,6 +76,7 @@ describe('LicenseExpirationAlert', () => {
     const monitoringCluster = null;
     const config = {
       ui: {
+        show_license_expiration: true,
         ccs: { enabled: true },
         container: { elasticsearch: { enabled: false } },
         metricbeat: { index: 'metricbeat-*' },
@@ -281,6 +282,33 @@ describe('LicenseExpirationAlert', () => {
         expiredDate: 'THE_DATE',
         state: 'resolved',
       });
+    });
+
+    it('should not fire actions if we are not showing license expiration', async () => {
+      const alert = new LicenseExpirationAlert();
+      const customConfig = {
+        ...config,
+        ui: {
+          ...config.ui,
+          show_license_expiration: false,
+        },
+      };
+      alert.initializeAlertType(
+        getUiSettingsService as any,
+        monitoringCluster as any,
+        getLogger as any,
+        customConfig as any,
+        kibanaUrl,
+        false
+      );
+      const type = alert.getAlertType();
+      await type.executor({
+        ...executorOptions,
+        // @ts-ignore
+        params: alert.defaultParams,
+      } as any);
+      expect(replaceState).not.toHaveBeenCalledWith({});
+      expect(scheduleActions).not.toHaveBeenCalled();
     });
   });
 });

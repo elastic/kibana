@@ -19,7 +19,7 @@ export const buildLastFirstSeenHostQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         firstSeen: { min: { field: '@timestamp' } },
         lastSeen: { max: { field: '@timestamp' } },

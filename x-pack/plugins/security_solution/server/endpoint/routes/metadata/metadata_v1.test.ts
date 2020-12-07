@@ -63,9 +63,7 @@ describe('test endpoint route v1', () => {
   };
 
   beforeEach(() => {
-    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient() as jest.Mocked<
-      ILegacyClusterClient
-    >;
+    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient() as jest.Mocked<ILegacyClusterClient>;
     mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);

@@ -17,9 +17,7 @@ export const migrations: SavedObjectMigrationMap = {
 function moveIntervalIntoSchedule({
   attributes: { interval, ...attributes },
   ...doc
-}: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>): SavedObjectUnsanitizedDoc<
-  TaskInstance
-> {
+}: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>): SavedObjectUnsanitizedDoc<TaskInstance> {
   return {
     ...doc,
     attributes: {

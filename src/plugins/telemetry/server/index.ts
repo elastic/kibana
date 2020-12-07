@@ -44,7 +44,6 @@ export const plugin = (initializerContext: PluginInitializerContext<TelemetryCon
 export { constants };
 export {
   getClusterUuids,
-  getLocalLicense,
   getLocalStats,
   TelemetryLocalStats,
   DATA_TELEMETRY_ID,

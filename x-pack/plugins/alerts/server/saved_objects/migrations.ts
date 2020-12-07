@@ -37,8 +37,15 @@ export function getMigrations(
     )
   );
 
+  const migrationAlertUpdatedAtDate = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+    // migrate all documents in 7.11 in order to add the "updatedAt" field
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
+    pipeMigrations(setAlertUpdatedAtDate)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
+    '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtDate, '7.11.0'),
   };
 }
 
@@ -58,6 +65,19 @@ function executeMigrationWithErrorHandling(
     return doc;
   };
 }
+
+const setAlertUpdatedAtDate = (
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> => {
+  const updatedAt = doc.updated_at || doc.attributes.createdAt;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      updatedAt,
+    },
+  };
+};
 
 const consumersToChange: Map<string, string> = new Map(
   Object.entries({

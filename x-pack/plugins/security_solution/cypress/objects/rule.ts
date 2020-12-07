@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { mockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
@@ -13,9 +15,14 @@ export const totalNumberOfPrebuiltRulesInEsArchive = 127;
 
 export const totalNumberOfPrebuiltRulesInEsArchiveCustomRule = 145;
 
-interface Mitre {
+interface MitreAttackTechnique {
+  name: string;
+  subtechniques: string[];
+}
+
+export interface Mitre {
   tactic: string;
-  techniques: string[];
+  techniques: MitreAttackTechnique[];
 }
 
 interface SeverityOverride {
@@ -30,10 +37,10 @@ interface Interval {
 }
 
 export interface CustomRule {
-  customQuery: string;
+  customQuery?: string;
   name: string;
   description: string;
-  index?: string[];
+  index: string[];
   interval?: string;
   severity: string;
   riskScore: string;
@@ -43,7 +50,7 @@ export interface CustomRule {
   falsePositivesExamples: string[];
   mitre: Mitre[];
   note: string;
-  timelineId: string;
+  timelineId?: string;
   runsEvery: Interval;
   lookBack: Interval;
 }
@@ -58,6 +65,12 @@ export interface OverrideRule extends CustomRule {
   riskOverride: string;
   nameOverride: string;
   timestampOverride: string;
+}
+
+export interface ThreatIndicatorRule extends CustomRule {
+  indicatorIndexPattern: string[];
+  indicatorMapping: string;
+  indicatorIndexField: string;
 }
 
 export interface MachineLearningRule {
@@ -77,14 +90,40 @@ export interface MachineLearningRule {
   lookBack: Interval;
 }
 
+export const indexPatterns = [
+  'apm-*-transaction*',
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'logs-*',
+  'packetbeat-*',
+  'winlogbeat-*',
+];
+
+const { tactic, technique, subtechnique } = mockThreatData;
+
 const mitre1: Mitre = {
-  tactic: 'Discovery (TA0007)',
-  techniques: ['Cloud Service Discovery (T1526)', 'File and Directory Discovery (T1083)'],
+  tactic: `${tactic.name} (${tactic.id})`,
+  techniques: [
+    {
+      name: `${technique.name} (${technique.id})`,
+      subtechniques: [`${subtechnique.name} (${subtechnique.id})`],
+    },
+    {
+      name: `${technique.name} (${technique.id})`,
+      subtechniques: [],
+    },
+  ],
 };
 
 const mitre2: Mitre = {
-  tactic: 'Execution (TA0002)',
-  techniques: ['CMSTP (T1191)'],
+  tactic: `${tactic.name} (${tactic.id})`,
+  techniques: [
+    {
+      name: `${technique.name} (${technique.id})`,
+      subtechniques: [`${subtechnique.name} (${subtechnique.id})`],
+    },
+  ],
 };
 
 const severityOverride1: SeverityOverride = {
@@ -121,6 +160,7 @@ const lookBack: Interval = {
 
 export const newRule: CustomRule = {
   customQuery: 'host.name:*',
+  index: indexPatterns,
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -162,6 +202,7 @@ export const existingRule: CustomRule = {
 
 export const newOverrideRule: OverrideRule = {
   customQuery: 'host.name:*',
+  index: indexPatterns,
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -182,6 +223,7 @@ export const newOverrideRule: OverrideRule = {
 
 export const newThresholdRule: ThresholdRule = {
   customQuery: 'host.name:*',
+  index: indexPatterns,
   name: 'New Rule Test',
   description: 'The new rule description.',
   severity: 'High',
@@ -217,6 +259,7 @@ export const machineLearningRule: MachineLearningRule = {
 export const eqlRule: CustomRule = {
   customQuery: 'any where process.name == "which"',
   name: 'New EQL Rule',
+  index: indexPatterns,
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',
@@ -236,6 +279,7 @@ export const eqlSequenceRule: CustomRule = {
      [any where process.name == "which"]\
      [any where process.name == "xargs"]',
   name: 'New EQL Sequence Rule',
+  index: indexPatterns,
   description: 'New EQL rule description.',
   severity: 'High',
   riskScore: '17',
@@ -249,15 +293,23 @@ export const eqlSequenceRule: CustomRule = {
   lookBack,
 };
 
-export const indexPatterns = [
-  'apm-*-transaction*',
-  'auditbeat-*',
-  'endgame-*',
-  'filebeat-*',
-  'logs-*',
-  'packetbeat-*',
-  'winlogbeat-*',
-];
+export const newThreatIndicatorRule: ThreatIndicatorRule = {
+  name: 'Threat Indicator Rule Test',
+  description: 'The threat indicator rule description.',
+  index: ['threat-data-*'],
+  severity: 'Critical',
+  riskScore: '20',
+  tags: ['test', 'threat'],
+  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  runsEvery,
+  lookBack,
+  indicatorIndexPattern: ['threat-indicator-*'],
+  indicatorMapping: 'agent.id',
+  indicatorIndexField: 'agent.threat',
+};
 
 export const severitiesOverride = ['Low', 'Medium', 'High', 'Critical'];
 
@@ -265,4 +317,5 @@ export const editedRule = {
   ...existingRule,
   severity: 'Medium',
   description: 'Edited Rule description',
+  tags: [...existingRule.tags, 'edited'],
 };

@@ -9,7 +9,7 @@ import { IFieldType } from 'src/plugins/data/public';
 // @ts-ignore
 import { EuiSuggest, EuiSuggestItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDebounce, useStartDeps } from '../hooks';
+import { useDebounce, useStartServices } from '../hooks';
 import { INDEX_NAME, AGENT_SAVED_OBJECT_TYPE } from '../constants';
 
 const DEBOUNCE_SEARCH_MS = 150;
@@ -80,7 +80,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   );
 };
 
-function transformSuggestionType(type: string): { iconType: string; color: string } {
+export function transformSuggestionType(type: string): { iconType: string; color: string } {
   switch (type) {
     case 'field':
       return { iconType: 'kqlField', color: 'tint4' };
@@ -96,7 +96,7 @@ function transformSuggestionType(type: string): { iconType: string; color: strin
 }
 
 function useSuggestions(fieldPrefix: string, search: string) {
-  const { data } = useStartDeps();
+  const { data } = useStartServices();
 
   const debouncedSearch = useDebounce(search, DEBOUNCE_SEARCH_MS);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);

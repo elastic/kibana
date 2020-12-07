@@ -63,24 +63,12 @@ export const useNetworkKpiUniquePrivateIps = ({
   const [
     networkKpiUniquePrivateIpsRequest,
     setNetworkKpiUniquePrivateIpsRequest,
-  ] = useState<NetworkKpiUniquePrivateIpsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
-          filterQuery: createFilter(filterQuery),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        }
-      : null
-  );
+  ] = useState<NetworkKpiUniquePrivateIpsRequestOptions | null>(null);
 
-  const [networkKpiUniquePrivateIpsResponse, setNetworkKpiUniquePrivateIpsResponse] = useState<
-    NetworkKpiUniquePrivateIpsArgs
-  >({
+  const [
+    networkKpiUniquePrivateIpsResponse,
+    setNetworkKpiUniquePrivateIpsResponse,
+  ] = useState<NetworkKpiUniquePrivateIpsArgs>({
     uniqueDestinationPrivateIps: 0,
     uniqueDestinationPrivateIpsHistogram: null,
     uniqueSourcePrivateIps: 0,
@@ -96,7 +84,7 @@ export const useNetworkKpiUniquePrivateIps = ({
 
   const networkKpiUniquePrivateIpsSearch = useCallback(
     (request: NetworkKpiUniquePrivateIpsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -157,7 +145,7 @@ export const useNetworkKpiUniquePrivateIps = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -173,12 +161,12 @@ export const useNetworkKpiUniquePrivateIps = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     networkKpiUniquePrivateIpsSearch(networkKpiUniquePrivateIpsRequest);

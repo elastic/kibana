@@ -87,9 +87,9 @@ const importList = async ({
   list_id,
   type,
   signal,
-}: ApiParams & ImportListItemSchemaEncoded & ImportListItemQuerySchemaEncoded): Promise<
-  ListSchema
-> => {
+}: ApiParams &
+  ImportListItemSchemaEncoded &
+  ImportListItemQuerySchemaEncoded): Promise<ListSchema> => {
   const formData = new FormData();
   formData.append('file', file as Blob);
 

@@ -20,7 +20,7 @@ toJSON(): {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
-        customName: string | undefined;
+        customLabel: string | undefined;
     };
 ```
 <b>Returns:</b>
@@ -38,6 +38,6 @@ toJSON(): {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
-        customName: string | undefined;
+        customLabel: string | undefined;
     }`
 

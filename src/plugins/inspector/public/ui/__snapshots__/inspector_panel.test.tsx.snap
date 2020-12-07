@@ -240,12 +240,11 @@ exports[`InspectorPanel should render as expected 1`] = `
                     hasArrow={true}
                     id="inspectorViewChooser"
                     isOpen={false}
-                    ownFocus={true}
+                    ownFocus={false}
                     panelPaddingSize="none"
                     repositionOnScroll={true}
                   >
                     <EuiOutsideClickDetector
-                      isDisabled={true}
                       onOutsideClick={[Function]}
                     >
                       <div
