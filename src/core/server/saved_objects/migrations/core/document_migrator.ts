@@ -403,7 +403,7 @@ function props(doc: SavedObjectUnsanitizedDoc) {
  */
 function propVersion(doc: SavedObjectUnsanitizedDoc | ActiveMigrations, prop: string) {
   return (
-    (doc.hasOwnProperty(prop) && (doc as any)[prop].latestVersion) ||
+    ((doc as any)[prop] && (doc as any)[prop].latestVersion) ||
     (doc.migrationVersion && (doc as any).migrationVersion[prop])
   );
 }
