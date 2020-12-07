@@ -63,7 +63,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
   };
 
   addColor = () => {
-    const colors = [...this.props.formatParams.colors];
+    const colors = [...(this.props.formatParams.colors || [])];
     this.onChange({
       colors: [...colors, { ...fieldFormats.DEFAULT_CONVERTER_COLOR }],
     });
