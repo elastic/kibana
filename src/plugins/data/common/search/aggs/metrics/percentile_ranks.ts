@@ -25,6 +25,7 @@ import { BaseAggParams } from '../types';
 
 import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
+import { aggPercentileRanksFnName } from './percentile_ranks_fn';
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
 
@@ -64,6 +65,7 @@ export const getPercentileRanksMetricAgg = ({
 }: PercentileRanksMetricAggDependencies) => {
   return new MetricAggType<IPercentileRanksAggConfig>({
     name: METRIC_TYPES.PERCENTILE_RANKS,
+    expressionName: aggPercentileRanksFnName,
     title: i18n.translate('data.search.aggs.metrics.percentileRanksTitle', {
       defaultMessage: 'Percentile Ranks',
     }),

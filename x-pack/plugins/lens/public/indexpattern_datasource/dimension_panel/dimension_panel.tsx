@@ -12,7 +12,7 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternColumn } from '../indexpattern';
-import { fieldIsInvalid } from '../utils';
+import { isColumnInvalid } from '../utils';
 import { IndexPatternPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
 import { DateRange } from '../../../common';
@@ -45,24 +45,22 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
 ) {
   const layerId = props.layerId;
   const layer = props.state.layers[layerId];
-  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] || null;
   const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
+  const { columnId, uniqueLabel } = props;
 
-  const selectedColumnSourceField =
-    selectedColumn && 'sourceField' in selectedColumn ? selectedColumn.sourceField : undefined;
-  const currentFieldIsInvalid = useMemo(
-    () =>
-      fieldIsInvalid(selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern),
-    [selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern]
+  const currentColumnHasErrors = useMemo(
+    () => isColumnInvalid(layer, columnId, currentIndexPattern),
+    [layer, columnId, currentIndexPattern]
   );
 
-  const { columnId, uniqueLabel } = props;
+  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] || null;
+
   if (!selectedColumn) {
     return null;
   }
   const formattedLabel = wrapOnDot(uniqueLabel);
 
-  if (currentFieldIsInvalid) {
+  if (currentColumnHasErrors) {
     return (
       <EuiToolTip
         content={

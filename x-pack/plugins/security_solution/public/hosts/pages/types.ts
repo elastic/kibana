@@ -14,21 +14,16 @@ import { DocValueFields } from '../../common/containers/source';
 export const hostsPagePath = '/';
 export const hostDetailsPagePath = `/:detailName`;
 
-export type HostsTabsProps = HostsComponentProps &
-  GlobalTimeArgs & {
-    docValueFields: DocValueFields[];
-    filterQuery: string;
-    indexNames: string[];
-    type: hostsModel.HostsType;
-    setAbsoluteRangeDatePicker: ActionCreator<{
-      id: InputsModelId;
-      from: string;
-      to: string;
-    }>;
-  };
+export type HostsTabsProps = GlobalTimeArgs & {
+  docValueFields: DocValueFields[];
+  filterQuery: string;
+  indexNames: string[];
+  type: hostsModel.HostsType;
+  setAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: string;
+    to: string;
+  }>;
+};
 
 export type HostsQueryProps = GlobalTimeArgs;
-
-export interface HostsComponentProps {
-  hostsPagePath: string;
-}

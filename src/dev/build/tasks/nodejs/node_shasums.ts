@@ -18,9 +18,12 @@
  */
 
 import axios from 'axios';
+import { ToolingLog } from '@kbn/dev-utils';
 
-export async function getNodeShasums(nodeVersion: string) {
+export async function getNodeShasums(log: ToolingLog, nodeVersion: string) {
   const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v${nodeVersion}/SHASUMS256.txt`;
+
+  log.debug('Downloading shasum values for node version', nodeVersion, 'from', url);
 
   const { status, data } = await axios.get(url);
 

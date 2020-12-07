@@ -18,13 +18,13 @@
  */
 
 jest.mock('../../../legacy/server/kbn_server');
-jest.mock('./cluster_manager');
+jest.mock('./cli_dev_mode');
 
 import { BehaviorSubject, throwError } from 'rxjs';
 import { REPO_ROOT } from '@kbn/dev-utils';
 
 // @ts-expect-error js file to remove TS dependency on cli
-import { ClusterManager as MockClusterManager } from './cluster_manager';
+import { CliDevMode as MockCliDevMode } from './cli_dev_mode';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
 import { BasePathProxyServer } from '../http';
@@ -239,7 +239,7 @@ describe('once LegacyService is set up with connection info', () => {
     );
 
     expect(MockKbnServer).not.toHaveBeenCalled();
-    expect(MockClusterManager).not.toHaveBeenCalled();
+    expect(MockCliDevMode).not.toHaveBeenCalled();
   });
 
   test('reconfigures logging configuration if new config is received.', async () => {
@@ -355,7 +355,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     });
   });
 
-  test('creates ClusterManager without base path proxy.', async () => {
+  test('creates CliDevMode without base path proxy.', async () => {
     const devClusterLegacyService = new LegacyService({
       coreId,
       env: Env.createDefault(
@@ -373,8 +373,8 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 
-    expect(MockClusterManager).toHaveBeenCalledTimes(1);
-    expect(MockClusterManager).toHaveBeenCalledWith(
+    expect(MockCliDevMode.fromCoreServices).toHaveBeenCalledTimes(1);
+    expect(MockCliDevMode.fromCoreServices).toHaveBeenCalledWith(
       expect.objectContaining({ silent: true, basePath: false }),
       expect.objectContaining({
         get: expect.any(Function),
@@ -384,7 +384,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     );
   });
 
-  test('creates ClusterManager with base path proxy.', async () => {
+  test('creates CliDevMode with base path proxy.', async () => {
     const devClusterLegacyService = new LegacyService({
       coreId,
       env: Env.createDefault(
@@ -402,8 +402,8 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 
-    expect(MockClusterManager).toHaveBeenCalledTimes(1);
-    expect(MockClusterManager).toHaveBeenCalledWith(
+    expect(MockCliDevMode.fromCoreServices).toHaveBeenCalledTimes(1);
+    expect(MockCliDevMode.fromCoreServices).toHaveBeenCalledWith(
       expect.objectContaining({ quiet: true, basePath: true }),
       expect.objectContaining({
         get: expect.any(Function),
