@@ -44,7 +44,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'linux.advanced.artifacts.global.interval',
     first_supported_version: '7.11',
-    documentation: 'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
+    documentation:
+      'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
   },
   {
     key: 'linux.advanced.artifacts.user.base_url',
@@ -65,7 +66,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'linux.advanced.artifacts.user.interval',
     first_supported_version: '7.11',
-    documentation: 'Interval between user artifact manifest download attempts, in seconds. Default: 3600.',
+    documentation:
+      'Interval between user artifact manifest download attempts, in seconds. Default: 3600.',
   },
   {
     key: 'linux.advanced.elasticsearch.delay',
@@ -119,7 +121,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'mac.advanced.artifacts.global.interval',
     first_supported_version: '7.11',
-    documentation: 'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
+    documentation:
+      'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
   },
   {
     key: 'mac.advanced.artifacts.user.base_url',
@@ -140,7 +143,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'mac.advanced.artifacts.user.interval',
     first_supported_version: '7.11',
-    documentation: 'Interval between user artifact manifest download attempts, in seconds. Default: 3600.',
+    documentation:
+      'Interval between user artifact manifest download attempts, in seconds. Default: 3600.',
   },
   {
     key: 'mac.advanced.elasticsearch.delay',
@@ -223,7 +227,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'windows.advanced.artifacts.global.interval',
     first_supported_version: '7.11',
-    documentation: 'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
+    documentation:
+      'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
   },
   {
     key: 'windows.advanced.artifacts.user.base_url',
@@ -244,7 +249,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'windows.advanced.artifacts.user.interval',
     first_supported_version: '7.11',
-    documentation: 'Interval between user artifact manifest download attempts, in seconds. Default: 3600.',
+    documentation:
+      'Interval between user artifact manifest download attempts, in seconds. Default: 3600.',
   },
   {
     key: 'windows.advanced.elasticsearch.delay',
