@@ -12,10 +12,19 @@ import {
 } from '../../../../../src/plugins/presentation_util/public';
 import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 
-type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<DashboardSaveModalProps, 'onSave'> & {
+export type DashboardSaveProps = OnSaveProps & {
+  returnToOrigin: boolean;
+  dashboardId?: string | null;
+  newTags?: string[];
+};
+
+export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
+  DashboardSaveModalProps,
+  'onSave'
+> & {
   initialTags: string[];
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  onSave: (props: OnSaveProps & { dashboardId?: string | null; newTags?: string[] }) => void;
+  onSave: (props: DashboardSaveProps) => void;
 };
 
 export const TagEnhancedSavedObjectSaveModalDashboard: FC<TagEnhancedSavedObjectSaveModalDashboardProps> = ({
@@ -43,6 +52,7 @@ export const TagEnhancedSavedObjectSaveModalDashboard: FC<TagEnhancedSavedObject
     (saveOptions) => {
       onSave({
         ...saveOptions,
+        returnToOrigin: false,
         newTags: selectedTags,
       });
     },
