@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../browsers/chromium/puppeteer', () => ({
-  puppeteerLaunch: () => ({
+jest.mock('puppeteer', () => ({
+  launch: () => ({
     // Fixme needs event emitters
     newPage: () => ({
       setDefaultTimeout: jest.fn(),

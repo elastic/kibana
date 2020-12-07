@@ -21,7 +21,7 @@ import { monaco } from '../monaco_imports';
 
 import { WorkerProxyService, EditorStateService } from './services';
 import { ID } from './constants';
-import { PainlessContext, Field } from './types';
+import { PainlessContext, PainlessAutocompleteField } from './types';
 import { PainlessWorker } from './worker';
 import { PainlessCompletionAdapter } from './completion_adapter';
 
@@ -38,7 +38,10 @@ monaco.languages.onLanguage(ID, async () => {
   workerProxyService.setup();
 });
 
-export const getSuggestionProvider = (context: PainlessContext, fields?: Field[]) => {
+export const getSuggestionProvider = (
+  context: PainlessContext,
+  fields?: PainlessAutocompleteField[]
+) => {
   editorStateService.setup(context, fields);
 
   return new PainlessCompletionAdapter(worker, editorStateService);
