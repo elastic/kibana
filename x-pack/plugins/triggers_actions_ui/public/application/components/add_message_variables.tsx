@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '../../types';
+import { templateActionVariable } from '../lib';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -41,9 +42,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       >
         <>
           <EuiText size="m" data-test-subj={`variableMenuButton-${i}-templated-name`}>
-            {variable.useWithTripleBracesInTemplates
-              ? `{{{${variable.name}}}}`
-              : `{{${variable.name}}}`}
+            {templateActionVariable(variable)}
           </EuiText>
           <EuiText size="m" color="subdued">
             <div className="euiTextColor--subdued">{variable.description}</div>

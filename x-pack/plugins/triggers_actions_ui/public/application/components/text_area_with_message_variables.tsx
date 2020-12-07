@@ -8,6 +8,7 @@ import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import './add_message_variables.scss';
 import { AddMessageVariables } from './add_message_variables';
 import { ActionVariable } from '../../types';
+import { templateActionVariable } from '../lib';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -30,8 +31,8 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
 
-  const onSelectMessageVariable = ({ name, useWithTripleBracesInTemplates }: ActionVariable) => {
-    const templatedVar = useWithTripleBracesInTemplates ? `{{{${name}}}}` : `{{${name}}}`;
+  const onSelectMessageVariable = (variable: ActionVariable) => {
+    const templatedVar = templateActionVariable(variable);
     const startPosition = currentTextElement?.selectionStart ?? 0;
     const endPosition = currentTextElement?.selectionEnd ?? 0;
     const newValue =

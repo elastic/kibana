@@ -12,6 +12,7 @@ import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
 
 import { AddMessageVariables } from './add_message_variables';
 import { ActionVariable } from '../../types';
+import { templateActionVariable } from '../lib';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -43,8 +44,8 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
 
   const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
 
-  const onSelectMessageVariable = ({ name, useWithTripleBracesInTemplates }: ActionVariable) => {
-    const templatedVar = useWithTripleBracesInTemplates ? `{{{${name}}}}` : `{{${name}}}`;
+  const onSelectMessageVariable = (variable: ActionVariable) => {
+    const templatedVar = templateActionVariable(variable);
     let newValue = '';
     if (cursorPosition) {
       const cursor = cursorPosition.getCursor();
