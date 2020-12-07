@@ -23,7 +23,12 @@ describe('get_query_filter_from_type_value', () => {
     });
     const expected: QueryFilterType = [
       { term: { list_id: 'list-123' } },
-      { terms: { ip: ['127.0.0.1'] } },
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
+        },
+      },
     ];
     expect(queryFilter).toEqual(expected);
   });
@@ -36,7 +41,15 @@ describe('get_query_filter_from_type_value', () => {
     });
     const expected: QueryFilterType = [
       { term: { list_id: 'list-123' } },
-      { terms: { ip: ['127.0.0.1', '127.0.0.2'] } },
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            { term: { ip: { _name: '0.0', value: '127.0.0.1' } } },
+            { term: { ip: { _name: '1.0', value: '127.0.0.2' } } },
+          ],
+        },
+      },
     ];
     expect(queryFilter).toEqual(expected);
   });
@@ -49,7 +62,12 @@ describe('get_query_filter_from_type_value', () => {
     });
     const expected: QueryFilterType = [
       { term: { list_id: 'list-123' } },
-      { terms: { keyword: ['host-name-1'] } },
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [{ term: { keyword: { _name: '0.0', value: 'host-name-1' } } }],
+        },
+      },
     ];
     expect(queryFilter).toEqual(expected);
   });
@@ -62,7 +80,15 @@ describe('get_query_filter_from_type_value', () => {
     });
     const expected: QueryFilterType = [
       { term: { list_id: 'list-123' } },
-      { terms: { keyword: ['host-name-1', 'host-name-2'] } },
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            { term: { keyword: { _name: '0.0', value: 'host-name-1' } } },
+            { term: { keyword: { _name: '1.0', value: 'host-name-2' } } },
+          ],
+        },
+      },
     ];
     expect(queryFilter).toEqual(expected);
   });
@@ -75,18 +101,43 @@ describe('get_query_filter_from_type_value', () => {
     });
     const expected: QueryFilterType = [
       { term: { list_id: 'list-123' } },
-      { terms: { keyword: [] } },
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              match_none: {
+                _name: 'empty',
+              },
+            },
+          ],
+        },
+      },
     ];
     expect(queryFilter).toEqual(expected);
   });
 
-  test('it returns an empty ip given an empty value', () => {
+  test('it returns an empty object given an empty value', () => {
     const queryFilter = getQueryFilterFromTypeValue({
       listId: 'list-123',
       type: 'ip',
       value: [],
     });
-    const expected: QueryFilterType = [{ term: { list_id: 'list-123' } }, { terms: { ip: [] } }];
+    const expected: QueryFilterType = [
+      { term: { list_id: 'list-123' } },
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              match_none: {
+                _name: 'empty',
+              },
+            },
+          ],
+        },
+      },
+    ];
     expect(queryFilter).toEqual(expected);
   });
 });
