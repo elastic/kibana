@@ -17,17 +17,18 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
 import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // @ts-ignore not TS yet
 import * as KibanaServer from './kibana_server';
 
-export function EsArchiverProvider({ getService, hasService }: FtrProviderContext): EsArchiver {
+export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiver {
   const config = getService('config');
   const client = getService('legacyEs');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   if (!config.get('esArchiver')) {
     throw new Error(`esArchiver can't be used unless you specify it's config in your config file`);
@@ -39,17 +40,15 @@ export function EsArchiverProvider({ getService, hasService }: FtrProviderContex
     client,
     dataDir,
     log,
-    kibanaUrl: formatUrl(config.get('servers.kibana')),
+    kbnClient: kibanaServer,
   });
 
-  if (hasService('kibanaServer')) {
-    KibanaServer.extendEsArchiver({
-      esArchiver,
-      kibanaServer: getService('kibanaServer'),
-      retry: getService('retry'),
-      defaults: config.get('uiSettings.defaults'),
-    });
-  }
+  KibanaServer.extendEsArchiver({
+    esArchiver,
+    kibanaServer,
+    retry,
+    defaults: config.get('uiSettings.defaults'),
+  });
 
   return esArchiver;
 }

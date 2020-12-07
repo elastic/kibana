@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { eqlRule, eqlSequenceRule, indexPatterns } from '../objects/rule';
 
 import {
@@ -79,11 +80,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = eqlRule.referenceUrls.join('');
 const expectedFalsePositives = eqlRule.falsePositivesExamples.join('');
 const expectedTags = eqlRule.tags.join('');
-const expectedMitre = eqlRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
+const expectedMitre = formatMitreAttackDescription(eqlRule.mitre);
 const expectedNumberOfRules = 1;
 const expectedNumberOfAlerts = 7;
 const expectedNumberOfSequenceAlerts = 1;
