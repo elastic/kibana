@@ -29,10 +29,15 @@ export const InfraMetadataOSRT = rt.partial({
   name: rt.string,
   platform: rt.string,
   version: rt.string,
+  build: rt.string,
 });
 
 export const InfraMetadataHostRT = rt.partial({
   name: rt.string,
+  hostname: rt.string,
+  id: rt.string,
+  ip: rt.array(rt.string),
+  mac: rt.array(rt.string),
   os: InfraMetadataOSRT,
   architecture: rt.string,
   containerized: rt.boolean,
@@ -43,25 +48,40 @@ export const InfraMetadataInstanceRT = rt.partial({
   name: rt.string,
 });
 
+export const InfraMetadataAccountRT = rt.partial({
+  id: rt.string,
+  name: rt.string,
+});
+
 export const InfraMetadataProjectRT = rt.partial({
   id: rt.string,
 });
 
 export const InfraMetadataMachineRT = rt.partial({
   interface: rt.string,
+  type: rt.string,
 });
 
 export const InfraMetadataCloudRT = rt.partial({
   instance: InfraMetadataInstanceRT,
   provider: rt.string,
+  account: InfraMetadataAccountRT,
   availability_zone: rt.string,
   project: InfraMetadataProjectRT,
   machine: InfraMetadataMachineRT,
+  region: rt.string,
+});
+
+export const InfraMetadataAgentRT = rt.partial({
+  id: rt.string,
+  version: rt.string,
+  policy: rt.string,
 });
 
 export const InfraMetadataInfoRT = rt.partial({
   cloud: InfraMetadataCloudRT,
   host: InfraMetadataHostRT,
+  agent: InfraMetadataAgentRT,
 });
 
 const InfraMetadataRequiredRT = rt.type({

@@ -349,7 +349,6 @@ exports[`extend index management ilm summary extension should return extension w
             panelPaddingSize="m"
           >
             <EuiOutsideClickDetector
-              isDisabled={true}
               onOutsideClick={[Function]}
             >
               <div
@@ -598,7 +597,6 @@ exports[`extend index management ilm summary extension should return extension w
                     panelPaddingSize="m"
                   >
                     <EuiOutsideClickDetector
-                      isDisabled={true}
                       onOutsideClick={[Function]}
                     >
                       <div
