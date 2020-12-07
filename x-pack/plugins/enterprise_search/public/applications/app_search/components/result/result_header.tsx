@@ -20,7 +20,7 @@ export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta }) => {
   const showEngineLabel: boolean = resultMeta.id !== resultMeta.scopedId;
 
   return (
-    <div className="appSearchResultHeader">
+    <header className="appSearchResultHeader">
       {showScore && (
         <div className="appSearchResultHeader__column">
           <ResultHeaderItem
@@ -43,6 +43,6 @@ export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta }) => {
         )}
         <ResultHeaderItem data-test-subj="ResultId" field="id" value={resultMeta.id} type="id" />
       </div>
-    </div>
+    </header>
   );
 };

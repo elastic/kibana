@@ -41,9 +41,9 @@ export const Result: React.FC<Props> = ({ result, showScore }) => {
         defaultMessage: 'View document details',
       })}
     >
-      <div className="appSearchResult__contentWrap">
+      <article className="appSearchResult__content">
         <ResultHeader resultMeta={resultMeta} showScore={!!showScore} />
-        <div className="appSearchResult__contentInner">
+        <div className="appSearchResult__body">
           {resultFields
             .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
             .map(([field, value]: [string, FieldValue]) => (
@@ -51,19 +51,20 @@ export const Result: React.FC<Props> = ({ result, showScore }) => {
             ))}
         </div>
         {numResults > RESULT_CUTOFF && !isOpen && (
-          <div className="appSearchResult__hiddenFieldsIndicator">
+          <footer className="appSearchResult__hiddenFieldsIndicator">
             {i18n.translate('xpack.enterpriseSearch.appSearch.result.numberOfAdditionalFields', {
               defaultMessage: '{numberOfAdditionalFields} more fields',
               values: {
                 numberOfAdditionalFields: numResults - RESULT_CUTOFF,
               },
             })}
-          </div>
+          </footer>
         )}
-      </div>
+      </article>
       {numResults > RESULT_CUTOFF && (
         <button
-          className="appSearchResult__toggleExpandButton"
+          type="button"
+          className="appSearchResult__actionButton"
           onClick={() => setIsOpen(!isOpen)}
           aria-label={
             isOpen
