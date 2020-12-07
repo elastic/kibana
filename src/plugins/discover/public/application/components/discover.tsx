@@ -21,8 +21,6 @@ import React, { useState, useRef } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiDataGrid,
-  EuiDataGridProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHideFor,

@@ -4,7 +4,7 @@
   height: 100%;
   overflow: hidden;
 }
-.dscTable__footer {
+.dscDiscoverGrid__footer {
   background-color: $euiColorLightShade;
   padding: $euiSize / 2 $euiSize;
   margin-top: $euiSize / 4;
@@ -13,41 +13,6 @@
 
 .dscTable__flyoutHeader {
   white-space: nowrap;
-}
-
-.dscEuiDataGridRowCell .euiDataGridRowCell {
-  align-items: start;
-}
-
-.dscEuiDataGridRowCellFilter {
-  display: none;
-  text-align: right;
-}
-
-.dscEuiDataGridRowCellBtn {
-  text-align: right;
-  padding: 0 2px;
-  min-height: auto;
-  min-width: auto;
-  transition: none;
-  -webkit-transition: none;
-  -o-transition: none;
-}
-
-.dscValue {
-  position: relative;
-}
-
-.dscValue .dscValueFilter {
-  background: $euiColorLightShade;
-}
-
-.euiDataGridRowCell:hover .dscEuiDataGridRowCellFilter {
-  display: flex;
-}
-
-.euiDataGrid__verticalScroll {
-  will-change: transform;
 }
 
 // We only truncate if the cell is not a control column.
@@ -79,4 +44,22 @@
   text-align: center;
   height: 100%;
   width: 100%;
+}
+
+.dscApp .dscFormatSource {
+  word-break: break-word;
+}
+
+.dscFormatSource__title {
+  background-color: transparentize(shade($euiColorPrimary, 20%), 0.9);
+  border-radius: $euiBorderRadius / 2;
+  color: $euiTextColor;
+  padding: ($euiSizeXS / 2) $euiSizeXS;
+  margin-right: $euiSizeXS;
+  word-break: normal;
+  display: inline;
+}
+
+.dscFormatSource__description {
+  display: inline;
 }

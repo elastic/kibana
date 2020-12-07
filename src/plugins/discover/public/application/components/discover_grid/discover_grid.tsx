@@ -222,7 +222,7 @@ export const DiscoverGrid = ({
         />
 
         {showDisclaimer && (
-          <p className="dscTable__footer">
+          <p className="dscDiscoverGrid__footer">
             <FormattedMessage
               id="discover.howToSeeOtherMatchingDocumentsDescriptionGrid"
               defaultMessage="These are the first {sampleSize} documents matching your search, refine your search to see others."

@@ -83,24 +83,6 @@ discover-app {
   padding: $euiSizeS $euiSizeS 0 $euiSizeS;
 }
 
-.dscApp .dscFormatSource {
-  word-break: break-word;
-}
-
-.dscFormatSource__title {
-  background-color: transparentize(shade($euiColorPrimary, 20%), 0.9);
-  border-radius: $euiBorderRadius / 2;
-  color: $euiTextColor;
-  padding: ($euiSizeXS / 2) $euiSizeXS;
-  margin-right: $euiSizeXS;
-  word-break: normal;
-  display: inline;
-}
-
-.dscFormatSource__description {
-  display: inline;
-}
-
 .dscTable {
   // SASSTODO: add a monospace modifier to the doc-table component
   .kbnDocTable__row {
