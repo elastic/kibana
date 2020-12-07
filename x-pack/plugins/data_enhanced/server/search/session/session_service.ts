@@ -5,6 +5,7 @@
  */
 
 import moment, { Moment } from 'moment';
+import { orderBy } from 'lodash';
 import { from, Observable } from 'rxjs';
 import { first, switchMap } from 'rxjs/operators';
 import {
@@ -35,6 +36,7 @@ import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
 
+const INMEM_MAX_SESSIONS = 10000;
 const DEFAULT_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
 export const INMEM_TRACKING_INTERVAL = 10 * 1000;
 export const INMEM_TRACKING_TIMEOUT_SEC = 60;
@@ -93,6 +95,7 @@ export class BackgroundSessionService implements ISessionService {
       .map((sessionId) => `"${sessionId}"`)
       .join(' | ');
     const res = await this.internalSavedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
+      perPage: INMEM_MAX_SESSIONS,
       type: BACKGROUND_SESSION_TYPE,
       search: activeMappingIds,
       searchFields: ['sessionId'],
@@ -104,6 +107,27 @@ export class BackgroundSessionService implements ISessionService {
 
   private clearSessions = () => {
     const curTime = moment();
+
+    // Drop old items if map size exceeds max.
+    if (this.sessionSearchMap.size > INMEM_MAX_SESSIONS) {
+      const sortedSessionIds = orderBy(
+        Array.from(this.sessionSearchMap.keys()).map((sessionId) => {
+          return {
+            sessionId,
+            insertTime: this.sessionSearchMap.get(sessionId)!.insertTime,
+          };
+        }),
+        ['insertTime'],
+        ['asc']
+      );
+
+      while (this.sessionSearchMap.size > INMEM_MAX_SESSIONS) {
+        const { sessionId } = sortedSessionIds.shift()!;
+        this.logger.warn(`clearSessions | Map full | Dropping ${sessionId}`);
+        this.sessionSearchMap.delete(sessionId);
+      }
+    }
+
     this.sessionSearchMap.forEach((sessionInfo, sessionId) => {
       if (
         moment.duration(curTime.diff(sessionInfo.insertTime)).asSeconds() >
