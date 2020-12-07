@@ -31,7 +31,6 @@ export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
   readonly attributesToExcludeFromAAD?: ReadonlySet<string>;
-  readonly allowPredefinedID?: boolean;
 }
 
 /**
@@ -143,25 +142,6 @@ export class EncryptedSavedObjectsService {
    */
   public isRegistered(type: string) {
     return this.typeDefinitions.has(type);
-  }
-
-  /**
-   * Checks whether ID can be specified for the provided saved object.
-   *
-   * If the type isn't registered as an encrypted saved object, or when overwriting an existing
-   * saved object with a version specified, this will return "true".
-   *
-   * @param type Saved object type.
-   * @param version Saved object version number which changes on each successful write operation.
-   * Can be used in conjunction with `overwrite` for implementing optimistic concurrency
-   * control.
-   * @param overwrite Overwrite existing documents.
-   */
-  public canSpecifyID(type: string, version?: string, overwrite?: boolean) {
-    const typeDefinition = this.typeDefinitions.get(type);
-    return (
-      typeDefinition === undefined || typeDefinition.allowPredefinedID || !!(version && overwrite)
-    );
   }
 
   /**

@@ -5,45 +5,43 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { ThemeProvider } from 'styled-components';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { mount } from 'enzyme';
 import '../../../../common/mock/formatted_relative';
-
-import { Note } from '../../../../common/lib/note';
 
 import { NoteCards } from '.';
 import { TimelineStatus } from '../../../../../common/types/timeline';
+import { TestProviders } from '../../../../common/mock';
+
+const getNotesByIds = () => ({
+  abc: {
+    created: new Date(),
+    id: 'abc',
+    lastEdit: null,
+    note: 'a fake note',
+    saveObjectId: null,
+    user: 'elastic',
+    version: null,
+  },
+  def: {
+    created: new Date(),
+    id: 'def',
+    lastEdit: null,
+    note: 'another fake note',
+    saveObjectId: null,
+    user: 'elastic',
+    version: null,
+  },
+});
+
+jest.mock('../../../../common/hooks/use_selector', () => ({
+  useDeepEqualSelector: jest.fn().mockReturnValue(getNotesByIds()),
+}));
 
 describe('NoteCards', () => {
   const noteIds = ['abc', 'def'];
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
-
-  const getNotesByIds = (_: string[]): Note[] => [
-    {
-      created: new Date(),
-      id: 'abc',
-      lastEdit: null,
-      note: 'a fake note',
-      saveObjectId: null,
-      user: 'elastic',
-      version: null,
-    },
-    {
-      created: new Date(),
-      id: 'def',
-      lastEdit: null,
-      note: 'another fake note',
-      saveObjectId: null,
-      user: 'elastic',
-      version: null,
-    },
-  ];
 
   const props = {
     associateNote: jest.fn(),
-    getNotesByIds,
-    getNewNoteId: jest.fn(),
     noteIds,
     showAddNote: true,
     status: TimelineStatus.active,
@@ -52,10 +50,10 @@ describe('NoteCards', () => {
   };
 
   test('it renders the notes column when noteIds are specified', () => {
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+    const wrapper = mount(
+      <TestProviders>
         <NoteCards {...props} />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="notes"]').exists()).toEqual(true);
@@ -63,20 +61,20 @@ describe('NoteCards', () => {
 
   test('it does NOT render the notes column when noteIds are NOT specified', () => {
     const testProps = { ...props, noteIds: [] };
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+    const wrapper = mount(
+      <TestProviders>
         <NoteCards {...testProps} />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="notes"]').exists()).toEqual(false);
   });
 
   test('renders note cards', () => {
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+    const wrapper = mount(
+      <TestProviders>
         <NoteCards {...props} />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(
@@ -86,14 +84,14 @@ describe('NoteCards', () => {
         .find('.euiMarkdownFormat')
         .first()
         .text()
-    ).toEqual(getNotesByIds(noteIds)[0].note);
+    ).toEqual(getNotesByIds().abc.note);
   });
 
   test('it shows controls for adding notes when showAddNote is true', () => {
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+    const wrapper = mount(
+      <TestProviders>
         <NoteCards {...props} />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="add-note"]').exists()).toEqual(true);
@@ -102,10 +100,10 @@ describe('NoteCards', () => {
   test('it does NOT show controls for adding notes when showAddNote is false', () => {
     const testProps = { ...props, showAddNote: false };
 
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
+    const wrapper = mount(
+      <TestProviders>
         <NoteCards {...testProps} />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="add-note"]').exists()).toEqual(false);
