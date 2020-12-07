@@ -35,11 +35,24 @@ export interface Dimensions {
   splitRow?: SchemaConfig[];
 }
 
+export interface ColumnWidthData {
+  colIndex: number;
+  width: number;
+}
+
 export interface TableVisUiState {
   sort: {
     columnIndex: number | null;
     direction: 'asc' | 'desc' | null;
   };
+  colWidth: ColumnWidthData[];
+}
+
+export interface TableVisUseUiStateProps {
+  columnsWidth: TableVisUiState['colWidth'];
+  sort: TableVisUiState['sort'];
+  setSort: (s?: TableVisUiState['sort']) => void;
+  setColumnsWidth: (column: ColumnWidthData) => void;
 }
 
 export interface TableVisParams {

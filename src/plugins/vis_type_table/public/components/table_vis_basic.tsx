@@ -18,29 +18,34 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiDataGrid, EuiDataGridSorting, EuiTitle } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridProps, EuiDataGridSorting, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { createTableVisCell } from './table_vis_cell';
 import { Table } from '../table_vis_response_handler';
-import { TableVisConfig, TableVisUiState } from '../types';
+import { TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { useFormattedColumnsAndRows, usePagination } from '../utils';
 import { TableVisControls } from './table_vis_controls';
 import { createGridColumns } from './table_vis_columns';
 
 interface TableVisBasicProps {
   fireEvent: IInterpreterRenderHandlers['event'];
-  setSort: (s?: TableVisUiState['sort']) => void;
-  sort: TableVisUiState['sort'];
   table: Table;
   visConfig: TableVisConfig;
   title?: string;
+  uiStateProps: TableVisUseUiStateProps;
 }
 
 export const TableVisBasic = memo(
-  ({ fireEvent, setSort, sort, table, visConfig, title }: TableVisBasicProps) => {
+  ({
+    fireEvent,
+    table,
+    visConfig,
+    title,
+    uiStateProps: { columnsWidth, sort, setColumnsWidth, setSort },
+  }: TableVisBasicProps) => {
     const { columns, rows } = useFormattedColumnsAndRows(table, visConfig);
 
     // custom sorting is in place until the EuiDataGrid sorting gets rid of flaws -> https://github.com/elastic/eui/issues/4108
@@ -59,12 +64,7 @@ export const TableVisBasic = memo(
     ]);
 
     // Columns config
-    const gridColumns = useMemo(() => createGridColumns(table, columns, sortedRows, fireEvent), [
-      table,
-      columns,
-      sortedRows,
-      fireEvent,
-    ]);
+    const gridColumns = createGridColumns(table, columns, columnsWidth, sortedRows, fireEvent);
 
     // Pagination config
     const pagination = usePagination(visConfig);
@@ -97,6 +97,17 @@ export const TableVisBasic = memo(
       i18n.translate('visTypeTable.defaultAriaLabel', {
         defaultMessage: 'Data table visualization',
       });
+
+    const onColumnResize: EuiDataGridProps['onColumnResize'] = useCallback(
+      ({ columnId, width }) => {
+        const colIndex = columns.findIndex((c) => c.id === columnId);
+        setColumnsWidth({
+          colIndex,
+          width,
+        });
+      },
+      [columns, setColumnsWidth]
+    );
 
     return (
       <>
@@ -142,6 +153,7 @@ export const TableVisBasic = memo(
           }
           pagination={pagination}
           sorting={{ columns: sortingColumns, onSort }}
+          onColumnResize={onColumnResize}
         />
       </>
     );

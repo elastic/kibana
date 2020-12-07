@@ -28,7 +28,7 @@ import { TableVisConfig } from '../types';
 import { TableContext } from '../table_vis_response_handler';
 import { TableVisBasic } from './table_vis_basic';
 import { TableVisSplit } from './table_vis_split';
-import { useSort } from '../utils';
+import { useUiState } from '../utils';
 
 interface TableVisualizationComponentProps {
   core: CoreStart;
@@ -47,7 +47,7 @@ const TableVisualizationComponent = ({
     handlers.done();
   }, [handlers]);
 
-  const { sort, setSort } = useSort(handlers.uiState);
+  const uiStateProps = useUiState(handlers.uiState);
 
   const className = classNames('tbvChart', {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -63,18 +63,16 @@ const TableVisualizationComponent = ({
               <TableVisBasic
                 fireEvent={handlers.event}
                 table={table}
-                sort={sort}
-                setSort={setSort}
                 visConfig={visConfig}
+                uiStateProps={uiStateProps}
               />
             </div>
           ) : (
             <TableVisSplit
               fireEvent={handlers.event}
               tables={tables}
-              sort={sort}
-              setSort={setSort}
               visConfig={visConfig}
+              uiStateProps={uiStateProps}
             />
           )}
         </div>

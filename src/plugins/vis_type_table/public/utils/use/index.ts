@@ -19,4 +19,4 @@
 
 export * from './use_formatted_columns';
 export * from './use_pagination';
-export * from './use_sort';
+export * from './use_ui_state';
