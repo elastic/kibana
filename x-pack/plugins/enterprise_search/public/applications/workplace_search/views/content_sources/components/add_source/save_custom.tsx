@@ -6,8 +6,6 @@
 
 import React from 'react';
 
-import { Link } from 'react-router-dom';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +19,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
+import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { CredentialItem } from '../../../../components/shared/credential_item';
 import { LicenseBadge } from '../../../../components/shared/license_badge';
 
@@ -68,9 +67,9 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                   <br />
                   Be sure to copy your API keys below.
                   <br />
-                  <Link to={getSourcesPath(SOURCES_PATH, isOrganization)}>
-                    <EuiLink>Return to Sources</EuiLink>
-                  </Link>
+                  <EuiLinkTo to={getSourcesPath(SOURCES_PATH, isOrganization)}>
+                    Return to Sources
+                  </EuiLinkTo>
                 </EuiTextAlign>
               </EuiText>
             </EuiFlexItem>
@@ -119,9 +118,11 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
               <EuiText color="secondary" size="s">
                 <p>
                   Use{' '}
-                  <Link to={getContentSourcePath(SOURCE_DISPLAY_SETTINGS_PATH, id, isOrganization)}>
-                    <EuiLink>Display Settings</EuiLink>
-                  </Link>{' '}
+                  <EuiLinkTo
+                    to={getContentSourcePath(SOURCE_DISPLAY_SETTINGS_PATH, id, isOrganization)}
+                  >
+                    Display Settings
+                  </EuiLinkTo>{' '}
                   to customize how your documents will appear within your search results. Workplace
                   Search will use fields in alphabetical order by default.
                 </p>

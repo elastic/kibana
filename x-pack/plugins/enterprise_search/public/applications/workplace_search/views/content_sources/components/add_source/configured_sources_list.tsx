@@ -6,10 +6,7 @@
 
 import React from 'react';
 
-import { Link } from 'react-router-dom';
-
 import {
-  EuiButtonEmpty,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
 import { SourceDataItem } from '../../../../types';
 import { getSourcesPath } from '../../../../routes';
@@ -90,9 +88,9 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                 </EuiFlexItem>
                 {(!isOrganization || (isOrganization && !accountContextOnly)) && (
                   <EuiFlexItem grow={false}>
-                    <Link to={`${getSourcesPath(addPath, isOrganization)}/connect`}>
-                      <EuiButtonEmpty>Connect</EuiButtonEmpty>
-                    </Link>
+                    <EuiButtonEmptyTo to={`${getSourcesPath(addPath, isOrganization)}/connect`}>
+                      Connect
+                    </EuiButtonEmptyTo>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
