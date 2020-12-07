@@ -15,17 +15,20 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'linux.advanced.agent.connection_delay',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'How long to wait for agent connectivity before sending first policy reply, in seconds. Default: 60.',
   },
   {
     key: 'linux.advanced.artifacts.global.base_url',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'Base URL from which to download global artifact manifests. Default is https://artifacts.security.elastic.co.',
   },
   {
     key: 'linux.advanced.artifacts.global.manifest_relative_url',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'Relative URL from which to download global artifact manifests. Default is /downloads/endpoint/manifest/artifacts-<version>.zip.',
   },
   {
     key: 'linux.advanced.artifacts.global.ca_cert',
@@ -85,17 +88,19 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'mac.advanced.agent.connection_delay',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'How long to wait for agent connectivity before sending first policy reply, in seconds. Default: 60.',
   },
   {
     key: 'mac.advanced.artifacts.global.base_url',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'URL from which to download global artifact manifests.',
   },
   {
     key: 'mac.advanced.artifacts.global.manifest_relative_url',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'Relative URL from which to download global artifact manifests. Default is /downloads/endpoint/manifest/artifacts-<version>.zip.',
   },
   {
     key: 'mac.advanced.artifacts.global.ca_cert',
@@ -163,11 +168,6 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: '',
   },
   {
-    key: 'mac.advanced.kernel.harden',
-    first_supported_version: '7.11',
-    documentation: '',
-  },
-  {
     key: 'mac.advanced.kernel.process',
     first_supported_version: '7.11',
     documentation: '',
@@ -185,17 +185,19 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   {
     key: 'windows.advanced.agent.connection_delay',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'How long to wait for agent connectivity before sending first policy reply, in seconds. Default: 60.',
   },
   {
     key: 'windows.advanced.artifacts.global.base_url',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation: 'URL from which to download global artifact manifests.',
   },
   {
     key: 'windows.advanced.artifacts.global.manifest_relative_url',
     first_supported_version: '7.11',
-    documentation: '',
+    documentation:
+      'Relative URL from which to download global artifact manifests. Default is /downloads/endpoint/manifest/artifacts-<version>.zip.',
   },
   {
     key: 'windows.advanced.artifacts.global.ca_cert',
@@ -269,11 +271,6 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.kernel.connect',
-    first_supported_version: '7.11',
-    documentation: '',
-  },
-  {
-    key: 'windows.advanced.kernel.harden',
     first_supported_version: '7.11',
     documentation: '',
   },
