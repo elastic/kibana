@@ -71,7 +71,7 @@ async function searchLatency({
       size: 0,
       query: { bool: { filter } },
       aggs: {
-        response_times: {
+        latency: {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: intervalString,
@@ -129,7 +129,7 @@ export async function getLatencyCharts({
     overallAvgDuration:
       response.aggregations.overall_avg_duration.value || null,
     latency: convertLatencyBucketsToCoordinates(
-      response.aggregations.response_times.buckets
+      response.aggregations.latency.buckets
     ),
   };
 }

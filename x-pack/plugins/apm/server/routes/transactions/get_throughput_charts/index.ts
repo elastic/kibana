@@ -75,7 +75,7 @@ async function searchThroughput({
       size: 0,
       query: { bool: { filter } },
       aggs: {
-        transaction_results: {
+        throughput: {
           terms: { field: TRANSACTION_RESULT, missing: '' },
           aggs: {
             timeseries: {
@@ -128,8 +128,7 @@ export async function getThroughputCharts({
 
   return {
     throughput: getThroughputBuckets({
-      transactionResultBuckets:
-        response.aggregations.transaction_results.buckets,
+      throughputResultBuckets: response.aggregations.throughput.buckets,
       bucketSize,
       durationAsMinutes,
     }),

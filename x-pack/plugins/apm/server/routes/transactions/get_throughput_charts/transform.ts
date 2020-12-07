@@ -8,18 +8,18 @@ import { sortBy } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { ThroughputChartsResponse } from '.';
 
-type TransactionResultBuckets = Required<ThroughputChartsResponse>['aggregations']['transaction_results']['buckets'];
+type ThroughputResultBuckets = Required<ThroughputChartsResponse>['aggregations']['throughput']['buckets'];
 
 export function getThroughputBuckets({
-  transactionResultBuckets = [],
+  throughputResultBuckets = [],
   bucketSize,
   durationAsMinutes,
 }: {
-  transactionResultBuckets: TransactionResultBuckets;
+  throughputResultBuckets?: ThroughputResultBuckets;
   bucketSize: number;
   durationAsMinutes: number;
 }) {
-  const buckets = transactionResultBuckets.map(
+  const buckets = throughputResultBuckets.map(
     ({ key: resultKey, timeseries }) => {
       const dataPoints = timeseries.buckets.map((bucket) => {
         return {
