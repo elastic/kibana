@@ -9,6 +9,8 @@ import { AlertingSetup, StackAlertsStartDeps } from '../types';
 import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoThreshold } from './geo_threshold';
 import { register as registerGeoContainment } from './geo_containment';
+import { LicensingPluginSetup } from '../../../licensing/server';
+import { STACK_ALERTS_FEATURE_ID } from '../../common';
 
 interface RegisterAlertTypesParams {
   logger: Logger;
@@ -16,8 +18,16 @@ interface RegisterAlertTypesParams {
   alerts: AlertingSetup;
 }
 
-export function registerBuiltInAlertTypes(params: RegisterAlertTypesParams) {
-  registerIndexThreshold(params);
-  registerGeoThreshold(params);
-  registerGeoContainment(params);
+export function registerBuiltInAlertTypes(
+  params: RegisterAlertTypesParams & { licensing: LicensingPluginSetup }
+) {
+  params.licensing.license$.subscribe((license) => {
+    const { state } = license.check(STACK_ALERTS_FEATURE_ID, 'gold');
+    const hasGoldLicense = state === 'valid';
+    if (hasGoldLicense) {
+      registerGeoThreshold(params);
+      registerGeoContainment(params);
+    }
+    registerIndexThreshold(params);
+  });
 }

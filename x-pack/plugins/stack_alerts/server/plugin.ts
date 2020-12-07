@@ -20,7 +20,7 @@ export class AlertingBuiltinsPlugin
 
   public async setup(
     core: CoreSetup<StackAlertsStartDeps>,
-    { alerts, features }: StackAlertsDeps
+    { alerts, features, licensing }: StackAlertsDeps
   ): Promise<void> {
     features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
 
@@ -30,6 +30,7 @@ export class AlertingBuiltinsPlugin
         .getStartServices()
         .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
       alerts,
+      licensing,
     });
   }
 
