@@ -127,15 +127,6 @@ describe('getAll', () => {
       Array [
         Object {
           "body": Object {
-            "aggs": Object {
-              "locations": Object {
-                "terms": Object {
-                  "field": "observer.geo.name",
-                  "missing": "N/A",
-                  "size": 1000,
-                },
-              },
-            },
             "query": Object {
               "bool": Object {
                 "filter": Array [
@@ -205,15 +196,6 @@ describe('getAll', () => {
       Array [
         Object {
           "body": Object {
-            "aggs": Object {
-              "locations": Object {
-                "terms": Object {
-                  "field": "observer.geo.name",
-                  "missing": "N/A",
-                  "size": 1000,
-                },
-              },
-            },
             "query": Object {
               "bool": Object {
                 "filter": Array [
@@ -283,15 +265,6 @@ describe('getAll', () => {
       Array [
         Object {
           "body": Object {
-            "aggs": Object {
-              "locations": Object {
-                "terms": Object {
-                  "field": "observer.geo.name",
-                  "missing": "N/A",
-                  "size": 1000,
-                },
-              },
-            },
             "query": Object {
               "bool": Object {
                 "filter": Array [
@@ -361,15 +334,6 @@ describe('getAll', () => {
       Array [
         Object {
           "body": Object {
-            "aggs": Object {
-              "locations": Object {
-                "terms": Object {
-                  "field": "observer.geo.name",
-                  "missing": "N/A",
-                  "size": 1000,
-                },
-              },
-            },
             "query": Object {
               "bool": Object {
                 "filter": Array [
@@ -444,15 +408,6 @@ describe('getAll', () => {
       Array [
         Object {
           "body": Object {
-            "aggs": Object {
-              "locations": Object {
-                "terms": Object {
-                  "field": "observer.geo.name",
-                  "missing": "N/A",
-                  "size": 1000,
-                },
-              },
-            },
             "query": Object {
               "bool": Object {
                 "filter": Array [

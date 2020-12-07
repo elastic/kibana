@@ -19,7 +19,6 @@ export interface UptimeUrlParams {
   pagination?: string;
   filters: string;
   search: string;
-  selectedPingStatus: string;
   statusFilter: string;
   focusConnectorField?: boolean;
 }
@@ -32,7 +31,6 @@ const {
   DATE_RANGE_START,
   DATE_RANGE_END,
   SEARCH,
-  SELECTED_PING_LIST_STATUS,
   FILTERS,
   STATUS_FILTER,
 } = CLIENT_DEFAULTS;
@@ -73,13 +71,13 @@ export const getSupportedUrlParams = (params: {
     dateRangeEnd,
     filters,
     search,
-    selectedPingStatus,
     statusFilter,
     pagination,
     focusConnectorField,
   } = filteredParams;
 
   return {
+    pagination,
     absoluteDateRangeStart: parseAbsoluteDate(
       dateRangeStart || DATE_RANGE_START,
       ABSOLUTE_DATE_RANGE_START
@@ -95,10 +93,7 @@ export const getSupportedUrlParams = (params: {
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
     filters: filters || FILTERS,
     search: search || SEARCH,
-    selectedPingStatus:
-      selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
     statusFilter: statusFilter || STATUS_FILTER,
-    pagination,
     focusConnectorField: !!focusConnectorField,
   };
 };

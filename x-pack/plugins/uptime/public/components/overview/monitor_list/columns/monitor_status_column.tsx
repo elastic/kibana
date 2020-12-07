@@ -18,9 +18,9 @@ import {
   SHORT_TS_LOCALE,
 } from '../../../../../common/constants';
 
-import * as labels from '../translations';
 import { UptimeThemeContext } from '../../../../contexts';
 import { euiStyled } from '../../../../../../observability/public';
+import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
 
 interface MonitorListStatusColumnProps {
   status: string;
@@ -37,9 +37,9 @@ const StatusColumnFlexG = styled(EuiFlexGroup)`
 export const getHealthMessage = (status: string): string | null => {
   switch (status) {
     case STATUS.UP:
-      return labels.UP;
+      return STATUS_UP_LABEL;
     case STATUS.DOWN:
-      return labels.DOWN;
+      return STATUS_DOWN_LABEL;
     default:
       return null;
   }
