@@ -9,7 +9,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiImage,
   EuiLink,
   EuiSpacer,
