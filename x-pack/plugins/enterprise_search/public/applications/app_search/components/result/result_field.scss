@@ -1,6 +1,6 @@
 .appSearchResultField {
-  font-size: $euiSize * .875; // 14px
-  line-height: 1.5;
+  font-size: $euiFontSizeS;
+  line-height: $euiLineHeight;
   display: grid;
   grid-template-columns: calc(35% + #{$euiSize * 3.45} /*55px*/ ) 1.875 * $euiSize /*30px*/ 1fr;
   grid-gap: $euiSizeXS;
