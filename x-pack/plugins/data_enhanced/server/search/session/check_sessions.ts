@@ -23,7 +23,7 @@ export enum SearchStatus {
 
 async function checkAsyncId(client: ElasticsearchClient, logger: Logger, asyncId: string) {
   try {
-    const path = encodeURI(`/_async_search/get/${asyncId}`);
+    const path = encodeURI(`/_async_search/status/${asyncId}`);
     const response: ApiResponse<any> = await client.transport.request({
       path,
       method: 'GET',
@@ -40,13 +40,11 @@ async function checkAsyncId(client: ElasticsearchClient, logger: Logger, asyncId
       return SearchStatus.ERROR;
     }
   } catch (e) {
-    logger.error(e);
     return SearchStatus.ERROR;
   }
 }
 
 async function getSessionStatus(
-  session: SavedObjectsFindResult<BackgroundSessionSavedObjectAttributes>,
   searchStatuses: SearchStatus[]
 ): Promise<BackgroundSessionStatus | undefined> {
   if (searchStatuses.some((item) => item === SearchStatus.ERROR)) {
@@ -54,7 +52,7 @@ async function getSessionStatus(
   } else if (searchStatuses.every((item) => item === SearchStatus.COMPLETE)) {
     return BackgroundSessionStatus.COMPLETE;
   } else {
-    // Strill running
+    // Still running
     return undefined;
   }
 }
@@ -74,36 +72,38 @@ export async function checkBackgoundSessions(
       }
     );
 
-    logger.debug(`Found ${runningBackgroundSearchesResponse.total} running background sessios`);
+    logger.debug(`Found ${runningBackgroundSearchesResponse.total} running sessios`);
 
     const updatedSessions = new Array<
       SavedObjectsFindResult<BackgroundSessionSavedObjectAttributes>
     >();
 
-    await runningBackgroundSearchesResponse.saved_objects.map(async (session) => {
-      const searchIds = Object.values(session.attributes.idMapping);
-      const searchStatuses = await Promise.all(
-        searchIds.map(async (searchId: string) => {
-          return await checkAsyncId(client, logger, searchId);
-        })
-      );
+    await Promise.all(
+      runningBackgroundSearchesResponse.saved_objects.map(async (session) => {
+        const searchIds = Object.values(session.attributes.idMapping);
+        const searchStatuses = await Promise.all(
+          searchIds.map(async (searchId: string) => {
+            return await checkAsyncId(client, logger, searchId);
+          })
+        );
 
-      const sessionStatus = await getSessionStatus(session, searchStatuses);
-      if (sessionStatus) {
-        session.attributes.status = sessionStatus;
-        updatedSessions.push(session);
-      }
-    });
-
-    // If there's an error, we'll try again in the next iteration
-    const updatedResponse = await savedObjectsClient.bulkUpdate<BackgroundSessionSavedObjectAttributes>(
-      updatedSessions.filter((item) => item !== undefined) as Array<
-        SavedObjectsFindResult<BackgroundSessionSavedObjectAttributes>
-      >
+        const sessionStatus = await getSessionStatus(searchStatuses);
+        if (sessionStatus) {
+          session.attributes.status = sessionStatus;
+          updatedSessions.push(session);
+        }
+      })
     );
 
-    logger.debug(`Updated ${updatedResponse.saved_objects.length} background sessios`);
+    if (updatedSessions.length) {
+      // If there's an error, we'll try again in the next iteration
+      const updatedResponse = await savedObjectsClient.bulkUpdate<BackgroundSessionSavedObjectAttributes>(
+        updatedSessions
+      );
+      logger.debug(`Updated ${updatedResponse.saved_objects.length} background sessios`);
+    }
   } catch (err) {
+    logger.error(err);
     return;
   }
 }
