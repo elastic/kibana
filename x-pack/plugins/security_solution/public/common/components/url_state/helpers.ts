@@ -16,7 +16,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { inputsSelectors, State } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
+import { TimelineTabs, TimelineUrl } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
@@ -130,9 +130,10 @@ export const makeMapStateToProps = () => {
         ? {
             id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
             isOpen: flyoutTimeline.show,
+            activeTab: flyoutTimeline.activeTab,
             graphEventId: flyoutTimeline.graphEventId ?? '',
           }
-        : { id: '', isOpen: false, graphEventId: '' };
+        : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;

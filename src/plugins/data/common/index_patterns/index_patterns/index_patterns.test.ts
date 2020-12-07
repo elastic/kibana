@@ -191,15 +191,27 @@ describe('IndexPatterns', () => {
     expect(indexPatterns.refreshFields).toBeCalled();
   });
 
-  describe('createAndSave', () => {
-    test('creates "index pattern" saved object and and makes it the default index pattern', async () => {
-      const title = 'kibana-*';
-      indexPatterns.createSavedObject = jest.fn();
-      indexPatterns.setDefault = jest.fn();
-      await indexPatterns.createAndSave({ title });
-      expect(indexPatterns.createSavedObject).toBeCalled();
-      expect(indexPatterns.setDefault).toBeCalled();
+  test('find', async () => {
+    const search = 'kibana*';
+    const size = 10;
+    await indexPatterns.find('kibana*', size);
+
+    expect(savedObjectsClient.find).lastCalledWith({
+      type: 'index-pattern',
+      fields: ['title'],
+      search,
+      searchFields: ['title'],
+      perPage: size,
     });
+  });
+
+  test('createAndSave', async () => {
+    const title = 'kibana-*';
+    indexPatterns.createSavedObject = jest.fn();
+    indexPatterns.setDefault = jest.fn();
+    await indexPatterns.createAndSave({ title });
+    expect(indexPatterns.createSavedObject).toBeCalled();
+    expect(indexPatterns.setDefault).toBeCalled();
   });
 
   test('savedObjectToSpec', () => {
