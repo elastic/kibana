@@ -78,6 +78,7 @@ export interface DashboardContainerServices {
   overlays: CoreStart['overlays'];
   uiSettings: IUiSettingsClient;
   embeddable: EmbeddableStart;
+  hideWriteControls: boolean;
   uiActions: UiActionsStart;
   http: CoreStart['http'];
 }
@@ -106,7 +107,6 @@ const defaultCapabilities = {
   saveQuery: false,
   createShortUrl: false,
   hideWriteControls: true,
-  showWriteControls: false,
   mapsCapabilities: { save: false },
   visualizeCapabilities: { save: false },
 };

@@ -528,7 +528,6 @@ export function DashboardApp({
       },
     ]);
   }, [
-    dashboardCapabilities.showWriteControls,
     state.dashboardStateManager,
     data.query.timefilter.timefilter,
     core.overlays,

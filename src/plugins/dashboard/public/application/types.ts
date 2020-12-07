@@ -60,7 +60,6 @@ export interface DashboardCapabilities {
   visualizeCapabilities: { save: boolean };
   mapsCapabilities: { save: boolean };
   hideWriteControls: boolean;
-  showWriteControls: boolean;
   createShortUrl: boolean;
   saveQuery: boolean;
   createNew: boolean;

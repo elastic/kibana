@@ -226,6 +226,7 @@ export class DashboardPlugin
       };
       return {
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
+        hideWriteControls: deps.kibanaLegacy.dashboardConfig.getHideWriteControls(),
         notifications: coreStart.notifications,
         application: coreStart.application,
         uiSettings: coreStart.uiSettings,

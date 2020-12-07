@@ -50,8 +50,8 @@ export class DashboardContainerFactoryDefinition
   ) {}
 
   public isEditable = async () => {
-    const { application } = await this.getStartServices();
-    return !!application.capabilities.createNew && !!application.capabilities.showWriteControls;
+    const { application, hideWriteControls } = await this.getStartServices();
+    return !!application.capabilities.createNew && !hideWriteControls;
   };
 
   public readonly getDisplayName = () => {

@@ -24,11 +24,6 @@ import { ViewMode } from './services/embeddable';
 import { SavedDashboardPanel } from '../common/types';
 export { SavedDashboardPanel };
 
-export interface DashboardCapabilities {
-  showWriteControls: boolean;
-  createNew: boolean;
-}
-
 // TODO: Replace Saved object interfaces by the ones Core will provide when it is ready.
 export type SavedObjectAttribute =
   | string

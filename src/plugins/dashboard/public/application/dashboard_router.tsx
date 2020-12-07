@@ -112,7 +112,6 @@ export async function mountApp({
       mapsCapabilities: { save: Boolean(coreStart.application.capabilities.maps?.save) },
       createShortUrl: Boolean(coreStart.application.capabilities.dashboard.createShortUrl),
       visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
-      showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
     },
   };
 
@@ -210,7 +209,7 @@ export async function mountApp({
   );
 
   addHelpMenuToAppChrome(dashboardServices.chrome, coreStart.docLinks);
-  if (!coreStart.application.capabilities.dashboard.showWriteControls) {
+  if (dashboardServices.dashboardCapabilities.hideWriteControls) {
     coreStart.chrome.setBadge({
       text: dashboardReadonlyBadge.getText(),
       tooltip: dashboardReadonlyBadge.getTooltip(),
