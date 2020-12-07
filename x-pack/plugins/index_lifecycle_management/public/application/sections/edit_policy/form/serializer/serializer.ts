@@ -68,19 +68,24 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       if (!updatedPolicy.phases.hot!.actions?.set_priority) {
         delete hotPhaseActions.set_priority;
       }
+
+      if (!updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
+        delete hotPhaseActions.searchable_snapshot;
+      }
     }
 
     /**
      * WARM PHASE SERIALIZATION
      */
     if (_meta.warm.enabled) {
+      draft.phases.warm!.actions = draft.phases.warm?.actions ?? {};
       const warmPhase = draft.phases.warm!;
       // If warm phase on rollover is enabled, delete min age field
       // An index lifecycle switches to warm phase when rollover occurs, so you cannot specify a warm phase time
       // They are mutually exclusive
       if (
         (!_meta.hot.useRollover || !_meta.warm.warmPhaseOnRollover) &&
-        updatedPolicy.phases.warm!.min_age
+        updatedPolicy.phases.warm?.min_age
       ) {
         warmPhase.min_age = `${updatedPolicy.phases.warm!.min_age}${_meta.warm.minAgeUnit}`;
       } else {
@@ -93,17 +98,17 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         originalPolicy?.phases.warm?.actions
       );
 
-      if (!updatedPolicy.phases.warm!.actions?.forcemerge) {
+      if (!updatedPolicy.phases.warm?.actions?.forcemerge) {
         delete warmPhase.actions.forcemerge;
       } else if (_meta.warm.bestCompression) {
         warmPhase.actions.forcemerge!.index_codec = 'best_compression';
       }
 
-      if (!updatedPolicy.phases.warm!.actions?.set_priority) {
+      if (!updatedPolicy.phases.warm?.actions?.set_priority) {
         delete warmPhase.actions.set_priority;
       }
 
-      if (!updatedPolicy.phases.warm!.actions?.shrink) {
+      if (!updatedPolicy.phases.warm?.actions?.shrink) {
         delete warmPhase.actions.shrink;
       }
     } else {
@@ -114,9 +119,10 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
      * COLD PHASE SERIALIZATION
      */
     if (_meta.cold.enabled) {
+      draft.phases.cold!.actions = draft.phases.cold?.actions ?? {};
       const coldPhase = draft.phases.cold!;
 
-      if (updatedPolicy.phases.cold!.min_age) {
+      if (updatedPolicy.phases.cold?.min_age) {
         coldPhase.min_age = `${updatedPolicy.phases.cold!.min_age}${_meta.cold.minAgeUnit}`;
       }
 
@@ -132,8 +138,12 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         delete coldPhase.actions.freeze;
       }
 
-      if (!updatedPolicy.phases.cold!.actions?.set_priority) {
+      if (!updatedPolicy.phases.cold?.actions?.set_priority) {
         delete coldPhase.actions.set_priority;
+      }
+
+      if (!updatedPolicy.phases.cold?.actions?.searchable_snapshot) {
+        delete coldPhase.actions.searchable_snapshot;
       }
     } else {
       delete draft.phases.cold;
@@ -144,14 +154,13 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
      */
     if (_meta.delete.enabled) {
       const deletePhase = draft.phases.delete!;
-      if (updatedPolicy.phases.delete!.min_age) {
+      deletePhase.actions = deletePhase.actions ?? {};
+      deletePhase.actions.delete = deletePhase.actions.delete ?? {};
+      if (updatedPolicy.phases.delete?.min_age) {
         deletePhase.min_age = `${updatedPolicy.phases.delete!.min_age}${_meta.delete.minAgeUnit}`;
       }
 
-      if (
-        !updatedPolicy.phases.delete!.actions?.wait_for_snapshot &&
-        deletePhase.actions.wait_for_snapshot
-      ) {
+      if (!updatedPolicy.phases.delete?.actions?.wait_for_snapshot) {
         delete deletePhase.actions.wait_for_snapshot;
       }
     } else {

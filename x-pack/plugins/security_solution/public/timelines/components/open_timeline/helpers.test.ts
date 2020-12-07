@@ -15,7 +15,6 @@ import {
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
-  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
@@ -45,6 +44,7 @@ import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
 } from './__mocks__';
+import { TimelineTabs } from '../../store/timeline/model';
 
 jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
@@ -237,6 +237,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -302,7 +303,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -336,6 +336,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -401,7 +402,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -435,6 +435,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -500,7 +501,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -532,6 +532,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -597,7 +598,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -629,6 +629,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         savedObjectId: 'savedObject-1',
         columns: [
           {
@@ -732,7 +733,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         title: '',
@@ -795,6 +795,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         savedObjectId: 'savedObject-1',
         columns: [
           {
@@ -899,7 +900,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         title: '',
@@ -932,6 +932,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -997,7 +998,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -1031,6 +1031,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -1096,7 +1097,6 @@ describe('helpers', () => {
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: null,
-          filterQueryDraft: null,
         },
         loadingEventIds: [],
         noteIds: [],
@@ -1394,7 +1394,6 @@ describe('helpers', () => {
         timeline: mockTimelineModel,
       })();
 
-      expect(dispatchSetKqlFilterQueryDraft).not.toHaveBeenCalled();
       expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
     });
 
@@ -1419,7 +1418,6 @@ describe('helpers', () => {
             kuery: null,
             serializedQuery: 'some-serialized-query',
           },
-          filterQueryDraft: null,
         },
       };
       timelineDispatch({
@@ -1431,7 +1429,6 @@ describe('helpers', () => {
         timeline: mockTimeline,
       })();
 
-      expect(dispatchSetKqlFilterQueryDraft).not.toHaveBeenCalled();
       expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
     });
 
@@ -1443,7 +1440,6 @@ describe('helpers', () => {
             kuery: { expression: 'expression', kind: 'kuery' as KueryFilterQueryKind },
             serializedQuery: 'some-serialized-query',
           },
-          filterQueryDraft: null,
         },
       };
       timelineDispatch({
@@ -1455,13 +1451,6 @@ describe('helpers', () => {
         timeline: mockTimeline,
       })();
 
-      expect(dispatchSetKqlFilterQueryDraft).toHaveBeenCalledWith({
-        id: TimelineId.active,
-        filterQueryDraft: {
-          kind: 'kuery',
-          expression: 'expression',
-        },
-      });
       expect(dispatchApplyKqlFilterQuery).toHaveBeenCalledWith({
         id: TimelineId.active,
         filterQuery: {

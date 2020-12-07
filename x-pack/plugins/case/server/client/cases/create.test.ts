@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorTypes, CasePostRequest } from '../../../common/api';
+import { ConnectorTypes, CasePostRequest, CaseStatuses } from '../../../common/api';
 
 import {
   createMockSavedObjectsRepository,
@@ -60,7 +60,7 @@ describe('create', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         external_service: null,
         title: 'Super Bad Security Issue',
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['defacement'],
         updated_at: null,
         updated_by: null,
@@ -126,7 +126,7 @@ describe('create', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         external_service: null,
         title: 'Super Bad Security Issue',
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['defacement'],
         updated_at: null,
         updated_by: null,
@@ -169,7 +169,7 @@ describe('create', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         external_service: null,
         title: 'Super Bad Security Issue',
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['defacement'],
         updated_at: null,
         updated_by: null,
@@ -316,7 +316,7 @@ describe('create', () => {
         title: 'a title',
         description: 'This is a brand new case of a bad meanie defacing data',
         tags: ['defacement'],
-        status: 'closed',
+        status: CaseStatuses.closed,
         connector: {
           id: 'none',
           name: 'none',

@@ -20,7 +20,6 @@ import {
   ErrorWithReason,
 } from '../lib';
 import {
-  AlertType,
   RawAlert,
   IntervalSchedule,
   Services,
@@ -39,7 +38,8 @@ import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_l
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
-import { RecoveredActionGroup } from '../../common';
+import { ActionGroup } from '../../common';
+import { NormalizedAlertType } from '../alert_type_registry';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -58,10 +58,10 @@ export class TaskRunner {
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
-  private alertType: AlertType;
+  private alertType: NormalizedAlertType;
 
   constructor(
-    alertType: AlertType,
+    alertType: NormalizedAlertType,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext
   ) {
@@ -243,6 +243,7 @@ export class TaskRunner {
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
       scheduleActionsForRecoveredInstances({
+        recoveryActionGroup: this.alertType.recoveryActionGroup,
         recoveredAlertInstances,
         executionHandler,
         mutedInstanceIdsSet,
@@ -525,6 +526,7 @@ function generateNewAndRecoveredInstanceEvents(
 
 interface ScheduleActionsForRecoveredInstancesParams {
   logger: Logger;
+  recoveryActionGroup: ActionGroup;
   recoveredAlertInstances: Dictionary<AlertInstance>;
   executionHandler: ReturnType<typeof createExecutionHandler>;
   mutedInstanceIdsSet: Set<string>;
@@ -534,6 +536,7 @@ interface ScheduleActionsForRecoveredInstancesParams {
 function scheduleActionsForRecoveredInstances(params: ScheduleActionsForRecoveredInstancesParams) {
   const {
     logger,
+    recoveryActionGroup,
     recoveredAlertInstances,
     executionHandler,
     mutedInstanceIdsSet,
@@ -547,15 +550,15 @@ function scheduleActionsForRecoveredInstances(params: ScheduleActionsForRecovere
       );
     } else {
       const instance = recoveredAlertInstances[id];
-      instance.updateLastScheduledActions(RecoveredActionGroup.id);
+      instance.updateLastScheduledActions(recoveryActionGroup.id);
       instance.unscheduleActions();
       executionHandler({
-        actionGroup: RecoveredActionGroup.id,
+        actionGroup: recoveryActionGroup.id,
         context: {},
         state: {},
         alertInstanceId: id,
       });
-      instance.scheduleActions(RecoveredActionGroup.id);
+      instance.scheduleActions(recoveryActionGroup.id);
     }
   }
 }
