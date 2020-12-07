@@ -30,7 +30,7 @@ export { JsonEditor, OnJsonEditorUpdateHandler, JsonEditorState } from './compon
 
 export { SectionLoading } from './components/section_loading';
 
-export { CronEditor } from './components/cron_editor';
+export { Frequency, CronEditor } from './components/cron_editor';
 
 export {
   SendRequestConfig,

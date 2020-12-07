@@ -17,4 +17,5 @@
  * under the License.
  */
 
+export { Frequency } from './types';
 export { CronEditor } from './cron_editor';

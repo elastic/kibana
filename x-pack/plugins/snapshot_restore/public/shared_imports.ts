@@ -8,6 +8,7 @@ export {
   AuthorizationProvider,
   CronEditor,
   Error,
+  Frequency,
   NotAuthorizedSection,
   SectionError,
   sendRequest,

@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { Repository } from '../../../../../common/types';
-import { CronEditor, SectionError } from '../../../../shared_imports';
+import { Frequency, CronEditor, SectionError } from '../../../../shared_imports';
 import { useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
@@ -71,7 +71,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   // State for cron editor
   const [simpleCron, setSimpleCron] = useState<{
     expression: string;
-    frequency: string;
+    frequency: Frequency;
   }>({
     expression: DEFAULT_POLICY_SCHEDULE,
     frequency: DEFAULT_POLICY_FREQUENCY,
