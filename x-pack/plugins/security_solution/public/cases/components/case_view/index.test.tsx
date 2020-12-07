@@ -19,8 +19,8 @@ import { act, waitFor } from '@testing-library/react';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
-
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 jest.mock('../../containers/use_update_case');
@@ -28,12 +28,14 @@ jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
+jest.mock('../../../detections/containers/detection_engine/alerts/use_query');
 jest.mock('../user_action_tree/user_action_timestamp');
 
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useQueryAlertsMock = useQueryAlerts as jest.Mock;
 
 export const caseProps: CaseProps = {
   caseId: basicCase.id,
@@ -99,6 +101,10 @@ describe('CaseView ', () => {
     useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockImplementation(() => ({ isLoading: false, postPushToService }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, isLoading: false }));
+    useQueryAlertsMock.mockImplementation(() => ({
+      isLoading: false,
+      alerts: { hits: { hists: [] } },
+    }));
   });
 
   it('should render CaseComponent', async () => {

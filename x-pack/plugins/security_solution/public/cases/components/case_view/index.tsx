@@ -132,18 +132,21 @@ export const CaseComponent = React.memo<CaseProps>(
       unknown
     >(alertsQuery, selectedPatterns[0]);
 
-    const alerts =
-      alertsData?.hits.hits.reduce<Record<string, Alert>>(
-        (acc, { _id, _index, _source }) => ({
-          ...acc,
-          [_id]: {
-            _id,
-            _index,
-            ..._source.signal,
-          },
-        }),
-        {}
-      ) ?? {};
+    const alerts = useMemo(
+      () =>
+        alertsData?.hits.hits.reduce<Record<string, Alert>>(
+          (acc, { _id, _index, _source }) => ({
+            ...acc,
+            [_id]: {
+              _id,
+              _index,
+              ..._source.signal,
+            },
+          }),
+          {}
+        ) ?? {},
+      [alertsData?.hits.hits]
+    );
 
     // Update Fields
     const onUpdateField = useCallback(
@@ -328,17 +331,30 @@ export const CaseComponent = React.memo<CaseProps>(
       [allCasesLink]
     );
 
-    const showAlert = useCallback((alertId: string, index: string) => {
+    const showAlert = useCallback(
+      (alertId: string, index: string) => {
+        dispatch(
+          timelineActions.toggleExpandedEvent({
+            timelineId: TimelineId.active,
+            event: {
+              eventId: alertId,
+              indexName: index,
+              loading: false,
+            },
+          })
+        );
+      },
+      [dispatch]
+    );
+
+    useEffect(() => {
       dispatch(
         timelineActions.toggleExpandedEvent({
           timelineId: TimelineId.active,
-          event: {
-            eventId: alertId,
-            indexName: index,
-            loading: false,
-          },
+          event: {},
         })
       );
+      // We need to close the EventFlyout on component mount in case it was open before in detections
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
