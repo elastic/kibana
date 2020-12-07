@@ -31,7 +31,7 @@ import {
   IndexPatternsContract,
   syncQueryStateWithUrl,
 } from '../../../../../src/plugins/data/public';
-import { LENS_EMBEDDABLE_TYPE, getFullPath, getBasePath } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, getFullPath } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
 import { getLensTopNavConfig } from './lens_top_nav';
 import { SaveModal } from './save_modal';
