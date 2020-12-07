@@ -20,7 +20,7 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../../observability/public';
 import {
