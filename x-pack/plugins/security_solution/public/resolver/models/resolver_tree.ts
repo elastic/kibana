@@ -15,39 +15,60 @@ import {
   ResolverSchema,
 } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
-import { IndexedProcessTree } from '../types';
-import { calculateGenerations } from '../lib/tree_sequencers';
 
 /**
- * Given an indexedProcessTree, we will walk the tree via DFS and calculate the number of generations
- * beginning with the origin
+ * These values are only exported for testing. They should not be used directly. Instead use the functions below.
  */
-export function originDescendantGenerationCount(tree: IndexedProcessTree) {
-  if (tree.originID) {
-    return calculateGenerations<string | undefined, ResolverNode>(
-      tree.originID,
-      0,
-      (parentID: string | undefined): ResolverNode[] => {
-        const currentSiblings = tree.idToChildren.get(parentID);
-        return currentSiblings === undefined ? [] : currentSiblings;
-      }
-    );
-  }
+
+/**
+ * The limit for the ancestors in the server request when the ancestry field is defined in the schema.
+ */
+export const ancestorsWithAncestryField = 200;
+/**
+ * The limit for the ancestors in the server request when the ancestry field is not defined in the schema.
+ */
+export const ancestorsWithoutAncestryField = 20;
+/**
+ * The limit for the generations in the server request when the ancestry field is defined. Essentially this means
+ * that the generations field will be ignored when the ancestry field is defined.
+ */
+export const generationsWithAncestryField = 0;
+/**
+ * The limit for the generations in the server request when the ancestry field is not defined.
+ */
+export const generationsWithoutAncestryField = 10;
+/**
+ * The limit for the descendants in the server request.
+ */
+export const descendantsLimit = 500;
+
+/**
+ * Returns the number of ancestors we should use when requesting a tree from the server
+ * depending on whether the schema received from the server has the ancestry field defined.
+ */
+export function ancestorsRequestAmount(schema: ResolverSchema | undefined) {
+  return schema?.ancestry !== undefined
+    ? ancestorsWithAncestryField
+    : ancestorsWithoutAncestryField;
 }
 
-export function ancestorRequestAmount(schema: ResolverSchema): number {
-  const withAncestryField = 200;
-  const withoutAncestryField = 20;
-
-  return schema.ancestry ? withAncestryField : withoutAncestryField;
+/**
+ * Returns the number of generations we should use when requesting a tree from the server
+ * depending on whether the schema received from the server has the ancestry field defined.
+ */
+export function generationsRequestAmount(schema: ResolverSchema | undefined) {
+  return schema?.ancestry !== undefined
+    ? generationsWithAncestryField
+    : generationsWithoutAncestryField;
 }
 
-export function generationRequestAmount(schema: ResolverSchema): number {
-  const withAncestryField = 1000;
-  const withoutAncestryField = 10;
-
-  return schema.ancestry ? withAncestryField : withoutAncestryField;
+/**
+ * The number of the descendants to use in a request to the server for a resolver tree.
+ */
+export function descendantsRequestAmount() {
+  return descendantsLimit;
 }
+
 /**
  * This returns a map of nodeIDs to the associated stats provided by the datasource.
  */

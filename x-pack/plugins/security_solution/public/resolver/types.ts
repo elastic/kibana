@@ -208,16 +208,6 @@ export interface TreeFetcherParameters {
    * The indices that the backend will use to search for the document ID.
    */
   indices: string[];
-
-  /**
-   * The number of ancestors that were requested from the server.
-   */
-  requestedAncestors?: number;
-
-  /**
-   * The number of descendants that were requested from the sever.
-   */
-  requestedDescendants?: number;
 }
 
 /**
@@ -473,6 +463,27 @@ export interface IndexedProcessTree {
    * The id of the origin or root node provided by the backend
    */
   originID: string | undefined;
+  /**
+   * The number of generations from the origin in the tree. If the origin has no descendants, then this value will be
+   * zero. The origin of the graph is the analyzed event, not necessarily the root node of the tree.
+   *
+   * If the originID is not defined then the generations will be undefined.
+   */
+  generations: number | undefined;
+  /**
+   * The number of descendants from the origin of the graph. The origin of the graph is the analyzed event, not
+   * necessarily the root node of the tree.
+   *
+   * If the originID is not defined then the descendants will be undefined.
+   */
+  descendants: number | undefined;
+  /**
+   * The number of ancestors from the origin of the graph. The amount includes the origin. The origin of the graph is
+   * analyzed event.
+   *
+   * If the originID is not defined the ancestors will be undefined.
+   */
+  ancestors: number | undefined;
 }
 
 /**

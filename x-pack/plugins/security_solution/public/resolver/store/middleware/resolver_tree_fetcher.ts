@@ -14,9 +14,7 @@ import {
 import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
-
-const numberOfAncestors = 200;
-const numberOfDescendants = 1000;
+import { ancestorsRequestAmount, descendantsRequestAmount } from '../../models/resolver_tree';
 
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
@@ -84,8 +82,8 @@ export function ResolverTreeFetcher(
           schema: dataSourceSchema,
           timeRange,
           indices: databaseParameters.indices,
-          ancestors: numberOfAncestors,
-          descendants: numberOfDescendants,
+          ancestors: ancestorsRequestAmount(dataSourceSchema),
+          descendants: descendantsRequestAmount(),
         });
 
         const resolverTree: NewResolverTree = {
@@ -99,11 +97,7 @@ export function ResolverTreeFetcher(
             result: resolverTree,
             dataSource,
             schema: dataSourceSchema,
-            parameters: {
-              ...databaseParameters,
-              requestedAncestors: numberOfAncestors,
-              requestedDescendants: numberOfDescendants,
-            },
+            parameters: databaseParameters,
           },
         });
       } catch (error) {

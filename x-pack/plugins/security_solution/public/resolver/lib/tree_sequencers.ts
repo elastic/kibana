@@ -20,20 +20,43 @@ export function* levelOrder<T>(root: T, children: (parent: T) => T[]): Iterable<
   }
 }
 
-export function calculateGenerations<T, S>(
-  id: T,
-  currentLevel: number,
-  children: (parent: T) => S[]
-) {
-  const childrenArray = children(id);
+/**
+ * Calculates the generations and descendants in a resolver graph starting from a specific node in the graph.
+ *
+ * @param node the ResolverNode to start traversing the tree from
+ * @param currentLevel the level within the tree, the caller should pass in 0 to calculate the descendants from the
+ * passed in node
+ * @param totalDescendants the accumulated descendants while traversing the tree
+ * @param children a function for retrieving the direct children of a node
+ */
+export function calculateGenerationsAndDescendants<T>({
+  node,
+  currentLevel,
+  totalDescendants,
+  children,
+}: {
+  node: T;
+  currentLevel: number;
+  totalDescendants: number;
+  children: (parent: T) => T[];
+}): { generations: number; descendants: number } {
+  const childrenArray = children(node);
+  // we reached a node that does not have any children so return
   if (childrenArray.length <= 0) {
-    return currentLevel;
+    return { generations: currentLevel, descendants: totalDescendants };
   }
 
   let greatestLevel = 0;
-  for (const currChild of childrenArray) {
-    const returnedLevel = calculateGenerations(currChild, currentLevel + 1, children);
-    greatestLevel = Math.max(greatestLevel, returnedLevel);
+  let sumDescendants = totalDescendants;
+  for (const child of childrenArray) {
+    const { generations, descendants } = calculateGenerationsAndDescendants({
+      node: child,
+      currentLevel: currentLevel + 1,
+      totalDescendants: sumDescendants + 1,
+      children,
+    });
+    sumDescendants = descendants;
+    greatestLevel = Math.max(greatestLevel, generations);
   }
-  return greatestLevel;
+  return { generations: greatestLevel, descendants: sumDescendants };
 }

@@ -7,8 +7,58 @@
 import { orderByTime } from '../process_event';
 import { IndexedProcessTree } from '../../types';
 import { ResolverNode } from '../../../../common/endpoint/types';
-import { levelOrder as baseLevelOrder } from '../../lib/tree_sequencers';
+import {
+  levelOrder as baseLevelOrder,
+  calculateGenerationsAndDescendants,
+} from '../../lib/tree_sequencers';
 import * as nodeModel from '../../../../common/endpoint/models/node';
+
+function calculateGenerationsAndDescendantsFromOrigin(
+  origin: ResolverNode | undefined,
+  descendants: Map<string | undefined, ResolverNode[]>
+): { generations: number; descendants: number } | undefined {
+  if (!origin) {
+    return;
+  }
+
+  return calculateGenerationsAndDescendants({
+    node: origin,
+    currentLevel: 0,
+    totalDescendants: 0,
+    children: (parentNode: ResolverNode): ResolverNode[] =>
+      descendants.get(nodeModel.nodeID(parentNode)) ?? [],
+  });
+}
+
+function parentInternal(node: ResolverNode, idToNode: Map<string, ResolverNode>) {
+  const uniqueParentId = nodeModel.parentId(node);
+  if (uniqueParentId === undefined) {
+    return undefined;
+  } else {
+    return idToNode.get(uniqueParentId);
+  }
+}
+
+/**
+ * Returns the number of ancestors nodes (including the origin) in the graph.
+ */
+function countAncestors(
+  originID: string | undefined,
+  idToNode: Map<string, ResolverNode>
+): number | undefined {
+  if (!originID) {
+    return;
+  }
+
+  // include the origin
+  let total = 1;
+  let current: ResolverNode | undefined = idToNode.get(originID);
+  while (current !== undefined && parentInternal(current, idToNode) !== undefined) {
+    total++;
+    current = parentInternal(current, idToNode);
+  }
+  return total;
+}
 
 /**
  * Create a new IndexedProcessTree from an array of ProcessEvents.
@@ -43,10 +93,27 @@ export function factory(
     siblings.sort(orderByTime);
   }
 
+  let generations: number | undefined;
+  let descendants: number | undefined;
+  if (originID) {
+    const originNode = idToValue.get(originID);
+    const treeGenerationsAndDescendants = calculateGenerationsAndDescendantsFromOrigin(
+      originNode,
+      idToChildren
+    );
+    generations = treeGenerationsAndDescendants?.generations;
+    descendants = treeGenerationsAndDescendants?.descendants;
+  }
+
+  const ancestors = countAncestors(originID, idToValue);
+
   return {
     idToChildren,
     idToNode: idToValue,
     originID,
+    generations,
+    descendants,
+    ancestors,
   };
 }
 
@@ -72,12 +139,7 @@ export function parent(
   tree: IndexedProcessTree,
   childNode: ResolverNode
 ): ResolverNode | undefined {
-  const uniqueParentId = nodeModel.parentId(childNode);
-  if (uniqueParentId === undefined) {
-    return undefined;
-  } else {
-    return tree.idToNode.get(uniqueParentId);
-  }
+  return parentInternal(childNode, tree.idToNode);
 }
 
 /**
@@ -114,30 +176,4 @@ export function* levelOrder(tree: IndexedProcessTree) {
       children(tree, nodeModel.nodeID(parentNode))
     );
   }
-}
-
-/**
- * Returns the number of descendant nodes in the graph.
- */
-export function countChildren(tree: IndexedProcessTree) {
-  // The children map includes the origin, so remove that
-  return tree.idToChildren.size - 1;
-}
-
-/**
- * Returns the number of ancestors nodes (including the origin) in the graph.
- */
-export function countAncestors(tree: IndexedProcessTree) {
-  if (!tree.originID) {
-    return 0;
-  }
-
-  // include the origin
-  let total = 1;
-  let current: ResolverNode | undefined = tree.idToNode.get(tree.originID);
-  while (current !== undefined && parent(tree, current) !== undefined) {
-    total++;
-    current = parent(tree, current);
-  }
-  return total;
 }

@@ -286,6 +286,10 @@ export interface TreeNode {
  */
 export interface Tree {
   /**
+   * Children grouped by the parent's ID
+   */
+  childrenByParent: Map<string, Map<string, TreeNode>>;
+  /**
    * Map of entity_id to node
    */
   children: Map<string, TreeNode>;
@@ -836,6 +840,7 @@ export class EndpointDocGenerator {
     const { startTime, endTime } = EndpointDocGenerator.getStartEndTimes(allEvents);
 
     return {
+      childrenByParent,
       children: childrenNodes,
       ancestry: ancestryNodes,
       allEvents,

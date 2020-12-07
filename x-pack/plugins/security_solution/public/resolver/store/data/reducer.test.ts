@@ -10,28 +10,23 @@ import * as selectors from './selectors';
 import { DataState, GeneratedTreeMetadata } from '../../types';
 import { DataAction } from './action';
 import { generateTreeWithDAL } from '../../data_access_layer/mocks/generator_tree';
-import { endpointSourceSchema } from './../../mocks/tree_schema';
-import { NewResolverTree } from '../../../../common/endpoint/types';
+import { endpointSourceSchema, winlogSourceSchema } from './../../mocks/tree_schema';
+import { NewResolverTree, ResolverSchema } from '../../../../common/endpoint/types';
+import { ancestorsWithAncestryField, descendantsLimit } from '../../models/resolver_tree';
+
+type SourceAndSchemaFunction = () => { schema: ResolverSchema; dataSource: string };
 
 /**
  * Test the data reducer and selector.
  */
 describe('Resolver Data Middleware', () => {
   let store: Store<DataState, DataAction>;
-  let dispatchTree: (
-    tree: NewResolverTree,
-    requestedAncestors: number,
-    requestedDescendants: number
-  ) => void;
+  let dispatchTree: (tree: NewResolverTree, sourceAndSchema: SourceAndSchemaFunction) => void;
 
   beforeEach(() => {
     store = createStore(dataReducer, undefined);
-    dispatchTree = (
-      tree: NewResolverTree,
-      requestedAncestors: number,
-      requestedDescendants: number
-    ) => {
-      const { schema, dataSource } = endpointSourceSchema();
+    dispatchTree = (tree: NewResolverTree, sourceAndSchema: SourceAndSchemaFunction) => {
+      const { schema, dataSource } = sourceAndSchema();
       const action: DataAction = {
         type: 'serverReturnedResolverData',
         payload: {
@@ -41,9 +36,6 @@ describe('Resolver Data Middleware', () => {
           parameters: {
             databaseDocumentID: '',
             indices: [],
-            // +1 to include the origin
-            requestedAncestors,
-            requestedDescendants,
           },
         },
       };
@@ -51,47 +43,126 @@ describe('Resolver Data Middleware', () => {
     };
   });
 
-  describe("when data the server's ancestry and descendants limits were reached", () => {
+  describe('when the generated tree has dimensions smaller than the limits sent to the server', () => {
+    let generatedTreeMetadata: GeneratedTreeMetadata;
     beforeEach(() => {
-      const { metadata } = generateTreeWithDAL({
+      ({ metadata: generatedTreeMetadata } = generateTreeWithDAL({
         ancestors: 5,
         generations: 1,
         children: 5,
+      }));
+    });
+
+    describe.each([
+      ['endpoint', endpointSourceSchema],
+      ['winlog', winlogSourceSchema],
+    ])('when using %s schema to layout the graph', (name, schema) => {
+      beforeEach(() => {
+        dispatchTree(generatedTreeMetadata.formattedTree, schema);
       });
-      dispatchTree(
-        metadata.formattedTree,
-        metadata.generatedTree.ancestry.size,
-        metadata.generatedTree.children.size
-      );
-    });
-    it('should indicate there are additional ancestor', () => {
-      expect(selectors.hasMoreAncestors(store.getState())).toBe(true);
-    });
-    it('should indicate there are additional children', () => {
-      expect(selectors.hasMoreChildren(store.getState())).toBe(true);
+      it('should indicate that there are no more ancestors to retrieve', () => {
+        expect(selectors.hasMoreAncestors(store.getState())).toBeFalsy();
+      });
+
+      it('should indicate that there are no more descendants to retrieve', () => {
+        expect(selectors.hasMoreChildren(store.getState())).toBeFalsy();
+      });
+
+      it('should indicate that there were no more generations to retrieve', () => {
+        expect(selectors.hasMoreGenerations(store.getState())).toBeFalsy();
+      });
     });
   });
 
-  describe("when data the server's ancestry and descendants limits were not reached", () => {
+  describe('when the generated tree has dimensions larger than the limits sent to the server', () => {
+    let generatedTreeMetadata: GeneratedTreeMetadata;
     beforeEach(() => {
-      const { metadata } = generateTreeWithDAL({
-        ancestors: 5,
-        generations: 1,
-        children: 5,
+      ({ metadata: generatedTreeMetadata } = generateTreeWithDAL({
+        ancestors: ancestorsWithAncestryField + 10,
+        // using the descendants limit here so we can avoid creating a massive tree but still
+        // accurately get over the descendants limit as well
+        generations: descendantsLimit + 10,
+        children: 1,
+      }));
+    });
+
+    describe('when using endpoint schema to layout the graph', () => {
+      beforeEach(() => {
+        dispatchTree(generatedTreeMetadata.formattedTree, endpointSourceSchema);
+      });
+      it('should indicate that there are more ancestors to retrieve', () => {
+        expect(selectors.hasMoreAncestors(store.getState())).toBeTruthy();
       });
 
-      dispatchTree(
-        metadata.formattedTree,
-        // +100 means we requested more than the number of ancestors and descendants that were returned
-        metadata.generatedTree.ancestry.size + 100,
-        metadata.generatedTree.children.size + 100
-      );
+      it('should indicate that there are more descendants to retrieve', () => {
+        expect(selectors.hasMoreChildren(store.getState())).toBeTruthy();
+      });
+
+      it('should indicate that there were no more generations to retrieve', () => {
+        expect(selectors.hasMoreGenerations(store.getState())).toBeFalsy();
+      });
     });
-    it('should indicate there are additional ancestor', () => {
-      expect(selectors.hasMoreAncestors(store.getState())).toBe(false);
+
+    describe('when using winlog schema to layout the graph', () => {
+      beforeEach(() => {
+        dispatchTree(generatedTreeMetadata.formattedTree, winlogSourceSchema);
+      });
+      it('should indicate that there are more ancestors to retrieve', () => {
+        expect(selectors.hasMoreAncestors(store.getState())).toBeTruthy();
+      });
+
+      it('should indicate that there are more descendants to retrieve', () => {
+        expect(selectors.hasMoreChildren(store.getState())).toBeTruthy();
+      });
+
+      it('should indicate that there were more generations to retrieve', () => {
+        expect(selectors.hasMoreGenerations(store.getState())).toBeTruthy();
+      });
     });
-    it('should indicate there are additional children', () => {
-      expect(selectors.hasMoreChildren(store.getState())).toBe(false);
+  });
+
+  describe('when the generated tree has more children than the limit, less generations than the limit, and no ancestors', () => {
+    let generatedTreeMetadata: GeneratedTreeMetadata;
+    beforeEach(() => {
+      ({ metadata: generatedTreeMetadata } = generateTreeWithDAL({
+        ancestors: 0,
+        generations: 1,
+        children: descendantsLimit + 1,
+      }));
+    });
+
+    describe('when using endpoint schema to layout the graph', () => {
+      beforeEach(() => {
+        dispatchTree(generatedTreeMetadata.formattedTree, endpointSourceSchema);
+      });
+      it('should indicate that there are no more ancestors to retrieve', () => {
+        expect(selectors.hasMoreAncestors(store.getState())).toBeFalsy();
+      });
+
+      it('should indicate that there are more descendants to retrieve', () => {
+        expect(selectors.hasMoreChildren(store.getState())).toBeTruthy();
+      });
+
+      it('should indicate that there were no more generations to retrieve', () => {
+        expect(selectors.hasMoreGenerations(store.getState())).toBeFalsy();
+      });
+    });
+
+    describe('when using winlog schema to layout the graph', () => {
+      beforeEach(() => {
+        dispatchTree(generatedTreeMetadata.formattedTree, winlogSourceSchema);
+      });
+      it('should indicate that there are no more ancestors to retrieve', () => {
+        expect(selectors.hasMoreAncestors(store.getState())).toBeFalsy();
+      });
+
+      it('should indicate that there are more descendants to retrieve', () => {
+        expect(selectors.hasMoreChildren(store.getState())).toBeTruthy();
+      });
+
+      it('should indicate that there were no more generations to retrieve', () => {
+        expect(selectors.hasMoreGenerations(store.getState())).toBeFalsy();
+      });
     });
   });
 
@@ -109,7 +180,7 @@ describe('Resolver Data Middleware', () => {
           },
         ],
       }));
-      dispatchTree(metadata.formattedTree, 0, 0);
+      dispatchTree(metadata.formattedTree, endpointSourceSchema);
     });
     it('should have the correct total related events for a child node', () => {
       // get the first level of children, and there should only be a single child

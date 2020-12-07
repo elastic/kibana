@@ -61,21 +61,6 @@ export function resolverComponentInstanceID(state: DataState): string {
 }
 
 /**
- * The number of requested ancestors from the server. If zero ancestors were requested
- * then the server would still return the origin node.
- */
-function resolverRequestedAncestors(state: DataState): number | undefined {
-  return state.tree?.lastResponse?.parameters.requestedAncestors;
-}
-
-/**
- * The number of requested descendants from the server.
- */
-function resolverRequestedDescendants(state: DataState): number | undefined {
-  return state.tree?.lastResponse?.parameters.requestedAncestors;
-}
-
-/**
  * The last NewResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
  * we're currently interested in.
  */
@@ -103,8 +88,8 @@ export function resolverTreeSourceAndSchema(
  */
 export const originID: (state: DataState) => string | undefined = createSelector(
   resolverTreeResponse,
-  function (resolverTree?) {
-    return resolverTree?.originID ?? undefined;
+  function (resolverTree) {
+    return resolverTree?.originID;
   }
 );
 
@@ -201,7 +186,7 @@ export const relatedEventTotalCount: (
 });
 
 /**
- *
+ * Returns a boolean indicating if an even in the event_detail view is loading.
  *
  * @export
  * @param {DataState} state
@@ -212,7 +197,7 @@ export function isCurrentRelatedEventLoading(state: DataState) {
 }
 
 /**
- *
+ * Returns the current related event data for the `event_detail` view.
  *
  * @export
  * @param {DataState} state
@@ -240,6 +225,31 @@ export const relatedEventCountByCategory: (
 );
 
 /**
+ * Returns true if there might be more generations in the graph that we didn't get because we reached
+ * the requested generations limit.
+ *
+ * If we set a limit at 10 and we received 9, then we know there weren't anymore. If we received 10 then there
+ * might be more generations.
+ */
+export const hasMoreGenerations: (state: DataState) => boolean = createSelector(
+  tree,
+  resolverTreeSourceAndSchema,
+  (resolverTree, sourceAndSchema) => {
+    // if the ancestry field is defined then the server request will not be limited by the generations
+    // field, so let's just assume that we always get all the generations we can, but we are instead
+    // limited by the number of descendants to retrieve which is handled by a different selector
+    if (sourceAndSchema?.schema?.ancestry) {
+      return false;
+    }
+
+    return (
+      (resolverTree.generations ?? 0) >=
+      resolverTreeModel.generationsRequestAmount(sourceAndSchema?.schema)
+    );
+  }
+);
+
+/**
  * Returns true if there might be more descendants in the graph that we didn't get because
  * we reached the requested descendants limit.
  *
@@ -248,11 +258,8 @@ export const relatedEventCountByCategory: (
  */
 export const hasMoreChildren: (state: DataState) => boolean = createSelector(
   tree,
-  resolverRequestedDescendants,
-  (resolverTree, requestedDescendants) => {
-    return requestedDescendants !== undefined
-      ? indexedProcessTreeModel.countChildren(resolverTree) >= requestedDescendants
-      : false;
+  (resolverTree) => {
+    return (resolverTree.descendants ?? 0) >= resolverTreeModel.descendantsRequestAmount();
   }
 );
 
@@ -265,11 +272,12 @@ export const hasMoreChildren: (state: DataState) => boolean = createSelector(
  */
 export const hasMoreAncestors: (state: DataState) => boolean = createSelector(
   tree,
-  resolverRequestedAncestors,
-  (resolverTree, requestedAncestors) => {
-    return requestedAncestors !== undefined
-      ? indexedProcessTreeModel.countAncestors(resolverTree) >= requestedAncestors
-      : false;
+  resolverTreeSourceAndSchema,
+  (resolverTree, sourceAndSchema) => {
+    return (
+      (resolverTree.ancestors ?? 0) >=
+      resolverTreeModel.ancestorsRequestAmount(sourceAndSchema?.schema)
+    );
   }
 );
 

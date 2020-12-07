@@ -119,7 +119,8 @@ export const NodeList = memo(() => {
 
   const children = useSelector(selectors.hasMoreChildren);
   const ancestors = useSelector(selectors.hasMoreAncestors);
-  const showWarning = children === true || ancestors === true;
+  const generations = useSelector(selectors.hasMoreGenerations);
+  const showWarning = children === true || ancestors === true || generations === true;
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (
     <StyledPanel>

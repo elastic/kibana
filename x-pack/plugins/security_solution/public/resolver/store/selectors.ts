@@ -180,14 +180,22 @@ export const hadErrorLoadingTree = composeSelectors(
 );
 
 /**
- * True if the children cursor is not null
+ * True there might be more descendants to retrieve in the resolver graph.
  */
 export const hasMoreChildren = composeSelectors(dataStateSelector, dataSelectors.hasMoreChildren);
 
 /**
- * True if the ancestor cursor is not null
+ * True if there might be more ancestors to retrieve in the resolver graph.
  */
 export const hasMoreAncestors = composeSelectors(dataStateSelector, dataSelectors.hasMoreAncestors);
+
+/**
+ * True if there might be more generations to retrieve in the resolver graph.
+ */
+export const hasMoreGenerations = composeSelectors(
+  dataStateSelector,
+  dataSelectors.hasMoreGenerations
+);
 
 /**
  * An array containing all the processes currently in the Resolver than can be graphed
