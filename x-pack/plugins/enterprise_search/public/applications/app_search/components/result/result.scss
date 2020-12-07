@@ -8,7 +8,7 @@
     width: 100%;
     padding: $euiSize;
     display: grid;
-    grid-template-rows: 1fr $euiSize * 1.25 /* 20px */;
+    grid-template-rows: 1fr $euiSizeXS * 5;
     border-right: $euiBorderThin;
   }
 
@@ -34,7 +34,7 @@
     justify-self: stretch;
     align-self: stretch;
     display: flex;
-    width: $euiSize * 3.125; // 50px
+    width: $euiSizeL * 2;
 
     &:hover,
     &:focus,

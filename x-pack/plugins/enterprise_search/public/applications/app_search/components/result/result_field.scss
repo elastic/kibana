@@ -2,7 +2,7 @@
   font-size: $euiFontSizeS;
   line-height: $euiLineHeight;
   display: grid;
-  grid-template-columns: calc(35% + #{$euiSize * 3.45} /*55px*/ ) 1.875 * $euiSize /*30px*/ 1fr;
+  grid-template-columns: calc(35% + #{$euiSizeS * 7} ) $euiSize * 2 1fr;
   grid-gap: $euiSizeXS;
 
   &__separator {
