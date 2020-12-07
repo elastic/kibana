@@ -140,7 +140,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
               <EuiSpacer size="s" />
             </>
           }
-          alt="NO IMAGE AVAILABLE"
+          alt="No image available"
           url={imgSrc}
         />
       )}
