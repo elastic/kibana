@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import escapeRegExp from 'lodash/fp/escapeRegExp';
+import { escapeRegExp } from 'lodash/fp';
 import type { IndexPattern } from 'src/plugins/data/public';
 
 /**
