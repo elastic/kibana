@@ -101,7 +101,7 @@ export class TelemetryEventsSender {
     }
   }
 
-  public async fetchDiagnosticAlerts(fromTimestamp: string, toTimestamp: string) {
+  public async fetchDiagnosticAlerts() {
     const query = {
       expand_wildcards: 'open,hidden',
       // logs-diagnostic.endpoint.collection-default
@@ -110,12 +110,7 @@ export class TelemetryEventsSender {
       size: 100,
       body: {
         query: {
-          range: {
-            '@timestamp': {
-              gt: fromTimestamp,
-              lte: toTimestamp,
-            },
-          },
+          match_all: {},
         },
       },
     };
@@ -298,6 +293,9 @@ const allowlistEventFields: AllowlistFields = {
   ecs: true,
   elastic: true,
   event: true,
+  rule: {
+    ruleset: true,
+  },
   file: {
     name: true,
     path: true,

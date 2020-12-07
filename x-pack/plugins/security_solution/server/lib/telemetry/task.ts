@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import moment from 'moment';
 import { Logger } from 'src/core/server';
 import {
   ConcreteTaskInstance,
@@ -15,14 +14,13 @@ import { TelemetryEventsSender, TelemetryEvent } from './sender';
 export const TelemetryDiagTaskConstants = {
   TIMEOUT: '1m',
   TYPE: 'security:telemetry-diagnostics',
-  INTERVAL: '10s', // TODO: update to 5m
+  INTERVAL: '2m', // TODO: update to 5m
   VERSION: '1.0.0',
 };
 
 export class TelemetryDiagTask {
   private readonly logger: Logger;
   private readonly sender: TelemetryEventsSender;
-  private lastQueryTimestamp?: string;
 
   constructor(
     logger: Logger,
@@ -70,6 +68,7 @@ export class TelemetryDiagTask {
   };
 
   public runTask = async (taskId: string) => {
+    this.logger.debug(`running task ${taskId}`);
     // Check that this task is current
     if (taskId !== this.getTaskId()) {
       this.logger.debug(`Outdated task running: ${taskId}`);
@@ -82,11 +81,7 @@ export class TelemetryDiagTask {
       return;
     }
 
-    const fetchFromTimestamp =
-      this.lastQueryTimestamp || moment.utc().subtract(5, 'm').toISOString();
-    const fetchToTimestamp = moment.utc().toISOString();
-    const response = await this.sender.fetchDiagnosticAlerts(fetchFromTimestamp, fetchToTimestamp);
-    this.lastQueryTimestamp = fetchToTimestamp;
+    const response = await this.sender.fetchDiagnosticAlerts();
 
     const hits = response.hits?.hits || [];
     if (!Array.isArray(hits) || !hits.length) {
