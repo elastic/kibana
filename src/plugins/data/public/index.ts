@@ -235,7 +235,6 @@ import {
   ILLEGAL_CHARACTERS,
   isDefault,
   validateIndexPattern,
-  getFromSavedObject,
   flattenHitWrapper,
   formatHitProvider,
 } from './index_patterns';
@@ -252,7 +251,6 @@ export const indexPatterns = {
   isFilterable,
   isNestedField,
   validate: validateIndexPattern,
-  getFromSavedObject,
   flattenHitWrapper,
   formatHitProvider,
 };

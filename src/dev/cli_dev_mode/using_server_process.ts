@@ -41,7 +41,7 @@ export function usingServerProcess<T>(
         nodeOptions: [
           ...process.execArgv,
           ...(ACTIVE_INSPECT_FLAG ? [`${ACTIVE_INSPECT_FLAG}=${process.debugPort + 1}`] : []),
-        ].filter((arg) => !arg.includes('inspect')),
+        ],
         env: {
           ...process.env,
           NODE_OPTIONS: process.env.NODE_OPTIONS,

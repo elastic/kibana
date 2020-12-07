@@ -3,7 +3,8 @@
 exports[`SSL Certificate component renders 1`] = `
 Array [
   .c0.c0.c0 {
-  width: 35%;
+  width: 30%;
+  max-width: 250px;
 }
 
 <dt
@@ -15,7 +16,7 @@ Array [
     class="euiSpacer euiSpacer--s"
   />,
   .c0.c0.c0 {
-  width: 65%;
+  width: 70%;
   overflow-wrap: anywhere;
 }
 
@@ -57,7 +58,8 @@ Array [
 exports[`SSL Certificate component renders null if invalid date 1`] = `
 Array [
   .c0.c0.c0 {
-  width: 35%;
+  width: 30%;
+  max-width: 250px;
 }
 
 <dt
@@ -69,7 +71,7 @@ Array [
     class="euiSpacer euiSpacer--s"
   />,
   .c0.c0.c0 {
-  width: 65%;
+  width: 70%;
   overflow-wrap: anywhere;
 }
 
