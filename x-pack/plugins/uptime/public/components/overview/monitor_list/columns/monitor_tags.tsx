@@ -11,8 +11,8 @@ import { Ping } from '../../../../../common/runtime_types/ping';
 
 interface Props {
   detailsPage?: boolean;
-  ping?: MonitorSummary;
-  summary?: Ping;
+  ping?: Ping;
+  summary?: MonitorSummary;
 }
 
 const getTagsFromSummary = (summary: MonitorSummary) => {
