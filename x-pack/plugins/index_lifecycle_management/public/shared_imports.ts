@@ -11,6 +11,7 @@ export {
   useForm,
   useFormData,
   Form,
+  FormHook,
   UseField,
   FieldConfig,
   OnFormUpdateArg,

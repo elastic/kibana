@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { useDispatch } from 'react-redux';
 
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import {
@@ -20,32 +19,32 @@ import {
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 const StyledEuiFlyout = styled(EuiFlyout)`
-  z-index: 9999;
+  z-index: ${({ theme }) => theme.eui.euiZLevel7};
 `;
 
 interface EventDetailsFlyoutProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   timelineId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 }
+
+const emptyExpandedEvent = {};
 
 const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   browserFields,
   docValueFields,
   timelineId,
-  toggleColumn,
 }) => {
   const dispatch = useDispatch();
   const expandedEvent = useDeepEqualSelector(
-    (state) => state.timeline.timelineById[timelineId]?.expandedEvent ?? {}
+    (state) => state.timeline.timelineById[timelineId]?.expandedEvent ?? emptyExpandedEvent
   );
 
   const handleClearSelection = useCallback(() => {
     dispatch(
       timelineActions.toggleExpandedEvent({
         timelineId,
-        event: {},
+        event: emptyExpandedEvent,
       })
     );
   }, [dispatch, timelineId]);
@@ -65,7 +64,6 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
           docValueFields={docValueFields}
           event={expandedEvent}
           timelineId={timelineId}
-          toggleColumn={toggleColumn}
         />
       </EuiFlyoutBody>
     </StyledEuiFlyout>
@@ -77,6 +75,5 @@ export const EventDetailsFlyout = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
-    prevProps.timelineId === nextProps.timelineId &&
-    prevProps.toggleColumn === nextProps.toggleColumn
+    prevProps.timelineId === nextProps.timelineId
 );
