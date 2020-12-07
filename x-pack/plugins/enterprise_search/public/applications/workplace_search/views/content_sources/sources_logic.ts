@@ -14,7 +14,7 @@ import { HttpLogic } from '../../../shared/http';
 
 import {
   flashAPIErrors,
-  setSuccessMessage,
+  setQueuedSuccessMessage,
   FlashMessagesLogic,
 } from '../../../shared/flash_messages';
 
@@ -225,7 +225,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
         }
       );
 
-      setSuccessMessage(
+      setQueuedSuccessMessage(
         [
           successfullyConnectedMessage,
           additionalConfiguration ? additionalConfigurationMessage : '',
