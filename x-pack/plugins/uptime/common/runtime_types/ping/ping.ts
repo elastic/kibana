@@ -232,6 +232,7 @@ export const PingType = t.intersection([
       full: t.string,
       port: t.number,
       scheme: t.string,
+      path: t.string,
     }),
     service: t.partial({
       name: t.string,
@@ -298,7 +299,6 @@ export const makePing = (f: {
 
 export const PingsResponseType = t.type({
   total: t.number,
-  locations: t.array(t.string),
   pings: t.array(PingType),
 });
 
@@ -311,7 +311,7 @@ export const GetPingsParamsType = t.intersection([
   t.partial({
     index: t.number,
     size: t.number,
-    location: t.string,
+    locations: t.string,
     monitorId: t.string,
     sort: t.string,
     status: t.string,

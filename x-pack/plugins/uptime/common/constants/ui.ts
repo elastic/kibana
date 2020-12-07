@@ -17,6 +17,16 @@ export const STEP_DETAIL_ROUTE = '/journey/:checkGroupId/step/:stepIndex';
 export enum STATUS {
   UP = 'up',
   DOWN = 'down',
+  COMPLETE = 'complete',
+  FAILED = 'failed',
+  SKIPPED = 'skipped',
+}
+
+export enum MONITOR_TYPES {
+  HTTP = 'http',
+  TCP = 'tcp',
+  ICMP = 'icmp',
+  BROWSER = 'browser',
 }
 
 export const ML_JOB_ID = 'high_latency_by_geo';
