@@ -48,6 +48,15 @@ export interface SerializedActionWithAllocation {
   migrate?: MigrateAction;
 }
 
+export interface SearchableSnapshotAction {
+  snapshot_repository: string;
+  /**
+   * We do not configure this value in the UI as it is an advanced setting that will
+   * not suit the vast majority of cases.
+   */
+  force_merge_index?: boolean;
+}
+
 export interface SerializedHotPhase extends SerializedPhase {
   actions: {
     rollover?: {
@@ -59,6 +68,10 @@ export interface SerializedHotPhase extends SerializedPhase {
     set_priority?: {
       priority: number | null;
     };
+    /**
+     * Only available on enterprise license
+     */
+    searchable_snapshot?: SearchableSnapshotAction;
   };
 }
 
@@ -84,6 +97,10 @@ export interface SerializedColdPhase extends SerializedPhase {
       priority: number | null;
     };
     migrate?: MigrateAction;
+    /**
+     * Only available on enterprise license
+     */
+    searchable_snapshot?: SearchableSnapshotAction;
   };
 }
 

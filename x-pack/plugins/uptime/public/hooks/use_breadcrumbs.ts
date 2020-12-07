@@ -27,6 +27,7 @@ export const makeBaseBreadcrumb = (
     // values in dateRangeStart are better for a URL.
     delete crumbParams.absoluteDateRangeStart;
     delete crumbParams.absoluteDateRangeEnd;
+    delete crumbParams.statusFilter;
     const query = stringifyUrlParams(crumbParams, true);
     href += query === EMPTY_QUERY ? '' : query;
   }
