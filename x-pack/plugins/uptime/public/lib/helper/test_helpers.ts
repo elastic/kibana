@@ -8,6 +8,7 @@
 
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
+import * as redux from 'react-redux';
 
 export function mockMoment() {
   // avoid timezone issues
@@ -19,4 +20,10 @@ export function mockMoment() {
   jest.spyOn(moment.prototype, 'fromNow').mockImplementation(function (this: Moment) {
     return `15 minutes ago`;
   });
+}
+
+export function mockReduxHooks(response?: any) {
+  jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
+
+  jest.spyOn(redux, 'useSelector').mockReturnValue(response);
 }
