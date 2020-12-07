@@ -48,7 +48,7 @@ describe('getBulkActions', () => {
 
   const getIds = (actions: TagBulkAction[]) => actions.map((action) => action.id);
 
-  it('only returns the `delete` action if user got `delete` permission', () => {
+  it('only returns the `delete` action if user has `delete` permission', () => {
     let actions = getActions({ delete: true });
 
     expect(getIds(actions)).toContain('delete');
@@ -58,7 +58,7 @@ describe('getBulkActions', () => {
     expect(getIds(actions)).not.toContain('delete');
   });
 
-  it('only returns the `assign` action if user got `assign` permission and there is at least one assignable type', () => {
+  it('only returns the `assign` action if user has `assign` permission and there is at least one assignable type', () => {
     let actions = getActions({ assign: true }, { assignableTypes: ['foo'] });
 
     expect(getIds(actions)).toContain('assign');
