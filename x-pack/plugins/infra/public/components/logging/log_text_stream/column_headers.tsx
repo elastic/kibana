@@ -9,12 +9,6 @@ import { transparentize } from 'polished';
 
 import { euiStyled } from '../../../../../observability/public';
 import {
-  LogColumnConfiguration,
-  isTimestampLogColumnConfiguration,
-  isFieldLogColumnConfiguration,
-  isMessageLogColumnConfiguration,
-} from '../../../utils/source_configuration';
-import {
   LogEntryColumn,
   LogEntryColumnContent,
   LogEntryColumnWidth,
@@ -23,43 +17,78 @@ import {
 import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
 import { LogPositionState } from '../../../containers/logs/log_position';
 import { localizedDate } from '../../../../common/formatters/datetime';
+import {
+  LogColumnRenderConfiguration,
+  isTimestampColumnRenderConfiguration,
+  isMessageColumnRenderConfiguration,
+  isFieldColumnRenderConfiguration,
+} from '../../../utils/log_column_render_configuration';
 
 export const LogColumnHeaders: React.FunctionComponent<{
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   columnWidths: LogEntryColumnWidths;
 }> = ({ columnConfigurations, columnWidths }) => {
   const { firstVisiblePosition } = useContext(LogPositionState.Context);
   return (
     <LogColumnHeadersWrapper>
       {columnConfigurations.map((columnConfiguration) => {
-        if (isTimestampLogColumnConfiguration(columnConfiguration)) {
+        if (isTimestampColumnRenderConfiguration(columnConfiguration)) {
+          let columnHeader;
+          if (columnConfiguration.timestampColumn.header === false) {
+            columnHeader = null;
+          } else if (typeof columnConfiguration.timestampColumn.header === 'string') {
+            columnHeader = columnConfiguration.timestampColumn.header;
+          } else {
+            columnHeader = firstVisiblePosition
+              ? localizedDate(firstVisiblePosition.time)
+              : 'Timestamp';
+          }
+
           return (
             <LogColumnHeader
               key={columnConfiguration.timestampColumn.id}
               columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
               data-test-subj="logColumnHeader timestampLogColumnHeader"
             >
-              {firstVisiblePosition ? localizedDate(firstVisiblePosition.time) : 'Timestamp'}
+              {columnHeader}
             </LogColumnHeader>
           );
-        } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
+        } else if (isMessageColumnRenderConfiguration(columnConfiguration)) {
+          let columnHeader;
+          if (columnConfiguration.messageColumn.header === false) {
+            columnHeader = null;
+          } else if (typeof columnConfiguration.messageColumn.header === 'string') {
+            columnHeader = columnConfiguration.messageColumn.header;
+          } else {
+            columnHeader = 'Mesage'; // FIXME: localise
+          }
+
           return (
             <LogColumnHeader
               columnWidth={columnWidths[columnConfiguration.messageColumn.id]}
               data-test-subj="logColumnHeader messageLogColumnHeader"
               key={columnConfiguration.messageColumn.id}
             >
-              Message
+              {columnHeader}
             </LogColumnHeader>
           );
-        } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
+        } else if (isFieldColumnRenderConfiguration(columnConfiguration)) {
+          let columnHeader;
+          if (columnConfiguration.fieldColumn.header === false) {
+            columnHeader = null;
+          } else if (typeof columnConfiguration.fieldColumn.header === 'string') {
+            columnHeader = columnConfiguration.fieldColumn.header;
+          } else {
+            columnHeader = columnConfiguration.fieldColumn.field;
+          }
+
           return (
             <LogColumnHeader
               columnWidth={columnWidths[columnConfiguration.fieldColumn.id]}
               data-test-subj="logColumnHeader fieldLogColumnHeader"
               key={columnConfiguration.fieldColumn.id}
             >
-              {columnConfiguration.fieldColumn.field}
+              {columnHeader}
             </LogColumnHeader>
           );
         }
