@@ -13,8 +13,6 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiToolTip,
-  EuiCallOut,
-  EuiSpacer,
 } from '@elastic/eui';
 
 import {
@@ -33,6 +31,7 @@ import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ML_APP_URL_GENERATOR } from '../../../../common/constants/ml_url_generator';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
+import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
@@ -180,35 +179,15 @@ export const ExplorerChartsContainerUI = ({
   } = kibana;
   const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
 
-  console.log('errorMessages', errorMessages);
   // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
   // If that's the case we trick it doing that with the following settings:
   const chartsWidth = chartsPerRow === 1 ? 'calc(100% - 20px)' : 'auto';
   const chartsColumns = chartsPerRow === 1 ? 0 : chartsPerRow;
 
   const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
-  console.log('errorMessages', errorMessages);
-  const errorMessagesCallouts =
-    errorMessages && Object.keys(errorMessages).length > 0
-      ? Object.keys(errorMessages).map((errorType) => (
-          <EuiCallOut color={'warning'} size="s">
-            <FormattedMessage
-              id={'xpack.errorMessage'}
-              defaultMessage="You can't view records for {jobs} because there are nested terms aggregations in the datafeed and model plot is disabled."
-              values={{ jobs: [...errorMessages[errorType]].join(', ') }}
-            />
-          </EuiCallOut>
-        ))
-      : undefined;
   return (
     <>
-      {errorMessagesCallouts !== undefined && (
-        <>
-          {errorMessagesCallouts}
-          <EuiSpacer />
-        </>
-      )}
-
+      <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
       <EuiFlexGrid columns={chartsColumns}>
         {seriesToPlot.length > 0 &&
           seriesToPlot.map((series) => (

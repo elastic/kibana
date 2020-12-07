@@ -34,6 +34,7 @@ import { i18n } from '@kbn/i18n';
 export function getDefaultChartsData() {
   return {
     chartsPerRow: 1,
+    errorMessages: undefined,
     seriesToPlot: [],
     // default values, will update on every re-render
     tooManyBuckets: false,
@@ -426,7 +427,6 @@ export const anomalyDataChange = function (
 };
 
 function processRecordsForDisplay(anomalyRecords) {
-  console.log('anomalyRecords', anomalyRecords);
   // Aggregate the anomaly data by detector, and entity (by/over/partition).
   if (anomalyRecords.length === 0) {
     return [[], undefined];
@@ -451,16 +451,6 @@ function processRecordsForDisplay(anomalyRecords) {
     const datafeedAggregationErrorMsg = getDatafeedAggregationsErrorMessage(job);
     if (datafeedAggregationErrorMsg !== undefined) {
       jobsErrorMessage[record.job_id] = datafeedAggregationErrorMsg;
-      //   i18n.translate(
-      //   'xpack.ml.explorerCharts.nestedTermsAggregationsErrorMessage',
-      //   {
-      //     defaultMessage: `You can't view records for {selectedJobId} in this dashboard because {reason}.`,
-      //     values: {
-      //       selectedJobId: record.job_id,
-      //       reason: datafeedAggregationErrorMsg,
-      //     },
-      //   }
-      // );
       return;
     }
 
