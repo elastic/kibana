@@ -602,27 +602,7 @@ The final result of this tutorial is this spec:
 
 [float]
 [[vega-tutorial-update-kibana-filters-from-vega]]
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
 === Try it: Update {kib} filters from Vega
-=======
-=======
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
-=======
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
-<<<<<<< HEAD:docs/user/dashboard/tutorials.asciidoc
-=== Update {kib} filters from Vega
-=======
-=== Try it: Update {kib} filters from Vega
->>>>>>> 865824bb873bceb52474b8bc279df9524077b131:docs/user/dashboard/vega.asciidoc
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
-=======
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
-=======
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
 
 In this tutorial you will build an area chart in Vega using an {es} search query,
 and add a click handler and drag handler to update {kib} filters.
@@ -1211,30 +1191,9 @@ The final Vega spec for this tutorial is here:
 }
 
 ----
-====
 
 For more information about *Vega* and *Vega-Lite*, refer to:
 
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
 * <<reference-for-kibana-extensions,Reference for Kibana extensions>>
 * <<resources-and-examples,Resources and examples>>
-=======
-=======
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
-=======
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
-<<<<<<< HEAD:docs/user/dashboard/tutorials.asciidoc
-For additional information on Timelion conditional capabilities, go to https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].
-=======
-* <<reference-for-kibana-extensions,Reference for Kibana extensions>>
-* <<resources-and-examples,Resources and examples>>
->>>>>>> 865824bb873bceb52474b8bc279df9524077b131:docs/user/dashboard/vega.asciidoc
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
-<<<<<<< Updated upstream:docs/user/dashboard/vega.asciidoc
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
-=======
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
-=======
->>>>>>> Stashed changes:docs/user/dashboard/vega.asciidoc
+
