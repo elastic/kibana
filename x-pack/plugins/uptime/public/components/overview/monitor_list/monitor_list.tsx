@@ -27,7 +27,7 @@ import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
 import { CertStatusColumn } from './columns/cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
-import { URL_LABEL } from '../../common/translations';
+import { TAGS_LABEL, URL_LABEL } from '../../common/translations';
 import { EnableMonitorAlert } from './columns/enable_alert';
 import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
@@ -102,15 +102,18 @@ export const MonitorListComponent: ({
       align: 'left' as const,
       field: 'state.url.full',
       name: URL_LABEL,
-      width: '40%',
-      render: (url: string, summary: MonitorSummary) => (
-        <span>
-          <EuiLink href={url} target="_blank" color="text" external>
-            {url}
-          </EuiLink>
-          <MonitorTags summary={summary} />
-        </span>
+      width: '35%',
+      render: (url: string) => (
+        <EuiLink href={url} target="_blank" color="text" external>
+          {url}
+        </EuiLink>
       ),
+    },
+    {
+      align: 'left' as const,
+      field: 'state.monitor.name',
+      name: TAGS_LABEL,
+      render: (_name: string, summary: MonitorSummary) => <MonitorTags summary={summary} />,
     },
     {
       align: 'left' as const,

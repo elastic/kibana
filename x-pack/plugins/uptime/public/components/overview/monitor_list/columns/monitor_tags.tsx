@@ -35,7 +35,9 @@ export const MonitorTags = ({ summary }: Props) => {
   return (
     <EuiBadgeGroup>
       {tagsToDisplay.map((tag) => (
-        <EuiBadge color="hollow">{tag}</EuiBadge>
+        <EuiBadge color="hollow" className="eui-textTruncate" style={{ maxWidth: 120 }}>
+          {tag}
+        </EuiBadge>
       ))}
       {tags.length > toDisplay && (
         <EuiBadge
