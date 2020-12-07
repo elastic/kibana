@@ -356,12 +356,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   // `const res = resW as ResponseType<typeof stateP.controlState>;`
 
   let stateP: State = cloneDeep(currentState);
-  if (Either.isLeft<unknown, unknown>(resW)) {
-    if (resW.left.type === 'retryable_es_client_error') {
-      stateP = delayRetryState(stateP, resW.left);
-      return stateP;
-    }
+
+  // Handle retryable_es_client_errors. Other left values need to be handled
+  // by the control state specific code below.
+  if (Either.isLeft<unknown, unknown>(resW) && resW.left.type === 'retryable_es_client_error') {
+    // Retry the same step after an exponentially increasing delay.
+    stateP = delayRetryState(stateP, resW.left);
+    return stateP;
   } else {
+    // If the action didn't fail with a retryable_es_client_error, reset the
+    // retry counter and retryDelay state
     stateP = resetRetryState(stateP);
   }
 
@@ -685,12 +689,19 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // If there are no more results we have transformed all outdated
         // documents and can proceed to the next step
         if (Option.isSome(stateP.versionIndexReadyActions)) {
+          // If there are some versionIndexReadyActions we performed a full
+          // migration and need to point the aliases to our newly migrated
+          // index.
           return {
             ...stateP,
             controlState: 'MARK_VERSION_INDEX_READY',
             versionIndexReadyActions: stateP.versionIndexReadyActions,
           };
         } else {
+          // If there are none versionIndexReadyActions another instance
+          // already completed this migration and we only updated the mappings
+          // and transformed outdated documents for incase a new plugin was
+          // enabled.
           return {
             ...stateP,
             controlState: 'DONE',

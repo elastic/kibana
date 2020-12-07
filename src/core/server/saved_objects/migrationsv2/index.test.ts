@@ -71,13 +71,13 @@ describe('migrations v2', () => {
   test.todo('logs all messages');
 
   describe('model', () => {
-    describe('exponential retry delays', () => {
+    describe('exponential retry delays for retryable_es_client_error', () => {
       let state: State = { ...baseState, controlState: 'INIT' };
       const retryableError: RetryableEsClientError = {
         type: 'retryable_es_client_error',
         message: 'snapshot_in_progress_exception',
       };
-      test('sets retryCount, exponential retryDelay if an action fails with a RetryableEsClientError', () => {
+      test('sets retryCount, exponential retryDelay if an action fails with a retryable_es_client_error', () => {
         const states = new Array(10).fill(1).map(() => {
           state = model(state, Either.left(retryableError));
           return state;
@@ -141,6 +141,20 @@ describe('migrations v2', () => {
           },
         });
         const newState = model({ ...state, ...{ retryCount: 5, retryDelay: 32000 } }, res);
+
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+
+      test('resets retryCount, retryDelay when an action fails with a non-retryable error', () => {
+        const legacyReindexState = {
+          ...state,
+          ...{ controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK', retryCount: 5, retryDelay: 32000 },
+        };
+        const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.left({
+          type: 'target_index_had_write_block',
+        });
+        const newState = model(legacyReindexState as State, res);
 
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
