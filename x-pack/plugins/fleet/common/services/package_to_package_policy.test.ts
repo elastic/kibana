@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { installationStatuses } from '../constants';
 import { PackageInfo } from '../types';
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
 
@@ -29,7 +28,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         map: [],
       },
     },
-    status: installationStatuses.NotInstalled,
+    status: 'not_installed',
     release: 'experimental',
     owner: {
       github: 'elastic/fleet',
