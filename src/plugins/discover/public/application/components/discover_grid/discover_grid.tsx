@@ -72,9 +72,9 @@ export interface DiscoverGridProps {
   sort: SortPairArr[];
 }
 
-export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => (
-  <EuiDataGrid {...props} />
-));
+export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
+  return <EuiDataGrid {...props} />;
+});
 
 export const DiscoverGrid = ({
   ariaLabelledBy,
@@ -152,7 +152,7 @@ export const DiscoverGrid = ({
    * Render variables
    */
   const showDisclaimer = rowsLength === sampleSize && isOnLastPage;
-  const randomId = useMemo(() => String(htmlIdGenerator()), []);
+  const randomId = useMemo(() => htmlIdGenerator()(), []);
 
   const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
   const euiGridColumns = useMemo(
