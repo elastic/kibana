@@ -19,4 +19,6 @@
 
 export { getAutocompleteSuggestions } from './autocomplete';
 
-export { PainlessError, PainlessErrorService } from './error';
+export { PainlessError } from './error_listener';
+
+export { parseAndGetSyntaxErrors } from './parser';

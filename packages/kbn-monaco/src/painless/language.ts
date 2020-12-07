@@ -19,7 +19,7 @@
 
 import { monaco } from '../monaco_imports';
 
-import { WorkerProxyService, EditorStateService } from './services';
+import { WorkerProxyService, EditorStateService } from './lib';
 import { ID } from './constants';
 import { PainlessContext, Field } from './types';
 import { PainlessWorker } from './worker';

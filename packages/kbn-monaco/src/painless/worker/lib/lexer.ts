@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { CommonTokenStream, CharStream, CharStreams } from 'antlr4ts';
-import { painless_parser as PainlessParser } from '../antlr/painless_parser';
-import { painless_lexer as PainlessLexer } from '../antlr/painless_lexer';
-import { PainlessError, PainlessErrorService } from './lib';
+import { CharStream } from 'antlr4ts';
+import { painless_lexer as PainlessLexer } from '../../antlr/painless_lexer';
 
-class PainlessLexerEnhanced extends PainlessLexer {
+export class PainlessLexerEnhanced extends PainlessLexer {
   constructor(input: CharStream) {
     super(input);
   }
@@ -50,37 +48,4 @@ class PainlessLexerEnhanced extends PainlessLexer {
         return true;
     }
   }
-}
-
-const parse = (code: string) => {
-  const inputStream = CharStreams.fromString(code);
-  const lexer = new PainlessLexerEnhanced(inputStream);
-  // @ts-ignore
-  lexer.removeErrorListeners();
-  const painlessLangErrorListener = new PainlessErrorService();
-  // @ts-ignore
-  lexer.addErrorListener(painlessLangErrorListener);
-  // @ts-ignore
-  const tokenStream = new CommonTokenStream(lexer);
-  const parser = new PainlessParser(tokenStream);
-  // @ts-ignore
-  parser.removeErrorListeners();
-  // @ts-ignore
-  parser.addErrorListener(painlessLangErrorListener);
-  const errors: PainlessError[] = painlessLangErrorListener.getErrors();
-
-  return {
-    ast: parser.source(),
-    errors,
-  };
-};
-
-export function parseAndGetAST(code: string) {
-  const { ast } = parse(code);
-  return ast;
-}
-
-export function parseAndGetSyntaxErrors(code: string): PainlessError[] {
-  const { errors } = parse(code);
-  return errors;
 }

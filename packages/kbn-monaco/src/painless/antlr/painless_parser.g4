@@ -23,7 +23,7 @@ statement
 // "dangling-else" ambiguity by forcing the 'else' token to be consumed
 // as soon as one is found.  See (https://en.wikipedia.org/wiki/Dangling_else).
 rstatement
-    : IF LP expression RP trailer ( ELSE trailer | { this._input.LA(1) != PainlessParser.ELSE }? )                 # if
+    : IF LP expression RP trailer ( ELSE trailer | { this._input.LA(1) != painless_parser.ELSE }? )                 # if
     | WHILE LP expression RP ( trailer | empty )                                               # while
     | FOR LP initializer? SEMICOLON expression? SEMICOLON afterthought? RP ( trailer | empty ) # for
     | FOR LP decltype ID COLON expression RP trailer                                           # each

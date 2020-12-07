@@ -53,6 +53,7 @@ generatedAntlrFolderContents
   });
 
 // Rename generated parserListener file to snakecase to satisfy file casing check
+// There doesn't appear to be a way to fix this OOTB with antlr4ts-cli
 try {
   renameSync(
     join(generatedAntlrFolder, 'painless_parserListener.ts'),

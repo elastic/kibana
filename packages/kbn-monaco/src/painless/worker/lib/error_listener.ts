@@ -27,7 +27,7 @@ export interface PainlessError {
   message: string;
 }
 
-export class PainlessErrorService implements ANTLRErrorListener<any> {
+export class PainlessErrorListener implements ANTLRErrorListener<any> {
   private errors: PainlessError[] = [];
 
   syntaxError(
