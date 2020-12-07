@@ -518,7 +518,7 @@ export class SearchSource {
       );
       const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
-      if (uniqFieldNames.indexOf('*') === -1) {
+      if (!uniqFieldNames.includes('*')) {
         // filter down script_fields to only include items specified
         body.script_fields = pick(
           body.script_fields,
