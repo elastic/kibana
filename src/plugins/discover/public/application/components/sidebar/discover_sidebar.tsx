@@ -19,7 +19,7 @@
 import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import {
   EuiAccordion,
   EuiFlexItem,
@@ -105,7 +105,7 @@ export interface DiscoverSidebarProps {
    * @param metricType
    * @param eventName
    */
-  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   /**
    * Shows index pattern and a button that displays the sidebar in a flyout
    */
