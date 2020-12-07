@@ -61,20 +61,44 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Data streams', function () {
     describe('Get', () => {
+      const defaultHiddenDataStream = {
+        name: 'ilm-history-5',
+        timeStampField: { name: '@timestamp' },
+        indices: [{ name: '.ds-ilm-history-5-000001', uuid: 'generated-by-elasticsearch' }],
+        generation: 1,
+        health: 'green',
+        indexTemplateName: 'ilm-history',
+        ilmPolicyName: 'ilm-history-ilm-policy',
+        _meta: { description: 'index template for ILM history indices', managed: true },
+        privileges: { delete_index: true },
+        hidden: true,
+      };
+
       const testDataStreamName = 'test-data-stream';
 
       before(async () => await createDataStream(testDataStreamName));
       after(async () => await deleteDataStream(testDataStreamName));
 
-      it('returns an array of all data streams', async () => {
+      it('returns an array of all data streams (including hidden data streams)', async () => {
         const { body: dataStreams } = await supertest
           .get(`${API_BASE_PATH}/data_streams`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
         // ES determines these values so we'll just echo them back.
-        const { name: indexName, uuid } = dataStreams[0].indices[0];
+        const { name: hiddenDsIndexName, uuid: hiddenDsIndexUuid } = dataStreams[0].indices[0];
+        const { name: indexName, uuid } = dataStreams[1].indices[0];
+
         expect(dataStreams).to.eql([
+          {
+            ...defaultHiddenDataStream,
+            indices: [
+              {
+                name: hiddenDsIndexName,
+                uuid: hiddenDsIndexUuid,
+              },
+            ],
+          },
           {
             name: testDataStreamName,
             privileges: {
@@ -90,6 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
             generation: 1,
             health: 'yellow',
             indexTemplateName: testDataStreamName,
+            hidden: false,
           },
         ]);
       });
@@ -101,11 +126,13 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         // ES determines these values so we'll just echo them back.
-        const { name: indexName, uuid } = dataStreams[0].indices[0];
-        const { storageSize, ...dataStreamWithoutStorageSize } = dataStreams[0];
+        // dataStreams[0] is a hidden data stream created by ES
+        const { name: indexName, uuid } = dataStreams[1].indices[0];
+        const { storageSize, ...dataStreamWithoutStorageSize } = dataStreams[1];
         assertDataStreamStorageSizeExists(storageSize);
 
-        expect(dataStreams.length).to.be(1);
+        expect(dataStreams.length).to.be(2);
+
         expect(dataStreamWithoutStorageSize).to.eql({
           name: testDataStreamName,
           privileges: {
@@ -122,6 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'yellow',
           indexTemplateName: testDataStreamName,
           maxTimeStamp: 0,
+          hidden: false,
         });
       });
 
@@ -152,6 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'yellow',
           indexTemplateName: testDataStreamName,
           maxTimeStamp: 0,
+          hidden: false,
         });
       });
     });

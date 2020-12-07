@@ -33,7 +33,7 @@ import { Section } from '../home';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
 import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';
-import { FilterListButton, Filters } from '../template_list/components';
+import { FilterListButton, Filters } from '../components';
 
 export type DataStreamFilterName = 'managed' | 'hidden';
 interface MatchParams {
@@ -155,11 +155,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <FilterListButton<DataStreamFilterName> filters={filters} onChange={setFilters} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <FilterListButton<DataStreamFilterName> filters={filters} onChange={setFilters} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
