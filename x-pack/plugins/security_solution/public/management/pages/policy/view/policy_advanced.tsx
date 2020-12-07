@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { policyConfig } from '../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
@@ -78,15 +79,25 @@ function getValue(obj: Record<string, unknown>, path: string[]) {
   }
   return currentPolicyConfig[path[path.length - 1]];
 }
-
-const warningMessage = `This section contains policy values that support advanced use cases. If not configured
-properly, these values can cause unpredictable behavior. Please consult documentation
-carefully or contact support before editing these values.`;
+const calloutTitle = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.advanced.calloutTitle',
+  {
+    defaultMessage: 'Proceed with caution!',
+  }
+);
+const warningMessage = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.advanced.warningMessage',
+  {
+    defaultMessage: `This section contains policy values that support advanced use cases. If not configured
+    properly, these values can cause unpredictable behavior. Please consult documentation
+    carefully or contact support before editing these values.`,
+  }
+);
 
 export const AdvancedPolicyForms = React.memo(() => {
   return (
     <>
-      <EuiCallOut title="Proceed with caution!" color="warning" iconType="alert">
+      <EuiCallOut title={calloutTitle} color="warning" iconType="alert">
         <p>{warningMessage}</p>
       </EuiCallOut>
       <EuiSpacer />
@@ -161,9 +172,7 @@ const PolicyAdvanced = React.memo(
           label={
             <EuiFlexGroup>
               <EuiFlexItem>{configPath.join('.')}</EuiFlexItem>
-              {documentation === '' ? (
-                <></>
-              ) : (
+              {documentation && (
                 <EuiFlexItem>
                   <EuiIconTip content={documentation} position="right" />
                 </EuiFlexItem>
