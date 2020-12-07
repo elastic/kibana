@@ -489,86 +489,26 @@ const expectAssetsInstalled = ({
         test_metrics: 'metrics-all_assets.test_metrics-*',
       },
       package_assets: [
-        {
-          id: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ilm_policy/all_assets.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/default.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/pipeline1.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/pipeline2.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/data_stream/test_logs/fields/ecs.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/data_stream/test_logs/fields/fields.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/data_stream/test_logs/manifest.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/data_stream/test_metrics/fields/ecs.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/data_stream/test_metrics/fields/fields.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/data_stream/test_metrics/manifest.yml',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/docs/README.md',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/elasticsearch/transform/test/default.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/img/logo_overrides_64_color.svg',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/kibana/dashboard/sample_dashboard.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/kibana/dashboard/sample_dashboard2.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/kibana/index_pattern/invalid.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/kibana/index_pattern/test_index_pattern.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/kibana/search/sample_search.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/kibana/visualization/sample_visualization.json',
-          type: 'epm-packages-assets',
-        },
-        {
-          id: 'all_assets-0.1.0/manifest.yml',
-          type: 'epm-packages-assets',
-        },
+        { id: '333a22a1-e639-5af5-ae62-907ffc83d603', type: 'epm-packages-assets' },
+        { id: '256f3dad-6870-56c3-80a1-8dfa11e2d568', type: 'epm-packages-assets' },
+        { id: '3fa0512f-bc01-5c2e-9df1-bc2f2a8259c8', type: 'epm-packages-assets' },
+        { id: 'ea334ad8-80c2-5acd-934b-2a377290bf97', type: 'epm-packages-assets' },
+        { id: '96c6eb85-fe2e-56c6-84be-5fda976796db', type: 'epm-packages-assets' },
+        { id: '2d73a161-fa69-52d0-aa09-1bdc691b95bb', type: 'epm-packages-assets' },
+        { id: '0a00c2d2-ce63-5b9c-9aa0-0cf1938f7362', type: 'epm-packages-assets' },
+        { id: 'b36e6dd0-58f7-5dd0-a286-8187e4019274', type: 'epm-packages-assets' },
+        { id: 'f839c76e-d194-555a-90a1-3265a45789e4', type: 'epm-packages-assets' },
+        { id: '9af7bbb3-7d8a-50fa-acc9-9dde6f5efca2', type: 'epm-packages-assets' },
+        { id: '1e97a20f-9d1c-529b-8ff2-da4e8ba8bb71', type: 'epm-packages-assets' },
+        { id: '8cfe0a2b-7016-5522-87e4-6d352360d1fc', type: 'epm-packages-assets' },
+        { id: 'bd5ff3c5-655e-5385-9918-b60ff3040aad', type: 'epm-packages-assets' },
+        { id: '0954ce3b-3165-5c1f-a4c0-56eb5f2fa487', type: 'epm-packages-assets' },
+        { id: '60d6d054-57e4-590f-a580-52bf3f5e7cca', type: 'epm-packages-assets' },
+        { id: '47758dc2-979d-5fbe-a2bd-9eded68a5a43', type: 'epm-packages-assets' },
+        { id: '318959c9-997b-5a14-b328-9fc7355b4b74', type: 'epm-packages-assets' },
+        { id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58', type: 'epm-packages-assets' },
+        { id: '53c94591-aa33-591d-8200-cd524c2a0561', type: 'epm-packages-assets' },
+        { id: 'b658d2d4-752e-54b8-afc2-4c76155c1466', type: 'epm-packages-assets' },
       ],
       name: 'all_assets',
       version: '0.1.0',
