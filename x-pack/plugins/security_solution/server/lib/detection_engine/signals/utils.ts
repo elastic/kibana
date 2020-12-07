@@ -663,7 +663,7 @@ export const createTotalHitsFromSearchResult = ({
   return totalHits;
 };
 
-interface ReturnType {
+export interface TimestampsAndIndices {
   [timestampString: string]: string[]; // maps timestampString like @timestamp or 'event.ingested' to the indices that contain that timestamp mapping
 }
 
@@ -673,7 +673,7 @@ export const checkMappingForTimestampFields = async (
   services: AlertServices,
   logger: Logger,
   buildRuleMessage: BuildRuleMessage
-): Promise<ReturnType> => {
+): Promise<TimestampsAndIndices> => {
   try {
     const foundMappings: GetFieldMappingType = await services.callCluster(
       'indices.getFieldMapping',
@@ -694,7 +694,7 @@ export const checkMappingForTimestampFields = async (
         ),
         ...acc,
       };
-    }, {} as ReturnType);
+    }, {} as TimestampsAndIndices);
     return toReturn;
   } catch (exc) {
     logger.error(
@@ -711,10 +711,11 @@ export interface PreCheckRuleResultInterface {
   failingIndexes: string[];
   successIndexes: string[];
   resultMessages: string[];
+  timestampsAndIndices: TimestampsAndIndices;
 }
 
 // run privilege checks before rule execution begins
-export const preCheckRuleExecution = async (
+export const preExecutionRuleCheck = async (
   indices: string[],
   timestamps: string[],
   services: AlertServices,
@@ -726,6 +727,7 @@ export const preCheckRuleExecution = async (
     resultMessages: [],
     successIndexes: [],
     failingIndexes: [],
+    timestampsAndIndices: {},
   };
   const timestampsAndIndices = await checkMappingForTimestampFields(
     indices,
@@ -778,6 +780,7 @@ export const preCheckRuleExecution = async (
           ],
           failingIndexes: [...acc.failingIndexes, ...indices],
           successIndexes: [...acc.successIndexes],
+          timestampsAndIndices,
         };
       }
       // find all indexes that match given pattern, make sure the length of all indexes that match pattern in timestampsAndIndices[timestamp] is equal to the indexPatternsCount[regExp]
@@ -829,6 +832,7 @@ export const preCheckRuleExecution = async (
         ],
         failingIndexes: [...acc.failingIndexes, ...failingIndexes],
         successIndexes: [...acc.successIndexes, ...successIndexes],
+        timestampsAndIndices,
       };
     },
     { ...toReturn } as PreCheckRuleResultInterface

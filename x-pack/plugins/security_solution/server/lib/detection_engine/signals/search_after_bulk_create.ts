@@ -29,8 +29,8 @@ export const searchAfterAndBulkCreate = async ({
   logger,
   eventsTelemetry,
   id,
-  inputIndexPattern,
   signalsIndex,
+  timestampsAndIndices,
   filter,
   actions,
   name,
@@ -54,20 +54,9 @@ export const searchAfterAndBulkCreate = async ({
   // signalsCreatedCount keeps track of how many signals we have created,
   // to ensure we don't exceed maxSignals
   let signalsCreatedCount = 0;
-  const timestampsToSort = ruleParams.timestampOverride
-    ? [ruleParams.timestampOverride, '@timestamp']
-    : ['@timestamp'];
+  const timestampsToSort = Object.keys(timestampsAndIndices);
 
-  // tomorrow I need to figure out how to get rid of this
-  const timestampsAndIndices = await checkMappingForTimestampFields(
-    inputIndexPattern,
-    timestampsToSort,
-    services,
-    logger,
-    buildRuleMessage
-  );
-
-  if (Object.keys(timestampsAndIndices).length === 0) {
+  if (timestampsToSort == null || timestampsToSort.length === 0) {
     throw Error(`No indices contained timestamp fields: ${JSON.stringify(timestampsToSort)}`);
   }
 
@@ -97,18 +86,6 @@ export const searchAfterAndBulkCreate = async ({
       while (signalsCreatedCount < tuple.maxSignals) {
         try {
           logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
-
-          logger.debug(
-            `inputIndexPattern: ${JSON.stringify(
-              inputIndexPattern,
-              null,
-              2
-            )}, timestampsAndIndices[timestamp].length: ${JSON.stringify(
-              timestampsAndIndices[timestamp],
-              null,
-              2
-            )}`
-          );
 
           // perform search_after with optionally undefined sortId
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({

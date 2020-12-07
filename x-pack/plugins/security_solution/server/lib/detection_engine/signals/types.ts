@@ -27,6 +27,7 @@ import { Logger } from '../../../../../../../src/core/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
+import { TimestampsAndIndices } from './utils';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -220,8 +221,8 @@ export interface SearchAfterAndBulkCreateParams {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
   id: string;
-  inputIndexPattern: string[];
   signalsIndex: string;
+  timestampsAndIndices: TimestampsAndIndices;
   name: string;
   actions: RuleAlertAction[];
   createdAt: string;

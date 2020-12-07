@@ -42,7 +42,7 @@ import {
   createErrorsFromShard,
   createSearchAfterReturnType,
   mergeReturns,
-  preCheckRuleExecution,
+  preExecutionRuleCheck,
   createSearchAfterReturnTypeFromResponse,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
@@ -170,7 +170,7 @@ export const signalRulesAlertType = ({
         ? [timestampOverride, '@timestamp']
         : ['@timestamp'];
 
-      const preCheckResult = await preCheckRuleExecution(
+      const preCheckResult = await preExecutionRuleCheck(
         inputIndexPattern,
         timestampsToSort,
         services,
@@ -523,7 +523,7 @@ export const signalRulesAlertType = ({
             logger,
             eventsTelemetry,
             id: alertId,
-            inputIndexPattern: filteredIndexPattern,
+            timestampsAndIndices: preCheckResult.timestampsAndIndices,
             signalsIndex: outputIndex,
             filter: esFilter,
             actions,

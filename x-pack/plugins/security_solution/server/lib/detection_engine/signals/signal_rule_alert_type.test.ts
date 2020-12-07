@@ -16,7 +16,7 @@ import {
   getListsClient,
   getExceptions,
   sortExceptionItems,
-  preCheckRuleExecution,
+  preExecutionRuleCheck,
 } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
@@ -123,7 +123,7 @@ describe('rules_notification_alert_type', () => {
       searchAfterTimes: [],
       createdSignalsCount: 10,
     });
-    (preCheckRuleExecution as jest.Mock).mockImplementation((indices, t, s, l, b) => ({
+    (preExecutionRuleCheck as jest.Mock).mockImplementation((indices, t, s, l, b) => ({
       result: 'success',
       resultMessages: [],
       successIndexes: [...indices],
