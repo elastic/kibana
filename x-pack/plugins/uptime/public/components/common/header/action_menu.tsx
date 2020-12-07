@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { HeaderMenuPortal } from '../../../../../observability/public';
 import { AppMountParameters } from '../../../../../../../src/core/public';
-import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
   defaultMessage: 'Add data',
