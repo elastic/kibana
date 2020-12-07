@@ -78,7 +78,6 @@ export interface DashboardContainerServices {
   overlays: CoreStart['overlays'];
   uiSettings: IUiSettingsClient;
   embeddable: EmbeddableStart;
-  hideWriteControls: boolean;
   uiActions: UiActionsStart;
   http: CoreStart['http'];
 }
