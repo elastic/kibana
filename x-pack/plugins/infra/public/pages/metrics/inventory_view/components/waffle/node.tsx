@@ -54,6 +54,7 @@ export const Node = class extends React.PureComponent<Props, State> {
       defaultMessage: '{nodeName}, click to open menu',
       values: { nodeName: node.name },
     });
+
     return (
       <>
         <NodeContextMenu
@@ -102,7 +103,12 @@ export const Node = class extends React.PureComponent<Props, State> {
   }
 
   private togglePopover = () => {
-    this.setState((prevState) => ({ isPopoverOpen: !prevState.isPopoverOpen }));
+    const { nodeType } = this.props;
+    if (nodeType === 'host') {
+      this.toggleNewOverlay();
+    } else {
+      this.setState((prevState) => ({ isPopoverOpen: !prevState.isPopoverOpen }));
+    }
   };
 
   private toggleNewOverlay = () => {
