@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constants/states';
 import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/data_frame_task_state';
 import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import { JobType } from '../../../../plugins/ml/common/types/saved_objects';
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
@@ -880,12 +881,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED);
     },
 
-    async asignJobToSpaces(
-      jobId: string,
-      jobType: 'anomaly-detector' | 'data-frame-analytics',
-      spacesToAdd: string[],
-      space?: string
-    ) {
+    async asignJobToSpaces(jobId: string, jobType: JobType, spacesToAdd: string[], space?: string) {
       const { body } = await kbnSupertest
         .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/assign_job_to_space`)
         .set(COMMON_REQUEST_HEADERS)
@@ -897,7 +893,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async removeJobFromSpaces(
       jobId: string,
-      jobType: 'anomaly-detector' | 'data-frame-analytics',
+      jobType: JobType,
       spacesToRemove: string[],
       space?: string
     ) {
@@ -910,11 +906,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       expect(body).to.eql({ [jobId]: { success: true } });
     },
 
-    async assertJobSpaces(
-      jobId: string,
-      jobType: 'anomaly-detector' | 'data-frame-analytics',
-      expectedSpaces: string[]
-    ) {
+    async assertJobSpaces(jobId: string, jobType: JobType, expectedSpaces: string[]) {
       const { body } = await kbnSupertest
         .get('/api/ml/saved_objects/jobs_spaces')
         .set(COMMON_REQUEST_HEADERS)

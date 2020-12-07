@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { JobType } from '../../../../../plugins/ml/common/types/saved_objects';
 
 export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
@@ -20,7 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(
     requestBody: {
-      jobType: 'anomaly-detector' | 'data-frame-analytics';
+      jobType: JobType;
       jobIds: string[];
       spaces: string[];
     },

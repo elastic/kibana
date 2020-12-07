@@ -8,6 +8,7 @@ import { ProvidedType } from '@kbn/test/types/ftr';
 import { savedSearches, dashboards } from './test_resources_data';
 import { COMMON_REQUEST_HEADERS } from './common_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { JobType } from '../../../../plugins/ml/common/types/saved_objects';
 
 export enum SavedObjectType {
   CONFIG = 'config',
@@ -513,10 +514,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       await this.assertSavedObjectExistsById(id, SavedObjectType.DASHBOARD);
     },
 
-    async deleteMlSavedObjectByJobId(
-      jobId: string,
-      jobType: 'anomaly-detector' | 'data-frame-analytics'
-    ) {
+    async deleteMlSavedObjectByJobId(jobId: string, jobType: JobType) {
       const savedObjectId = `${jobType}-${jobId}`;
       await this.deleteSavedObjectById(savedObjectId, SavedObjectType.ML_JOB, true);
     },
