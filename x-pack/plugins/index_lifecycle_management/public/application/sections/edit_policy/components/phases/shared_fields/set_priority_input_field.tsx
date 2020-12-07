@@ -12,13 +12,13 @@ import { Phases } from '../../../../../../../common/types';
 
 import { UseField, NumericField } from '../../../../../../shared_imports';
 
-import { LearnMoreLink } from '../../';
+import { LearnMoreLink } from '../..';
 
 interface Props {
   phase: keyof Phases & string;
 }
 
-export const SetPriorityInput: FunctionComponent<Props> = ({ phase }) => {
+export const SetPriorityInputField: FunctionComponent<Props> = ({ phase }) => {
   return (
     <EuiDescribedFormGroup
       title={
