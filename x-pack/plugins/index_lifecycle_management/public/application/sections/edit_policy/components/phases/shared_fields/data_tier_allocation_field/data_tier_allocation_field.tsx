@@ -146,7 +146,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
         />
 
         {/* Data tier related warnings and call-to-action notices */}
-        {renderNotice()}
+        {!isLoading && renderNotice()}
       </div>
     </EuiDescribedFormGroup>
   );
