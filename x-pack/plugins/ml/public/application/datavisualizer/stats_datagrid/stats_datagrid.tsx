@@ -25,6 +25,7 @@ import { DistinctValues } from './components/field_data_column/distinct_values';
 import { NumberContentPreview } from './components/field_data_column/number_content_preview';
 import { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
+import { TopValuesPreview } from './components/field_data_column/top_values_preview';
 
 const FIELD_NAME = 'fieldName';
 
@@ -203,6 +204,10 @@ export const DataVisualizerDataGrid = ({
       ),
       render: (item: FieldVisConfig) => {
         if (item === undefined || showDistributions === false) return null;
+        if (item.type === 'keyword' && item.stats?.topValues !== undefined) {
+          return <TopValuesPreview config={item} />;
+        }
+
         if (item.type === 'number' && item.stats?.distribution !== undefined) {
           return <NumberContentPreview config={item} />;
         }

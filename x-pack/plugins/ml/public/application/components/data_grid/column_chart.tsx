@@ -18,9 +18,10 @@ interface Props {
   chartData: ChartData;
   columnType: EuiDataGridColumn;
   dataTestSubj: string;
+  compressed?: boolean;
 }
 
-export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj }) => {
+export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj, compressed }) => {
   const { data, legendText, xScaleType } = useColumnChart(chartData, columnType);
 
   return (
@@ -68,7 +69,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj }) 
       >
         {legendText}
       </div>
-      <div data-test-subj={`${dataTestSubj}-id`}>{columnType.id}</div>
+      {!compressed && <div data-test-subj={`${dataTestSubj}-id`}>{columnType.id}</div>}
     </div>
   );
 };

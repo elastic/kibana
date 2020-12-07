@@ -45,25 +45,26 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor }) => {
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
   return (
     <div data-test-subj="mlFieldDataCardTopValues">
-      {topValues.map((value: any) => (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
-          <EuiFlexItem grow={false} style={{ width: 100 }} className="eui-textTruncate">
-            <EuiToolTip content={kibanaFieldFormat(value.key, fieldFormat)} position="right">
-              <EuiText size="xs" textAlign="right" color="subdued">
-                {kibanaFieldFormat(value.key, fieldFormat)}
+      {Array.isArray(topValues) &&
+        topValues.map((value: any) => (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
+            <EuiFlexItem grow={false} style={{ width: 100 }} className="eui-textTruncate">
+              <EuiToolTip content={kibanaFieldFormat(value.key, fieldFormat)} position="right">
+                <EuiText size="xs" textAlign="right" color="subdued">
+                  {kibanaFieldFormat(value.key, fieldFormat)}
+                </EuiText>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem data-test-subj="mlFieldDataCardTopValueBar">
+              <EuiProgress value={value.doc_count} max={progressBarMax} color={barColor} size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ width: 70 }} className="eui-textTruncate">
+              <EuiText size="xs" textAlign="left" color="subdued">
+                {getPercentLabel(value.doc_count, progressBarMax)}
               </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem data-test-subj="mlFieldDataCardTopValueBar">
-            <EuiProgress value={value.doc_count} max={progressBarMax} color={barColor} size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ width: 70 }} className="eui-textTruncate">
-            <EuiText size="xs" textAlign="left" color="subdued">
-              {getPercentLabel(value.doc_count, progressBarMax)}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ))}
       {isTopValuesSampled === true && (
         <Fragment>
           <EuiSpacer size="xs" />

@@ -124,7 +124,7 @@ type ChartDataItem = NumericDataItem | OrdinalDataItem;
 export type ChartData = NumericChartData | OrdinalChartData | UnsupportedChartData;
 
 type LegendText = string | JSX.Element;
-const getLegendText = (chartData: ChartData): LegendText => {
+export const getLegendText = (chartData: ChartData): LegendText => {
   if (chartData.type === 'unsupported') {
     return i18n.translate('xpack.ml.dataGridChart.histogramNotAvailable', {
       defaultMessage: 'Chart not supported.',

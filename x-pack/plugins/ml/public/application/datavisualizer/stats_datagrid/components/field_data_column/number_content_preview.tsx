@@ -12,7 +12,7 @@ import {
   buildChartDataFromStats,
 } from '../../../index_based/components/field_data_card/metric_distribution_chart';
 
-const METRIC_DISTRIBUTION_CHART_WIDTH = 200;
+const METRIC_DISTRIBUTION_CHART_WIDTH = 400;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 80;
 
 export const NumberContentPreview: FC<FieldDataCardProps> = ({ config }) => {
@@ -32,7 +32,7 @@ export const NumberContentPreview: FC<FieldDataCardProps> = ({ config }) => {
       height={METRIC_DISTRIBUTION_CHART_HEIGHT}
       chartData={distributionChartData}
       fieldFormat={fieldFormat}
-      hideXAxis={false}
+      hideXAxis={true}
     />
   );
 };

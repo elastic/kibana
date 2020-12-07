@@ -83,6 +83,21 @@ export const MetricDistributionChart: FC<Props> = ({
       <Chart>
         <Settings
           theme={{
+            background: { color: 'transparent' },
+            chartMargins: {
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 1,
+            },
+            chartPaddings: {
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+            },
+            scales: { barsPadding: 0.1 },
+
             colors: {
               vizColors: [AREA_SERIES_COLOR],
             },
