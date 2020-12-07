@@ -254,3 +254,8 @@ export type DynamicStylePropertyOptions =
   | LabelDynamicOptions
   | OrientationDynamicOptions
   | SizeDynamicOptions;
+
+export type DynamicStyleProperties = {
+  type: STYLE_TYPE.DYNAMIC;
+  options: DynamicStylePropertyOptions;
+};
