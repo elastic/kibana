@@ -352,8 +352,7 @@ export const getTopNavConfig = (
                     path,
                   });
 
-                  // TODO: this is just to get past the Saved object modal validation
-                  // we can do better probably
+                  // TODO: Saved Object Modal requires `id` to be defined so this is a workaround
                   return { id: true };
                 }
 
