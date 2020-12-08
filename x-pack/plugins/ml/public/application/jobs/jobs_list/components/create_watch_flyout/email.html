@@ -22,7 +22,7 @@
     <br />
     <br />
 
-    <a href="<%= serverAddress %>#/explorer/?_g=(ml:(jobIds:!('{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0._source.job_id}}')),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.start.0}}',mode:absolute,to:'{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.end.0}}'))&_a=(filters:!(),mlAnomaliesTable:(intervalValue:auto,thresholdValue:0),mlExplorerSwimlane:(selectedLane:Overall,selectedTime:{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.timestamp_epoch.0}},selectedType:overall),query:(query_string:(analyze_wildcard:!t,query:'*')))">
+    <a href="<%= serverAddress %>#/explorer/?_g=(ml:(jobIds:!('{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0._source.job_id}}')),time:(from:'{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.start.0}}',mode:absolute,to:'{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.end.0}}'))&_a=(filters:!(),mlAnomaliesTable:(intervalValue:auto,thresholdValue:0),mlExplorerSwimlane:(selectedLane:Overall,selectedTime:{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.timestamp_epoch.0}},selectedType:overall),query:(query_string:(analyze_wildcard:!t,query:'*')))">
       <%= openInAnomalyExplorerLinkText %>
     </a>
     <br />

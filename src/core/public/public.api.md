@@ -12,6 +12,7 @@ import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
+import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
 import { History } from 'history';
@@ -885,7 +886,11 @@ export interface OverlayFlyoutOpenOptions {
     // (undocumented)
     closeButtonAriaLabel?: string;
     // (undocumented)
+    maxWidth?: boolean | number | string;
+    // (undocumented)
     ownFocus?: boolean;
+    // (undocumented)
+    size?: EuiFlyoutSize;
 }
 
 // @public
