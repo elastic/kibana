@@ -415,8 +415,8 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
   function removeElFromColumns(el, columns) {
     const index = columns.indexOf(el);
-    if (index !== -1 && columns.splice(index, 1).length > 0) {
-      return columns.splice(index, 1);
+    if (index !== -1) {
+      columns.splice(index, 1);
     }
     return columns;
   }
@@ -431,6 +431,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
   function getDefaultColumns() {
     const columns = [...savedSearch.columns];
+
     if ($scope.useNewFieldsApi) {
       return removeSourceFromColumns(columns);
     } else if (columns.length > 0) {

@@ -19,12 +19,7 @@
 
 import _ from 'lodash';
 import { IndexPattern } from './index_pattern';
-import {
-  ES_FIELD_TYPES,
-  FieldFormatsContentType,
-  IndexPatternField,
-  KBN_FIELD_TYPES,
-} from '../../../common';
+import { FieldFormatsContentType } from '../../../common';
 
 const formattedCache = new WeakMap();
 const partialFormattedCache = new WeakMap();
@@ -38,20 +33,8 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     fieldName: string,
     type: FieldFormatsContentType = 'html'
   ) {
-    let field = indexPattern.fields.getByName(fieldName);
-    let format = defaultFormat;
-    if (field) {
-      format = indexPattern.getFormatterForField(field);
-    } else if (fieldName === 'fields') {
-      field = new IndexPatternField({
-        name: fieldName,
-        type: KBN_FIELD_TYPES._SOURCE,
-        esTypes: [ES_FIELD_TYPES._SOURCE],
-        searchable: true,
-        aggregatable: true,
-      });
-      format = indexPattern.getFormatterForField(field);
-    }
+    const field = indexPattern.fields.getByName(fieldName);
+    const format = field ? indexPattern.getFormatterForField(field) : defaultFormat;
 
     return format.convert(val, type, { field, hit, indexPattern });
   }
@@ -104,10 +87,8 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
       partials = {};
       partialFormattedCache.set(hit, partials);
     }
-    const unformattedFields = ['fields', '_source'];
-    const val = unformattedFields.includes(fieldName)
-      ? hit[fieldName]
-      : indexPattern.flattenHit(hit)[fieldName];
+
+    const val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
     return convert(hit, val, fieldName);
   };
 

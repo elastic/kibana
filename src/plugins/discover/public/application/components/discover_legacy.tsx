@@ -167,7 +167,8 @@ export function DiscoverLegacy({
 
   const removeElFromColumns = (el: string, columns: string[]) => {
     const index = columns.indexOf(el);
-    return columns.splice(index, 1);
+    columns.splice(index, 1);
+    return columns;
   };
 
   const getDefaultColumns = (column: string, cols: string[]) => {

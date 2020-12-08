@@ -17,12 +17,33 @@
  * under the License.
  */
 
-import { SourceFormat } from './source';
-import { FIELD_FORMAT_IDS } from '../types';
+import { keys } from 'lodash';
+import { doTemplate, SourceFormat } from './source';
+import { FIELD_FORMAT_IDS, HtmlContextTypeConvert } from '../types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { shortenDottedString } from '../../utils';
 
 export class FieldsFormat extends SourceFormat {
   static id = FIELD_FORMAT_IDS.FIELDS;
   static title = 'fields';
   static fieldType = KBN_FIELD_TYPES._SOURCE;
+
+  htmlConvert: HtmlContextTypeConvert = (value, options = {}) => {
+    const { hit, indexPattern } = options;
+
+    const highlights = (hit && hit.highlight) || {};
+    const formatted = indexPattern.formatHit(hit);
+    const highlightPairs: any[] = [];
+    const sourcePairs: any[] = [];
+    const isShortDots = false;
+
+    keys(formatted).forEach((key) => {
+      const pairs = highlights[key] ? highlightPairs : sourcePairs;
+      const newField = isShortDots ? shortenDottedString(key) : key;
+      const val = formatted[key];
+      pairs.push([newField, val]);
+    }, []);
+
+    return doTemplate({ defPairs: highlightPairs.concat(sourcePairs) });
+  };
 }
