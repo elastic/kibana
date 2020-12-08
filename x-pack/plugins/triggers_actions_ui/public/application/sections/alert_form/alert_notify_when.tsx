@@ -22,15 +22,11 @@ import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { InitialAlert } from './alert_reducer';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
-import {
-  getDurationNumberInItsUnit,
-  getDurationUnitValue,
-} from '../../../../../alerts/common/parse_duration';
 import { AlertNotifyWhenType } from '../../../types';
 
-const DEFAULT_ACTION_FREQUENCY_VALUE: AlertNotifyWhenType = 'onActionGroupChange';
+const DEFAULT_NOTIFY_WHEN_VALUE: AlertNotifyWhenType = 'onActionGroupChange';
 
-const ACTION_FREQUENCY_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
+const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
   {
     value: 'onActionGroupChange',
     inputDisplay: 'Run only on status change',
@@ -40,14 +36,14 @@ const ACTION_FREQUENCY_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>>
         <strong>
           <FormattedMessage
             defaultMessage="Run only on status change"
-            id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.onActionGroupChange.label"
+            id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActionGroupChange.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
               defaultMessage="Actions will run when the alert status changes."
-              id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.onActionGroupChange.description"
+              id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActionGroupChange.description"
             />
           </p>
         </EuiText>
@@ -63,14 +59,14 @@ const ACTION_FREQUENCY_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>>
         <strong>
           <FormattedMessage
             defaultMessage="Run every time alert is active"
-            id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.onActiveAlert.label"
+            id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
               defaultMessage="Actions will run with every active alert execution."
-              id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.onActiveAlert.description"
+              id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.description"
             />
           </p>
         </EuiText>
@@ -86,14 +82,14 @@ const ACTION_FREQUENCY_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>>
         <strong>
           <FormattedMessage
             defaultMessage="Set a custom action interval"
-            id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.onThrottleInterval.label"
+            id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onThrottleInterval.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
               defaultMessage="Set a custom interval for the actions to run when the alert is active."
-              id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.onThrottleInterval.description"
+              id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onThrottleInterval.description"
             />
           </p>
         </EuiText>
@@ -102,66 +98,44 @@ const ACTION_FREQUENCY_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>>
   },
 ];
 
-export interface ActionFrequencyOpts {
-  throttle: number | null;
-  notifyWhen: AlertNotifyWhenType;
-}
-
-interface ActionFrequencyFormProps {
+interface AlertNotifyWhenProps {
   alert: InitialAlert;
   throttle: number | null;
   throttleUnit: string;
-  onActionFreqencyChange: (opts: ActionFrequencyOpts) => void;
+  onNotifyWhenChange: (notifyWhen: AlertNotifyWhenType) => void;
   onThrottleChange: (throttle: number | null, throttleUnit: string) => void;
-  onThrottleUnitChange: (throttleUnit: string) => void;
 }
 
-export const ActionFrequencyForm = ({
+export const AlertNotifyWhen = ({
   alert,
-  onActionFreqencyChange,
+  throttle,
+  throttleUnit,
+  onNotifyWhenChange,
   onThrottleChange,
-  onThrottleUnitChange,
-}: ActionFrequencyFormProps) => {
-  const [alertThrottle, setAlertThrottle] = useState<number | null>(null);
-  const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('m');
-  const [showCustomActionFrequencyOpts, setShowCustomActionFrequencyOpts] = useState<boolean>(
-    false
-  );
-  const [actionFrequencyValue, setActionFrequencyValue] = useState<AlertNotifyWhenType>(
-    DEFAULT_ACTION_FREQUENCY_VALUE
+}: AlertNotifyWhenProps) => {
+  const [alertThrottle, setAlertThrottle] = useState<number>(throttle || 1);
+  const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
+  const [notifyWhenValue, setNotifyWhenValue] = useState<AlertNotifyWhenType>(
+    DEFAULT_NOTIFY_WHEN_VALUE
   );
 
   useEffect(() => {
     if (alert.notifyWhen) {
-      setActionFrequencyValue(alert.notifyWhen);
+      setNotifyWhenValue(alert.notifyWhen);
     } else {
       // If 'notifyWhen' is not set, derive value from existence of throttle value
-      setActionFrequencyValue(alert.throttle ? 'onThrottleInterval' : 'onActiveAlert');
-    }
-
-    if (!alert.throttle) {
-      setAlertThrottle(
-        alert.schedule.interval ? getDurationNumberInItsUnit(alert.schedule.interval) : null
-      );
-      setAlertThrottleUnit(
-        alert.schedule.interval ? getDurationUnitValue(alert.schedule.interval) : 'm'
-      );
-    } else {
-      setAlertThrottle(alert.throttle ? getDurationNumberInItsUnit(alert.throttle) : null);
-      setAlertThrottleUnit(alert.throttle ? getDurationUnitValue(alert.throttle) : 'm');
+      setNotifyWhenValue(alert.throttle ? 'onThrottleInterval' : 'onActiveAlert');
     }
   }, [alert]);
 
   useEffect(() => {
-    setShowCustomActionFrequencyOpts(actionFrequencyValue === 'onThrottleInterval');
-  }, [actionFrequencyValue]);
+    setShowCustomThrottleOpts(notifyWhenValue === 'onThrottleInterval');
+  }, [notifyWhenValue]);
 
-  const onActionFrequencyValueChange = useCallback((newValue: AlertNotifyWhenType) => {
-    onActionFreqencyChange({
-      notifyWhen: newValue,
-      throttle: newValue === 'onThrottleInterval' ? alertThrottle! : null,
-    });
-    setActionFrequencyValue(newValue);
+  const onNotifyWhenValueChange = useCallback((newValue: AlertNotifyWhenType) => {
+    onThrottleChange(newValue === 'onThrottleInterval' ? alertThrottle : null, throttleUnit);
+    onNotifyWhenChange(newValue);
+    setNotifyWhenValue(newValue);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -187,12 +161,12 @@ export const ActionFrequencyForm = ({
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
             <EuiSuperSelect
-              data-test-subj="actionFrequencySelect"
-              options={ACTION_FREQUENCY_OPTIONS}
-              valueOfSelected={actionFrequencyValue}
-              onChange={onActionFrequencyValueChange}
+              data-test-subj="notifyWhenSelect"
+              options={NOTIFY_WHEN_OPTIONS}
+              valueOfSelected={notifyWhenValue}
+              onChange={onNotifyWhenValueChange}
             />
-            {showCustomActionFrequencyOpts && (
+            {showCustomThrottleOpts && (
               <Fragment>
                 <EuiSpacer />
                 <EuiFormRow fullWidth>
@@ -201,11 +175,11 @@ export const ActionFrequencyForm = ({
                       <EuiFieldNumber
                         fullWidth
                         min={1}
-                        value={alertThrottle || ''}
+                        value={alertThrottle}
                         name="throttle"
                         data-test-subj="throttleInput"
                         prepend={i18n.translate(
-                          'xpack.triggersActionsUI.sections.alertForm.actionFrequency.label',
+                          'xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.label',
                           {
                             defaultMessage: 'Every',
                           }
@@ -218,7 +192,7 @@ export const ActionFrequencyForm = ({
                             filter((value) => !isNaN(value)),
                             map((value) => {
                               setAlertThrottle(value);
-                              onThrottleChange(value, alertThrottleUnit);
+                              onThrottleChange(value, throttleUnit);
                             })
                           );
                         }}
@@ -227,11 +201,10 @@ export const ActionFrequencyForm = ({
                     <EuiFlexItem grow={false}>
                       <EuiSelect
                         data-test-subj="throttleUnitInput"
-                        value={alertThrottleUnit}
-                        options={getTimeOptions(alertThrottle ?? 1)}
+                        value={throttleUnit}
+                        options={getTimeOptions(throttle ?? 1)}
                         onChange={(e) => {
-                          setAlertThrottleUnit(e.target.value);
-                          onThrottleUnitChange(e.target.value);
+                          onThrottleChange(throttle, e.target.value);
                         }}
                       />
                     </EuiFlexItem>

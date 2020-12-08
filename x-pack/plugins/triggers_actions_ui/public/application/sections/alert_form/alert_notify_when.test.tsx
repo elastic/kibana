@@ -9,18 +9,15 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { Alert } from '../../../types';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
-import { ActionFrequencyForm } from './action_frequency';
+import { AlertNotifyWhen } from './alert_notify_when';
 
-describe('action_frequency_form', () => {
+describe('alert_notify_when', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  const alertThrottle = null;
-  const alertThrottleUnit = 'm';
-  const onActionFreqencyChange = jest.fn();
+  const onNotifyWhenChange = jest.fn();
   const onThrottleChange = jest.fn();
-  const onThrottleUnitChange = jest.fn();
 
   describe('action_frequency_form new alert', () => {
     let wrapper: ReactWrapper<any>;
@@ -43,13 +40,12 @@ describe('action_frequency_form', () => {
       } as unknown) as Alert;
 
       wrapper = mountWithIntl(
-        <ActionFrequencyForm
+        <AlertNotifyWhen
           alert={initialAlert}
-          throttle={alertThrottle}
-          throttleUnit={alertThrottleUnit}
-          onActionFreqencyChange={onActionFreqencyChange}
+          throttle={null}
+          throttleUnit="m"
+          onNotifyWhenChange={onNotifyWhenChange}
           onThrottleChange={onThrottleChange}
-          onThrottleUnitChange={onThrottleUnitChange}
         />
       );
 
@@ -59,12 +55,18 @@ describe('action_frequency_form', () => {
       });
     }
 
+    it(`should determine initial selection from throttle value if 'notifyWhen' is null`, async () => {
+      await setup({ notifyWhen: null });
+      const notifyWhenSelect = wrapper.find('[data-test-subj="notifyWhenSelect"]');
+      expect(notifyWhenSelect.exists()).toBeTruthy();
+      expect(notifyWhenSelect.first().prop('valueOfSelected')).toEqual('onActiveAlert');
+    });
+
     it(`should correctly select 'onActionGroupChange' option on initial render`, async () => {
       await setup();
-      const actionFrequencySelect = wrapper.find('[data-test-subj="actionFrequencySelect"]');
-      expect(actionFrequencySelect.exists()).toBeTruthy();
-      expect(actionFrequencySelect.first().prop('valueOfSelected')).toEqual('onActionGroupChange');
-
+      const notifyWhenSelect = wrapper.find('[data-test-subj="notifyWhenSelect"]');
+      expect(notifyWhenSelect.exists()).toBeTruthy();
+      expect(notifyWhenSelect.first().prop('valueOfSelected')).toEqual('onActionGroupChange');
       expect(wrapper.find('[data-test-subj="throttleInput"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="throttleUnitInput"]').exists()).toBeFalsy();
     });
@@ -73,10 +75,9 @@ describe('action_frequency_form', () => {
       await setup({
         notifyWhen: 'onActiveAlert',
       });
-
-      const actionFrequencySelect = wrapper.find('[data-test-subj="actionFrequencySelect"]');
-      expect(actionFrequencySelect.exists()).toBeTruthy();
-      expect(actionFrequencySelect.first().prop('valueOfSelected')).toEqual('onActiveAlert');
+      const notifyWhenSelect = wrapper.find('[data-test-subj="notifyWhenSelect"]');
+      expect(notifyWhenSelect.exists()).toBeTruthy();
+      expect(notifyWhenSelect.first().prop('valueOfSelected')).toEqual('onActiveAlert');
       expect(wrapper.find('[data-test-subj="throttleInput"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="throttleUnitInput"]').exists()).toBeFalsy();
     });
@@ -84,16 +85,14 @@ describe('action_frequency_form', () => {
     it(`should correctly select 'onThrottleInterval' option on initial render and render throttle inputs`, async () => {
       await setup({
         notifyWhen: 'onThrottleInterval',
-        throttle: '20m',
       });
-
-      const actionFrequencySelect = wrapper.find('[data-test-subj="actionFrequencySelect"]');
-      expect(actionFrequencySelect.exists()).toBeTruthy();
-      expect(actionFrequencySelect.first().prop('valueOfSelected')).toEqual('onThrottleInterval');
+      const notifyWhenSelect = wrapper.find('[data-test-subj="notifyWhenSelect"]');
+      expect(notifyWhenSelect.exists()).toBeTruthy();
+      expect(notifyWhenSelect.first().prop('valueOfSelected')).toEqual('onThrottleInterval');
 
       const throttleInput = wrapper.find('[data-test-subj="throttleInput"]');
       expect(throttleInput.exists()).toBeTruthy();
-      expect(throttleInput.at(1).prop('value')).toEqual(20);
+      expect(throttleInput.at(1).prop('value')).toEqual(1);
 
       const throttleUnitInput = wrapper.find('[data-test-subj="throttleUnitInput"]');
       expect(throttleUnitInput.exists()).toBeTruthy();
@@ -103,25 +102,21 @@ describe('action_frequency_form', () => {
     it('should update action frequency type correctly', async () => {
       await setup();
 
-      wrapper.find('button[data-test-subj="actionFrequencySelect"]').simulate('click');
+      wrapper.find('button[data-test-subj="notifyWhenSelect"]').simulate('click');
       wrapper.update();
       wrapper.find('button[data-test-subj="onActiveAlert"]').simulate('click');
       wrapper.update();
-      expect(onActionFreqencyChange).toHaveBeenCalledWith({
-        notifyWhen: 'onActiveAlert',
-        throttle: null,
-      });
+      expect(onNotifyWhenChange).toHaveBeenCalledWith('onActiveAlert');
+      expect(onThrottleChange).toHaveBeenCalledWith(null, 'm');
 
-      wrapper.find('button[data-test-subj="actionFrequencySelect"]').simulate('click');
+      wrapper.find('button[data-test-subj="notifyWhenSelect"]').simulate('click');
       wrapper.update();
       wrapper.find('button[data-test-subj="onActionGroupChange"]').simulate('click');
       wrapper.update();
       expect(wrapper.find('[data-test-subj="throttleInput"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="throttleUnitInput"]').exists()).toBeFalsy();
-      expect(onActionFreqencyChange).toHaveBeenCalledWith({
-        notifyWhen: 'onActionGroupChange',
-        throttle: null,
-      });
+      expect(onNotifyWhenChange).toHaveBeenCalledWith('onActionGroupChange');
+      expect(onThrottleChange).toHaveBeenCalledWith(null, 'm');
     });
 
     it('should renders throttle input when custom throttle is selected and update throttle value', async () => {
@@ -141,9 +136,7 @@ describe('action_frequency_form', () => {
       const throttleUnitField = wrapper.find('[data-test-subj="throttleUnitInput"]');
       expect(throttleUnitField.exists()).toBeTruthy();
       throttleUnitField.at(1).simulate('change', { target: { value: newThrottleUnit } });
-      const throttleUnitFieldAfterUpdate = wrapper.find('[data-test-subj="throttleUnitInput"]');
-      expect(throttleUnitFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottleUnit);
-      expect(onThrottleUnitChange).toHaveBeenCalledWith('h');
+      expect(onThrottleChange).toHaveBeenCalledWith(null, 'h');
     });
   });
 });

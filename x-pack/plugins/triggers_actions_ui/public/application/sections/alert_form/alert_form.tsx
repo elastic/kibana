@@ -60,7 +60,7 @@ import './alert_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage } from '../../constants';
 import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
-import { ActionFrequencyForm, ActionFrequencyOpts } from './action_frequency';
+import { AlertNotifyWhen } from './alert_notify_when';
 
 const ENTER_KEY = 13;
 
@@ -660,27 +660,24 @@ export const AlertForm = ({
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <ActionFrequencyForm
+          <AlertNotifyWhen
             alert={alert}
             throttle={alertThrottle}
             throttleUnit={alertThrottleUnit}
-            onActionFreqencyChange={({ throttle, notifyWhen }: ActionFrequencyOpts) => {
-              setAlertThrottle(throttle);
-              setAlertProperty('notifyWhen', notifyWhen);
-            }}
+            onNotifyWhenChange={useCallback(
+              (notifyWhen) => {
+                setAlertProperty('notifyWhen', notifyWhen);
+              },
+              [setAlertProperty]
+            )}
             onThrottleChange={useCallback(
               (throttle: number | null, throttleUnit: string) => {
                 setAlertThrottle(throttle);
+                setAlertThrottleUnit(throttleUnit);
                 setAlertProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
               },
               [setAlertProperty]
             )}
-            onThrottleUnitChange={(throttleUnit: string) => {
-              setAlertThrottleUnit(throttleUnit);
-              if (alertThrottle) {
-                setAlertProperty('throttle', `${alertThrottle}${throttleUnit}`);
-              }
-            }}
           />
         </EuiFlexItem>
       </EuiFlexGrid>

@@ -156,7 +156,7 @@ describe('alert_form', () => {
     });
 
     it('should update throttle value', async () => {
-      wrapper.find('button[data-test-subj="actionFrequencySelect"]').simulate('click');
+      wrapper.find('button[data-test-subj="notifyWhenSelect"]').simulate('click');
       wrapper.update();
       wrapper.find('button[data-test-subj="onThrottleInterval"]').simulate('click');
       wrapper.update();
