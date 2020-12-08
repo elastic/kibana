@@ -10,6 +10,7 @@ import { TaskStatus } from '../../../../task_manager/server';
 
 import { TelemetryDiagTask, TelemetryDiagTaskConstants } from './task';
 import { TelemetryEventsSender } from './sender';
+import { createMockTelemetryEventsSender, MockTelemetryDiagnosticTask } from './mocks';
 
 describe('test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -51,9 +52,9 @@ describe('test', () => {
   });
 
   test('task should run', async () => {
-    const mockContext = new TelemetryEventsSender(logger);
+    const mockContext = createMockTelemetryEventsSender();
     const mockTaskManager = taskManagerMock.createSetup();
-    const telemetryDiagTask = new TelemetryDiagTask(logger, mockTaskManager, mockContext);
+    const telemetryDiagTask = new MockTelemetryDiagnosticTask(logger, mockTaskManager, mockContext);
 
     const mockTaskInstance = {
       id: TelemetryDiagTaskConstants.TYPE,
