@@ -229,7 +229,9 @@ export function DashboardApp({
               }
             }}
           />
-          <EmbeddableRenderer embeddable={dashboardContainer} />
+          <div className="dashboardViewport">
+            <EmbeddableRenderer embeddable={dashboardContainer} />
+          </div>
         </>
       )}
     </div>
