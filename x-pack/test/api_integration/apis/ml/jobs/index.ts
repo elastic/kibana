@@ -11,5 +11,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./jobs_summary'));
     loadTestFile(require.resolve('./delete_jobs'));
     loadTestFile(require.resolve('./close_jobs'));
+    loadTestFile(require.resolve('./jobs_summary_spaces'));
+    loadTestFile(require.resolve('./jobs_exist_spaces'));
+    loadTestFile(require.resolve('./close_jobs_spaces'));
+    loadTestFile(require.resolve('./delete_jobs_spaces'));
   });
 }
