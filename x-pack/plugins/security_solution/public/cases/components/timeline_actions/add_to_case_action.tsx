@@ -54,7 +54,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, 
     [postComment, eventId, eventIndex, dispatchToaster]
   );
 
-  const { Modal: CreateCaseModal, openModal: openCreateCaseModal } = useCreateCaseModal({
+  const { modal: createCaseModal, openModal: openCreateCaseModal } = useCreateCaseModal({
     onCaseCreated: attachAlertToCase,
   });
 
@@ -75,7 +75,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, 
     [attachAlertToCase, openCreateCaseModal]
   );
 
-  const { Modal: AllCasesModal, openModal: openAllCaseModal } = useAllCasesModal({
+  const { modal: allCasesModal, openModal: openAllCaseModal } = useAllCasesModal({
     onRowClick: onCaseClicked,
   });
 
@@ -141,8 +141,8 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, 
           <EuiContextMenuPanel items={items} />
         </EuiPopover>
       </ActionIconItem>
-      <CreateCaseModal />
-      <AllCasesModal />
+      {createCaseModal}
+      {allCasesModal}
     </>
   );
 };

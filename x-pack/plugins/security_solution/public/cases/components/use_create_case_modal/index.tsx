@@ -12,7 +12,7 @@ interface Props {
   onCaseCreated: (theCase: Case) => void;
 }
 export interface UseAllCasesModalReturnedValues {
-  Modal: React.FC;
+  modal: JSX.Element;
   isModalOpen: boolean;
   closeModal: () => void;
   openModal: () => void;
@@ -30,20 +30,20 @@ export const useCreateCaseModal = ({ onCaseCreated }: Props) => {
     [onCaseCreated, closeModal]
   );
 
-  const Modal: React.FC = useCallback(
-    () =>
-      isModalOpen ? <CreateCaseModal onCloseCaseModal={closeModal} onSuccess={onSuccess} /> : null,
-    [closeModal, isModalOpen, onSuccess]
-  );
-
   const state = useMemo(
     () => ({
-      Modal,
+      modal: (
+        <CreateCaseModal
+          isModalOpen={isModalOpen}
+          onCloseCaseModal={closeModal}
+          onSuccess={onSuccess}
+        />
+      ),
       isModalOpen,
       closeModal,
       openModal,
     }),
-    [isModalOpen, closeModal, openModal, Modal]
+    [isModalOpen, closeModal, onSuccess, openModal]
   );
 
   return state;

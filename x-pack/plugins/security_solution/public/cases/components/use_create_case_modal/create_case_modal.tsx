@@ -21,6 +21,7 @@ import { Case } from '../../containers/types';
 import * as i18n from '../../translations';
 
 export interface CreateCaseModalProps {
+  isModalOpen: boolean;
   onCloseCaseModal: () => void;
   onSuccess: (theCase: Case) => void;
 }
@@ -32,8 +33,12 @@ const Container = styled.div`
   `}
 `;
 
-const CreateModalComponent: React.FC<CreateCaseModalProps> = ({ onCloseCaseModal, onSuccess }) => {
-  return (
+const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
+  isModalOpen,
+  onCloseCaseModal,
+  onSuccess,
+}) => {
+  return isModalOpen ? (
     <EuiOverlayMask data-test-subj="all-cases-modal">
       <EuiModal onClose={onCloseCaseModal}>
         <EuiModalHeader>
@@ -49,7 +54,7 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({ onCloseCaseModal
         </EuiModalBody>
       </EuiModal>
     </EuiOverlayMask>
-  );
+  ) : null;
 };
 
 export const CreateCaseModal = memo(CreateModalComponent);

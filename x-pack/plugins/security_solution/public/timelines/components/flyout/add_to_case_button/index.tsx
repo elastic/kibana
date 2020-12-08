@@ -62,7 +62,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     [dispatch, graphEventId, navigateToApp, savedObjectId, timelineId, timelineTitle]
   );
 
-  const { Modal: AllCasesModal, openModal: openCaseModal } = useAllCasesModal({ onRowClick });
+  const { modal: allCasesModal, openModal: openCaseModal } = useAllCasesModal({ onRowClick });
 
   const handleButtonClick = useCallback(() => {
     setPopover((currentIsOpen) => !currentIsOpen);
@@ -155,7 +155,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
-      <AllCasesModal />
+      {allCasesModal}
     </>
   );
 };

@@ -29,9 +29,9 @@ jest.mock('react-redux', () => {
 jest.mock('../../../common/lib/kibana');
 jest.mock('../all_cases', () => {
   return {
-    AllCases: ({ onRowClick }: { onRowClick: ({ id }: { id: string }) => void }) => {
+    AllCases: ({ onRowClick }: { onRowClick: (id: string, title: string) => void }) => {
       return (
-        <button type="button" onClick={() => onRowClick({ id: 'case-id' })}>
+        <button type="button" onClick={() => onRowClick('case-id', 'case title')}>
           {'case-row'}
         </button>
       );
@@ -122,14 +122,14 @@ describe('useAllCasesModal', () => {
       result.current.openModal();
     });
 
-    const Modal = result.current.Modal;
-    render(<Modal />);
+    const modal = result.current.modal;
+    render(<>{modal}</>);
 
     act(() => {
       userEvent.click(screen.getByText('case-row'));
     });
 
     expect(result.current.isModalOpen).toBe(false);
-    expect(onRowClick).toHaveBeenCalledWith({ id: 'case-id' });
+    expect(onRowClick).toHaveBeenCalledWith('case-id', 'case title');
   });
 });

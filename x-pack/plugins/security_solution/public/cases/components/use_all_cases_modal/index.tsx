@@ -13,7 +13,7 @@ export interface UseAllCasesModalProps {
 }
 
 export interface UseAllCasesModalReturnedValues {
-  Modal: React.FC;
+  modal: JSX.Element;
   isModalOpen: boolean;
   closeModal: () => void;
   openModal: () => void;
@@ -33,21 +33,21 @@ export const useAllCasesModal = ({
     [closeModal, onRowClick]
   );
 
-  const Modal: React.FC = useCallback(
-    () =>
-      isModalOpen ? <AllCasesModal onCloseCaseModal={closeModal} onRowClick={onClick} /> : null,
-    [closeModal, onClick, isModalOpen]
-  );
-
   const state = useMemo(
     () => ({
-      Modal,
+      modal: (
+        <AllCasesModal
+          isModalOpen={isModalOpen}
+          onCloseCaseModal={closeModal}
+          onRowClick={onClick}
+        />
+      ),
       isModalOpen,
       closeModal,
       openModal,
       onRowClick,
     }),
-    [isModalOpen, closeModal, openModal, onRowClick, Modal]
+    [isModalOpen, closeModal, onClick, openModal, onRowClick]
   );
 
   return state;

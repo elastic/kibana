@@ -27,6 +27,7 @@ jest.mock('../../../common/lib/kibana', () => {
 const onCloseCaseModal = jest.fn();
 const onRowClick = jest.fn();
 const defaultProps = {
+  isModalOpen: true,
   onCloseCaseModal,
   onRowClick,
 };
@@ -44,6 +45,16 @@ describe('AllCasesModal', () => {
     );
 
     expect(wrapper.find(`[data-test-subj='all-cases-modal']`).exists()).toBeTruthy();
+  });
+
+  it('it does not render the modal isModalOpen=false ', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesModal {...defaultProps} isModalOpen={false} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj='all-cases-modal']`).exists()).toBeFalsy();
   });
 
   it('Closing modal calls onCloseCaseModal', () => {
