@@ -415,9 +415,27 @@ describe('BackgroundSessionService', () => {
       service.stop();
     });
 
+    it('schedules the next iteration', async () => {
+      const findSpy = jest.fn().mockResolvedValue({ saved_objects: [] });
+      createMockInternalSavedObjectClient(findSpy);
+
+      const mockIdMapping = createMockIdMapping([[MOCK_KEY_HASH, MOCK_ASYNC_ID]], moment());
+
+      Object.defineProperty(service, 'sessionSearchMap', {
+        get: () => mockIdMapping,
+      });
+
+      jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
+      expect(findSpy).toHaveBeenCalledTimes(1);
+      await flushPromises();
+
+      jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
+      expect(findSpy).toHaveBeenCalledTimes(2);
+    });
+
     it('should delete expired IDs', async () => {
-      const bulkGetSpy = jest.fn().mockResolvedValueOnce({ saved_objects: [] });
-      createMockInternalSavedObjectClient(bulkGetSpy);
+      const findSpy = jest.fn().mockResolvedValueOnce({ saved_objects: [] });
+      createMockInternalSavedObjectClient(findSpy);
 
       const mockIdMapping = createMockIdMapping(
         [[MOCK_KEY_HASH, MOCK_ASYNC_ID]],
@@ -432,13 +450,13 @@ describe('BackgroundSessionService', () => {
       // Get setInterval to fire
       jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
 
-      expect(bulkGetSpy).not.toHaveBeenCalled();
+      expect(findSpy).not.toHaveBeenCalled();
       expect(deleteSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should delete IDs that passed max retries', async () => {
-      const bulkGetSpy = jest.fn().mockResolvedValueOnce({ saved_objects: [] });
-      createMockInternalSavedObjectClient(bulkGetSpy);
+      const findSpy = jest.fn().mockResolvedValueOnce({ saved_objects: [] });
+      createMockInternalSavedObjectClient(findSpy);
 
       const mockIdMapping = createMockIdMapping(
         [[MOCK_KEY_HASH, MOCK_ASYNC_ID]],
@@ -454,16 +472,16 @@ describe('BackgroundSessionService', () => {
       // Get setInterval to fire
       jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
 
-      expect(bulkGetSpy).not.toHaveBeenCalled();
+      expect(findSpy).not.toHaveBeenCalled();
       expect(deleteSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should not fetch when no IDs are mapped', async () => {
-      const bulkGetSpy = jest.fn().mockResolvedValueOnce({ saved_objects: [] });
-      createMockInternalSavedObjectClient(bulkGetSpy);
+      const findSpy = jest.fn().mockResolvedValueOnce({ saved_objects: [] });
+      createMockInternalSavedObjectClient(findSpy);
 
       jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
-      expect(bulkGetSpy).not.toHaveBeenCalled();
+      expect(findSpy).not.toHaveBeenCalled();
     });
 
     it('should try to fetch saved objects if some ids are mapped', async () => {

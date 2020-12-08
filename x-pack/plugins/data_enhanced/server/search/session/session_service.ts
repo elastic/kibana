@@ -58,7 +58,7 @@ export class BackgroundSessionService implements ISessionService {
    */
   private sessionSearchMap = new Map<string, SessionInfo>();
   private internalSavedObjectsClient!: SavedObjectsClientContract;
-  private monitorInterval!: NodeJS.Timeout;
+  private monitorTimer!: NodeJS.Timeout;
 
   constructor(private readonly logger: Logger) {}
 
@@ -68,7 +68,7 @@ export class BackgroundSessionService implements ISessionService {
 
   public stop() {
     this.sessionSearchMap.clear();
-    clearInterval(this.monitorInterval);
+    clearTimeout(this.monitorTimer);
   }
 
   private setupMonitoring = async (core: CoreStart, config$: Observable<ConfigSchema>) => {
@@ -77,7 +77,7 @@ export class BackgroundSessionService implements ISessionService {
       this.logger.debug(`setupMonitoring | Enabling monitoring`);
       const internalRepo = core.savedObjects.createInternalRepository([BACKGROUND_SESSION_TYPE]);
       this.internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
-      this.monitorInterval = setInterval(this.monitorMappedIds.bind(this), INMEM_TRACKING_INTERVAL);
+      this.monitorTimer = setTimeout(this.monitorMappedIds.bind(this), INMEM_TRACKING_INTERVAL);
     }
   };
 
@@ -121,7 +121,7 @@ export class BackgroundSessionService implements ISessionService {
     });
   };
 
-  public async monitorMappedIds() {
+  private async monitorMappedIds() {
     try {
       this.clearSessions();
 
@@ -150,8 +150,11 @@ export class BackgroundSessionService implements ISessionService {
         }
       });
     } catch (e) {
-      this.logger.error(`monitorMappedIds | Error fetching sessions. ${e}`);
+      this.logger.error(`monitorMappedIds | Error while updating sessions. ${e}`);
     }
+
+    // Schedule the next iteration
+    this.monitorTimer = setTimeout(this.monitorMappedIds.bind(this), INMEM_TRACKING_INTERVAL);
   }
 
   private async updateAllSavedObjects(
