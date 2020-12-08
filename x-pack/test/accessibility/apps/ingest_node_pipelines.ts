@@ -3,26 +3,48 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export default function ({ getService, getPageObjects }) {
+import { deleteAllPipelines, putSamplePipeline } from './helpers';
+export default function ({ getService, getPageObjects }: any) {
   const { common } = getPageObjects(['common']);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const esClient = getService('es');
+  const log = getService('log');
   const a11y = getService('a11y'); /* this is the wrapping service around axe */
 
-  describe('Ingest Node Pipeliens', () => {
+  describe('Ingest Node Pipelines', async () => {
     before(async () => {
-      await common.navigateToApp('ingestPipelines'); /* navigates to the page we want to test */
+      await deleteAllPipelines(esClient, log);
+      /* navigates to the page we want to test */
     });
 
     it('Empty State Home View', async () => {
-      await retry.waitFor(
-        'Ingest Node Pipelines page to be visible',
-        async () => await testSubjects.exists('title')
-      ); /* confirm you're on the correct page and that it's loaded */
+      await common.navigateToApp('ingestPipelines');
+      await retry.waitFor('Create New Pipeline Title to be visible', async () => {
+        return testSubjects.exists('title') ? true : false;
+      }); /* confirm you're on the correct page and that it's loaded */
       await a11y.testAppSnapshot(); /* this expects that there are no failures found by axe */
     });
 
+    it('List View', async () => {
+      await putSamplePipeline(esClient);
+      await retry.waitFor('Ingest Node Pipelines page to be visible', async () => {
+        await common.navigateToApp('ingestPipelines');
+        return testSubjects.exists('pipelineDetailsLink') ? true : false;
+      });
+      await a11y.testAppSnapshot();
+    });
+
+    it('List View', async () => {
+      await testSubjects.click('pipelineDetailsLink');
+      await retry.waitFor('testPipeline detail panel to be visible', async () => {
+        if (!testSubjects.isDisplayed('pipelineDetails')) {
+          await testSubjects.click('pipelineDetailsLink');
+        }
+        return testSubjects.isDisplayed('pipelineDetails') ? true : false;
+      });
+      await a11y.testAppSnapshot();
+    });
     /**
      * If these tests were added by our QA team, tests that fail that require significant app code
      * changes to be fixed will be skipped with a corresponding issue label with more info
