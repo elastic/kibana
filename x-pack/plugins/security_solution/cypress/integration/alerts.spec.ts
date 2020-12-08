@@ -25,6 +25,7 @@ import {
   markInProgressFirstAlert,
   goToInProgressAlerts,
 } from '../tasks/alerts';
+import { removeSignalsIndex } from '../tasks/api_calls';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
@@ -38,6 +39,7 @@ describe('Alerts', () => {
     });
 
     afterEach(() => {
+      removeSignalsIndex();
       esArchiverUnload('alerts');
     });
 
@@ -167,6 +169,7 @@ describe('Alerts', () => {
     });
 
     afterEach(() => {
+      removeSignalsIndex();
       esArchiverUnload('closed_alerts');
     });
 
@@ -218,6 +221,7 @@ describe('Alerts', () => {
     });
 
     afterEach(() => {
+      removeSignalsIndex();
       esArchiverUnload('alerts');
     });
 
