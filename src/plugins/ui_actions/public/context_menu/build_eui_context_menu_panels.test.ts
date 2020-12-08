@@ -20,25 +20,31 @@
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { buildContextMenuForActions } from './build_eui_context_menu_panels';
 import { Action, createAction } from '../actions';
+import { PresentableGrouping } from '../util';
 
 const createTestAction = ({
   type,
   dispayName,
   order,
+  grouping = undefined,
 }: {
   type?: string;
   dispayName: string;
   order?: number;
+  grouping?: PresentableGrouping;
 }) =>
   createAction({
     type: type as any, // mapping doesn't matter for this test
     getDisplayName: () => dispayName,
     order,
     execute: async () => {},
+    grouping,
   });
 
 const resultMapper = (panel: EuiContextMenuPanelDescriptor) => ({
-  items: panel.items ? panel.items.map((item) => ({ name: item.name })) : [],
+  items: panel.items
+    ? panel.items.map((item) => ({ name: item.isSeparator ? 'SEPARATOR' : item.name }))
+    : [],
 });
 
 test('sorts items in DESC order by "order" field first, then by display name', async () => {
@@ -229,6 +235,200 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
           Object {
             "name": "Foo 4",
           },
+          Object {
+            "name": "Foo 5",
+          },
+        ],
+      },
+    ]
+  `);
+});
+
+test('separates grouped items from main items with a separator', async () => {
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 1',
+    }),
+    createTestAction({
+      dispayName: 'Foo 2',
+    }),
+    createTestAction({
+      dispayName: 'Foo 3',
+    }),
+    createTestAction({
+      dispayName: 'Foo 4',
+      grouping: [
+        {
+          id: 'testGroup',
+          getDisplayName: () => 'Test group',
+        },
+      ],
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 1",
+          },
+          Object {
+            "name": "Foo 2",
+          },
+          Object {
+            "name": "Foo 3",
+          },
+          Object {
+            "name": "SEPARATOR",
+          },
+          Object {
+            "name": "Foo 4",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 4",
+          },
+        ],
+      },
+    ]
+  `);
+});
+
+test('separates multiple groups each with its own separator', async () => {
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 1',
+    }),
+    createTestAction({
+      dispayName: 'Foo 2',
+    }),
+    createTestAction({
+      dispayName: 'Foo 3',
+    }),
+    createTestAction({
+      dispayName: 'Foo 4',
+      grouping: [
+        {
+          id: 'testGroup',
+          getDisplayName: () => 'Test group',
+        },
+      ],
+    }),
+    createTestAction({
+      dispayName: 'Foo 5',
+      grouping: [
+        {
+          id: 'testGroup2',
+          getDisplayName: () => 'Test group 2',
+        },
+      ],
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 1",
+          },
+          Object {
+            "name": "Foo 2",
+          },
+          Object {
+            "name": "Foo 3",
+          },
+          Object {
+            "name": "SEPARATOR",
+          },
+          Object {
+            "name": "Foo 4",
+          },
+          Object {
+            "name": "SEPARATOR",
+          },
+          Object {
+            "name": "Foo 5",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 4",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 5",
+          },
+        ],
+      },
+    ]
+  `);
+});
+
+test('does not add separator for first grouping if there are no main items', async () => {
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 4',
+      grouping: [
+        {
+          id: 'testGroup',
+          getDisplayName: () => 'Test group',
+        },
+      ],
+    }),
+    createTestAction({
+      dispayName: 'Foo 5',
+      grouping: [
+        {
+          id: 'testGroup2',
+          getDisplayName: () => 'Test group 2',
+        },
+      ],
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 4",
+          },
+          Object {
+            "name": "SEPARATOR",
+          },
+          Object {
+            "name": "Foo 5",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
+          Object {
+            "name": "Foo 4",
+          },
+        ],
+      },
+      Object {
+        "items": Array [
           Object {
             "name": "Foo 5",
           },

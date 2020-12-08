@@ -66,6 +66,33 @@ describe('Range Agg', () => {
     );
   };
 
+  test('produces the expected expression ast', () => {
+    const aggConfigs = getAggConfigs();
+    expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Object {
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "bytes",
+          ],
+          "id": Array [
+            "1",
+          ],
+          "ranges": Array [
+            "[{\\"from\\":0,\\"to\\":1000},{\\"from\\":1000,\\"to\\":2000}]",
+          ],
+          "schema": Array [
+            "segment",
+          ],
+        },
+        "function": "aggRange",
+        "type": "function",
+      }
+    `);
+  });
+
   describe('getSerializedFormat', () => {
     test('generates a serialized field format in the expected shape', () => {
       const aggConfigs = getAggConfigs();

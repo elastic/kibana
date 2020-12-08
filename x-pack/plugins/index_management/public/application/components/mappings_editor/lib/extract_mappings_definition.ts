@@ -15,16 +15,22 @@ const isMappingDefinition = (obj: GenericObject): boolean => {
     return false;
   }
 
-  const { properties, dynamic_templates: dynamicTemplates, ...mappingsConfiguration } = obj;
+  const {
+    properties,
+    dynamic_templates: dynamicTemplates,
+    runtime,
+    ...mappingsConfiguration
+  } = obj;
 
   const { errors } = validateMappingsConfiguration(mappingsConfiguration);
   const isConfigurationValid = errors.length === 0;
   const isPropertiesValid = properties === undefined || isPlainObject(properties);
   const isDynamicTemplatesValid = dynamicTemplates === undefined || Array.isArray(dynamicTemplates);
+  const isRuntimeValid = runtime === undefined || isPlainObject(runtime);
 
-  // If the configuration, the properties and the dynamic templates are valid
+  // If the configuration, the properties, the dynamic templates and runtime are valid
   // we can assume that the mapping is declared at root level (no types)
-  return isConfigurationValid && isPropertiesValid && isDynamicTemplatesValid;
+  return isConfigurationValid && isPropertiesValid && isDynamicTemplatesValid && isRuntimeValid;
 };
 
 /**

@@ -6,11 +6,6 @@ exports[`LocationLink component renders a help link when location not present 1`
   target="_blank"
 >
   Add location
-   
-  <EuiIcon
-    size="s"
-    type="popout"
-  />
 </EuiLink>
 `;
 

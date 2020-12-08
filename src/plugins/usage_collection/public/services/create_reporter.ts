@@ -33,7 +33,7 @@ export function createReporter(config: AnalyicsReporterConfig): Reporter {
     debug,
     storage: localStorage,
     async http(report) {
-      const response = await fetch.post('/api/ui_metric/report', {
+      const response = await fetch.post('/api/ui_counters/_report', {
         body: JSON.stringify({ report }),
       });
 

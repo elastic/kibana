@@ -16,11 +16,10 @@ describe('stringifyUrlParams', () => {
       filters: 'monitor.id: bar',
       focusConnectorField: true,
       search: 'monitor.id: foo',
-      selectedPingStatus: 'down',
       statusFilter: 'up',
     });
     expect(result).toMatchInlineSnapshot(
-      `"?autorefreshInterval=50000&autorefreshIsPaused=false&dateRangeStart=now-15m&dateRangeEnd=now&filters=monitor.id%3A%20bar&focusConnectorField=true&search=monitor.id%3A%20foo&selectedPingStatus=down&statusFilter=up"`
+      `"?autorefreshInterval=50000&autorefreshIsPaused=false&dateRangeStart=now-15m&dateRangeEnd=now&filters=monitor.id%3A%20bar&focusConnectorField=true&search=monitor.id%3A%20foo&statusFilter=up"`
     );
   });
 
@@ -34,7 +33,6 @@ describe('stringifyUrlParams', () => {
         filters: 'monitor.id: bar',
         focusConnectorField: false,
         search: undefined,
-        selectedPingStatus: undefined,
         statusFilter: '',
         pagination: undefined,
       },
@@ -46,6 +44,5 @@ describe('stringifyUrlParams', () => {
 
     expect(result.includes('pagination')).toBeFalsy();
     expect(result.includes('search')).toBeFalsy();
-    expect(result.includes('selectedPingStatus')).toBeFalsy();
   });
 });
