@@ -271,7 +271,7 @@ const columns: Array<{
   {
     field: 'startTime',
     name: i18n.translate('xpack.infra.metrics.nodeDetails.processes.columnLabelTime', {
-      defaultMessage: 'CPU Time',
+      defaultMessage: 'Time',
     }),
     align: RIGHT_ALIGNMENT,
     sortable: true,
