@@ -46,8 +46,7 @@ export const useFormattedColumnsAndRows = (table: Table, visConfig: TableVisConf
         };
 
         const isDate = dimension.format.id === 'date' || dimension.format.params?.id === 'date';
-        // @ts-expect-error
-        const allowsNumericalAggregations: boolean = formatter.allowsNumericalAggregations;
+        const allowsNumericalAggregations = formatter.allowsNumericalAggregations;
 
         if (allowsNumericalAggregations || isDate || visConfig.totalFunc === AggTypes.COUNT) {
           const sumOfColumnValues = table.rows.reduce((prev, curr) => {
