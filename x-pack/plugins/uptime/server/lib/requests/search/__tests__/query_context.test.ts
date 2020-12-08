@@ -7,6 +7,7 @@
 import { QueryContext } from '../query_context';
 import { CursorPagination } from '../types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
+import { getUptimeESMockClient } from '../../__tests__/helper';
 
 describe(QueryContext, () => {
   // 10 minute range
@@ -19,7 +20,17 @@ describe(QueryContext, () => {
   };
 
   let qc: QueryContext;
-  beforeEach(() => (qc = new QueryContext({}, rangeStart, rangeEnd, pagination, null, 10)));
+  beforeEach(
+    () =>
+      (qc = new QueryContext(
+        getUptimeESMockClient().uptimeEsClient,
+        rangeStart,
+        rangeEnd,
+        pagination,
+        null,
+        10
+      ))
+  );
 
   describe('dateRangeFilter()', () => {
     const expectedRange = {
