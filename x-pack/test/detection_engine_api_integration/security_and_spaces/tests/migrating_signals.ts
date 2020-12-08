@@ -362,6 +362,28 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
+      it('deletes the original index for deletion by applying our cleanup policy', async () => {
+        const [migratingIndex] = migratingIndices;
+
+        await waitFor(async () => {
+          const {
+            body: { completed },
+          } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ migration_token: migratingIndex.migration_token })
+            .expect(200);
+
+          return completed;
+        }, `polling finalize_migration until complete`);
+
+        const { statusCode } = await es.tasks.get(
+          { task_id: migratingIndex.migration_task_id },
+          { ignore: [404] }
+        );
+        expect(statusCode).to.eql(404);
+      });
+
       it('can be invoked multiple times without ill effect', async () => {
         const [migratingIndex] = migratingIndices;
 

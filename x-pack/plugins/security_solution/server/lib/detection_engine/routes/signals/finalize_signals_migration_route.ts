@@ -88,6 +88,7 @@ export const finalizeSignalsMigrationRoute = (router: IRouter) => {
         });
 
         await applyMigrationCleanupPolicy({ alias: signalsIndex, esClient, index: sourceIndex });
+        await esClient.delete({ index: '.tasks', id: taskId });
 
         return response.ok({
           body: {
