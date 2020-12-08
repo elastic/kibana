@@ -1,0 +1,283 @@
+[[lens-end-to-end]]
+=== Try it: Build a dashboard with Lens
+
+Learn to use Kibana Lens, an intuitive and easy-to-use UI that simplifies the process of data visualization.
+
+This guide will walk you through the features of Kibana Lens version 7.11. You will create an example analytical dashboard with all visualizations done in Lens. 
+
+[role="screenshot"]
+image::images/lens_end_to_end_dashboard.png[Final dashboard vis] 
+
+You’ll be able to respond to some key questions regarding website traffic:
+
+* How many users have visited my website?
+* What’s the distribution of visitors by operating system?
+* What’s the ratio of code responses over time?
+* What’s the average bytes transfer per day? How does it relate to the number of visitors?
+* What's the percentage of small vs big files transfer?
+* How does website traffic look like hour by hour?
+* Where does the traffic come from for top three countries?
+// * What’s the traffic distribution of my visitors by operating system in custom defined key countries?
+
+By the end of this tutorial you will have a good working knowledge of how to use Lens to work on your data. 
+
+You’ll be using the _Sample web logs_ data set that is available in Kibana. Before getting started, <<gs-get-data-into-kibana, load the sample web logs data set>>. You can set up your own cluster or use a 14-day free trial of https://www.elastic.co/elasticsearch/service[Elasticsearch Service]. 
+
+Once you have your data loaded, create a dashboard to display your visualizations. Open side navigation and click on *Dashboard*. Then click on *Create new dashboard*.  
+
+[float]
+[[metric-vis]]
+==== How many users have visited my website? A metric visualization
+
+To create your first Lens visualization, click on the *create new* button and choose Lens. 
+
+[role="screenshot"]
+image::images/lens_end_to_end_1_1.png[New visualization popover]
+
+After being redirected to Lens, make sure you have the correct index pattern active (_kibana_sample_data_logs_) and that you picked up the time range that interests you.
+
+[role="screenshot"]
+image::images/lens_end_to_end_1_2.png[Index pattern switch and time picker]
+
+. To create a metric visualization, switch the chart type from *Stacked bar* to *Metric* on the top of the workspace.
+. Find a field *clientip* in the fields panel on the left and drag and drop it to the workspace.
++
+[role="screenshot"]
+image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
++
+. Click on the *Unique count of clientip* on the left. This will open a configuration panel for metric.
+. Change display name to `Unique visitors`.
++
+[role="screenshot"]
+image::images/lens_end_to_end_1_4.png[Flyout config open]
+
+. Click on the *Save* button and give the visualization a title `Unique visitors`. 
+. Clicking on *Save and return* will take you back to the dashboard.
+[float]
+[[donut-vis]]
+
+==== What’s the distribution of visitors by operating system? A donut chart
+
+Now that you have our first visualization created, you’ll create a donut chart. Checking top values of operating system could help you answer some business questions, for example:
+
+* Should you keep providing Windows 7 support for your customers?
+* How important is mobile traffic from iOS devices for your business? 
+
+Start by creating a new visualization from the dashboard.
+
+===== Configuring the donut chart
+
+. Switch the chart type to *Donut*.
+. Drag and drop a field *clientip* to *Size by* dimension.
+. Drag and drop a field *machine.os.keyword* to *Slice by* dimension.
+
+===== Changing the color palette
+The steps above already give you a fully configured donut chart, but let's go a step further and change the color palette. 
+
+. Click on the *Top values of machine.os.keyword* in the config panel 
+. Change a color palette to `Compability`.
+. Save the visualization as `Visitors by OS` and go back to the dashboard.
+
+[role="screenshot"]
+image::images/lens_end_to_end_2_1.png[Donut chart with open config panel]
+
+
+
+
+[float]
+[[mixed-multiaxis]]
+====  What’s the average bytes transfer per day? How does it relate to the number of visitors? A mixed type multiaxis chart
+
+Knowing how the traffic of your page grows or drops can help you optimise the cost of page maintainance and prevent from server unresponsiveness in case of increased unpredicted needs.
+
+===== Configuring a chart with custom time interval
+
+. Drag and drop *bytes* field to the workspace. 
+. Click on *timestamp* in the config panel 
+. Toggle on *Customize time interval* and change the interval to `1 days`.
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_1.png[Customize time interval]
+. Close the *Horizontal axis configuration*.
+. Change the type of the chart to *Area*.
+
+===== Adding a second layer
+
+Now you'll add number of visitors to your visualization as a line. It has to be configured as a separate layer because of it different chart type.
+
+. To add a new layer, click on the plus symbol under the existing layer.
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_2.png[Add new layer button]
+. Change layer type by clicking on the button on the top of the layer. Notice than the type of the chart in the main chart type switch changed to *Mixed XY*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_3_3.png[Change layer type]
+. Move *timestamp* field to the second layer's horizontal axis drop and customize the time interval like for the first layer.
+. Move *clientip* to the second layer's Vertical axis drop. 
+. Open the settings for *Unique count of clientip* and:
+.. Change the label to *Unique visitors*.
+.. Change a *Series color* to something more contrasting, for example: *#CA8EAE*.
+
+===== Configuring the multiaxis chart
+
+The significant difference in value ranges for both verical axes series makes the values for  *Unique visitors* hard to read. To avoid this problem, let's add a separate axis for *Unique visitors*. 
+
+. Click on *Unique visitors*.
+. Choose *Axis side*: *Right*.
+
+Hint: Having two different formatting on functions will lead to creating separate axes by default. Change the formatting for *Average of bytes* to *Bytes (1024)* in *Value format*. It will automatically split the axes.
+
+[role="screenshot"]
+image::images/lens_end_to_end_3_4.png[Multiaxis chart]
+
+[[lens-legend-position]]
+===== Modifying the legend position
+
+The chart is now clear and functional, but the legend takes a lot of space. Let's change its position to the top of the chart.
+
+. Click on the *legend* icon on the top of the visualization pane.
+. Choose the *top* position.
+
+[role="screenshot"]
+image::images/lens_end_to_end_3_5.png[legend position]
+
+Save your chart as `Average Bytes vs. Unique Visitors` and go back to the dashboard.
+
+[role="screenshot"]
+image::images/lens_end_to_end_3_6.png[Multiaxis chart legend position]
+
+[float]
+[[percentage-stacked-area]]
+==== What’s the ratio of code responses over time? A percentage stacked area chart
+
+This chart shows the health of the website. It helps to notice some unusual traffic, existance of dead links or errors coming from the server. To configure this chart, you will use *filters* aggregation to divide the responses codes to the following groups:
+
+* successful responses (200-299)
+* redirects (300-399)
+* client errors (400-499)
+* server errors (500-599) 
+
+
+===== Configure the filters visualization
+
+. Drop the field *Records* to the vertical axis.
+. Drop the field *@timestamp* to the horizontal axis. 
+. Click on the button under *Break down by* axis. 
+. Choose filters from the available functions.
+. Modify the default filter _All records_ by clicking on it and typing in KQL field: `response.keyword>=200 AND response.keyword<300`. 
+. Add custom label: `2XX`.
++
+[role="screenshot"]
+image::images/lens_end_to_end_4_1.png[First filter in filters aggregation]
+
+. Proceed with adding the remaining filters:
+
+  ```
+  response.keyword>=300 AND response.keyword<400
+  response.keyword>=400 AND response.keyword<500
+  response.keyword>=500 AND response.keyword<600
+  ```
+
+. Once your visualization data is set up, adjust some visual details:
+.. Don't display the label on Y-axis. Click on the icon on the top of visualization and turn off *Axis name*
++
+[role="screenshot"]
+image::images/lens_end_to_end_4_3.png[Turn off axis name]
+.. Choose `Status` color pallete - it is nicely aligned with response codes.
+.. Switch chart type to `Percentage bar`.
+. Save your visualization as `Response Codes Over Time`.
+
+[role="screenshot"]
+image::images/lens_end_to_end_4_4.png[Responses codes chart]
+
+[float]
+[[histogram]]
+====  How does website traffic look like hour by hour? A histogram chart
+
+Do you want to add a new post with the intention of reaching as many users as possible? Or do you need to make a change in your website that requires a short outage of your service? In both cases knowing an hourly website traffic distribution will help. 
+
+. Drag and drop *bytes* to the vertical axis. 
+. Open the config panel and configure the following:
+.. Select the *sum* function.
+.. Change the *Display name* to `Transferred bytes`.
+.. Change the *Value format* to `Bytes(1024)`.
++
+[role="screenshot"]
+image::images/lens_end_to_end_5_1.png[Vertical axis configuration]
+
+. Drag *hour_of_day* field to the horizontal axis.
+. Open the config panel for *hour_of_day*. 
+. Modify a slider *Intervals granularity* to get hourly intervals.
++
+[role="screenshot"]
+image::images/lens_end_to_end_5_2.png[Create custom ranges]
+. Save the visualization as `Hourly Traffic Distribution`
+
+[float]
+[[custom-ranges]]
+====  What's the percentage of small vs big files transfer? Pie chart
+
+Another interesting option for *intervals* function is using custom ranges. Let's say you want to compare what's the percentage of small (<10KB) and big (>=10KB) files in over traffic on your page. _Side note: you can also use filters function to achieve the same result with KQL/Lucene filters_
+
+. Drag and drop *bytes* field to the vertical axis. 
+. Open the config panel for the dropped element and select a function *sum*.
+. Drag and drop *bytes* field to *Break down by*. 
+. Open the config panel.
+. Change the *Value format* to *Bytes(1024)*.
+. Click on *Create custom ranges*.
+. Create two custom ranges:
+.. `0 - 10240` (up to 10KB) with label `below 10KB`
+.. `10240 - +∞` with label: `above 10KB`
++
+[role="screenshot"]
+image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
+. Change the chart type to *pie*.
+. Save your chart as `File size distribution`
+
+[role="screenshot"]
+image::images/lens_end_to_end_6_2.png[Files size distribution]
+
+
+[float]
+[[treemap]]
+====  Where does the traffic come from for top three countries? A multi-level treemap chart
+
+Why would you monitor where the traffic comes from? By analyzing it, you can boost your business and reach out more audience. It gives you insights of which of your strategies work and which don't.
+
+For this chart, let's assume we are interested in tracking the referers specifically from facebook, twitter and the rest. 
+
+===== Creating a multi-level treemap chart
+
+. Choose *treemap* chart type. 
+. To the *Size by*, drop *Records* field.  
+. Click on the *+* button under the *Group by*.
+. Create a filters function with the following filters:
+.. KQL: `referer : *facebook.com*`, label: `facebook`
+.. KQL: `referer : *twitter.com*`, label: `twitter`
+.. KQL: `NOT referer : *twitter* OR NOT referer: *facebook.com*`, label: `other`
++
+[role="screenshot"]
+image::images/lens_end_to_end_7_1.png[Referers filters]
+. Let's assume you want to check out this data only for three top countries. Drag the *geo.src* field to the workspace. 
+. _Top values of geo.src_ was added as a second position in *Group by* group. However, we want to firstly divide by countries and then by referers filters. Reorder the items *Filters* and _Top values of geo.src_ by dragging. 
++
+[role="screenshot"]
+image::images/lens_end_to_end_7_2.png[Treemap vis]
+. The Treemap visualization shows four groups for _Top values of geo.src_ - three top countries and a bucket for *Other*. We don't want to display _Other_. Open the config panel for _Top values of geo.src_. 
+. Click on *Advanced*.
+. Unselect *Group other values as "Other"*.
++
+[role="screenshot"]
+image::images/lens_end_to_end_7_3.png[Group other values as Other]
+
+. Save your visualization as `Traffic Source For Top 3 Countries` and go back to the dashboard.
+
+==== The result dashboard
+
+Here's the final result after some repositioning and rescaling some visualizations:
+
+[role="screenshot"]
+image::images/lens_end_to_end_dashboard.png[Final dashboard vis] 
+
+
