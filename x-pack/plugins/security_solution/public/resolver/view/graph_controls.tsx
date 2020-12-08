@@ -329,14 +329,12 @@ const SchemaInformation = ({
   return (
     <EuiPopover
       ownFocus
-      onScroll={closePopover}
-      repositionOnScroll={false}
-      onClick={setAsActivePopover}
       button={
         <StyledEuiButtonIcon
           size="m"
           title={schemaInfoButtonTitle}
           aria-label={schemaInfoButtonTitle}
+          onClick={setAsActivePopover}
           iconType="iInCircle"
           $backgroundColor={colorMap.graphControlsBackground}
           $iconColor={colorMap.graphControls}
@@ -445,15 +443,13 @@ const CubeLegend = ({
           size="m"
           title={nodesLegendButtonTitle}
           aria-label={nodesLegendButtonTitle}
+          onClick={setAsActivePopover}
           iconType="node"
           $backgroundColor={colorMap.graphControlsBackground}
           $iconColor={colorMap.graphControls}
           $borderColor={colorMap.graphControlsBorderColor}
         />
       }
-      onScroll={closePopover}
-      repositionOnScroll={false}
-      onClick={setAsActivePopover}
       isOpen={isOpen}
       closePopover={closePopover}
       anchorPosition="leftCenter"
