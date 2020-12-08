@@ -81,16 +81,16 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-const expectedUrls = newThreatIndicatorRule.referenceUrls.join('');
-const expectedFalsePositives = newThreatIndicatorRule.falsePositivesExamples.join('');
-const expectedTags = newThreatIndicatorRule.tags.join('');
-const expectedMitre = formatMitreAttackDescription(newThreatIndicatorRule.mitre);
-const expectedNumberOfRules = 1;
-const expectedNumberOfAlerts = 1;
-
 // FLAKY: https://github.com/elastic/kibana/issues/85215
 // FLAKY: https://github.com/elastic/kibana/issues/85216
 describe.skip('Detection rules, Indicator Match', () => {
+  const expectedUrls = newThreatIndicatorRule.referenceUrls.join('');
+  const expectedFalsePositives = newThreatIndicatorRule.falsePositivesExamples.join('');
+  const expectedTags = newThreatIndicatorRule.tags.join('');
+  const expectedMitre = formatMitreAttackDescription(newThreatIndicatorRule.mitre);
+  const expectedNumberOfRules = 1;
+  const expectedNumberOfAlerts = 1;
+
   beforeEach(() => {
     esArchiverLoad('threat_indicator');
     esArchiverLoad('threat_data');

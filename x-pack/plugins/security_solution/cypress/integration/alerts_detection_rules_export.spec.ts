@@ -16,9 +16,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-let rule = '';
-
 describe('Export rules', () => {
+  let rule = '';
   before(async () => {
     cy.server();
     cy.route(

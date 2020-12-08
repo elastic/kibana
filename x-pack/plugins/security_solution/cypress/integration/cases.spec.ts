@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import deepMerge from 'deepmerge';
 import { case1 } from '../objects/case';
 
 import {
@@ -52,23 +53,24 @@ import { closeTimeline } from '../tasks/timeline';
 import { CASES_URL } from '../urls/navigation';
 
 describe('Cases', () => {
+  let mycase: typeof case1;
+
   before(async () => {
     const createdTimeline = await createTimeline(case1.timeline);
-    // eslint-disable-next-line require-atomic-updates
-    case1.timeline.id = createdTimeline[0];
+    mycase = deepMerge(case1, { timeline: { id: createdTimeline[0] } });
   });
 
   after(() => {
     closeTimeline();
-    deleteTimeline(case1.timeline.id!);
+    deleteTimeline(mycase.timeline.id!);
     deleteCase();
   });
 
   it('Creates a new case with timeline and opens the timeline', () => {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
-    fillCasesMandatoryfields(case1);
-    attachTimeline(case1);
+    fillCasesMandatoryfields(mycase);
+    attachTimeline(mycase);
     createCase();
     backToCases();
 
@@ -79,9 +81,9 @@ describe('Cases', () => {
     cy.get(ALL_CASES_OPEN_CASES_COUNT).should('have.text', 'Open (1)');
     cy.get(ALL_CASES_REPORTERS_COUNT).should('have.text', 'Reporter1');
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
-    cy.get(ALL_CASES_NAME).should('have.text', case1.name);
-    cy.get(ALL_CASES_REPORTER).should('have.text', case1.reporter);
-    case1.tags.forEach((tag, index) => {
+    cy.get(ALL_CASES_NAME).should('have.text', mycase.name);
+    cy.get(ALL_CASES_REPORTER).should('have.text', mycase.reporter);
+    mycase.tags.forEach((tag, index) => {
       cy.get(ALL_CASES_TAGS(index)).should('have.text', tag);
     });
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', '0');
@@ -92,24 +94,24 @@ describe('Cases', () => {
 
     goToCaseDetails();
 
-    const expectedTags = case1.tags.join('');
-    cy.get(CASE_DETAILS_PAGE_TITLE).should('have.text', case1.name);
+    const expectedTags = mycase.tags.join('');
+    cy.get(CASE_DETAILS_PAGE_TITLE).should('have.text', mycase.name);
     cy.get(CASE_DETAILS_STATUS).should('have.text', 'Open');
-    cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME).should('have.text', case1.reporter);
+    cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME).should('have.text', mycase.reporter);
     cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT).should('have.text', 'added description');
     cy.get(CASE_DETAILS_DESCRIPTION).should(
       'have.text',
-      `${case1.description} ${case1.timeline.title}`
+      `${mycase.description} ${mycase.timeline.title}`
     );
-    cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('have.text', case1.reporter);
-    cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('have.text', case1.reporter);
+    cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('have.text', mycase.reporter);
+    cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('have.text', mycase.reporter);
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
     cy.get(CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN).should('have.attr', 'disabled');
 
     openCaseTimeline();
 
-    cy.get(TIMELINE_TITLE).contains(case1.timeline.title);
-    cy.get(TIMELINE_DESCRIPTION).contains(case1.timeline.description);
-    cy.get(TIMELINE_QUERY).invoke('text').should('eq', case1.timeline.query);
+    cy.get(TIMELINE_TITLE).contains(mycase.timeline.title);
+    cy.get(TIMELINE_DESCRIPTION).contains(mycase.timeline.description);
+    cy.get(TIMELINE_QUERY).invoke('text').should('eq', mycase.timeline.query);
   });
 });

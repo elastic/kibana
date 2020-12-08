@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import deepMerge from 'deepmerge';
 import { loginAndWaitForTimeline } from '../tasks/login';
 import {
   attachTimelineToNewCase,
@@ -18,31 +19,33 @@ import { caseTimeline, timeline } from '../objects/timeline';
 import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 
 describe('attach timeline to case', () => {
+  let myTimeline: typeof timeline;
+
   context('without cases created', () => {
     before(async () => {
       const createdTimeline = await createTimeline(timeline);
-      // eslint-disable-next-line require-atomic-updates
-      timeline.id = createdTimeline[0];
+      myTimeline = deepMerge(timeline, {});
+      myTimeline.id = createdTimeline[0];
     });
 
     after(() => {
-      deleteTimeline(timeline.id!);
+      deleteTimeline(myTimeline.id!);
     });
 
     it('attach timeline to a new case', () => {
-      loginAndWaitForTimeline(timeline.id!);
+      loginAndWaitForTimeline(myTimeline.id!);
       attachTimelineToNewCase();
 
       cy.location('origin').then((origin) => {
         cy.get(DESCRIPTION_INPUT).should(
           'have.text',
-          `[${timeline.title}](${origin}/app/security/timelines?timeline=(id:%27${timeline.id}%27,isOpen:!t))`
+          `[${myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${myTimeline.id}%27,isOpen:!t))`
         );
       });
     });
 
     it('attach timeline to an existing case with no case', () => {
-      loginAndWaitForTimeline(timeline.id!);
+      loginAndWaitForTimeline(myTimeline.id!);
       attachTimelineToExistingCase();
       addNewCase();
 
@@ -50,8 +53,8 @@ describe('attach timeline to case', () => {
         cy.get(DESCRIPTION_INPUT).should(
           'have.text',
           `[${
-            timeline.title
-          }](${origin}/app/security/timelines?timeline=(id:%27${timeline.id!}%27,isOpen:!t))`
+            myTimeline.title
+          }](${origin}/app/security/timelines?timeline=(id:%27${myTimeline.id!}%27,isOpen:!t))`
         );
       });
     });

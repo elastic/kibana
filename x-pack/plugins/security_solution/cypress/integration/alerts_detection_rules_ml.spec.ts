@@ -64,13 +64,13 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-const expectedUrls = machineLearningRule.referenceUrls.join('');
-const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
-const expectedTags = machineLearningRule.tags.join('');
-const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
-const expectedNumberOfRules = 1;
-
 describe('Detection rules, machine learning', () => {
+  const expectedUrls = machineLearningRule.referenceUrls.join('');
+  const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
+  const expectedTags = machineLearningRule.tags.join('');
+  const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
+  const expectedNumberOfRules = 1;
+
   after(() => {
     deleteRule();
   });
