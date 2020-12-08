@@ -20,8 +20,8 @@ export class UiMetricService {
       return;
     }
 
-    const { reportUiStats, METRIC_TYPE } = this.usageCollection;
-    reportUiStats(UIM_APP_NAME, METRIC_TYPE.COUNT, name);
+    const { reportUiCounter, METRIC_TYPE } = this.usageCollection;
+    reportUiCounter(UIM_APP_NAME, METRIC_TYPE.COUNT, name);
   }
 
   public trackUiMetric(eventName: string) {

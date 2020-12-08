@@ -12,7 +12,7 @@ import {
 } from 'kibana/server';
 
 import { LicensingPluginSetup } from '../../../licensing/server';
-import { LicenseType } from '../../../licensing/common/types';
+import { LicenseType, ILicense } from '../shared_imports';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -26,6 +26,7 @@ interface SetupSettings {
 }
 
 export class License {
+  private currentLicense: ILicense | undefined;
   private licenseStatus: LicenseStatus = {
     isValid: false,
     message: 'Invalid License',
@@ -36,6 +37,7 @@ export class License {
     { licensing, logger }: { licensing: LicensingPluginSetup; logger: Logger }
   ) {
     licensing.license$.subscribe((license) => {
+      this.currentLicense = license;
       const { state, message } = license.check(pluginId, minimumLicenseType);
       const hasRequiredLicense = state === 'valid';
 
@@ -74,6 +76,13 @@ export class License {
 
       return handler(ctx, request, response);
     };
+  }
+
+  isCurrentLicenseAtLeast(type: LicenseType): boolean {
+    if (!this.currentLicense) {
+      return false;
+    }
+    return this.currentLicense.hasAtLeast(type);
   }
 
   getStatus() {

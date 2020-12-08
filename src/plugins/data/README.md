@@ -48,6 +48,405 @@ Coming soon.
 
 Coming soon.
 
+### Index Patterns HTTP API
+
+Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
+
+- Index Patterns API
+  - Create an index pattern &mdash; `POST /api/index_patterns/index_pattern`
+  - Fetch an index pattern by `{id}` &mdash; `GET /api/index_patterns/index_pattern/{id}`
+  - Delete an index pattern by `{id}` &mdash; `DELETE /api/index_patterns/index_pattern/{id}`
+  - Partially update an index pattern by `{id}` &mdash; `POST /api/index_patterns/index_pattern/{id}`
+- Fields API
+  - Update field &mdash; `POST /api/index_patterns/index_pattern/{id}/fields`
+- Scripted Fields API
+  - Create a scripted field &mdash; `POST /api/index_patterns/index_pattern/{id}/scripted_field`
+  - Upsert a scripted field &mdash; `PUT /api/index_patterns/index_pattern/{id}/scripted_field`
+  - Fetch a scripted field &mdash; `GET /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
+  - Remove a scripted field &mdash; `DELETE /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
+  - Update a scripted field &mdash; `POST /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
+
+
+### Index Patterns API
+
+Index Patterns CURD API allows you to create, retrieve and delete index patterns. I also
+exposes an update endpoint which allows you to update specific fields without changing
+the rest of the index pattern object.
+
+#### Create an index pattern
+
+Create an index pattern with a custom title.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "index_pattern": {
+        "title": "hello"
+    }
+}
+```
+
+Customize creation behavior with:
+
+- `override` &mdash; if set to `true`, replaces an existing index pattern if an
+  index pattern with the provided title already exists. Defaults to `false`.
+- `refresh_fields` &mdash; if set to `true` reloads index pattern fields after
+  the index pattern is stored. Defaults to `false`.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "override": false,
+    "refresh_fields": true,
+    "index_pattern": {
+        "title": "hello"
+    }
+}
+```
+
+At creation all index pattern fields are option and you can provide them.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "index_pattern": {
+        "id": "...",
+        "version": "...",
+        "title": "...",
+        "type": "...",
+        "intervalName": "...",
+        "timeFieldName": "...",
+        "sourceFilters": [],
+        "fields": {},
+        "typeMeta": {},
+        "fieldFormats": {},
+        "fieldAttrs": {}
+    }
+}
+```
+
+The endpoint returns the created index pattern object.
+
+```json
+{
+    "index_pattern": {}
+}
+```
+
+
+#### Fetch an index pattern by ID
+
+Retrieve and index pattern by its ID.
+
+```
+GET /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+Returns an index pattern object.
+
+```json
+{
+    "index_pattern": {
+        "id": "...",
+        "version": "...",
+        "title": "...",
+        "type": "...",
+        "intervalName": "...",
+        "timeFieldName": "...",
+        "sourceFilters": [],
+        "fields": {},
+        "typeMeta": {},
+        "fieldFormats": {},
+        "fieldAttrs": {}
+    }
+}
+```
+
+
+#### Delete an index pattern by ID
+
+Delete and index pattern by its ID.
+
+```
+DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+Returns an '200 OK` response with empty body on success.
+
+
+#### Partially update an index pattern by ID
+
+Update part of an index pattern. Only provided fields will be updated on the
+index pattern, missing fields will stay as they are persisted.
+
+These fields can be update partially:
+  - `title`
+  - `timeFieldName`
+  - `intervalName`
+  - `fields` (optionally refresh fields)
+  - `sourceFilters`
+  - `fieldFormatMap`
+  - `type`
+  - `typeMeta`
+
+Update a title of an index pattern.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+{
+    "index_pattern": {
+        "title": "new_title"
+    }
+}
+```
+
+All update fields are optional, you can specify the following fields.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "index_pattern": {
+        "title": "...",
+        "timeFieldName": "...",
+        "intervalName": "...",
+        "sourceFilters": [],
+        "fieldFormats": {},
+        "type": "...",
+        "typeMeta": {},
+        "fields": {}
+    }
+}
+```
+
+- `refresh_fields` &mdash; if set to `true` reloads index pattern fields after
+  the index pattern is stored. Defaults to `false`.
+
+```
+POST /api/index_patterns/index_pattern
+{
+    "refresh_fields": true,
+    "index_pattern": {
+        "fields": {}
+    }
+}
+```
+
+This endpoint returns the updated index pattern object.
+
+```json
+{
+    "index_pattern": {
+
+    }
+}
+```
+
+
+### Fields API
+
+Fields API allows to change field metadata, such as `count`, `customLabel`, and `format`.
+
+
+#### Update fields
+
+Update endpoint allows you to update fields presentation metadata, such as `count`,
+`customLabel`, and `format`. You can update multiple fields in one request. Updates
+are merges with persisted metadata. To remove existing metadata specify `null` as value.
+
+Set popularity `count` for field `foo`:
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fields
+{
+    "fields": {
+        "foo": {
+            "count": 123
+        }
+    }
+}
+```
+
+Update multiple metadata values and fields in one request:
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fields
+{
+    "fields": {
+        "foo": {
+            "count": 123,
+            "customLabel": "Foo"
+        },
+        "bar": {
+            "customLabel": "Bar"
+        }
+    }
+}
+```
+
+Use `null` value to delete metadata:
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fields
+{
+    "fields": {
+        "foo": {
+            "customLabel": null
+        }
+    }
+}
+```
+
+This endpoint returns the updated index pattern object.
+
+```json
+{
+    "index_pattern": {
+
+    }
+}
+```
+
+
+### Scripted Fields API
+
+Scripted Fields API provides CRUD API for scripted fields of an index pattern.
+
+#### Create a scripted field
+
+Create a field by simply specifying its name, will default to `string` type. Returns
+an error if a field with the provided name already exists.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field
+{
+    "field": {
+        "name": "my_field"
+    }
+}
+```
+
+Create a field by specifying all field properties.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field
+{
+    "field": {
+        "name": "",
+        "type": "",
+        "searchable": false,
+        "aggregatable": false,
+        "count": 0,
+        "script": "",
+        "scripted": false,
+        "lang": "",
+        "conflictDescriptions": {},
+        "format": {},
+        "esTypes": [],
+        "readFromDocValues": false,
+        "subType": {},
+        "indexed": false,
+        "customLabel": "",
+        "shortDotsEnable": false
+    }
+}
+```
+
+#### Upsert a scripted field
+
+Creates a new field or updates an existing one, if one already exists with the same name.
+
+Create a field by simply specifying its name.
+
+```
+PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field
+{
+    "field": {
+        "name": "my_field"
+    }
+}
+```
+
+Create a field by specifying all field properties.
+
+```
+PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field
+{
+    "field": {
+        "name": "",
+        "type": "",
+        "searchable": false,
+        "aggregatable": false,
+        "count": 0,
+        "script": "",
+        "scripted": false,
+        "lang": "",
+        "conflictDescriptions": {},
+        "format": {},
+        "esTypes": [],
+        "readFromDocValues": false,
+        "subType": {},
+        "indexed": false,
+        "customLabel": "",
+        "shortDotsEnable": false
+    }
+}
+```
+
+#### Fetch a scripted field
+
+Fetch an existing index pattern field by field name.
+
+```
+GET /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field/<name>
+```
+
+Returns the field object.
+
+```json
+{
+    "field": {}
+}
+```
+
+#### Delete a scripted field
+
+Delete a field of an index pattern.
+
+```
+DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field/<name>
+```
+
+#### Update a an existing scripted field
+
+Updates an exiting field by mergin provided properties with the existing ones. If
+there is no existing field with the specified name, returns a `404 Not Found` error.
+
+You can specify any field properties, except `name` which is specified in the URL path.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scripted_field/<name>
+{
+    "field": {
+        "type": "",
+        "searchable": false,
+        "aggregatable": false,
+        "count": 0,
+        "script": "",
+        "scripted": false,
+        "lang": "",
+        "conflictDescriptions": {},
+        "format": {},
+        "esTypes": [],
+        "readFromDocValues": false,
+        "subType": {},
+        "indexed": false,
+        "customLabel": "",
+        "shortDotsEnable": false
+    }
+}
+```
+
+
 ## Query
 
 The query service is responsible for managing the configuration of a search query (`QueryState`): filters, time range, query string, and settings such as the auto refresh behavior and saved queries.

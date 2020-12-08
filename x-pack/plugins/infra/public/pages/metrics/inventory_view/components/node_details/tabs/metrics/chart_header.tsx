@@ -11,7 +11,6 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { colorTransformer } from '../../../../../../../../common/color_palette';
 import { MetricsExplorerOptionsMetric } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { euiStyled } from '../../../../../../../../../observability/public';
 
 interface Props {
   title: string;
@@ -20,33 +19,33 @@ interface Props {
 
 export const ChartHeader = ({ title, metrics }: Props) => {
   return (
-    <ChartHeaderWrapper>
+    <EuiFlexGroup gutterSize={'s'} responsive={false}>
       <EuiFlexItem grow={1}>
-        <EuiText>
-          <strong>{title}</strong>
+        <EuiText size={'s'}>
+          <h4>{title}</h4>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+        <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
           {metrics.map((chartMetric) => (
-            <EuiFlexGroup key={chartMetric.label!} gutterSize={'s'} alignItems={'center'}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon color={colorTransformer(chartMetric.color!)} type={'dot'} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size={'xs'}>{chartMetric.label}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiFlexItem key={chartMetric.label!}>
+              <EuiFlexGroup
+                key={chartMetric.label!}
+                gutterSize={'xs'}
+                alignItems={'center'}
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiIcon color={colorTransformer(chartMetric.color!)} type={'dot'} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size={'xs'}>{chartMetric.label}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           ))}
         </EuiFlexGroup>
       </EuiFlexItem>
-    </ChartHeaderWrapper>
+    </EuiFlexGroup>
   );
 };
-
-const ChartHeaderWrapper = euiStyled.div`
-  display: flex;
-  width: 100%;
-  padding: ${(props) => props.theme.eui.paddingSizes.s} ${(props) =>
-  props.theme.eui.paddingSizes.m};
-`;

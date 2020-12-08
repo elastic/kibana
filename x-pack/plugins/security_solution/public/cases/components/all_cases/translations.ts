@@ -69,12 +69,6 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
     defaultMessage: 'e.g. case name',
   }
 );
-export const OPEN_CASES = i18n.translate('xpack.securitySolution.case.caseTable.openCases', {
-  defaultMessage: 'Open cases',
-});
-export const CLOSED_CASES = i18n.translate('xpack.securitySolution.case.caseTable.closedCases', {
-  defaultMessage: 'Closed cases',
-});
 
 export const CLOSED = i18n.translate('xpack.securitySolution.case.caseTable.closed', {
   defaultMessage: 'Closed',

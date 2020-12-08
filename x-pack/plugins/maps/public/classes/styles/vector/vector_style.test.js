@@ -31,8 +31,8 @@ class MockSource {
   }
 }
 
-describe('getDescriptorWithMissingStylePropsRemoved', () => {
-  const fieldName = 'doIStillExist';
+describe('getDescriptorWithUpdatedStyleProps', () => {
+  const previousFieldName = 'doIStillExist';
   const mapColors = [];
   const properties = {
     fillColor: {
@@ -43,7 +43,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
       type: STYLE_TYPE.DYNAMIC,
       options: {
         field: {
-          name: fieldName,
+          name: previousFieldName,
           origin: FIELD_ORIGIN.SOURCE,
         },
       },
@@ -53,10 +53,12 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
       options: {
         minSize: 1,
         maxSize: 10,
-        field: { name: fieldName, origin: FIELD_ORIGIN.SOURCE },
+        field: { name: previousFieldName, origin: FIELD_ORIGIN.SOURCE },
       },
     },
   };
+
+  const previousFields = [new MockField({ fieldName: previousFieldName })];
 
   beforeEach(() => {
     require('../../../kibana_services').getUiSettings = () => ({
@@ -64,78 +66,110 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     });
   });
 
-  it('Should return no changes when next ordinal fields contain existing style property fields', async () => {
-    const vectorStyle = new VectorStyle({ properties }, new MockSource());
+  describe('When there is no mismatch in configuration', () => {
+    it('Should return no changes when next ordinal fields contain existing style property fields', async () => {
+      const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
-    const nextFields = [new MockField({ fieldName, dataType: 'number' })];
-    const { hasChanges } = await vectorStyle.getDescriptorWithMissingStylePropsRemoved(
-      nextFields,
-      mapColors
-    );
-    expect(hasChanges).toBe(false);
-  });
-
-  it('Should clear missing fields when next ordinal fields do not contain existing style property fields', async () => {
-    const vectorStyle = new VectorStyle({ properties }, new MockSource());
-
-    const nextFields = [new MockField({ fieldName: 'someOtherField', dataType: 'number' })];
-    const {
-      hasChanges,
-      nextStyleDescriptor,
-    } = await vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields, mapColors);
-    expect(hasChanges).toBe(true);
-    expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
-      options: {},
-      type: 'DYNAMIC',
-    });
-    expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
-      options: {
-        minSize: 1,
-        maxSize: 10,
-      },
-      type: 'DYNAMIC',
+      const nextFields = [new MockField({ fieldName: previousFieldName, dataType: 'number' })];
+      const { hasChanges } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
+        nextFields,
+        previousFields,
+        mapColors
+      );
+      expect(hasChanges).toBe(false);
     });
   });
 
-  it('Should convert dynamic styles to static styles when there are no next fields', async () => {
-    const vectorStyle = new VectorStyle({ properties }, new MockSource());
+  describe('When styles should revert to static styling', () => {
+    it('Should convert dynamic styles to static styles when there are no next fields', async () => {
+      const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
-    const nextFields = [];
-    const {
-      hasChanges,
-      nextStyleDescriptor,
-    } = await vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields, mapColors);
-    expect(hasChanges).toBe(true);
-    expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
-      options: {
-        color: '#41937c',
-      },
-      type: 'STATIC',
+      const nextFields = [];
+      const {
+        hasChanges,
+        nextStyleDescriptor,
+      } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
+        nextFields,
+        previousFields,
+        mapColors
+      );
+      expect(hasChanges).toBe(true);
+      expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
+        options: {
+          color: '#41937c',
+        },
+        type: 'STATIC',
+      });
+      expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
+        options: {
+          size: 6,
+        },
+        type: 'STATIC',
+      });
     });
-    expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
-      options: {
-        size: 6,
-      },
-      type: 'STATIC',
+
+    it('Should convert dynamic ICON_SIZE static style when there are no next ordinal fields', async () => {
+      const vectorStyle = new VectorStyle({ properties }, new MockSource());
+
+      const nextFields = [
+        new MockField({
+          fieldName: previousFieldName,
+          dataType: 'number',
+          supportsAutoDomain: false,
+        }),
+      ];
+      const {
+        hasChanges,
+        nextStyleDescriptor,
+      } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
+        nextFields,
+        previousFields,
+        mapColors
+      );
+      expect(hasChanges).toBe(true);
+      expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
+        options: {
+          size: 6,
+        },
+        type: 'STATIC',
+      });
     });
   });
 
-  it('Should convert dynamic ICON_SIZE static style when there are no next ordinal fields', async () => {
-    const vectorStyle = new VectorStyle({ properties }, new MockSource());
+  describe('When styles should not be cleared', () => {
+    it('Should update field in styles when the fields and style combination remains compatible', async () => {
+      const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
-    const nextFields = [
-      new MockField({ fieldName, dataType: 'number', supportsAutoDomain: false }),
-    ];
-    const {
-      hasChanges,
-      nextStyleDescriptor,
-    } = await vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields, mapColors);
-    expect(hasChanges).toBe(true);
-    expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
-      options: {
-        size: 6,
-      },
-      type: 'STATIC',
+      const nextFields = [new MockField({ fieldName: 'someOtherField', dataType: 'number' })];
+      const {
+        hasChanges,
+        nextStyleDescriptor,
+      } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
+        nextFields,
+        previousFields,
+        mapColors
+      );
+      expect(hasChanges).toBe(true);
+      expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
+        options: {
+          field: {
+            name: 'someOtherField',
+            origin: FIELD_ORIGIN.SOURCE,
+          },
+        },
+        type: 'DYNAMIC',
+      });
+      expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
+        options: {
+          minSize: 1,
+          maxSize: 10,
+          field: {
+            name: 'someOtherField',
+            origin: FIELD_ORIGIN.SOURCE,
+          },
+        },
+        type: 'DYNAMIC',
+      });
     });
   });
 });

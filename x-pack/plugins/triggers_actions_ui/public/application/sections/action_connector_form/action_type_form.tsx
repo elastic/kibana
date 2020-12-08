@@ -115,7 +115,7 @@ export const ActionTypeForm = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionItem.group, defaultParams]);
+  }, [actionItem.group]);
 
   const canSave = hasSaveActionsCapability(capabilities);
   const getSelectedOptions = (actionItemId: string) => {
