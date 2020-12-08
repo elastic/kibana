@@ -6,7 +6,8 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "node ./scripts/build.js",
-    "kbn:bootstrap": "yarn build --dev"
+    "kbn:bootstrap": "yarn build --dev",
+    "build:antlr4ts": "../../node_modules/antlr4ts-cli/antlr4ts ./src/painless/antlr/painless_lexer.g4 ./src/painless/antlr/painless_parser.g4 && node ./scripts/fix_generated_antlr.js"
   },
   "devDependencies": {
     "@kbn/babel-preset": "link:../kbn-babel-preset",

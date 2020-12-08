@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function executionStatusAlertTests({ getService }: FtrProviderContext) {
+  const retry = getService('retry');
   const supertest = getService('supertest');
   const spaceId = Spaces[0].id;
 
@@ -37,16 +38,18 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
       let executionStatus = await waitForStatus(alertId, new Set(['ok']), 10000);
 
-      // break AAD
-      await supertest
-        .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${alertId}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {
-            name: 'bar',
-          },
-        })
-        .expect(200);
+      await retry.try(async () => {
+        // break AAD
+        await supertest
+          .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${alertId}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            attributes: {
+              name: 'bar',
+            },
+          })
+          .expect(200);
+      });
 
       executionStatus = await waitForStatus(alertId, new Set(['error']));
       expect(executionStatus.error).to.be.ok();

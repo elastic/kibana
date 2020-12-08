@@ -5,10 +5,8 @@
  */
 
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { alertTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/alert_type_registry.mock';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
+// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
+import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import React from 'react';
@@ -22,6 +20,12 @@ jest.mock('../../../containers/source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
+  }),
+}));
+
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibanaContextForPlugin: () => ({
+    services: mockCoreMock.createStart(),
   }),
 }));
 
@@ -39,41 +43,15 @@ describe('Expression', () => {
       nodeType: undefined,
       filterQueryText: '',
     };
-
-    const mocks = coreMock.createSetup();
-    const startMocks = coreMock.createStart();
-    const [
-      {
-        application: { capabilities },
-      },
-    ] = await mocks.getStartServices();
-
-    const context: AlertsContextValue<AlertContextMeta> = {
-      http: mocks.http,
-      toastNotifications: mocks.notifications.toasts,
-      actionTypeRegistry: actionTypeRegistryMock.create() as any,
-      alertTypeRegistry: alertTypeRegistryMock.create() as any,
-      docLinks: startMocks.docLinks,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
-        },
-      },
-      metadata: currentOptions,
-    };
-
     const wrapper = mountWithIntl(
       <Expressions
-        alertsContext={context}
         alertInterval="1m"
         alertThrottle="1m"
         alertParams={alertParams as any}
         errors={[]}
         setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
         setAlertProperty={() => {}}
+        metadata={currentOptions}
       />
     );
 
@@ -153,9 +131,6 @@ describe('ExpressionRow', () => {
           metric: [],
         }}
         expression={expression}
-        alertsContextMetadata={{
-          customMetrics: [],
-        }}
         fields={[{ name: 'some.system.field', type: 'bzzz' }]}
       />
     );
