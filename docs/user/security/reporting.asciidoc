@@ -34,7 +34,7 @@ POST /_xpack/security/user/reporter
 * If you are using an LDAP or Active Directory realm, you can either assign
 roles on a per user basis, or assign roles to groups of users. By default, role
 mappings are configured in
-{ref}/mapping-roles.html[`config/shield/role_mapping.yml`].
+{ref}/mapping-roles.html[`config/role_mapping.yml`].
 For example, the following snippet assigns the user named Bill Murray the
 `kibana_user` and `reporting_user` roles:
 +
