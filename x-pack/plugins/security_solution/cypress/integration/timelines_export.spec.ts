@@ -11,12 +11,11 @@ import { TIMELINES_URL } from '../urls/navigation';
 import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
 import { expectedExportedTimeline, timeline } from '../objects/timeline';
 
-let timelineBody = '';
-let timelineId = '';
-
 describe('Export timelines', () => {
+  let timelineBody = '';
+  let timelineId = '';
   before(async () => {
-    cy.intercept('POST', '**api/timeline/_export?file_name=timelines_export.ndjson*').as('export');
+    cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
     const newTimeline = await createTimeline(timeline);
     timelineId = newTimeline[0];
     timelineBody = newTimeline[1];
@@ -30,7 +29,7 @@ describe('Export timelines', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
-    const jsonTimeline = JSON.parse(JSON.stringify(timelineBody));
+    const jsonTimeline = timelineBody;
     exportTimeline(timelineId);
 
     cy.wait('@export').then(({ response }) => {

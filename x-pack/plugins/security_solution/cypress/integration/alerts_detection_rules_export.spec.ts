@@ -21,7 +21,7 @@ describe('Export rules', () => {
   before(async () => {
     cy.intercept(
       'POST',
-      '**api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson*'
+      'api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
     ).as('export');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
@@ -36,9 +36,8 @@ describe('Export rules', () => {
   it('Exports a custom rule', () => {
     goToManageAlertsDetectionRules();
     exportFirstRule();
-    const jsonRule = JSON.parse(JSON.stringify(rule));
     cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.body).should('eql', expectedExportedRule(jsonRule));
+      cy.wrap(response!.body).should('eql', expectedExportedRule(rule));
     });
   });
 });

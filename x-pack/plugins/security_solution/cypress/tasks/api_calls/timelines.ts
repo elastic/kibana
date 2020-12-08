@@ -57,7 +57,7 @@ export const createTimeline = async (timeline: Timeline): Promise<string[]> => {
   return [timelineId, timelineBody];
 };
 
-export const createTimelineTemplate = async (timeline: Timeline): Promise<string> => {
+export const createTimelineTemplate = async (timeline: Timeline) => {
   const response = await cy
     .request({
       method: 'POST',
