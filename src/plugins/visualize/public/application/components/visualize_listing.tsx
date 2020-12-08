@@ -156,7 +156,7 @@ export const VisualizeListing = () => {
     <>
       <FormattedMessage
         id="visualize.visualizeListingDashboardFlowDescription"
-        defaultMessage="Building a dashboard? Create new content directly from the {dashboardApp} using a new integrated workflow."
+        defaultMessage="Building a dashboard? Create content directly from the {dashboardApp} using a new integrated workflow."
         values={{
           dashboardApp: (
             <EuiLink
