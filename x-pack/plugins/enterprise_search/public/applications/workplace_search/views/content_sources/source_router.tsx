@@ -8,9 +8,10 @@ import React, { useEffect } from 'react';
 
 import { History } from 'history';
 import { useActions, useValues } from 'kea';
+import moment from 'moment';
 import { Route, Switch, useHistory, useParams } from 'react-router-dom';
 
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
@@ -41,6 +42,7 @@ import { Overview } from './components/overview';
 import { Schema } from './components/schema';
 import { SchemaChangeErrors } from './components/schema/schema_change_errors';
 import { SourceContent } from './components/source_content';
+import { SourceInfoCard } from './components/source_info_card';
 import { SourceSettings } from './components/source_settings';
 
 export const SourceRouter: React.FC = () => {
@@ -56,8 +58,27 @@ export const SourceRouter: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const { name, serviceType, supportedByLicense } = contentSource;
+  const {
+    name,
+    createdAt,
+    serviceType,
+    serviceName,
+    isFederatedSource,
+    supportedByLicense,
+  } = contentSource;
   const isCustomSource = serviceType === CUSTOM_SERVICE_TYPE;
+
+  const pageHeader = (
+    <>
+      <SourceInfoCard
+        sourceName={serviceName}
+        sourceType={serviceType}
+        dateCreated={moment(createdAt).format('MMMM D, YYYY')}
+        isFederatedSource={isFederatedSource}
+      />
+      <EuiHorizontalRule />
+    </>
+  );
 
   const callout = (
     <>
@@ -77,6 +98,7 @@ export const SourceRouter: React.FC = () => {
   return (
     <>
       {!supportedByLicense && callout}
+      {pageHeader}
       <Switch>
         <Route exact path={sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization)}>
           <SendTelemetry action="viewed" metric="source_overview" />
