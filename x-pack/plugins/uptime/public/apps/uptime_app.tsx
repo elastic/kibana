@@ -25,10 +25,7 @@ import {
 import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
 import { setBasePath } from '../state/actions';
 import { PageRouter } from '../routes';
-import {
-  UptimeAlertsContextProvider,
-  UptimeAlertsFlyoutWrapper,
-} from '../components/overview/alerts';
+import { UptimeAlertsFlyoutWrapper } from '../components/overview/alerts';
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
@@ -111,17 +108,15 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <UptimeAlertsContextProvider>
-                          <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                            <RedirectAppLinks application={core.application}>
-                              <main>
-                                <UptimeAlertsFlyoutWrapper />
-                                <PageRouter />
-                                <ActionMenu appMountParameters={appMountParameters} />
-                              </main>
-                            </RedirectAppLinks>
-                          </EuiPage>
-                        </UptimeAlertsContextProvider>
+                        <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                          <RedirectAppLinks application={core.application}>
+                            <main>
+                              <UptimeAlertsFlyoutWrapper />
+                              <PageRouter />
+                              <ActionMenu appMountParameters={appMountParameters} />
+                            </main>
+                          </RedirectAppLinks>
+                        </EuiPage>
                       </UptimeStartupPluginsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>
