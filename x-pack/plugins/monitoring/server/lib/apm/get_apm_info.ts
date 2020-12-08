@@ -21,7 +21,14 @@ export function handleResponse(response: ElasticsearchResponse, apmUuid: string)
     return {};
   }
 
-  const firstStats = response.hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats;
+  if (
+    !response.hits.hits[0].inner_hits?.first_hit?.hits?.hits ||
+    response.hits.hits[0].inner_hits?.first_hit?.hits?.hits.length === 0
+  ) {
+    return {};
+  }
+
+  const firstStats = response.hits.hits[0].inner_hits.first_hit?.hits.hits[0]._source.beats_stats;
   const stats = response.hits.hits[0]._source.beats_stats;
 
   if (!firstStats || !stats) {

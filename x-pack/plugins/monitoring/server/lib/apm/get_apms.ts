@@ -24,6 +24,13 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
       return accum;
     }
 
+    if (
+      !hit.inner_hits?.earliest?.hits?.hits ||
+      hit.inner_hits?.earliest?.hits?.hits.length === 0
+    ) {
+      return accum;
+    }
+
     const earliestStats = hit.inner_hits.earliest.hits.hits[0]._source.beats_stats;
     if (!earliestStats) {
       return accum;
