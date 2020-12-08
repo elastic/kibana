@@ -2,4 +2,4 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-yarn run grunt run:test_jest
+checks-reporter-with-killswitch "Jest tests" node scripts/jest --ci --verbose --maxWorkers=4
