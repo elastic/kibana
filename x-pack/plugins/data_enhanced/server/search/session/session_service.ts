@@ -35,6 +35,7 @@ import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
 
+const INMEM_MAX_SESSIONS = 10000;
 const DEFAULT_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
 export const INMEM_TRACKING_INTERVAL = 10 * 1000;
 export const INMEM_TRACKING_TIMEOUT_SEC = 60;
@@ -93,6 +94,7 @@ export class BackgroundSessionService implements ISessionService {
       .map((sessionId) => `"${sessionId}"`)
       .join(' | ');
     const res = await this.internalSavedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
+      perPage: INMEM_MAX_SESSIONS, // If there are more sessions in memory, they will be synced when some items are cleared out.
       type: BACKGROUND_SESSION_TYPE,
       search: activeMappingIds,
       searchFields: ['sessionId'],
@@ -104,6 +106,7 @@ export class BackgroundSessionService implements ISessionService {
 
   private clearSessions = () => {
     const curTime = moment();
+
     this.sessionSearchMap.forEach((sessionInfo, sessionId) => {
       if (
         moment.duration(curTime.diff(sessionInfo.insertTime)).asSeconds() >
