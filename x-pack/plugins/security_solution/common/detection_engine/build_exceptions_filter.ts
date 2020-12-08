@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EsQueryConfig, Filter, IIndexPattern } from '../../../../../src/plugins/data/common';
+import { Filter } from '../../../../../src/plugins/data/common';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -75,16 +75,12 @@ export const createOrClauses = (
 
 export const buildExceptionFilter = ({
   lists,
-  config,
   excludeExceptions,
   chunkSize,
-  indexPattern,
 }: {
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
-  config: EsQueryConfig;
   excludeExceptions: boolean;
   chunkSize: number;
-  indexPattern?: IIndexPattern;
 }): Filter | undefined => {
   // Remove exception items with large value lists. These are evaluated
   // elsewhere for the moment being.

@@ -54,12 +54,6 @@ export const getAnomalies = async (
             ],
             must_not: buildExceptionFilter({
               lists: params.exceptionItems,
-              config: {
-                allowLeadingWildcards: true,
-                queryStringOptions: { analyze_wildcard: true },
-                ignoreFilterIfFieldNotInIndex: false,
-                dateFormatTZ: 'Zulu',
-              },
               excludeExceptions: true,
               chunkSize: 1024,
             })?.query,

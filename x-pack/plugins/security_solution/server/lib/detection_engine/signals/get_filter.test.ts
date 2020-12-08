@@ -192,66 +192,69 @@ describe('get_filter', () => {
         index: ['auditbeat-*'],
         lists: [getExceptionListItemSchemaMock()],
       });
+
       expect(filter).toEqual({
         bool: {
           must: [],
           filter: [
-            { bool: { should: [{ match: { 'host.name': 'siem' } }], minimum_should_match: 1 } },
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      'host.name': 'siem',
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
           ],
-          should: [],
           must_not: [
             {
               bool: {
                 should: [
                   {
-                    nested: {
-                      path: 'some.parentField',
-                      query: {
-                        bool: {
-                          filter: [
-                            {
+                    bool: {
+                      filter: [
+                        {
+                          nested: {
+                            path: 'some.parentField',
+                            query: {
                               bool: {
                                 should: [
                                   {
-                                    match_phrase: { 'some.parentField.nested.field': 'some value' },
-                                  },
-                                ],
-                                minimum_should_match: 1,
-                              },
-                            },
-                            {
-                              bool: {
-                                should: [
-                                  {
-                                    bool: {
-                                      should: [
-                                        { match_phrase: { 'some.parentField.nested.boo': 'a' } },
-                                      ],
-                                      minimum_should_match: 1,
-                                    },
-                                  },
-                                  {
-                                    bool: {
-                                      should: [
-                                        { match_phrase: { 'some.parentField.nested.boo': 'b' } },
-                                      ],
-                                      minimum_should_match: 1,
+                                    match_phrase: {
+                                      'some.parentField.nested.field': 'some value',
                                     },
                                   },
                                 ],
                                 minimum_should_match: 1,
                               },
                             },
-                          ],
+                            score_mode: 'none',
+                          },
                         },
-                      },
-                      score_mode: 'none',
+                        {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'some.not.nested.field': 'some value',
+                                },
+                              },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
               },
             },
           ],
+          should: [],
         },
       });
     });

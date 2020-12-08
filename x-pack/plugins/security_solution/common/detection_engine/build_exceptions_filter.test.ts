@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EsQueryConfig, IIndexPattern } from 'src/plugins/data/common';
 
 import {
   getEntryMatchMock,
@@ -48,18 +47,6 @@ const modifiedGetEntryMatchAnyMock = (): EntryMatchAny => ({
   value: ['some "host" name', 'some other host name'],
 });
 
-const mockIndexPattern: IIndexPattern = {
-  fields: [],
-  title: '.auditbeat',
-};
-
-const mockConfig: EsQueryConfig = {
-  allowLeadingWildcards: true,
-  queryStringOptions: { analyze_wildcard: true },
-  ignoreFilterIfFieldNotInIndex: false,
-  dateFormatTZ: 'Zulu',
-};
-
 const getExceptionListItemsWoValueLists = (num: number): ExceptionItemSansLargeValueLIsts[] => {
   const items = getExceptionListItemSchemaXMock(num);
   return items.filter(
@@ -74,10 +61,52 @@ describe('build_exceptions_filter', () => {
         lists: [],
         excludeExceptions: false,
         chunkSize: 1,
-        config: mockConfig,
-        indexPattern: mockIndexPattern,
       });
       expect(booleanFilter).toBeUndefined();
+    });
+
+    test('it should build a filter given an exception list', () => {
+      const booleanFilter = buildExceptionFilter({
+        lists: [getExceptionListItemSchemaMock()],
+        excludeExceptions: false,
+        chunkSize: 1,
+      });
+
+      expect(booleanFilter).toEqual({
+        meta: { alias: null, negate: false, disabled: false },
+        query: {
+          bool: {
+            should: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      nested: {
+                        path: 'some.parentField',
+                        query: {
+                          bool: {
+                            should: [
+                              { match_phrase: { 'some.parentField.nested.field': 'some value' } },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        score_mode: 'none',
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [{ match_phrase: { 'some.not.nested.field': 'some value' } }],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      });
     });
 
     test('it should build a filter without chunking exception items', () => {
@@ -94,13 +123,8 @@ describe('build_exceptions_filter', () => {
       };
       const exceptionFilter = buildExceptionFilter({
         lists: [exceptionItem1, exceptionItem2],
-        config: mockConfig,
         excludeExceptions: true,
         chunkSize: 2,
-        indexPattern: {
-          fields: [],
-          title: 'auditbeat-*',
-        },
       });
       expect(exceptionFilter).toEqual({
         meta: {
@@ -177,13 +201,8 @@ describe('build_exceptions_filter', () => {
       };
       const exceptionFilter = buildExceptionFilter({
         lists: [exceptionItem1, exceptionItem2, exceptionItem3],
-        config: mockConfig,
         excludeExceptions: true,
         chunkSize: 2,
-        indexPattern: {
-          fields: [],
-          title: 'auditbeat-*',
-        },
       });
 
       expect(exceptionFilter).toEqual({
@@ -281,8 +300,6 @@ describe('build_exceptions_filter', () => {
         lists: exceptions,
         excludeExceptions: true,
         chunkSize: 1,
-        config: mockConfig,
-        indexPattern: mockIndexPattern,
       });
 
       expect(booleanFilter).toEqual({

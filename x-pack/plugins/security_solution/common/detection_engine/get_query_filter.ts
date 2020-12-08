@@ -44,10 +44,8 @@ export const getQueryFilter = (
   // very conservative value.
   const exceptionFilter = buildExceptionFilter({
     lists,
-    config,
     excludeExceptions,
     chunkSize: 1024,
-    indexPattern,
   });
 
   const enabledFilters = ((filters as unknown) as Filter[]).filter((f) => !isFilterDisabled(f));
@@ -78,26 +76,14 @@ export const buildEqlSearchRequest = (
   eventCategoryOverride: string | undefined
 ): EqlSearchRequest => {
   const timestamp = timestampOverride ?? '@timestamp';
-  const indexPattern: IIndexPattern = {
-    fields: [],
-    title: index.join(),
-  };
-  const config: EsQueryConfig = {
-    allowLeadingWildcards: true,
-    queryStringOptions: { analyze_wildcard: true },
-    ignoreFilterIfFieldNotInIndex: false,
-    dateFormatTZ: 'Zulu',
-  };
   // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
   // allowing us to make 1024-item chunks of exception list items.
   // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
   // very conservative value.
   const exceptionFilter = buildExceptionFilter({
     lists: exceptionLists,
-    config,
     excludeExceptions: true,
     chunkSize: 1024,
-    indexPattern,
   });
   const indexString = index.join();
   const requestFilter: unknown[] = [
