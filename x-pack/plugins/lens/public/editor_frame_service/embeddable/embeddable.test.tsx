@@ -25,7 +25,7 @@ import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks'
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
 import { coreMock, httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { IBasePath } from '../../../../../../src/core/public';
-import { AttributeService } from '../../../../../../src/plugins/embeddable/public';
+import { AttributeService, ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import { LensAttributeService } from '../../lens_attribute_service';
 import { OnSaveProps } from '../../../../../../src/plugins/saved_objects/public/save_modal';
 import { act } from 'react-dom/test-utils';
@@ -210,6 +210,74 @@ describe('embeddable', () => {
       query,
       filters,
       searchSessionId: 'searchSessionId',
+    });
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
+  });
+
+  it('should re-render when dashboard view/edit mode changes', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
+      },
+      { id: '123' } as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({
+      viewMode: ViewMode.VIEW,
+    });
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
+  });
+
+  it('should re-render when dynamic actions input changes', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
+      },
+      { id: '123' } as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({
+      enhancements: {
+        dynamicActions: {},
+      },
     });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
