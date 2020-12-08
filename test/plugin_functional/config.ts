@@ -31,8 +31,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     testFiles: [
-      // require.resolve('./test_suites/core'),
-      // require.resolve('./test_suites/custom_visualizations'),
+      require.resolve('./test_suites/core'),
+      require.resolve('./test_suites/custom_visualizations'),
       require.resolve('./test_suites/panel_actions'),
       require.resolve('./test_suites/core_plugins'),
       require.resolve('./test_suites/management'),
