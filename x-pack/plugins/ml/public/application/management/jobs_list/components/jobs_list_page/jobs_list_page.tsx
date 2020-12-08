@@ -157,7 +157,7 @@ export const JobsListPage: FC<{
   }
 
   const anomalyDetectionJobsUrl = getDocLinks().links.ml.anomalyDetectionJobs;
-  const anomalyJobsUrl = getDocLinks().links.ml.dataFrameAnalytics;
+  const dataFrameAnalyticsUrl = getDocLinks().links.ml.dataFrameAnalytics;
 
   const anomalyDetectionDocsLabel = i18n.translate(
     'xpack.ml.management.jobsList.anomalyDetectionDocsLabel',
@@ -220,7 +220,7 @@ export const JobsListPage: FC<{
                         href={
                           currentTabId === 'anomaly_detection_jobs'
                             ? anomalyDetectionJobsUrl
-                            : anomalyJobsUrl
+                            : dataFrameAnalyticsUrl
                         }
                       >
                         {currentTabId === 'anomaly_detection_jobs'
