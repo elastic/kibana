@@ -20,7 +20,7 @@ import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 
-type TransactionGroup = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups'>['items'][0];
+type TransactionGroup = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups'>['items'][0];
 
 // Truncate both the link and the child span (the tooltip anchor.) The link so
 // it doesn't overflow, and the anchor so we get the ellipsis.

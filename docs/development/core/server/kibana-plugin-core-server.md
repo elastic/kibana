@@ -177,6 +177,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsImportSuccess](./kibana-plugin-core-server.savedobjectsimportsuccess.md) | Represents a successful import. |
 |  [SavedObjectsImportUnknownError](./kibana-plugin-core-server.savedobjectsimportunknownerror.md) | Represents a failure to import due to an unknown reason. |
 |  [SavedObjectsImportUnsupportedTypeError](./kibana-plugin-core-server.savedobjectsimportunsupportedtypeerror.md) | Represents a failure to import due to having an unsupported saved object type. |
+|  [SavedObjectsIncrementCounterField](./kibana-plugin-core-server.savedobjectsincrementcounterfield.md) |  |
 |  [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |  |
 |  [SavedObjectsMappingProperties](./kibana-plugin-core-server.savedobjectsmappingproperties.md) | Describe the fields of a [saved object type](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md)<!-- -->. |
 |  [SavedObjectsMigrationLogger](./kibana-plugin-core-server.savedobjectsmigrationlogger.md) |  |

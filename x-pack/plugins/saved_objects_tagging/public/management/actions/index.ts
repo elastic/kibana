@@ -4,39 +4,62 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart } from 'src/core/public';
+import { Observable } from 'rxjs';
+import { CoreStart } from 'kibana/public';
 import { TagsCapabilities } from '../../../common';
-import { ITagInternalClient } from '../../tags';
-import { TagBulkAction } from '../types';
-import { getBulkDeleteAction } from './bulk_delete';
-import { getClearSelectionAction } from './clear_selection';
+import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
+import { TagAction } from './types';
+import { getDeleteAction } from './delete';
+import { getEditAction } from './edit';
+import { getAssignAction } from './assign';
 
-interface GetBulkActionOptions {
+export { TagAction } from './types';
+
+interface GetActionsOptions {
   core: CoreStart;
   capabilities: TagsCapabilities;
   tagClient: ITagInternalClient;
-  clearSelection: () => void;
+  tagCache: ITagsCache;
+  assignmentService: ITagAssignmentService;
   setLoading: (loading: boolean) => void;
+  assignableTypes: string[];
+  fetchTags: () => Promise<void>;
+  canceled$: Observable<void>;
 }
 
-export const getBulkActions = ({
+export const getTableActions = ({
   core: { notifications, overlays },
   capabilities,
   tagClient,
-  clearSelection,
+  tagCache,
+  assignmentService,
   setLoading,
-}: GetBulkActionOptions): TagBulkAction[] => {
-  const actions: TagBulkAction[] = [];
+  assignableTypes,
+  fetchTags,
+  canceled$,
+}: GetActionsOptions): TagAction[] => {
+  const actions: TagAction[] = [];
 
-  if (capabilities.delete) {
-    actions.push(getBulkDeleteAction({ notifications, overlays, tagClient, setLoading }));
+  if (capabilities.edit) {
+    actions.push(getEditAction({ notifications, overlays, tagClient, fetchTags }));
   }
 
-  // only add clear selection if user has permission to perform any other action
-  // as having at least one action will show the bulk action menu, and the selection column on the table
-  // and we want to avoid doing that only for the 'unselect' action.
-  if (actions.length > 0) {
-    actions.push(getClearSelectionAction({ clearSelection }));
+  if (capabilities.assign && assignableTypes.length > 0) {
+    actions.push(
+      getAssignAction({
+        tagCache,
+        assignmentService,
+        assignableTypes,
+        fetchTags,
+        notifications,
+        overlays,
+        canceled$,
+      })
+    );
+  }
+
+  if (capabilities.delete) {
+    actions.push(getDeleteAction({ overlays, notifications, tagClient, fetchTags }));
   }
 
   return actions;

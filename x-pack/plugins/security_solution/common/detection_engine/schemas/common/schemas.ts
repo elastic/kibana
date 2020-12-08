@@ -413,16 +413,32 @@ export const threat_tactic = t.type({
   name: threat_tactic_name,
   reference: threat_tactic_reference,
 });
+export const threat_subtechnique_id = t.string;
+export const threat_subtechnique_name = t.string;
+export const threat_subtechnique_reference = t.string;
+export const threat_subtechnique = t.type({
+  id: threat_subtechnique_id,
+  name: threat_subtechnique_name,
+  reference: threat_subtechnique_reference,
+});
+export const threat_subtechniques = t.array(threat_subtechnique);
 export const threat_technique_id = t.string;
 export const threat_technique_name = t.string;
 export const threat_technique_reference = t.string;
-export const threat_technique = t.exact(
-  t.type({
-    id: threat_technique_id,
-    name: threat_technique_name,
-    reference: threat_technique_reference,
-  })
-);
+export const threat_technique = t.intersection([
+  t.exact(
+    t.type({
+      id: threat_technique_id,
+      name: threat_technique_name,
+      reference: threat_technique_reference,
+    })
+  ),
+  t.exact(
+    t.partial({
+      subtechnique: threat_subtechniques,
+    })
+  ),
+]);
 export const threat_techniques = t.array(threat_technique);
 export const threat = t.array(
   t.exact(

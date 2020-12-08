@@ -73,7 +73,6 @@ export function createRootWithSettings(
       quiet: false,
       silent: false,
       watch: false,
-      repl: false,
       basePath: false,
       runExamples: false,
       oss: true,

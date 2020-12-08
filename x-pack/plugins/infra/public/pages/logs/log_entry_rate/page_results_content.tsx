@@ -144,9 +144,13 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     filteredDatasets: selectedDatasets,
   });
 
-  const { flyoutVisible, setFlyoutVisibility, flyoutItem, isLoading: isFlyoutLoading } = useContext(
-    LogFlyout.Context
-  );
+  const {
+    flyoutVisible,
+    setFlyoutVisibility,
+    flyoutError,
+    flyoutItem,
+    isLoading: isFlyoutLoading,
+  } = useContext(LogFlyout.Context);
 
   const handleQueryTimeRangeChange = useCallback(
     ({ start: startTime, end: endTime }: { start: string; end: string }) => {
@@ -304,6 +308,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
 
       {flyoutVisible ? (
         <LogEntryFlyout
+          flyoutError={flyoutError}
           flyoutItem={flyoutItem}
           setFlyoutVisibility={setFlyoutVisibility}
           loading={isFlyoutLoading}

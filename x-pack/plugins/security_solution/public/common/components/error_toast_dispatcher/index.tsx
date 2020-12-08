@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import React, { useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
-import { appSelectors, State } from '../../store';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { appSelectors } from '../../store';
 import { appActions } from '../../store/app';
 import { useStateToaster } from '../toasters';
 
@@ -15,14 +16,12 @@ interface OwnProps {
   toastLifeTimeMs?: number;
 }
 
-type Props = OwnProps & PropsFromRedux;
-
-const ErrorToastDispatcherComponent = ({
-  toastLifeTimeMs = 5000,
-  errors = [],
-  removeError,
-}: Props) => {
+const ErrorToastDispatcherComponent: React.FC<OwnProps> = ({ toastLifeTimeMs = 5000 }) => {
+  const dispatch = useDispatch();
+  const getErrorSelector = useMemo(() => appSelectors.errorsSelector(), []);
+  const errors = useDeepEqualSelector(getErrorSelector);
   const [{ toasts }, dispatchToaster] = useStateToaster();
+
   useEffect(() => {
     errors.forEach(({ id, title, message }) => {
       if (!toasts.some((toast) => toast.id === id)) {
@@ -38,23 +37,13 @@ const ErrorToastDispatcherComponent = ({
           },
         });
       }
-      removeError({ id });
+      dispatch(appActions.removeError({ id }));
     });
-  });
+  }, [dispatch, dispatchToaster, errors, toastLifeTimeMs, toasts]);
+
   return null;
 };
 
-const makeMapStateToProps = () => {
-  const getErrorSelector = appSelectors.errorsSelector();
-  return (state: State) => getErrorSelector(state);
-};
+ErrorToastDispatcherComponent.displayName = 'ErrorToastDispatcherComponent';
 
-const mapDispatchToProps = {
-  removeError: appActions.removeError,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const ErrorToastDispatcher = connector(ErrorToastDispatcherComponent);
+export const ErrorToastDispatcher = React.memo(ErrorToastDispatcherComponent);
