@@ -18,7 +18,6 @@ interface Props {
 export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }) => {
   const {
     services: {
-      docLinks,
       http: { basePath },
     },
   } = useMlKibana();
