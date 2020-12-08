@@ -13,13 +13,11 @@ export {
   AlertExecutorOptions,
 } from '../../alerts/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
 
 // this plugin's dependendencies
 export interface StackAlertsDeps {
   alerts: AlertingSetup;
   features: FeaturesPluginSetup;
-  licensing: LicensingPluginSetup;
 }
 
 export interface StackAlertsStartDeps {
