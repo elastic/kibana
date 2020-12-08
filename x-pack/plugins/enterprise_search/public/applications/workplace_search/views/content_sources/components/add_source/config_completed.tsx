@@ -80,7 +80,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
             <EuiText>
               <EuiTextAlign textAlign="center">
                 {!accountContextOnly ? (
-                  <p>
+                  <p data-test-subj="OrgCanConnectMessage">
                     {i18n.translate(
                       'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.orgCanConnect.message',
                       {
@@ -90,7 +90,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
                     )}
                   </p>
                 ) : (
-                  <EuiText color="subdued" grow={false}>
+                  <EuiText color="subdued" grow={false} data-test-subj="PersonalConnectLinkMessage">
                     <p>
                       {i18n.translate(
                         'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.personalConnectLink.message',
@@ -102,7 +102,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
                       )}
                     </p>
                     {!privateSourcesEnabled && (
-                      <p>
+                      <p data-test-subj="PrivateDisabledMessage">
                         <FormattedMessage
                           id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.privateDisabled.message"
                           defaultMessage="Remember to {securityLink} in Security settings."
@@ -117,7 +117,11 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
                       </p>
                     )}
                     <p>
-                      <EuiLink target="_blank" href={PRIVATE_SOURCES_DOCS_URL}>
+                      <EuiLink
+                        target="_blank"
+                        data-test-subj="ConfigCompletedPrivateSourcesDocsLink"
+                        href={PRIVATE_SOURCES_DOCS_URL}
+                      >
                         {CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK}
                       </EuiLink>
                     </p>
@@ -143,7 +147,13 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
       </EuiFlexItem>
       {!accountContextOnly && (
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" className="eui-textNoWrap" fill onClick={advanceStep}>
+          <EuiButton
+            color="primary"
+            className="eui-textNoWrap"
+            fill
+            onClick={advanceStep}
+            data-test-subj="ConfigCompletedConnectButton"
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.connect.button',
               {
