@@ -42,7 +42,7 @@ export function Correlations() {
           setIsFlyoutVisible(true);
         }}
       >
-        View significant tags
+        View significant terms
       </EuiButton>
 
       {isFlyoutVisible && (
@@ -54,7 +54,7 @@ export function Correlations() {
           >
             <EuiFlyoutHeader hasBorder aria-labelledby="correlations-flyout">
               <EuiTitle>
-                <h2 id="correlations-flyout">Significant tags</h2>
+                <h2 id="correlations-flyout">Significant terms</h2>
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
@@ -80,7 +80,7 @@ export function Correlations() {
                 iconType="alert"
               >
                 <p>
-                  Significant tags is an experimental feature and in active
+                  Significant terms is an experimental feature and in active
                   development. Bugs and surprises are to be expected but your
                   feedback is very welcome so we can improve it.
                 </p>

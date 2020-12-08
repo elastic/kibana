@@ -19,14 +19,14 @@ export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
   [enableCorrelations]: {
     category: ['observability'],
     name: i18n.translate('xpack.apm.enableCorrelationsExperimentName', {
-      defaultMessage: 'APM Correlations',
+      defaultMessage: 'APM Significant terms',
     }),
     value: false,
     description: i18n.translate(
       'xpack.apm.enableCorrelationsExperimentDescription',
       {
         defaultMessage:
-          'Enable the experimental correlations UI and API endpoint in APM.',
+          'Enable the experimental Significant terms feature in APM',
       }
     ),
     schema: schema.boolean(),

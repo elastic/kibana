@@ -57,43 +57,37 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns significant terms', () => {
-          expectSnapshot(response.body?.significantTerms?.map((term) => term.fieldName).sort())
-            .toMatchInline(`
+          const sorted = response.body?.significantTerms?.sort();
+          expectSnapshot(sorted?.map((term) => term.fieldName)).toMatchInline(`
             Array [
-              "container.id",
-              "container.id",
-              "host.ip",
-              "host.ip",
-              "service.node.name",
-              "service.node.name",
-              "url.domain",
-              "url.domain",
               "user_agent.name",
+              "url.domain",
+              "host.ip",
+              "service.node.name",
+              "container.id",
+              "url.domain",
               "user_agent.name",
             ]
           `);
         });
 
-        it('returns a timeseries per term', () => {
-          // @ts-ignore
-          expectSnapshot(response.body?.significantTerms[0].timeseries.length).toMatchInline(`31`);
-        });
-
         it('returns a distribution per term', () => {
-          // @ts-ignore
-          expectSnapshot(response.body?.significantTerms[0].distribution.length).toMatchInline(
-            `42`
-          );
-        });
-
-        it('returns overall timeseries', () => {
-          // @ts-ignore
-          expectSnapshot(response.body?.overall.timeseries.length).toMatchInline(`31`);
+          expectSnapshot(response.body?.significantTerms?.map((term) => term.distribution.length))
+            .toMatchInline(`
+            Array [
+              11,
+              11,
+              11,
+              11,
+              11,
+              11,
+              11,
+            ]
+          `);
         });
 
         it('returns overall distribution', () => {
-          // @ts-ignore
-          expectSnapshot(response.body?.overall.distribution.length).toMatchInline(`42`);
+          expectSnapshot(response.body?.overall?.distribution.length).toMatchInline(`11`);
         });
       });
     });
