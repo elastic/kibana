@@ -26,8 +26,9 @@
 import Path from 'path';
 import Url from 'url';
 import readline from 'readline';
+import Fs from 'fs';
 
-import { RunWithCommands, createFlagError } from '@kbn/dev-utils';
+import { RunWithCommands, createFlagError, KbnClient, CA_CERT_PATH } from '@kbn/dev-utils';
 import { readConfigFile } from '@kbn/test';
 import legacyElasticsearch from 'elasticsearch';
 
@@ -40,13 +41,15 @@ export function runCli() {
   new RunWithCommands({
     description: 'CLI to manage archiving/restoring data in elasticsearch',
     globalFlags: {
-      string: ['es-url', 'kibana-url', 'dir', 'config'],
+      string: ['es-url', 'kibana-url', 'dir', 'config', 'es-ca', 'kibana-ca'],
       help: `
         --config           path to an FTR config file that sets --es-url, --kibana-url, and --dir
                              default: ${defaultConfigPath}
         --es-url           url for Elasticsearch, prefer the --config flag
         --kibana-url       url for Kibana, prefer the --config flag
         --dir              where arechives are stored, prefer the --config flag
+        --kibana-ca        if Kibana url points to https://localhost we default to the CA from @kbn/dev-utils, customize the CA with this flag
+        --es-ca            if Elasticsearch url points to https://localhost we default to the CA from @kbn/dev-utils, customize the CA with this flag
       `,
     },
     async extendContext({ log, flags, addCleanupTask }) {
@@ -78,6 +81,40 @@ export function runCli() {
         throw createFlagError('--kibana-url or --config must be defined');
       }
 
+      const kibanaCaPath = flags['kibana-ca'];
+      if (kibanaCaPath && typeof kibanaCaPath !== 'string') {
+        throw createFlagError('--kibana-ca must be a string');
+      }
+
+      let kibanaCa;
+      if (config.get('servers.kibana.certificateAuthorities') && !kibanaCaPath) {
+        kibanaCa = config.get('servers.kibana.certificateAuthorities');
+      } else if (kibanaCaPath) {
+        kibanaCa = Fs.readFileSync(kibanaCaPath);
+      } else {
+        const { protocol, hostname } = Url.parse(kibanaUrl);
+        if (protocol === 'https:' && hostname === 'localhost') {
+          kibanaCa = Fs.readFileSync(CA_CERT_PATH);
+        }
+      }
+
+      const esCaPath = flags['es-ca'];
+      if (esCaPath && typeof esCaPath !== 'string') {
+        throw createFlagError('--es-ca must be a string');
+      }
+
+      let esCa;
+      if (config.get('servers.elasticsearch.certificateAuthorities') && !esCaPath) {
+        esCa = config.get('servers.elasticsearch.certificateAuthorities');
+      } else if (esCaPath) {
+        esCa = Fs.readFileSync(esCaPath);
+      } else {
+        const { protocol, hostname } = Url.parse(kibanaUrl);
+        if (protocol === 'https:' && hostname === 'localhost') {
+          esCa = Fs.readFileSync(CA_CERT_PATH);
+        }
+      }
+
       let dir = flags.dir;
       if (dir && typeof dir !== 'string') {
         throw createFlagError('--dir must be a string');
@@ -91,15 +128,22 @@ export function runCli() {
 
       const client = new legacyElasticsearch.Client({
         host: esUrl,
+        ssl: esCa ? { ca: esCa } : undefined,
         log: flags.verbose ? 'trace' : [],
       });
       addCleanupTask(() => client.close());
+
+      const kbnClient = new KbnClient({
+        log,
+        url: kibanaUrl,
+        certificateAuthorities: kibanaCa ? [kibanaCa] : undefined,
+      });
 
       const esArchiver = new EsArchiver({
         log,
         client,
         dataDir: dir,
-        kibanaUrl,
+        kbnClient,
       });
 
       return {

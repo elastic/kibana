@@ -34,6 +34,8 @@ import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/pu
 import { parseSearchParams } from '../search_syntax';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
 
+import './search_bar.scss';
+
 interface Props {
   globalSearch: GlobalSearchPluginStart;
   navigateToUrl: ApplicationStart['navigateToUrl'];
@@ -316,6 +318,7 @@ export function SearchBar({
         'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
         compressed: true,
+        className: 'kbnSearchBar',
         placeholder: i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
           defaultMessage: 'Search Elastic',
         }),
@@ -332,16 +335,16 @@ export function SearchBar({
       emptyMessage={emptyMessage}
       noMatchesMessage={emptyMessage}
       popoverFooter={
-        <EuiText color="subdued" size="xs">
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="s"
-            responsive={false}
-            wrap
-          >
-            <EuiFlexItem>
-              <p style={{ marginBottom: 0 }}>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+          wrap
+        >
+          <EuiFlexItem>
+            <EuiText color="subdued" size="xs">
+              <p>
                 <FormattedMessage
                   id="xpack.globalSearchBar.searchBar.helpText.helpTextPrefix"
                   defaultMessage="Filter by"
@@ -355,9 +358,11 @@ export function SearchBar({
                 &nbsp;
                 <EuiCode>tag:</EuiCode>
               </p>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <p style={{ marginBottom: 0 }}>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued" size="xs">
+              <p>
                 <FormattedMessage
                   id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutDetail"
                   defaultMessage="{shortcutDescription} {commandDescription}"
@@ -386,9 +391,9 @@ export function SearchBar({
                   }}
                 />
               </p>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     />
   );
