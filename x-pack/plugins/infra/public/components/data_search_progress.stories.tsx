@@ -13,11 +13,9 @@ import { DataSearchProgress } from './data_search_progress';
 export default {
   title: 'infra/dataSearch/DataSearchProgress',
   decorators: [
-    (WrappedStory) => (
+    (wrappedStory) => (
       <EuiThemeProvider>
-        <div style={{ width: 400 }}>
-          <WrappedStory />
-        </div>
+        <div style={{ width: 400 }}>{wrappedStory()}</div>
       </EuiThemeProvider>
     ),
   ],

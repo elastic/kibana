@@ -13,11 +13,9 @@ import { DataSearchErrorCallout } from './data_search_error_callout';
 export default {
   title: 'infra/dataSearch/DataSearchErrorCallout',
   decorators: [
-    (WrappedStory) => (
+    (wrappedStory) => (
       <EuiThemeProvider>
-        <div style={{ width: 600 }}>
-          <WrappedStory />
-        </div>
+        <div style={{ width: 600 }}>{wrappedStory()}</div>
       </EuiThemeProvider>
     ),
   ],
