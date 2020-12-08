@@ -61,41 +61,42 @@ const PinnedTab: React.FC<BasicTimelineTab> = memo(({ timelineId }) => (
 ));
 PinnedTab.displayName = 'PinnedTab';
 
-const ActiveTimelineTab: React.FC<BasicTimelineTab & { activeTimelineTab: TimelineTabs }> = memo(
-  ({ activeTimelineTab, timelineId }) => {
-    const getTab = useCallback(
-      (tab: TimelineTabs) => {
-        switch (tab) {
-          case TimelineTabs.graph:
-            return <GraphTab timelineId={timelineId} />;
-          case TimelineTabs.notes:
-            return <NotesTab timelineId={timelineId} />;
-          case TimelineTabs.pinned:
-            return <PinnedTab timelineId={timelineId} />;
-          default:
-            return null;
-        }
-      },
-      [timelineId]
-    );
+type ActiveTimelineTabProps = BasicTimelineTab & { activeTimelineTab: TimelineTabs };
 
-    /* Future developer -> why are we doing that
-     * It is really expansive to re-render the QueryTab because the drag/drop
-     * Therefore, we are only hiding its dom when switching to another tab
-     * to avoid mounting/un-mounting === re-render
-     */
-    return (
-      <>
-        <HideShowContainer $isVisible={TimelineTabs.query === activeTimelineTab}>
-          <QueryTab timelineId={timelineId} />
-        </HideShowContainer>
-        <HideShowContainer $isVisible={TimelineTabs.query !== activeTimelineTab}>
-          {activeTimelineTab !== TimelineTabs.query && getTab(activeTimelineTab)}
-        </HideShowContainer>
-      </>
-    );
-  }
-);
+const ActiveTimelineTab = memo<ActiveTimelineTabProps>(({ activeTimelineTab, timelineId }) => {
+  const getTab = useCallback(
+    (tab: TimelineTabs) => {
+      switch (tab) {
+        case TimelineTabs.graph:
+          return <GraphTab timelineId={timelineId} />;
+        case TimelineTabs.notes:
+          return <NotesTab timelineId={timelineId} />;
+        case TimelineTabs.pinned:
+          return <PinnedTab timelineId={timelineId} />;
+        default:
+          return null;
+      }
+    },
+    [timelineId]
+  );
+
+  /* Future developer -> why are we doing that
+   * It is really expansive to re-render the QueryTab because the drag/drop
+   * Therefore, we are only hiding its dom when switching to another tab
+   * to avoid mounting/un-mounting === re-render
+   */
+  return (
+    <>
+      <HideShowContainer $isVisible={TimelineTabs.query === activeTimelineTab}>
+        <QueryTab timelineId={timelineId} />
+      </HideShowContainer>
+      <HideShowContainer $isVisible={TimelineTabs.query !== activeTimelineTab}>
+        {activeTimelineTab !== TimelineTabs.query && getTab(activeTimelineTab)}
+      </HideShowContainer>
+    </>
+  );
+});
+
 ActiveTimelineTab.displayName = 'ActiveTimelineTab';
 
 const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEventId }) => {
@@ -145,6 +146,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
     <>
       <EuiTabs>
         <EuiTab
+          data-test-subj={`timelineTabs-${TimelineTabs.query}`}
           onClick={setQueryAsActiveTab}
           isSelected={activeTab === TimelineTabs.query}
           disabled={false}
@@ -153,6 +155,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
           {i18n.QUERY_TAB}
         </EuiTab>
         <EuiTab
+          data-test-subj={`timelineTabs-${TimelineTabs.graph}`}
           onClick={setGraphAsActiveTab}
           isSelected={activeTab === TimelineTabs.graph}
           disabled={!graphEventId}
@@ -161,6 +164,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
           {i18n.GRAPH_TAB}
         </EuiTab>
         <EuiTab
+          data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
           onClick={setNotesAsActiveTab}
           isSelected={activeTab === TimelineTabs.notes}
           disabled={false}
@@ -169,6 +173,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
           {i18n.NOTES_TAB}
         </EuiTab>
         <EuiTab
+          data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
           onClick={setPinnedAsActiveTab}
           isSelected={activeTab === TimelineTabs.pinned}
           disabled={true}

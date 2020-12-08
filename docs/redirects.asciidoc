@@ -96,8 +96,8 @@ More information on this new feature is available in <<apm-alerts>>.
 
 This content has moved to the <<development-rbac, Security>> page.
 
-[role="exclude",id="TSVB"]
-== TSVB
+[role="exclude",id="TSVB"]	
+== TSVB	
 
 This page was deleted. See <<tsvb>>.
 
@@ -167,6 +167,11 @@ This content has moved. See <<discover, **Discover**>>.
 == View field data statistics
 
 This content has moved. See <<discover, **Discover**>>.
+
+[role="exclude",id="lens"]
+== Lens
+
+This content has moved. See <<create-panels-with-lens>>.
 
 [role="exclude",id="known-plugins"]
 == Known plugins
