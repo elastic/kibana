@@ -84,7 +84,7 @@ export class BackgroundSessionService implements ISessionService {
   /**
    * Gets all {@link SessionSavedObjectAttributes | Background Searches} that
    * currently being tracked by the service.
-   *	   *
+   *
    * @remarks
    * Uses `internalSavedObjectsClient` as this is called asynchronously, not within the
    * context of a user's session.
