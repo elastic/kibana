@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { indexPatterns, newOverrideRule, severitiesOverride } from '../objects/rule';
 
 import {
@@ -85,11 +86,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = newOverrideRule.referenceUrls.join('');
 const expectedFalsePositives = newOverrideRule.falsePositivesExamples.join('');
 const expectedTags = newOverrideRule.tags.join('');
-const expectedMitre = newOverrideRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
+const expectedMitre = formatMitreAttackDescription(newOverrideRule.mitre);
 
 describe('Detection rules, override', () => {
   beforeEach(async () => {

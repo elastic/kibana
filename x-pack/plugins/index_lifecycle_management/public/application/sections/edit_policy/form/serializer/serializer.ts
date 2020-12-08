@@ -68,6 +68,10 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       if (!updatedPolicy.phases.hot!.actions?.set_priority) {
         delete hotPhaseActions.set_priority;
       }
+
+      if (!updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
+        delete hotPhaseActions.searchable_snapshot;
+      }
     }
 
     /**
@@ -136,6 +140,10 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
 
       if (!updatedPolicy.phases.cold?.actions?.set_priority) {
         delete coldPhase.actions.set_priority;
+      }
+
+      if (!updatedPolicy.phases.cold?.actions?.searchable_snapshot) {
+        delete coldPhase.actions.searchable_snapshot;
       }
     } else {
       delete draft.phases.cold;

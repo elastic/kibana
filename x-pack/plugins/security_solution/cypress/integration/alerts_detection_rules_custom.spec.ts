@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { newRule, existingRule, indexPatterns, editedRule } from '../objects/rule';
 import {
   ALERT_RULE_METHOD,
@@ -106,11 +107,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = newRule.referenceUrls.join('');
 const expectedFalsePositives = newRule.falsePositivesExamples.join('');
 const expectedTags = newRule.tags.join('');
-const expectedMitre = newRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
+const expectedMitre = formatMitreAttackDescription(newRule.mitre);
 const expectedNumberOfRules = 1;
 const expectedEditedtags = editedRule.tags.join('');
 const expectedEditedIndexPatterns =
@@ -219,7 +216,8 @@ describe('Custom detection rules creation', async () => {
   });
 });
 
-describe('Custom detection rules deletion and edition', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/83793
+describe.skip('Custom detection rules deletion and edition', () => {
   beforeEach(() => {
     esArchiverLoad('custom_rules');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);

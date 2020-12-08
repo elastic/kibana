@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { newThreatIndicatorRule } from '../objects/rule';
 
 import {
@@ -83,15 +84,13 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = newThreatIndicatorRule.referenceUrls.join('');
 const expectedFalsePositives = newThreatIndicatorRule.falsePositivesExamples.join('');
 const expectedTags = newThreatIndicatorRule.tags.join('');
-const expectedMitre = newThreatIndicatorRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
+const expectedMitre = formatMitreAttackDescription(newThreatIndicatorRule.mitre);
 const expectedNumberOfRules = 1;
 const expectedNumberOfAlerts = 1;
 
-describe('Detection rules, Indicator Match', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/85215
+// FLAKY: https://github.com/elastic/kibana/issues/85216
+describe.skip('Detection rules, Indicator Match', () => {
   beforeEach(() => {
     esArchiverLoad('threat_indicator');
     esArchiverLoad('threat_data');

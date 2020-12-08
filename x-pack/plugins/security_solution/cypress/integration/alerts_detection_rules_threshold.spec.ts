@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { formatMitreAttackDescription } from '../helpers/rules';
 import { indexPatterns, newThresholdRule } from '../objects/rule';
 
 import {
@@ -81,11 +82,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const expectedUrls = newThresholdRule.referenceUrls.join('');
 const expectedFalsePositives = newThresholdRule.falsePositivesExamples.join('');
 const expectedTags = newThresholdRule.tags.join('');
-const expectedMitre = newThresholdRule.mitre
-  .map(function (mitre) {
-    return mitre.tactic + mitre.techniques.join('');
-  })
-  .join('');
+const expectedMitre = formatMitreAttackDescription(newThresholdRule.mitre);
 
 describe('Detection rules, threshold', () => {
   beforeEach(async () => {

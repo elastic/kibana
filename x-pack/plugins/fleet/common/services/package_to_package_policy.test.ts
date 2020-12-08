@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { installationStatuses } from '../constants';
 import { PackageInfo } from '../types';
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
 
@@ -14,9 +13,9 @@ describe('Fleet - packageToPackagePolicy', () => {
     version: '0.0.0',
     latestVersion: '0.0.0',
     description: 'description',
-    type: 'mock',
+    type: 'integration',
     categories: [],
-    requirement: { kibana: { versions: '' }, elasticsearch: { versions: '' } },
+    conditions: { kibana: { version: '' } },
     format_version: '',
     download: '',
     path: '',
@@ -29,7 +28,11 @@ describe('Fleet - packageToPackagePolicy', () => {
         map: [],
       },
     },
-    status: installationStatuses.NotInstalled,
+    status: 'not_installed',
+    release: 'experimental',
+    owner: {
+      github: 'elastic/fleet',
+    },
   };
 
   describe('packageToPackagePolicyInputs', () => {
