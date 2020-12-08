@@ -11,7 +11,7 @@ import { SavedObjectTaggingOssPluginSetup } from '../../../../src/plugins/saved_
 import { tagManagementSectionId } from '../common/constants';
 import { getTagsCapabilities } from '../common/capabilities';
 import { SavedObjectTaggingPluginStart } from './types';
-import { TagsClient, TagsCache } from './tags';
+import { TagsClient, TagsCache, TagAssignmentService } from './services';
 import { getUiApi } from './ui_api';
 import { SavedObjectsTaggingClientConfig, SavedObjectsTaggingClientConfigRawType } from './config';
 
@@ -24,6 +24,7 @@ export class SavedObjectTaggingPlugin
   implements Plugin<{}, SavedObjectTaggingPluginStart, SetupDeps, {}> {
   private tagClient?: TagsClient;
   private tagCache?: TagsCache;
+  private assignmentService?: TagAssignmentService;
   private readonly config: SavedObjectsTaggingClientConfig;
 
   constructor(context: PluginInitializerContext) {
@@ -42,11 +43,13 @@ export class SavedObjectTaggingPlugin
       title: i18n.translate('xpack.savedObjectsTagging.management.sectionLabel', {
         defaultMessage: 'Tags',
       }),
-      order: 2,
+      order: 1.5,
       mount: async (mountParams) => {
         const { mountSection } = await import('./management');
         return mountSection({
           tagClient: this.tagClient!,
+          tagCache: this.tagCache!,
+          assignmentService: this.assignmentService!,
           core,
           mountParams,
         });
@@ -66,6 +69,7 @@ export class SavedObjectTaggingPlugin
       refreshInterval: this.config.cacheRefreshInterval,
     });
     this.tagClient = new TagsClient({ http, changeListener: this.tagCache });
+    this.assignmentService = new TagAssignmentService({ http });
 
     // do not fetch tags on anonymous page
     if (!http.anonymousPaths.isAnonymous(window.location.pathname)) {
