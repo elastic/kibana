@@ -161,7 +161,7 @@ export class BackgroundSessionService implements ISessionService {
 
     this.logger.debug(`updateAllSavedObjects | Updating ${activeMappingObjects.length} items`);
     const updatedSessions = activeMappingObjects
-      ?.filter((so) => !so.error)
+      .filter((so) => !so.error)
       .map((sessionSavedObject) => {
         const sessionInfo = this.sessionSearchMap.get(sessionSavedObject.id);
         const idMapping = sessionInfo ? Object.fromEntries(sessionInfo.ids.entries()) : {};
