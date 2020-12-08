@@ -72,6 +72,8 @@ export async function checkBackgoundSessions(
       }
     );
 
+    if (!runningBackgroundSearchesResponse.total) return;
+
     logger.debug(`Found ${runningBackgroundSearchesResponse.total} running sessios`);
 
     const updatedSessions = new Array<

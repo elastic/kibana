@@ -20,7 +20,6 @@ import {
   enhancedEsSearchStrategyProvider,
   eqlSearchStrategyProvider,
 } from './search';
-import { registerBackgroundSessionsTask, scheduleBackgroundSessionsTasks } from './search/session';
 import { getUiSettings } from './ui_settings';
 
 interface SetupDependencies {
@@ -71,12 +70,17 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
 
     const router = core.http.createRouter();
     registerSessionRoutes(router);
-    registerBackgroundSessionsTask(core, deps.taskManager, this.logger);
+
+    this.sessionService.setup(core, {
+      taskManager: deps.taskManager,
+    });
   }
 
   public start(core: CoreStart, { taskManager }: StartDependencies) {
-    scheduleBackgroundSessionsTasks(taskManager, this.logger);
-    this.sessionService.start(core, this.initializerContext.config.create());
+    this.sessionService.start(core, {
+      taskManager,
+      config$: this.initializerContext.config.create(),
+    });
   }
 
   public stop() {

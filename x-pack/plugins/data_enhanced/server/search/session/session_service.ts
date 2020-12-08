@@ -14,6 +14,7 @@ import {
   SavedObjectsClientContract,
   Logger,
   SavedObject,
+  CoreSetup,
 } from '../../../../../../src/core/server';
 import {
   IKibanaSearchRequest,
@@ -27,6 +28,10 @@ import {
   SearchStrategyDependencies,
 } from '../../../../../../src/plugins/data/server';
 import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../task_manager/server';
+import {
   BackgroundSessionSavedObjectAttributes,
   BackgroundSessionFindOptions,
   BackgroundSessionStatus,
@@ -34,6 +39,7 @@ import {
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
+import { registerBackgroundSessionsTask, scheduleBackgroundSessionsTasks } from './monitoring_task';
 
 const INMEM_MAX_SESSIONS = 10000;
 const DEFAULT_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
@@ -51,6 +57,15 @@ export interface SessionInfo {
   ids: Map<string, string>;
 }
 
+interface SetupDependencies {
+  taskManager: TaskManagerSetupContract;
+}
+
+interface StartDependencies {
+  taskManager: TaskManagerStartContract;
+  config$: Observable<ConfigSchema>;
+}
+
 export class BackgroundSessionService implements ISessionService {
   /**
    * Map of sessionId to { [requestHash]: searchId }
@@ -62,8 +77,12 @@ export class BackgroundSessionService implements ISessionService {
 
   constructor(private readonly logger: Logger) {}
 
-  public async start(core: CoreStart, config$: Observable<ConfigSchema>) {
-    return this.setupMonitoring(core, config$);
+  public setup(core: CoreSetup, deps: SetupDependencies) {
+    registerBackgroundSessionsTask(core, deps.taskManager, this.logger);
+  }
+
+  public async start(core: CoreStart, deps: StartDependencies) {
+    return this.setupMonitoring(core, deps);
   }
 
   public stop() {
@@ -71,9 +90,10 @@ export class BackgroundSessionService implements ISessionService {
     clearInterval(this.monitorInterval);
   }
 
-  private setupMonitoring = async (core: CoreStart, config$: Observable<ConfigSchema>) => {
-    const config = await config$.pipe(first()).toPromise();
+  private setupMonitoring = async (core: CoreStart, deps: StartDependencies) => {
+    const config = await deps.config$.pipe(first()).toPromise();
     if (config.search.sendToBackground.enabled) {
+      scheduleBackgroundSessionsTasks(deps.taskManager, this.logger);
       this.logger.debug(`setupMonitoring | Enabling monitoring`);
       const internalRepo = core.savedObjects.createInternalRepository([BACKGROUND_SESSION_TYPE]);
       this.internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
