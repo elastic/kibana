@@ -339,32 +339,20 @@ export const AllCases = React.memo<AllCasesProps>(
 
     const TableWrap = useMemo(() => (isModal ? 'span' : Panel), [isModal]);
 
-    const onTableRowClick = useMemo(
-      () =>
-        memoize<(theCase: Case) => () => void>((theCase) => () => {
+    const tableRowProps = useCallback(
+      (theCase: Case) => {
+        const onTableRowClick = memoize(() => {
           if (onRowClick) {
             onRowClick(theCase);
           }
-        }),
-      [onRowClick]
-    );
+        });
 
-    const tableRowProps = useCallback(
-      (item) => {
-        const rowProps = {
-          'data-test-subj': `cases-table-row-${item.id}`,
+        return {
+          'data-test-subj': `cases-table-row-${theCase.id}`,
+          ...(isModal ? { onClick: onTableRowClick } : {}),
         };
-
-        if (isModal) {
-          return {
-            ...rowProps,
-            onClick: onTableRowClick(item),
-          };
-        }
-
-        return rowProps;
       },
-      [isModal, onTableRowClick]
+      [isModal, onRowClick]
     );
 
     return (

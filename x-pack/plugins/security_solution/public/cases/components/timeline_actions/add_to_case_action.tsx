@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useMemo } from 'react';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -89,41 +89,47 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, 
     openAllCaseModal();
   }, [openAllCaseModal, closePopover]);
 
-  const items = [
-    <EuiContextMenuItem
-      key="add-new-case-menu-item"
-      onClick={addNewCaseClick}
-      aria-label={i18n.ACTION_ADD_NEW_CASE}
-      data-test-subj="add-new-case-item"
-      disabled={disabled}
-    >
-      <EuiText size="m">{i18n.ACTION_ADD_NEW_CASE}</EuiText>
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="add-existing-case-menu-item"
-      onClick={addExistingCaseClick}
-      aria-label={i18n.ACTION_ADD_EXISTING_CASE}
-      data-test-subj="add-existing-case-menu-item"
-      disabled={disabled}
-    >
-      <EuiText size="m">{i18n.ACTION_ADD_EXISTING_CASE}</EuiText>
-    </EuiContextMenuItem>,
-  ];
-
-  const button = (
-    <EuiToolTip
-      data-test-subj="attach-alert-to-case-tooltip"
-      content={i18n.ACTION_ADD_TO_CASE_TOOLTIP}
-    >
-      <EuiButtonIcon
-        aria-label={i18n.ACTION_ADD_TO_CASE_ARIA_LABEL}
-        data-test-subj="attach-alert-to-case-button"
-        size="s"
-        iconType="folderClosed"
-        onClick={openPopover}
+  const items = useMemo(
+    () => [
+      <EuiContextMenuItem
+        key="add-new-case-menu-item"
+        onClick={addNewCaseClick}
+        aria-label={i18n.ACTION_ADD_NEW_CASE}
+        data-test-subj="add-new-case-item"
         disabled={disabled}
-      />
-    </EuiToolTip>
+      >
+        <EuiText size="m">{i18n.ACTION_ADD_NEW_CASE}</EuiText>
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="add-existing-case-menu-item"
+        onClick={addExistingCaseClick}
+        aria-label={i18n.ACTION_ADD_EXISTING_CASE}
+        data-test-subj="add-existing-case-menu-item"
+        disabled={disabled}
+      >
+        <EuiText size="m">{i18n.ACTION_ADD_EXISTING_CASE}</EuiText>
+      </EuiContextMenuItem>,
+    ],
+    [addExistingCaseClick, addNewCaseClick, disabled]
+  );
+
+  const button = useMemo(
+    () => (
+      <EuiToolTip
+        data-test-subj="attach-alert-to-case-tooltip"
+        content={i18n.ACTION_ADD_TO_CASE_TOOLTIP}
+      >
+        <EuiButtonIcon
+          aria-label={i18n.ACTION_ADD_TO_CASE_ARIA_LABEL}
+          data-test-subj="attach-alert-to-case-button"
+          size="s"
+          iconType="folderClosed"
+          onClick={openPopover}
+          disabled={disabled}
+        />
+      </EuiToolTip>
+    ),
+    [disabled, openPopover]
   );
 
   return (

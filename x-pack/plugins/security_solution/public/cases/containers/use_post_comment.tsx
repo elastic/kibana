@@ -81,8 +81,7 @@ export const usePostComment = (): UsePostComment => {
         cancel = true;
       };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [dispatchToaster]
   );
 
   return { ...state, postComment: postMyComment };
