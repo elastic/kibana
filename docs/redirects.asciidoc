@@ -210,7 +210,7 @@ This page has been moved. Please see <<Testing>>.
 [[kibana-keystore-has-moved-from-the-data-folder-to-the-config-folder]]
 === Kibana Keystore has moved from the Data Folder to the Config Folder
 
-This page has been deleted. Please see <<Breaking Changes in 8.0>>.
+This page has been deleted. Please see link:https://www.elastic.co/guide/en/kibana/7.9/breaking-changes-7.9.html#user-facing-changes-79[Breaking changes in 7.9].
 
 [float]
 [[createvis]]
