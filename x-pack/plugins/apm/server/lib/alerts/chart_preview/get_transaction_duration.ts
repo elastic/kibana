@@ -4,33 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { MetricsAggregationResponsePart } from '../../../../../../typings/elasticsearch/aggregations';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
+  TRANSACTION_DURATION,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeFilter } from '../../../../common/utils/range_filter';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { Setup } from '../../helpers/setup_request';
-import {
-  calculateTransactionErrorPercentage,
-  getOutcomeAggregation,
-} from '../../helpers/transaction_error_rate';
+
+const BUCKET_SIZE = 20;
 
 export async function getTransactionDurationChartPreview({
-  setup,
   alertParams,
+  setup,
 }: {
-  setup: Setup;
   alertParams: AlertParams;
+  setup: Setup;
 }) {
   const { apmEventClient } = setup;
   const {
+    aggregationType,
     environment,
     serviceName,
-    threshold,
     transactionType,
     windowSize,
     windowUnit,
@@ -55,19 +54,24 @@ export async function getTransactionDurationChartPreview({
       ],
     },
   };
-  const outcomes = getOutcomeAggregation({
-    searchAggregatedTransactions: false,
-  });
+
   const aggs = {
-    outcomes,
     timeseries: {
       date_histogram: {
         field: '@timestamp',
-        fixed_interval: intervalString,
-        min_doc_count: 0,
-        extended_bounds: { min: start, max: end },
+        fixed_interval: `${windowSize}${windowUnit}`,
       },
-      aggs: { outcomes },
+      aggs: {
+        agg:
+          aggregationType === 'avg'
+            ? { avg: { field: TRANSACTION_DURATION } }
+            : {
+                percentiles: {
+                  field: TRANSACTION_DURATION,
+                  percents: [aggregationType === '95th' ? 95 : 99],
+                },
+              },
+      },
     },
   };
   const params = {
@@ -75,16 +79,20 @@ export async function getTransactionDurationChartPreview({
     body: { size: 0, query, aggs },
   };
   const resp = await apmEventClient.search(params);
+
   if (!resp.aggregations) {
     return [];
   }
+
   return resp.aggregations.timeseries.buckets.map((bucket) => {
-    const errorPercentage = calculateTransactionErrorPercentage(
-      bucket.outcomes
-    );
-    return {
-      x: bucket.key,
-      y: errorPercentage > threshold ? errorPercentage : null,
-    };
+    const percentilesKey = aggregationType === '95th' ? '95.0' : '99.0';
+    const x = bucket.key;
+    const y =
+      aggregationType === 'avg'
+        ? (bucket.agg as MetricsAggregationResponsePart).value
+        : (bucket.agg as { values: Record<string, number | null> }).values[
+            percentilesKey
+          ];
+    return { x, y: y === null ? null : y / 1000 };
   });
 }

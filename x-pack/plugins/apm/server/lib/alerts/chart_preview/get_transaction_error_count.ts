@@ -20,13 +20,7 @@ export async function getTransactionErrorCountChartPreview({
   alertParams: AlertParams;
 }) {
   const { apmEventClient } = setup;
-  const {
-    windowSize,
-    windowUnit,
-    threshold,
-    serviceName,
-    environment,
-  } = alertParams;
+  const { windowSize, windowUnit, serviceName, environment } = alertParams;
 
   const query = {
     bool: {

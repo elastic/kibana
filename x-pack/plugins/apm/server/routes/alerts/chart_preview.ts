@@ -10,7 +10,6 @@ import { getTransactionErrorRateChartPreview } from '../../lib/alerts/chart_prev
 import { getTransactionDurationChartPreview } from '../../lib/alerts/chart_preview/get_transaction_duration';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createRoute } from '../create_route';
-import { rangeRt } from '../default_api_types';
 
 const typeNumber = jsonRt.pipe(t.number);
 
@@ -21,6 +20,11 @@ const alertParamsRt = t.intersection([
     threshold: typeNumber,
   }),
   t.partial({
+    aggregationType: t.union([
+      t.literal('avg'),
+      t.literal('95th'),
+      t.literal('99th'),
+    ]),
     serviceName: t.string,
     environment: t.string,
     transactionType: t.string,
@@ -65,9 +69,10 @@ export const transactionDurationChartPreview = createRoute({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { _debug, ...alertParams } = context.params.query;
+
     return getTransactionDurationChartPreview({
-      setup,
       alertParams,
+      setup,
     });
   },
 });

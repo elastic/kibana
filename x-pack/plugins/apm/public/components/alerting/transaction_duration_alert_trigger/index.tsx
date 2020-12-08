@@ -22,6 +22,9 @@ import {
   IsAboveField,
 } from '../fields';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useFetcher } from '../../../../../observability/public';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { ChartPreview } from '../chart_preview';
 
 interface AlertParams {
   windowSize: number;
@@ -63,14 +66,48 @@ interface Props {
 export function TransactionDurationAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
-  const { transactionTypes } = useApmServiceContext();
+  const { transactionTypes, transactionType } = useApmServiceContext();
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { start, end, transactionType } = urlParams;
+  const { start, end } = urlParams;
   const { environmentOptions } = useEnvironmentsFetcher({
     serviceName,
     start,
     end,
   });
+  const {
+    aggregationType,
+    environment,
+    threshold,
+    windowSize,
+    windowUnit,
+  } = alertParams;
+
+  const { data } = useFetcher(() => {
+    if (threshold && windowSize && windowUnit) {
+      return callApmApi({
+        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
+        params: {
+          query: {
+            aggregationType,
+            environment,
+            serviceName,
+            threshold,
+            transactionType: alertParams.transactionType,
+            windowSize,
+            windowUnit,
+          },
+        },
+      });
+    }
+  }, [
+    aggregationType,
+    environment,
+    serviceName,
+    threshold,
+    alertParams.transactionType,
+    windowSize,
+    windowUnit,
+  ]);
 
   if (!transactionTypes.length || !serviceName) {
     return null;
@@ -81,9 +118,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
     aggregationType: 'avg',
     windowSize: 5,
     windowUnit: 'm',
-
-    // use the current transaction type or default to the first in the list
-    transactionType: transactionType || transactionTypes[0],
+    transactionType,
     environment: urlParams.environment || ENVIRONMENT_ALL.value,
   };
 
@@ -145,11 +180,14 @@ export function TransactionDurationAlertTrigger(props: Props) {
     />,
   ];
 
+  const chartPreview = <ChartPreview data={data} threshold={threshold} />;
+
   return (
     <ServiceAlertTrigger
       alertTypeName={ALERT_TYPES_CONFIG['apm.transaction_duration'].name}
-      fields={fields}
+      chartPreview={chartPreview}
       defaults={defaults}
+      fields={fields}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}
     />
