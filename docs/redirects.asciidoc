@@ -277,7 +277,7 @@ This page has been moved. Please see <<dashboard>>.
 [[dashboard-drilldown]]
 === Dashboard Drilldowns
 
-This page has been moved. Please see <<Create custom dashboard actions>>.
+This page has been moved. Please see <<dashboard-drilldowns>>.
 
 [float]
 [[rpm]]
