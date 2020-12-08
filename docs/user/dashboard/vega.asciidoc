@@ -1165,6 +1165,8 @@ The final Vega spec for this tutorial is here:
 
 ----
 
+====
+
 For more information about *Vega* and *Vega-Lite*, refer to:
 
 * <<reference-for-kibana-extensions,Reference for Kibana extensions>>

@@ -53,7 +53,7 @@ image::images/intro-discover.png[Discover UI]
 === Visualize & analyze
 
 A visualization is worth a thousand log lines, and {kib} provides
-many options for showcasing your data. Use *Lens*,
+many options for showcasing your data. Use <<add-panels, Lens>>,
 our drag-and-drop interface,
 to rapidly build
 charts, tables, metrics, and more. If there

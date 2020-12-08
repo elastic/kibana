@@ -4,7 +4,7 @@
 *Timelion* is a time series data visualizer that enables you to combine independent data sources within a single visualization.
 
 [NOTE]
-====
+=====================================
 Timelion app deprecation
 
 In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib}. 
@@ -12,8 +12,7 @@ To prepare for the removal of *Timelion* app, you must migrate *Timelion* app wo
 
 For information on how to migrate *Timelion* app worksheets, refer to the 
 link:https://www.elastic.co/guide/en/kibana/current/release-notes-7.10.0.html#deprecation-v7.10.0[7.10.0 Release Notes].
-
-====
+=====================================
 
 [float]
 [[timelion-tutorial-create-time-series-visualizations]]
