@@ -20,7 +20,6 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { PalettePicker, PalettePickerProps } from './palette_picker';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { chartPluginMock } from '../../../../charts/public/mocks';
 import { EuiColorPalettePicker } from '@elastic/eui';
 
@@ -56,12 +55,5 @@ describe('PalettePicker', function () {
     component = mountWithIntl(<PalettePicker {...props} />);
     const palettePicker = component.find(EuiColorPalettePicker);
     expect(palettePicker.props().valueOfSelected).toBe('kibana_palette');
-  });
-
-  it('should set the new palette', function () {
-    component = mountWithIntl(<PalettePicker {...props} />);
-    const input = findTestSubject(component, 'piePalettePicker');
-    input.simulate('change', { target: { value: 'temperature' } });
-    expect(props.setPalette).toHaveBeenCalled();
   });
 });

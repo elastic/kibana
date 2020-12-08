@@ -24,7 +24,6 @@ import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface PalettePickerProps<ParamName extends string> {
-  'data-test-subj'?: string;
   activePalette?: PaletteOutput;
   palettes: PaletteRegistry;
   paramName: ParamName;
