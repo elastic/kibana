@@ -1,7 +1,7 @@
-[[enhance-dashboards]]
-== Enhance dashboards
+[[edit-dashboards]]
+== Edit dashboards
 
-Now that you have added panels to your dashboard, you can add filter panels to interact with the data, and Markdown panels to add context to the data. 
+Now that you have added panels to your dashboard, you can add filter panels to interact with the data, and Markdown panels to add context to the dashboard. 
 To make your dashboard look the way you want, use the editing options.
 
 [float]
@@ -12,10 +12,10 @@ To filter the data on your dashboard in real-time, add a *Controls* panel.
 
 You can add two types of *Controls*:
 
-* *Options list* — Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation. 
+* Options list — Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation. 
 For example, use the options list on the sample flight dashboard when you want to filter the data by origin city and destination city.
 
-* *Range slider* — Filters data within a specified range of numbers. The minimum and maximum values are dynamically populated with the results of a 
+* Range slider — Filters data within a specified range of numbers. The minimum and maximum values are dynamically populated with the results of a 
 min and max aggregation. For example, use the range slider when you want to filter the sample flight dashboard by a specific average ticket price.
 
 [role="screenshot"]
@@ -63,22 +63,6 @@ The following image is displayed:
 
 [role="screenshot"]
 image::images/markdown_example_4.png[]
-
-[float]
-[[add-existing-panels]]
-=== Add existing panels
-
-Add panels that you’ve already created to your dashboard.
-
-On the dashboard, click *Add an existing*, then select the panel you want to add.
-
-When a panel contains a stored query, both queries are applied.
-
-[role="screenshot"]
-image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
-
-To make changes to the panel, put the dashboard in *Edit* mode, then select the edit option from the panel menu.
-The changes you make appear in every dashboard that uses the panel, except if you edit the panel title. Changes to the panel title appear only on the dashboard where you made the change.
 
 [float]
 [[arrange-panels]]
