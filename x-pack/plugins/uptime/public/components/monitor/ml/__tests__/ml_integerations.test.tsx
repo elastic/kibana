@@ -8,7 +8,10 @@ import React from 'react';
 import { MLIntegrationComponent } from '../ml_integeration';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 import * as redux from 'react-redux';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { coreMock } from 'src/core/public/mocks';
 
+const core = coreMock.createStart();
 describe('ML Integrations', () => {
   beforeEach(() => {
     const spy = jest.spyOn(redux, 'useDispatch');
@@ -24,7 +27,13 @@ describe('ML Integrations', () => {
   });
 
   it('renders without errors', () => {
-    const wrapper = renderWithRouter(<MLIntegrationComponent />);
+    const wrapper = renderWithRouter(
+      <KibanaContextProvider
+        services={{ ...core, triggersActionsUi: { getEditAlertFlyout: jest.fn() } }}
+      >
+        <MLIntegrationComponent />
+      </KibanaContextProvider>
+    );
     expect(wrapper).toMatchSnapshot();
   });
 });
