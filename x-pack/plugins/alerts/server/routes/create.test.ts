@@ -11,6 +11,7 @@ import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
 import { Alert } from '../../common/alert';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 const alertsClient = alertsClientMock.create();
 
@@ -166,5 +167,22 @@ describe('createAlertRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('ensures the alert type gets validated for the license', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    createAlertRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    alertsClient.create.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, {}, ['ok', 'forbidden']);
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
   });
 });

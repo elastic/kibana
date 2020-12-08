@@ -15,6 +15,7 @@ import {
 import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -39,8 +40,15 @@ export const disableAlertRoute = (router: IRouter, licenseState: ILicenseState) 
       }
       const alertsClient = context.alerting.getAlertsClient();
       const { id } = req.params;
-      await alertsClient.disable({ id });
-      return res.noContent();
+      try {
+        await alertsClient.disable({ id });
+        return res.noContent();
+      } catch (e) {
+        if (e instanceof AlertTypeDisabledError) {
+          return e.sendResponse(res);
+        }
+        throw e;
+      }
     })
   );
 };
