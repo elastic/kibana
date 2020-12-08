@@ -157,7 +157,7 @@ interface UpdateOptions {
     actions: NormalizedAlertAction[];
     params: Record<string, unknown>;
     throttle: string | null;
-    notifyOnStateChange: boolean;
+    notifyOnlyOnActionGroupChange: boolean;
   };
 }
 

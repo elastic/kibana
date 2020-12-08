@@ -1356,6 +1356,7 @@ describe('update()', () => {
           },
           throttle: null,
           actions: [],
+          notifyOnlyOnActionGroupChange: false,
         },
       });
 
@@ -1385,6 +1386,7 @@ describe('update()', () => {
             },
             throttle: null,
             actions: [],
+            notifyOnlyOnActionGroupChange: false,
           },
         })
       ).rejects.toThrow();

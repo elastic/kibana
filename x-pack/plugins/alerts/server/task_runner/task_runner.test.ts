@@ -396,47 +396,55 @@ describe('Task Runner', () => {
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
-    expect(eventLogger.logEvent).toHaveBeenCalledWith({
-      event: {
-        action: 'active-instance',
-      },
-      kibana: {
-        alerting: {
-          action_group_id: 'default',
-          instance_id: '1',
-        },
-        saved_objects: [
-          {
-            id: '1',
-            namespace: undefined,
-            rel: 'primary',
-            type: 'alert',
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "event": Object {
+              "action": "active-instance",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
           },
         ],
-      },
-      message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
-    });
-    expect(eventLogger.logEvent).toHaveBeenCalledWith({
-      '@timestamp': '1970-01-01T00:00:00.000Z',
-      event: {
-        action: 'execute',
-        outcome: 'success',
-      },
-      kibana: {
-        alerting: {
-          status: 'active',
-        },
-        saved_objects: [
-          {
-            id: '1',
-            namespace: undefined,
-            rel: 'primary',
-            type: 'alert',
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute",
+              "outcome": "success",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "active",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "alert executed: test:1: 'alert-name'",
           },
         ],
-      },
-      message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
-    });
+      ]
+    `);
   });
 
   test('actionsPlugin.execute is called when notifyOnlyOnActionGroupChange is true and alert instance state has changed', async () => {

@@ -38,7 +38,7 @@ export const bodySchema = schema.object({
     }),
     { defaultValue: [] }
   ),
-  notifyOnlyOnActionGroupChange: schema.maybe(schema.boolean({ defaultValue: false })),
+  notifyOnlyOnActionGroupChange: schema.boolean({ defaultValue: false }),
 });
 
 export const createAlertRoute = (router: IRouter, licenseState: LicenseState) => {
