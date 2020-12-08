@@ -27,6 +27,7 @@ import {
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
   isErrorEmbeddable,
+  ViewMode,
 } from '../../../../embeddable/public';
 
 import { DashboardStateManager } from '../dashboard_state_manager';
@@ -98,6 +99,10 @@ export const useDashboardContainer = (
       if (!newContainer || isErrorEmbeddable(newContainer)) {
         return;
       }
+
+      // inject switch view mode callback for the empty screen to use
+      newContainer.switchViewMode = (newViewMode: ViewMode) =>
+        dashboardStateManager.switchViewMode(newViewMode);
 
       // If the incoming embeddable is newly created, or doesn't exist in the current panels list,
       // add it with `addNewEmbeddable`

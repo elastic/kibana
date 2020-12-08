@@ -44,7 +44,7 @@ import {
 } from '.';
 
 import { getQueryParams } from '../services/kibana_utils';
-import { EmbeddablePackageState, isErrorEmbeddable, ViewMode } from '../services/embeddable';
+import { EmbeddablePackageState, isErrorEmbeddable } from '../services/embeddable';
 import {
   esFilters,
   FilterManager,
@@ -78,7 +78,12 @@ export const getChangesFromAppStateForContainerState = ({
   }
 
   Object.keys(
-    _.omit(containerInput, ['filters', 'searchSessionId', 'lastReloadRequestTime'])
+    _.omit(containerInput, [
+      'filters',
+      'searchSessionId',
+      'lastReloadRequestTime',
+      'switchViewMode',
+    ])
   ).forEach((key) => {
     const containerValue = (containerInput as { [key: string]: unknown })[key];
     const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[key];
@@ -102,7 +107,6 @@ export const getChangesFromAppStateForContainerState = ({
 
 export const getDashboardContainerInput = ({
   query,
-  switchViewMode,
   searchSessionId,
   incomingEmbeddable,
   isEmbeddedExternally,
@@ -115,7 +119,6 @@ export const getDashboardContainerInput = ({
   incomingEmbeddable?: EmbeddablePackageState;
   lastReloadRequestTime?: number;
   isEmbeddedExternally: boolean;
-  switchViewMode?: (v: ViewMode) => void;
   searchSessionId?: string;
   query: QueryStart;
 }): DashboardContainerInput => {
@@ -157,7 +160,6 @@ export const getDashboardContainerInput = ({
     dashboardCapabilities,
     isEmbeddedExternally,
     searchSessionId,
-    switchViewMode,
     timeRange: {
       ..._.cloneDeep(query.timefilter.timefilter.getTime()),
     },

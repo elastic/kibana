@@ -52,7 +52,6 @@ import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_pan
 import { DashboardCapabilities } from '../types';
 
 export interface DashboardContainerInput extends ContainerInput {
-  switchViewMode?: (newViewMode: ViewMode) => void;
   dashboardCapabilities?: DashboardCapabilities;
   refreshConfig?: RefreshInterval;
   isEmbeddedExternally?: boolean;
@@ -114,6 +113,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
+  public switchViewMode?: (newViewMode: ViewMode) => void;
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
@@ -261,7 +261,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           <DashboardViewport
             container={this}
             PanelComponent={this.embeddablePanel}
-            switchViewMode={this.getInput().switchViewMode}
+            switchViewMode={this.switchViewMode}
           />
         </KibanaContextProvider>
       </I18nProvider>,

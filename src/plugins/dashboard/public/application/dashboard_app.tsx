@@ -43,7 +43,7 @@ import {
 
 import { removeQueryParam } from '../services/kibana_utils';
 import { IndexPattern } from '../services/data';
-import { ViewMode, EmbeddableRenderer } from '../services/embeddable';
+import { EmbeddableRenderer } from '../services/embeddable';
 
 export interface DashboardAppProps {
   history: History;
@@ -74,13 +74,6 @@ export function DashboardApp({
   const dashboardStateManager = useDashboardStateManager(savedDashboard, history);
   const dashboardContainer = useDashboardContainer(dashboardStateManager, history, false);
 
-  const switchViewMode = useCallback(
-    (newMode: ViewMode) => {
-      dashboardStateManager?.switchViewMode(newMode);
-    },
-    [dashboardStateManager]
-  );
-
   const refreshDashboardContainer = useCallback(
     (lastReloadRequestTime?: number) => {
       if (!dashboardContainer || !dashboardStateManager) {
@@ -94,7 +87,6 @@ export function DashboardApp({
           lastReloadRequestTime,
           dashboardCapabilities,
           query: data.query,
-          switchViewMode,
         }),
       });
       if (changes) {
@@ -113,7 +105,6 @@ export function DashboardApp({
       history,
       data.query,
       embedSettings,
-      switchViewMode,
       dashboardContainer,
       data.search.session,
       dashboardCapabilities,
