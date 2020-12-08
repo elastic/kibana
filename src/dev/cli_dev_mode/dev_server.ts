@@ -45,6 +45,7 @@ export interface Options {
   processExit$?: Rx.Observable<void>;
   sigint$?: Rx.Observable<void>;
   sigterm$?: Rx.Observable<void>;
+  mapLogLine?: DevServer['mapLogLine'];
 }
 
 export class DevServer {
@@ -59,6 +60,7 @@ export class DevServer {
   private readonly script: string;
   private readonly argv: string[];
   private readonly gracefulTimeout: number;
+  private readonly mapLogLine?: (line: string) => string | null;
 
   constructor(options: Options) {
     this.log = options.log;
@@ -70,6 +72,7 @@ export class DevServer {
     this.processExit$ = options.processExit$ ?? Rx.fromEvent(process as EventEmitter, 'exit');
     this.sigint$ = options.sigint$ ?? Rx.fromEvent(process as EventEmitter, 'SIGINT');
     this.sigterm$ = options.sigterm$ ?? Rx.fromEvent(process as EventEmitter, 'SIGTERM');
+    this.mapLogLine = options.mapLogLine;
   }
 
   isReady$() {
@@ -124,8 +127,11 @@ export class DevServer {
         // observable which emits devServer states containing lines
         // logged to stdout/stderr, completes when stdio streams complete
         const log$ = Rx.merge(observeLines(proc.stdout!), observeLines(proc.stderr!)).pipe(
-          tap((line) => {
-            this.log.write(line);
+          tap((observedLine) => {
+            const line = this.mapLogLine ? this.mapLogLine(observedLine) : observedLine;
+            if (line !== null) {
+              this.log.write(line);
+            }
           })
         );
 
