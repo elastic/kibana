@@ -458,6 +458,41 @@ describe('embeddable', () => {
     );
   });
 
+  it('should execute trigger on row click event from expression renderer', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
+      },
+      { id: '123' } as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
+
+    const eventData = {};
+    onEvent({ name: 'tableRowContextMenuClick', data: eventData });
+
+    expect(getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick);
+    expect(trigger.exec).toHaveBeenCalledWith(
+      expect.objectContaining({ data: eventData, embeddable: expect.anything() })
+    );
+  });
+
   it('should not re-render if only change is in disabled filter', async () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
