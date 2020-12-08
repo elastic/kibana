@@ -164,3 +164,10 @@ export const CONFIG_INTRO_STEP2_TEXT = i18n.translate(
       'Use the new OAuth application to connect any number of instances of the content source to Workplace Search.',
   }
 );
+
+export const CONFIG_CUSTOM_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.button',
+  {
+    defaultMessage: 'Create Custom API Source',
+  }
+);
