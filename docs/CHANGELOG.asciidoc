@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.10.1>>
 * <<release-notes-7.10.0>>
 * <<release-notes-7.9.3>>
 * <<release-notes-7.9.2>>
@@ -44,6 +45,80 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.10.1]]
+== {kib} 7.10.1
+
+coming::[7.10.1]
+
+For detailed information about the 7.10.1 release, review the following enhancements and bug fixes.
+
+For the breaking changes, refer to the <<breaking-changes-7.10,breaking changes in 7.10>>.
+
+[float]
+[[enhancement-v7.10.1]]
+=== Enhancements
+Machine Learning::
+* Adds unsigned_long support to data frame analytics and anomaly detection {kibana-pull}82636[#82636]
+Platform::
+* Fixes a bug causing searching for saved objects using special characters such as * or - to not return any results {kibana-pull}82693[#82693]
+
+[float]
+[[bug-v7.10.1]]
+=== Bug fixes
+APM::
+* Fixes missing `service.node.name` {kibana-pull}84269[#84269]
+* Page load chart breakdown tooltip formatting {kibana-pull}83627[#83627]
+Canvas::
+* Fixes elements not being updated properly when filter is changed on workpad {kibana-pull}81863[#81863]
+Dashboard::
+* Fixes an issue when exporting a Saved Search visualization, inside of a dashboard,ß to CSV was returning blank rows {kibana-pull}81524[#81524]
+Discover::
+* Fixes double fetching of saved search embeddable  {kibana-pull}84060[#84060]
+Ingest Management::
+* Fixes error with creating agent policy during add integration {kibana-pull}83993[#83993]
+* Disallows dashes in namespace strings {kibana-pull}83996[#83996]
+* Adds config options to accepted docker env vars {kibana-pull}84338[#84338]
+Lens and visualizations::
+* Reloads on change via history object {kibana-pull}81753[#81753]
+* Fixes underlying data drilldown for Lens {kibana-pull}82737[#82737]
+* Fixes bug in terms formatting {kibana-pull}82776[#82776]
+* Do not reset filter state on incoming app navigation {kibana-pull}83786[#83786]
+* Vis listing page breaks on unknown vis type {kibana-pull}82018[#82018]
+* Fixes area rendering with negative values {kibana-pull}83313[#83313]
+* Vertical cursor is not displayed across visualizations of a dashboard {kibana-pull}83435[#83435]
+* Y-axis has number formatting not considering all series formatters in the group {kibana-pull}83438[#83438]
+* Fixes tagcloud explicitly pass params {kibana-pull}84107[#84107]
+* Fixes timelion not working with single quotes {kibana-pull}84196[#84196]
+Machine Learning::
+* Fixes setting of anomaly chart time range depending on bucket spans {kibana-pull}81291[#81291]
+* Fixes formatting of fields in index data visualizer {kibana-pull}82593[#82593]
+* Fixes anomaly detection validation when using advanced properties in the analysis config {kibana-pull}82703[#82703]
+* Fixes Anomaly Explorer population charts when multiple causes in anomaly {kibana-pull}84254[#84254]
+* Fixes swim lane for top influencers {kibana-pull}84258[#84258]
+* Fixes unnecessary trigger of wildcard field type search for {ml} plugin routes {kibana-pull}84605[#84605]
+Management::
+* Fixes a bug causing Kibana to crash when importing a file with an invalid format from the saved object management section {kibana-pull}82406[#82406]
+Maps::
+* Fixes threshold alert issue resolving nested fields {kibana-pull}83577[#83577]
+Metrics::
+* Adds timerange and sorting to node detail metadata request {kibana-pull}81033[#81033]
+* Converts legend key to optional {kibana-pull}83495[#83495]
+* Optimizations for Snapshot and Inventory Metadata {kibana-pull}83596[#83596]
+Monitoring::
+* Adds catch clause to handle exceptions on loading page {kibana-pull}82179[#82179]
+* Fixes the plugins passed into legacy routes {kibana-pull}82192[#82192]
+* Fixes small issue with detecting missing monitoring data from APM {kibana-pull}83646[#83646]
+* Only looks at ES for the missing data alert for now {kibana-pull}83839[#83839]
+* Fixes rison error {kibana-pull}83987[#83987]
+* Fixes issues with show_license_expiration {kibana-pull}84361[#84361]
+Security::
+* Adjusts encoding for security management pages {kibana-pull}83629[#83629]
+* Fixes "Severity override" dropdowns in "Create new rule" -> "About rule" {kibana-pull}82271[#82271]
+Sharing::
+* Embeddable Error Handling Without ReplacePanel {kibana-pull}82201[#82201]
+Uptime::
+* Page load chart breakdown tooltip formatting {kibana-pull}83627[#83627]
+
 
 [[release-notes-7.10.0]]
 == {kib} 7.10.0
@@ -538,7 +613,7 @@ Operations::
 Platform::
 * The legacy plugin system and the legacy plugin API have been removed. It is no longer possible to use third parties legacy Kibana plugins. Legacy plugin owners should migrate their plugins to the Kibana Platform plugin API {kibana-pull}77599[#77599]
 
-//For more information, refer to <<breaking-changes-7.10>,breaking changes in 7.10>>.
+For more information, refer to <<breaking-changes-7.10,breaking changes in 7.10>>.
 
 [[release-notes-7.9.3]]
 == {kib} 7.9.3
