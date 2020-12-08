@@ -29,7 +29,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
         <div>
           {step.synthetics?.step?.index && checkGroup ? (
             <StepDetailLink checkGroupId={checkGroup} stepIndex={step.synthetics.step.index!}>
-              <EuiText grow={false}>
+              <EuiText>
                 <strong>
                   <FormattedMessage
                     id="xpack.uptime.synthetics.executedStep.stepName"
