@@ -41,6 +41,7 @@ describe('Alerts', () => {
     afterEach(() => {
       removeSignalsIndex();
       esArchiverUnload('alerts');
+      removeSignalsIndex();
     });
 
     it('Closes and opens alerts', () => {
@@ -171,6 +172,7 @@ describe('Alerts', () => {
     afterEach(() => {
       removeSignalsIndex();
       esArchiverUnload('closed_alerts');
+      removeSignalsIndex();
     });
 
     it('Open one alert when more than one closed alerts are selected', () => {
@@ -223,6 +225,7 @@ describe('Alerts', () => {
     afterEach(() => {
       removeSignalsIndex();
       esArchiverUnload('alerts');
+      removeSignalsIndex();
     });
 
     it('Mark one alert in progress when more than one open alerts are selected', () => {

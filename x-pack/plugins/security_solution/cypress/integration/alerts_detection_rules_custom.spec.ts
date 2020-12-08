@@ -120,6 +120,7 @@ describe('Custom detection rules creation', () => {
   after(() => {
     deleteRule();
     esArchiverUnload('timeline');
+    removeSignalsIndex();
   });
 
   it('Creates and activates a new rule', () => {
