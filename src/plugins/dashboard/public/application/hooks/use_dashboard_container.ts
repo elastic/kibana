@@ -112,6 +112,7 @@ export const useDashboardContainer = (
           (incomingEmbeddable.embeddableId &&
             !newContainer.getInput().panels[incomingEmbeddable.embeddableId]))
       ) {
+        dashboardStateManager.switchViewMode(ViewMode.EDIT);
         newContainer.addNewEmbeddable<EmbeddableInput>(
           incomingEmbeddable.type,
           incomingEmbeddable.input

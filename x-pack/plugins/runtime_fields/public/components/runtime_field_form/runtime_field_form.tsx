@@ -5,6 +5,8 @@
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 import { PainlessLang, PainlessContext } from '@kbn/monaco';
 import {
   EuiFlexGroup,
@@ -260,20 +262,25 @@ const RuntimeFieldFormComp = ({
               error={getErrorsMessages()}
               isInvalid={!isValid}
               helpText={
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiLink
-                      href={links.runtimePainless}
-                      target="_blank"
-                      external
-                      data-test-subj="painlessSyntaxLearnMoreLink"
-                    >
-                      {i18n.translate('xpack.runtimeFields.form.script.learnMoreLinkText', {
-                        defaultMessage: 'Learn more about syntax.',
-                      })}
-                    </EuiLink>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <FormattedMessage
+                  id="xpack.runtimeFields.form.source.scriptFieldHelpText"
+                  defaultMessage="Runtime fields without a script retrieve values from a field with the same name in {source}. If a field with the same name doesn’t exist, no values return when a search request includes the runtime field. {learnMoreLink}"
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink
+                        href={links.runtimePainless}
+                        target="_blank"
+                        external
+                        data-test-subj="painlessSyntaxLearnMoreLink"
+                      >
+                        {i18n.translate('xpack.runtimeFields.form.script.learnMoreLinkText', {
+                          defaultMessage: 'Learn about script syntax.',
+                        })}
+                      </EuiLink>
+                    ),
+                    source: <EuiCode>{'_source'}</EuiCode>,
+                  }}
+                />
               }
               fullWidth
             >
