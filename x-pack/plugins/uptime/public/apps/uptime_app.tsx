@@ -25,16 +25,15 @@ import {
 import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
 import { setBasePath } from '../state/actions';
 import { PageRouter } from '../routes';
-import {
-  UptimeAlertsContextProvider,
-  UptimeAlertsFlyoutWrapper,
-} from '../components/overview/alerts';
+import { UptimeAlertsFlyoutWrapper } from '../components/overview/alerts';
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ScopedHistory } from '../../../../../src/core/public';
+import { EuiThemeProvider } from '../../../observability/public';
 
 export interface UptimeAppColors {
   danger: string;
+  dangerBehindText: string;
   success: string;
   gray: string;
   range: string;
@@ -103,11 +102,11 @@ const Application = (props: UptimeAppProps) => {
             services={{ ...core, ...plugins, triggersActionsUi: startPlugins.triggersActionsUi }}
           >
             <Router history={props.history}>
-              <UptimeRefreshContextProvider>
-                <UptimeSettingsContextProvider {...props}>
-                  <UptimeThemeContextProvider darkMode={darkMode}>
-                    <UptimeStartupPluginsContextProvider {...startPlugins}>
-                      <UptimeAlertsContextProvider>
+              <EuiThemeProvider darkMode={darkMode}>
+                <UptimeRefreshContextProvider>
+                  <UptimeSettingsContextProvider {...props}>
+                    <UptimeThemeContextProvider darkMode={darkMode}>
+                      <UptimeStartupPluginsContextProvider {...startPlugins}>
                         <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                           <RedirectAppLinks application={core.application}>
                             <main>
@@ -116,11 +115,11 @@ const Application = (props: UptimeAppProps) => {
                             </main>
                           </RedirectAppLinks>
                         </EuiPage>
-                      </UptimeAlertsContextProvider>
-                    </UptimeStartupPluginsContextProvider>
-                  </UptimeThemeContextProvider>
-                </UptimeSettingsContextProvider>
-              </UptimeRefreshContextProvider>
+                      </UptimeStartupPluginsContextProvider>
+                    </UptimeThemeContextProvider>
+                  </UptimeSettingsContextProvider>
+                </UptimeRefreshContextProvider>
+              </EuiThemeProvider>
             </Router>
           </KibanaContextProvider>
         </ReduxProvider>

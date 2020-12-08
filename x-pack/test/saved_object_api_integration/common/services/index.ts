@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore not ts yet
-import { LegacyEsProvider } from './legacy_es';
-
 import { services as commonServices } from '../../../common/services';
 import { services as apiIntegrationServices } from '../../../api_integration/services';
 import { services as kibanaApiIntegrationServices } from '../../../../../test/api_integration/services';
@@ -14,7 +11,6 @@ import { services as kibanaFunctionalServices } from '../../../../../test/functi
 
 export const services = {
   ...commonServices,
-  legacyEs: LegacyEsProvider,
   esSupertestWithoutAuth: apiIntegrationServices.esSupertestWithoutAuth,
   supertest: kibanaApiIntegrationServices.supertest,
   supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,

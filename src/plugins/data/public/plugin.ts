@@ -48,7 +48,6 @@ import {
   setUiSettings,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
-import { getEsaggs } from './search/expressions';
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
@@ -69,7 +68,7 @@ import {
 } from './actions';
 
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
-import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
+import { getIndexPatternLoad } from './index_patterns/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 
 declare module '../../ui_actions/public' {
@@ -105,26 +104,11 @@ export class DataPublicPlugin
 
   public setup(
     core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
-    { expressions, uiActions, usageCollection }: DataSetupDependencies
+    { bfetch, expressions, uiActions, usageCollection }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    expressions.registerFunction(indexPatternLoad);
-    expressions.registerFunction(
-      getEsaggs({
-        getStartDependencies: async () => {
-          const [, , self] = await core.getStartServices();
-          const { fieldFormats, indexPatterns, query, search } = self;
-          return {
-            addFilters: query.filterManager.addFilters.bind(query.filterManager),
-            aggs: search.aggs,
-            deserializeFieldFormat: fieldFormats.deserialize.bind(fieldFormats),
-            indexPatterns,
-            searchSource: search.searchSource,
-          };
-        },
-      })
-    );
+    expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
 
     this.usageCollection = usageCollection;
 
@@ -152,6 +136,7 @@ export class DataPublicPlugin
     );
 
     const searchService = this.searchService.setup(core, {
+      bfetch,
       usageCollection,
       expressions,
     });
@@ -222,13 +207,16 @@ export class DataPublicPlugin
       core,
       data: dataServices,
       storage: this.storage,
-      trackUiMetric: this.usageCollection?.reportUiStats.bind(this.usageCollection, 'data_plugin'),
+      trackUiMetric: this.usageCollection?.reportUiCounter.bind(
+        this.usageCollection,
+        'data_plugin'
+      ),
     });
 
     return {
       ...dataServices,
       ui: {
-        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
+        IndexPatternSelect: createIndexPatternSelect(indexPatterns),
         SearchBar,
       },
     };

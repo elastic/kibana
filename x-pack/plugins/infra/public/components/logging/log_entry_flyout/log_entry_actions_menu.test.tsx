@@ -28,7 +28,7 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
+            logEntry={{
               fields: [{ field: 'host.ip', value: ['HOST_IP'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
@@ -58,7 +58,7 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
+            logEntry={{
               fields: [{ field: 'container.id', value: ['CONTAINER_ID'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
@@ -88,7 +88,7 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
+            logEntry={{
               fields: [{ field: 'kubernetes.pod.uid', value: ['POD_UID'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
@@ -118,7 +118,7 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
+            logEntry={{
               fields: [
                 { field: 'container.id', value: ['CONTAINER_ID'] },
                 { field: 'host.ip', value: ['HOST_IP'] },
@@ -154,7 +154,7 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
+            logEntry={{
               fields: [],
               id: 'ITEM_ID',
               index: 'INDEX',
@@ -188,7 +188,7 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
+            logEntry={{
               fields: [{ field: 'trace.id', value: ['1234567'] }],
               id: 'ITEM_ID',
               index: 'INDEX',
@@ -219,7 +219,7 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
+            logEntry={{
               fields: [
                 { field: 'trace.id', value: ['1234567'] },
                 { field: '@timestamp', value: [timestamp] },
@@ -252,7 +252,7 @@ describe('LogEntryActionsMenu component', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
-            logItem={{
+            logEntry={{
               fields: [],
               id: 'ITEM_ID',
               index: 'INDEX',

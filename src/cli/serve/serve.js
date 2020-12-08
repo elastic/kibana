@@ -42,11 +42,8 @@ function canRequire(path) {
   }
 }
 
-const CLUSTER_MANAGER_PATH = resolve(__dirname, '../cluster/cluster_manager');
-const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
-
-const REPL_PATH = resolve(__dirname, '../repl');
-const CAN_REPL = canRequire(REPL_PATH);
+const DEV_MODE_PATH = resolve(__dirname, '../../dev/cli_dev_mode');
+const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
 
 const pathCollector = function () {
   const paths = [];
@@ -176,10 +173,6 @@ export default function (program) {
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
-  if (CAN_REPL) {
-    command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
-  }
-
   if (!IS_KIBANA_DISTRIBUTABLE) {
     command
       .option('--oss', 'Start Kibana without X-Pack')
@@ -189,7 +182,7 @@ export default function (program) {
       );
   }
 
-  if (CAN_CLUSTER) {
+  if (DEV_MODE_SUPPORTED) {
     command
       .option('--dev', 'Run the server with development mode defaults')
       .option('--ssl', 'Run the dev server using HTTPS')
@@ -225,7 +218,6 @@ export default function (program) {
         quiet: !!opts.quiet,
         silent: !!opts.silent,
         watch: !!opts.watch,
-        repl: !!opts.repl,
         runExamples: !!opts.runExamples,
         // We want to run without base path when the `--run-examples` flag is given so that we can use local
         // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
@@ -240,8 +232,7 @@ export default function (program) {
         dist: !!opts.dist,
       },
       features: {
-        isClusterModeSupported: CAN_CLUSTER,
-        isReplModeSupported: CAN_REPL,
+        isCliDevModeSupported: DEV_MODE_SUPPORTED,
       },
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });

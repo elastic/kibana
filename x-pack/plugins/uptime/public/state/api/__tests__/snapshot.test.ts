@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HttpFetchError } from 'src/core/public';
 import { fetchSnapshotCount } from '../snapshot';
 import { apiService } from '../utils';
-import { HttpFetchError } from 'src/core/public';
 
 describe('snapshot API', () => {
   let fetchMock: jest.SpyInstance<Partial<unknown>>;
@@ -15,8 +15,9 @@ describe('snapshot API', () => {
   beforeEach(() => {
     apiService.http = {
       get: jest.fn(),
+      fetch: jest.fn(),
     } as any;
-    fetchMock = jest.spyOn(apiService.http, 'get');
+    fetchMock = jest.spyOn(apiService.http, 'fetch');
     mockResponse = { up: 3, down: 12, total: 15 };
   });
 
@@ -31,7 +32,9 @@ describe('snapshot API', () => {
       dateRangeEnd: 'now',
       filters: 'monitor.id:"auto-http-0X21EE76EAC459873F"',
     });
-    expect(fetchMock).toHaveBeenCalledWith('/api/uptime/snapshot/count', {
+    expect(fetchMock).toHaveBeenCalledWith({
+      asResponse: false,
+      path: '/api/uptime/snapshot/count',
       query: {
         dateRangeEnd: 'now',
         dateRangeStart: 'now-15m',

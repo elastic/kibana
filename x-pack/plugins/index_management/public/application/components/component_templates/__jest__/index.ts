@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { appDependencies as componentTemplatesMockDependencies } from './client_integration/helpers';
+export { componentTemplatesDependencies as componentTemplatesMockDependencies } from './client_integration/helpers';

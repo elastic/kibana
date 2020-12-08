@@ -69,13 +69,20 @@ import { I18nServiceSetup } from './i18n';
 // Because of #79265 we need to explicity import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
+  CoreUsageStats,
   CoreUsageData,
   CoreConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
 
-export { CoreUsageData, CoreConfigUsageData, CoreEnvironmentUsageData, CoreServicesUsageData };
+export {
+  CoreUsageStats,
+  CoreUsageData,
+  CoreConfigUsageData,
+  CoreEnvironmentUsageData,
+  CoreServicesUsageData,
+};
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -295,6 +302,7 @@ export {
   SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsIncrementCounterField,
   SavedObjectsComplexFieldMapping,
   SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,
@@ -394,6 +402,9 @@ export interface RequestHandlerContext {
     elasticsearch: {
       client: IScopedClusterClient;
       legacy: {
+        /*
+         * @deprecated Use {@link IScopedClusterClient}.
+         */
         client: ILegacyScopedClusterClient;
       };
     };

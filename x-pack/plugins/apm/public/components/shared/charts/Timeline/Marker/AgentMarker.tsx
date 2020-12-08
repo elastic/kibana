@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 import { asDuration } from '../../../../../../common/utils/formatters';
-import { useTheme } from '../../../../../hooks/useTheme';
+import { useTheme } from '../../../../../hooks/use_theme';
 import { px, units } from '../../../../../style/variables';
 import { Legend } from '../../Legend';
 import { AgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
