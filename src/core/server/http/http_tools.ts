@@ -32,6 +32,7 @@ import uuid from 'uuid';
 import { HttpConfig } from './http_config';
 import { validateObject } from './prototype_pollution';
 
+const corsAllowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'];
 /**
  * Converts Kibana `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.
  */
@@ -40,6 +41,7 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
     ? {
         credentials: config.cors.credentials,
         origin: config.cors.origin,
+        headers: corsAllowedHeaders,
       }
     : false;
   // Note that all connection options configured here should be exactly the same

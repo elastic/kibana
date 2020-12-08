@@ -25,8 +25,10 @@ function renderBody(kibanaUrl: string) {
   </head>
   <script>
 fetch('${url}', {
+  method: 'POST',
   headers: {
     Authorization: 'Basic ${apiToken}',
+    'kbn-xsrf': 'kibana',
   },
   credentials: 'include',
 })
@@ -47,7 +49,7 @@ export class CorsTestPlugin implements Plugin {
 
   async setup(core: CoreSetup) {
     const router = core.http.createRouter();
-    router.get({ path: '/cors-test', validate: false }, (_context, req, res) =>
+    router.post({ path: '/cors-test', validate: false }, (context, req, res) =>
       res.ok({ body: 'content from kibana' })
     );
   }

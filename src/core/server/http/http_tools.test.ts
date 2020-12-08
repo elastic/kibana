@@ -188,6 +188,25 @@ describe('getServerOptions', () => {
       }
     `);
   });
+
+  it('properly configures CORS when cors enabled', () => {
+    const httpConfig = new HttpConfig(
+      config.schema.validate({
+        cors: {
+          enabled: true,
+          credentials: false,
+          origin: '*',
+        },
+      }),
+      {} as any
+    );
+
+    expect(getServerOptions(httpConfig).routes?.cors).toEqual({
+      credentials: false,
+      origin: '*',
+      headers: ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'],
+    });
+  });
 });
 
 describe('getRequestId', () => {
