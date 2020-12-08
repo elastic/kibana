@@ -9,14 +9,9 @@ import React from 'react';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
-import {
-  defaultHeaders,
-  mockDetailItemData,
-  mockDetailItemDataId,
-  TestProviders,
-} from '../../mock';
+import { mockDetailItemData, mockDetailItemDataId, TestProviders } from '../../mock';
 
-import { EventDetails, View } from './event_details';
+import { EventDetails, EventsViewType } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockAlertDetailsData } from './__mocks__';
@@ -27,14 +22,11 @@ describe('EventDetails', () => {
   const mount = useMountAppended();
   const defaultProps = {
     browserFields: mockBrowserFields,
-    columnHeaders: defaultHeaders,
     data: mockDetailItemData,
     id: mockDetailItemDataId,
-    view: 'table-view' as View,
-    onUpdateColumns: jest.fn(),
     onViewSelected: jest.fn(),
     timelineId: 'test',
-    toggleColumn: jest.fn(),
+    view: EventsViewType.summaryView,
   };
 
   const alertsProps = {
