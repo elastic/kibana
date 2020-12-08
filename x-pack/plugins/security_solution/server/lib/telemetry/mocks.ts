@@ -10,7 +10,9 @@ import { TelemetryDiagTask } from './task';
 /**
  * Creates a mocked Telemetry Events Sender
  */
-export const createMockTelemetryEventsSender = (): jest.Mocked<TelemetryEventsSender> => {
+export const createMockTelemetryEventsSender = (
+  enableTelemtry: boolean
+): jest.Mocked<TelemetryEventsSender> => {
   return ({
     setup: jest.fn(),
     start: jest.fn(),
@@ -18,7 +20,7 @@ export const createMockTelemetryEventsSender = (): jest.Mocked<TelemetryEventsSe
     fetchDiagnosticAlerts: jest.fn(),
     queueTelemetryEvents: jest.fn(),
     processEvents: jest.fn(),
-    isTelemetryOptedIn: jest.fn(),
+    isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemtry ?? jest.fn()),
     sendIfDue: jest.fn(),
     fetchClusterInfo: jest.fn(),
     fetchTelemetryUrl: jest.fn(),
