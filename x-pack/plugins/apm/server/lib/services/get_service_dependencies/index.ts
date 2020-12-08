@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ValuesType } from 'utility-types';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import {
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_SUBTYPE,
-  SPAN_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getMetrics } from './get_metrics';
 import { getDestinationMap } from './get_destination_map';
@@ -25,7 +21,7 @@ export interface ServiceDependencyItem {
     value: number | null;
     timeseries: Array<{ x: number; y: number | null }>;
   };
-  error_rate: {
+  errorRate: {
     value: number | null;
     timeseries: Array<{ x: number; y: number | null }>;
   };
@@ -48,22 +44,18 @@ export async function getServiceDependencies({
   environment: string;
   numBuckets: number;
 }): Promise<ServiceDependencyItem[]> {
-  const { start, end, apmEventClient } = setup;
+  const { start, end } = setup;
 
   const [allMetrics, destinationMap] = await Promise.all([
     getMetrics({
-      start,
-      end,
-      apmEventClient,
+      setup,
       serviceName,
       environment,
       numBuckets,
     }),
     getDestinationMap({
-      apmEventClient,
+      setup,
       serviceName,
-      start,
-      end,
       environment,
     }),
   ]);
@@ -73,12 +65,18 @@ export async function getServiceDependencies({
 
     const destination = destinationMap[spanDestination];
 
-    return {
-      destination: destination
-        ? destination
-        : {
-            [SPAN_DESTINATION_SERVICE_RESOURCE]: metricItem.key,
+    const defaultInfo = {
+      span: {
+        destination: {
+          service: {
+            resource: metricItem.key,
           },
+        },
+      },
+    };
+
+    return {
+      destination: destination ? destination : defaultInfo,
       metrics: [metricItem],
     };
   }, []);
@@ -150,7 +148,7 @@ export async function getServiceDependencies({
             y: point.count > 0 ? point.count / deltaAsMinutes : null,
           })),
         },
-        error_rate: {
+        errorRate: {
           value:
             mergedMetrics.value.count > 0
               ? (mergedMetrics.value.error_count ?? 0) /
@@ -165,20 +163,22 @@ export async function getServiceDependencies({
 
       if ('service' in destination) {
         return {
-          name: destination.service!.name,
-          serviceName: destination.service!.name,
-          environment: destination.service!.environment,
-          agentName: destination.service!.agentName,
+          name: destination.service.name,
+          serviceName: destination.service.name,
+          environment: destination.service.environment,
+          agentName: destination.agent.name,
           ...destMetrics,
         };
       }
 
       return {
-        name: destination[SPAN_DESTINATION_SERVICE_RESOURCE],
-        spanType:
-          'span.type' in destination ? destination[SPAN_TYPE] : undefined,
-        spanSubtype:
-          'span.subtype' in destination ? destination[SPAN_SUBTYPE] : undefined,
+        name: destination.span.destination.service.resource!,
+        ...('span' in destination && 'type' in destination.span
+          ? {
+              spanType: destination.span.type,
+              spanSubtype: destination.span.subtype,
+            }
+          : {}),
         ...destMetrics,
       };
     }
@@ -186,7 +186,7 @@ export async function getServiceDependencies({
 
   const latencySums = metricsByResolvedAddress
     .map((metrics) => metrics.latency.value)
-    .filter((n) => n !== null) as number[];
+    .filter(isFiniteNumber);
 
   const minLatencySum = Math.min(...latencySums);
   const maxLatencySum = Math.max(...latencySums);

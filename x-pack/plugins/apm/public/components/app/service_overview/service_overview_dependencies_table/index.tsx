@@ -93,7 +93,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         return (
           <SparkPlotWithValueLabel
             color="euiColorVis1"
-            series={latency.timeseries ?? undefined}
+            series={latency.timeseries}
             valueLabel={asDuration(latency.value)}
           />
         );
@@ -101,7 +101,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       sortable: true,
     },
     {
-      field: 'throughput_value',
+      field: 'throughputValue',
       name: i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableColumnThroughput',
         {
@@ -114,7 +114,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           <SparkPlotWithValueLabel
             compact
             color="euiColorVis0"
-            series={throughput.timeseries ?? undefined}
+            series={throughput.timeseries}
             valueLabel={asTransactionRate(throughput.value)}
           />
         );
@@ -122,7 +122,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       sortable: true,
     },
     {
-      field: 'error_rate_value',
+      field: 'errorRateValue',
       name: i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableColumnErrorRate',
         {
@@ -130,12 +130,12 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         }
       ),
       width: px(unit * 10),
-      render: (_, { error_rate: errorRate }) => {
+      render: (_, { errorRate }) => {
         return (
           <SparkPlotWithValueLabel
             compact
             color="euiColorVis7"
-            series={errorRate.timeseries ?? undefined}
+            series={errorRate.timeseries}
             valueLabel={asPercent(errorRate.value, 1)}
           />
         );
@@ -143,7 +143,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       sortable: true,
     },
     {
-      field: 'impact_value',
+      field: 'impactValue',
       name: i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableColumnImpact',
         {
@@ -186,10 +186,10 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
   // need top-level sortable fields for the managed table
   const items = data.map((item) => ({
     ...item,
-    error_rate_value: item.error_rate.value,
-    latency_value: item.latency.value,
-    throughput_value: item.throughput.value,
-    impact_value: item.impact,
+    errorRateValue: item.errorRate.value,
+    latencyValue: item.latency.value,
+    throughputValue: item.throughput.value,
+    impactValue: item.impact,
   }));
 
   return (
@@ -235,7 +235,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
               sorting={{
                 sort: {
                   direction: 'desc',
-                  field: 'impact_value',
+                  field: 'impactValue',
                 },
               }}
             />

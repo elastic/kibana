@@ -21,7 +21,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 
 interface Props {
   color: string;
-  series?: Array<{ x: number; y: number | null }>;
+  series?: Array<{ x: number; y: number | null }> | null;
   width: string;
 }
 

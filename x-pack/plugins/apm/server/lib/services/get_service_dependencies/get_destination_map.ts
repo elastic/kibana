@@ -20,22 +20,20 @@ import {
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
-import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export const getDestinationMap = async ({
-  apmEventClient,
+  setup,
   serviceName,
-  start,
-  end,
   environment,
 }: {
-  apmEventClient: APMEventClient;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
-  start: number;
-  end: number;
   environment: string;
 }) => {
+  const { start, end, apmEventClient } = setup;
+
   const response = await apmEventClient.search({
     apm: {
       events: [ProcessorEvent.span],
@@ -62,6 +60,8 @@ export const getDestinationMap = async ({
                   terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
                 },
               },
+              // make sure we get samples for both successful
+              // and failed calls
               { [EVENT_OUTCOME]: { terms: { field: EVENT_OUTCOME } } },
             ],
           },
@@ -110,6 +110,7 @@ export const getDestinationMap = async ({
                 ),
               },
             },
+            { range: rangeFilter(start, end) },
           ],
         },
       },
@@ -133,13 +134,42 @@ export const getDestinationMap = async ({
     },
   }));
 
-  const connections = joinByKey(
-    joinByKey(
-      [...outgoingConnections, ...joinByKey(incomingConnections, 'service')],
-      'id'
-    ),
-    SPAN_DESTINATION_SERVICE_RESOURCE
+  const joinedBySpanId = joinByKey(
+    [...outgoingConnections, ...joinByKey(incomingConnections, 'service')],
+    'id'
   );
+
+  const connections = joinByKey(
+    joinedBySpanId,
+    SPAN_DESTINATION_SERVICE_RESOURCE
+  ).map((connection) => {
+    const info = {
+      span: {
+        type: connection[SPAN_TYPE],
+        subtype: connection[SPAN_SUBTYPE],
+        destination: {
+          service: {
+            resource: connection[SPAN_DESTINATION_SERVICE_RESOURCE],
+          },
+        },
+      },
+    };
+
+    return {
+      ...info,
+      ...('service' in connection && connection.service
+        ? {
+            service: {
+              name: connection.service.name,
+              environment: connection.service.environment,
+            },
+            agent: {
+              name: connection.service.agentName,
+            },
+          }
+        : {}),
+    };
+  });
 
   // map span.destination.service.resource to an instrumented service (service.name, service.environment)
   // or an external service (span.type, span.subtype)

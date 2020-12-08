@@ -15,25 +15,23 @@ import {
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
-import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export const getMetrics = async ({
-  start,
-  end,
-  apmEventClient,
+  setup,
   serviceName,
   environment,
   numBuckets,
 }: {
-  start: number;
-  end: number;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
-  apmEventClient: APMEventClient;
   environment: string;
   numBuckets: number;
 }) => {
+  const { start, end, apmEventClient } = setup;
+
   const response = await apmEventClient.search({
     apm: {
       events: [ProcessorEvent.metric],

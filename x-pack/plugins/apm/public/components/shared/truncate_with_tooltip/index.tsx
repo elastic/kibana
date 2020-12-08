@@ -9,9 +9,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { truncate } from '../../../style/variables';
 
+const tooltipAnchorClassname = '_apm_truncate_tooltip_anchor_';
+
 const TooltipWrapper = styled.div`
   width: 100%;
-  .euiToolTipAnchor {
+  .${tooltipAnchorClassname} {
     width: 100% !important;
     display: block !important;
   }
@@ -31,7 +33,11 @@ export function TruncateWithTooltip(props: Props) {
 
   return (
     <TooltipWrapper>
-      <EuiToolTip delay="long" content={text}>
+      <EuiToolTip
+        delay="long"
+        content={text}
+        anchorClassName={tooltipAnchorClassname}
+      >
         <ContentWrapper>{content || text}</ContentWrapper>
       </EuiToolTip>
     </TooltipWrapper>

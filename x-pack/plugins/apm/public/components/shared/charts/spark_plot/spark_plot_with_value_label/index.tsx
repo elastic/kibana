@@ -29,7 +29,7 @@ export function SparkPlotWithValueLabel({
   compact,
 }: {
   color: Color;
-  series?: Array<{ x: number; y: number | null }>;
+  series?: Array<{ x: number; y: number | null }> | null;
   valueLabel: React.ReactNode;
   compact?: boolean;
 }) {

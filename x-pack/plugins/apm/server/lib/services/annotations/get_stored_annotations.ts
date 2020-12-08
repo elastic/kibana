@@ -5,6 +5,7 @@
  */
 
 import { LegacyAPICaller, Logger } from 'kibana/server';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
@@ -34,12 +35,7 @@ export async function getStoredAnnotations({
       bool: {
         filter: [
           {
-            range: {
-              '@timestamp': {
-                gte: setup.start,
-                lt: setup.end,
-              },
-            },
+            range: rangeFilter(setup.start, setup.end),
           },
           { term: { 'annotation.type': 'deployment' } },
           { term: { tags: 'apm' } },
