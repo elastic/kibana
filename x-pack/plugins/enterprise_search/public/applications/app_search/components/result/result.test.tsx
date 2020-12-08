@@ -126,8 +126,8 @@ describe('Result', () => {
 
       beforeAll(() => {
         wrapper = shallow(<Result {...propsWithMoreFields} />);
-        expect(wrapper.find('.appSearchResult__toggleExpandButton').exists()).toBe(true);
-        wrapper.find('.appSearchResult__toggleExpandButton').simulate('click');
+        expect(wrapper.find('.appSearchResult__actionButton').exists()).toBe(true);
+        wrapper.find('.appSearchResult__actionButton').simulate('click');
       });
 
       it('renders a collapse button', () => {
@@ -152,9 +152,9 @@ describe('Result', () => {
 
       beforeAll(() => {
         wrapper = shallow(<Result {...propsWithMoreFields} />);
-        expect(wrapper.find('.appSearchResult__toggleExpandButton').exists()).toBe(true);
-        wrapper.find('.appSearchResult__toggleExpandButton').simulate('click');
-        wrapper.find('.appSearchResult__toggleExpandButton').simulate('click');
+        expect(wrapper.find('.appSearchResult__actionButton').exists()).toBe(true);
+        wrapper.find('.appSearchResult__actionButton').simulate('click');
+        wrapper.find('.appSearchResult__actionButton').simulate('click');
       });
 
       it('renders a collapse button', () => {
