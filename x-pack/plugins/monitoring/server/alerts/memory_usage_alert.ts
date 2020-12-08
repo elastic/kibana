@@ -40,7 +40,6 @@ export class MemoryUsageAlert extends BaseAlert {
     super(rawAlert, {
       id: ALERT_MEMORY_USAGE,
       name: ALERT_DETAILS[ALERT_MEMORY_USAGE].label,
-      accessorKey: 'memoryUsage',
       defaultParams: {
         threshold: 85,
         duration: '5m',
@@ -104,13 +103,23 @@ export class MemoryUsageAlert extends BaseAlert {
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
-    const currentState = super.getDefaultAlertState(cluster, item);
-    currentState.ui.severity = AlertSeverity.Warning;
-    return currentState;
+    const stat = item.meta as AlertMemoryUsageNodeStats;
+    const base = super.getDefaultAlertState(cluster, item);
+    return {
+      ...base,
+      stackProduct: ELASTICSEARCH_SYSTEM_ID,
+      stackProductUuid: stat.nodeId,
+      stackProductName: stat.nodeName || stat.nodeId,
+      memoryUsage: stat.memoryUsage,
+      ui: {
+        ...base.ui,
+        severity: AlertSeverity.Warning,
+      },
+    };
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const stat = item.meta as AlertMemoryUsageState;
+    const stat = item.meta as AlertMemoryUsageNodeStats;
     return {
       text: i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.firingMessage', {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting JVM memory usage of {memoryUsage}% at #absolute`,

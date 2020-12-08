@@ -7,9 +7,11 @@
 import { Alert, SanitizedAlert } from '../../../alerts/common';
 import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
 
+export type CommonAlert = Alert | SanitizedAlert;
+
 export interface CommonAlertStatus {
   states: CommonAlertState[];
-  rawAlert: Alert | SanitizedAlert;
+  rawAlert: CommonAlert;
 }
 
 export interface CommonAlertState {
@@ -49,11 +51,7 @@ export interface AlertEnableAction {
 
 export interface AlertInstanceState {
   alertStates: Array<
-    | AlertState
-    | AlertCpuUsageState
-    | AlertDiskUsageState
-    | AlertThreadPoolRejectionsState
-    | AlertNodeState
+    AlertState | AlertCpuUsageState | AlertDiskUsageState | AlertThreadPoolRejectionsState
   >;
   [x: string]: unknown;
 }
@@ -62,24 +60,21 @@ export interface AlertState {
   cluster: AlertCluster;
   ccs?: string;
   ui: AlertUiState;
+  stackProduct: string;
+  stackProductUuid: string;
+  stackProductName: string;
   [key: string]: unknown;
 }
 
-export interface AlertNodeState extends AlertState {
-  nodeId: string;
-  nodeName?: string;
-  [key: string]: unknown;
-}
-
-export interface AlertCpuUsageState extends AlertNodeState {
+export interface AlertCpuUsageState extends AlertState {
   cpuUsage: number;
 }
 
-export interface AlertDiskUsageState extends AlertNodeState {
+export interface AlertDiskUsageState extends AlertState {
   diskUsage: number;
 }
 
-export interface AlertMemoryUsageState extends AlertNodeState {
+export interface AlertMemoryUsageState extends AlertState {
   memoryUsage: number;
 }
 

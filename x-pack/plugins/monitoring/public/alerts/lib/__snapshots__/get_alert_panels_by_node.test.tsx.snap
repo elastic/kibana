@@ -92,11 +92,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_jvm_memory_usage_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_jvm_memory_usage",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_jvm_memory_usage",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.728Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.728Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_jvm_memory_usage_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.728Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -134,11 +153,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_jvm_memory_usage_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_jvm_memory_usage",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_jvm_memory_usage",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.728Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.728Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_jvm_memory_usage_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.728Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -317,11 +355,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_nodes_changed_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_nodes_changed",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_nodes_changed",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.713Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.713Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_nodes_changed_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.713Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -359,11 +416,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_disk_usage_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_disk_usage",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_disk_usage",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.713Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.713Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_disk_usage_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.713Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -401,11 +477,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_license_expiration_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_license_expiration",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_license_expiration",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.713Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.713Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_license_expiration_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.713Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -443,11 +538,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_nodes_changed_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_nodes_changed",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_nodes_changed",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.713Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.713Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_nodes_changed_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.713Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -485,11 +599,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_license_expiration_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_license_expiration",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_license_expiration",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.713Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.713Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_license_expiration_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.713Z,
+          "updatedBy": null,
         }
       }
       alertState={

@@ -9,8 +9,8 @@ import { AlertPanel } from '../panel';
 import {
   AlertMessage,
   CommonAlertStatus,
-  CommonBaseAlert,
   CommonAlertState,
+  CommonAlert,
   AlertState,
 } from '../../../common/types/alerts';
 import { PanelItem } from '../types';
@@ -26,7 +26,7 @@ export function getAlertPanelsByNode(
   const alertsByNodes: {
     [uuid: string]: {
       [alertName: string]: {
-        alert: CommonBaseAlert;
+        alert: CommonAlert;
         states: CommonAlertState[];
         count: number;
       };
@@ -36,8 +36,8 @@ export function getAlertPanelsByNode(
     [uuid: string]: CommonAlertState[];
   } = {};
 
-  for (const { states, alert } of alerts) {
-    const { type } = alert;
+  for (const { states, rawAlert } of alerts) {
+    const { alertTypeId } = rawAlert;
     for (const alertState of states.filter(
       ({ firing, state: _state }) => firing && stateFilter(_state)
     )) {
@@ -46,11 +46,11 @@ export function getAlertPanelsByNode(
       statesByNodes[state.stackProductUuid].push(alertState);
 
       alertsByNodes[state.stackProductUuid] = alertsByNodes[state.stackProductUuid] || {};
-      alertsByNodes[state.stackProductUuid][type] = alertsByNodes[
+      alertsByNodes[state.stackProductUuid][alertTypeId] = alertsByNodes[
         alertState.state.stackProductUuid
-      ][type] || { alert, states: [], count: 0 };
-      alertsByNodes[state.stackProductUuid][type].count++;
-      alertsByNodes[state.stackProductUuid][type].states.push(alertState);
+      ][alertTypeId] || { alert: rawAlert, states: [], count: 0 };
+      alertsByNodes[state.stackProductUuid][alertTypeId].count++;
+      alertsByNodes[state.stackProductUuid][alertTypeId].states.push(alertState);
     }
   }
 
@@ -95,7 +95,7 @@ export function getAlertPanelsByNode(
             name: (
               <Fragment>
                 <EuiText size="s">{getFormattedDateForAlertState(alertState)}</EuiText>
-                <EuiText size="s">{alert.label}</EuiText>
+                <EuiText size="s">{alert.name}</EuiText>
                 <EuiText size="s">{alertState.state.stackProductName}</EuiText>
               </Fragment>
             ),
@@ -116,7 +116,7 @@ export function getAlertPanelsByNode(
         for (const alertState of states) {
           accum.push({
             id: ++tertiaryPanelIndex,
-            title: alert.label,
+            title: alert.name,
             width: 400,
             content: (
               <AlertPanel alert={alert} alertState={alertState} nextStepsFilter={nextStepsFilter} />

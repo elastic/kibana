@@ -27,7 +27,9 @@ export function getAlertPanelsByCategory(
     if (inSetupMode) {
       const alertsInCategory = [];
       for (const categoryAlert of category.alerts) {
-        if (Boolean(alerts.find(({ alert }) => alert.type === categoryAlert.alertName))) {
+        if (
+          Boolean(alerts.find(({ rawAlert }) => rawAlert.alertTypeId === categoryAlert.alertName))
+        ) {
           alertsInCategory.push(categoryAlert);
         }
       }
@@ -37,7 +39,7 @@ export function getAlertPanelsByCategory(
           alerts: alertsInCategory.map(({ alertName }) => {
             const alertStatus = alertsContext.allAlerts[alertName];
             return {
-              alert: alertStatus.alert,
+              alert: alertStatus.rawAlert,
               firingStates: [],
               alertName,
             };
@@ -48,14 +50,16 @@ export function getAlertPanelsByCategory(
     } else {
       const firingAlertsInCategory = [];
       for (const { alertName } of category.alerts) {
-        const foundAlert = alerts.find(({ alert: { type } }) => alertName === type);
+        const foundAlert = alerts.find(
+          ({ rawAlert: { alertTypeId } }) => alertName === alertTypeId
+        );
         if (foundAlert && foundAlert.states.length > 0) {
           const firingStates = foundAlert.states.filter(
             (state) => state.firing && stateFilter(state.state)
           );
           if (firingStates.length > 0) {
             firingAlertsInCategory.push({
-              alert: foundAlert.alert,
+              alert: foundAlert.rawAlert,
               firingStates,
               alertName,
             });
@@ -115,7 +119,7 @@ export function getAlertPanelsByCategory(
         items: category.alerts.map(({ alertName }) => {
           const alertStatus = alertsContext.allAlerts[alertName];
           return {
-            name: <EuiText>{alertStatus.alert.label}</EuiText>,
+            name: <EuiText>{alertStatus.rawAlert.name}</EuiText>,
             panel: ++secondaryPanelIndex,
           };
         }),
@@ -128,9 +132,9 @@ export function getAlertPanelsByCategory(
         const alertStatus = alertsContext.allAlerts[alertName];
         panels.push({
           id: ++tertiaryPanelIndex,
-          title: `${alert.label}`,
+          title: `${alert.name}`,
           width: 400,
-          content: <AlertPanel alert={alertStatus.alert} nextStepsFilter={nextStepsFilter} />,
+          content: <AlertPanel alert={alertStatus.rawAlert} nextStepsFilter={nextStepsFilter} />,
         });
       }
     }
@@ -144,10 +148,10 @@ export function getAlertPanelsByCategory(
         items: category.alerts.map(({ alertName, firingStates }) => {
           const alertStatus = alertsContext.allAlerts[alertName];
           const name = inSetupMode ? (
-            <EuiText>{alertStatus.alert.label}</EuiText>
+            <EuiText>{alertStatus.rawAlert.name}</EuiText>
           ) : (
             <EuiText>
-              {alertStatus.alert.label} ({firingStates.length})
+              {alertStatus.rawAlert.name} ({firingStates.length})
             </EuiText>
           );
           return {
@@ -172,7 +176,7 @@ export function getAlertPanelsByCategory(
             name: (
               <Fragment>
                 <EuiText size="s">{getFormattedDateForAlertState(alertState)}</EuiText>
-                <EuiText size="s">{alert.label}</EuiText>
+                <EuiText size="s">{alert.name}</EuiText>
                 <EuiText size="s">{alertState.state.stackProductName}</EuiText>
               </Fragment>
             ),
@@ -185,7 +189,7 @@ export function getAlertPanelsByCategory(
 
         panels.push({
           id: ++secondaryPanelIndex,
-          title: `${alert.label}`,
+          title: `${alert.name}`,
           items,
         });
       }
@@ -200,7 +204,7 @@ export function getAlertPanelsByCategory(
         for (const state of firingStates) {
           panels.push({
             id: ++tertiaryPanelIndex2,
-            title: `${alert.label}`,
+            title: `${alert.name}`,
             width: 400,
             content: (
               <AlertPanel alert={alert} alertState={state} nextStepsFilter={nextStepsFilter} />

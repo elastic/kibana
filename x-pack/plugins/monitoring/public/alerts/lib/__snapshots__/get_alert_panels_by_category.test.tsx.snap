@@ -100,11 +100,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_jvm_memory_usage_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_jvm_memory_usage",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_jvm_memory_usage",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.731Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.731Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_jvm_memory_usage_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.731Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -142,11 +161,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_jvm_memory_usage_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_jvm_memory_usage",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_jvm_memory_usage",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.731Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.731Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_jvm_memory_usage_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.731Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -406,11 +444,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_nodes_changed_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_nodes_changed",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_nodes_changed",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.714Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.714Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_nodes_changed_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.714Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -448,11 +505,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_nodes_changed_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_nodes_changed",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_nodes_changed",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.714Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.714Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_nodes_changed_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.714Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -490,11 +566,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_disk_usage_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_disk_usage",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_disk_usage",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.714Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.714Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_disk_usage_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.714Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -532,11 +627,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_license_expiration_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_license_expiration",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_license_expiration",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.714Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.714Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_license_expiration_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.714Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -574,11 +688,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_license_expiration_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_license_expiration",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_license_expiration",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.714Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.714Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_license_expiration_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.714Z,
+          "updatedBy": null,
         }
       }
       alertState={
@@ -645,11 +778,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_jvm_memory_usage_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_jvm_memory_usage",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_jvm_memory_usage",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.711Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.711Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_jvm_memory_usage_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.711Z,
+          "updatedBy": null,
         }
       }
       nextStepsFilter={[Function]}
@@ -727,11 +879,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_nodes_changed_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_nodes_changed",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_nodes_changed",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.711Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.711Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_nodes_changed_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.711Z,
+          "updatedBy": null,
         }
       }
       nextStepsFilter={[Function]}
@@ -744,11 +915,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_disk_usage_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_disk_usage",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_disk_usage",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.711Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.711Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_disk_usage_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.711Z,
+          "updatedBy": null,
         }
       }
       nextStepsFilter={[Function]}
@@ -761,11 +951,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_license_expiration_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_license_expiration",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_license_expiration",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.711Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.711Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_license_expiration_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.711Z,
+          "updatedBy": null,
         }
       }
       nextStepsFilter={[Function]}
@@ -843,11 +1052,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_logstash_version_mismatch_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_logstash_version_mismatch",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_logstash_version_mismatch",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.711Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.711Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_logstash_version_mismatch_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.711Z,
+          "updatedBy": null,
         }
       }
       nextStepsFilter={[Function]}
@@ -860,11 +1088,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_cpu_usage_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_cpu_usage",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_cpu_usage",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.711Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.711Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_cpu_usage_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.711Z,
+          "updatedBy": null,
         }
       }
       nextStepsFilter={[Function]}
@@ -877,11 +1124,30 @@ Array [
     "content": <AlertPanel
       alert={
         Object {
-          "isLegacy": false,
-          "label": "monitoring_alert_thread_pool_write_rejections_label",
-          "paramDetails": Object {},
-          "rawAlert": Object {},
-          "type": "monitoring_alert_thread_pool_write_rejections",
+          "actions": Array [],
+          "alertTypeId": "monitoring_alert_thread_pool_write_rejections",
+          "apiKey": null,
+          "apiKeyOwner": null,
+          "consumer": "",
+          "createdAt": 2020-12-08T17:57:39.711Z,
+          "createdBy": null,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2020-12-08T17:57:39.711Z,
+            "status": "ok",
+          },
+          "id": "",
+          "muteAll": false,
+          "mutedInstanceIds": Array [],
+          "name": "monitoring_alert_thread_pool_write_rejections_label",
+          "params": Object {},
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "tags": Array [],
+          "throttle": null,
+          "updatedAt": 2020-12-08T17:57:39.711Z,
+          "updatedBy": null,
         }
       }
       nextStepsFilter={[Function]}

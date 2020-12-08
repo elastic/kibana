@@ -40,7 +40,6 @@ export class CpuUsageAlert extends BaseAlert {
     super(rawAlert, {
       id: ALERT_CPU_USAGE,
       name: ALERT_DETAILS[ALERT_CPU_USAGE].label,
-      accessorKey: 'cpuUsage',
       defaultParams: {
         threshold: 85,
         duration: '5m',
@@ -105,9 +104,14 @@ export class CpuUsageAlert extends BaseAlert {
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
+    const stat = item.meta as AlertCpuUsageNodeStats;
     const base = super.getDefaultAlertState(cluster, item);
     return {
       ...base,
+      stackProduct: ELASTICSEARCH_SYSTEM_ID,
+      stackProductUuid: stat.nodeId,
+      stackProductName: stat.nodeName || stat.nodeId,
+      cpuUsage: stat.cpuUsage,
       ui: {
         ...base.ui,
         severity: AlertSeverity.Danger,

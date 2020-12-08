@@ -18,6 +18,7 @@ import {
   ALERT_DISK_USAGE,
   ALERT_MEMORY_USAGE,
 } from '../../../common/constants';
+import { AlertExecutionStatusValues } from '../../../../alerts/common';
 
 jest.mock('../../legacy_shims', () => ({
   Legacy: {
@@ -78,14 +79,29 @@ describe('getAlertPanelsByNode', () => {
     }
 
     return {
-      exists: true,
-      enabled: true,
-      alert: {
-        type,
-        label: `${type}_label`,
-        paramDetails: {},
-        rawAlert: {} as any,
-        isLegacy: false,
+      rawAlert: {
+        alertTypeId: type,
+        name: `${type}_label`,
+        id: '',
+        enabled: true,
+        tags: [],
+        consumer: '',
+        schedule: { interval: '1m' },
+        actions: [],
+        params: {},
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        apiKey: null,
+        apiKeyOwner: null,
+        throttle: null,
+        muteAll: false,
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: AlertExecutionStatusValues[0],
+          lastExecutionDate: new Date(),
+        },
       },
       states,
     };

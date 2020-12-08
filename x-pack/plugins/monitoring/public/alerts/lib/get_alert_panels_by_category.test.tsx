@@ -20,6 +20,7 @@ import {
   ALERT_MEMORY_USAGE,
 } from '../../../common/constants';
 import { AlertsByName } from '../types';
+import { AlertExecutionStatusValues } from '../../../../alerts/common';
 
 jest.mock('../../legacy_shims', () => ({
   Legacy: {
@@ -39,15 +40,30 @@ jest.mock('./get_formatted_date_for_alert_state', () => ({
 function getAllAlerts() {
   return ALERTS.reduce((accum: AlertsByName, alertType) => {
     accum[alertType] = {
-      exists: true,
-      enabled: true,
       states: [],
-      alert: {
-        type: alertType,
-        label: `${alertType}_label`,
-        paramDetails: {},
-        rawAlert: {} as any,
-        isLegacy: false,
+      rawAlert: {
+        alertTypeId: alertType,
+        name: `${alertType}_label`,
+        id: '',
+        enabled: true,
+        tags: [],
+        consumer: '',
+        schedule: { interval: '1m' },
+        actions: [],
+        params: {},
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        apiKey: null,
+        apiKeyOwner: null,
+        throttle: null,
+        muteAll: false,
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: AlertExecutionStatusValues[0],
+          lastExecutionDate: new Date(),
+        },
       },
     };
     return accum;
@@ -104,16 +120,31 @@ describe('getAlertPanelsByCategory', () => {
     }
 
     return {
-      exists: true,
-      enabled: true,
-      alert: {
-        type,
-        label: `${type}_label`,
-        paramDetails: {},
-        rawAlert: {} as any,
-        isLegacy: false,
-      },
       states,
+      rawAlert: {
+        alertTypeId: type,
+        name: `${type}_label`,
+        id: '',
+        enabled: true,
+        tags: [],
+        consumer: '',
+        schedule: { interval: '1m' },
+        actions: [],
+        params: {},
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        apiKey: null,
+        apiKeyOwner: null,
+        throttle: null,
+        muteAll: false,
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: AlertExecutionStatusValues[0],
+          lastExecutionDate: new Date(),
+        },
+      },
     };
   }
 

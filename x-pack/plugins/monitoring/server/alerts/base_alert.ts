@@ -17,7 +17,6 @@ import { Alert, RawAlertInstance, SanitizedAlert } from '../../../alerts/common'
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
-  AlertNodeState,
   AlertCluster,
   AlertMessage,
   AlertData,
@@ -62,7 +61,6 @@ interface AlertOptions {
   defaultParams?: CommonAlertParams;
   actionVariables: Array<{ name: string; description: string }>;
   fetchClustersRange?: number;
-  accessorKey?: string;
 }
 
 type CallCluster = (
@@ -221,7 +219,7 @@ export class BaseAlert {
     if (!filterOnNodes) {
       return true;
     }
-    const alertInstanceStates = alertInstance.state?.alertStates as AlertNodeState[];
+    const alertInstanceStates = alertInstance.state?.alertStates as AlertState[];
     const nodeFilter = filters?.find((filter) => filter.nodeUuid);
     if (!filters || !filters.length || !alertInstanceStates?.length || !nodeFilter?.nodeUuid) {
       return true;
@@ -344,24 +342,18 @@ export class BaseAlert {
         .join(',');
       const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
       const instance = services.alertInstanceFactory(instanceId);
-      const newAlertStates: AlertNodeState[] = [];
-      const key = this.alertOptions.accessorKey;
+      const newAlertStates: AlertState[] = [];
       for (const node of nodes) {
         if (!node.shouldFire) {
           continue;
         }
-        const stat = node.meta as AlertNodeState;
-        const nodeState = this.getDefaultAlertState(cluster, node) as AlertNodeState;
-        if (key) {
-          nodeState[key] = stat[key];
-        }
-        nodeState.nodeId = stat.nodeId || node.nodeId!;
-        nodeState.nodeName = stat.nodeName || node.nodeName || nodeState.nodeId;
-        nodeState.ui.triggeredMS = currentUTC;
-        nodeState.ui.isFiring = true;
-        nodeState.ui.severity = node.severity;
-        nodeState.ui.message = this.getUiMessage(nodeState, node);
-        newAlertStates.push(nodeState);
+
+        const alertState = this.getDefaultAlertState(cluster, node) as AlertState;
+        alertState.ui.triggeredMS = currentUTC;
+        alertState.ui.isFiring = true;
+        alertState.ui.severity = node.severity;
+        alertState.ui.message = this.getUiMessage(alertState, node);
+        newAlertStates.push(alertState);
       }
 
       const alertInstanceState = { alertStates: newAlertStates };

@@ -3,36 +3,34 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
-import { CommonBaseAlert } from '../../common/types/alerts';
+import { CommonAlert } from '../../common/types/alerts';
 import { Legacy } from '../legacy_shims';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
-import { AlertEdit } from '../../../triggers_actions_ui/public';
 import { hideBottomBar, showBottomBar } from '../lib/setup_mode';
 import { BASE_ALERT_API_PATH } from '../../../alerts/common';
 
 interface Props {
-  alert: CommonBaseAlert;
+  alert: CommonAlert;
   compressed?: boolean;
 }
 export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   const { alert, compressed } = props;
   const [showFlyout, setShowFlyout] = React.useState(false);
-  const [isEnabled, setIsEnabled] = React.useState(alert.rawAlert.enabled);
-  const [isMuted, setIsMuted] = React.useState(alert.rawAlert.muteAll);
+  const [isEnabled, setIsEnabled] = React.useState(alert.enabled);
+  const [isMuted, setIsMuted] = React.useState(alert.muteAll);
   const [isSaving, setIsSaving] = React.useState(false);
 
-  if (!alert.rawAlert) {
-    return null;
-  }
+  // if (!alert) {
+  //   return null;
+  // }
 
   async function disableAlert() {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_disable`);
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.id}/_disable`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.disableAlert.errorTitle', {
@@ -46,7 +44,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   async function enableAlert() {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_enable`);
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.id}/_enable`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.enableAlert.errorTitle', {
@@ -60,7 +58,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   async function muteAlert() {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_mute_all`);
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.id}/_mute_all`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.muteAlert.errorTitle', {
@@ -74,7 +72,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   async function unmuteAlert() {
     setIsSaving(true);
     try {
-      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.rawAlert.id}/_unmute_all`);
+      await Legacy.shims.http.post(`${BASE_ALERT_API_PATH}/alert/${alert.id}/_unmute_all`);
     } catch (err) {
       Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.alerts.panel.ummuteAlert.errorTitle', {
@@ -86,28 +84,19 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
     setIsSaving(false);
   }
 
-  const flyoutUi = showFlyout ? (
-    <AlertsContextProvider
-      value={{
-        http: Legacy.shims.http,
-        actionTypeRegistry: Legacy.shims.actionTypeRegistry,
-        alertTypeRegistry: Legacy.shims.alertTypeRegistry,
-        toastNotifications: Legacy.shims.toastNotifications,
-        uiSettings: Legacy.shims.uiSettings,
-        docLinks: Legacy.shims.docLinks,
-        reloadAlerts: async () => {},
-        capabilities: Legacy.shims.capabilities,
-      }}
-    >
-      <AlertEdit
-        initialAlert={alert.rawAlert}
-        onClose={() => {
+  const flyoutUi = useMemo(
+    () =>
+      showFlyout &&
+      Legacy.shims.triggersActionsUi.getEditAlertFlyout({
+        initialAlert: alert,
+        onClose: () => {
           setShowFlyout(false);
           showBottomBar();
-        }}
-      />
-    </AlertsContextProvider>
-  ) : null;
+        },
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [showFlyout]
+  );
 
   return (
     <Fragment>

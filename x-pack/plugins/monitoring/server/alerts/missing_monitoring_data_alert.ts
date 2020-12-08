@@ -12,16 +12,17 @@ import {
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertNodeState,
   AlertMessageTimeToken,
   CommonAlertFilter,
   CommonAlertParams,
+  AlertMissingData,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import {
   INDEX_PATTERN,
   ALERT_MISSING_MONITORING_DATA,
   ALERT_DETAILS,
+  ELASTICSEARCH_SYSTEM_ID,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
@@ -45,7 +46,6 @@ export class MissingMonitoringDataAlert extends BaseAlert {
         limit: '1d',
       },
       throttle: '6h',
-      accessorKey: 'gapDuration',
       actionVariables: [
         {
           name: 'nodes',
@@ -85,7 +85,6 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       now,
       now - limit - LIMIT_BUFFER
     );
-    // console.log(JSON.stringify(missingData))
     return missingData.map((missing) => {
       return {
         clusterUuid: missing.clusterUuid,
@@ -102,9 +101,14 @@ export class MissingMonitoringDataAlert extends BaseAlert {
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
+    const stat = item.meta as AlertMissingData;
     const base = super.getDefaultAlertState(cluster, item);
     return {
       ...base,
+      stackProduct: ELASTICSEARCH_SYSTEM_ID,
+      stackProductUuid: stat.nodeId,
+      stackProductName: stat.nodeName || stat.nodeId,
+      gapDuration: stat.gapDuration,
       ui: {
         ...base.ui,
         severity: AlertSeverity.Danger,
@@ -154,7 +158,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
 
   protected executeActions(
     instance: AlertInstance,
-    { alertStates }: { alertStates: AlertNodeState[] },
+    { alertStates }: { alertStates: AlertState[] },
     item: AlertData | null,
     cluster: AlertCluster
   ) {

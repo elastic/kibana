@@ -24,6 +24,7 @@ import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_DISK_USAGE,
   ALERT_DETAILS,
+  ELASTICSEARCH_SYSTEM_ID,
 } from '../../common/constants';
 import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
@@ -38,7 +39,6 @@ export class DiskUsageAlert extends BaseAlert {
     super(rawAlert, {
       id: ALERT_DISK_USAGE,
       name: ALERT_DETAILS[ALERT_DISK_USAGE].label,
-      accessorKey: 'diskUsage',
       defaultParams: {
         threshold: 80,
         duration: '5m',
@@ -97,13 +97,23 @@ export class DiskUsageAlert extends BaseAlert {
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
-    const currentState = super.getDefaultAlertState(cluster, item);
-    currentState.ui.severity = AlertSeverity.Warning;
-    return currentState;
+    const stat = item.meta as AlertDiskUsageNodeStats;
+    const base = super.getDefaultAlertState(cluster, item);
+    return {
+      ...base,
+      stackProduct: ELASTICSEARCH_SYSTEM_ID,
+      stackProductUuid: stat.nodeId,
+      stackProductName: stat.nodeName || stat.nodeId,
+      diskUsage: stat.diskUsage,
+      ui: {
+        ...base.ui,
+        severity: AlertSeverity.Warning,
+      },
+    };
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const stat = item.meta as AlertDiskUsageState;
+    const stat = item.meta as AlertDiskUsageNodeStats;
     return {
       text: i18n.translate('xpack.monitoring.alerts.diskUsage.ui.firingMessage', {
         defaultMessage: `Node #start_link{nodeName}#end_link is reporting disk usage of {diskUsage}% at #absolute`,

@@ -12,14 +12,14 @@ import {
   EuiListGroupItem,
 } from '@elastic/eui';
 
-import { CommonBaseAlert, CommonAlertState, AlertMessage } from '../../common/types/alerts';
+import { CommonAlert, CommonAlertState, AlertMessage } from '../../common/types/alerts';
 import { replaceTokens } from './lib/replace_tokens';
 import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 import { AlertConfiguration } from './configuration';
 
 interface Props {
-  alert: CommonBaseAlert;
+  alert: CommonAlert;
   alertState?: CommonAlertState;
   nextStepsFilter?: (nextStep: AlertMessage) => boolean;
 }
@@ -27,7 +27,7 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
   const { alert, alertState, nextStepsFilter = () => true } = props;
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
-  if (!alert.rawAlert) {
+  if (!alert) {
     return null;
   }
 
