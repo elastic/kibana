@@ -67,4 +67,34 @@ describe('query for signal', () => {
       })
     );
   });
+
+  it('returns an inline error if write index is out of date but specified', async () => {
+    clients.appClient.getSignalsIndex.mockReturnValue('my-alias');
+    // @ts-expect-error mocking the bare minimum of our queries
+    // stub index to be write index.
+    clients.newClusterClient.asCurrentUser.indices.getAlias.mockReset().mockResolvedValueOnce({
+      body: { 'my-index': { aliases: { 'my-alias': { is_write_index: true } } } },
+    });
+
+    const request = requestMock.create({
+      method: 'post',
+      path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
+      body: getCreateSignalsMigrationSchemaMock('my-index'),
+    });
+    const response = await server.inject(request, context);
+
+    expect(response.status).toEqual(200);
+    expect(response.body.indices).toEqual([
+      {
+        error: {
+          message: 'The specified index is a write index and cannot be migrated.',
+          status_code: 400,
+        },
+        index: 'my-index',
+        migration_index: null,
+        migration_task_id: null,
+        migration_token: null,
+      },
+    ]);
+  });
 });

@@ -50,16 +50,7 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
         );
         if (nonSignalsIndices.length > 0) {
           throw new BadRequestError(
-            `The following indices are not signals indices and cannot be migrated: [${nonSignalsIndices.join()}]`
-          );
-        }
-
-        const writeIndices = indices.filter((index) =>
-          signalsIndexAliases.some((alias) => alias.index === index && alias.isWriteIndex)
-        );
-        if (writeIndices.length > 0) {
-          throw new BadRequestError(
-            `The following indices are write indices and cannot be migrated: [${writeIndices.join()}]`
+            `The following indices are not signals indices and cannot be migrated: [${nonSignalsIndices.join()}].`
           );
         }
 
@@ -68,20 +59,43 @@ export const createSignalsMigrationRoute = (router: IRouter) => {
           indices.map(async (index) => {
             const status = migrationStatuses.find(({ name }) => name === index);
             if (indexIsOutdated({ status, version: currentVersion })) {
-              const migrationDetails = await migrateSignals({
-                esClient,
-                index,
-                version: currentVersion,
-                reindexOptions,
-              });
-              const migrationToken = encodeMigrationToken(migrationDetails);
+              try {
+                const isWriteIndex = signalsIndexAliases.some(
+                  (alias) => alias.isWriteIndex && alias.index === index
+                );
+                if (isWriteIndex) {
+                  throw new BadRequestError(
+                    'The specified index is a write index and cannot be migrated.'
+                  );
+                }
 
-              return {
-                index,
-                migration_index: migrationDetails.destinationIndex,
-                migration_task_id: migrationDetails.taskId,
-                migration_token: migrationToken,
-              };
+                const migrationDetails = await migrateSignals({
+                  esClient,
+                  index,
+                  version: currentVersion,
+                  reindexOptions,
+                });
+                const migrationToken = encodeMigrationToken(migrationDetails);
+
+                return {
+                  index,
+                  migration_index: migrationDetails.destinationIndex,
+                  migration_task_id: migrationDetails.taskId,
+                  migration_token: migrationToken,
+                };
+              } catch (err) {
+                const error = transformError(err);
+                return {
+                  index,
+                  error: {
+                    message: error.message,
+                    status_code: error.statusCode,
+                  },
+                  migration_index: null,
+                  migration_task_id: null,
+                  migration_token: null,
+                };
+              }
             } else {
               return {
                 index,

@@ -197,7 +197,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body).to.eql({
           message:
-            'The following indices are not signals indices and cannot be migrated: [.siem-signals-default]',
+            'The following indices are not signals indices and cannot be migrated: [.siem-signals-default].',
           status_code: 400,
         });
       });
@@ -211,23 +211,8 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(400);
 
         expect(body).to.eql({
-          message: 'The following indices are not signals indices and cannot be migrated: [.tasks]',
-          status_code: 400,
-        });
-      });
-
-      it('rejects if a write index is specified', async () => {
-        const writeIndex = `${DEFAULT_SIGNALS_INDEX}-default-000001`;
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ index: [writeIndex, outdatedSignalsIndexName] })
-          .expect(400);
-
-        expect(body).to.eql({
           message:
-            'The following indices are write indices and cannot be migrated: [.siem-signals-default-000001]',
+            'The following indices are not signals indices and cannot be migrated: [.tasks].',
           status_code: 400,
         });
       });
@@ -241,12 +226,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body).to.eql({
           message:
-            'The following indices are not signals indices and cannot be migrated: [random-index]',
+            'The following indices are not signals indices and cannot be migrated: [random-index].',
           status_code: 400,
         });
       });
 
-      it('rejects a duplicated request as the destination index already exists', async () => {
+      it('returns an inline error on a duplicated request as the destination index already exists', async () => {
         await supertest
           .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
@@ -257,9 +242,17 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
           .send({ index: [legacySignalsIndexName] })
-          .expect(400);
+          .expect(200);
 
-        expect(body.message).to.contain('resource_already_exists_exception');
+        const [{ error, ...info }] = body.indices;
+        expect(info).to.eql({
+          index: legacySignalsIndexName,
+          migration_index: null,
+          migration_task_id: null,
+          migration_token: null,
+        });
+        expect(error.status_code).to.eql(400);
+        expect(error.message).to.contain('resource_already_exists_exception');
       });
 
       it('rejects the request if the user does not have sufficient privileges', async () => {
@@ -384,7 +377,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(statusCode).to.eql(404);
       });
 
-      it('can be invoked multiple times without ill effect', async () => {
+      it('subsequent attempts at finalization are 404s', async () => {
         const [migratingIndex] = migratingIndices;
 
         await waitFor(async () => {
@@ -403,9 +396,10 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
           .set('kbn-xsrf', 'true')
           .send({ migration_token: migratingIndex.migration_token })
-          .expect(200);
+          .expect(404);
 
-        expect(body.completed).to.eql(true);
+        expect(body.status_code).to.eql(404);
+        expect(body.message).to.contain('resource_not_found_exception');
 
         const { body: bodyAfter } = await supertest
           .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
