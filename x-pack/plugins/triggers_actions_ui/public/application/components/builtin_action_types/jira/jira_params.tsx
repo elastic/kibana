@@ -55,6 +55,21 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     [actionParams.subActionParams]
   );
 
+  useEffect(() => {
+    return () => {
+      // clear subActionParams when connector is changed
+      editAction(
+        'subActionParams',
+        {
+          incident: {},
+          comments: [],
+        },
+        index
+      );
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionConnector]);
+
   const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
     http,
     toastNotifications: toasts,
@@ -105,10 +120,12 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
       if (!incident.priority && priorities.length > 0) {
         editSubActionProperty('priority', priorities[0].id ?? '');
       }
-      return priorities.map((p: { id: string; name: string }) => ({
-        value: p.name,
-        text: p.name,
-      }));
+      return priorities.map((p: { id: string; name: string }) => {
+        return {
+          value: p.name,
+          text: p.name,
+        };
+      });
     }
     return [];
   }, [editSubActionProperty, fields, incident.issueType, incident.priority]);
@@ -123,18 +140,19 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
       editAction('subAction', 'pushToService', index);
     }
     return () => {
-      editAction(
-        'subActionParams',
-        {
-          incident: {},
-          comments: [],
-        },
-        index
-      );
+      if (actionParams.subActionParams != null) {
+        editAction(
+          'subActionParams',
+          {
+            incident: {},
+            comments: [],
+          },
+          index
+        );
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   return (
     <Fragment>
       <>

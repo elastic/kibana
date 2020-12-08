@@ -45,6 +45,21 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       },
     [actionParams.subActionParams]
   );
+
+  useEffect(() => {
+    return () => {
+      // clear subActionParams when connector is changed
+      editAction(
+        'subActionParams',
+        {
+          incident: {},
+          comments: [],
+        },
+        index
+      );
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionConnector]);
   const {
     isLoading: isLoadingIncidentTypes,
     incidentTypes: allIncidentTypes,
@@ -127,14 +142,16 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       editAction('subAction', 'pushToService', index);
     }
     return () => {
-      editAction(
-        'subActionParams',
-        {
-          incident: {},
-          comments: [],
-        },
-        index
-      );
+      if (actionParams.subActionParams != null) {
+        editAction(
+          'subActionParams',
+          {
+            incident: {},
+            comments: [],
+          },
+          index
+        );
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
