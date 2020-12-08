@@ -216,7 +216,7 @@ This page has been deleted. Please see link:https://www.elastic.co/guide/en/kiba
 [[createvis]]
 === Create Visualization
 
-This page has been deleted. Please see <<Dashboard>>.
+This page has been deleted. Please see <<dashboard>>.
 
 [float]
 [[data-table]]
