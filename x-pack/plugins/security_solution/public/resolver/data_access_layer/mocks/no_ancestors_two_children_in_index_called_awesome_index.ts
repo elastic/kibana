@@ -108,9 +108,10 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
 
       async event({
         nodeID,
+        eventID,
         eventCategory,
         eventTimestamp,
-        eventID,
+        winlogRecordID,
         timeRange,
         indexPatterns,
       }: {
@@ -118,6 +119,7 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         eventCategory: string[];
         eventTimestamp: string;
         eventID?: string | number;
+        winlogRecordID: string;
         timeRange: TimeRange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {

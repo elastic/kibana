@@ -119,9 +119,10 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
        */
       async event({
         nodeID,
+        eventID,
         eventCategory,
         eventTimestamp,
-        eventID,
+        winlogRecordID,
         timeRange,
         indexPatterns,
       }: {
@@ -129,6 +130,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
         eventCategory: string[];
         eventTimestamp: string;
         eventID?: string | number;
+        winlogRecordID: string;
         timeRange: TimeRange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {

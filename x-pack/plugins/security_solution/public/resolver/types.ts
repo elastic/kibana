@@ -748,11 +748,13 @@ export interface DataAccessLayer {
     eventID,
     timeRange,
     indexPatterns,
+    winlogRecordID,
   }: {
     nodeID: string;
     eventCategory: string[];
     eventTimestamp: string;
     eventID?: string | number;
+    winlogRecordID: string;
     timeRange: TimeRange;
     indexPatterns: string[];
   }) => Promise<SafeResolverEvent | null>;
@@ -968,5 +970,12 @@ export type PanelViewAndParameters =
          * `event['@timestamp']` that identifies the given timestamp for an event
          */
         eventTimestamp: string;
+
+        /**
+         * `winlog.record_id` an ID that unique identifies a winlogbeat sysmon event. This is not a globally unique field
+         * and must be coupled with nodeID, category, and timestamp. Once we have runtime fields support we should remove
+         * this.
+         */
+        winlogRecordID: string;
       };
     };

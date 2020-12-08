@@ -783,7 +783,17 @@ export type ECSField<T> = T | null | undefined | Array<T | null>;
  * A more conservative version of `ResolverEvent` that treats fields as optional and use `ECSField` to type all ECS fields.
  * Prefer this over `ResolverEvent`.
  */
-export type SafeResolverEvent = SafeEndpointEvent | SafeLegacyEndpointEvent;
+export type SafeResolverEvent = SafeEndpointEvent | SafeLegacyEndpointEvent | WinlogEvent;
+
+/**
+ * A type for describing a winlog event until we can leverage runtime fields.
+ */
+export type WinlogEvent = Partial<{
+  winlog: Partial<{
+    record_id: ECSField<string>;
+  }>;
+}> &
+  SafeEndpointEvent;
 
 /**
  * Safer version of ResolverEvent. Please use this going forward.

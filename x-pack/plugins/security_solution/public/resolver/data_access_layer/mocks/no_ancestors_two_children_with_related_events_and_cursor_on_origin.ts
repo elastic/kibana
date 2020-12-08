@@ -146,9 +146,10 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
        */
       async event({
         nodeID,
+        eventID,
         eventCategory,
         eventTimestamp,
-        eventID,
+        winlogRecordID,
         timeRange,
         indexPatterns,
       }: {
@@ -156,6 +157,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
         eventCategory: string[];
         eventTimestamp: string;
         eventID?: string | number;
+        winlogRecordID: string;
         timeRange: TimeRange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {
