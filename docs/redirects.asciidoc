@@ -198,7 +198,7 @@ This page has moved. Refer to <<url-template-variables>>.
 [[time-series-visual-builder]]
 === Time Series Visual Builder
 
-This page was deleted. Please see <<Dashboard>>.
+This page was deleted. Please see <<dashboard>>.
 
 [float]
 [[development-functional-tests]]
