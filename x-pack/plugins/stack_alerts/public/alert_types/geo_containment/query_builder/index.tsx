@@ -8,10 +8,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { EuiCallOut, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  AlertTypeParamsExpressionProps,
-  AlertsContextValue,
-} from '../../../../../triggers_actions_ui/public';
+import { AlertTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public';
 import { GeoContainmentAlertParams } from '../types';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
@@ -52,8 +49,8 @@ function validateQuery(query: Query) {
 }
 
 export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<GeoContainmentAlertParams, AlertsContextValue>
-> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, alertsContext }) => {
+  AlertTypeParamsExpressionProps<GeoContainmentAlertParams>
+> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, data }) => {
   const {
     index,
     indexId,
@@ -137,15 +134,15 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
         boundaryGeoField: boundaryGeoField ?? DEFAULT_VALUES.BOUNDARY_GEO_FIELD,
         boundaryNameField: boundaryNameField ?? DEFAULT_VALUES.BOUNDARY_NAME_FIELD,
       });
-      if (!alertsContext.dataIndexPatterns) {
+      if (!data.indexPatterns) {
         return;
       }
       if (indexId) {
-        const _indexPattern = await alertsContext.dataIndexPatterns.get(indexId);
+        const _indexPattern = await data.indexPatterns.get(indexId);
         setIndexPattern(_indexPattern);
       }
       if (boundaryIndexId) {
-        const _boundaryIndexPattern = await alertsContext.dataIndexPatterns.get(boundaryIndexId);
+        const _boundaryIndexPattern = await data.indexPatterns.get(boundaryIndexId);
         setBoundaryIndexPattern(_boundaryIndexPattern);
       }
     };
@@ -175,7 +172,6 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
       <EntityIndexExpression
         dateField={dateField}
         geoField={geoField}
-        alertsContext={alertsContext}
         errors={errors}
         setAlertParamsDate={(_date) => setAlertParams('dateField', _date)}
         setAlertParamsGeoField={(_geoField) => setAlertParams('geoField', _geoField)}
@@ -183,6 +179,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
         setIndexPattern={setIndexPattern}
         indexPattern={indexPattern}
         isInvalid={!indexId || !dateField || !geoField}
+        data={data}
       />
       <EntityByExpression
         errors={errors}
@@ -220,7 +217,6 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
       <EuiSpacer size="s" />
       <BoundaryIndexExpression
         alertParams={alertParams}
-        alertsContext={alertsContext}
         errors={errors}
         boundaryIndexPattern={boundaryIndexPattern}
         setBoundaryIndexPattern={setBoundaryIndexPattern}
@@ -233,6 +229,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
             : setAlertParams('boundaryNameField', '')
         }
         boundaryNameField={boundaryNameField}
+        data={data}
       />
       <EuiSpacer size="s" />
       <EuiFlexItem>
