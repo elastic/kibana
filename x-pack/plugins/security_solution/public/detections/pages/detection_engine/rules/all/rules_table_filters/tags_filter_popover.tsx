@@ -25,7 +25,6 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { union } from 'lodash';
 import * as i18n from '../../translations';
 import { toggleSelectedGroup } from '../../../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
 import { caseInsensitiveSort } from '../helpers';
@@ -66,10 +65,10 @@ const TagsFilterPopoverComponent = ({
   onSelectedTagsChanged,
   currentFilterTags,
 }: TagsFilterPopoverProps) => {
-  const sortedTags = useMemo(() => caseInsensitiveSort(union(tags, currentFilterTags)), [
-    tags,
-    currentFilterTags,
-  ]);
+  const sortedTags = useMemo(
+    () => caseInsensitiveSort(Array.from(new Set([...tags, ...currentFilterTags]))),
+    [tags, currentFilterTags]
+  );
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [filterTags, setFilterTags] = useState(sortedTags);
