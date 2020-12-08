@@ -40,12 +40,13 @@ import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
 import { registerBackgroundSessionsTask, scheduleBackgroundSessionsTasks } from './monitoring_task';
-
-const INMEM_MAX_SESSIONS = 10000;
-const DEFAULT_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
-export const INMEM_TRACKING_INTERVAL = 10 * 1000;
-export const INMEM_TRACKING_TIMEOUT_SEC = 60;
-export const MAX_UPDATE_RETRIES = 3;
+import {
+  DEFAULT_EXPIRATION,
+  INMEM_MAX_SESSIONS,
+  INMEM_TRACKING_INTERVAL,
+  INMEM_TRACKING_TIMEOUT_SEC,
+  MAX_UPDATE_RETRIES,
+} from './constants';
 
 export interface BackgroundSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;

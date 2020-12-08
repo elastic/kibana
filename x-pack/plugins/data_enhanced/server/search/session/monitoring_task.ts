@@ -9,7 +9,7 @@ import {
   TaskManagerStartContract,
   RunContext,
 } from '../../../../task_manager/server';
-import { checkBackgoundSessions } from './check_sessions';
+import { checkRunningSessions } from './check_running_sessions';
 import { CoreSetup, SavedObjectsClient, Logger } from '../../../../../../src/core/server';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 
@@ -26,10 +26,10 @@ function backgroundSessionRunner(core: CoreSetup, logger: Logger) {
           BACKGROUND_SESSION_TYPE,
         ]);
         const internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
-        await checkBackgoundSessions(
+        await checkRunningSessions(
           internalSavedObjectsClient,
-          logger,
-          coreStart.elasticsearch.client.asInternalUser
+          coreStart.elasticsearch.client.asInternalUser,
+          logger
         );
 
         return {

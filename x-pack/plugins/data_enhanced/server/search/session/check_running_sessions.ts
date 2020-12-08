@@ -4,63 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
 import {
-  SavedObjectsClient,
   Logger,
   ElasticsearchClient,
   SavedObjectsFindResult,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import { BackgroundSessionStatus, BackgroundSessionSavedObjectAttributes } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
-import { isAsyncSearchStatusResponse } from '../types';
+import { getSearchStatus } from './get_search_status';
+import { getSessionStatus } from './get_session_status';
 
-export enum SearchStatus {
-  IN_PROGRESS = 'in_progress',
-  ERROR = 'error',
-  COMPLETE = 'complete',
-}
-
-async function checkAsyncId(client: ElasticsearchClient, logger: Logger, asyncId: string) {
-  try {
-    const path = encodeURI(`/_async_search/status/${asyncId}`);
-    const response: ApiResponse<any> = await client.transport.request({
-      path,
-      method: 'GET',
-    });
-    if (isAsyncSearchStatusResponse(response)) {
-      if ((response.is_partial && !response.is_running) || response.completion_status > 200) {
-        return SearchStatus.ERROR;
-      } else if (response.is_partial && !response.is_running) {
-        return SearchStatus.COMPLETE;
-      } else {
-        return SearchStatus.IN_PROGRESS;
-      }
-    } else {
-      return SearchStatus.ERROR;
-    }
-  } catch (e) {
-    return SearchStatus.ERROR;
-  }
-}
-
-async function getSessionStatus(
-  searchStatuses: SearchStatus[]
-): Promise<BackgroundSessionStatus | undefined> {
-  if (searchStatuses.some((item) => item === SearchStatus.ERROR)) {
-    return BackgroundSessionStatus.ERROR;
-  } else if (searchStatuses.every((item) => item === SearchStatus.COMPLETE)) {
-    return BackgroundSessionStatus.COMPLETE;
-  } else {
-    // Still running
-    return undefined;
-  }
-}
-
-export async function checkBackgoundSessions(
-  savedObjectsClient: SavedObjectsClient,
-  logger: Logger,
-  client: ElasticsearchClient
+export async function checkRunningSessions(
+  savedObjectsClient: SavedObjectsClientContract,
+  client: ElasticsearchClient,
+  logger: Logger
 ): Promise<void> {
   try {
     const runningBackgroundSearchesResponse = await savedObjectsClient.find<BackgroundSessionSavedObjectAttributes>(
@@ -85,12 +43,12 @@ export async function checkBackgoundSessions(
         const searchIds = Object.values(session.attributes.idMapping);
         const searchStatuses = await Promise.all(
           searchIds.map(async (searchId: string) => {
-            return await checkAsyncId(client, logger, searchId);
+            return await getSearchStatus(client, searchId);
           })
         );
 
-        const sessionStatus = await getSessionStatus(searchStatuses);
-        if (sessionStatus) {
+        const sessionStatus = getSessionStatus(searchStatuses);
+        if (sessionStatus !== BackgroundSessionStatus.IN_PROGRESS) {
           session.attributes.status = sessionStatus;
           updatedSessions.push(session);
         }
@@ -98,7 +56,7 @@ export async function checkBackgoundSessions(
     );
 
     if (updatedSessions.length) {
-      // If there's an error, we'll try again in the next iteration
+      // If there's an error, we'll try again in the next iteration, so there's no need to check the output.
       const updatedResponse = await savedObjectsClient.bulkUpdate<BackgroundSessionSavedObjectAttributes>(
         updatedSessions
       );
@@ -106,6 +64,5 @@ export async function checkBackgoundSessions(
     }
   } catch (err) {
     logger.error(err);
-    return;
   }
 }

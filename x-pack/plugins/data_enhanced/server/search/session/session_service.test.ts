@@ -13,14 +13,14 @@ import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import {
   BackgroundSessionDependencies,
   BackgroundSessionService,
-  INMEM_TRACKING_INTERVAL,
-  MAX_UPDATE_RETRIES,
   SessionInfo,
 } from './session_service';
 import { createRequestHash } from './utils';
 import moment from 'moment';
 import { coreMock } from 'src/core/server/mocks';
 import { ConfigSchema } from '../../../config';
+import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { INMEM_TRACKING_INTERVAL, MAX_UPDATE_RETRIES } from './constants';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -406,7 +406,11 @@ describe('BackgroundSessionService', () => {
           },
         },
       });
-      await service.start(coreMock.createStart(), config$);
+      const mockTaskManager = taskManagerMock.createStart();
+      await service.start(coreMock.createStart(), {
+        config$,
+        taskManager: mockTaskManager,
+      });
       await flushPromises();
     });
 
