@@ -57,7 +57,7 @@ export const deletePhaseToES = (
     esPhase.min_age = `${phase.selectedMinimumAge}${phase.selectedMinimumAgeUnits}`;
   }
 
-  esPhase.actions = esPhase.actions ? { ...esPhase.actions, delete: {} } : { delete: {} };
+  esPhase.actions = esPhase.actions ? {  delete: {}, ...esPhase.actions } : { delete: {} };
 
   if (phase.waitForSnapshotPolicy) {
     esPhase.actions.wait_for_snapshot = {
