@@ -27,11 +27,7 @@ import {
   IP_FIELD_TYPE,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
-import {
-  DESTINATION_IP_FIELD_NAME,
-  Ip,
-  SOURCE_IP_FIELD_NAME,
-} from '../../../network/components/ip';
+import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
 import { LineClamp } from '../line_clamp';
 import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
 
@@ -68,17 +64,6 @@ const getDescription = ({
   fieldType?: string;
   linkValue?: string;
 }) => {
-  if (fieldType === IP_FIELD_TYPE) {
-    return (
-      <Ip
-        contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}`}
-        eventId={eventId}
-        fieldName={fieldName}
-        value={value}
-      />
-    );
-  }
-
   if (fieldName === 'signal.status') {
     return (
       <EuiBadge>
