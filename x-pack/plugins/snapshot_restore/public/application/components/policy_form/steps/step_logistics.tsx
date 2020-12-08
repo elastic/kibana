@@ -488,10 +488,6 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               cronExpression: expression,
               frequency,
               fieldToPreferredValueMap: newFieldToPreferredValueMap,
-            }: {
-              cronExpression: string;
-              frequency: string;
-              fieldToPreferredValueMap: any;
             }) => {
               setSimpleCron({
                 expression,
