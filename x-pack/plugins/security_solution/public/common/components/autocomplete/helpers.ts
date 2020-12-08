@@ -161,7 +161,7 @@ export const filterFieldToList = (lists: ListSchema[], field?: IFieldType) => {
  * @param type The type to match against the esType
  * @param esType The ES type to match with
  */
-export const typeMatch = (type: Type, esType: string) => {
+export const typeMatch = (type: Type, esType: string): boolean => {
   return (
     type === esType ||
     (type === 'ip_range' && esType === 'ip') ||
