@@ -113,3 +113,54 @@ export const CONFIG_COMPLETED_CONFIGURE_NEW_BUTTON = i18n.translate(
     defaultMessage: 'Configure a new content source',
   }
 );
+
+export const CONFIG_INTRO_ALT_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.alt.text',
+  {
+    defaultMessage: 'Connection illustration',
+  }
+);
+
+export const CONFIG_INTRO_STEPS_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.steps.text',
+  {
+    defaultMessage: 'Quick setup, then all of your documents will be searchable.',
+  }
+);
+
+export const CONFIG_INTRO_STEP1_HEADING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.step1.heading',
+  {
+    defaultMessage: 'Step 1',
+  }
+);
+
+export const CONFIG_INTRO_STEP1_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.step1.text',
+  {
+    defaultMessage:
+      'Setup a secure OAuth application through the content source that you or your team will use to connect and synchronize content. You only have to do this once per content source.',
+  }
+);
+
+export const CONFIG_INTRO_STEP2_HEADING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.step2.heading',
+  {
+    defaultMessage: 'Step 2',
+  }
+);
+
+export const CONFIG_INTRO_STEP2_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.step2.title',
+  {
+    defaultMessage: 'Connect the content source',
+  }
+);
+
+export const CONFIG_INTRO_STEP2_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.step2.text',
+  {
+    defaultMessage:
+      'Use the new OAuth application to connect any number of instances of the content source to Workplace Search.',
+  }
+);
