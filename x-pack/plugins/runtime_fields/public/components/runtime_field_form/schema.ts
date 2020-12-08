@@ -45,10 +45,6 @@ export const schema: FormSchema<RuntimeField> = {
       label: i18n.translate('xpack.runtimeFields.form.defineFieldLabel', {
         defaultMessage: 'Define field (optional)',
       }),
-      helpText: i18n.translate('xpack.runtimeFields.form.source.scriptFieldHelpText', {
-        defaultMessage:
-          'Runtime fields without a script retrieve values from a field with the same name in _source. If a field with the same name doesn’t exist, no values are returned when a search request includes the runtime field.',
-      }),
     },
   },
 };
