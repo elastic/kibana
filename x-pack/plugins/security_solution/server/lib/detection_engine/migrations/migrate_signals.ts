@@ -12,7 +12,7 @@ import { MigrationDetails } from './types';
 /**
  * Migrates signals for a given concrete index. Signals are reindexed into a
  * new index in order to receive new fields. Migrated signals have a
- * `signal._meta.schema_version` field representing the mappings version at the time of the migration.
+ * `signal._meta.version` field representing the mappings version at the time of the migration.
  *
  * @param esClient An {@link ElasticsearchClient}
  * @param index name of the concrete signals index to be migrated
