@@ -94,8 +94,23 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
         scriptFields.indexOf(dtr.over_field_name!) === -1;
     }
 
-    // We don't currently support nested terms aggregation when model plot is not enabled
-    if (getDatafeedAggregationsErrorMessage(job) !== undefined) return false;
+    // We cannot plot the source data if there are nested terms aggregation
+    const hasDatafeed =
+      typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+    if (hasDatafeed) {
+      const aggs = getDatafeedAggregations(job.datafeed_config);
+      if (aggs !== undefined) {
+        const aggBucketsName = getAggregationBucketsName(aggs);
+        if (aggBucketsName !== undefined) {
+          // if datafeed has any nested terms aggregations at all
+          const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
+          const termsField = findAggField(aggregations, 'terms', true);
+          if (termsField !== undefined && Object.keys(termsField).length > 1) {
+            return false;
+          }
+        }
+      }
+    }
   }
 
   return isSourceDataChartable;
