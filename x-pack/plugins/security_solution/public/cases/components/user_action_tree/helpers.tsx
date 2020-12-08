@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps } from '@elastic/eui';
-import { History } from 'history';
 
 import {
   CaseFullExternalService,
@@ -194,7 +193,6 @@ export const getAlertComment = ({
 }: {
   action: CaseUserActions;
   alert: Alert | undefined;
-  history: History;
   onShowAlertDetails: (alertId: string, index: string) => void;
 }): EuiCommentProps => {
   return {

@@ -7,7 +7,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { isEmpty, noop } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -464,7 +464,6 @@ export const CaseComponent = React.memo<CaseProps>(
           browserFields={browserFields}
           docValueFields={docValueFields}
           timelineId={TimelineId.active}
-          toggleColumn={noop}
         />
         <SpyRoute state={spyState} pageName={SecurityPageName.case} />
       </>
