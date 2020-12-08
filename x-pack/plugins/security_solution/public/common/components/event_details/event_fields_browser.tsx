@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy } from 'lodash';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { getOr } from 'lodash/fp';
+import { getOr, sortBy } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import { rgba } from 'polished';
 import styled from 'styled-components';
@@ -78,7 +77,7 @@ export const EventFieldsBrowser = React.memo<Props>(
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const items = useMemo(
       () =>
-        sortBy(data, ['field']).map((item) => ({
+        sortBy(['field'], data).map((item) => ({
           ...item,
           ...fieldsByName[item.field],
           valuesConcatenated: item.values != null ? item.values.join() : '',

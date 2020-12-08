@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { find } from 'lodash/fp';
 
+import styled from 'styled-components';
 import { TimelineExpandedEvent } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
@@ -41,37 +42,32 @@ interface Props {
   timelineId: string;
 }
 
+interface ExpandableEventTitleProps {
+  isAlert: boolean;
+  loading: boolean;
+  timelineId: string;
+  onEventDetailsClose?: OnEventDetailsClose;
+}
+
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  flex: 0;
+`;
+
 export const ExpandableEventTitle = React.memo(
-  ({
-    isAlert,
-    loading,
-    timelineId,
-    onEventDetailsClose,
-  }: {
-    isAlert: boolean;
-    loading: boolean;
-    timelineId: string;
-    onEventDetailsClose?: OnEventDetailsClose;
-  }) => {
+  ({ isAlert, loading, timelineId, onEventDetailsClose }: ExpandableEventTitleProps) => {
     return (
-      <div>
-        <EuiFlexGroup justifyContent="spaceBetween" wrap={true}>
+      <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={true}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            {!loading ? <h4>{isAlert ? i18n.ALERT_DETAILS : i18n.EVENT_DETAILS}</h4> : <></>}
+          </EuiTitle>
+        </EuiFlexItem>
+        {onEventDetailsClose && (
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              {!loading ? <h4>{isAlert ? i18n.ALERT_DETAILS : i18n.EVENT_DETAILS}</h4> : <></>}
-            </EuiTitle>
+            <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={onEventDetailsClose} />
           </EuiFlexItem>
-          {onEventDetailsClose && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                aria-label={i18n.CLOSE}
-                onClick={onEventDetailsClose}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </div>
+        )}
+      </StyledEuiFlexGroup>
     );
   }
 );

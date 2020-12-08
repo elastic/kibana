@@ -46,7 +46,7 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   }
 `;
 
-export const EventDetailsComponent: React.FC<Props> = ({
+const EventDetailsComponent: React.FC<Props> = ({
   browserFields,
   data,
   id,
