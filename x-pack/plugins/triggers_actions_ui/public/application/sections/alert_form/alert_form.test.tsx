@@ -82,6 +82,7 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
+          minimumLicenseRequired: 'basic',
           recoveryActionGroup: RecoveredActionGroup,
           producer: ALERTS_FEATURE_ID,
           authorizedConsumers: {
@@ -204,6 +205,7 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
+          minimumLicenseRequired: 'basic',
           recoveryActionGroup: RecoveredActionGroup,
           producer: ALERTS_FEATURE_ID,
           authorizedConsumers: {
@@ -221,6 +223,7 @@ describe('alert_form', () => {
             },
           ],
           defaultActionGroupId: 'testActionGroup',
+          minimumLicenseRequired: 'basic',
           recoveryActionGroup: RecoveredActionGroup,
           producer: 'test',
           authorizedConsumers: {

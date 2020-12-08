@@ -28,15 +28,18 @@ import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
+import { NormalizedAlertType } from '../alert_type_registry';
 const alertType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
   defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
 };
+
 let fakeTimer: sinon.SinonFakeTimers;
 
 describe('Task Runner', () => {
@@ -140,7 +143,7 @@ describe('Task Runner', () => {
 
   test('successfully executes the task', async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: {
@@ -226,7 +229,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -361,7 +364,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -528,7 +531,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: {
@@ -611,7 +614,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertTypeWithCustomRecovery,
+      alertTypeWithCustomRecovery as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: {
@@ -702,7 +705,7 @@ describe('Task Runner', () => {
     );
     const date = new Date().toISOString();
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: {
@@ -831,7 +834,7 @@ describe('Task Runner', () => {
             param1: schema.string(),
           }),
         },
-      },
+      } as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -859,7 +862,7 @@ describe('Task Runner', () => {
 
   test('uses API key when provided', async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -892,7 +895,7 @@ describe('Task Runner', () => {
 
   test(`doesn't use API key when not provided`, async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -922,7 +925,7 @@ describe('Task Runner', () => {
 
   test('rescheduled the Alert if the schedule has update during a task run', async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -963,7 +966,7 @@ describe('Task Runner', () => {
     );
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1030,7 +1033,7 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1089,7 +1092,7 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1156,7 +1159,7 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1226,7 +1229,7 @@ describe('Task Runner', () => {
     const legacyTaskInstance = omit(mockedTaskInstance, 'schedule');
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       legacyTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -1264,7 +1267,7 @@ describe('Task Runner', () => {
     );
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       {
         ...mockedTaskInstance,
         state: originalAlertSate,
@@ -1295,7 +1298,7 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      alertType as NormalizedAlertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );

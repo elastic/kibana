@@ -20,6 +20,7 @@ const alertType: AlertType = {
     { id: 'other-group', name: 'Other Group' },
   ],
   defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',

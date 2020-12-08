@@ -22,6 +22,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
             id: 'myAppAlertType',
             name: 'myAppAlertType',
             producer: 'myApp',
+            minimumLicenseRequired: 'basic',
             authorizedConsumers: {
               myApp: { read: true, all: true },
             },
@@ -42,6 +43,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            minimumLicenseRequired: 'basic',
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
@@ -68,6 +70,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            minimumLicenseRequired: 'basic',
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
@@ -82,6 +85,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            minimumLicenseRequired: 'basic',
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myOtherAppAlertType',
             name: 'myOtherAppAlertType',
@@ -96,6 +100,7 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            minimumLicenseRequired: 'basic',
             recoveryActionGroup: RecoveredActionGroup,
             id: 'mySecondAppAlertType',
             name: 'mySecondAppAlertType',

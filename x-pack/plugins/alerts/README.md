@@ -172,6 +172,7 @@ server.newPlatform.setup.plugins.alerts.registerType({
 			{ name: 'cpuUsage', description: 'CPU usage' },
 		],
 	},
+	minimumLicenseRequired: 'basic',
 	async executor({
     alertId,
 		startedAt,
@@ -239,6 +240,7 @@ server.newPlatform.setup.plugins.alerts.registerType({
 		},
 	],
 	defaultActionGroupId: 'default',
+	minimumLicenseRequired: 'basic',
 	actionVariables: {
 		context: [
 			{ name: 'server', description: 'the server' },

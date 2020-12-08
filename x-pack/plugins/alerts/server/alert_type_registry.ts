@@ -146,6 +146,7 @@ export class AlertTypeRegistry {
             defaultActionGroupId,
             actionVariables,
             producer,
+            minimumLicenseRequired,
           },
         ]: [string, NormalizedAlertType]) => ({
           id,
@@ -155,6 +156,7 @@ export class AlertTypeRegistry {
           defaultActionGroupId,
           actionVariables,
           producer,
+          minimumLicenseRequired,
         })
       )
     );

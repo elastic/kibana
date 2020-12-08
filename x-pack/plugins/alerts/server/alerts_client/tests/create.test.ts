@@ -759,6 +759,7 @@ describe('create()', () => {
           threshold: schema.number({ min: 0, max: 1 }),
         }),
       },
+      minimumLicenseRequired: 'basic',
       async executor() {},
       producer: 'alerts',
     });

@@ -59,6 +59,7 @@ describe('find()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       id: 'myType',
       name: 'myType',
       producer: 'myApp',
@@ -115,6 +116,7 @@ describe('find()', () => {
           actionGroups: [{ id: 'default', name: 'Default' }],
           recoveryActionGroup: RecoveredActionGroup,
           defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },

@@ -44,6 +44,7 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
@@ -74,6 +75,7 @@ describe('listAlertTypesRoute', () => {
             "authorizedConsumers": Object {},
             "defaultActionGroupId": "default",
             "id": "1",
+            "minimumLicenseRequired": "basic",
             "name": "name",
             "producer": "test",
             "recoveryActionGroup": Object {
@@ -113,6 +115,7 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
@@ -163,6 +166,7 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
