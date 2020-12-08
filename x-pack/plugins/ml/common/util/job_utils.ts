@@ -94,7 +94,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
         scriptFields.indexOf(dtr.over_field_name!) === -1;
     }
 
-    // We cannot plot the source data if there are nested terms aggregation
+    // We cannot plot the source data for some specific aggregation configurations
     const hasDatafeed =
       typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
     if (hasDatafeed) {
@@ -102,10 +102,10 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       if (aggs !== undefined) {
         const aggBucketsName = getAggregationBucketsName(aggs);
         if (aggBucketsName !== undefined) {
-          // if datafeed has any nested terms aggregations at all
+          // if fieldName is a aggregated field under nested terms using bucket_script
           const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
-          const termsField = findAggField(aggregations, 'terms', true);
-          if (termsField !== undefined && Object.keys(termsField).length > 1) {
+          const foundField = findAggField(aggregations, dtr.field_name, false);
+          if (foundField?.bucket_script !== undefined) {
             return false;
           }
         }
@@ -146,41 +146,9 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
   return isModelPlotChartable;
 }
 
-// Returns a reason to indicate why the datafeed aggregation configuration is not supported
-// if the result is undefined, that means the config is supported
-export function getDatafeedAggregationsErrorMessage(job: CombinedJob): string | undefined {
-  const hasDatafeed =
-    typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
-  if (hasDatafeed) {
-    const aggs = getDatafeedAggregations(job.datafeed_config);
-    if (aggs !== undefined) {
-      const aggBucketsName = getAggregationBucketsName(aggs);
-      if (aggBucketsName !== undefined) {
-        // if datafeed has any nested terms aggregations at all
-        const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
-        const termsField = findAggField(aggregations, 'terms', true);
-        if (
-          termsField !== undefined &&
-          Object.keys(termsField).length > 1 &&
-          job.model_plot_config?.enabled !== true
-        ) {
-          return i18n.translate('xpack.ml.timeSeriesJob.nestedTermsAggregationsMessage', {
-            defaultMessage:
-              'there are nested terms aggregations in the datafeed and model plot is disabled',
-          });
-        }
-      }
-    }
-  }
-  return;
-}
-
 // Returns a reason to indicate why the job configuration is not supported
 // if the result is undefined, that means the single metric job should be viewable
 export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
-  const datafeedAggregationError = getDatafeedAggregationsErrorMessage(job);
-  if (datafeedAggregationError !== undefined) return datafeedAggregationError;
-
   // only allow jobs with at least one detector whose function corresponds to
   // an ES aggregation which can be viewed in the single metric view and which
   // doesn't use a scripted field which can be very difficult or impossible to

@@ -22,7 +22,6 @@ import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
-  getDatafeedAggregationsErrorMessage,
 } from '../../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
@@ -444,13 +443,6 @@ function processRecordsForDisplay(anomalyRecords) {
     // if we already know this job has datafeed aggregations we cannot support
     // no need to do more checks
     if (jobsErrorMessage[record.job_id] !== undefined) {
-      return;
-    }
-
-    // check to see if datafeed has nested term aggregations with model plot disabled
-    const datafeedAggregationErrorMsg = getDatafeedAggregationsErrorMessage(job);
-    if (datafeedAggregationErrorMsg !== undefined) {
-      jobsErrorMessage[record.job_id] = datafeedAggregationErrorMsg;
       return;
     }
 

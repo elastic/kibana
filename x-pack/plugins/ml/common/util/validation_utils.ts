@@ -34,9 +34,10 @@ export function isValidJson(json: string) {
 
 export function findAggField(
   aggs: Record<string, any> | { [key: string]: any },
-  fieldName: string,
+  fieldName: string | undefined,
   returnParent: boolean = false
 ): any {
+  if (fieldName === undefined) return;
   let value;
   Object.keys(aggs).some(function (k) {
     if (k === fieldName) {
