@@ -31,6 +31,10 @@ describe('filterEventsAgainstList', () => {
     listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should respond with eventSearchResult if exceptionList is empty array', async () => {
     const res = await filterEventsAgainstList({
       logger: mockLogger,
@@ -90,6 +94,7 @@ describe('filterEventsAgainstList', () => {
       });
       expect(res.hits.hits.length).toEqual(4);
     });
+
     it('should respond with less items in the list if some values match', async () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [
@@ -507,6 +512,7 @@ describe('filterEventsAgainstList', () => {
       });
       expect(res.hits.hits.length).toEqual(0);
     });
+
     it('should respond with less items in the list if some values match', async () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [

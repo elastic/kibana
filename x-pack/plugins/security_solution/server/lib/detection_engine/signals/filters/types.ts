@@ -30,11 +30,7 @@ export interface CreateSetToFilterAgainstOptions<T> {
 
 export interface FilterEventsOptions<T> {
   events: SearchResponse<T>['hits']['hits'];
-  fieldAndSetTuples: Array<{
-    field: string;
-    operator: 'excluded' | 'included';
-    matchedSet: Set<unknown>;
-  }>;
+  fieldAndSetTuples: FieldSet[];
 }
 
 export interface CreateFieldAndSetTuplesOptions<T> {

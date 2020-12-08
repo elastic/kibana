@@ -146,7 +146,7 @@ export function getGenericComboBoxProps<T>({
  * @param lists The lists to match against the field
  * @param field The field to check against the list to see if they are compatible
  */
-export const filterFieldToList = (lists: ListSchema[], field?: IFieldType) => {
+export const filterFieldToList = (lists: ListSchema[], field?: IFieldType): ListSchema[] => {
   if (field != null) {
     const { esTypes = [] } = field;
     return lists.filter(({ type }) => esTypes.some((esType) => typeMatch(type, esType)));

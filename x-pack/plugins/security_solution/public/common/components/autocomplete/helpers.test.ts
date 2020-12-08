@@ -6,6 +6,7 @@
 import moment from 'moment';
 import '../../../common/mock/match_media';
 import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { IFieldType } from '../../../../../../../src/plugins/data/common';
 
 import * as i18n from './translations';
 import {
@@ -21,7 +22,10 @@ import {
   paramIsValid,
   getGenericComboBoxProps,
   typeMatch,
+  filterFieldToList,
 } from './helpers';
+import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
+import { ListSchema } from '../../../../../lists/common';
 
 describe('helpers', () => {
   // @ts-ignore
@@ -314,6 +318,69 @@ describe('helpers', () => {
 
     test('integer -> long is false', () => {
       expect(typeMatch('integer', 'long')).toEqual(false);
+    });
+  });
+
+  describe('#filterFieldToList', () => {
+    test('it returns empty array if given a undefined for field', () => {
+      const filter = filterFieldToList([], undefined);
+      expect(filter).toEqual([]);
+    });
+
+    test('it returns empty array if filed does not contain esTypes', () => {
+      const field: IFieldType = { name: 'some-name', type: 'some-type' };
+      const filter = filterFieldToList([], field);
+      expect(filter).toEqual([]);
+    });
+
+    test('it returns single filtered list of ip_range -> ip', () => {
+      const field: IFieldType = { name: 'some-name', type: 'ip', esTypes: ['ip'] };
+      const listItem: ListSchema = { ...getListResponseMock(), type: 'ip_range' };
+      const filter = filterFieldToList([listItem], field);
+      const expected: ListSchema[] = [listItem];
+      expect(filter).toEqual(expected);
+    });
+
+    test('it returns single filtered list of ip -> ip', () => {
+      const field: IFieldType = { name: 'some-name', type: 'ip', esTypes: ['ip'] };
+      const listItem: ListSchema = { ...getListResponseMock(), type: 'ip' };
+      const filter = filterFieldToList([listItem], field);
+      const expected: ListSchema[] = [listItem];
+      expect(filter).toEqual(expected);
+    });
+
+    test('it returns single filtered list of keyword -> keyword', () => {
+      const field: IFieldType = { name: 'some-name', type: 'keyword', esTypes: ['keyword'] };
+      const listItem: ListSchema = { ...getListResponseMock(), type: 'keyword' };
+      const filter = filterFieldToList([listItem], field);
+      const expected: ListSchema[] = [listItem];
+      expect(filter).toEqual(expected);
+    });
+
+    test('it returns single filtered list of text -> text', () => {
+      const field: IFieldType = { name: 'some-name', type: 'text', esTypes: ['text'] };
+      const listItem: ListSchema = { ...getListResponseMock(), type: 'text' };
+      const filter = filterFieldToList([listItem], field);
+      const expected: ListSchema[] = [listItem];
+      expect(filter).toEqual(expected);
+    });
+
+    test('it returns 2 filtered lists of ip_range -> ip', () => {
+      const field: IFieldType = { name: 'some-name', type: 'ip', esTypes: ['ip'] };
+      const listItem1: ListSchema = { ...getListResponseMock(), type: 'ip_range' };
+      const listItem2: ListSchema = { ...getListResponseMock(), type: 'ip_range' };
+      const filter = filterFieldToList([listItem1, listItem2], field);
+      const expected: ListSchema[] = [listItem1, listItem2];
+      expect(filter).toEqual(expected);
+    });
+
+    test('it returns 1 filtered lists of ip_range -> ip if the 2nd is not compatible type', () => {
+      const field: IFieldType = { name: 'some-name', type: 'ip', esTypes: ['ip'] };
+      const listItem1: ListSchema = { ...getListResponseMock(), type: 'ip_range' };
+      const listItem2: ListSchema = { ...getListResponseMock(), type: 'text' };
+      const filter = filterFieldToList([listItem1, listItem2], field);
+      const expected: ListSchema[] = [listItem1];
+      expect(filter).toEqual(expected);
     });
   });
 });

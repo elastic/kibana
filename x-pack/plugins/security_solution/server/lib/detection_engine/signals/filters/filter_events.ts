@@ -10,6 +10,7 @@ import { FilterEventsOptions } from './types';
 
 /**
  * Check if for each tuple, the entry is not in both for when two or more value list entries exist.
+ * If the entry is in both an inclusion and exclusion list it will not be filtered out.
  * @param events The events to check against
  * @param fieldAndSetTuples The field and set tuples
  */
