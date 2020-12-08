@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -13,10 +13,8 @@ import {
   EuiTableBody,
   EuiTableHeaderCell,
   EuiTableRowCell,
-  EuiSpacer,
-  EuiTablePagination,
   EuiLoadingChart,
-  Query,
+  EuiEmptyPrompt,
   SortableProperties,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
@@ -24,17 +22,18 @@ import {
 import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
 import { FORMATTERS } from '../../../../../../../../common/formatters';
 import { euiStyled } from '../../../../../../../../../observability/public';
+import { SortBy } from '../../../../hooks/use_process_list';
 import { Process } from './types';
 import { ProcessRow, CodeLine } from './process_row';
-import { parseProcessList } from './parse_process_list';
 import { StateBadge } from './state_badge';
 import { STATE_ORDER } from './states';
 
 interface TableProps {
-  processList: ProcessListAPIResponse;
+  processList: ProcessListAPIResponse['processList'];
   currentTime: number;
   isLoading: boolean;
-  searchFilter: Query;
+  sortBy: SortBy;
+  setSortBy: (s: SortBy) => void;
 }
 
 function useSortableProperties<T>(
@@ -43,25 +42,21 @@ function useSortableProperties<T>(
     getValue: (obj: T) => any;
     isAscending: boolean;
   }>,
-  defaultSortProperty: string
+  defaultSortProperty: string,
+  callback: (s: SortBy) => void
 ) {
   const [sortableProperties] = useState<SortableProperties<T>>(
     new SortableProperties(sortablePropertyItems, defaultSortProperty)
   );
-  const [sortedColumn, setSortedColumn] = useState(
-    omit(sortableProperties.getSortedProperty(), 'getValue')
-  );
 
   return {
-    setSortedColumn: useCallback(
+    updateSortableProperties: useCallback(
       (property) => {
         sortableProperties.sortOn(property);
-        setSortedColumn(omit(sortableProperties.getSortedProperty(), 'getValue'));
+        callback(omit(sortableProperties.getSortedProperty(), 'getValue'));
       },
-      [sortableProperties]
+      [sortableProperties, callback]
     ),
-    sortedColumn,
-    sortItems: (items: T[]) => sortableProperties.sortItems(items),
   };
 }
 
@@ -69,28 +64,15 @@ export const ProcessesTable = ({
   processList,
   currentTime,
   isLoading,
-  searchFilter,
+  sortBy,
+  setSortBy,
 }: TableProps) => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  useEffect(() => setCurrentPage(0), [processList, searchFilter, itemsPerPage]);
-
-  const { sortedColumn, sortItems, setSortedColumn } = useSortableProperties<Process>(
+  const { updateSortableProperties } = useSortableProperties<Process>(
     [
-      {
-        name: 'state',
-        getValue: (item: any) => STATE_ORDER.indexOf(item.state),
-        isAscending: true,
-      },
-      {
-        name: 'command',
-        getValue: (item: any) => item.command.toLowerCase(),
-        isAscending: true,
-      },
       {
         name: 'startTime',
         getValue: (item: any) => Date.parse(item.startTime),
-        isAscending: false,
+        isAscending: true,
       },
       {
         name: 'cpu',
@@ -103,31 +85,33 @@ export const ProcessesTable = ({
         isAscending: false,
       },
     ],
-    'state'
+    'cpu',
+    setSortBy
   );
 
-  const currentItems = useMemo(() => {
-    const filteredItems = Query.execute(searchFilter, parseProcessList(processList)) as Process[];
-    if (!filteredItems.length) return [];
-    const sortedItems = sortItems(filteredItems);
-    return sortedItems;
-  }, [processList, searchFilter, sortItems]);
-
-  const pageCount = useMemo(() => Math.ceil(currentItems.length / itemsPerPage), [
-    itemsPerPage,
-    currentItems,
-  ]);
-
-  const pageStartIdx = useMemo(() => currentPage * itemsPerPage + (currentPage > 0 ? 1 : 0), [
-    currentPage,
-    itemsPerPage,
-  ]);
-  const currentItemsPage = useMemo(
-    () => currentItems.slice(pageStartIdx, pageStartIdx + itemsPerPage),
-    [pageStartIdx, currentItems, itemsPerPage]
+  const currentItems = useMemo(
+    () =>
+      processList.sort(
+        (a, b) => STATE_ORDER.indexOf(a.state) - STATE_ORDER.indexOf(b.state)
+      ) as Process[],
+    [processList]
   );
 
   if (isLoading) return <LoadingPlaceholder />;
+
+  if (currentItems.length === 0)
+    return (
+      <EuiEmptyPrompt
+        iconType="tableDensityNormal"
+        title={
+          <h4>
+            {i18n.translate('xpack.infra.metrics.nodeDetails.noProcesses', {
+              defaultMessage: 'No processes matched these search terms',
+            })}
+          </h4>
+        }
+      />
+    );
 
   return (
     <>
@@ -139,27 +123,18 @@ export const ProcessesTable = ({
               key={`${String(column.field)}-header`}
               align={column.align ?? LEFT_ALIGNMENT}
               width={column.width}
-              onSort={column.sortable ? () => setSortedColumn(column.field) : undefined}
-              isSorted={sortedColumn.name === column.field}
-              isSortAscending={sortedColumn.name === column.field && sortedColumn.isAscending}
+              onSort={column.sortable ? () => updateSortableProperties(column.field) : undefined}
+              isSorted={sortBy.name === column.field}
+              isSortAscending={sortBy.name === column.field && sortBy.isAscending}
             >
               {column.name}
             </EuiTableHeaderCell>
           ))}
         </EuiTableHeader>
         <StyledTableBody>
-          <ProcessesTableBody items={currentItemsPage} currentTime={currentTime} />
+          <ProcessesTableBody items={currentItems} currentTime={currentTime} />
         </StyledTableBody>
       </EuiTable>
-      <EuiSpacer size="m" />
-      <EuiTablePagination
-        itemsPerPage={itemsPerPage}
-        activePage={currentPage}
-        pageCount={pageCount}
-        itemsPerPageOptions={[10, 20, 50]}
-        onChangePage={setCurrentPage}
-        onChangeItemsPerPage={setItemsPerPage}
-      />
     </>
   );
 };
@@ -213,8 +188,8 @@ const StyledTableBody = euiStyled(EuiTableBody)`
 
 const ONE_MINUTE = 60 * 1000;
 const ONE_HOUR = ONE_MINUTE * 60;
-const RuntimeCell = ({ startTime, currentTime }: { startTime: string; currentTime: number }) => {
-  const runtimeLength = currentTime - Date.parse(startTime);
+const RuntimeCell = ({ startTime, currentTime }: { startTime: number; currentTime: number }) => {
+  const runtimeLength = currentTime - startTime;
   let remainingRuntimeMS = runtimeLength;
   const runtimeHours = Math.floor(remainingRuntimeMS / ONE_HOUR);
   remainingRuntimeMS -= runtimeHours * ONE_HOUR;
@@ -244,7 +219,7 @@ const columns: Array<{
     name: i18n.translate('xpack.infra.metrics.nodeDetails.processes.columnLabelState', {
       defaultMessage: 'State',
     }),
-    sortable: true,
+    sortable: false,
     render: (state: string) => <StateBadge state={state} />,
     width: 84,
     textOnly: false,
@@ -254,7 +229,7 @@ const columns: Array<{
     name: i18n.translate('xpack.infra.metrics.nodeDetails.processes.columnLabelCommand', {
       defaultMessage: 'Command',
     }),
-    sortable: true,
+    sortable: false,
     width: '40%',
     render: (command: string) => <CodeLine>{command}</CodeLine>,
   },
@@ -265,7 +240,7 @@ const columns: Array<{
     }),
     align: RIGHT_ALIGNMENT,
     sortable: true,
-    render: (startTime: string, currentTime: number) => (
+    render: (startTime: number, currentTime: number) => (
       <RuntimeCell startTime={startTime} currentTime={currentTime} />
     ),
   },
