@@ -1,5 +1,7 @@
 package templates
 
+import StandardAgents
+import co.elastic.teamcity.common.requireAgent
 import vcs.Kibana
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildStep
 import jetbrains.buildServer.configs.kotlin.v2019_2.ParameterDisplay
@@ -21,10 +23,7 @@ object KibanaTemplate : Template({
 //    checkoutDir = "/dev/shm/%system.teamcity.buildType.id%/%system.build.number%/kibana"
   }
 
-  requirements {
-    equals("system.cloud.profile_id", "kibana", "RQ_CLOUD_PROFILE_ID")
-    startsWith("teamcity.agent.name", "kibana-standard-2-", "RQ_AGENT_NAME")
-  }
+  requireAgent(StandardAgents["2"]!!)
 
   features {
     perfmon {  }
