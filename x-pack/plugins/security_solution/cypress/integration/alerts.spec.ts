@@ -25,15 +25,13 @@ import {
   markInProgressFirstAlert,
   goToInProgressAlerts,
 } from '../tasks/alerts';
+import { removeSignalsIndex } from '../tasks/api_calls';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/83773
-// FLAKY: https://github.com/elastic/kibana/issues/83774
-// FLAKY: https://github.com/elastic/kibana/issues/83775
-describe.skip('Alerts', () => {
+describe('Alerts', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
       esArchiverLoad('alerts');
@@ -41,6 +39,7 @@ describe.skip('Alerts', () => {
     });
 
     afterEach(() => {
+      removeSignalsIndex();
       esArchiverUnload('alerts');
     });
 
@@ -170,6 +169,7 @@ describe.skip('Alerts', () => {
     });
 
     afterEach(() => {
+      removeSignalsIndex();
       esArchiverUnload('closed_alerts');
     });
 
@@ -221,6 +221,7 @@ describe.skip('Alerts', () => {
     });
 
     afterEach(() => {
+      removeSignalsIndex();
       esArchiverUnload('alerts');
     });
 
