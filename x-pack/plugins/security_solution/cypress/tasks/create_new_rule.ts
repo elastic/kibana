@@ -35,10 +35,7 @@ import {
   MACHINE_LEARNING_DROPDOWN,
   MACHINE_LEARNING_LIST,
   MACHINE_LEARNING_TYPE,
-  MITRE_BTN,
   MITRE_TACTIC,
-  MITRE_TACTIC_DROPDOWN,
-  MITRE_TECHNIQUES_INPUT,
   REFERENCE_URLS_INPUT,
   REFRESH_BUTTON,
   RISK_INPUT,
@@ -67,6 +64,12 @@ import {
   EQL_QUERY_VALIDATION_SPINNER,
   COMBO_BOX_CLEAR_BTN,
   COMBO_BOX_RESULT,
+  MITRE_ATTACK_TACTIC_DROPDOWN,
+  MITRE_ATTACK_TECHNIQUE_DROPDOWN,
+  MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN,
+  MITRE_ATTACK_ADD_TACTIC_BUTTON,
+  MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON,
+  MITRE_ATTACK_ADD_TECHNIQUE_BUTTON,
 } from '../screens/create_new_rule';
 import { NOTIFICATION_TOASTS, TOAST_ERROR_CLASS } from '../screens/shared';
 import { TIMELINE } from '../screens/timelines';
@@ -109,18 +112,29 @@ export const fillAboutRule = (
     cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
   });
 
-  rule.mitre.forEach((mitre, index) => {
-    cy.get(MITRE_TACTIC_DROPDOWN).eq(index).click({ force: true });
+  let techniqueIndex = 0;
+  let subtechniqueInputIndex = 0;
+  rule.mitre.forEach((mitre, tacticIndex) => {
+    cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).eq(tacticIndex).click({ force: true });
     cy.contains(MITRE_TACTIC, mitre.tactic).click();
 
     mitre.techniques.forEach((technique) => {
-      cy.get(MITRE_TECHNIQUES_INPUT)
-        .eq(index)
-        .clear({ force: true })
-        .type(`${technique}{enter}`, { force: true });
+      cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click({ force: true });
+      cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).eq(techniqueIndex).click({ force: true });
+      cy.contains(MITRE_TACTIC, technique.name).click();
+
+      technique.subtechniques.forEach((subtechnique) => {
+        cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).eq(techniqueIndex).click({ force: true });
+        cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN)
+          .eq(subtechniqueInputIndex)
+          .click({ force: true });
+        cy.contains(MITRE_TACTIC, subtechnique).click();
+        subtechniqueInputIndex++;
+      });
+      techniqueIndex++;
     });
 
-    cy.get(MITRE_BTN).click({ force: true });
+    cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).click({ force: true });
   });
 
   cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true }).type(rule.note, { force: true });
@@ -173,15 +187,29 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
     cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
   });
 
-  rule.mitre.forEach((mitre, index) => {
-    cy.get(MITRE_TACTIC_DROPDOWN).eq(index).click({ force: true });
+  let techniqueIndex = 0;
+  let subtechniqueInputIndex = 0;
+  rule.mitre.forEach((mitre, tacticIndex) => {
+    cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).eq(tacticIndex).click({ force: true });
     cy.contains(MITRE_TACTIC, mitre.tactic).click();
 
     mitre.techniques.forEach((technique) => {
-      cy.get(MITRE_TECHNIQUES_INPUT).eq(index).type(`${technique}{enter}`, { force: true });
+      cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click({ force: true });
+      cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).eq(techniqueIndex).click({ force: true });
+      cy.contains(MITRE_TACTIC, technique.name).click();
+
+      technique.subtechniques.forEach((subtechnique) => {
+        cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).eq(techniqueIndex).click({ force: true });
+        cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN)
+          .eq(subtechniqueInputIndex)
+          .click({ force: true });
+        cy.contains(MITRE_TACTIC, subtechnique).click();
+        subtechniqueInputIndex++;
+      });
+      techniqueIndex++;
     });
 
-    cy.get(MITRE_BTN).click({ force: true });
+    cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).click({ force: true });
   });
 
   cy.get(INVESTIGATION_NOTES_TEXTAREA).type(rule.note, { force: true });

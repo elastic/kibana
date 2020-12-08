@@ -17,7 +17,6 @@ export interface PingListState {
 const initialState: PingListState = {
   pingList: {
     total: 0,
-    locations: [],
     pings: [],
   },
   loading: false,
@@ -36,6 +35,7 @@ export const pingListReducer = handleActions<PingListState, PingListPayload>(
       ...state,
       pingList: { ...action.payload },
       loading: false,
+      error: undefined,
     }),
 
     [String(getPingsFail)]: (state, action: Action<Error>) => ({
