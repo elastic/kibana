@@ -271,7 +271,7 @@ This page has been moved. Please see <<Dashboard>>.
 [[timelion-customize]]
 === Customize and format visualizations
 
-This page has been moved. Please see <<Dashboard>>.
+This page has been moved. Please see <<dashboard>>.
 
 [float]
 [[dashboard-drilldown]]
