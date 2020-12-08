@@ -178,14 +178,6 @@ describe('alert_form', () => {
       expect(alertTypeSelectOptions.exists()).toBeFalsy();
     });
 
-    it('renders notify on state change only switch', async () => {
-      await setup();
-      const notifyOnlyOnActionGroupChangeSwitch = wrapper.find(
-        '[data-test-subj="notifyOnlyOnActionGroupChange"]'
-      );
-      expect(notifyOnlyOnActionGroupChangeSwitch.exists()).toBeTruthy();
-    });
-
     it('renders registered action types', async () => {
       await setup();
       const alertTypeSelectOptions = wrapper.find(
@@ -433,26 +425,6 @@ describe('alert_form', () => {
       await setup();
       const alertTypeSelectOptions = wrapper.find('[data-test-subj="selectedAlertTypeTitle"]');
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
-    });
-
-    it('should update throttle value', async () => {
-      const newThrottle = 17;
-      await setup();
-      const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
-      expect(throttleField.exists()).toBeTruthy();
-      throttleField.at(1).simulate('change', { target: { value: newThrottle.toString() } });
-      const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
-      expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
-    });
-
-    it('should unset throttle value', async () => {
-      const newThrottle = '';
-      await setup();
-      const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
-      expect(throttleField.exists()).toBeTruthy();
-      throttleField.at(1).simulate('change', { target: { value: newThrottle } });
-      const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
-      expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
     });
 
     it('renders alert type description', async () => {

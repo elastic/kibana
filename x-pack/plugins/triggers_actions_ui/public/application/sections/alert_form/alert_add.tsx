@@ -45,6 +45,7 @@ export const AlertAdd = ({
       },
       actions: [],
       tags: [],
+      notifyOnlyOnActionGroupChange: true,
       ...(initialValues ? initialValues : {}),
     }),
     [alertTypeId, consumer, initialValues]
