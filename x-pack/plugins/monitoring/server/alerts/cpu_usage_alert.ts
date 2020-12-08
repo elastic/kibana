@@ -209,7 +209,9 @@ export class CpuUsageAlert extends BaseAlert {
         internalShortMessage,
         internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: firingNodes.map(({ nodeName, cpuUsage }) => `${nodeName}:${cpuUsage}`).toString(),
+        nodes: firingNodes
+          .map(({ stackProductName, cpuUsage }) => `${stackProductName}:${cpuUsage}`)
+          .toString(),
         count: firingCount,
         clusterName: cluster.clusterName,
         action,

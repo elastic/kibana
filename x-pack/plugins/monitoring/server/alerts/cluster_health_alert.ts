@@ -15,7 +15,11 @@ import {
   LegacyAlert,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import { ALERT_CLUSTER_HEALTH, LEGACY_ALERT_DETAILS } from '../../common/constants';
+import {
+  ALERT_CLUSTER_HEALTH,
+  ELASTICSEARCH_SYSTEM_ID,
+  LEGACY_ALERT_DETAILS,
+} from '../../common/constants';
 import { AlertMessageTokenType, AlertClusterHealthType } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerts/common';

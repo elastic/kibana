@@ -15,7 +15,11 @@ import {
   LegacyAlertNodesChangedList,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import { ALERT_NODES_CHANGED, LEGACY_ALERT_DETAILS } from '../../common/constants';
+import {
+  ALERT_NODES_CHANGED,
+  ELASTICSEARCH_SYSTEM_ID,
+  LEGACY_ALERT_DETAILS,
+} from '../../common/constants';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerts/common';
 

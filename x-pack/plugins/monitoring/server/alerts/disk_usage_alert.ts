@@ -220,7 +220,7 @@ export class DiskUsageAlert extends BaseAlert {
         internalShortMessage,
         internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: firingNodes.map((state) => `${state.nodeName}:${state.diskUsage}`).join(','),
+        nodes: firingNodes.map((state) => `${state.stackProductName}:${state.diskUsage}`).join(','),
         count: firingCount,
         clusterName: cluster.clusterName,
         action,

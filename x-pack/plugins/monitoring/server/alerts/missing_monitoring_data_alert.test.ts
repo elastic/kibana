@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { MissingMonitoringDataAlert } from './missing_monitoring_data_alert';
-import { ALERT_MISSING_MONITORING_DATA } from '../../common/constants';
+import { ALERT_MISSING_MONITORING_DATA, ELASTICSEARCH_SYSTEM_ID } from '../../common/constants';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 
@@ -129,8 +129,9 @@ describe('MissingMonitoringDataAlert', () => {
             ccs: undefined,
             cluster: { clusterUuid, clusterName },
             gapDuration,
-            nodeName,
-            nodeId,
+            stackProduct: ELASTICSEARCH_SYSTEM_ID,
+            stackProductName: nodeName,
+            stackProductUuid: nodeId,
             ui: {
               isFiring: true,
               message: {

@@ -203,7 +203,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
         internalShortMessage,
         internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: firingNodes.map((state) => `node: ${state.nodeName}`).toString(),
+        nodes: firingNodes.map((state) => `node: ${state.stackProductName}`).toString(),
         count: firingCount,
         clusterName: cluster.clusterName,
         action,

@@ -14,7 +14,11 @@ import {
   LegacyAlert,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import { ALERT_KIBANA_VERSION_MISMATCH, LEGACY_ALERT_DETAILS } from '../../common/constants';
+import {
+  ALERT_KIBANA_VERSION_MISMATCH,
+  KIBANA_SYSTEM_ID,
+  LEGACY_ALERT_DETAILS,
+} from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerts/common';
