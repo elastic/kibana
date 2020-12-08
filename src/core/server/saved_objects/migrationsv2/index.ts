@@ -31,6 +31,7 @@ import { Logger, LogMeta } from '../../logging';
 import { SavedObjectsMigrationVersion } from '../types';
 import { AliasAction } from './actions';
 import { ControlState, stateActionMachine } from './state_action_machine';
+import { MigrationResult, MigrationStatus } from '../migrations/core';
 import { SavedObjectsRawDoc, SavedObjectsSerializer } from '..';
 
 /**
@@ -108,7 +109,7 @@ export type PostInitState = BaseState & {
   readonly outdatedDocumentsQuery: Record<string, unknown>;
 };
 
-export type DoneState = BaseState & {
+export type DoneState = PostInitState & {
   /** Migration completed successfully */
   readonly controlState: 'DONE';
 };
@@ -903,7 +904,7 @@ export async function migrationStateMachine({
     indexLogger.info(`${state.controlState} RESPONSE`, res as LogMeta);
   };
 
-  return await stateActionMachine<State>(
+  const finalState = await stateActionMachine<State>(
     initialState,
     (state) => next(client, transformRawDocs, state),
     (state, res) => {
@@ -913,4 +914,24 @@ export async function migrationStateMachine({
       return newState;
     }
   );
+
+  if (finalState.controlState === 'DONE') {
+    return Option.fold<string, MigrationResult>(
+      () => ({
+        status: 'patched' as const,
+        destIndex: finalState.targetIndex,
+        elapsedMs: 0,
+      }),
+      (sourceIndex) => ({
+        status: 'migrated' as const,
+        destIndex: finalState.targetIndex,
+        sourceIndex,
+        elapsedMs: 0,
+      })
+    )(finalState.sourceIndex);
+  } else {
+    throw new Error(
+      `Unable to complete saved object migrations for the [${finalState.indexPrefix}] index. Please check the health of your Elasticsearch cluster.`
+    );
+  }
 }

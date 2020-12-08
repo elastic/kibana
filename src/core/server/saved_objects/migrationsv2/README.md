@@ -9,11 +9,6 @@
    (e.g. in `.kibana`, `.kibana_N` or perhaps a combination of both). We can
    prepare a `.kibana_7.11.0_001` index and ask users to manually reindex
    documents into this index.
- - [ ] The ES docs added a new recommendation to use search_after instead of
-   scroll searches for paging through > 10k results. We don't actually need a
-   "search context", a "point in time" or stable sorting so we could just
-   perform a new search for the next batch of unmigrated documents and repeat
-   this until there are no more unmigrated documents.
 
 ## Manual QA Test Plan
 ### 1. Legacy pre-migration

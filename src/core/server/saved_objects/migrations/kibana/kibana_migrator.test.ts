@@ -163,8 +163,57 @@ describe('KibanaMigrator', () => {
       });
     });
     describe('when enableV2 = true', () => {
-      it.todo('creates a V2 migrator');
-      it.todo('emits results on getMigratorResult$()');
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('creates a V2 migrator that initializes a new index and migrates an existing index', async () => {
+        const options = mockV2MigrationOptions();
+        const migrator = new KibanaMigrator(options);
+        const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+        await migrator.runMigrations();
+
+        // Basic assertions that we're creating and cloning the expected indices
+        expect(options.client.indices.create).toHaveBeenCalledTimes(2);
+        expect(options.client.indices.create.mock.calls).toEqual(
+          expect.arrayContaining([
+            expect.arrayContaining([expect.objectContaining({ index: '.my-index_pre8.2.3_001' })]),
+            expect.arrayContaining([expect.objectContaining({ index: 'other-index_8.2.3_001' })]),
+          ])
+        );
+        expect(options.client.indices.clone.mock.calls).toEqual(
+          expect.arrayContaining([
+            expect.arrayContaining([
+              expect.objectContaining({
+                index: '.my-index_pre8.2.3_001',
+                target: '.my-index_8.2.3_001',
+              }),
+            ]),
+          ])
+        );
+        const { status } = await migratorStatus;
+        return expect(status).toEqual('completed');
+      });
+      it('emits results on getMigratorResult$()', async () => {
+        const options = mockV2MigrationOptions();
+        const migrator = new KibanaMigrator(options);
+        const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+        await migrator.runMigrations();
+
+        const { status, result } = await migratorStatus;
+        expect(status).toEqual('completed');
+        expect(result![0]).toMatchObject({
+          destIndex: '.my-index_8.2.3_001',
+          sourceIndex: '.my-index_pre8.2.3_001',
+          elapsedMs: expect.any(Number),
+          status: 'migrated',
+        });
+        expect(result![1]).toMatchObject({
+          destIndex: 'other-index_8.2.3_001',
+          elapsedMs: expect.any(Number),
+          status: 'patched',
+        });
+      });
     });
   });
 });
@@ -173,7 +222,40 @@ type MockedOptions = KibanaMigratorOptions & {
   client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 };
 
-const mockOptions = () => {
+const mockV2MigrationOptions = () => {
+  const options = mockOptions({ enableV2: true });
+
+  options.client.indices.get.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise(
+      {
+        '.my-index': {
+          aliases: { '.kibana': {} },
+          mappings: { properties: {} },
+          settings: {},
+        },
+      },
+      { statusCode: 200 }
+    )
+  );
+  options.client.indices.addBlock.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise({ acknowledged: true })
+  );
+  options.client.reindex.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise({ taskId: 'reindex_task_id' })
+  );
+  options.client.tasks.get.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
+      completed: true,
+      error: undefined,
+      failures: [],
+      task: { description: 'task description' },
+    })
+  );
+
+  return options;
+};
+
+const mockOptions = ({ enableV2 }: { enableV2: boolean } = { enableV2: false }) => {
   const options: MockedOptions = {
     logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
@@ -187,7 +269,7 @@ const mockOptions = () => {
             name: { type: 'keyword' },
           },
         },
-        migrations: {},
+        migrations: { '8.2.3': jest.fn().mockImplementation((doc) => doc) },
       },
       {
         name: 'testtype2',
@@ -211,7 +293,7 @@ const mockOptions = () => {
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
-      enableV2: false,
+      enableV2,
     },
     client: elasticsearchClientMock.createElasticsearchClient(),
   };

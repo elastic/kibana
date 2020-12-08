@@ -191,12 +191,7 @@ export class KibanaMigrator {
                 ),
               migrationVersionPerType: this.documentMigrator.migrationVersion,
               indexPrefix: index,
-            }).then(() => ({
-              status: 'migrated' as 'migrated',
-              destIndex: 'target',
-              sourceIndex: 'source',
-              elapsedMs: 0,
-            }));
+            });
           },
         };
       } else {
