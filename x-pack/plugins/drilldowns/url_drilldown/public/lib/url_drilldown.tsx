@@ -97,7 +97,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
-    return !config.url.template;
+    return !!config.url.template;
   };
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
