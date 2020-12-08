@@ -6,6 +6,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 import { PainlessLang, PainlessContext } from '@kbn/monaco';
 import {
   EuiFlexGroup,
@@ -263,7 +264,7 @@ const RuntimeFieldFormComp = ({
               helpText={
                 <FormattedMessage
                   id="xpack.runtimeFields.form.source.scriptFieldHelpText"
-                  defaultMessage="Runtime fields without a script retrieve values from a field with the same name in _source. If a field with the same name doesn’t exist, no values are returned when a search request includes the runtime field. {learnMoreLink}"
+                  defaultMessage="Runtime fields without a script retrieve values from a field with the same name in {source}. If a field with the same name doesn’t exist, no values return when a search request includes the runtime field. {learnMoreLink}"
                   values={{
                     learnMoreLink: (
                       <EuiLink
@@ -273,10 +274,11 @@ const RuntimeFieldFormComp = ({
                         data-test-subj="painlessSyntaxLearnMoreLink"
                       >
                         {i18n.translate('xpack.runtimeFields.form.script.learnMoreLinkText', {
-                          defaultMessage: 'Learn more about syntax.',
+                          defaultMessage: 'Learn about script syntax.',
                         })}
                       </EuiLink>
                     ),
+                    source: <EuiCode>{'_source'}</EuiCode>,
                   }}
                 />
               }

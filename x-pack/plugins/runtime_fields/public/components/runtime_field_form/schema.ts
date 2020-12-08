@@ -43,7 +43,7 @@ export const schema: FormSchema<RuntimeField> = {
   script: {
     source: {
       label: i18n.translate('xpack.runtimeFields.form.defineFieldLabel', {
-        defaultMessage: 'Define field (optional)',
+        defaultMessage: 'Define script (optional)',
       }),
     },
   },
