@@ -14,7 +14,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const queryBar = getService('queryBar');
 
-  describe('Endpoint Event Resolver', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/85085
+  describe.skip('Endpoint Event Resolver', function () {
     before(async () => {
       await pageObjects.hosts.navigateToSecurityHostsPage();
       await pageObjects.common.dismissBanner();

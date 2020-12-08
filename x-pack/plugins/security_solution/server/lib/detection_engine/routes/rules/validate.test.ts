@@ -14,6 +14,7 @@ import { BulkError } from '../utils';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { getResult, getFindResultStatus } from '../__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
+import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 export const ruleOutput = (): RulesSchema => ({
   actions: [],
@@ -45,23 +46,7 @@ export const ruleOutput = (): RulesSchema => ({
   to: 'now',
   type: 'query',
   throttle: 'no_actions',
-  threat: [
-    {
-      framework: 'MITRE ATT&CK',
-      tactic: {
-        id: 'TA0040',
-        name: 'impact',
-        reference: 'https://attack.mitre.org/tactics/TA0040/',
-      },
-      technique: [
-        {
-          id: 'T1499',
-          name: 'endpoint denial of service',
-          reference: 'https://attack.mitre.org/techniques/T1499/',
-        },
-      ],
-    },
-  ],
+  threat: getThreatMock(),
   version: 1,
   filters: [
     {

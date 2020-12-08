@@ -180,3 +180,17 @@ export const lexerRules = {
     ],
   },
 } as Language;
+
+export const languageConfiguration: monaco.languages.LanguageConfiguration = {
+  brackets: [
+    ['{', '}'],
+    ['[', ']'],
+    ['(', ')'],
+  ],
+  autoClosingPairs: [
+    { open: '{', close: '}' },
+    { open: '[', close: ']' },
+    { open: '(', close: ')' },
+    { open: '"', close: '"' },
+  ],
+};
