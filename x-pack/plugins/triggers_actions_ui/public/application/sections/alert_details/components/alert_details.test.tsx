@@ -16,7 +16,6 @@ import {
 } from '../../../../../../alerts/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
-import { LicenseType } from '../../../../../../licensing/public';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -639,7 +638,7 @@ describe('edit button', () => {
     },
   ];
   alertTypeRegistry.has.mockReturnValue(true);
-  const alertTypeR = ({
+  const alertTypeR: AlertTypeModel = {
     id: 'my-alert-type',
     iconClass: 'test',
     name: 'test-alert',
@@ -648,9 +647,9 @@ describe('edit button', () => {
     validate: () => {
       return { errors: {} };
     },
-    alertParamsExpression: () => {},
+    alertParamsExpression: jest.fn(),
     requiresAppContext: false,
-  } as unknown) as AlertTypeModel;
+  };
   alertTypeRegistry.get.mockReturnValue(alertTypeR);
   useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
 

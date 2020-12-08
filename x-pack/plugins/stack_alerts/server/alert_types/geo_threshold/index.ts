@@ -5,7 +5,7 @@
  */
 
 import { Logger } from 'src/core/server';
-import { AlertingSetup, AlertType } from '../../types';
+import { AlertingSetup } from '../../types';
 import { getAlertType } from './alert_type';
 
 interface RegisterParams {
@@ -15,5 +15,5 @@ interface RegisterParams {
 
 export function register(params: RegisterParams) {
   const { logger, alerts } = params;
-  alerts.registerType((getAlertType(logger) as unknown) as AlertType);
+  alerts.registerType(getAlertType(logger));
 }

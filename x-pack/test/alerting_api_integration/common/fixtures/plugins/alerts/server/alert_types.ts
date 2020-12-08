@@ -51,7 +51,7 @@ function getAlwaysFiringAlertType() {
     },
     executor: curry(alwaysFiringExecutor)(),
   };
-  return (result as unknown) as AlertType;
+  return result;
 }
 
 async function alwaysFiringExecutor(alertExecutorOptions: any) {
@@ -178,7 +178,7 @@ function getNeverFiringAlertType() {
       };
     },
   };
-  return (result as unknown) as AlertType;
+  return result;
 }
 
 function getFailingAlertType() {
@@ -216,7 +216,7 @@ function getFailingAlertType() {
       throw new Error('Failed to execute alert type');
     },
   };
-  return (result as unknown) as AlertType;
+  return result;
 }
 
 function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
@@ -308,7 +308,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
       });
     },
   };
-  return (result as unknown) as AlertType;
+  return result;
 }
 
 function getValidationAlertType() {
@@ -333,7 +333,7 @@ function getValidationAlertType() {
     },
     async executor() {},
   };
-  return (result as unknown) as AlertType;
+  return result;
 }
 
 function getPatternFiringAlertType() {
@@ -394,7 +394,7 @@ function getPatternFiringAlertType() {
       };
     },
   };
-  return (result as unknown) as AlertType;
+  return result;
 }
 
 export function defineAlertTypes(

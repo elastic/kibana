@@ -5,7 +5,7 @@
  */
 
 import { Logger } from 'src/core/server';
-import { AlertingSetup, AlertType, StackAlertsStartDeps } from '../../types';
+import { AlertingSetup, StackAlertsStartDeps } from '../../types';
 import { getAlertType } from './alert_type';
 
 // future enhancement: make these configurable?
@@ -21,5 +21,5 @@ interface RegisterParams {
 
 export function register(params: RegisterParams) {
   const { logger, data, alerts } = params;
-  alerts.registerType((getAlertType(logger, data) as unknown) as AlertType);
+  alerts.registerType(getAlertType(logger, data));
 }

@@ -5,8 +5,8 @@
  */
 
 import { Logger } from 'src/core/server';
-import { AlertingSetup, AlertType } from '../../types';
-import { getAlertType } from './alert_type';
+import { AlertingSetup } from '../../types';
+import { GeoContainmentParams, getAlertType } from './alert_type';
 
 interface RegisterParams {
   logger: Logger;
@@ -15,5 +15,5 @@ interface RegisterParams {
 
 export function register(params: RegisterParams) {
   const { logger, alerts } = params;
-  alerts.registerType((getAlertType(logger) as unknown) as AlertType);
+  alerts.registerType<GeoContainmentParams>(getAlertType(logger));
 }
