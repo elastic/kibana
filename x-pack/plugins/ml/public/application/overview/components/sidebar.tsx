@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlKibana } from '../../contexts/kibana';
-
+import { getDocLinks } from '../../../../util/dependency_cache';
 const feedbackLink = 'https://www.elastic.co/community/';
 
 interface Props {
@@ -23,7 +23,6 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
     },
   } = useMlKibana();
 
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const docsLink = getDocLinks().links.ml.guide;
   const transformsLink = `${basePath.get()}/app/management/data/transform`;
 

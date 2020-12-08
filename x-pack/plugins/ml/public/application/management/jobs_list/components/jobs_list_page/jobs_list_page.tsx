@@ -156,8 +156,6 @@ export const JobsListPage: FC<{
     return null;
   }
 
-  const docLinks = getDocLinks();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const anomalyDetectionJobsUrl = getDocLinks().links.ml.anomalyDetectionJobs;
   const anomalyJobsUrl = getDocLinks().links.ml.dataFrameAnalytics;
 
