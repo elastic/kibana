@@ -698,9 +698,9 @@ export const AlertForm = ({
         alert={alert}
         throttle={alertThrottle}
         throttleUnit={alertThrottleUnit}
-        onActionFreqencyChange={(opts: ActionFrequencyOpts) => {
-          setAlertThrottle(opts.throttle);
-          setAlertProperty('notifyOnlyOnActionGroupChange', opts.notifyOnlyOnActionGroupChange);
+        onActionFreqencyChange={({ throttle, notifyWhen }: ActionFrequencyOpts) => {
+          setAlertThrottle(throttle);
+          setAlertProperty('notifyWhen', notifyWhen);
         }}
         onThrottleChange={useCallback(
           (throttle: number | null, throttleUnit: string) => {

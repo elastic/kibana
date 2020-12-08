@@ -27,6 +27,8 @@ export enum AlertExecutionStatusErrorReasons {
   Unknown = 'unknown',
 }
 
+export type AlertNotifyWhenType = 'onActionGroupChange' | 'onActiveAlert' | 'onThrottleInterval';
+
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
   lastExecutionDate: Date;
@@ -68,7 +70,7 @@ export interface Alert {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
-  notifyOnlyOnActionGroupChange: boolean;
+  notifyWhen: AlertNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;

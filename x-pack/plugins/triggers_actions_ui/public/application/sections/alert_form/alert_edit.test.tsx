@@ -103,7 +103,7 @@ describe('alert_edit', () => {
       tags: [],
       name: 'test alert',
       throttle: null,
-      notifyOnlyOnActionGroupChange: false,
+      notifyWhen: null,
       apiKeyOwner: null,
       createdBy: 'elastic',
       updatedBy: 'elastic',

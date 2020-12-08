@@ -27,79 +27,85 @@ import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
 } from '../../../../../alerts/common/parse_duration';
+import { AlertNotifyWhenType } from '../../../types';
 
-type ActionFreqencyType = 'notifyOnlyOnActionGroupChange' | 'throttleNull' | 'throttleCustom';
+const DEFAULT_ACTION_FREQUENCY_VALUE: AlertNotifyWhenType = 'onActionGroupChange';
 
-type ActionFrequencyOptionsType = {
-  description: string;
-  formatOpts: (throttle: number | null, throttleUnit: string) => ActionFrequencyOpts;
-} & EuiSuperSelectOption<ActionFreqencyType>;
-
-const ActionFrequencyOptions: ActionFrequencyOptionsType[] = [
+const ACTION_FREQUENCY_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
   {
-    value: 'notifyOnlyOnActionGroupChange',
+    value: 'onActionGroupChange',
     inputDisplay: 'Run only on status change',
-    description: 'Actions will run when the alert status changes.',
-    formatOpts: () => ({
-      throttle: null,
-      notifyOnlyOnActionGroupChange: true,
-    }),
-  },
-  {
-    value: 'throttleNull',
-    inputDisplay: 'Run every time alert is active',
-    description: 'Actions will run with every active alert execution.',
-    formatOpts: () => ({
-      throttle: null,
-      notifyOnlyOnActionGroupChange: false,
-    }),
-  },
-  {
-    value: 'throttleCustom',
-    inputDisplay: 'Set a custom action interval',
-    description: 'Set a custom interval for the actions to run when the alert is active.',
-    formatOpts: (throttle: number | null, throttleUnit: string) => ({
-      throttle: throttle!,
-      throttleUnit,
-      notifyOnlyOnActionGroupChange: false,
-    }),
-  },
-];
-
-const DEFAULT_ACTION_FREQUENCY_VALUE: ActionFreqencyType = 'notifyOnlyOnActionGroupChange';
-
-const ACTION_FREQUENCY_OPTIONS: Array<
-  EuiSuperSelectOption<ActionFreqencyType>
-> = ActionFrequencyOptions.map(
-  ({ value, inputDisplay, description }: ActionFrequencyOptionsType) => ({
-    value,
-    inputDisplay,
-    'data-test-subj': value,
+    'data-test-subj': 'onActionGroupChange',
     dropdownDisplay: (
       <Fragment>
         <strong>
           <FormattedMessage
-            defaultMessage={`${inputDisplay}`}
-            id={`xpack.triggersActionsUI.sections.alertForm.actionFrequency.${value}.label`}
+            defaultMessage="Run only on status change"
+            id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.onActionGroupChange.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage={`${description}`}
-              id={`xpack.triggersActionsUI.sections.alertForm.actionFrequency.${value}.description`}
+              defaultMessage="Actions will run when the alert status changes."
+              id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.onActionGroupChange.description"
             />
           </p>
         </EuiText>
       </Fragment>
     ),
-  })
-);
+  },
+  {
+    value: 'onActiveAlert',
+    inputDisplay: 'Run every time alert is active',
+    'data-test-subj': 'onActiveAlert',
+    dropdownDisplay: (
+      <Fragment>
+        <strong>
+          <FormattedMessage
+            defaultMessage="Run every time alert is active"
+            id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.onActiveAlert.label"
+          />
+        </strong>
+        <EuiText size="s" color="subdued">
+          <p>
+            <FormattedMessage
+              defaultMessage="Actions will run with every active alert execution."
+              id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.onActiveAlert.description"
+            />
+          </p>
+        </EuiText>
+      </Fragment>
+    ),
+  },
+  {
+    value: 'onThrottleInterval',
+    inputDisplay: 'Set a custom action interval',
+    'data-test-subj': 'onThrottleInterval',
+    dropdownDisplay: (
+      <Fragment>
+        <strong>
+          <FormattedMessage
+            defaultMessage="Set a custom action interval"
+            id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.onThrottleInterval.label"
+          />
+        </strong>
+        <EuiText size="s" color="subdued">
+          <p>
+            <FormattedMessage
+              defaultMessage="Set a custom interval for the actions to run when the alert is active."
+              id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.onThrottleInterval.description"
+            />
+          </p>
+        </EuiText>
+      </Fragment>
+    ),
+  },
+];
 
 export interface ActionFrequencyOpts {
   throttle: number | null;
-  throttleUnit?: string;
-  notifyOnlyOnActionGroupChange: boolean;
+  notifyWhen: AlertNotifyWhenType;
 }
 
 interface ActionFrequencyFormProps {
@@ -122,18 +128,17 @@ export const ActionFrequencyForm = ({
   const [showCustomActionFrequencyOpts, setShowCustomActionFrequencyOpts] = useState<boolean>(
     false
   );
-  const [actionFrequencyValue, setActionFrequencyValue] = useState<ActionFreqencyType>(
+  const [actionFrequencyValue, setActionFrequencyValue] = useState<AlertNotifyWhenType>(
     DEFAULT_ACTION_FREQUENCY_VALUE
   );
 
   useEffect(() => {
-    setActionFrequencyValue(
-      alert.notifyOnlyOnActionGroupChange
-        ? 'notifyOnlyOnActionGroupChange'
-        : alert.throttle
-        ? 'throttleCustom'
-        : 'throttleNull'
-    );
+    if (alert.notifyWhen) {
+      setActionFrequencyValue(alert.notifyWhen);
+    } else {
+      // If 'notifyWhen' is not set, derive value from existence of throttle value
+      setActionFrequencyValue(alert.throttle ? 'onThrottleInterval' : 'onActiveAlert');
+    }
 
     if (!alert.throttle) {
       setAlertThrottle(
@@ -149,17 +154,15 @@ export const ActionFrequencyForm = ({
   }, [alert]);
 
   useEffect(() => {
-    setShowCustomActionFrequencyOpts(actionFrequencyValue === 'throttleCustom');
+    setShowCustomActionFrequencyOpts(actionFrequencyValue === 'onThrottleInterval');
   }, [actionFrequencyValue]);
 
-  const onActionFrequencyValueChange = useCallback((newValue: ActionFreqencyType) => {
-    const type = ActionFrequencyOptions.find(
-      (opt: ActionFrequencyOptionsType) => opt.value === newValue
-    );
-    if (type) {
-      onActionFreqencyChange(type.formatOpts(alertThrottle, alertThrottleUnit));
-      setActionFrequencyValue(newValue);
-    }
+  const onActionFrequencyValueChange = useCallback((newValue: AlertNotifyWhenType) => {
+    onActionFreqencyChange({
+      notifyWhen: newValue,
+      throttle: newValue === 'onThrottleInterval' ? alertThrottle! : null,
+    });
+    setActionFrequencyValue(newValue);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -29,7 +29,7 @@ import {
   mapFiltersToKql,
 } from './alert_api';
 import uuid from 'uuid';
-import { ALERTS_FEATURE_ID } from '../../../../alerts/common';
+import { AlertNotifyWhenType, ALERTS_FEATURE_ID } from '../../../../alerts/common';
 
 const http = httpServiceMock.createStartContract();
 
@@ -548,7 +548,7 @@ describe('createAlert', () => {
       actions: [],
       params: {},
       throttle: null,
-      notifyOnlyOnActionGroupChange: false,
+      notifyWhen: 'onActionGroupChange' as AlertNotifyWhenType,
       createdAt: new Date('1970-01-01T00:00:00.000Z'),
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
@@ -574,7 +574,7 @@ describe('createAlert', () => {
       Array [
         "/api/alerts/alert",
         Object {
-          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerts\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"notifyOnlyOnActionGroupChange\\":false,\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
+          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerts\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"notifyWhen\\":\\"onActionGroupChange\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
       ]
     `);
@@ -597,7 +597,7 @@ describe('updateAlert', () => {
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
       apiKeyOwner: null,
-      notifyOnlyOnActionGroupChange: false,
+      notifyWhen: 'onThrottleInterval' as AlertNotifyWhenType,
     };
     const resolvedValue: Alert = {
       ...alertToUpdate,
@@ -621,7 +621,7 @@ describe('updateAlert', () => {
       Array [
         "/api/alerts/alert/123",
         Object {
-          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"notifyOnlyOnActionGroupChange\\":false}",
+          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"notifyWhen\\":\\"onThrottleInterval\\"}",
         },
       ]
     `);

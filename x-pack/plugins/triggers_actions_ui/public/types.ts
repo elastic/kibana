@@ -20,6 +20,7 @@ import {
   AlertInstanceStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
+  AlertNotifyWhenType,
 } from '../../alerts/common';
 export {
   Alert,
@@ -30,6 +31,7 @@ export {
   AlertInstanceStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
+  AlertNotifyWhenType,
 };
 export { ActionType };
 

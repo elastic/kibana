@@ -10,10 +10,7 @@ import { AlertActionParam, IntervalSchedule } from '../../../../../alerts/common
 import { Alert, AlertAction } from '../../../types';
 
 export type InitialAlert = Partial<Alert> &
-  Pick<
-    Alert,
-    'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyOnlyOnActionGroupChange'
-  >;
+  Pick<Alert, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyWhen'>;
 
 interface CommandType<
   T extends
