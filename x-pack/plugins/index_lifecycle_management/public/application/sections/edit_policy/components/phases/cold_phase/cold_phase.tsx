@@ -142,7 +142,7 @@ export const ColdPhase: FunctionComponent = () => {
                         { defaultMessage: 'Set replicas' }
                       ),
                       initialValue: Boolean(
-                        policy.phases.cold?.actions?.allocate?.number_of_replicas
+                        policy.phases.cold?.actions?.allocate?.number_of_replicas != null
                       ),
                     }}
                     fullWidth

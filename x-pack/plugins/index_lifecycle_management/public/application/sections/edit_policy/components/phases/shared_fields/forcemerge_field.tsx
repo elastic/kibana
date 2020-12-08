@@ -24,7 +24,7 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
   const { policy } = useEditPolicyContext();
 
   const initialToggleValue = useMemo<boolean>(() => {
-    return Boolean(policy.phases[phase]?.actions?.forcemerge);
+    return Boolean(policy.phases[phase]?.actions?.forcemerge != null);
   }, [policy, phase]);
 
   return (
