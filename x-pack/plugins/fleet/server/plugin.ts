@@ -44,7 +44,8 @@ import {
   registerDataStreamRoutes,
   registerAgentPolicyRoutes,
   registerSetupRoutes,
-  registerAgentRoutes,
+  registerAgentAPIRoutes,
+  registerElasticAgentRoutes,
   registerEnrollmentApiKeyRoutes,
   registerInstallScriptRoutes,
   registerOutputRoutes,
@@ -222,6 +223,7 @@ export class FleetPlugin
 
     // Always register app routes for permissions checking
     registerAppRoutes(router);
+    // For all the routes we enforce the user to have role superuser
     const routerSuperuserOnly = makeRouterEnforcingSuperuser(router);
     // Register rest of routes only if security is enabled
     if (this.security) {
@@ -247,12 +249,14 @@ export class FleetPlugin
           // we currently only use this global interceptor if fleet is enabled
           // since it would run this func on *every* req (other plugins, CSS, etc)
           registerLimitedConcurrencyRoutes(core, config);
-          registerAgentRoutes(router, config);
+          registerAgentAPIRoutes(routerSuperuserOnly, config);
           registerEnrollmentApiKeyRoutes(routerSuperuserOnly);
           registerInstallScriptRoutes({
             router: routerSuperuserOnly,
             basePath: core.http.basePath,
           });
+          // Do not enforce superuser role for Elastic Agent routes
+          registerElasticAgentRoutes(router, config);
         }
       }
     }

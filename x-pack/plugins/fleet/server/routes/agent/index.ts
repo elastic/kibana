@@ -57,7 +57,6 @@ import { appContextService } from '../../services';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
 import { FleetConfigType } from '../..';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
-import { enforceSuperUser } from '../security';
 
 const ajv = new Ajv({
   coerceTypes: true,
@@ -82,7 +81,7 @@ function makeValidator(jsonSchema: any) {
   };
 }
 
-export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
+export const registerAPIRoutes = (router: IRouter, config: FleetConfigType) => {
   // Get one
   router.get(
     {
@@ -90,7 +89,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: GetOneAgentRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    enforceSuperUser(getAgentHandler)
+    getAgentHandler
   );
   // Update
   router.put(
@@ -99,7 +98,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: UpdateAgentRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    enforceSuperUser(updateAgentHandler)
+    updateAgentHandler
   );
   // Delete
   router.delete(
@@ -108,7 +107,7 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: DeleteAgentRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    enforceSuperUser(deleteAgentHandler)
+    deleteAgentHandler
   );
   // List
   router.get(
@@ -117,9 +116,99 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       validate: GetAgentsRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    enforceSuperUser(getAgentsHandler)
+    getAgentsHandler
   );
 
+  // Agent actions
+  router.post(
+    {
+      path: AGENT_API_ROUTES.ACTIONS_PATTERN,
+      validate: PostNewAgentActionRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postNewAgentActionHandlerBuilder({
+      getAgent: AgentService.getAgent,
+      createAgentAction: AgentService.createAgentAction,
+    })
+  );
+
+  router.post(
+    {
+      path: AGENT_API_ROUTES.UNENROLL_PATTERN,
+      validate: PostAgentUnenrollRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postAgentUnenrollHandler
+  );
+
+  router.put(
+    {
+      path: AGENT_API_ROUTES.REASSIGN_PATTERN,
+      validate: PutAgentReassignRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    putAgentsReassignHandler
+  );
+
+  // Get agent events
+  router.get(
+    {
+      path: AGENT_API_ROUTES.EVENTS_PATTERN,
+      validate: GetOneAgentEventsRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
+    },
+    getAgentEventsHandler
+  );
+
+  // Get agent status for policy
+  router.get(
+    {
+      path: AGENT_API_ROUTES.STATUS_PATTERN,
+      validate: GetAgentStatusRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
+    },
+    getAgentStatusForAgentPolicyHandler
+  );
+  // upgrade agent
+  router.post(
+    {
+      path: AGENT_API_ROUTES.UPGRADE_PATTERN,
+      validate: PostAgentUpgradeRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postAgentUpgradeHandler
+  );
+  // bulk upgrade
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
+      validate: PostBulkAgentUpgradeRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsUpgradeHandler
+  );
+  // Bulk reassign
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
+      validate: PostBulkAgentReassignRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsReassignHandler
+  );
+
+  // Bulk unenroll
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
+      validate: PostBulkAgentUnenrollRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsUnenrollHandler
+  );
+};
+
+export const registerElasticAgentRoutes = (router: IRouter, config: FleetConfigType) => {
   const pollingRequestTimeout = config.agents.pollingRequestTimeout;
   // Agent checkin
   router.post(
@@ -226,95 +315,5 @@ export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
       ),
       saveAgentEvents: AgentService.saveAgentEvents,
     })
-  );
-
-  // Agent actions
-  router.post(
-    {
-      path: AGENT_API_ROUTES.ACTIONS_PATTERN,
-      validate: PostNewAgentActionRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
-    },
-    enforceSuperUser(
-      postNewAgentActionHandlerBuilder({
-        getAgent: AgentService.getAgent,
-        createAgentAction: AgentService.createAgentAction,
-      })
-    )
-  );
-
-  router.post(
-    {
-      path: AGENT_API_ROUTES.UNENROLL_PATTERN,
-      validate: PostAgentUnenrollRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
-    },
-    enforceSuperUser(postAgentUnenrollHandler)
-  );
-
-  router.put(
-    {
-      path: AGENT_API_ROUTES.REASSIGN_PATTERN,
-      validate: PutAgentReassignRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
-    },
-    enforceSuperUser(putAgentsReassignHandler)
-  );
-
-  // Get agent events
-  router.get(
-    {
-      path: AGENT_API_ROUTES.EVENTS_PATTERN,
-      validate: GetOneAgentEventsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
-    },
-    enforceSuperUser(getAgentEventsHandler)
-  );
-
-  // Get agent status for policy
-  router.get(
-    {
-      path: AGENT_API_ROUTES.STATUS_PATTERN,
-      validate: GetAgentStatusRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
-    },
-    enforceSuperUser(getAgentStatusForAgentPolicyHandler)
-  );
-  // upgrade agent
-  router.post(
-    {
-      path: AGENT_API_ROUTES.UPGRADE_PATTERN,
-      validate: PostAgentUpgradeRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
-    },
-    enforceSuperUser(postAgentUpgradeHandler)
-  );
-  // bulk upgrade
-  router.post(
-    {
-      path: AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
-      validate: PostBulkAgentUpgradeRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
-    },
-    enforceSuperUser(postBulkAgentsUpgradeHandler)
-  );
-  // Bulk reassign
-  router.post(
-    {
-      path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
-      validate: PostBulkAgentReassignRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
-    },
-    enforceSuperUser(postBulkAgentsReassignHandler)
-  );
-
-  // Bulk unenroll
-  router.post(
-    {
-      path: AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
-      validate: PostBulkAgentUnenrollRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
-    },
-    enforceSuperUser(postBulkAgentsUnenrollHandler)
   );
 };
