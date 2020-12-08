@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createSHA256Hash } from '../../utils';
+import { createSHA256Hash } from '../utils';
 import { config } from './config';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));

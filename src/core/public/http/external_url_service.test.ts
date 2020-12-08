@@ -18,9 +18,9 @@
  */
 
 import { ExternalUrlConfig } from 'src/core/server/types';
-import { createSHA256Hash } from '../../utils';
 
 import { injectedMetadataServiceMock } from '../mocks';
+import { Sha256 } from '../utils';
 
 import { ExternalUrlService } from './external_url_service';
 
@@ -35,7 +35,7 @@ const setupService = ({
 }) => {
   const hashedPolicies = policy.map((entry) => ({
     ...entry,
-    host: entry.host ? createSHA256Hash(entry.host) : undefined,
+    host: entry.host ? new Sha256().update(entry.host, 'utf8').digest('hex') : undefined,
   }));
   const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
   injectedMetadata.getExternalUrlConfig.mockReturnValue({ policy: hashedPolicies });

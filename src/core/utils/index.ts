@@ -25,5 +25,4 @@ export {
   IContextContainer,
   IContextProvider,
 } from './context';
-export { createSHA256Hash } from './crypto';
 export { DEFAULT_APP_CATEGORIES } from './default_app_categories';

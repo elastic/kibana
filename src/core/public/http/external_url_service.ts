@@ -20,9 +20,9 @@
 import { IExternalUrlPolicy } from 'src/core/server/types';
 
 import { CoreService } from 'src/core/types';
-import { createSHA256Hash } from '../../utils';
 import { IExternalUrl } from './types';
 import { InjectedMetadataSetup } from '../injected_metadata';
+import { Sha256 } from '../utils';
 
 interface SetupDeps {
   location: Pick<Location, 'origin'>;
@@ -30,11 +30,10 @@ interface SetupDeps {
 }
 
 function* getHostHashes(actualHost: string) {
-  yield createSHA256Hash(actualHost);
+  yield new Sha256().update(actualHost, 'utf8').digest('hex');
   let host = actualHost.substr(actualHost.indexOf('.') + 1);
   while (host) {
-    const hash = createSHA256Hash(host);
-    yield hash;
+    yield new Sha256().update(host, 'utf8').digest('hex');
     if (host.indexOf('.') === -1) {
       break;
     }

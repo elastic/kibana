@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createSHA256Hash } from './crypto';
+import { createSHA256Hash } from './sha256';
 
 describe('createSHA256Hash', () => {
   it('creates a hex-encoded hash by default', () => {
