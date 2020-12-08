@@ -96,12 +96,8 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     openInNewTab: false,
   });
 
-  public readonly isConfigValid = (
-    config: Config,
-    context: ActionFactoryContext
-  ): config is Config => {
-    // TODO: add validation
-    return true;
+  public readonly isConfigValid = (config: Config): config is Config => {
+    return !config.url.template;
   };
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
