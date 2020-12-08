@@ -38,12 +38,17 @@ describe('Cases connectors', () => {
     version: 'WzEwNCwxXQ==',
   };
   before(() => {
-    cy.server();
-    cy.route('POST', '**/api/actions/action').as('createConnector');
-    cy.route2('POST', `**/api/cases/configure`, (req) => {
+    cy.intercept('POST', '/api/actions/action').as('createConnector');
+    cy.intercept('POST', '/api/cases/configure', (req) => {
       const connector = JSON.parse(req.body).connector;
       req.reply(JSON.stringify({ ...configureResult, connector }));
-    });
+    }).as('saveConnector');
+    // cy.server();
+    // cy.route('POST', '**/api/actions/action').as('createConnector');
+    // cy.route2('POST', `**/api/cases/configure`, (req) => {
+    //   const connector = JSON.parse(req.body).connector;
+    //   req.reply(JSON.stringify({ ...configureResult, connector }));
+    // });
   });
 
   it('Configures a new connector', () => {
@@ -52,13 +57,16 @@ describe('Cases connectors', () => {
     openAddNewConnectorOption();
     addServiceNowConnector(serviceNowConnector);
 
-    cy.wait('@createConnector').its('status').should('eql', 200);
-    cy.get(TOASTER).should('have.text', "Created 'New connector'");
-    cy.get(TOASTER).should('not.exist');
+    cy.wait('@createConnector').then(({ response }) => {
+      cy.wrap(response!.statusCode).should('eql', 200);
+      cy.get(TOASTER).should('have.text', "Created 'New connector'");
+      cy.get(TOASTER).should('not.exist');
 
-    selectLastConnectorCreated();
+      selectLastConnectorCreated(response!.body.id);
 
-    cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');
-    cy.get(TOASTER).should('have.text', 'Saved external connection settings');
+      cy.wait('@saveConnector', { timeout: 10000 }).its('response.statusCode').should('eql', 200);
+      cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');
+      cy.get(TOASTER).should('have.text', 'Saved external connection settings');
+    });
   });
 });
