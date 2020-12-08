@@ -228,7 +228,7 @@ export function DiscoverField({
     }
     return (
       <React.Fragment>
-        <EuiTitle size="xs">
+        <EuiTitle size="xxxs">
           <h5>
             {i18n.translate('discover.fieldChooser.discoverField.multiFields', {
               defaultMessage: 'Multi fields',
@@ -238,7 +238,7 @@ export function DiscoverField({
         {multiFields.map((entry) => (
           <FieldButton
             size="s"
-            className="dscSidebarItem"
+            className="dscSidebarItem dscSidebarItem--multi"
             isActive={false}
             onClick={() => {}}
             dataTestSubj={`field-${entry.field.name}-showDetails`}
@@ -274,7 +274,7 @@ export function DiscoverField({
       panelClassName="dscSidebarItem__fieldPopoverPanel"
     >
       <EuiPopoverTitle style={{ textTransform: 'none' }}>{field.displayName}</EuiPopoverTitle>
-      <EuiTitle size="xs">
+      <EuiTitle size="xxxs">
         <h5>
           {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
             defaultMessage: 'Top 5 values',
