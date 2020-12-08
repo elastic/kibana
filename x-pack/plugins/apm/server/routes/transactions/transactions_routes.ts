@@ -8,6 +8,7 @@ import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { toNumberRt } from '../../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
+import { latencyAggregationTypeRt } from '../../lib/helpers/latency_aggregation_type';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceTransactionGroups } from '../../lib/services/get_service_transaction_groups';
 import { getTransactionBreakdown } from '../../lib/transactions/breakdown';
@@ -76,6 +77,7 @@ export const transactionGroupsOverviewRoute = createRoute({
           t.literal('errorRate'),
           t.literal('impact'),
         ]),
+        latencyAggregationType: latencyAggregationTypeRt,
       }),
     ]),
   }),
@@ -91,7 +93,14 @@ export const transactionGroupsOverviewRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: { size, numBuckets, pageIndex, sortDirection, sortField },
+      query: {
+        size,
+        numBuckets,
+        pageIndex,
+        sortDirection,
+        sortField,
+        latencyAggregationType,
+      },
     } = context.params;
 
     return getServiceTransactionGroups({
@@ -103,6 +112,7 @@ export const transactionGroupsOverviewRoute = createRoute({
       sortDirection,
       sortField,
       numBuckets,
+      latencyAggregationType,
     });
   },
 });
