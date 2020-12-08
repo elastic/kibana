@@ -473,7 +473,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
-    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[9][0]).toContain(
+    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[8][0]).toContain(
       'sortIds was empty on searchResult'
     );
   });
@@ -554,7 +554,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
-    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[16][0]).toContain(
+    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[15][0]).toContain(
       'sortIds was empty on searchResult name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });

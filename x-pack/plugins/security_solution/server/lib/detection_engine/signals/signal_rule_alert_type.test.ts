@@ -43,7 +43,7 @@ jest.mock('./utils', () => {
     getListsClient: jest.fn(),
     getExceptions: jest.fn(),
     sortExceptionItems: jest.fn(),
-    preCheckRuleExecution: jest.fn(),
+    preExecutionRuleCheck: jest.fn(),
   };
 });
 jest.mock('../notifications/schedule_notification_actions');
