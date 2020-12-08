@@ -20,20 +20,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = encodeURIComponent(metadata.end);
   const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'testing' }));
 
-  describe('Transaction charts', () => {
+  describe('Throughput', () => {
     describe('when data is not loaded ', () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transactions/charts?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/services/opbeans-node/transactions/charts/throughput?start=${start}&end=${end}&uiFilters=${uiFilters}`
         );
 
         expect(response.status).to.be(200);
 
-        expect(response.body.apmTimeseries.overallAvgDuration).to.be(null);
-        expect(response.body.apmTimeseries.responseTimes.avg.length).to.be(0);
-        expect(response.body.apmTimeseries.responseTimes.p95.length).to.be(0);
-        expect(response.body.apmTimeseries.responseTimes.p99.length).to.be(0);
-        expect(response.body.apmTimeseries.tpmBuckets.length).to.be(0);
+        expect(response.body.throughput.length).to.be(0);
       });
     });
 
@@ -45,28 +41,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         response = await supertest.get(
-          `/api/apm/services/opbeans-node/transactions/charts?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/services/opbeans-node/transactions/charts/throughput?start=${start}&end=${end}&uiFilters=${uiFilters}`
         );
       });
 
-      it('returns some data', async () => {
+      it('returns throughput timeseries', async () => {
         expect(response.status).to.be(200);
 
-        expect(response.body.apmTimeseries.overallAvgDuration).not.to.be(null);
-        expect(response.body.apmTimeseries.responseTimes.avg.length).to.be.greaterThan(0);
-        expect(response.body.apmTimeseries.responseTimes.p95.length).to.be.greaterThan(0);
-        expect(response.body.apmTimeseries.responseTimes.p99.length).to.be.greaterThan(0);
-        expect(response.body.apmTimeseries.tpmBuckets.length).to.be.greaterThan(0);
-      });
-
-      it('returns the correct data', () => {
-        expectSnapshot(response.body.apmTimeseries.overallAvgDuration).toMatchInline(
-          `600888.274678112`
-        );
-        expectSnapshot(response.body.apmTimeseries.responseTimes.avg.length).toMatchInline(`61`);
-        expectSnapshot(response.body.apmTimeseries.tpmBuckets.length).toMatchInline(`3`);
-
-        expectSnapshot(response.body).toMatch();
+        expect(response.body.throughput.length).to.be.greaterThan(0);
       });
     });
   });
