@@ -14,6 +14,9 @@ export interface EditPolicyContextValue {
   policy: SerializedPolicy;
   existingPolicies: PolicyFromES[];
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  license: {
+    canUseSearchableSnapshot: () => boolean;
+  };
   policyName?: string;
 }
 
