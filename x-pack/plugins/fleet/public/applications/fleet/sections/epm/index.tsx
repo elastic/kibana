@@ -11,6 +11,7 @@ import { useBreadcrumbs } from '../../hooks';
 import { CreatePackagePolicyPage } from '../agent_policy/create_package_policy_page';
 import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
+import { Policy } from './screens/policy';
 
 export const EPMApp: React.FunctionComponent = () => {
   useBreadcrumbs('integrations');
@@ -20,6 +21,9 @@ export const EPMApp: React.FunctionComponent = () => {
       <Switch>
         <Route path={PAGE_ROUTING_PATHS.add_integration_to_policy}>
           <CreatePackagePolicyPage />
+        </Route>
+        <Route path={PAGE_ROUTING_PATHS.integration_policy_edit}>
+          <Policy />
         </Route>
         <Route path={PAGE_ROUTING_PATHS.integration_details}>
           <Detail />

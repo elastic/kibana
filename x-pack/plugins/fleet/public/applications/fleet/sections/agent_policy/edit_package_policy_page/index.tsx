@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -46,14 +46,23 @@ import { ExtensionWrapper } from '../../../components/extension_wrapper';
 import { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
 import { PackagePolicyEditExtensionComponentProps } from '../../../types';
 
-export const EditPackagePolicyPage: React.FunctionComponent = () => {
+export const EditPackagePolicyPage = memo(() => {
+  const {
+    params: { policyId, packagePolicyId },
+  } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
+
+  return <EditPackagePolicyForm policyId={policyId} packagePolicyId={packagePolicyId} />;
+});
+
+export const EditPackagePolicyForm = memo<{
+  packagePolicyId: string;
+  /** If not defined, then agent policy id will be retrieved from the given packagePolicyId */
+  policyId: string;
+}>(({ policyId, packagePolicyId }) => {
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
-  const {
-    params: { policyId, packagePolicyId },
-  } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
   const history = useHistory();
   const { getHref, getPath } = useLink();
 
@@ -362,7 +371,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
           error={
             loadingError ||
             i18n.translate('xpack.fleet.editPackagePolicy.errorLoadingDataMessage', {
-              defaultMessage: 'There was an error loading this intergration information',
+              defaultMessage: 'There was an error loading this integration information',
             })
           }
         />
@@ -423,7 +432,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
       )}
     </CreatePackagePolicyPageLayout>
   );
-};
+});
 
 const Breadcrumb: React.FunctionComponent<{ policyName: string; policyId: string }> = ({
   policyName,
