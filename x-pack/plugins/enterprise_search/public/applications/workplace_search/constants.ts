@@ -260,3 +260,10 @@ export const GITHUB_LINK_TITLE = i18n.translate(
 );
 
 export const CUSTOM_SERVICE_TYPE = 'custom';
+
+export const DOCUMENTATION_LINK_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.documentation',
+  {
+    defaultMessage: 'Documentation',
+  }
+);
