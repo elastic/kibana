@@ -54,7 +54,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         apiKeyOwner: null,
         muteAll: false,
         mutedInstanceIds: [],
-        notifyWhen: null,
+        notifyWhen: 'onThrottleInterval',
         scheduledTaskId: createdAlert.scheduledTaskId,
         createdAt: response.body.createdAt,
         updatedAt: response.body.updatedAt,

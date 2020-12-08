@@ -73,6 +73,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               },
             ],
             throttle: '1m',
+            notifyWhen: 'onThrottleInterval',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
@@ -126,7 +127,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                     params: {},
                   },
                 ],
-                notifyWhen: null,
                 scheduledTaskId: createdAlert.scheduledTaskId,
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
@@ -172,6 +172,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             schedule: { interval: '12s' },
             actions: [],
             throttle: '1m',
+            notifyWhen: 'onThrottleInterval',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
@@ -214,7 +215,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
                 executionStatus: response.body.executionStatus,
-                notifyWhen: null,
               });
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
@@ -256,6 +256,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             schedule: { interval: '12s' },
             actions: [],
             throttle: '1m',
+            notifyWhen: 'onThrottleInterval',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
@@ -305,7 +306,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 apiKeyOwner: user.username,
                 muteAll: false,
                 mutedInstanceIds: [],
-                notifyWhen: null,
                 scheduledTaskId: createdAlert.scheduledTaskId,
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
@@ -351,6 +351,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             schedule: { interval: '12s' },
             actions: [],
             throttle: '1m',
+            notifyWhen: 'onThrottleInterval',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
@@ -400,7 +401,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 apiKeyOwner: user.username,
                 muteAll: false,
                 mutedInstanceIds: [],
-                notifyWhen: null,
                 scheduledTaskId: createdAlert.scheduledTaskId,
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
@@ -455,6 +455,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             schedule: { interval: '12s' },
             actions: [],
             throttle: '1m',
+            notifyWhen: 'onThrottleInterval',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
@@ -493,7 +494,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 apiKeyOwner: user.username,
                 muteAll: false,
                 mutedInstanceIds: [],
-                notifyWhen: null,
                 scheduledTaskId: createdAlert.scheduledTaskId,
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
@@ -534,6 +534,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             schedule: { interval: '12s' },
             actions: [],
             throttle: '1m',
+            notifyWhen: 'onThrottleInterval',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
@@ -803,6 +804,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             schedule: { interval: '1m' },
             actions: [],
             throttle: '1m',
+            notifyWhen: 'onThrottleInterval',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
@@ -868,6 +870,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             schedule: { interval: '1m' },
             actions: [],
             throttle: '1m',
+            notifyWhen: 'onThrottleInterval',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
@@ -943,6 +946,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             schedule: { interval: '1s' },
             actions: [],
             throttle: '1m',
+            notifyWhen: 'onThrottleInterval',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
