@@ -41,7 +41,7 @@ describe('state action machine', () => {
   const countUntilThree = countUntilModel(3);
   const finalStateP = stateActionMachine(state, next, countUntilThree);
 
-  test('await the next action and passes the result to the model with the updated state from the previous step', () => {
+  test('await the next action and passes the response to the model with the updated state from the previous step', () => {
     expect(countUntilThree.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [

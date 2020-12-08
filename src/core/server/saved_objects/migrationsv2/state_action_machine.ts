@@ -68,8 +68,8 @@ export async function stateActionMachine<S extends ControlState>(
 
   while (nextAction != null) {
     // Perform the action that triggers the next step
-    const actionResult = await nextAction();
-    const newState = model(state, actionResult);
+    const actionResponse = await nextAction();
+    const newState = model(state, actionResponse);
 
     controlStateStepCounter =
       newState.controlState === state.controlState ? controlStateStepCounter + 1 : 0;
