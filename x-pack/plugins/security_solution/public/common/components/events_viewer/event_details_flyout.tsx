@@ -79,7 +79,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   return (
     <StyledEuiFlyout size="s" onClose={handleClearSelection}>
       <EuiFlyoutHeader hasBorder>
-        <ExpandableEventTitle isAlert={ruleId != null} loading={loading} />
+        <ExpandableEventTitle isAlert={ruleId != null} loading={loading} timelineId={timelineId} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ExpandableEvent

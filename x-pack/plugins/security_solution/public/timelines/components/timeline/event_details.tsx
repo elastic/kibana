@@ -19,6 +19,7 @@ import { BrowserFields, DocValueFields } from '../../../common/containers/source
 import {
   ExpandableEvent,
   ExpandableEventTitle,
+  OnEventDetailsClose,
 } from '../../../timelines/components/timeline/expandable_event';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
@@ -28,12 +29,14 @@ interface EventDetailsProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   timelineId: string;
+  onEventDetailsClose?: OnEventDetailsClose;
 }
 
 const EventDetailsComponent: React.FC<EventDetailsProps> = ({
   browserFields,
   docValueFields,
   timelineId,
+  onEventDetailsClose,
 }) => {
   const expandedEvent = useDeepEqualSelector(
     (state) => state.timeline.timelineById[timelineId]?.expandedEvent
@@ -61,7 +64,12 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
 
   return (
     <>
-      <ExpandableEventTitle isAlert={ruleId != null} loading={loading} />
+      <ExpandableEventTitle
+        isAlert={ruleId != null}
+        loading={loading}
+        timelineId={timelineId}
+        onEventDetailsClose={onEventDetailsClose}
+      />
       <EuiSpacer size="m" />
       <ExpandableEvent
         browserFields={browserFields}

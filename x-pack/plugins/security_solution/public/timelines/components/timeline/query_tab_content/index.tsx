@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
@@ -157,6 +157,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   updateEventTypeAndIndexesName,
 }) => {
   const [showEventDetailsColumn, setShowEventDetailsColumn] = useState(false);
+
+  const onEventDetailsClose = useCallback(() => {
+    setShowEventDetailsColumn(false);
+  }, [setShowEventDetailsColumn]);
 
   useEffect(() => {
     // it should changed only once to true and then stay visible till the component umount
@@ -331,6 +335,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 timelineId={timelineId}
+                onEventDetailsClose={onEventDetailsClose}
               />
             </ScrollableFlexItem>
           </>

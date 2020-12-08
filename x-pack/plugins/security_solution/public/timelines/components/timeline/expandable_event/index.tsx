@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useMemo, useState } from 'react';
+
 import {
+  EuiButtonIcon,
   EuiTextColor,
   EuiLoadingContent,
   EuiTitle,
@@ -12,8 +15,9 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
 import { find } from 'lodash/fp';
 
 import { TimelineExpandedEvent } from '../../../../../common/types/timeline';
@@ -27,6 +31,7 @@ import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy
 import * as i18n from './translations';
 import { LineClamp } from '../../../../common/components/line_clamp';
 
+export type OnEventDetailsClose = () => void;
 interface Props {
   browserFields: BrowserFields;
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -36,11 +41,38 @@ interface Props {
 }
 
 export const ExpandableEventTitle = React.memo(
-  ({ isAlert, loading }: { isAlert: boolean; loading: boolean }) => (
-    <EuiTitle size="s">
-      {!loading ? <h4>{isAlert ? i18n.ALERT_DETAILS : i18n.EVENT_DETAILS}</h4> : <></>}
-    </EuiTitle>
-  )
+  ({
+    isAlert,
+    loading,
+    timelineId,
+    onEventDetailsClose,
+  }: {
+    isAlert: boolean;
+    loading: boolean;
+    timelineId: string;
+    onEventDetailsClose?: OnEventDetailsClose;
+  }) => {
+    return (
+      <div>
+        <EuiFlexGroup justifyContent="spaceBetween" wrap={true}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              {!loading ? <h4>{isAlert ? i18n.ALERT_DETAILS : i18n.EVENT_DETAILS}</h4> : <></>}
+            </EuiTitle>
+          </EuiFlexItem>
+          {onEventDetailsClose && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="cross"
+                aria-label={i18n.CLOSE}
+                onClick={onEventDetailsClose}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </div>
+    );
+  }
 );
 
 ExpandableEventTitle.displayName = 'ExpandableEventTitle';
@@ -72,12 +104,14 @@ export const ExpandableEvent = React.memo<Props>(
 
     return (
       <>
-        <EuiDescriptionList data-test-subj="event-message" compressed>
-          <EuiDescriptionListTitle>{i18n.MESSAGE}</EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            <LineClamp content={message} />
-          </EuiDescriptionListDescription>
-        </EuiDescriptionList>
+        {message && (
+          <EuiDescriptionList data-test-subj="event-message" compressed>
+            <EuiDescriptionListTitle>{i18n.MESSAGE}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <LineClamp content={message} />
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        )}
         <EuiSpacer size="m" />
         <EventDetails
           browserFields={browserFields}
