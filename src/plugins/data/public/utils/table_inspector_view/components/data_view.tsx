@@ -23,14 +23,10 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { DataTableFormat } from './data_table';
 import { IUiSettingsClient } from '../../../../../../core/public';
-import {
-  Datatable,
-  DatatableColumn,
-} from '../../../../../expressions/common/expression_types/specs';
 import { InspectorViewProps, Adapters } from '../../../../../inspector/public';
 import { UiActionsStart } from '../../../../../ui_actions/public';
 import { FieldFormatsStart } from '../../../field_formats';
-import { TablesAdapter } from '../../../../../expressions/common';
+import { TablesAdapter, Datatable, DatatableColumn } from '../../../../../expressions/public';
 
 interface DataViewComponentState {
   datatable: Datatable;
@@ -55,7 +51,6 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
   };
 
   state = {} as DataViewComponentState;
-  _isMounted = false;
 
   static getDerivedStateFromProps(
     nextProps: Readonly<DataViewComponentProps>,
@@ -87,12 +82,10 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
   };
 
   componentDidMount() {
-    this._isMounted = true;
     this.props.adapters.tables!.on('change', this.onUpdateData);
   }
 
   componentWillUnmount() {
-    this._isMounted = false;
     this.props.adapters.tables!.removeListener('change', this.onUpdateData);
   }
 

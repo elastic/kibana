@@ -36,10 +36,7 @@ import { i18n } from '@kbn/i18n';
 import { DataDownloadOptions } from './download_options';
 import { DataViewRow, DataViewColumn } from '../types';
 import { IUiSettingsClient } from '../../../../../../core/public';
-import {
-  Datatable,
-  DatatableColumn,
-} from '../../../../../expressions/common/expression_types/specs';
+import { Datatable, DatatableColumn } from '../../../../../expressions/public';
 import { FieldFormatsStart } from '../../../field_formats';
 import { UiActionsStart } from '../../../../../ui_actions/public';
 
