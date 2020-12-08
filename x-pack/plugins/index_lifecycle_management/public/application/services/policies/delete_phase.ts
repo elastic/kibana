@@ -13,7 +13,7 @@ import {
   positiveNumberRequiredMessage,
 } from './policy_validation';
 
-const deletePhaseInitialization: DeletePhase = {
+export const deletePhaseInitialization: DeletePhase = {
   phaseEnabled: false,
   selectedMinimumAge: '0',
   selectedMinimumAgeUnits: 'd',

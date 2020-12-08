@@ -19,7 +19,7 @@ import {
 import { determineDataTierAllocationType } from '../../lib';
 import { serializePhaseWithAllocation } from './shared';
 
-const warmPhaseInitialization: WarmPhase = {
+export const warmPhaseInitialization: WarmPhase = {
   phaseEnabled: false,
   warmPhaseOnRollover: false,
   selectedMinimumAge: '0',
