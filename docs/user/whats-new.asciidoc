@@ -74,7 +74,7 @@ percentage bar charts and percentage area charts.
 [role="screenshot"]
 image::user/images/lens-whats-new.png[Percentage bar chart in Lens]
 
-For more information, refer to the {kibana-ref}/dashboard.html#lens[documentation].
+For more information, refer to the {kibana-ref}/dashboard.html#create-panels-with-lens[documentation].
 
 [float]
 [[drilldowns-to-urls]]
