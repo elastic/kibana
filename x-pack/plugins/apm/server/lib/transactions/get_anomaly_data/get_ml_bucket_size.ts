@@ -5,7 +5,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 interface IOptions {
   setup: Setup & SetupTimeRange;

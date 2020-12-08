@@ -3,26 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
-import { PromiseReturnType } from '../../../../../../observability/typings/common';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
-  TRANSACTION_RESULT,
   TRANSACTION_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../../common/utils/range_filter';
+} from '../../../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
-} from '../../../helpers/aggregated_transactions';
-import { getBucketSize } from '../../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
+} from '../../../lib/helpers/aggregated_transactions';
+import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
+import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
+import { convertLatencyBucketsToCoordinates } from './transform';
 
-export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
-export function timeseriesFetcher({
+export type LatencyChartsSearchResponse = PromiseReturnType<
+  typeof searchLatency
+>;
+
+async function searchLatency({
   serviceName,
   transactionType,
   transactionName,
@@ -51,10 +53,13 @@ export function timeseriesFetcher({
     filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
   }
 
-  // TODO reimplement these as uiFilters
   if (transactionType) {
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
   }
+
+  const field = getTransactionDurationFieldForAggregatedTransactions(
+    searchAggregatedTransactions
+  );
 
   const params = {
     apm: {
@@ -68,7 +73,7 @@ export function timeseriesFetcher({
       size: 0,
       query: { bool: { filter } },
       aggs: {
-        response_times: {
+        latency: {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: intervalString,
@@ -76,56 +81,57 @@ export function timeseriesFetcher({
             extended_bounds: { min: start, max: end },
           },
           aggs: {
-            avg: {
-              avg: {
-                field: getTransactionDurationFieldForAggregatedTransactions(
-                  searchAggregatedTransactions
-                ),
-              },
-            },
+            avg: { avg: { field } },
             pct: {
               percentiles: {
-                field: getTransactionDurationFieldForAggregatedTransactions(
-                  searchAggregatedTransactions
-                ),
+                field,
                 percents: [95, 99],
                 hdr: { number_of_significant_value_digits: 2 },
               },
             },
           },
         },
-        overall_avg_duration: {
-          avg: {
-            field: getTransactionDurationFieldForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
-          },
-        },
-        transaction_results: {
-          terms: { field: TRANSACTION_RESULT, missing: '' },
-          aggs: {
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                min_doc_count: 0,
-                extended_bounds: { min: start, max: end },
-              },
-              aggs: {
-                count: {
-                  value_count: {
-                    field: getTransactionDurationFieldForAggregatedTransactions(
-                      searchAggregatedTransactions
-                    ),
-                  },
-                },
-              },
-            },
-          },
-        },
+        overall_avg_duration: { avg: { field } },
       },
     },
   };
 
   return apmEventClient.search(params);
+}
+
+export async function getLatencyCharts({
+  serviceName,
+  transactionType,
+  transactionName,
+  setup,
+  searchAggregatedTransactions,
+}: {
+  serviceName: string;
+  transactionType: string | undefined;
+  transactionName: string | undefined;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+}) {
+  const response = await searchLatency({
+    serviceName,
+    transactionType,
+    transactionName,
+    setup,
+    searchAggregatedTransactions,
+  });
+
+  if (!response.aggregations) {
+    return {
+      latency: { avg: [], p95: [], p99: [] },
+      overallAvgDuration: null,
+    };
+  }
+
+  return {
+    overallAvgDuration:
+      response.aggregations.overall_avg_duration.value || null,
+    latency: convertLatencyBucketsToCoordinates(
+      response.aggregations.latency.buckets
+    ),
+  };
 }

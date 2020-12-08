@@ -22,12 +22,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = encodeURIComponent(range.end);
   const transactionType = 'request';
 
-  describe('APM Transaction Overview', () => {
+  describe('Latency', () => {
     describe('when data is loaded', () => {
       before(() => esArchiver.load(archiveName));
       after(() => esArchiver.unload(archiveName));
 
-      describe('and fetching transaction charts with uiFilters', () => {
+      describe('and fetching latency with uiFilters', () => {
         const serviceName = 'opbeans-java';
         let response: PromiseReturnType<typeof supertest.get>;
 
@@ -35,7 +35,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const uiFilters = encodeURIComponent(JSON.stringify({}));
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/${serviceName}/transactions/charts/latency?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
           it('should return an error response', () => {
@@ -46,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         describe('without uiFilters', () => {
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}`
+              `/api/apm/services/${serviceName}/transactions/charts/latency?start=${start}&end=${end}&transactionType=${transactionType}`
             );
           });
           it('should return an error response', () => {
@@ -58,7 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'production' }));
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/${serviceName}/transactions/charts/latency?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
 
@@ -81,13 +81,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('when not defined environments selected', () => {
+        describe('when not defined environments seleted', () => {
           const uiFilters = encodeURIComponent(
             JSON.stringify({ environment: 'ENVIRONMENT_NOT_DEFINED' })
           );
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/${serviceName}/transactions/charts/latency?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
 
@@ -113,7 +113,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const uiFilters = encodeURIComponent(JSON.stringify({ environment: 'ENVIRONMENT_ALL' }));
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/${serviceName}/transactions/charts/latency?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
 
@@ -132,7 +132,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           );
           before(async () => {
             response = await supertest.get(
-              `/api/apm/services/${serviceName}/transactions/charts?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
+              `/api/apm/services/${serviceName}/transactions/charts/latency?start=${start}&end=${end}&transactionType=${transactionType}&uiFilters=${uiFilters}`
             );
           });
 

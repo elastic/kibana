@@ -6,18 +6,20 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { toNumberRt } from '../../../common/runtime_types/to_number_rt';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
-import { latencyAggregationTypeRt } from '../../lib/helpers/latency_aggregation_type';
-import { setupRequest } from '../../lib/helpers/setup_request';
-import { getServiceTransactionGroups } from '../../lib/services/get_service_transaction_groups';
-import { getTransactionBreakdown } from '../../lib/transactions/breakdown';
-import { getTransactionCharts } from '../../lib/transactions/charts';
-import { getTransactionDistribution } from '../../lib/transactions/distribution';
-import { getTransactionGroupList } from '../../lib/transaction_groups';
-import { getErrorRate } from '../../lib/transaction_groups/get_error_rate';
-import { createRoute } from '../create_route';
-import { rangeRt, uiFiltersRt } from '../default_api_types';
+import { createRoute } from './create_route';
+import { rangeRt, uiFiltersRt } from './default_api_types';
+import { toNumberRt } from '../../common/runtime_types/to_number_rt';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { setupRequest } from '../lib/helpers/setup_request';
+import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
+import { getTransactionBreakdown } from '../lib/transactions/breakdown';
+import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
+import { getTransactionDistribution } from '../lib/transactions/distribution';
+import { getTransactionGroupList } from '../lib/transaction_groups';
+import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
+import { getLatencyCharts } from '../lib/transactions/get_latency_charts';
+import { getThroughputCharts } from '../lib/transactions/get_throughput_charts';
+import { latencyAggregationTypeRt } from '../lib/helpers/latency_aggregation_type';
 
 /**
  * Returns a list of transactions grouped by name
@@ -117,15 +119,8 @@ export const transactionGroupsOverviewRoute = createRoute({
   },
 });
 
-/**
- * Returns timeseries for latency, throughput and anomalies
- * TODO: break it into 3 new APIs:
- * - Latency: /transactions/charts/latency
- * - Throughput: /transactions/charts/throughput
- * - anomalies: /transactions/charts/anomaly
- */
-export const transactionChartsRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/transactions/charts',
+export const transactionLatencyChatsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/transactions/charts/latency',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -162,10 +157,61 @@ export const transactionChartsRoute = createRoute({
       transactionName,
       setup,
       searchAggregatedTransactions,
-      logger,
     };
 
-    return getTransactionCharts(options);
+    const { latency, overallAvgDuration } = await getLatencyCharts(options);
+
+    const anomalyTimeseries = latency
+      ? await getAnomalySeries({
+          ...options,
+          logger,
+          timeSeriesDates: latency.avg.map(({ x }) => x),
+        })
+      : null;
+
+    return { latency, overallAvgDuration, anomalyTimeseries };
+  },
+});
+
+export const transactionThroughputChatsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/transactions/charts/throughput',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      t.partial({
+        transactionType: t.string,
+        transactionName: t.string,
+      }),
+      uiFiltersRt,
+      rangeRt,
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionType, transactionName } = context.params.query;
+
+    if (!setup.uiFilters.environment) {
+      throw Boom.badRequest(
+        `environment is a required property of the ?uiFilters JSON for transaction_groups/charts.`
+      );
+    }
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return await getThroughputCharts({
+      serviceName,
+      transactionType,
+      transactionName,
+      setup,
+      searchAggregatedTransactions,
+    });
   },
 });
 

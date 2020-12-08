@@ -4,25 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { timeseriesResponse } from './mock_responses/timeseries_response';
-import {
-  ApmTimeSeriesResponse,
-  getTpmBuckets,
-  timeseriesTransformer,
-} from './transform';
+import { timeseriesResponse } from './mock_response/timeseries_response';
+import { getThroughputBuckets } from './transform';
 
-describe('timeseriesTransformer', () => {
-  let res: ApmTimeSeriesResponse;
-  beforeEach(async () => {
-    res = await timeseriesTransformer({
-      timeseriesResponse,
-      bucketSize: 120,
-      durationAsMinutes: 10,
-    });
-  });
+describe('getThroughputBuckets', () => {
+  const bucketSize = 30;
+  const durationAsMinutes = 10;
 
   it('should have correct order', () => {
-    expect(res.tpmBuckets.map((bucket) => bucket.key)).toEqual([
+    const throughput = getThroughputBuckets({
+      throughputResultBuckets:
+        timeseriesResponse.aggregations?.throughput.buckets,
+      bucketSize,
+      durationAsMinutes,
+    });
+    expect(throughput.map((bucket) => bucket.key)).toEqual([
       'HTTP 2xx',
       'HTTP 3xx',
       'HTTP 4xx',
@@ -31,13 +27,7 @@ describe('timeseriesTransformer', () => {
     ]);
   });
 
-  it('should match snapshot', () => {
-    expect(res).toMatchSnapshot();
-  });
-});
-
-describe('getTpmBuckets', () => {
-  it('should return response', () => {
+  it('calculates the thoughput based bucket size and duration', () => {
     const buckets = [
       {
         key: 'HTTP 4xx',
@@ -48,33 +38,25 @@ describe('getTpmBuckets', () => {
               key_as_string: '',
               key: 0,
               doc_count: 0,
-              count: {
-                value: 0,
-              },
+              count: { value: 0 },
             },
             {
               key_as_string: '',
               key: 1,
               doc_count: 200,
-              count: {
-                value: 200,
-              },
+              count: { value: 200 },
             },
             {
               key_as_string: '',
               key: 2,
               doc_count: 300,
-              count: {
-                value: 300,
-              },
+              count: { value: 300 },
             },
             {
               key_as_string: '',
               key: 3,
               doc_count: 400,
-              count: {
-                value: 400,
-              },
+              count: { value: 400 },
             },
           ],
         },
@@ -88,46 +70,36 @@ describe('getTpmBuckets', () => {
               key_as_string: '',
               key: 0,
               doc_count: 0,
-              count: {
-                value: 0,
-              },
+              count: { value: 0 },
             },
             {
               key_as_string: '',
               key: 1,
               doc_count: 100,
-              count: {
-                value: 100,
-              },
+              count: { value: 100 },
             },
             {
               key_as_string: '',
               key: 2,
               doc_count: 100,
-              count: {
-                value: 100,
-              },
+              count: { value: 100 },
             },
             {
               key_as_string: '',
               key: 3,
               doc_count: 300,
-              count: {
-                value: 300,
-              },
+              count: { value: 300 },
             },
           ],
         },
       },
     ];
-
-    expect(
-      getTpmBuckets({
-        transactionResultBuckets: buckets,
-        bucketSize: 120,
-        durationAsMinutes: 10,
-      })
-    ).toEqual([
+    const throuput = getThroughputBuckets({
+      throughputResultBuckets: buckets,
+      bucketSize: 120,
+      durationAsMinutes: 10,
+    });
+    expect(throuput).toEqual([
       {
         avg: 90,
         dataPoints: [

@@ -5,7 +5,7 @@
  */
 
 import { first, last } from 'lodash';
-import { Coordinate, RectCoordinate } from '../../../../../typings/timeseries';
+import { Coordinate, RectCoordinate } from '../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
 
 type IBucket = ReturnType<typeof getBucket>;
