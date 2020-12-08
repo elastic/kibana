@@ -9,8 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiFlexGrid,
+  EuiIconTip,
   EuiFormRow,
   EuiFieldNumber,
   EuiSelect,
@@ -166,87 +165,83 @@ export const ActionFrequencyForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const labelForAlertRenotify = (
+    <>
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.alertForm.renotifyFieldLabel"
+        defaultMessage="Notify every"
+      />{' '}
+      <EuiIconTip
+        position="right"
+        type="questionInCircle"
+        content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip', {
+          defaultMessage: 'Define how often to repeat the action while the alert is active.',
+        })}
+      />
+    </>
+  );
+
   return (
     <Fragment>
-      <EuiFlexGrid columns={1}>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h1>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.title"
-                defaultMessage="Action Frequency"
-              />
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-      <EuiFlexGrid columns={2}>
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertForm.actionFrequency.description"
-              defaultMessage="Choose how often the actions should run when the alert is active."
+      <EuiFormRow fullWidth label={labelForAlertRenotify}>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiSuperSelect
+              data-test-subj="actionFrequencySelect"
+              options={ACTION_FREQUENCY_OPTIONS}
+              valueOfSelected={actionFrequencyValue}
+              onChange={onActionFrequencyValueChange}
             />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSuperSelect
-            data-test-subj="actionFrequencySelect"
-            options={ACTION_FREQUENCY_OPTIONS}
-            valueOfSelected={actionFrequencyValue}
-            onChange={onActionFrequencyValueChange}
-          />
-          {showCustomActionFrequencyOpts && (
-            <Fragment>
-              <EuiSpacer />
-              <EuiFormRow fullWidth>
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiFieldNumber
-                      fullWidth
-                      min={1}
-                      compressed
-                      value={alertThrottle || ''}
-                      name="throttle"
-                      data-test-subj="throttleInput"
-                      prepend={i18n.translate(
-                        'xpack.triggersActionsUI.sections.alertForm.actionFrequency.label',
-                        {
-                          defaultMessage: 'Every',
-                        }
-                      )}
-                      onChange={(e) => {
-                        pipe(
-                          some(e.target.value.trim()),
-                          filter((value) => value !== ''),
-                          map((value) => parseInt(value, 10)),
-                          filter((value) => !isNaN(value)),
-                          map((value) => {
-                            setAlertThrottle(value);
-                            onThrottleChange(value, alertThrottleUnit);
-                          })
-                        );
-                      }}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiSelect
-                      compressed
-                      data-test-subj="throttleUnitInput"
-                      value={alertThrottleUnit}
-                      options={getTimeOptions(alertThrottle ?? 1)}
-                      onChange={(e) => {
-                        setAlertThrottleUnit(e.target.value);
-                        onThrottleUnitChange(e.target.value);
-                      }}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormRow>
-            </Fragment>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGrid>
+            {showCustomActionFrequencyOpts && (
+              <Fragment>
+                <EuiSpacer />
+                <EuiFormRow fullWidth>
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem>
+                      <EuiFieldNumber
+                        fullWidth
+                        min={1}
+                        value={alertThrottle || ''}
+                        name="throttle"
+                        data-test-subj="throttleInput"
+                        prepend={i18n.translate(
+                          'xpack.triggersActionsUI.sections.alertForm.actionFrequency.label',
+                          {
+                            defaultMessage: 'Every',
+                          }
+                        )}
+                        onChange={(e) => {
+                          pipe(
+                            some(e.target.value.trim()),
+                            filter((value) => value !== ''),
+                            map((value) => parseInt(value, 10)),
+                            filter((value) => !isNaN(value)),
+                            map((value) => {
+                              setAlertThrottle(value);
+                              onThrottleChange(value, alertThrottleUnit);
+                            })
+                          );
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiSelect
+                        data-test-subj="throttleUnitInput"
+                        value={alertThrottleUnit}
+                        options={getTimeOptions(alertThrottle ?? 1)}
+                        onChange={(e) => {
+                          setAlertThrottleUnit(e.target.value);
+                          onThrottleUnitChange(e.target.value);
+                        }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFormRow>
+              </Fragment>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
     </Fragment>
   );
 };

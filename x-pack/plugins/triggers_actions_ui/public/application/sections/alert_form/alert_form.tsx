@@ -20,6 +20,7 @@ import {
   EuiComboBox,
   EuiFieldNumber,
   EuiSelect,
+  EuiIconTip,
   EuiButtonIcon,
   EuiHorizontalRule,
   EuiLoadingSpinner,
@@ -533,9 +534,25 @@ export const AlertForm = ({
     </Fragment>
   );
 
+  const labelForAlertChecked = (
+    <>
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.alertForm.checkFieldLabel"
+        defaultMessage="Check every"
+      />{' '}
+      <EuiIconTip
+        position="right"
+        type="questionInCircle"
+        content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.checkWithTooltip', {
+          defaultMessage: 'Define how often to evaluate the condition.',
+        })}
+      />
+    </>
+  );
+
   return (
     <EuiForm>
-      <EuiFlexGrid columns={1}>
+      <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
@@ -553,7 +570,6 @@ export const AlertForm = ({
               fullWidth
               autoFocus={true}
               isInvalid={errors.name.length > 0 && alert.name !== undefined}
-              compressed
               name="name"
               data-test-subj="alertNameInput"
               value={alert.name || ''}
@@ -567,6 +583,105 @@ export const AlertForm = ({
               }}
             />
           </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.triggersActionsUI.sections.alertForm.tagsFieldLabel', {
+              defaultMessage: 'Tags (optional)',
+            })}
+          >
+            <EuiComboBox
+              noSuggestions
+              fullWidth
+              data-test-subj="tagsComboBox"
+              selectedOptions={tagsOptions}
+              onCreateOption={(searchValue: string) => {
+                const newOptions = [...tagsOptions, { label: searchValue }];
+                setAlertProperty(
+                  'tags',
+                  newOptions.map((newOption) => newOption.label)
+                );
+              }}
+              onChange={(selectedOptions: Array<{ label: string }>) => {
+                setAlertProperty(
+                  'tags',
+                  selectedOptions.map((selectedOption) => selectedOption.label)
+                );
+              }}
+              onBlur={() => {
+                if (!alert.tags) {
+                  setAlertProperty('tags', []);
+                }
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiSpacer size="m" />
+      <EuiFlexGrid columns={2}>
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            display="rowCompressed"
+            label={labelForAlertChecked}
+            isInvalid={errors.interval.length > 0}
+            error={errors.interval}
+          >
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>
+                <EuiFieldNumber
+                  fullWidth
+                  min={1}
+                  isInvalid={errors.interval.length > 0}
+                  value={alertInterval || ''}
+                  name="interval"
+                  data-test-subj="intervalInput"
+                  onChange={(e) => {
+                    const interval =
+                      e.target.value !== '' ? parseInt(e.target.value, 10) : undefined;
+                    setAlertInterval(interval);
+                    setScheduleProperty('interval', `${e.target.value}${alertIntervalUnit}`);
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  fullWidth
+                  value={alertIntervalUnit}
+                  options={getTimeOptions(alertInterval ?? 1)}
+                  onChange={(e) => {
+                    setAlertIntervalUnit(e.target.value);
+                    setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ActionFrequencyForm
+            alert={alert}
+            throttle={alertThrottle}
+            throttleUnit={alertThrottleUnit}
+            onActionFreqencyChange={({ throttle, notifyWhen }: ActionFrequencyOpts) => {
+              setAlertThrottle(throttle);
+              setAlertProperty('notifyWhen', notifyWhen);
+            }}
+            onThrottleChange={useCallback(
+              (throttle: number | null, throttleUnit: string) => {
+                setAlertThrottle(throttle);
+                setAlertProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
+              },
+              [setAlertProperty]
+            )}
+            onThrottleUnitChange={(throttleUnit: string) => {
+              setAlertThrottleUnit(throttleUnit);
+              if (alertThrottle) {
+                setAlertProperty('throttle', `${alertThrottle}${throttleUnit}`);
+              }
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />
@@ -624,135 +739,6 @@ export const AlertForm = ({
       ) : (
         <CenterJustifiedSpinner />
       )}
-      <EuiHorizontalRule />
-      <EuiSpacer size="m" />
-      <EuiFlexGrid columns={1}>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h1>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertForm.alertSchedule.title"
-                defaultMessage="Alert Schedule"
-              />
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-      <EuiFlexGrid columns={2}>
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertForm.alertSchedule.description"
-              defaultMessage="Choose how often this alert should check the conditions."
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            display="rowCompressed"
-            isInvalid={errors.interval.length > 0}
-            error={errors.interval}
-          >
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <EuiFieldNumber
-                  fullWidth
-                  min={1}
-                  isInvalid={errors.interval.length > 0}
-                  compressed
-                  value={alertInterval || ''}
-                  name="interval"
-                  data-test-subj="intervalInput"
-                  prepend={i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertForm.alertSchedule.label',
-                    {
-                      defaultMessage: 'Every',
-                    }
-                  )}
-                  onChange={(e) => {
-                    const interval =
-                      e.target.value !== '' ? parseInt(e.target.value, 10) : undefined;
-                    setAlertInterval(interval);
-                    setScheduleProperty('interval', `${e.target.value}${alertIntervalUnit}`);
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  fullWidth
-                  compressed
-                  value={alertIntervalUnit}
-                  options={getTimeOptions(alertInterval ?? 1)}
-                  onChange={(e) => {
-                    setAlertIntervalUnit(e.target.value);
-                    setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-      <ActionFrequencyForm
-        alert={alert}
-        throttle={alertThrottle}
-        throttleUnit={alertThrottleUnit}
-        onActionFreqencyChange={({ throttle, notifyWhen }: ActionFrequencyOpts) => {
-          setAlertThrottle(throttle);
-          setAlertProperty('notifyWhen', notifyWhen);
-        }}
-        onThrottleChange={useCallback(
-          (throttle: number | null, throttleUnit: string) => {
-            setAlertThrottle(throttle);
-            setAlertProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
-          },
-          [setAlertProperty]
-        )}
-        onThrottleUnitChange={(throttleUnit: string) => {
-          setAlertThrottleUnit(throttleUnit);
-          if (alertThrottle) {
-            setAlertProperty('throttle', `${alertThrottle}${throttleUnit}`);
-          }
-        }}
-      />
-      <EuiHorizontalRule />
-      <EuiFlexGrid columns={1}>
-        <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate('xpack.triggersActionsUI.sections.alertForm.tagsFieldLabel', {
-              defaultMessage: 'Tags (optional)',
-            })}
-          >
-            <EuiComboBox
-              noSuggestions
-              fullWidth
-              compressed
-              data-test-subj="tagsComboBox"
-              selectedOptions={tagsOptions}
-              onCreateOption={(searchValue: string) => {
-                const newOptions = [...tagsOptions, { label: searchValue }];
-                setAlertProperty(
-                  'tags',
-                  newOptions.map((newOption) => newOption.label)
-                );
-              }}
-              onChange={(selectedOptions: Array<{ label: string }>) => {
-                setAlertProperty(
-                  'tags',
-                  selectedOptions.map((selectedOption) => selectedOption.label)
-                );
-              }}
-              onBlur={() => {
-                if (!alert.tags) {
-                  setAlertProperty('tags', []);
-                }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGrid>
     </EuiForm>
   );
 };
