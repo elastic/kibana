@@ -16,6 +16,7 @@ import { AlertsAuthorization, WriteOperations, ReadOperations } from './alerts_a
 import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import uuid from 'uuid';
+import { RecoveredActionGroup } from '../../common';
 
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
@@ -172,6 +173,7 @@ beforeEach(() => {
     name: 'My Alert Type',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'myApp',
   }));
@@ -534,6 +536,7 @@ describe('AlertsAuthorization', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'alerts',
@@ -542,6 +545,7 @@ describe('AlertsAuthorization', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
@@ -550,6 +554,7 @@ describe('AlertsAuthorization', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'mySecondAppAlertType',
       name: 'mySecondAppAlertType',
       producer: 'myApp',
@@ -824,6 +829,7 @@ describe('AlertsAuthorization', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'myOtherApp',
@@ -832,6 +838,7 @@ describe('AlertsAuthorization', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
@@ -880,6 +887,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -906,6 +917,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -972,6 +987,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -994,6 +1013,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1055,6 +1078,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1145,6 +1172,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -1167,6 +1198,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1241,6 +1276,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);

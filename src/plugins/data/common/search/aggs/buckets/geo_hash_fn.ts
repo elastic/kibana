@@ -23,17 +23,22 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggGeoHash';
+export const aggGeoHashFnName = 'aggGeoHash';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.GEOHASH_GRID>;
 
 type Arguments = Assign<AggArgs, { boundingBox?: string }>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggGeoHashFnName,
+  Input,
+  Arguments,
+  Output
+>;
 
 export const aggGeoHash = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggGeoHashFnName,
   help: i18n.translate('data.search.aggs.function.buckets.geoHash.help', {
     defaultMessage: 'Generates a serialized agg config for a Geo Hash agg',
   }),

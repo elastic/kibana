@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
@@ -54,20 +54,23 @@ const ToolTip = React.memo<ToolTipProps>(
     const { isLoading } = useMemo(() => getManageTimelineById(timelineId) ?? { isLoading: false }, [
       timelineId,
     ]);
+
+    const handleClick = useCallback(() => {
+      onUpdateColumns(
+        getColumnsWithTimestamp({
+          browserFields,
+          category: categoryId,
+        })
+      );
+    }, [browserFields, categoryId, onUpdateColumns]);
+
     return (
       <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
         {!isLoading ? (
           <EuiIcon
             aria-label={i18n.VIEW_CATEGORY(categoryId)}
             color="text"
-            onClick={() => {
-              onUpdateColumns(
-                getColumnsWithTimestamp({
-                  browserFields,
-                  category: categoryId,
-                })
-              );
-            }}
+            onClick={handleClick}
             type="visTable"
           />
         ) : (

@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { aggMedianFnName } from './median_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
@@ -34,6 +35,7 @@ export interface AggParamsMedian extends BaseAggParams {
 export const getMedianMetricAgg = () => {
   return new MetricAggType({
     name: METRIC_TYPES.MEDIAN,
+    expressionName: aggMedianFnName,
     dslName: 'percentiles',
     title: medianTitle,
     makeLabel(aggConfig) {

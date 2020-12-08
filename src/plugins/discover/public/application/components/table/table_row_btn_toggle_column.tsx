@@ -37,7 +37,7 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
         className="kbnDocViewer__actionButton"
         data-test-subj="toggleColumnButton"
         disabled
-        iconType={'tableOfContents'}
+        iconType={'listAdd'}
         iconSize={'s'}
       />
     );
@@ -59,7 +59,7 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
         onClick={onClick}
         className="kbnDocViewer__actionButton"
         data-test-subj="toggleColumnButton"
-        iconType={'tableOfContents'}
+        iconType={'listAdd'}
         iconSize={'s'}
       />
     </EuiToolTip>

@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { aggGeoCentroidFnName } from './geo_centroid_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
@@ -38,6 +39,7 @@ const geoCentroidLabel = i18n.translate('data.search.aggs.metrics.geoCentroidLab
 export const getGeoCentroidMetricAgg = () => {
   return new MetricAggType({
     name: METRIC_TYPES.GEO_CENTROID,
+    expressionName: aggGeoCentroidFnName,
     title: geoCentroidTitle,
     makeLabel: () => geoCentroidLabel,
     params: [

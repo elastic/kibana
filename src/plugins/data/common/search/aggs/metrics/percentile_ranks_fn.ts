@@ -22,15 +22,20 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggPercentileRanks';
+export const aggPercentileRanksFnName = 'aggPercentileRanks';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.PERCENTILE_RANKS>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggPercentileRanksFnName,
+  Input,
+  AggArgs,
+  Output
+>;
 
 export const aggPercentileRanks = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggPercentileRanksFnName,
   help: i18n.translate('data.search.aggs.function.metrics.percentile_ranks.help', {
     defaultMessage: 'Generates a serialized agg config for a Percentile Ranks agg',
   }),

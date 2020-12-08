@@ -507,8 +507,8 @@ Kibana.
 |or
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/spaces[spaces]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/spaces/README.md[spaces]
+|See Configuring Kibana Spaces.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/stack_alerts/README.md[stackAlerts]

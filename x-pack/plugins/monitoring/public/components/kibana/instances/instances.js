@@ -96,12 +96,6 @@ const getColumns = (setupMode, alerts) => {
             showBadge={true}
             alerts={alerts}
             stateFilter={(state) => state.stackProductUuid === instance.kibana.uuid}
-            nextStepsFilter={(nextStep) => {
-              if (nextStep.text.includes('Kibana instances')) {
-                return false;
-              }
-              return true;
-            }}
           />
         );
       },

@@ -10,7 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import {
   InfraRouteConfig,
   InfraTSVBResponse,
-  InfraServerPluginDeps,
+  InfraServerPluginSetupDeps,
   CallWithRequestParams,
   InfraDatabaseSearchResponse,
   InfraDatabaseMultiResponse,
@@ -33,9 +33,9 @@ import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../../src/plug
 
 export class KibanaFramework {
   public router: IRouter;
-  public plugins: InfraServerPluginDeps;
+  public plugins: InfraServerPluginSetupDeps;
 
-  constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {
+  constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginSetupDeps) {
     this.router = core.http.createRouter();
     this.plugins = plugins;
   }

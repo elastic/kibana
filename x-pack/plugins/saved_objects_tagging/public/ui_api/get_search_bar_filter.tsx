@@ -10,7 +10,7 @@ import {
   SavedObjectsTaggingApiUi,
   GetSearchBarFilterOptions,
 } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { ITagsCache } from '../tags';
+import { ITagsCache } from '../services';
 import { TagSearchBarOption } from '../components';
 import { byNameTagSorter } from '../utils';
 
