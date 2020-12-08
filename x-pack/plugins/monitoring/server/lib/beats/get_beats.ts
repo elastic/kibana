@@ -46,7 +46,7 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
 
     // add another beat summary
     accum.ids.add(uuid);
-    const earliestStats = hit.inner_hits.earliest.hits.hits[0]._source.beats_stats;
+    const earliestStats = hit.inner_hits?.earliest?.hits?.hits[0]._source.beats_stats ?? {};
 
     //  add the beat
     const rateOptions = {
