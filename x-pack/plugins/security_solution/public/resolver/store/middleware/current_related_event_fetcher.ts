@@ -42,6 +42,7 @@ export function CurrentRelatedEventFetcher(
       const currentNodeID = newParams.panelParameters.nodeID;
       const currentEventCategory = newParams.panelParameters.eventCategory;
       const currentEventTimestamp = newParams.panelParameters.eventTimestamp;
+      const winlogRecordID = newParams.panelParameters.winlogRecordID;
 
       api.dispatch({
         type: 'appRequestedCurrentRelatedEventData',
@@ -64,6 +65,7 @@ export function CurrentRelatedEventFetcher(
           eventCategory: [currentEventCategory],
           eventTimestamp: currentEventTimestamp,
           eventID: currentEventID,
+          winlogRecordID,
           indexPatterns: indices,
           timeRange,
         });

@@ -113,6 +113,7 @@ const NodeEventsListItem = memo(function ({
 }) {
   const timestamp = eventModel.eventTimestamp(event);
   const eventID = eventModel.eventID(event);
+  const winlogRecordID = eventModel.winlogRecordID(event);
   const date =
     useFormattedDate(timestamp) ||
     i18n.translate('xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved', {
@@ -125,6 +126,7 @@ const NodeEventsListItem = memo(function ({
       eventCategory,
       eventID,
       eventTimestamp: String(timestamp),
+      winlogRecordID: String(winlogRecordID),
     },
   });
   return (

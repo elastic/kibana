@@ -145,6 +145,7 @@ export function dataAccessLayerFactory(
       eventID,
       eventCategory,
       eventTimestamp,
+      winlogRecordID,
       timeRange,
       indexPatterns,
     }: {
@@ -152,6 +153,7 @@ export function dataAccessLayerFactory(
       eventCategory: string[];
       eventTimestamp: string;
       eventID?: string | number;
+      winlogRecordID: string;
       timeRange: TimeRange;
       indexPatterns: string[];
     }): Promise<SafeResolverEvent | null> {
@@ -164,6 +166,7 @@ export function dataAccessLayerFactory(
                   { terms: { 'event.category': eventCategory } },
                   { term: { 'process.entity_id': nodeID } },
                   { term: { '@timestamp': eventTimestamp } },
+                  { term: { 'winlog.record_id': winlogRecordID } },
                 ],
               },
             }

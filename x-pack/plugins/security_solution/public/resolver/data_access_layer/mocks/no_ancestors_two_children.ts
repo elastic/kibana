@@ -97,9 +97,10 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
 
       async event({
         nodeID,
+        eventID,
         eventCategory,
         eventTimestamp,
-        eventID,
+        winlogRecordID,
         timeRange,
         indexPatterns,
       }: {
@@ -107,6 +108,7 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
         eventCategory: string[];
         eventTimestamp: string;
         eventID?: string | number;
+        winlogRecordID: string;
         timeRange: TimeRange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {
