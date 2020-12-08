@@ -39,13 +39,13 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
   } = useKibana().services;
   const { incident, comments } = useMemo(
     () =>
-      actionParams.subActionParams ?? {
-        incident: { name: null, description: null, incidentTypes: null, severityCode: null },
+      actionParams.subActionParams ??
+      (({
+        incident: {},
         comments: [],
-      },
+      } as unknown) as ResilientActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
-
   useEffect(() => {
     return () => {
       // clear subActionParams when connector is changed

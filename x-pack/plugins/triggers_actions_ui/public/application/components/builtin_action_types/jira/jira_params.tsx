@@ -41,17 +41,11 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   } = useKibana().services;
   const { incident, comments } = useMemo(
     () =>
-      actionParams.subActionParams ?? {
-        incident: {
-          summary: null,
-          description: null,
-          issueType: null,
-          priority: null,
-          labels: null,
-          parent: null,
-        },
+      actionParams.subActionParams ??
+      (({
+        incident: {},
         comments: [],
-      },
+      } as unknown) as JiraActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
 

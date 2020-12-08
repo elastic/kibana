@@ -48,16 +48,11 @@ const ServiceNowParamsFields: React.FunctionComponent<
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
   const { incident, comments } = useMemo(
     () =>
-      actionParams.subActionParams ?? {
-        incident: {
-          short_description: null,
-          description: null,
-          severity: null,
-          urgency: null,
-          impact: null,
-        },
+      actionParams.subActionParams ??
+      (({
+        incident: {},
         comments: [],
-      },
+      } as unknown) as ServiceNowActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
 
@@ -189,7 +184,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'short_description'}
-          inputTargetValue={incident.short_description ?? undefined}
+          inputTargetValue={incident?.short_description ?? undefined}
           errors={errors.short_description as string[]}
         />
       </EuiFormRow>
