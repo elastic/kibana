@@ -10,6 +10,7 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 
 import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
+import { createRange } from './../../models/time_range';
 import { ResolverAction } from '../actions';
 
 /**
@@ -47,16 +48,6 @@ export function CurrentRelatedEventFetcher(
         type: 'appRequestedCurrentRelatedEventData',
       });
 
-      // TODO: Get timeline from selector. @kqualters
-      const today = new Date();
-      const from = new Date();
-      from.setDate(today.getDate() - 2);
-      const to = new Date();
-      to.setDate(today.getDate() + 14);
-      const timeRange = {
-        from,
-        to,
-      };
       let result: SafeResolverEvent | null = null;
       try {
         result = await dataAccessLayer.event({
@@ -65,7 +56,7 @@ export function CurrentRelatedEventFetcher(
           eventTimestamp: currentEventTimestamp,
           eventID: currentEventID,
           indexPatterns: indices,
-          timeRange,
+          timeRange: createRange(),
         });
       } catch (error) {
         api.dispatch({

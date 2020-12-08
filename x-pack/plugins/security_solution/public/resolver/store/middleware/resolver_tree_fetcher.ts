@@ -15,6 +15,7 @@ import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
 import { ancestorsRequestAmount, descendantsRequestAmount } from '../../models/resolver_tree';
+import { createRange } from './../../models/time_range';
 
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
@@ -34,17 +35,6 @@ export function ResolverTreeFetcher(
   return async () => {
     const state = api.getState();
     const databaseParameters = selectors.treeParametersToFetch(state);
-
-    // TODO: Get timeline from selector. @kqualters
-    const today = new Date();
-    const from = new Date();
-    from.setDate(today.getDate() - 2);
-    const to = new Date();
-    to.setDate(today.getDate() + 14);
-    const timeRange = {
-      from,
-      to,
-    };
 
     if (selectors.treeRequestParametersToAbort(state) && lastRequestAbortController) {
       lastRequestAbortController.abort();
@@ -80,7 +70,7 @@ export function ResolverTreeFetcher(
         result = await dataAccessLayer.resolverTree({
           dataId: entityIDToFetch,
           schema: dataSourceSchema,
-          timeRange,
+          timeRange: createRange(),
           indices: databaseParameters.indices,
           ancestors: ancestorsRequestAmount(dataSourceSchema),
           descendants: descendantsRequestAmount(),
