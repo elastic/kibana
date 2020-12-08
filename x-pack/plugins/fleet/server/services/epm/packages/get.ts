@@ -151,9 +151,15 @@ export async function getPackageFromSource(options: {
     if (!res) {
       res = await getEsPackage(pkgName, pkgVersion, savedObjectsClient);
     }
-    // for packages not in cache or package storage and installed from registry
+    // for packages not in cache or package storage and installed from registry, check registry
     if (!res && pkgInstallSource === 'registry') {
-      res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+      try {
+        res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+        // TODO: add to cache and storage here?
+      } catch (error) {
+        // treating this is a 404 as no status code returned
+        // in the unlikely event its missing from cache, storage, and never installed from registry
+      }
     }
   } else {
     // else package is not installed or installed and missing from cache and storage and installed from registry
