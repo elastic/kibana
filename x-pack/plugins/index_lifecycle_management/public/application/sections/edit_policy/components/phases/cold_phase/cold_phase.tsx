@@ -141,9 +141,8 @@ export const ColdPhase: FunctionComponent = () => {
                         'xpack.indexLifecycleMgmt.editPolicy.coldPhase.numberOfReplicas.switchLabel',
                         { defaultMessage: 'Set replicas' }
                       ),
-                      initialValue: Boolean(
-                        policy.phases.cold?.actions?.allocate?.number_of_replicas
-                      ),
+                      initialValue:
+                        policy.phases.cold?.actions?.allocate?.number_of_replicas != null,
                     }}
                     fullWidth
                   >

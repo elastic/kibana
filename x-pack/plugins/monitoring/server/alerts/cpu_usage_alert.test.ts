@@ -17,16 +17,29 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
 
+jest.mock('../static_globals', () => ({
+  Globals: {
+    app: {
+      getLogger: () => ({ debug: jest.fn() }),
+      config: {
+        ui: {
+          ccs: { enabled: true },
+          metricbeat: { index: 'metricbeat-*' },
+          container: { elasticsearch: { enabled: false } },
+        },
+      },
+    },
+  },
+}));
+
 describe('CpuUsageAlert', () => {
   it('should have defaults', () => {
     const alert = new CpuUsageAlert();
-    expect(alert.type).toBe(ALERT_CPU_USAGE);
-    expect(alert.label).toBe('CPU Usage');
-    expect(alert.defaultThrottle).toBe('1d');
-    // @ts-ignore
-    expect(alert.defaultParams).toStrictEqual({ threshold: 85, duration: '5m' });
-    // @ts-ignore
-    expect(alert.actionVariables).toStrictEqual([
+    expect(alert.alertOptions.id).toBe(ALERT_CPU_USAGE);
+    expect(alert.alertOptions.name).toBe('CPU Usage');
+    expect(alert.alertOptions.throttle).toBe('1d');
+    expect(alert.alertOptions.defaultParams).toStrictEqual({ threshold: 85, duration: '5m' });
+    expect(alert.alertOptions.actionVariables).toStrictEqual([
       { name: 'nodes', description: 'The list of nodes reporting high cpu usage.' },
       { name: 'count', description: 'The number of nodes reporting high cpu usage.' },
       {
@@ -62,21 +75,6 @@ describe('CpuUsageAlert', () => {
       nodeName,
       cpuUsage,
     };
-    const getUiSettingsService = () => ({
-      asScopedToClient: jest.fn(),
-    });
-    const getLogger = () => ({
-      debug: jest.fn(),
-    });
-    const monitoringCluster = null;
-    const config = {
-      ui: {
-        ccs: { enabled: true },
-        container: { elasticsearch: { enabled: false } },
-        metricbeat: { index: 'metricbeat-*' },
-      },
-    };
-    const kibanaUrl = 'http://localhost:5601';
 
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
@@ -115,19 +113,10 @@ describe('CpuUsageAlert', () => {
 
     it('should fire actions', async () => {
       const alert = new CpuUsageAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       const count = 1;
       expect(replaceState).toHaveBeenCalledWith({
@@ -142,7 +131,7 @@ describe('CpuUsageAlert', () => {
               isFiring: true,
               message: {
                 text:
-                  'Node #start_linkmyNodeName#end_link is reporting cpu usage of 91.00% at #absolute',
+                  'Node #start_linkmyNodeName#end_link is reporting cpu usage of 91% at #absolute',
                 nextSteps: [
                   {
                     text: '#start_linkCheck hot threads#end_link',
@@ -186,7 +175,6 @@ describe('CpuUsageAlert', () => {
                 ],
               },
               severity: 'danger',
-              resolvedMS: 0,
               triggeredMS: 1,
               lastCheckedMS: 0,
             },
@@ -200,7 +188,7 @@ describe('CpuUsageAlert', () => {
         actionPlain: 'Verify CPU levels across affected nodes.',
         clusterName,
         count,
-        nodes: `${nodeName}:${cpuUsage.toFixed(2)}`,
+        nodes: `${nodeName}:${cpuUsage}`,
         state: 'firing',
       });
     });
@@ -215,133 +203,15 @@ describe('CpuUsageAlert', () => {
         ];
       });
       const alert = new CpuUsageAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
-        alertStates: [
-          {
-            ccs: undefined,
-            cluster: {
-              clusterUuid,
-              clusterName,
-            },
-            cpuUsage: 1,
-            nodeId,
-            nodeName,
-            ui: {
-              isFiring: false,
-              lastCheckedMS: 0,
-              message: null,
-              resolvedMS: 0,
-              severity: 'danger',
-              triggeredMS: 0,
-            },
-          },
-        ],
+        alertStates: [],
       });
       expect(scheduleActions).not.toHaveBeenCalled();
-    });
-
-    it('should resolve with a resolved message', async () => {
-      (fetchCpuUsageNodeStats as jest.Mock).mockImplementation(() => {
-        return [
-          {
-            ...stat,
-            cpuUsage: 1,
-          },
-        ];
-      });
-      (getState as jest.Mock).mockImplementation(() => {
-        return {
-          alertStates: [
-            {
-              cluster: {
-                clusterUuid,
-                clusterName,
-              },
-              ccs: null,
-              cpuUsage: 91,
-              nodeId,
-              nodeName,
-              ui: {
-                isFiring: true,
-                message: null,
-                severity: 'danger',
-                resolvedMS: 0,
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
-        };
-      });
-      const alert = new CpuUsageAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
-      const type = alert.getAlertType();
-      await type.executor({
-        ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
-      } as any);
-      const count = 1;
-      expect(replaceState).toHaveBeenCalledWith({
-        alertStates: [
-          {
-            cluster: { clusterUuid, clusterName },
-            ccs: null,
-            cpuUsage: 1,
-            nodeId,
-            nodeName,
-            ui: {
-              isFiring: false,
-              message: {
-                text:
-                  'The cpu usage on node myNodeName is now under the threshold, currently reporting at 1.00% as of #resolved',
-                tokens: [
-                  {
-                    startToken: '#resolved',
-                    type: 'time',
-                    isAbsolute: true,
-                    isRelative: false,
-                    timestamp: 1,
-                  },
-                ],
-              },
-              severity: 'danger',
-              resolvedMS: 1,
-              triggeredMS: 1,
-              lastCheckedMS: 0,
-            },
-          },
-        ],
-      });
-      expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `CPU usage alert is resolved for ${count} node(s) in cluster: ${clusterName}.`,
-        internalShortMessage: `CPU usage alert is resolved for ${count} node(s) in cluster: ${clusterName}.`,
-        clusterName,
-        count,
-        nodes: `${nodeName}:1.00`,
-        state: 'resolved',
-      });
     });
 
     it('should handle ccs', async () => {
@@ -355,19 +225,10 @@ describe('CpuUsageAlert', () => {
         ];
       });
       const alert = new CpuUsageAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
+        params: alert.alertOptions.defaultParams,
       } as any);
       const count = 1;
       expect(scheduleActions).toHaveBeenCalledWith('default', {
@@ -377,228 +238,7 @@ describe('CpuUsageAlert', () => {
         actionPlain: 'Verify CPU levels across affected nodes.',
         clusterName,
         count,
-        nodes: `${nodeName}:${cpuUsage.toFixed(2)}`,
-        state: 'firing',
-      });
-    });
-
-    it('should show proper counts for resolved and firing nodes', async () => {
-      (fetchCpuUsageNodeStats as jest.Mock).mockImplementation(() => {
-        return [
-          {
-            ...stat,
-            cpuUsage: 1,
-          },
-          {
-            ...stat,
-            nodeId: 'anotherNode',
-            nodeName: 'anotherNode',
-            cpuUsage: 99,
-          },
-        ];
-      });
-      (getState as jest.Mock).mockImplementation(() => {
-        return {
-          alertStates: [
-            {
-              cluster: {
-                clusterUuid,
-                clusterName,
-              },
-              ccs: null,
-              cpuUsage: 91,
-              nodeId,
-              nodeName,
-              ui: {
-                isFiring: true,
-                message: null,
-                severity: 'danger',
-                resolvedMS: 0,
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-            {
-              cluster: {
-                clusterUuid,
-                clusterName,
-              },
-              ccs: null,
-              cpuUsage: 100,
-              nodeId: 'anotherNode',
-              nodeName: 'anotherNode',
-              ui: {
-                isFiring: true,
-                message: null,
-                severity: 'danger',
-                resolvedMS: 0,
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
-        };
-      });
-      const alert = new CpuUsageAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        false
-      );
-      const type = alert.getAlertType();
-      await type.executor({
-        ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
-      } as any);
-      const count = 1;
-      expect(replaceState).toHaveBeenCalledWith({
-        alertStates: [
-          {
-            cluster: { clusterUuid, clusterName },
-            ccs: null,
-            cpuUsage: 1,
-            nodeId,
-            nodeName,
-            ui: {
-              isFiring: false,
-              message: {
-                text:
-                  'The cpu usage on node myNodeName is now under the threshold, currently reporting at 1.00% as of #resolved',
-                tokens: [
-                  {
-                    startToken: '#resolved',
-                    type: 'time',
-                    isAbsolute: true,
-                    isRelative: false,
-                    timestamp: 1,
-                  },
-                ],
-              },
-              severity: 'danger',
-              resolvedMS: 1,
-              triggeredMS: 1,
-              lastCheckedMS: 0,
-            },
-          },
-          {
-            ccs: null,
-            cluster: { clusterUuid, clusterName },
-            cpuUsage: 99,
-            nodeId: 'anotherNode',
-            nodeName: 'anotherNode',
-            ui: {
-              isFiring: true,
-              message: {
-                text:
-                  'Node #start_linkanotherNode#end_link is reporting cpu usage of 99.00% at #absolute',
-                nextSteps: [
-                  {
-                    text: '#start_linkCheck hot threads#end_link',
-                    tokens: [
-                      {
-                        startToken: '#start_link',
-                        endToken: '#end_link',
-                        type: 'docLink',
-                        partialUrl:
-                          '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
-                      },
-                    ],
-                  },
-                  {
-                    text: '#start_linkCheck long running tasks#end_link',
-                    tokens: [
-                      {
-                        startToken: '#start_link',
-                        endToken: '#end_link',
-                        type: 'docLink',
-                        partialUrl:
-                          '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
-                      },
-                    ],
-                  },
-                ],
-                tokens: [
-                  {
-                    startToken: '#absolute',
-                    type: 'time',
-                    isAbsolute: true,
-                    isRelative: false,
-                    timestamp: 1,
-                  },
-                  {
-                    startToken: '#start_link',
-                    endToken: '#end_link',
-                    type: 'link',
-                    url: 'elasticsearch/nodes/anotherNode',
-                  },
-                ],
-              },
-              severity: 'danger',
-              resolvedMS: 0,
-              triggeredMS: 1,
-              lastCheckedMS: 0,
-            },
-          },
-        ],
-      });
-      expect(scheduleActions).toHaveBeenCalledTimes(1);
-      // expect(scheduleActions.mock.calls[0]).toEqual([
-      //   'default',
-      //   {
-      //     internalFullMessage: `CPU usage alert is resolved for ${count} node(s) in cluster: ${clusterName}.`,
-      //     internalShortMessage: `CPU usage alert is resolved for ${count} node(s) in cluster: ${clusterName}.`,
-      //     clusterName,
-      //     count,
-      //     nodes: `${nodeName}:1.00`,
-      //     state: 'resolved',
-      //   },
-      // ]);
-      expect(scheduleActions.mock.calls[0]).toEqual([
-        'default',
-        {
-          action: '[View nodes](elasticsearch/nodes)',
-          actionPlain: 'Verify CPU levels across affected nodes.',
-          internalFullMessage:
-            'CPU usage alert is firing for 1 node(s) in cluster: testCluster. [View nodes](elasticsearch/nodes)',
-          internalShortMessage:
-            'CPU usage alert is firing for 1 node(s) in cluster: testCluster. Verify CPU levels across affected nodes.',
-          nodes: 'anotherNode:99.00',
-          clusterName,
-          count,
-          state: 'firing',
-        },
-      ]);
-    });
-
-    it('should fire with different messaging for cloud', async () => {
-      const alert = new CpuUsageAlert();
-      alert.initializeAlertType(
-        getUiSettingsService as any,
-        monitoringCluster as any,
-        getLogger as any,
-        config as any,
-        kibanaUrl,
-        true
-      );
-      const type = alert.getAlertType();
-      await type.executor({
-        ...executorOptions,
-        // @ts-ignore
-        params: alert.defaultParams,
-      } as any);
-      const count = 1;
-      expect(scheduleActions).toHaveBeenCalledWith('default', {
-        internalFullMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify CPU levels across affected nodes.`,
-        internalShortMessage: `CPU usage alert is firing for ${count} node(s) in cluster: ${clusterName}. Verify CPU levels across affected nodes.`,
-        action: `[View nodes](elasticsearch/nodes)`,
-        actionPlain: 'Verify CPU levels across affected nodes.',
-        clusterName,
-        count,
-        nodes: `${nodeName}:${cpuUsage.toFixed(2)}`,
+        nodes: `${nodeName}:${cpuUsage}`,
         state: 'firing',
       });
     });
