@@ -230,7 +230,8 @@ export function SearchBar({
     // @ts-ignore - ts error is "union type is too complex to express"
     const { url, type, suggestion } = selected;
 
-    // TODO doc
+    // if the type is a suggestion, we change the query on the input and trigger a new search
+    // by setting the searchValue (only setting the field value does not trigger a search)
     if (type === '__suggestion__') {
       setFieldValue(searchRef!, suggestion);
       setSearchValue(suggestion);
