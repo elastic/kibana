@@ -227,10 +227,10 @@ export const EditPackagePolicyForm = memo<{
 
   // Cancel url + Success redirect Path:
   //  if `from === 'edit'` then it links back to Policy Details
-  //  if `from === 'package'` then it links back to the Integration Policy List
+  //  if `from === 'package-edit'` then it links back to the Integration Policy List
   const cancelUrl = useMemo((): string => {
     if (packageInfo && policyId) {
-      return from === 'package'
+      return from === 'package-edit'
         ? getHref('integration_details', {
             pkgkey: pkgKeyFromPackageInfo(packageInfo!),
             panel: 'policies',
@@ -242,7 +242,7 @@ export const EditPackagePolicyForm = memo<{
 
   const successRedirectPath = useMemo(() => {
     if (packageInfo && policyId) {
-      return from === 'package'
+      return from === 'package-edit'
         ? getPath('integration_details', {
             pkgkey: pkgKeyFromPackageInfo(packageInfo!),
             panel: 'policies',
@@ -404,7 +404,7 @@ export const EditPackagePolicyForm = memo<{
         />
       ) : (
         <>
-          {from === 'package' ? (
+          {from === 'package' || from === 'package-edit' ? (
             <IntegrationsBreadcrumb
               pkgkey={pkgKeyFromPackageInfo(packageInfo)}
               pkgTitle={packageInfo.title}
