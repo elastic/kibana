@@ -44,6 +44,7 @@ import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { THREAT_QUERY_LABEL } from './translations';
+import { filterEmptyThreats } from '../../../pages/detection_engine/rules/create/helpers';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
@@ -178,10 +179,8 @@ export const getDescriptionItem = (
       indexPatterns,
     });
   } else if (field === 'threat') {
-    const threat: IMitreEnterpriseAttack[] = get(field, data).filter(
-      (singleThreat: IMitreEnterpriseAttack) => singleThreat.tactic.name !== 'none'
-    );
-    return buildThreatDescription({ label, threat });
+    const threats: IMitreEnterpriseAttack[] = get(field, data);
+    return buildThreatDescription({ label, threat: filterEmptyThreats(threats) });
   } else if (field === 'threshold') {
     const threshold = get(field, data);
     return buildThresholdDescription(label, threshold);
