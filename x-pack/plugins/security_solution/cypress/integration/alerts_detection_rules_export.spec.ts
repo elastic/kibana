@@ -28,6 +28,7 @@ describe('Export rules', () => {
 
   after(() => {
     esArchiverUnload('export_rule');
+    removeSignalsIndex();
   });
 
   it('Exports a custom rule', () => {

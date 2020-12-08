@@ -42,6 +42,7 @@ describe.skip('Alerts', () => {
 
     afterEach(() => {
       esArchiverUnload('alerts');
+      removeSignalsIndex();
     });
 
     it('Closes and opens alerts', () => {
@@ -171,6 +172,7 @@ describe.skip('Alerts', () => {
 
     afterEach(() => {
       esArchiverUnload('closed_alerts');
+      removeSignalsIndex();
     });
 
     it('Open one alert when more than one closed alerts are selected', () => {
@@ -222,6 +224,7 @@ describe.skip('Alerts', () => {
 
     afterEach(() => {
       esArchiverUnload('alerts');
+      removeSignalsIndex();
     });
 
     it('Mark one alert in progress when more than one open alerts are selected', () => {
