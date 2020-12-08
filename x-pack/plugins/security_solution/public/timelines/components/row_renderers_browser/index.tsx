@@ -23,6 +23,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { RowRendererId } from '../../../../common/types/timeline';
 import { State } from '../../../common/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 
@@ -77,13 +78,16 @@ interface StatefulRowRenderersBrowserProps {
   timelineId: string;
 }
 
+const emptyExcludedRowRendererIds: RowRendererId[] = [];
+
 const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowserProps> = ({
   timelineId,
 }) => {
   const tableRef = useRef<EuiInMemoryTable<{}>>();
   const dispatch = useDispatch();
   const excludedRowRendererIds = useShallowEqualSelector(
-    (state: State) => state.timeline.timelineById[timelineId]?.excludedRowRendererIds || []
+    (state: State) =>
+      state.timeline.timelineById[timelineId]?.excludedRowRendererIds || emptyExcludedRowRendererIds
   );
   const [show, setShow] = useState(false);
 

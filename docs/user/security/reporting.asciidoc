@@ -101,7 +101,7 @@ If you are using an external identity provider, such as
 LDAP or Active Directory, you can either assign
 roles on a per user basis, or assign roles to groups of users. By default, role
 mappings are configured in
-{ref}/mapping-roles.html[`config/shield/role_mapping.yml`].
+{ref}/mapping-roles.html[`config/role_mapping.yml`].
 For example, the following snippet assigns the user named Bill Murray the
 `kibana_admin` and `reporting_user` roles:
 
