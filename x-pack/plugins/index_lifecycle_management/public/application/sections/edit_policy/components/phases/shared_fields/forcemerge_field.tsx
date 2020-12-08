@@ -14,7 +14,7 @@ import { i18nTexts } from '../../../i18n_texts';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
-import { LearnMoreLink, DescribedFormField } from '../../';
+import { LearnMoreLink, DescribedFormRow } from '../../';
 
 interface Props {
   phase: 'hot' | 'warm';
@@ -28,7 +28,7 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
   }, [policy, phase]);
 
   return (
-    <DescribedFormField
+    <DescribedFormRow
       title={
         <h3>
           <FormattedMessage
@@ -82,6 +82,6 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
           }}
         />
       </div>
-    </DescribedFormField>
+    </DescribedFormRow>
   );
 };
