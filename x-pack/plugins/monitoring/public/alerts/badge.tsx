@@ -45,7 +45,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const { stateFilter = () => true } = props;
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
-  const alerts = Object.values(props.alerts).filter(Boolean);
+  const alerts = Object.values(props.alerts).filter((alertItem) => Boolean(alertItem?.rawAlert));
 
   if (alerts.length === 0) {
     return null;

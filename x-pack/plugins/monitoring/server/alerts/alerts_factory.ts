@@ -68,6 +68,7 @@ export class AlertsFactory {
 
     if (!alertClientAlerts.total || !alertClientAlerts.data?.length) {
       return;
+      // return new alertCls() as BaseAlert;
     }
 
     const [rawAlert] = alertClientAlerts.data as [Alert];
