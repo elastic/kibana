@@ -43,7 +43,7 @@ export const useUiState = (
     columnsWidth: ColumnWidthData[];
     sort: TableVisUiState['sort'];
     /**
-     * Property to filter out chnages, which were done internally via local state.
+     * Property to filter out the changes, which were done internally via local state.
      */
     pendingUpdate: boolean;
   }>({
@@ -63,7 +63,7 @@ export const useUiState = (
        * Since the visualize app state is listening for uiState changes,
        * it synchronously re-renders an editor frame.
        * Setting new uiState values in the new event loop task,
-       * helps to udpate visualization frame firstly and not to block the rendering flow
+       * helps to update the visualization frame firstly and not to block the rendering flow
        */
       setTimeout(() => {
         uiState?.set('vis.params.sort', s);
@@ -92,7 +92,7 @@ export const useUiState = (
          * Since the visualize app state is listening for uiState changes,
          * it synchronously re-renders an editor frame.
          * Setting new uiState values in the new event loop task,
-         * helps to udpate visualization frame firstly and not to block the rendering flow
+         * helps to update the visualization frame firstly and not to block the rendering flow
          */
         setTimeout(() => {
           uiState?.set('vis.params.colWidth', updated);
@@ -110,12 +110,12 @@ export const useUiState = (
      * which are also handled synchronously.
      */
     const updateOnChange = debounce(() => {
-      const { vis } = uiState?.getChanges();
-
       // skip uiState updates if there are pending internal state updates
       if (uiStateValues.current.pendingUpdate) {
         return;
       }
+
+      const { vis } = uiState?.getChanges();
 
       if (!isEqual(vis?.params.colWidth, uiStateValues.current.columnsWidth)) {
         uiStateValues.current.columnsWidth = vis?.params.colWidth;
