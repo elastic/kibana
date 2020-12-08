@@ -22,7 +22,7 @@ export const transformElasticNamedSearchToListItem = ({
   type,
   value,
 }: TransformElasticMSearchToListItemOptions): SearchListItemArraySchema => {
-  const valueReduced = value.reduce<SearchListItemArraySchema>((accum, singleValue, index) => {
+  return value.reduce<SearchListItemArraySchema>((accum, singleValue, index) => {
     const matchingHits = response.hits.hits.filter((hit) => {
       if (hit.matched_queries != null) {
         return hit.matched_queries.some((matchedQuery) => {
@@ -47,5 +47,4 @@ export const transformElasticNamedSearchToListItem = ({
       return accum;
     }
   }, []);
-  return valueReduced;
 };
