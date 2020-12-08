@@ -88,7 +88,8 @@ const expectedMitre = formatMitreAttackDescription(newThreatIndicatorRule.mitre)
 const expectedNumberOfRules = 1;
 const expectedNumberOfAlerts = 1;
 
-describe('Detection rules, Indicator Match', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/85215
+describe.skip('Detection rules, Indicator Match', () => {
   beforeEach(() => {
     esArchiverLoad('threat_indicator');
     esArchiverLoad('threat_data');
