@@ -5,7 +5,7 @@
  */
 
 export default ({ loadTestFile }) => {
-  describe('Encryption Rotation', function () {
+  describe('APM smoke test', function () {
     loadTestFile(require.resolve('./apm_smoke_test'));
   });
 };

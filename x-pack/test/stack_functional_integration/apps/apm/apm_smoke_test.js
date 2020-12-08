@@ -8,7 +8,7 @@ export default function ({ getService, getPageObjects }) {
   describe('APM smoke test', function ampsmokeTest() {
     const browser = getService('browser');
     const testSubjects = getService('testSubjects');
-    const PageObjects = getPageObjects(['common', 'settings', 'timePicker']);
+    const PageObjects = getPageObjects(['common', 'timePicker']);
     const find = getService('find');
     const log = getService('log');
 
@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
     });
 
-    it('can navigate to Uptime app', async () => {
+    it('can navigate to APM app', async () => {
       await testSubjects.existOrFail('apmMainContainer', {
         timeout: 10000,
       });
