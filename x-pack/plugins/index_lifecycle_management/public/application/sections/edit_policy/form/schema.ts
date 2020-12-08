@@ -202,7 +202,7 @@ export const schema: FormSchema<FormInternal> = {
             }),
             validations: [
               {
-                validator: ifExistsNumberGreaterThanZero,
+                validator: ifExistsNumberNonNegative,
               },
             ],
             serializer: serializers.stringToNumber,
@@ -273,7 +273,7 @@ export const schema: FormSchema<FormInternal> = {
             }),
             validations: [
               {
-                validator: ifExistsNumberGreaterThanZero,
+                validator: ifExistsNumberNonNegative,
               },
             ],
             serializer: serializers.stringToNumber,
