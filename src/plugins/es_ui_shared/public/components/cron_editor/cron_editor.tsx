@@ -115,7 +115,7 @@ export class CronEditor extends Component<Props, State> {
     const { onChange, frequency, fieldToPreferredValueMap } = this.props;
 
     const editableFields = Object.keys(frequencyToFieldsMap[frequency]) as Field[];
-    const newFieldToValueMap: FieldToValueMap = {};
+    const newFieldToPreferredValueMap: FieldToValueMap = {};
 
     const editedFields = editableFields.reduce<FieldToValueMap>(
       (accumFields, field) => {
@@ -126,7 +126,7 @@ export class CronEditor extends Component<Props, State> {
           // frequency and changes the "Hour" field to "10", that field should still say "10" if the
           // user changes the frequency to "Weekly". We'll support this UX by storing these values
           // in the fieldToPreferredValueMap.
-          newFieldToValueMap[field] = fields[field];
+          newFieldToPreferredValueMap[field] = fields[field];
         } else {
           accumFields[field] = this.state[field];
         }
@@ -142,7 +142,7 @@ export class CronEditor extends Component<Props, State> {
       cronExpression: newCronExpression,
       fieldToPreferredValueMap: {
         ...fieldToPreferredValueMap,
-        ...newFieldToValueMap,
+        ...newFieldToPreferredValueMap,
       },
     });
   };
