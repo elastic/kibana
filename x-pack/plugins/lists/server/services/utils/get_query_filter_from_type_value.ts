@@ -13,6 +13,15 @@ export type QueryFilterType = [
   { terms: Record<string, unknown[]> } | { bool: {} }
 ];
 
+/**
+ * Given a type, value, and listId, this will return a valid query. If the type is
+ * "text" it will return a "text" match, otherwise it returns a terms query. If an
+ * array or array of arrays is passed, this will flatten, remove any "null" values,
+ * and then the result.
+ * @param type The type of list
+ * @param value The unknown value
+ * @param listId The list id
+ */
 export const getQueryFilterFromTypeValue = ({
   type,
   value,
