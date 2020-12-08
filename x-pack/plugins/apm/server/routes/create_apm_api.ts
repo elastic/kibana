@@ -58,7 +58,7 @@ import {
   transactionGroupsOverviewRoute,
   transactionLatencyChatsRoute,
   transactionThroughputChatsRoute,
-} from './transactions/transactions_routes';
+} from './transactions';
 import {
   errorGroupsLocalFiltersRoute,
   metricsLocalFiltersRoute,

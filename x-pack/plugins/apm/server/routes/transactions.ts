@@ -6,19 +6,19 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { toNumberRt } from '../../../common/runtime_types/to_number_rt';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
-import { setupRequest } from '../../lib/helpers/setup_request';
-import { getServiceTransactionGroups } from '../../lib/services/get_service_transaction_groups';
-import { getTransactionBreakdown } from '../../lib/transactions/breakdown';
-import { getAnomalySeries } from '../../lib/transactions/get_anomaly_data';
-import { getTransactionDistribution } from '../../lib/transactions/distribution';
-import { getTransactionGroupList } from '../../lib/transaction_groups';
-import { getErrorRate } from '../../lib/transaction_groups/get_error_rate';
-import { createRoute } from '../create_route';
-import { rangeRt, uiFiltersRt } from '../default_api_types';
-import { getLatencyCharts } from '../../lib/transactions/get_latency_charts';
-import { getThroughputCharts } from '../../lib/transactions/get_throughput_charts';
+import { createRoute } from './create_route';
+import { rangeRt, uiFiltersRt } from './default_api_types';
+import { toNumberRt } from '../../common/runtime_types/to_number_rt';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { setupRequest } from '../lib/helpers/setup_request';
+import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
+import { getTransactionBreakdown } from '../lib/transactions/breakdown';
+import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
+import { getTransactionDistribution } from '../lib/transactions/distribution';
+import { getTransactionGroupList } from '../lib/transaction_groups';
+import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
+import { getLatencyCharts } from '../lib/transactions/get_latency_charts';
+import { getThroughputCharts } from '../lib/transactions/get_throughput_charts';
 
 /**
  * Returns a list of transactions grouped by name
