@@ -66,6 +66,8 @@ describe('ES search strategy', () => {
 
   beforeEach(() => {
     mockApiCaller.mockClear();
+    mockGetCaller.mockClear();
+    mockSubmitCaller.mockClear();
   });
 
   it('returns a strategy with `search`', async () => {
@@ -101,6 +103,34 @@ describe('ES search strategy', () => {
     expect(request.id).toEqual('foo');
     expect(request).toHaveProperty('wait_for_completion_timeout');
     expect(request).toHaveProperty('keep_alive');
+  });
+
+  it('does not include keep_alive after a session is saved', async () => {
+    mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+    const params = { index: 'logstash-*', body: { query: {} } };
+    const options = { sessionId: 'foo', isStored: true };
+    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+    await esSearch.search({ id: 'foo', params }, options, mockDeps).toPromise();
+
+    expect(mockGetCaller).toBeCalled();
+    const request = mockGetCaller.mock.calls[0][0];
+    expect(request).not.toHaveProperty('keep_alive');
+  });
+
+  it('does not include keep_alive when a session is being restored', async () => {
+    mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+    const params = { index: 'logstash-*', body: { query: {} } };
+    const options = { sessionId: 'foo', isStored: true, isRestored: true };
+    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+    await esSearch.search({ id: 'foo', params }, options, mockDeps).toPromise();
+
+    expect(mockGetCaller).toBeCalled();
+    const request = mockGetCaller.mock.calls[0][0];
+    expect(request).not.toHaveProperty('keep_alive');
   });
 
   it('calls the rollup API if the index is a rollup type', async () => {

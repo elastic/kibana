@@ -44,7 +44,7 @@ export async function getDefaultAsyncSubmitParams(
   return {
     batched_reduce_size: 64,
     keep_on_completion: !!options.sessionId, // Always return an ID, even if the request completes quickly
-    ...getDefaultAsyncGetParams(),
+    ...getDefaultAsyncGetParams(options),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),
   };
@@ -53,12 +53,14 @@ export async function getDefaultAsyncSubmitParams(
 /**
  @internal
  */
-export function getDefaultAsyncGetParams(): Pick<
-  AsyncSearchGet,
-  'keep_alive' | 'wait_for_completion_timeout'
-> {
+export function getDefaultAsyncGetParams(
+  options: ISearchOptions
+): Pick<AsyncSearchGet, 'keep_alive' | 'wait_for_completion_timeout'> {
+  // Extend the TTL for this search request by one minute (unless it has already been sent to background)
+  const isSentToBackground = options.sessionId && (options.isStored || options.isRestore);
+  const keepAlive = !isSentToBackground ? { keep_alive: '1m' } : {};
   return {
-    keep_alive: '1m', // Extend the TTL for this search request by one minute
+    ...keepAlive,
     wait_for_completion_timeout: '100ms', // Wait up to 100ms for the response to return
   };
 }

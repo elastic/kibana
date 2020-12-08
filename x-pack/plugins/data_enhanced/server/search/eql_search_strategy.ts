@@ -37,11 +37,11 @@ export const eqlSearchStrategyProvider = (
           uiSettingsClient
         );
         const params = id
-          ? getDefaultAsyncGetParams()
+          ? getDefaultAsyncGetParams(options)
           : {
               ...(await getIgnoreThrottled(uiSettingsClient)),
               ...defaultParams,
-              ...getDefaultAsyncGetParams(),
+              ...getDefaultAsyncGetParams(options),
               ...request.params,
             };
         const promise = id

@@ -48,7 +48,7 @@ export const enhancedEsSearchStrategyProvider = (
 
     const search = async () => {
       const params = id
-        ? getDefaultAsyncGetParams()
+        ? getDefaultAsyncGetParams(options)
         : { ...(await getDefaultAsyncSubmitParams(uiSettingsClient, options)), ...request.params };
       const promise = id
         ? client.get<AsyncSearchResponse>({ ...params, id })
