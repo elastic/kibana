@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GraphWorkspaceSavedObject, Workspace } from '../../types';
-import { savedWorkspaceToAppState } from './deserialize';
+import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../../types';
+import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState } from './deserialize';
 import { createWorkspace } from '../../angular/graph_client_workspace';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import { IndexPattern } from '../../../../../../src/plugins/data/public';
@@ -21,7 +21,7 @@ describe('deserialize', () => {
       numLinks: 2,
       numVertices: 4,
       wsState: JSON.stringify({
-        indexPattern: 'Testindexpattern',
+        indexPattern: '123',
         selectedFields: [
           { color: 'black', name: 'field1', selected: true, iconClass: 'a' },
           { color: 'black', name: 'field2', selected: true, iconClass: 'b' },
@@ -207,5 +207,33 @@ describe('deserialize', () => {
     // C <-> E
     expect(workspace.edges[1].source).toBe(workspace.nodes[2]);
     expect(workspace.edges[1].target).toBe(workspace.nodes[4]);
+  });
+
+  describe('migrateLegacyIndexPatternRef', () => {
+    it('should migrate legacy index pattern ref', () => {
+      const workspacePayload = { ...savedWorkspace, legacyIndexPatternRef: 'Testpattern' };
+      const success = migrateLegacyIndexPatternRef(workspacePayload, [
+        { id: '678', attributes: { title: 'Testpattern' } } as IndexPatternSavedObject,
+        { id: '123', attributes: { title: 'otherpattern' } } as IndexPatternSavedObject,
+      ]);
+      expect(success).toEqual({ success: true });
+      expect(workspacePayload.legacyIndexPatternRef).toBeUndefined();
+      expect(JSON.parse(workspacePayload.wsState).indexPattern).toBe('678');
+    });
+
+    it('should return false if migration fails', () => {
+      const workspacePayload = { ...savedWorkspace, legacyIndexPatternRef: 'Testpattern' };
+      const success = migrateLegacyIndexPatternRef(workspacePayload, [
+        { id: '123', attributes: { title: 'otherpattern' } } as IndexPatternSavedObject,
+      ]);
+      expect(success).toEqual({ success: false, missingIndexPattern: 'Testpattern' });
+    });
+
+    it('should not modify migrated workspaces', () => {
+      const workspacePayload = { ...savedWorkspace };
+      const success = migrateLegacyIndexPatternRef(workspacePayload, []);
+      expect(success).toEqual({ success: true });
+      expect(workspacePayload).toEqual(savedWorkspace);
+    });
   });
 });

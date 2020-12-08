@@ -27,10 +27,14 @@ export interface GraphWorkspaceSavedObject {
   type: string;
   version?: number;
   wsState: string;
+  // the title of the index pattern used by this workspace.
+  // Only set for legacy saved objects.
+  legacyIndexPatternRef?: string;
   _source: Record<string, unknown>;
 }
 
 export interface SerializedWorkspaceState {
+  // the id of the index pattern saved object
   indexPattern: string;
   selectedFields: SerializedField[];
   blocklist: SerializedNode[];

@@ -7758,7 +7758,6 @@
     "xpack.graph.listing.table.entityName": "グラフ",
     "xpack.graph.listing.table.entityNamePlural": "グラフ",
     "xpack.graph.listing.table.titleColumnName": "タイトル",
-    "xpack.graph.loadWorkspace.missingIndexPatternErrorMessage": "インデックスパターンが見つかりませんでした",
     "xpack.graph.missingWorkspaceErrorMessage": "ID でグラフを読み込めませんでした",
     "xpack.graph.newGraphTitle": "保存されていないグラフ",
     "xpack.graph.noDataSourceNotificationMessageText": "データソースが見つかりませんでした。{managementIndexPatternsLink} に移動して Elasticsearch インデックスのインデックスパターンを作成してください。",

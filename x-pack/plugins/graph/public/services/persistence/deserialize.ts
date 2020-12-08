@@ -62,18 +62,32 @@ function deserializeUrlTemplate({
 }
 
 // returns the id of the index pattern, lookup is done in app.js
-export function lookupIndexPattern(
+export function migrateLegacyIndexPatternRef(
   savedWorkspace: GraphWorkspaceSavedObject,
   indexPatterns: IndexPatternSavedObject[]
-) {
-  const serializedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
-  const indexPattern = indexPatterns.find(
-    (pattern) => pattern.attributes.title === serializedWorkspaceState.indexPattern
-  );
-
-  if (indexPattern) {
-    return indexPattern;
+): { success: true } | { success: false; missingIndexPattern: string } {
+  const legacyIndexPatternRef = savedWorkspace.legacyIndexPatternRef;
+  if (!legacyIndexPatternRef) {
+    return { success: true };
   }
+  const serializedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
+  const indexPatternId = indexPatterns.find(
+    (pattern) => pattern.attributes.title === legacyIndexPatternRef
+  )?.id;
+  if (!indexPatternId) {
+    return { success: false, missingIndexPattern: legacyIndexPatternRef };
+  }
+  serializedWorkspaceState.indexPattern = indexPatternId!;
+  savedWorkspace.wsState = JSON.stringify(serializedWorkspaceState);
+  delete savedWorkspace.legacyIndexPatternRef;
+  return { success: true };
+}
+
+// returns the id of the index pattern, lookup is done in app.js
+export function lookupIndexPatternId(savedWorkspace: GraphWorkspaceSavedObject) {
+  const serializedWorkspaceState: SerializedWorkspaceState = JSON.parse(savedWorkspace.wsState);
+
+  return serializedWorkspaceState.indexPattern;
 }
 
 // returns all graph fields mapped out of the index pattern
