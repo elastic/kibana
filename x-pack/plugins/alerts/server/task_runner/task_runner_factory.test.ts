@@ -16,14 +16,14 @@ import {
 import { actionsMock } from '../../../actions/server/mocks';
 import { alertsMock, alertsClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { LicenseType } from '../../../licensing/server';
+import { NormalizedAlertType } from '../alert_type_registry';
 
-const alertType = {
+const alertType: NormalizedAlertType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
-  minimumLicenseRequired: 'basic' as LicenseType,
+  minimumLicenseRequired: 'basic',
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',

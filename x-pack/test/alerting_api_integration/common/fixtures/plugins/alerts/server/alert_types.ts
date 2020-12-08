@@ -7,7 +7,6 @@
 import { CoreSetup } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { curry, times } from 'lodash';
-import { LicenseType } from '../../../../../../../plugins/licensing/public';
 import { ES_TEST_INDEX_NAME } from '../../../../lib';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
@@ -44,7 +43,7 @@ function getAlwaysFiringAlertType() {
     },
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
-    minimumLicenseRequired: 'basic' as LicenseType,
+    minimumLicenseRequired: 'basic',
     actionVariables: {
       state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
       params: [{ name: 'instanceParamsValue', description: 'the instance params value' }],

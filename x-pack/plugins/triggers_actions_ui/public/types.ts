@@ -9,7 +9,7 @@ import { ComponentType } from 'react';
 import { ActionGroup, AlertActionParam } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
-import { AlertType as AlertTypeApi } from '../../alerts/common';
+import { AlertType as CommonAlertType } from '../../alerts/common';
 import {
   SanitizedAlert as Alert,
   AlertAction,
@@ -136,8 +136,17 @@ export const OPTIONAL_ACTION_VARIABLES = ['context'] as const;
 export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
   Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
 
-export interface AlertType extends Omit<AlertTypeApi, 'actionVariables'> {
-  recoveryActionGroup: ActionGroup;
+export interface AlertType
+  extends Pick<
+    CommonAlertType,
+    | 'id'
+    | 'name'
+    | 'actionGroups'
+    | 'producer'
+    | 'minimumLicenseRequired'
+    | 'recoveryActionGroup'
+    | 'defaultActionGroupId'
+  > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
 }
