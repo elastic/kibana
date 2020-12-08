@@ -468,7 +468,7 @@ function processRecordsForDisplay(anomalyRecords) {
         jobsErrorMessage[record.job_id] = i18n.translate(
           'xpack.ml.timeSeriesJob.sourceDataModelPlotNotChartableMessage',
           {
-            defaultMessage: 'both source data and model plot not chartable for this detector',
+            defaultMessage: 'both source data and model plot are not chartable for this detector',
           }
         );
       }

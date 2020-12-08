@@ -21,7 +21,7 @@ export const ExplorerChartsErrorCallOuts: FC<ExplorerChartsErrorCalloutsProps> =
     <EuiCallOut color={'warning'} size="s" key={errorType}>
       <FormattedMessage
         id="xpack.ml.explorerCharts.errorCallOutMessage"
-        defaultMessage="You can't view anomaly records for {jobs} because {reason}."
+        defaultMessage="You can't view anomaly charts for {jobs} because {reason}."
         values={{ jobs: [...errorMessagesByType[errorType]].join(', '), reason: errorType }}
       />
     </EuiCallOut>
