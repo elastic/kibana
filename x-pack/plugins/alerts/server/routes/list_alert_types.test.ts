@@ -11,6 +11,7 @@ import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
 import { RecoveredActionGroup } from '../../common';
+import { RegistryAlertTypeWithAuth } from '../authorization';
 
 const alertsClient = alertsClientMock.create();
 
@@ -53,7 +54,7 @@ describe('listAlertTypesRoute', () => {
         },
         producer: 'test',
         enabledInLicense: true,
-      },
+      } as RegistryAlertTypeWithAuth,
     ];
     alertsClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
 
@@ -126,7 +127,7 @@ describe('listAlertTypesRoute', () => {
         },
         producer: 'alerts',
         enabledInLicense: true,
-      },
+      } as RegistryAlertTypeWithAuth,
     ];
 
     alertsClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
@@ -178,7 +179,7 @@ describe('listAlertTypesRoute', () => {
         },
         producer: 'alerts',
         enabledInLicense: true,
-      },
+      } as RegistryAlertTypeWithAuth,
     ];
 
     alertsClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));

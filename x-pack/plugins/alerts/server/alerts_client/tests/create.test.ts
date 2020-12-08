@@ -18,7 +18,6 @@ import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
-import { licenseStateMock } from '../../lib/license_state.mock';
 
 jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -1196,7 +1195,13 @@ describe('create()', () => {
     );
   });
 
-  it('ensures the action type gets validated for the license', async () => {
-    const licenseState = licenseStateMock.create();
+  test('throws error when ensureActionTypeEnabled throws', async () => {
+    const data = getMockData();
+    alertTypeRegistry.ensureAlertTypeEnabled.mockImplementation(() => {
+      throw new Error('Fail');
+    });
+    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Fail"`
+    );
   });
 });

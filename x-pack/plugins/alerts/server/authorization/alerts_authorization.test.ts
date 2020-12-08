@@ -17,6 +17,7 @@ import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import uuid from 'uuid';
 import { RecoveredActionGroup } from '../../common';
+import { RegistryAlertType } from '../alert_type_registry';
 
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
@@ -533,7 +534,7 @@ describe('AlertsAuthorization', () => {
   });
 
   describe('getFindAuthorizationFilter', () => {
-    const myOtherAppAlertType = {
+    const myOtherAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -544,7 +545,7 @@ describe('AlertsAuthorization', () => {
       producer: 'alerts',
       enabledInLicense: true,
     };
-    const myAppAlertType = {
+    const myAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -555,7 +556,7 @@ describe('AlertsAuthorization', () => {
       producer: 'myApp',
       enabledInLicense: true,
     };
-    const mySecondAppAlertType = {
+    const mySecondAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -832,7 +833,7 @@ describe('AlertsAuthorization', () => {
   });
 
   describe('filterByAlertTypeAuthorization', () => {
-    const myOtherAppAlertType = {
+    const myOtherAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
@@ -843,7 +844,7 @@ describe('AlertsAuthorization', () => {
       producer: 'myOtherApp',
       enabledInLicense: true,
     };
-    const myAppAlertType = {
+    const myAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',

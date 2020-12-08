@@ -10,10 +10,14 @@ import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
-import { AlertsAuthorization } from '../../authorization/alerts_authorization';
+import {
+  AlertsAuthorization,
+  RegistryAlertTypeWithAuth,
+} from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup } from './lib';
 import { RecoveredActionGroup } from '../../../common';
+import { RegistryAlertType } from '../../alert_type_registry';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -47,7 +51,7 @@ beforeEach(() => {
 
 describe('listAlertTypes', () => {
   let alertsClient: AlertsClient;
-  const alertingAlertType = {
+  const alertingAlertType: RegistryAlertType = {
     actionGroups: [],
     actionVariables: undefined,
     defaultActionGroupId: 'default',
@@ -58,7 +62,7 @@ describe('listAlertTypes', () => {
     producer: 'alerts',
     enabledInLicense: true,
   };
-  const myAppAlertType = {
+  const myAppAlertType: RegistryAlertType = {
     actionGroups: [],
     actionVariables: undefined,
     defaultActionGroupId: 'default',
@@ -84,7 +88,7 @@ describe('listAlertTypes', () => {
   test('should return a list of AlertTypes that exist in the registry', async () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
     authorization.filterByAlertTypeAuthorization.mockResolvedValue(
-      new Set([
+      new Set<RegistryAlertTypeWithAuth>([
         { ...myAppAlertType, authorizedConsumers },
         { ...alertingAlertType, authorizedConsumers },
       ])
@@ -98,7 +102,7 @@ describe('listAlertTypes', () => {
   });
 
   describe('authorization', () => {
-    const listedTypes = new Set([
+    const listedTypes = new Set<RegistryAlertType>([
       {
         actionGroups: [],
         actionVariables: undefined,
@@ -126,7 +130,7 @@ describe('listAlertTypes', () => {
     });
 
     test('should return a list of AlertTypes that exist in the registry only if the user is authorised to get them', async () => {
-      const authorizedTypes = new Set([
+      const authorizedTypes = new Set<RegistryAlertTypeWithAuth>([
         {
           id: 'myType',
           name: 'Test',

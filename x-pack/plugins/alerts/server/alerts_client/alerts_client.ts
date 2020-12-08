@@ -686,6 +686,8 @@ export class AlertsClient {
     { id, data }: UpdateOptions,
     { attributes, version }: SavedObject<RawAlert>
   ): Promise<PartialAlert> {
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
 
     // Validate
@@ -983,6 +985,8 @@ export class AlertsClient {
       attributes = alert.attributes;
       version = alert.version;
     }
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     try {
       await this.authorization.ensureAuthorized(

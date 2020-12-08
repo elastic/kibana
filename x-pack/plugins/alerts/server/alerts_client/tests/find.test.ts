@@ -18,6 +18,7 @@ import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
+import { RegistryAlertType } from '../../alert_type_registry';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -53,7 +54,7 @@ beforeEach(() => {
 setGlobalDate();
 
 describe('find()', () => {
-  const listedTypes = new Set([
+  const listedTypes = new Set<RegistryAlertType>([
     {
       actionGroups: [],
       recoveryActionGroup: RecoveredActionGroup,
