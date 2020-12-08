@@ -75,7 +75,7 @@
         "type": "keyword"
       },
       "notifyWhen": {
-        "type": "string"
+        "type": "keyword"
       },
       "muteAll": {
         "type": "boolean"

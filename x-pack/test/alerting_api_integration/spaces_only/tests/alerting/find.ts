@@ -52,7 +52,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         scheduledTaskId: match.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',
-        notifyOnlyOnActionGroupChange: false,
+        notifyWhen: null,
         muteAll: false,
         mutedInstanceIds: [],
         createdAt: match.createdAt,

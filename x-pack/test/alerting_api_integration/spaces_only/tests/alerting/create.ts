@@ -83,7 +83,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         updatedBy: null,
         apiKeyOwner: null,
         throttle: '1m',
-        notifyOnlyOnActionGroupChange: false,
+        notifyWhen: null,
         muteAll: false,
         mutedInstanceIds: [],
         createdAt: response.body.createdAt,
