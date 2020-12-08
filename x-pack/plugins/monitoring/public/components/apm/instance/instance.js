@@ -18,7 +18,6 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { Status } from './status';
-import { AlertsCallout } from '../../../alerts/callout';
 
 export function ApmServerInstance({ summary, metrics, ...props }) {
   const seriesToShow = [
