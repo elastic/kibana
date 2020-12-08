@@ -12,7 +12,7 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
   "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;
 else
   echo " -> Running jest tests with coverage"
-  node scripts/jest --ci --verbose --coverage --coverageReporters json
+  node scripts/jest --runInBand --detectOpenHandles --ci --verbose --coverage --coverageReporters json
   rename_coverage_file "oss"
   echo ""
   echo ""
