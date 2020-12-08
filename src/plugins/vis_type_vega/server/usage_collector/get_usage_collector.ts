@@ -18,7 +18,7 @@
  */
 import { parse } from 'hjson';
 import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller, SavedObject } from 'src/core/server';
+import { ElasticsearchClient, SavedObject } from 'src/core/server';
 
 import { VegaSavedObjectAttributes, VisTypeVegaPluginSetupDependencies } from '../types';
 
@@ -64,7 +64,7 @@ export interface VegaUsage {
 }
 
 export const getStats = async (
-  callCluster: LegacyAPICaller,
+  esClient: ElasticsearchClient,
   index: string,
   { home }: UsageCollectorDependencies
 ): Promise<VegaUsage | undefined> => {
@@ -90,7 +90,7 @@ export const getStats = async (
     },
   };
 
-  const esResponse: ESResponse = await callCluster('search', searchParams);
+  const { body: esResponse } = await esClient.search<ESResponse>(searchParams);
   const size = esResponse?.hits?.hits?.length ?? 0;
 
   if (!size) {

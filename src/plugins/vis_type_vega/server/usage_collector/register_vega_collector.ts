@@ -35,10 +35,10 @@ export function registerVegaUsageCollector(
       vega_lite_lib_specs_total: { type: 'long' },
       vega_use_map_total: { type: 'long' },
     },
-    fetch: async ({ callCluster }) => {
+    fetch: async ({ esClient }) => {
       const { index } = (await config.pipe(first()).toPromise()).kibana;
 
-      return await getStats(callCluster, index, dependencies);
+      return await getStats(esClient, index, dependencies);
     },
   });
 
