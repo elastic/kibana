@@ -404,7 +404,15 @@ export const EditPackagePolicyForm = memo<{
         />
       ) : (
         <>
-          <Breadcrumb policyName={agentPolicy.name} policyId={policyId} />
+          {from === 'package' ? (
+            <IntegrationsBreadcrumb
+              pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+              pkgTitle={packageInfo.title}
+              policyName={packagePolicy.name}
+            />
+          ) : (
+            <PoliciesBreadcrumb policyName={agentPolicy.name} policyId={policyId} />
+          )}
           {formState === 'CONFIRM' && (
             <ConfirmDeployAgentPolicyModal
               agentCount={agentCount}
@@ -461,10 +469,19 @@ export const EditPackagePolicyForm = memo<{
   );
 });
 
-const Breadcrumb: React.FunctionComponent<{ policyName: string; policyId: string }> = ({
+const PoliciesBreadcrumb: React.FunctionComponent<{ policyName: string; policyId: string }> = ({
   policyName,
   policyId,
 }) => {
   useBreadcrumbs('edit_integration', { policyName, policyId });
   return null;
 };
+
+const IntegrationsBreadcrumb = memo<{
+  pkgTitle: string;
+  policyName: string;
+  pkgkey: string;
+}>(({ pkgTitle, policyName, pkgkey }) => {
+  useBreadcrumbs('integration_policy_edit', { policyName, pkgTitle, pkgkey });
+  return null;
+});
