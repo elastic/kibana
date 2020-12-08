@@ -48,8 +48,6 @@ This section summarizes the changes in each release.
 [[release-notes-7.10.1]]
 == {kib} 7.10.1
 
-coming::[7.10.1]
-
 For detailed information about the 7.10.1 release, review the following enhancements and bug fixes.
 
 For the breaking changes, refer to the <<breaking-changes-7.10,breaking changes in 7.10>>.
