@@ -45,6 +45,7 @@ import { useUIExtension } from '../../../hooks/use_ui_extension';
 import { ExtensionWrapper } from '../../../components/extension_wrapper';
 import { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
 import { PackagePolicyEditExtensionComponentProps } from '../../../types';
+import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -56,7 +57,8 @@ export const EditPackagePolicyPage = memo(() => {
 
 export const EditPackagePolicyForm = memo<{
   packagePolicyId: string;
-}>(({ packagePolicyId }) => {
+  from?: CreatePackagePolicyFrom;
+}>(({ packagePolicyId, from = 'edit' }) => {
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -159,7 +161,7 @@ export const EditPackagePolicyForm = memo<{
       }
     };
 
-    if (isFleetEnabled) {
+    if (isFleetEnabled && policyId) {
       getAgentCount();
     }
   }, [policyId, isFleetEnabled]);
@@ -223,8 +225,32 @@ export const EditPackagePolicyForm = memo<{
     [updatePackagePolicy]
   );
 
-  // Cancel url
-  const cancelUrl = getHref('policy_details', { policyId });
+  // Cancel url + Success redirect Path:
+  //  if `from === 'edit'` then it links back to Policy Details
+  //  if `from === 'package'` then it links back to the Integration Policy List
+  const cancelUrl = useMemo((): string => {
+    if (packageInfo && policyId) {
+      return from === 'package'
+        ? getHref('integration_details', {
+            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+            panel: 'policies',
+          })
+        : getHref('policy_details', { policyId });
+    }
+    return '/';
+  }, [from, getHref, packageInfo, policyId]);
+
+  const successRedirectPath = useMemo(() => {
+    if (packageInfo && policyId) {
+      return from === 'package'
+        ? getPath('integration_details', {
+            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+            panel: 'policies',
+          })
+        : getPath('policy_details', { policyId });
+    }
+    return '/';
+  }, [from, getPath, packageInfo, policyId]);
 
   // Save package policy
   const [formState, setFormState] = useState<PackagePolicyFormState>('INVALID');
@@ -246,7 +272,7 @@ export const EditPackagePolicyForm = memo<{
     }
     const { error } = await savePackagePolicy();
     if (!error) {
-      history.push(getPath('policy_details', { policyId }));
+      history.push(successRedirectPath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {
           defaultMessage: `Successfully updated '{packagePolicyName}'`,
@@ -296,7 +322,7 @@ export const EditPackagePolicyForm = memo<{
   };
 
   const layoutProps = {
-    from: 'edit' as CreatePackagePolicyFrom,
+    from,
     cancelUrl,
     agentPolicy,
     packageInfo,
