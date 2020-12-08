@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { createSHA256Hash } from '../../utils';
 import { config } from './config';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
@@ -82,6 +83,14 @@ export class ExternalUrlConfig implements IExternalUrlConfig {
    * @internal
    */
   constructor(rawConfig: IExternalUrlConfig) {
-    this.policy = rawConfig.policy;
+    this.policy = rawConfig.policy.map((entry) => {
+      if (entry.host) {
+        return {
+          ...entry,
+          host: createSHA256Hash(entry.host),
+        };
+      }
+      return entry;
+    });
   }
 }

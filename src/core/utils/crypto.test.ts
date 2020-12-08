@@ -17,13 +17,23 @@
  * under the License.
  */
 
-export {
-  ContextContainer,
-  HandlerContextType,
-  HandlerFunction,
-  HandlerParameters,
-  IContextContainer,
-  IContextProvider,
-} from './context';
-export { createSHA256Hash } from './crypto';
-export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
+import { createSHA256Hash } from './crypto';
+
+describe('createSHA256Hash', () => {
+  it('creates a hex-encoded hash by default', () => {
+    expect(createSHA256Hash('foo')).toMatchInlineSnapshot(
+      `"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae"`
+    );
+  });
+
+  it('allows the output encoding to be changed', () => {
+    expect(createSHA256Hash('foo', 'base64')).toMatchInlineSnapshot(
+      `"LCa0a2j/xo/5m0U8HTBBNBNCLXBkg7+g+YpeiGJm564="`
+    );
+  });
+
+  it('accepts a buffer as input', () => {
+    const data = Buffer.from('foo', 'utf8');
+    expect(createSHA256Hash(data)).toEqual(createSHA256Hash('foo'));
+  });
+});

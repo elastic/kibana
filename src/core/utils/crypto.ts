@@ -17,13 +17,17 @@
  * under the License.
  */
 
-export {
-  ContextContainer,
-  HandlerContextType,
-  HandlerFunction,
-  HandlerParameters,
-  IContextContainer,
-  IContextProvider,
-} from './context';
-export { createSHA256Hash } from './crypto';
-export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
+import crypto, { HexBase64Latin1Encoding } from 'crypto';
+
+export const createSHA256Hash = (
+  input: string | Buffer,
+  outputEncoding: HexBase64Latin1Encoding = 'hex'
+) => {
+  let data: Buffer;
+  if (typeof input === 'string') {
+    data = Buffer.from(input, 'utf8');
+  } else {
+    data = input;
+  }
+  return crypto.createHash('sha256').update(data).digest(outputEncoding);
+};

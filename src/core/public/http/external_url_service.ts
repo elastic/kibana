@@ -20,19 +20,35 @@
 import { IExternalUrlPolicy } from 'src/core/server/types';
 
 import { CoreService } from 'src/core/types';
-import { InjectedMetadataSetup } from '../injected_metadata';
+import { createSHA256Hash } from '../../utils';
 import { IExternalUrl } from './types';
+import { InjectedMetadataSetup } from '../injected_metadata';
 
 interface SetupDeps {
   location: Pick<Location, 'origin'>;
   injectedMetadata: InjectedMetadataSetup;
 }
 
-const isHostMatch = (actualHost: string, ruleHost: string) => {
-  const hostParts = actualHost.split('.').reverse();
-  const ruleParts = ruleHost.split('.').reverse();
+function* getHostHashes(actualHost: string) {
+  yield createSHA256Hash(actualHost);
+  let host = actualHost.substr(actualHost.indexOf('.') + 1);
+  while (host) {
+    const hash = createSHA256Hash(host);
+    yield hash;
+    if (host.indexOf('.') === -1) {
+      break;
+    }
+    host = host.substr(host.indexOf('.') + 1);
+  }
+}
 
-  return ruleParts.every((part, idx) => part === hostParts[idx]);
+const isHostMatch = (actualHost: string, ruleHostHash: string) => {
+  for (const hash of getHostHashes(actualHost)) {
+    if (hash === ruleHostHash) {
+      return true;
+    }
+  }
+  return false;
 };
 
 const isProtocolMatch = (actualProtocol: string, ruleProtocol: string) => {

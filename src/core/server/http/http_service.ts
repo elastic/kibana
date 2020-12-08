@@ -44,7 +44,11 @@ import {
 
 import { RequestHandlerContext } from '../../server';
 import { registerCoreHandlers } from './lifecycle_handlers';
-import { ExternalUrlConfigType, config as externalUrlConfig } from '../external_url';
+import {
+  ExternalUrlConfigType,
+  config as externalUrlConfig,
+  ExternalUrlConfig,
+} from '../external_url';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -105,7 +109,7 @@ export class HttpService
     this.internalSetup = {
       ...serverContract,
 
-      externalUrl: config.externalUrl,
+      externalUrl: new ExternalUrlConfig(config.externalUrl),
 
       createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);

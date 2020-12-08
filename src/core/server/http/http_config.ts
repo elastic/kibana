@@ -177,7 +177,7 @@ export class HttpConfig {
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
     this.csp = new CspConfig(rawCspConfig);
-    this.externalUrl = new ExternalUrlConfig(rawExternalUrlConfig);
+    this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
   }

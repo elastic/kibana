@@ -18,6 +18,7 @@
  */
 
 import { ExternalUrlConfig } from 'src/core/server/types';
+import { createSHA256Hash } from '../../utils';
 
 import { injectedMetadataServiceMock } from '../mocks';
 
@@ -32,8 +33,12 @@ const setupService = ({
   serverBasePath: string;
   policy: ExternalUrlConfig['policy'];
 }) => {
+  const hashedPolicies = policy.map((entry) => ({
+    ...entry,
+    host: entry.host ? createSHA256Hash(entry.host) : undefined,
+  }));
   const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
-  injectedMetadata.getExternalUrlConfig.mockReturnValue({ policy });
+  injectedMetadata.getExternalUrlConfig.mockReturnValue({ policy: hashedPolicies });
   injectedMetadata.getServerBasePath.mockReturnValue(serverBasePath);
 
   const service = new ExternalUrlService();
@@ -302,6 +307,44 @@ describe('External Url Service', () => {
           ],
         });
         const urlCandidate = `https://www.google.com/foo?bar=baz`;
+        const result = setup.validateUrl(urlCandidate);
+
+        expect(result).toBeInstanceOf(URL);
+        expect(result?.toString()).toEqual(urlCandidate);
+      });
+
+      it('allows external urls with a partially matching host and protocol in the allow list', () => {
+        const { setup } = setupService({
+          location,
+          serverBasePath,
+          policy: [
+            {
+              allow: true,
+              host: 'google.com',
+              protocol: 'https',
+            },
+          ],
+        });
+        const urlCandidate = `https://www.google.com/foo?bar=baz`;
+        const result = setup.validateUrl(urlCandidate);
+
+        expect(result).toBeInstanceOf(URL);
+        expect(result?.toString()).toEqual(urlCandidate);
+      });
+
+      it('allows external urls that specify a locally addressable host', () => {
+        const { setup } = setupService({
+          location,
+          serverBasePath,
+          policy: [
+            {
+              allow: true,
+              host: 'some-host-name',
+              protocol: 'https',
+            },
+          ],
+        });
+        const urlCandidate = `https://some-host-name/foo?bar=baz`;
         const result = setup.validateUrl(urlCandidate);
 
         expect(result).toBeInstanceOf(URL);
