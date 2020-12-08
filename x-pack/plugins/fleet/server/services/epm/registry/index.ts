@@ -148,7 +148,7 @@ export async function getInfo(name: string, version: string) {
 export async function getRegistryPackage(
   name: string,
   version: string
-): Promise<{ paths: string[]; packageInfo: RegistryPackage } | undefined> {
+): Promise<{ paths: string[]; packageInfo: RegistryPackage }> {
   const installSource = 'registry';
   let paths = getArchiveFilelist({ name, version });
   if (!paths || paths.length === 0) {
@@ -163,8 +163,6 @@ export async function getRegistryPackage(
   }
 
   const packageInfo = await getInfo(name, version);
-  if (!paths || !packageInfo) return undefined;
-
   return { paths, packageInfo };
 }
 
