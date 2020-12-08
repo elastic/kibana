@@ -6,6 +6,8 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import rison, { RisonValue } from 'rison-node';
+
 import { getMonitorList } from '../../../state/actions';
 import { monitorListSelector, snapshotDataSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
@@ -36,8 +38,8 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
 
   const dispatch = useDispatch();
 
-  const [getUrlValues] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd, pagination, statusFilter } = getUrlValues();
+  const [getUrlParams, updateUrlParams] = useUrlParams();
+  const { dateRangeStart, dateRangeEnd, pagination, statusFilter } = getUrlParams();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
@@ -52,11 +54,11 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
         dateRangeEnd,
         filters,
         pageSize,
-        pagination,
         statusFilter,
         sortField,
         sortDirection,
         pageIndex,
+        pagination,
       })
     );
   }, [
@@ -72,6 +74,16 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
     sortDirection,
     pageIndex,
   ]);
+
+  useEffect(() => {
+    updateUrlParams({
+      pagination: JSON.stringify({
+        size: pageSize,
+        index: pageIndex,
+        sk: { current: monitorList.list.skipped ?? 0, total: monitorList.list.skipped ?? 0 },
+      }),
+    });
+  }, [pageSize, pageIndex, monitorList.list.skipped, updateUrlParams]);
 
   return (
     <MonitorListComponent

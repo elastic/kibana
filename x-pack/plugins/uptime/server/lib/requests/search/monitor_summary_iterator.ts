@@ -87,6 +87,7 @@ export class MonitorSummaryIterator {
     }
 
     return {
+      noOfSkipped: this.noOfSkipped,
       monitorSummaries,
     };
   }
@@ -163,4 +164,5 @@ export class MonitorSummaryIterator {
 
 export interface MonitorSummariesPage {
   monitorSummaries: MonitorSummary[];
+  noOfSkipped: number;
 }

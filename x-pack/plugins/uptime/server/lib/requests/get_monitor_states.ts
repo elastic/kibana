@@ -56,6 +56,7 @@ export const getMonitorStates: UMElasticsearchQueryFn<
 
   return {
     summaries: page.monitorSummaries,
+    noOfSkipped: page.noOfSkipped,
   };
 };
 
