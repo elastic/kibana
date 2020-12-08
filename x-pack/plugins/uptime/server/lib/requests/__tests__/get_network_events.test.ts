@@ -296,7 +296,7 @@ describe('getNetworkEvents', () => {
       },
     } as any);
 
-    const result = await getNetworkEvents({
+    await getNetworkEvents({
       uptimeEsClient,
       checkGroup: 'my-fake-group',
       stepIndex: '1',
