@@ -79,7 +79,7 @@ describe('test', () => {
   test('task should not query elastic if telemetry is not opted in', async () => {
     const mockSender = createMockTelemetryEventsSender(false);
     const mockTaskManager = taskManagerMock.createSetup();
-    const telemetryDiagTask = new MockTelemetryDiagnosticTask(logger, mockTaskManager, mockSender);
+    new MockTelemetryDiagnosticTask(logger, mockTaskManager, mockSender);
 
     const mockTaskInstance = {
       id: TelemetryDiagTaskConstants.TYPE,
