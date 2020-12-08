@@ -97,7 +97,7 @@ export const EventDetailsComponent: React.FC<Props> = ({
         name: i18n.TABLE,
         content: (
           <>
-            <EuiSpacer size="m" />
+            <EuiSpacer size="l" />
             <EventFieldsBrowser
               browserFields={browserFields}
               data={data}

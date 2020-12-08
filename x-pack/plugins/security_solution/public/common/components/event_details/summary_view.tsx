@@ -114,7 +114,7 @@ export const SummaryViewComponent: React.FC<{
   const [investigationGuide, setInvestigationGuide] = useState<string | null>(null);
 
   const ruleIdField = useMemo(() => data.find((d) => d.field === 'signal.rule.id'), [data]);
-  const ruleId = getOr(null, 'values.0', ruleIdField);
+  const ruleId = getOr(null, 'originalValue', ruleIdField);
   const { rule: maybeRule } = useRuleAsync(ruleId);
   const summaryList = useMemo(() => {
     return data != null
@@ -125,8 +125,8 @@ export const SummaryViewComponent: React.FC<{
           }
           const linkValueField =
             item.linkField != null && data.find((d) => d.field === item.linkField);
-          const linkValue = getOr(null, 'values.0', linkValueField);
-          const value = getOr(null, 'values.0', field);
+          const linkValue = getOr(null, 'originalValue', linkValueField);
+          const value = getOr(null, 'originalValue', field);
           const category = field.category;
           const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
           const description = getDescription({

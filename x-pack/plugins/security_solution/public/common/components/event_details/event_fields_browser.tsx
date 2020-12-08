@@ -73,15 +73,6 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
   ({ browserFields, data, eventId, timelineId }) => {
-    const getLinkValue = useCallback(
-      (field: string) => {
-        const ruleIdField = (data ?? []).find((d) => d.field === 'signal.rule.id');
-        const ruleId = getOr(null, 'values.0', ruleIdField);
-        return field === 'signal.rule.name' ? ruleId : null;
-      },
-      [data]
-    );
-
     const dispatch = useDispatch();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
@@ -100,6 +91,19 @@ export const EventFieldsBrowser = React.memo<Props>(
 
       return getColumnHeaders(columns, browserFields);
     });
+
+    const getLinkValue = useCallback(
+      (field: string) => {
+        const linkField = (columnHeaders.find((col) => col.id === field) ?? {}).linkField;
+        if (!linkField) {
+          return null;
+        }
+        const linkFieldData = (data ?? []).find((d) => d.field === linkField);
+        const linkFieldValue = getOr(null, 'originalValue', linkFieldData);
+        return linkFieldValue;
+      },
+      [data, columnHeaders]
+    );
 
     const toggleColumn = useCallback(
       (column: ColumnHeaderOptions) => {
