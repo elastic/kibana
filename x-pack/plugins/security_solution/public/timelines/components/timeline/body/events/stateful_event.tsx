@@ -155,7 +155,6 @@ const StatefulEventComponent: React.FC<Props> = ({
       <EventColumnView
         id={event._id}
         actionsColumnWidth={actionsColumnWidth}
-        associateNote={associateNote}
         columnHeaders={columnHeaders}
         columnRenderers={columnRenderers}
         data={event.data}

@@ -12,7 +12,8 @@ import { appSelectors } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { AddNote } from '../add_note';
 import { AssociateNote } from '../helpers';
-import { NoteCard } from '../note_card';
+import { NotePreviews } from '../../open_timeline/note_previews';
+import { TimelineResultNote } from '../../open_timeline/types';
 
 const AddNoteContainer = styled.div``;
 AddNoteContainer.displayName = 'AddNoteContainer';
@@ -22,22 +23,12 @@ const NoteContainer = styled.div`
 `;
 NoteContainer.displayName = 'NoteContainer';
 
-interface NoteCardsCompProps {
-  children: React.ReactNode;
-}
 const NoteCardsCompContainer = styled(EuiPanel)`
   border: none;
   background-color: transparent;
   box-shadow: none;
 `;
 NoteCardsCompContainer.displayName = 'NoteCardsCompContainer';
-
-const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => (
-  <NoteCardsCompContainer data-test-subj="note-cards" hasShadow={false} paddingSize="none">
-    {children}
-  </NoteCardsCompContainer>
-));
-NoteCardsComp.displayName = 'NoteCardsComp';
 
 const NotesContainer = styled(EuiFlexGroup)`
   margin-bottom: 5px;
@@ -56,7 +47,6 @@ export const NoteCards = React.memo<Props>(
   ({ associateNote, noteIds, showAddNote, toggleShowAddNote }) => {
     const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
     const notesById = useDeepEqualSelector(getNotesByIds);
-    const items = useMemo(() => appSelectors.getNotes(notesById, noteIds), [notesById, noteIds]);
     const [newNote, setNewNote] = useState('');
 
     const associateNoteAndToggleShow = useCallback(
@@ -67,15 +57,23 @@ export const NoteCards = React.memo<Props>(
       [associateNote, toggleShowAddNote]
     );
 
+    const notes: TimelineResultNote[] = useMemo(
+      () =>
+        appSelectors.getNotes(notesById, noteIds).map((note) => ({
+          savedObjectId: note.saveObjectId,
+          note: note.note,
+          noteId: note.id,
+          updated: (note.lastEdit ?? note.created).getTime(),
+          updatedBy: note.user,
+        })),
+      [notesById, noteIds]
+    );
+
     return (
-      <NoteCardsComp>
-        {noteIds.length ? (
+      <NoteCardsCompContainer data-test-subj="note-cards" hasShadow={false} paddingSize="none">
+        {notes.length ? (
           <NotesContainer data-test-subj="notes" direction="column" gutterSize="none">
-            {items.map((note) => (
-              <NoteContainer data-test-subj="note-container" key={note.id}>
-                <NoteCard created={note.created} rawNote={note.note} user={note.user} />
-              </NoteContainer>
-            ))}
+            <NotePreviews notes={notes} />
           </NotesContainer>
         ) : null}
 
@@ -89,7 +87,7 @@ export const NoteCards = React.memo<Props>(
             />
           </AddNoteContainer>
         ) : null}
-      </NoteCardsComp>
+      </NoteCardsCompContainer>
     );
   }
 );

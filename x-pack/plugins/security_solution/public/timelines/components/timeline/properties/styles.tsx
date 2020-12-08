@@ -5,12 +5,7 @@
  */
 
 import { EuiFieldText } from '@elastic/eui';
-import styled, { keyframes } from 'styled-components';
-
-const fadeInEffect = keyframes`
-  from { opacity: 0; }
-  to { opacity: 1; }
-`;
+import styled from 'styled-components';
 
 export const NameField = styled(EuiFieldText)`
   .euiToolTipAnchor {
@@ -32,11 +27,6 @@ export const DescriptionContainer = styled.div`
   }
 `;
 DescriptionContainer.displayName = 'DescriptionContainer';
-
-export const ButtonContainer = styled.div<{ animate: boolean }>`
-  animation: ${fadeInEffect} ${({ animate }) => (animate ? '0.3s' : '0s')};
-`;
-ButtonContainer.displayName = 'ButtonContainer';
 
 export const LabelText = styled.div`
   margin-left: 10px;

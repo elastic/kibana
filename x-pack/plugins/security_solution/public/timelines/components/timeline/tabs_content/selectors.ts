@@ -10,3 +10,6 @@ import { selectTimeline } from '../../../store/timeline/selectors';
 
 export const getActiveTabSelector = () =>
   createSelector(selectTimeline, (timeline) => timeline?.activeTab ?? TimelineTabs.query);
+
+export const getShowTimelineSelector = () =>
+  createSelector(selectTimeline, (timeline) => timeline?.show ?? false);

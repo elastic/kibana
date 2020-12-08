@@ -5,15 +5,17 @@
  */
 
 import { uniqBy } from 'lodash/fp';
-import React from 'react';
+import { EuiAvatar, EuiCommentList } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n/react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { NotePreview } from './note_preview';
 import { TimelineResultNote } from '../types';
+import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
+import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 
 const NotePreviewsContainer = styled.section`
-  padding: ${(props) =>
-    `${props.theme.eui.euiSizeS} 0 ${props.theme.eui.euiSizeS} ${props.theme.eui.euiSizeXXL}`};
+  padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
 `;
 
 NotePreviewsContainer.displayName = 'NotePreviewsContainer';
@@ -24,25 +26,36 @@ NotePreviewsContainer.displayName = 'NotePreviewsContainer';
 export const NotePreviews = React.memo<{
   notes?: TimelineResultNote[] | null;
 }>(({ notes }) => {
+  const notesList = useMemo(
+    () =>
+      uniqBy('savedObjectId', notes).map((note) => ({
+        'data-test-subj': `note-preview-${note.savedObjectId}`,
+        username: defaultToEmptyTag(note.updatedBy),
+        event: 'added a comment',
+        timestamp: note.updated ? (
+          <FormattedRelative data-test-subj="updated" value={new Date(note.updated)} />
+        ) : (
+          getEmptyValue()
+        ),
+        children: <MarkdownRenderer>{note.note ?? ''}</MarkdownRenderer>,
+        timelineIcon: (
+          <EuiAvatar
+            data-test-subj="avatar"
+            name={note.updatedBy != null ? note.updatedBy : '?'}
+            size="l"
+          />
+        ),
+      })),
+    [notes]
+  );
+
   if (notes == null || notes.length === 0) {
     return null;
   }
 
-  const uniqueNotes = uniqBy('savedObjectId', notes);
-
   return (
     <NotePreviewsContainer data-test-subj="note-previews-container">
-      {uniqueNotes.map(({ note, savedObjectId, updated, updatedBy }) =>
-        savedObjectId != null ? (
-          <NotePreview
-            data-test-subj={`note-preview-${savedObjectId}`}
-            key={savedObjectId}
-            note={note}
-            updated={updated}
-            updatedBy={updatedBy}
-          />
-        ) : null
-      )}
+      <EuiCommentList comments={notesList} />
     </NotePreviewsContainer>
   );
 });

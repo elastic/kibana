@@ -4,8 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick } from 'lodash/fp';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiPanel } from '@elastic/eui';
+import { pick, uniqBy } from 'lodash/fp';
+import {
+  EuiAvatar,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiPanel,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -16,9 +25,10 @@ import { TimelineStatus } from '../../../../../common/types/timeline';
 import { appSelectors } from '../../../../common/store/app';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { AddNote } from '../../notes/add_note';
-import { InMemoryTable } from '../../notes';
-import { columns } from '../../notes/columns';
-import { search } from '../../notes/helpers';
+import { NOTES } from '../../notes/translations';
+import { PARTICIPANTS } from '../../../../cases/translations';
+import { NotePreviews } from '../../open_timeline/note_previews';
+import { TimelineResultNote } from '../../open_timeline/types';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
@@ -27,7 +37,8 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 `;
 
 const VerticalRule = styled.div`
@@ -41,6 +52,66 @@ const StyledPanel = styled(EuiPanel)`
   box-shadow: none;
 `;
 
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  flex: 0;
+`;
+
+const Username = styled(EuiText)`
+  font-weight: bold;
+`;
+
+interface UsernameWithAvatar {
+  username: string;
+}
+
+const UsernameWithAvatarComponent: React.FC<UsernameWithAvatar> = ({ username }) => (
+  <StyledEuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiAvatar data-test-subj="avatar" name={username} size="l" />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <Username>{username}</Username>
+    </EuiFlexItem>
+  </StyledEuiFlexGroup>
+);
+
+const UsernameWithAvatar = React.memo(UsernameWithAvatarComponent);
+
+interface ParticipantsProps {
+  users: TimelineResultNote[];
+}
+
+const ParticipantsComponent: React.FC<ParticipantsProps> = ({ users }) => {
+  const List = useMemo(
+    () =>
+      users.map((user) => (
+        <>
+          <UsernameWithAvatar key={user.updatedBy!} username={user.updatedBy!} />
+          <EuiSpacer size="s" />
+        </>
+      )),
+    [users]
+  );
+
+  if (!users.length) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h4>{PARTICIPANTS}</h4>
+      </EuiTitle>
+      <EuiHorizontalRule margin="s" />
+      {List}
+    </>
+  );
+};
+
+ParticipantsComponent.displayName = 'ParticipantsComponent';
+
+const Participants = React.memo(ParticipantsComponent);
+
 interface NotesTabContentProps {
   timelineId: string;
 }
@@ -48,8 +119,8 @@ interface NotesTabContentProps {
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { status: timelineStatus, noteIds } = useDeepEqualSelector((state) =>
-    pick(['noteIds', 'status'], getTimeline(state, timelineId) ?? timelineDefaults)
+  const { createdBy, status: timelineStatus, noteIds } = useDeepEqualSelector((state) =>
+    pick(['createdBy', 'noteIds', 'status'], getTimeline(state, timelineId) ?? timelineDefaults)
   );
 
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
@@ -57,7 +128,19 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
   const isImmutable = timelineStatus === TimelineStatus.immutable;
   const notesById = useDeepEqualSelector(getNotesByIds);
 
-  const items = useMemo(() => appSelectors.getNotes(notesById, noteIds), [notesById, noteIds]);
+  const notes: TimelineResultNote[] = useMemo(
+    () =>
+      appSelectors.getNotes(notesById, noteIds).map((note) => ({
+        savedObjectId: note.saveObjectId,
+        note: note.note,
+        noteId: note.id,
+        updated: (note.lastEdit ?? note.created).getTime(),
+        updatedBy: note.user,
+      })),
+    [notesById, noteIds]
+  );
+
+  const participants = useMemo(() => uniqBy('updatedBy', notes), [notes]);
 
   const associateNote = useCallback(
     (noteId: string) => dispatch(timelineActions.addNote({ id: timelineId, noteId })),
@@ -67,18 +150,12 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
   return (
     <FullWidthFlexGroup>
       <ScrollableFlexItem grow={2}>
-        <StyledPanel paddingSize="none">
+        <StyledPanel paddingSize="s">
           <EuiTitle>
-            <h3>{'Notes'}</h3>
+            <h3>{NOTES}</h3>
           </EuiTitle>
           <EuiSpacer />
-          <InMemoryTable
-            data-test-subj="notes-table"
-            items={items}
-            columns={columns}
-            search={search}
-            sorting={true}
-          />
+          <NotePreviews notes={notes} />
           <EuiSpacer size="s" />
           {!isImmutable && (
             <AddNote associateNote={associateNote} newNote={newNote} updateNewNote={setNewNote} />
@@ -86,7 +163,20 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
         </StyledPanel>
       </ScrollableFlexItem>
       <VerticalRule />
-      <ScrollableFlexItem grow={1}>{/* SIDEBAR PLACEHOLDER */}</ScrollableFlexItem>
+      <ScrollableFlexItem grow={1}>
+        {createdBy && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiTitle size="xs">
+              <h4>{'Created by'}</h4>
+            </EuiTitle>
+            <EuiHorizontalRule margin="s" />
+            <UsernameWithAvatar username={createdBy} />
+            <EuiSpacer size="xxl" />
+          </>
+        )}
+        <Participants users={participants} />
+      </ScrollableFlexItem>
     </FullWidthFlexGroup>
   );
 };

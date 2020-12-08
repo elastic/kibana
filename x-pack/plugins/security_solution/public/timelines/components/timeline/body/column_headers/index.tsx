@@ -220,6 +220,7 @@ export const ColumnHeadersComponent = ({
               width={FIELD_BROWSER_WIDTH}
             />
           </EventsTh>
+
           <EventsTh>
             <StatefulRowRenderersBrowser
               data-test-subj="row-renderers-browser"
@@ -227,24 +228,26 @@ export const ColumnHeadersComponent = ({
             />
           </EventsTh>
 
-          <EventsTh>
-            <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-              <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
-                <EuiButtonIcon
-                  aria-label={
-                    isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
-                      ? EXIT_FULL_SCREEN
-                      : i18n.FULL_SCREEN
-                  }
-                  className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
-                  color={fullScreen ? 'ghost' : 'primary'}
-                  data-test-subj="full-screen"
-                  iconType="fullScreen"
-                  onClick={toggleFullScreen}
-                />
-              </EuiToolTip>
-            </EventsThContent>
-          </EventsTh>
+          {isEventViewer && (
+            <EventsTh>
+              <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+                <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
+                  <EuiButtonIcon
+                    aria-label={
+                      isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
+                        ? EXIT_FULL_SCREEN
+                        : i18n.FULL_SCREEN
+                    }
+                    className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
+                    color={fullScreen ? 'ghost' : 'primary'}
+                    data-test-subj="full-screen"
+                    iconType="fullScreen"
+                    onClick={toggleFullScreen}
+                  />
+                </EuiToolTip>
+              </EventsThContent>
+            </EventsTh>
+          )}
 
           {showEventsSelect && (
             <EventsTh>

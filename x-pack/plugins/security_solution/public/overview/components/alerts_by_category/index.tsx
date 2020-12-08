@@ -35,26 +35,24 @@ import { LinkButton } from '../../../common/components/links';
 
 const ID = 'alertsByCategoryOverview';
 
-const NO_FILTERS: Filter[] = [];
-const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const DEFAULT_STACK_BY = 'event.module';
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
-  filters?: Filter[];
+  filters: Filter[];
   hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;
   indexNames: string[];
-  query?: Query;
+  query: Query;
 }
 
 const AlertsByCategoryComponent: React.FC<Props> = ({
   deleteQuery,
-  filters = NO_FILTERS,
+  filters,
   from,
   hideHeaderChildren = false,
   indexPattern,
   indexNames,
-  query = DEFAULT_QUERY,
+  query,
   setQuery,
   to,
 }) => {

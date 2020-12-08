@@ -12,6 +12,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
+  EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect } from 'react';
@@ -19,6 +20,7 @@ import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
+import { InPortal } from 'react-reverse-portal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { Direction } from '../../../../../common/search_strategy';
@@ -42,6 +44,7 @@ import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { EventDetails } from '../event_details';
 import { TimelineDatePickerLock } from '../date_picker_lock';
@@ -125,6 +128,10 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
 
 StyledEuiTabbedContent.displayName = 'StyledEuiTabbedContent';
 
+const EventsCountBadge = styled(EuiBadge)`
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
+
 const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
   prevProps.end === nextProps.end &&
   prevProps.start === nextProps.start &&
@@ -157,6 +164,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   updateEventTypeAndIndexesName,
 }) => {
   const [showEventDetailsColumn, setShowEventDetailsColumn] = useState(false);
+  const { timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
 
   useEffect(() => {
     // it should changed only once to true and then stay visible till the component umount
@@ -252,6 +260,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   return (
     <>
+      <InPortal node={timelineEventsCountPortalNode}>
+        {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+      </InPortal>
       <TimelineRefetch
         id={timelineId}
         inputId="timeline"

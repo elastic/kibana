@@ -37,6 +37,10 @@ describe('Alerts by category', () => {
     indexPattern: mockIndexPattern,
     setQuery: jest.fn(),
     to,
+    query: {
+      query: '',
+      language: 'kuery',
+    },
   };
   describe('before loading data', () => {
     beforeAll(async () => {

@@ -569,12 +569,11 @@ describe('StatefulOpenTimeline', () => {
 
         wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
         expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toEqual(true);
-        expect(wrapper.find('[data-test-subj="updated-by"]').exists()).toEqual(true);
+        expect(wrapper.find('.euiCommentEvent__headerUsername').exists()).toEqual(true);
 
         expect(
           wrapper
-            .find('[data-test-subj="note-previews-container"]')
-            .find('[data-test-subj="updated-by"]')
+            .find('[data-test-subj="note-previews-container"] .euiCommentEvent__headerUsername')
             .first()
             .text()
         ).toEqual('elastic');
