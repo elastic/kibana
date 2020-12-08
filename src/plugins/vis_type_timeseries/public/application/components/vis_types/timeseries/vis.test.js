@@ -74,6 +74,14 @@ describe('TimeseriesVisualization', () => {
       expect(yAxisFormattedValue).toBe('500B');
     });
 
+    test('should have custom format for single series', () => {
+      const timeSeriesProps = setupTimeSeriesPropsWithFormatters('0.00bitd');
+
+      const yAxisFormattedValue = timeSeriesProps.yAxis[0].tickFormatter(value);
+
+      expect(yAxisFormattedValue).toBe('500.00bit');
+    });
+
     test('should be the same number for byte and percent series', () => {
       const timeSeriesProps = setupTimeSeriesPropsWithFormatters('byte', 'percent');
 
