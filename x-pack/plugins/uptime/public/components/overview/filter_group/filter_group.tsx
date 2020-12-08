@@ -7,10 +7,13 @@
 import React, { useState } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
+import { useRouteMatch } from 'react-router-dom';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
 import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 import { filterLabels } from './translations';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
+import { MONITOR_ROUTE } from '../../../../common/constants';
+import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 
 interface PresentationalComponentProps {
   loading: boolean;
@@ -32,14 +35,15 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
     values: string[];
   }>({ fieldName: '', values: [] });
 
-  const { selectedLocations, selectedPorts, selectedSchemes, selectedTags } = useFilterUpdate(
-    updatedFieldValues.fieldName,
-    updatedFieldValues.values
-  );
+  useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
+
+  const { selectedLocations, selectedPorts, selectedSchemes, selectedTags } = useSelectedFilters();
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
     setUpdatedFieldValues({ fieldName, values });
   };
+
+  const isMonitorPage = useRouteMatch(MONITOR_ROUTE);
 
   const filterPopoverProps: FilterPopoverProps[] = [
     {
@@ -51,36 +55,41 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
       selectedItems: selectedLocations,
       title: filterLabels.LOCATION,
     },
-    {
-      loading,
-      onFilterFieldChange,
-      fieldName: 'url.port',
-      id: 'port',
-      disabled: ports.length === 0,
-      items: ports.map((p: number) => p.toString()),
-      selectedItems: selectedPorts,
-      title: filterLabels.PORT,
-    },
-    {
-      loading,
-      onFilterFieldChange,
-      fieldName: 'monitor.type',
-      id: 'scheme',
-      disabled: schemes.length === 0,
-      items: schemes,
-      selectedItems: selectedSchemes,
-      title: filterLabels.SCHEME,
-    },
-    {
-      loading,
-      onFilterFieldChange,
-      fieldName: 'tags',
-      id: 'tags',
-      disabled: tags.length === 0,
-      items: tags,
-      selectedItems: selectedTags,
-      title: filterLabels.TAGS,
-    },
+    // on monitor page we only display location filter in ping list
+    ...(!isMonitorPage
+      ? [
+          {
+            loading,
+            onFilterFieldChange,
+            fieldName: 'url.port',
+            id: 'port',
+            disabled: ports.length === 0,
+            items: ports.map((p: number) => p.toString()),
+            selectedItems: selectedPorts,
+            title: filterLabels.PORT,
+          },
+          {
+            loading,
+            onFilterFieldChange,
+            fieldName: 'monitor.type',
+            id: 'scheme',
+            disabled: schemes.length === 0,
+            items: schemes,
+            selectedItems: selectedSchemes,
+            title: filterLabels.SCHEME,
+          },
+          {
+            loading,
+            onFilterFieldChange,
+            fieldName: 'tags',
+            id: 'tags',
+            disabled: tags.length === 0,
+            items: tags,
+            selectedItems: selectedTags,
+            title: filterLabels.TAGS,
+          },
+        ]
+      : []),
   ];
 
   return (

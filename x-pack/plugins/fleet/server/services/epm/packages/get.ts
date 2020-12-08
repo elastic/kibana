@@ -7,7 +7,12 @@
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
 import { isPackageLimited, installationStatuses } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { ArchivePackage, InstallSource, RegistryPackage } from '../../../../common/types';
+import {
+  ArchivePackage,
+  InstallSource,
+  RegistryPackage,
+  EpmPackageAdditions,
+} from '../../../../common/types';
 import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
@@ -107,13 +112,14 @@ export async function getPackageInfo(options: {
   const packageInfo = getPackageRes.packageInfo;
 
   // add properties that aren't (or aren't yet) on the package
-  const updated = {
-    ...packageInfo,
+  const additions: EpmPackageAdditions = {
     latestVersion: latestPackage.version,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
     removable: !isRequiredPackage(pkgName),
   };
+  const updated = { ...packageInfo, ...additions };
+
   return createInstallableFrom(updated, savedObject);
 }
 
