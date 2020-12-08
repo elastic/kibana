@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
       datemath.parse('now-3d', { forceNow: now }),
     ];
     before(async () => {
-      await security.testUser.setRoles(['manage_rollups_role']);
+      await security.testUser.setRoles(['manage_rollups_role'], false);
       await PageObjects.common.navigateToApp('rollupJob');
     });
 
