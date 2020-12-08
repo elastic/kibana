@@ -156,9 +156,40 @@ describe('basePath', () => {
 describe('publicBaseUrl', () => {
   test('throws if invalid HTTP(S) URL', () => {
     const httpSchema = config.schema;
-    expect(() => httpSchema.validate({ publicBaseUrl: 'myhost.com' })).toThrow();
-    expect(() => httpSchema.validate({ publicBaseUrl: '//myhost.com' })).toThrow();
-    expect(() => httpSchema.validate({ publicBaseUrl: 'ftp://myhost.com' })).toThrow();
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'myhost.com' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl]: expected URI with scheme [http|https]."`
+    );
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: '//myhost.com' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl]: expected URI with scheme [http|https]."`
+    );
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'ftp://myhost.com' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl]: expected URI with scheme [http|https]."`
+    );
+  });
+
+  test('throws if includes hash, query, or auth', () => {
+    const httpSchema = config.schema;
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'http://myhost.com/?a=b' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl] may only contain a protocol, host, port, and pathname"`
+    );
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'http://myhost.com/#a' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl] may only contain a protocol, host, port, and pathname"`
+    );
+    expect(() =>
+      httpSchema.validate({ publicBaseUrl: 'http://user:pass@myhost.com' })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[publicBaseUrl] may only contain a protocol, host, port, and pathname"`
+    );
   });
 
   test('throws if basePath and publicBaseUrl are specified, but do not match', () => {
