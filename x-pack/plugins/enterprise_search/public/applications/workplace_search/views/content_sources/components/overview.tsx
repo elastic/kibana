@@ -523,7 +523,6 @@ export const Overview: React.FC = () => {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiEmptyPrompt />
       </EuiFlexGroup>
     </>
   );
