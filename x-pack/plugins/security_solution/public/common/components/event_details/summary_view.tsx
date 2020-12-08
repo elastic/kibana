@@ -157,7 +157,7 @@ export const SummaryViewComponent: React.FC<{
 
   return (
     <>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       <EuiDescriptionList
         data-test-subj="summary-view"
         type="responsiveColumn"

@@ -11,10 +11,11 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { find } from 'lodash/fp';
 
+import { useDispatch } from 'react-redux';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
 import {
   ExpandableEvent,
@@ -24,6 +25,9 @@ import {
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { useTimelineEventsDetails } from '../../containers/details';
+import { TimelineId } from '../../../../common/types/timeline';
+import { activeTimeline } from '../../containers/active_timeline_context';
+import { timelineActions } from '../../store/timeline';
 
 interface EventDetailsProps {
   browserFields: BrowserFields;
@@ -38,8 +42,10 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
   timelineId,
   onEventDetailsClose,
 }) => {
-  const expandedEvent = useDeepEqualSelector(
-    (state) => state.timeline.timelineById[timelineId]?.expandedEvent
+  const dispatch = useDispatch();
+
+  const { expandedEvent, isSaving } = useDeepEqualSelector(
+    (state) => state.timeline.timelineById[timelineId]
   );
 
   const [loading, detailsData] = useTimelineEventsDetails({
@@ -62,13 +68,40 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
     return null;
   }, [detailsData]);
 
+  const handleOnEventClosed = useCallback(() => {
+    dispatch(
+      timelineActions.toggleExpandedEvent({
+        timelineId,
+        event: null,
+      })
+    );
+
+    if (timelineId === TimelineId.active) {
+      activeTimeline.toggleExpandedEvent({
+        eventId: expandedEvent.eventId,
+        indexName: '',
+        loading: false,
+      });
+    }
+
+    if (onEventDetailsClose) {
+      onEventDetailsClose();
+    }
+  }, [dispatch, timelineId, expandedEvent.eventId, onEventDetailsClose]);
+
+  useEffect(() => {
+    if (isSaving) {
+      handleOnEventClosed();
+    }
+  }, [isSaving, onEventDetailsClose, handleOnEventClosed]);
+
   return (
     <>
       <ExpandableEventTitle
         isAlert={ruleId != null}
         loading={loading}
         timelineId={timelineId}
-        onEventDetailsClose={onEventDetailsClose}
+        onEventDetailsClose={handleOnEventClosed}
       />
       <EuiSpacer size="m" />
       <ExpandableEvent
