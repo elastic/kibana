@@ -1289,7 +1289,7 @@ export class EndpointDocGenerator {
       title: 'Elastic Endpoint',
       version: '0.5.0',
       description: 'This is the Elastic Endpoint package.',
-      type: 'solution',
+      type: 'integration',
       download: '/epr/endpoint/endpoint-0.5.0.tar.gz',
       path: '/package/endpoint/0.5.0',
       icons: [
@@ -1301,6 +1301,7 @@ export class EndpointDocGenerator {
         },
       ],
       status: 'installed',
+      release: 'ga',
       savedObject: {
         type: 'epm-packages',
         id: 'endpoint',
@@ -1327,6 +1328,7 @@ export class EndpointDocGenerator {
             { id: 'logs-endpoint.events.security', type: 'index_template' },
             { id: 'metrics-endpoint.telemetry', type: 'index_template' },
           ] as EsAssetReference[],
+          package_assets: [],
           es_index_patterns: {
             alerts: 'logs-endpoint.alerts-*',
             events: 'events-endpoint-*',

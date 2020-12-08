@@ -10,6 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
 import { timelineActions } from '../../../store/timeline';
 
@@ -298,7 +299,14 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         {DraggableContent}
       </Draggable>
     );
-  }
+  },
+  (prevProps, nextProps) =>
+    prevProps.groupIndex === nextProps.groupIndex &&
+    prevProps.index === nextProps.index &&
+    prevProps.timelineId === nextProps.timelineId &&
+    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
+    deepEqual(prevProps.group, nextProps.group) &&
+    deepEqual(prevProps.dataProvider, nextProps.dataProvider)
 );
 
 DataProvidersGroupItem.displayName = 'DataProvidersGroupItem';

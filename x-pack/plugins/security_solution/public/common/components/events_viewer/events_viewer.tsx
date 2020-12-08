@@ -18,9 +18,8 @@ import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/
 import { HeaderSection } from '../header_section';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
-import { StatefulBody } from '../../../timelines/components/timeline/body/stateful_body';
+import { StatefulBody } from '../../../timelines/components/timeline/body';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
 import { Footer, footerHeight } from '../../../timelines/components/timeline/footer';
 import { combineQueries, resolverIsShowing } from '../../../timelines/components/timeline/helpers';
 import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
@@ -36,7 +35,7 @@ import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useFullScreen } from '../../containers/use_full_screen';
-import { TimelineId, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
@@ -78,8 +77,8 @@ const EventsContainerLoading = styled.div`
 `;
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
-  width: 100%;
   overflow: hidden;
+  margin: 0;
   display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
 `;
 
@@ -113,12 +112,10 @@ interface Props {
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
-  onChangeItemsPerPage: OnChangeItemsPerPage;
   query: Query;
   onRuleChange?: () => void;
   start: string;
   sort: Sort;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId: string | undefined;
@@ -141,16 +138,14 @@ const EventsViewerComponent: React.FC<Props> = ({
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
-  onChangeItemsPerPage,
   query,
   onRuleChange,
   start,
   sort,
-  toggleColumn,
   utilityBar,
   graphEventId,
 }) => {
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen, timelineFullScreen } = useFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
@@ -275,7 +270,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               id={!resolverIsShowing(graphEventId) ? id : undefined}
               height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
               subtitle={utilityBar ? undefined : subtitle}
-              title={inspect ? justTitle : titleWithExitFullScreen}
+              title={timelineFullScreen ? justTitle : titleWithExitFullScreen}
             >
               {HeaderSectionContent}
             </HeaderSection>
@@ -291,26 +286,17 @@ const EventsViewerComponent: React.FC<Props> = ({
                 refetch={refetch}
               />
 
-              {graphEventId && (
-                <GraphOverlay
-                  graphEventId={graphEventId}
-                  isEventViewer={true}
-                  timelineId={id}
-                  timelineType={TimelineType.default}
-                />
-              )}
-              <FullWidthFlexGroup $visible={!graphEventId}>
+              {graphEventId && <GraphOverlay isEventViewer={true} timelineId={id} />}
+              <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody
                     browserFields={browserFields}
                     data={nonDeletedEvents}
-                    docValueFields={docValueFields}
                     id={id}
                     isEventViewer={true}
                     onRuleChange={onRuleChange}
                     refetch={refetch}
                     sort={sort}
-                    toggleColumn={toggleColumn}
                   />
                   <Footer
                     activePage={pageInfo.activePage}
@@ -323,7 +309,6 @@ const EventsViewerComponent: React.FC<Props> = ({
                     itemsCount={nonDeletedEvents.length}
                     itemsPerPage={itemsPerPage}
                     itemsPerPageOptions={itemsPerPageOptions}
-                    onChangeItemsPerPage={onChangeItemsPerPage}
                     onChangePage={loadPage}
                     totalCount={totalCountMinusDeleted}
                   />

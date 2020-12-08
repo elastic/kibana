@@ -31,8 +31,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       .then((response: SupertestResponse) => response.body);
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/82804
-  describe.skip('update', () => {
+  describe('update', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -429,17 +428,19 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
-          await supertest
-            .put(
-              `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
-            )
-            .set('kbn-xsrf', 'foo')
-            .send({
-              attributes: {
-                name: 'bar',
-              },
-            })
-            .expect(200);
+          await retry.try(async () => {
+            await supertest
+              .put(
+                `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
+              )
+              .set('kbn-xsrf', 'foo')
+              .send({
+                attributes: {
+                  name: 'bar',
+                },
+              })
+              .expect(200);
+          });
 
           const updatedData = {
             name: 'bcd',

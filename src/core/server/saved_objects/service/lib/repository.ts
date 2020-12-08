@@ -18,7 +18,6 @@
  */
 
 import { omit, isObject } from 'lodash';
-import uuid from 'uuid';
 import {
   ElasticsearchClient,
   DeleteDocumentResponse,
@@ -245,7 +244,7 @@ export class SavedObjectsRepository {
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
     const {
-      id,
+      id = SavedObjectsUtils.generateId(),
       migrationVersion,
       overwrite = false,
       references = [],
@@ -366,7 +365,9 @@ export class SavedObjectsRepository {
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
 
-      if (object.id == null) object.id = uuid.v1();
+      if (object.id == null) {
+        object.id = SavedObjectsUtils.generateId();
+      }
 
       return {
         tag: 'Right' as 'Right',
