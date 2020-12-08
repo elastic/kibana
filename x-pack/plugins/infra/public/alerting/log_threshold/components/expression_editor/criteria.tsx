@@ -22,7 +22,7 @@ import {
   getDenominator,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 import { Errors, CriterionErrors } from '../../validation';
-import { AlertsContext, ExpressionLike } from './editor';
+import { ExpressionLike } from './editor';
 import { CriterionPreview } from './criterion_preview_chart';
 
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
@@ -40,7 +40,6 @@ interface SharedProps {
   criteria?: AlertParams['criteria'];
   errors: Errors['criteria'];
   alertParams: Partial<AlertParams>;
-  context: AlertsContext;
   sourceId: string;
   updateCriteria: (criteria: AlertParams['criteria']) => void;
 }
@@ -66,7 +65,6 @@ interface CriteriaWrapperProps {
   addCriterion: () => void;
   criteria: CriteriaType;
   errors: CriterionErrors;
-  context: SharedProps['context'];
   sourceId: SharedProps['sourceId'];
   isRatio?: boolean;
 }
@@ -80,7 +78,6 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
     fields,
     errors,
     alertParams,
-    context,
     sourceId,
     isRatio = false,
   } = props;
@@ -108,7 +105,6 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
             >
               <CriterionPreview
                 alertParams={alertParams}
-                context={context}
                 chartCriterion={criterion}
                 sourceId={sourceId}
                 showThreshold={!isRatio}
@@ -127,7 +123,6 @@ interface RatioCriteriaProps {
   fields: SharedProps['fields'];
   criteria: RatioCriteriaType;
   errors: Errors['criteria'];
-  context: SharedProps['context'];
   sourceId: SharedProps['sourceId'];
   updateCriteria: (criteria: AlertParams['criteria']) => void;
 }
@@ -201,7 +196,6 @@ interface CountCriteriaProps {
   fields: SharedProps['fields'];
   criteria: CountCriteriaType;
   errors: Errors['criteria'];
-  context: SharedProps['context'];
   sourceId: SharedProps['sourceId'];
   updateCriteria: (criteria: AlertParams['criteria']) => void;
 }

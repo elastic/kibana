@@ -59,8 +59,8 @@ class ApiService {
     return ApiService.instance;
   }
 
-  public async get(apiUrl: string, params?: HttpFetchQuery, decodeType?: any) {
-    const response = await this._http!.get(apiUrl, { query: params });
+  public async get(apiUrl: string, params?: HttpFetchQuery, decodeType?: any, asResponse = false) {
+    const response = await this._http!.fetch({ path: apiUrl, query: params, asResponse });
 
     if (decodeType) {
       const decoded = decodeType.decode(response);

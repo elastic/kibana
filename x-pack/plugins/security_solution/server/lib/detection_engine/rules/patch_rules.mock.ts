@@ -58,6 +58,7 @@ const rule: SanitizedAlert = {
             id: 'T1499',
             name: 'endpoint denial of service',
             reference: 'https://attack.mitre.org/techniques/T1499/',
+            subtechnique: [],
           },
         ],
       },
